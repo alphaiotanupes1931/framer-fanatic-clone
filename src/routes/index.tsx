@@ -369,34 +369,59 @@ function TiltCard({ index, img, title, body }: { index: number; img: string; tit
 
 function CreatorsFans() {
   return (
-    <section id="creators" className="bg-blue px-6 md:px-10 pt-32 pb-40">
-      <div className="mx-auto max-w-[1400px] grid lg:grid-cols-[1.4fr_1fr] gap-16 items-start">
-        <div>
-          <ScrollHeadline
-            lines={["Creators. Fans.", "Nothing in", "between."]}
-            className="font-display text-ink font-medium text-[clamp(3rem,9vw,9.5rem)] leading-[0.9] tracking-[-0.05em]"
-          />
+    <section
+      id="creators"
+      className="relative overflow-hidden px-6 md:px-10 pt-24 pb-32 bg-[radial-gradient(120%_80%_at_50%_0%,#a8c3ff_0%,#6b8df0_55%,#4a6fd8_100%)]"
+    >
+      <div className="mx-auto max-w-[1400px]">
+        <ScrollHeadline
+          lines={["Turning passions", "into communities"]}
+          className="font-display text-ink font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.05em] text-center"
+        />
 
-          <div className="mt-20 max-w-md space-y-6 text-ink/90 text-lg leading-relaxed">
-            <p>
-              Planet Baltimore gives you a direct line of access to your fan community, with no ads or gatekeepers in the way.
-            </p>
-            <p>
-              Through real-time group chats, comments, DMs, and even directly over email, you can connect more deeply and directly with your community here than anywhere else.
-            </p>
-            <motion.a
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              href="#"
-              className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
-            >
-              Build real community
-            </motion.a>
-          </div>
+        <div className="mt-20 grid lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-end">
+          <ChatMockup />
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="grid sm:grid-cols-2 gap-10 lg:gap-14 pb-4"
+          >
+            <div className="space-y-5">
+              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">More ways to earn</h3>
+              <p className="text-ink/85 text-base md:text-lg leading-relaxed">
+                On Planet Baltimore, you can build a lasting livelihood outside the ad-based ecosystem, with revenue streams ranging from memberships and merch to shows, workshops, and direct community support.
+              </p>
+              <motion.a
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                href="#"
+                className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
+              >
+                Set up shop
+              </motion.a>
+            </div>
+
+            <div className="space-y-5">
+              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">Unlock growth</h3>
+              <p className="text-ink/85 text-base md:text-lg leading-relaxed">
+                Planet Baltimore isn't just for creative growth, it's for professional growth too. Get in-depth analytics about your fans, dig into powerful relationship tools, and tap into a thriving Baltimore creator community.
+              </p>
+              <motion.a
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                href="#"
+                className="inline-flex rounded-full border border-ink/80 text-ink px-7 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors"
+              >
+                Explore tools
+              </motion.a>
+            </div>
+          </motion.div>
         </div>
-
-        <ChatMockup />
       </div>
     </section>
   );
