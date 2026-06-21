@@ -14,7 +14,7 @@ import pbLogo from "@/assets/pb-logo.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Planet Baltimore — Your wildest creative reality" },
+      { title: "Planet Baltimore — Support what makes Baltimore" },
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
   }),
@@ -57,14 +57,12 @@ function Nav() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="flex md:hidden items-center gap-2"
         >
-          <motion.img
+          <img
             src={pbLogo.url}
             alt="Planet Baltimore"
             width={32}
             height={32}
             className="w-8 h-8 invert"
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
           />
           <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
         </motion.a>
@@ -77,14 +75,12 @@ function Nav() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2"
         >
-          <motion.img
+          <img
             src={pbLogo.url}
             alt="Planet Baltimore"
             width={36}
             height={36}
             className="w-9 h-9 invert"
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
           />
           <span className="font-display text-lg md:text-xl font-extrabold tracking-tight uppercase">Planet Baltimore</span>
         </motion.a>
@@ -168,7 +164,7 @@ function Hero() {
 
       {/* Headline with per-word stagger */}
       <div className="absolute bottom-24 md:bottom-20 left-0 right-0 px-6 md:px-10 text-paper font-display font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-[-0.045em]">
-        <AnimatedHeadline lines={["Your wildest", "creative reality"]} />
+        <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
       </div>
 
       {/* Scroll cue */}
