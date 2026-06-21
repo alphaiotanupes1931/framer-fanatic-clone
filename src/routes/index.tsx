@@ -173,40 +173,81 @@ function Hero() {
   );
 }
 
-function QuoteSection() {
+function StaggeredQuote({ text, className }: { text: string; className?: string }) {
+  const words = text.split(" ");
   return (
-    <section className="relative w-full overflow-hidden" style={{ height: "clamp(500px, 70vh, 900px)" }}>
-      <img
-        src={quoteCreator}
-        alt="Baltimore creator performing"
-        width={1920}
-        height={1080}
-        loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent" />
-
-      <div className="absolute bottom-0 left-0 right-0 px-6 md:px-10 pb-10 md:pb-14">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <motion.blockquote
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="text-paper font-display text-[clamp(1.5rem,3.5vw,3.5rem)] leading-[1.1] tracking-[-0.02em] max-w-4xl"
+    <blockquote className={className}>
+      {words.map((word, i) => (
+        <span key={i} className="inline-block overflow-hidden mr-[0.25em]">
+          <motion.span
+            initial={{ y: "110%" }}
+            whileInView={{ y: "0%" }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{
+              duration: 0.8,
+              delay: 0.04 * i,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="inline-block"
           >
-            "Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
-          </motion.blockquote>
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </blockquote>
+  );
+}
 
+function QuoteSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
+
+  return (
+    <section ref={ref} className="relative w-full overflow-hidden bg-ink">
+      {/* Bridge gradient from hero blue tones */}
+      <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-blue-deep/40 to-transparent pointer-events-none" />
+
+      <div className="relative max-w-[1200px] mx-auto px-6 md:px-10 py-24 md:py-32 lg:py-40">
+        <div className="grid lg:grid-cols-[1fr_1.5fr] gap-14 lg:gap-20 items-center">
+          {/* Portrait with parallax */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="text-paper font-display text-xl md:text-2xl tracking-widest uppercase shrink-0"
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="relative mx-auto lg:mx-0 max-w-[340px]"
           >
-            KAMAUU
+            <motion.div style={{ y: imageY }}>
+              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
+                <img
+                  src={terrellSpeaks.url}
+                  alt="Terrell Speaks"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </motion.div>
           </motion.div>
+
+          {/* Quote */}
+          <div className="text-paper">
+            <StaggeredQuote
+              text="Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
+              className="font-display text-[clamp(1.5rem,3.2vw,3.2rem)] leading-[1.15] tracking-[-0.02em]"
+            />
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-8 md:mt-10 font-display text-base md:text-lg tracking-wide text-paper/60"
+            >
+              Terrell Speaks
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
