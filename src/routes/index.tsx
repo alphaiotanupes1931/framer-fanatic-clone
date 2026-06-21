@@ -8,6 +8,7 @@ import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
+import queenForADay from "@/assets/queen-for-a-day.png.asset.json";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
@@ -561,7 +562,7 @@ function Features() {
   const items = [
     { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: musician },
     { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: nannyDarkYellow.url },
-    { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: filmmaker },
+    { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay.url },
   ];
   return (
     <section id="features" className="bg-blue px-6 md:px-10 py-32">
