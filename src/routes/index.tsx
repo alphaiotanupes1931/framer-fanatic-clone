@@ -399,22 +399,7 @@ function Features() {
 
         <div className="mt-20 grid md:grid-cols-3 gap-6">
           {items.map((it, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="group rounded-3xl bg-ink text-paper overflow-hidden hover:-translate-y-2 transition-transform duration-500"
-            >
-              <div className="aspect-[4/5] overflow-hidden">
-                <img src={it.img} alt="" loading="lazy" width={1024} height={1280} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              </div>
-              <div className="p-8">
-                <h3 className="font-display text-3xl font-medium tracking-tight">{it.title}</h3>
-                <p className="mt-3 text-paper/70 leading-relaxed">{it.body}</p>
-              </div>
-            </motion.div>
+            <TiltCard key={i} index={i} img={it.img} title={it.title} body={it.body} />
           ))}
         </div>
       </div>
