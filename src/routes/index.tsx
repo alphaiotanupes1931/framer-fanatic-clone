@@ -371,7 +371,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden px-6 md:px-10 pt-20 pb-24 bg-[radial-gradient(120%_80%_at_50%_0%,#a8c3ff_0%,#6b8df0_55%,#4a6fd8_100%)]"
+      className="relative overflow-hidden px-6 md:px-10 pt-10 pb-12 bg-[radial-gradient(120%_80%_at_50%_0%,#a8c3ff_0%,#6b8df0_55%,#4a6fd8_100%)]"
     >
       <div className="mx-auto max-w-[1400px]">
         <ScrollHeadline
