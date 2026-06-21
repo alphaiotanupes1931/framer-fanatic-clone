@@ -171,21 +171,6 @@ function Hero() {
         <AnimatedHeadline lines={["Your wildest", "creative reality"]} />
       </div>
 
-      {/* Featured creator card */}
-      <motion.a
-        href="#"
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.9, delay: 1.2 }}
-        whileHover={{ x: -4 }}
-        className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-3 group"
-      >
-        <img src={podcaster} alt="" width={64} height={64} loading="lazy" className="w-14 h-14 rounded-full object-cover ring-2 ring-paper/50" />
-        <span className="text-paper text-sm leading-snug max-w-[180px]">
-          Jade Novah is fusing her loves of music, writing, and comedy <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
-        </span>
-      </motion.a>
-
       {/* Scroll cue */}
       <motion.a
         href="#creators"
