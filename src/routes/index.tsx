@@ -565,7 +565,7 @@ function Features() {
     { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay.url },
   ];
   return (
-    <section id="features" className="bg-blue px-6 md:px-10 py-32">
+    <section id="features" className="bg-blue px-6 md:px-10 py-16">
       <div className="mx-auto max-w-[1400px]">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
