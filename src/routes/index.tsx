@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
 import { useRef } from "react";
-import { Search, Menu, X, Calendar, MapPin } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
 import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
 import boomSelecta from "@/assets/boom-selecta.png.asset.json";
