@@ -518,7 +518,10 @@ function Footer() {
       <div className="mx-auto max-w-[1400px]">
         <div className="grid md:grid-cols-[1.5fr_repeat(4,1fr)] gap-12 mb-20">
           <div>
-            <div className="font-display text-3xl font-extrabold tracking-tight">PATREON</div>
+            <div className="flex items-center gap-3">
+              <img src={pbLogo.url} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 invert" />
+              <div className="font-display text-2xl font-extrabold tracking-tight uppercase">Planet Baltimore</div>
+            </div>
             <p className="mt-4 text-sm text-paper/60 max-w-xs">
               Your wildest creative reality. © {new Date().getFullYear()}
             </p>
@@ -532,9 +535,15 @@ function Footer() {
             </div>
           ))}
         </div>
-        <div className="font-display text-[clamp(4rem,20vw,22rem)] leading-[0.8] tracking-[-0.06em] font-medium">
-          patreon
-        </div>
+        <motion.div
+          initial={{ y: 60, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          className="font-display text-[clamp(4rem,18vw,20rem)] leading-[0.8] tracking-[-0.06em] font-medium uppercase"
+        >
+          Planet Baltimore
+        </motion.div>
       </div>
     </footer>
   );
