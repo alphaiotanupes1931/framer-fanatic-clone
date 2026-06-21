@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Search, Menu, X, Calendar, MapPin } from "lucide-react";
 import { useState } from "react";
 import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
-import musician from "@/assets/creator-musician.jpg";
+import boomSelecta from "@/assets/boom-selecta.png.asset.json";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
@@ -448,7 +448,7 @@ function EventsMockup() {
       where: "Ottobar · Remington",
       time: "9:00 PM",
       tag: "Music",
-      img: musician,
+      img: boomSelecta.url,
       accent: "bg-[#3b6fa0]",
     },
     {
@@ -560,7 +560,7 @@ function EventsMockup() {
 
 function Features() {
   const items = [
-    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: musician },
+    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: boomSelecta.url },
     { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: nannyDarkYellow.url },
     { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay.url },
   ];
