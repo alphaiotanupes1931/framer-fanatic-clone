@@ -1,18 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { Search, ArrowDown, ArrowLeft, Heart, BookOpen, PartyPopper, MessageCircle } from "lucide-react";
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
+import { useRef } from "react";
+import { Search, ArrowDown, ArrowLeft, PartyPopper } from "lucide-react";
 import heroSinger from "@/assets/hero-singer.jpg";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
 import chelsea from "@/assets/avatar-chelsea.jpg";
+import pbLogo from "@/assets/pb-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Patreon — Your wildest creative reality" },
-      { name: "description", content: "Where creators and fans build something meaningful together." },
+      { title: "Planet Baltimore — Your wildest creative reality" },
+      { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
   }),
   component: Index,
@@ -38,15 +40,30 @@ function Nav() {
     <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
       <div className="flex items-center justify-between text-paper">
         <nav className="hidden md:flex items-center gap-8 text-base font-medium">
-          <a href="#creators" className="hover:opacity-70 transition-opacity">Creators</a>
-          <a href="#features" className="hover:opacity-70 transition-opacity">Features</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Pricing</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Resources</a>
+          <NavLink href="#creators">Creators</NavLink>
+          <NavLink href="#features">Features</NavLink>
+          <NavLink href="#">Pricing</NavLink>
+          <NavLink href="#">Resources</NavLink>
           <a href="#" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Updates</a>
         </nav>
-        <a href="#" className="absolute left-1/2 -translate-x-1/2 font-display text-2xl md:text-[28px] font-extrabold tracking-tight">
-          PATREON
-        </a>
+        <motion.a
+          href="#"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
+        >
+          <motion.img
+            src={pbLogo.url}
+            alt="Planet Baltimore"
+            width={36}
+            height={36}
+            className="w-9 h-9 invert"
+            animate={{ rotate: [0, 360] }}
+            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+          />
+          <span className="font-display text-lg md:text-xl font-extrabold tracking-tight uppercase hidden sm:inline">Planet Baltimore</span>
+        </motion.a>
         <div className="flex items-center gap-3">
           <a href="#" className="hidden md:inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
             <Search className="w-4 h-4" /> Find a Creator
@@ -56,6 +73,17 @@ function Nav() {
         </div>
       </div>
     </header>
+  );
+}
+
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} className="group relative">
+      <span className="relative inline-block overflow-hidden">
+        <span className="block transition-transform duration-300 group-hover:-translate-y-full">{children}</span>
+        <span className="absolute inset-0 block translate-y-full transition-transform duration-300 group-hover:translate-y-0">{children}</span>
+      </span>
+    </a>
   );
 }
 
