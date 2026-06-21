@@ -616,9 +616,9 @@ function CTA() {
 
 function Footer() {
   const cols = [
-    { h: "Product", l: ["Features", "Pricing", "Mobile apps", "Brand"] },
-    { h: "Creators", l: ["Podcasters", "Video", "Musicians", "Writers", "Artists"] },
-    { h: "Company", l: ["About", "Press", "Careers", "Newsroom"] },
+    { h: "Product", l: ["Features"] },
+    { h: "Creators", l: ["Musicians", "Writers", "Artists"] },
+    { h: "Company", l: ["About"] },
     { h: "Resources", l: ["Help center", "Handbook", "Community", "Privacy"] },
   ];
   return (
@@ -630,9 +630,6 @@ function Footer() {
               <img src={pbLogo.url} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 invert" />
               <div className="font-display text-2xl font-extrabold tracking-tight uppercase">Planet Baltimore</div>
             </div>
-            <p className="mt-4 text-sm text-paper/60 max-w-xs">
-              Your wildest creative reality. © {new Date().getFullYear()}
-            </p>
           </div>
           {cols.map((c) => (
             <div key={c.h}>
