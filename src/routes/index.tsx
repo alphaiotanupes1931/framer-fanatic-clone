@@ -9,6 +9,7 @@ import queenForADay from "@/assets/queen-for-a-day.png.asset.json";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
+import terrellStage from "@/assets/terrell-stage.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
