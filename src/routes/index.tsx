@@ -27,6 +27,7 @@ function Index() {
     <div className="min-h-screen bg-blue text-ink overflow-x-hidden font-sans">
       <Nav />
       <Hero />
+      <QuoteSection />
       <CreatorsFans />
       <Marquee />
       <Features />
