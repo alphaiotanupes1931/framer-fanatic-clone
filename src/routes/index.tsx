@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Search, Menu, X, Calendar, MapPin } from "lucide-react";
 import { useState } from "react";
 import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
-import musician from "@/assets/creator-musician.jpg";
+import boomSelecta from "@/assets/boom-selecta.png.asset.json";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
