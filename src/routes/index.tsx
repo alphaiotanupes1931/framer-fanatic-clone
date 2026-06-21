@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
 import { useRef } from "react";
-import { Search, ArrowDown, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
+import { Search, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
 import { useState } from "react";
 import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
+import quoteCreator from "@/assets/quote-creator.jpg";
 import chelsea from "@/assets/avatar-chelsea.jpg";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 
