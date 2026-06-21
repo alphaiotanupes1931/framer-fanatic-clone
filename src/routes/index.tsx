@@ -188,8 +188,8 @@ function HeroParallax() {
   return (
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
       <img
-        src={heroSinger}
-        alt="A musician singing into a microphone bathed in blue studio light"
+        src={heroBaltimore.url}
+        alt="A vibrant event space filled with people connecting in Baltimore"
         width={1920}
         height={1080}
         className="absolute inset-0 w-full h-full object-cover"
