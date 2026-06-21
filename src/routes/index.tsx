@@ -448,7 +448,7 @@ function EventsMockup() {
       where: "Ottobar · Remington",
       time: "9:00 PM",
       tag: "Music",
-      img: musician,
+      img: boomSelecta.url,
       accent: "bg-[#3b6fa0]",
     },
     {
