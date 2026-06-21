@@ -170,6 +170,30 @@ function AnimatedHeadline({ lines }: { lines: string[] }) {
   );
 }
 
+function ScrollHeadline({ lines, className }: { lines: string[]; className?: string }) {
+  return (
+    <h2 className={className}>
+      {lines.map((line, li) => (
+        <span key={li} className="block overflow-hidden">
+          {line.split(" ").map((word, wi) => (
+            <span key={wi} className="inline-block overflow-hidden mr-[0.25em] align-baseline">
+              <motion.span
+                initial={{ y: "110%" }}
+                whileInView={{ y: "0%" }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.9, delay: 0.05 * wi + li * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className="inline-block"
+              >
+                {word}
+              </motion.span>
+            </span>
+          ))}
+        </span>
+      ))}
+    </h2>
+  );
+}
+
 function CreatorsFans() {
   return (
     <section id="creators" className="bg-blue px-6 md:px-10 pt-32 pb-40">
