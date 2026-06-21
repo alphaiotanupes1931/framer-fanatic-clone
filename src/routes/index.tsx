@@ -9,6 +9,7 @@ import queenForADay from "@/assets/queen-for-a-day.png.asset.json";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
+import terrellStage from "@/assets/terrell-stage.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -412,8 +413,8 @@ function CreatorsFans() {
 
 function Features() {
   const items = [
-    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: boomSelecta.url },
-    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: nannyDarkYellow.url },
+    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: terrellStage.url },
+    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: boomSelecta.url },
     { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay.url },
   ];
   return (
