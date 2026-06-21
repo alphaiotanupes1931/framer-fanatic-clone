@@ -29,7 +29,6 @@ function Index() {
       <Hero />
       <QuoteSection />
       <CreatorsFans />
-      <Marquee />
       <Features />
       <Stats />
       <CTA />
@@ -556,25 +555,6 @@ function ChatMessage({ avatar, name, time, emoji, text, replies, newCount }: {
   );
 }
 
-function Marquee() {
-  const items = ["Musicians", "Podcasters", "Illustrators", "Writers", "Game devs", "Filmmakers", "Educators", "Photographers", "Comedians"];
-  return (
-    <section className="bg-ink text-paper py-8 overflow-hidden border-y border-ink">
-      <motion.div
-        className="flex gap-16 whitespace-nowrap"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-      >
-        {[...items, ...items, ...items].map((it, i) => (
-          <span key={i} className="font-display text-4xl md:text-6xl font-medium tracking-[-0.04em] flex items-center gap-16">
-            {it}
-            <span className="text-blue">●</span>
-          </span>
-        ))}
-      </motion.div>
-    </section>
-  );
-}
 
 function Features() {
   const items = [
@@ -592,7 +572,7 @@ function Features() {
           transition={{ duration: 0.8 }}
           className="font-display text-ink font-medium text-[clamp(2.5rem,7vw,7rem)] leading-[0.9] tracking-[-0.05em] max-w-5xl"
         >
-          Everything you need.<br />Nothing you don't.
+          Baltimore, fully connected.
         </motion.h2>
 
         <div className="mt-20 grid md:grid-cols-3 gap-6">
