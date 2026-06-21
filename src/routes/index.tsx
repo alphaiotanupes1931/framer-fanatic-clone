@@ -369,7 +369,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden px-6 md:px-10 pt-24 pb-32 bg-[radial-gradient(120%_80%_at_50%_0%,#a8c3ff_0%,#6b8df0_55%,#4a6fd8_100%)]"
+      className="relative overflow-hidden px-6 md:px-10 pt-20 pb-24 bg-[radial-gradient(120%_80%_at_50%_0%,#a8c3ff_0%,#6b8df0_55%,#4a6fd8_100%)]"
     >
       <div className="mx-auto max-w-[1400px]">
         <ScrollHeadline
@@ -377,7 +377,7 @@ function CreatorsFans() {
           className="font-display text-ink font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.05em] text-center"
         />
 
-        <div className="mt-20 grid lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-center">
+        <div className="mt-14 grid lg:grid-cols-[1fr_1.2fr] gap-10 lg:gap-16 items-center">
           <EventsMockup />
 
           <motion.div
@@ -385,12 +385,12 @@ function CreatorsFans() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="grid sm:grid-cols-2 gap-10 lg:gap-14 pb-4"
+            className="grid sm:grid-cols-2 gap-8 lg:gap-12"
           >
             <div className="space-y-5">
-              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">More ways to earn</h3>
+              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">Build Your Community</h3>
               <p className="text-ink/85 text-base md:text-lg leading-relaxed">
-                On Planet Baltimore, you can build a lasting livelihood outside the ad-based ecosystem, with revenue streams ranging from memberships and merch to shows, workshops, and direct community support.
+                Connect directly with Baltimore. No algorithms. No middlemen. Just you and the people who support what you do.
               </p>
               <motion.a
                 whileHover={{ scale: 1.04 }}
@@ -399,14 +399,14 @@ function CreatorsFans() {
                 href="#"
                 className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
               >
-                Set up shop
+                Start Building
               </motion.a>
             </div>
 
             <div className="space-y-5">
-              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">Unlock growth</h3>
+              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">Everything in One Place</h3>
               <p className="text-ink/85 text-base md:text-lg leading-relaxed">
-                Planet Baltimore isn't just for creative growth, it's for professional growth too. Get in-depth analytics about your fans, dig into powerful relationship tools, and tap into a thriving Baltimore creator community.
+                Artists, businesses, neighborhoods, events. Follow what moves you. Support what matters. All of Baltimore, together.
               </p>
               <motion.a
                 whileHover={{ scale: 1.04 }}
@@ -415,7 +415,7 @@ function CreatorsFans() {
                 href="#"
                 className="inline-flex rounded-full border border-ink/80 text-ink px-7 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors"
               >
-                Explore tools
+                Explore
               </motion.a>
             </div>
           </motion.div>
@@ -479,40 +479,37 @@ function EventsMockup() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      className="mx-auto w-full max-w-[340px]"
+      className="mx-auto w-full max-w-[300px]"
     >
       {/* Phone frame */}
-      <div className="relative rounded-[2.75rem] bg-ink p-3 shadow-[0_40px_90px_-20px_rgba(0,0,30,0.45)]">
-        <div className="relative rounded-[2.25rem] bg-paper overflow-hidden">
+      <div className="relative rounded-[2.5rem] bg-ink p-2.5 shadow-[0_30px_70px_-20px_rgba(0,0,30,0.4)]">
+        <div className="relative rounded-[2rem] bg-paper overflow-hidden">
           {/* Notch */}
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-5 bg-ink rounded-full z-10" />
+          <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-20 h-4 bg-ink rounded-full z-10" />
 
           {/* Status bar */}
-          <div className="flex items-center justify-between px-6 pt-3 pb-2 text-[11px] font-semibold text-ink">
+          <div className="flex items-center justify-between px-5 pt-2.5 pb-1 text-[10px] font-semibold text-ink/80">
             <span>9:41</span>
             <span />
           </div>
 
           {/* App header */}
-          <div className="px-5 pt-3 pb-4">
+          <div className="px-5 pt-4 pb-3">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.18em] text-ink/50 font-semibold">This Week</div>
-                <h4 className="font-display text-2xl font-extrabold tracking-tight text-ink">Events</h4>
-              </div>
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-ink/70 bg-ink/5 rounded-full px-3 py-1.5">
+              <h4 className="font-display text-xl font-bold tracking-tight text-ink">Events</h4>
+              <div className="flex items-center gap-1 text-[10px] font-medium text-ink/60">
                 <MapPin className="w-3 h-3" />
                 Baltimore
               </div>
             </div>
 
             {/* Filter chips */}
-            <div className="mt-4 flex gap-2 overflow-hidden">
+            <div className="mt-3 flex gap-1.5 overflow-hidden">
               {["All", "Music", "Art", "Talks", "Pods"].map((c, i) => (
                 <span
                   key={c}
-                  className={`text-[11px] font-medium px-3 py-1.5 rounded-full whitespace-nowrap ${
-                    i === 0 ? "bg-ink text-paper" : "bg-ink/5 text-ink/70"
+                  className={`text-[10px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${
+                    i === 0 ? "bg-ink text-paper" : "text-ink/50"
                   }`}
                 >
                   {c}
@@ -522,7 +519,7 @@ function EventsMockup() {
           </div>
 
           {/* Feed */}
-          <div className="px-4 pb-6 space-y-3 max-h-[460px] overflow-hidden">
+          <div className="px-4 pb-4 space-y-1 max-h-[420px] overflow-hidden">
             {events.map((e, i) => (
               <motion.div
                 key={i}
@@ -530,37 +527,25 @@ function EventsMockup() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.15 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="flex gap-3 bg-ink/[0.03] hover:bg-ink/[0.06] transition-colors rounded-2xl p-2.5"
+                className="flex gap-3 py-2.5 border-b border-ink/5 last:border-b-0"
               >
-                <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
                   <img src={e.img} alt="" className="w-full h-full object-cover" />
-                  <div className={`absolute top-1 left-1 ${e.accent} text-paper rounded-md px-1.5 py-0.5 text-[8px] font-bold leading-none flex flex-col items-center`}>
-                    <span>{e.month}</span>
-                    <span className="text-[11px] mt-0.5">{e.date}</span>
-                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] uppercase tracking-wider font-bold text-ink/50">{e.day} · {e.time}</span>
-                  </div>
+                  <div className="text-[9px] uppercase tracking-wider font-semibold text-ink/40">{e.day} {e.month} {e.date} · {e.time}</div>
                   <div className="font-semibold text-[13px] text-ink leading-tight mt-0.5 truncate">{e.title}</div>
-                  <div className="flex items-center gap-1 text-[11px] text-ink/60 mt-1">
-                    <MapPin className="w-3 h-3" />
-                    <span className="truncate">{e.where}</span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end justify-center">
-                  <span className="text-[9px] font-bold text-ink/40 uppercase tracking-wider">{e.tag}</span>
+                  <div className="text-[11px] text-ink/50 mt-0.5 truncate">{e.where}</div>
                 </div>
               </motion.div>
             ))}
           </div>
 
           {/* Tab bar */}
-          <div className="border-t border-ink/5 px-6 py-3 flex items-center justify-between text-[10px] text-ink/50 font-medium">
+          <div className="border-t border-ink/5 px-6 py-2.5 flex items-center justify-between text-[10px] text-ink/40 font-medium">
             <span>Home</span>
             <span>Artists</span>
-            <span className="text-ink font-bold flex items-center gap-1"><Calendar className="w-3 h-3" /> Events</span>
+            <span className="text-ink font-semibold flex items-center gap-1"><Calendar className="w-3 h-3" /> Events</span>
             <span>Feed</span>
             <span>You</span>
           </div>
