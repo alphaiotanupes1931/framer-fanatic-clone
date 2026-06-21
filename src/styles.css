@@ -63,33 +63,33 @@
 
 :root {
   --radius: 0.75rem;
-  /* Warm cream canvas, deep ink type, signature coral accent */
-  --background: oklch(0.965 0.018 80);
-  --foreground: oklch(0.16 0.01 60);
-  --card: oklch(0.98 0.012 80);
-  --card-foreground: oklch(0.16 0.01 60);
-  --popover: oklch(0.98 0.012 80);
-  --popover-foreground: oklch(0.16 0.01 60);
-  --primary: oklch(0.16 0.01 60);
-  --primary-foreground: oklch(0.965 0.018 80);
-  --secondary: oklch(0.92 0.025 75);
-  --secondary-foreground: oklch(0.16 0.01 60);
-  --muted: oklch(0.92 0.022 78);
-  --muted-foreground: oklch(0.42 0.02 60);
-  --accent: oklch(0.68 0.19 30);
-  --accent-foreground: oklch(0.98 0.012 80);
+  /* Patreon-style: signature electric blue + black */
+  --background: oklch(0.72 0.16 265);
+  --foreground: oklch(0.08 0 0);
+  --card: oklch(0.98 0 0);
+  --card-foreground: oklch(0.08 0 0);
+  --popover: oklch(0.98 0 0);
+  --popover-foreground: oklch(0.08 0 0);
+  --primary: oklch(0.08 0 0);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.85 0.09 265);
+  --secondary-foreground: oklch(0.08 0 0);
+  --muted: oklch(0.85 0.09 265);
+  --muted-foreground: oklch(0.25 0.05 265);
+  --accent: oklch(0.08 0 0);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.86 0.02 70);
-  --input: oklch(0.86 0.02 70);
-  --ring: oklch(0.68 0.19 30);
-  --coral: oklch(0.68 0.19 30);
-  --olive: oklch(0.45 0.06 110);
-  --plum: oklch(0.35 0.09 350);
-  --ink: oklch(0.16 0.01 60);
-  --cream: oklch(0.965 0.018 80);
+  --border: oklch(0.65 0.14 265);
+  --input: oklch(0.85 0.09 265);
+  --ring: oklch(0.08 0 0);
+  --blue: oklch(0.72 0.16 265);
+  --blue-deep: oklch(0.45 0.22 268);
+  --ink: oklch(0.08 0 0);
+  --paper: oklch(0.98 0 0);
+  --chat-bg: oklch(0.92 0.02 200);
 
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -156,22 +156,22 @@
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-feature-settings: "ss01", "ss02";
-    letter-spacing: -0.02em;
+    letter-spacing: -0.045em;
+    font-weight: 500;
   }
 
   ::selection {
-    background-color: var(--coral);
-    color: var(--cream);
+    background-color: var(--ink);
+    color: var(--paper);
   }
 }
 
 @theme inline {
-  --color-coral: var(--coral);
-  --color-olive: var(--olive);
-  --color-plum: var(--plum);
+  --color-blue: var(--blue);
+  --color-blue-deep: var(--blue-deep);
   --color-ink: var(--ink);
-  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-chat-bg: var(--chat-bg);
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
 }
