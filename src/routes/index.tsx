@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
 import { useRef } from "react";
-import { Search, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
+import { Search, Menu, X, Calendar, MapPin } from "lucide-react";
 import { useState } from "react";
 import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
 import musician from "@/assets/creator-musician.jpg";
@@ -9,7 +9,6 @@ import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
-import chelsea from "@/assets/avatar-chelsea.jpg";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -378,8 +377,8 @@ function CreatorsFans() {
           className="font-display text-ink font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.05em] text-center"
         />
 
-        <div className="mt-20 grid lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-end">
-          <ChatMockup />
+        <div className="mt-20 grid lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-center">
+          <EventsMockup />
 
           <motion.div
             initial={{ opacity: 0, y: 40 }}
