@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
 import { useRef } from "react";
-import { Search, ArrowDown, ArrowLeft, PartyPopper } from "lucide-react";
+import { Search, ArrowDown, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
+import { useState } from "react";
 import heroSinger from "@/assets/hero-singer.jpg";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
@@ -36,22 +37,45 @@ function Index() {
 }
 
 function Nav() {
+  const [open, setOpen] = useState(false);
   return (
     <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
       <div className="flex items-center justify-between text-paper">
+        {/* Desktop left nav */}
         <nav className="hidden md:flex items-center gap-8 text-base font-medium">
           <NavLink href="#creators">Creators</NavLink>
           <NavLink href="#features">Features</NavLink>
-          <NavLink href="#">Pricing</NavLink>
           <NavLink href="#">Resources</NavLink>
           <a href="#" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Updates</a>
         </nav>
+
+        {/* Mobile/tablet logo (left-aligned) */}
         <motion.a
           href="#"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
+          className="flex md:hidden items-center gap-2"
+        >
+          <motion.img
+            src={pbLogo.url}
+            alt="Planet Baltimore"
+            width={32}
+            height={32}
+            className="w-8 h-8 invert"
+            animate={{ rotate: [0, 360] }}
+            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+          />
+          <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
+        </motion.a>
+
+        {/* Desktop centered logo */}
+        <motion.a
+          href="#"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2"
         >
           <motion.img
             src={pbLogo.url}
@@ -62,16 +86,64 @@ function Nav() {
             animate={{ rotate: [0, 360] }}
             transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
           />
-          <span className="font-display text-lg md:text-xl font-extrabold tracking-tight uppercase hidden sm:inline">Planet Baltimore</span>
+          <span className="font-display text-lg md:text-xl font-extrabold tracking-tight uppercase">Planet Baltimore</span>
         </motion.a>
-        <div className="flex items-center gap-3">
-          <a href="#" className="hidden md:inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
+
+        {/* Desktop right actions */}
+        <div className="hidden md:flex items-center gap-3">
+          <a href="#" className="inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
             <Search className="w-4 h-4" /> Find a Creator
           </a>
-          <a href="#" className="hidden md:inline-flex rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Log in</a>
+          <a href="#" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Log in</a>
           <a href="#" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors">Get Started</a>
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+          className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-full border border-paper/70 text-paper hover:bg-paper hover:text-ink transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
       </div>
+
+      {/* Mobile menu overlay */}
+      <motion.div
+        initial={false}
+        animate={open ? { opacity: 1, pointerEvents: "auto" } : { opacity: 0, pointerEvents: "none" }}
+        transition={{ duration: 0.3 }}
+        className="md:hidden fixed inset-0 z-[60] bg-ink text-paper"
+      >
+        <div className="flex items-center justify-between px-6 pt-6">
+          <div className="flex items-center gap-2">
+            <img src={pbLogo.url} alt="" width={32} height={32} className="w-8 h-8 invert" />
+            <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
+          </div>
+          <button
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+            className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-paper/40 hover:bg-paper hover:text-ink transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <nav className="px-6 mt-16 flex flex-col gap-6 font-display text-4xl tracking-[-0.04em]">
+          {[
+            { href: "#creators", label: "Creators" },
+            { href: "#features", label: "Features" },
+            { href: "#", label: "Resources" },
+            { href: "#", label: "Updates" },
+            { href: "#", label: "Find a Creator" },
+            { href: "#", label: "Log in" },
+          ].map((l) => (
+            <a key={l.label} href={l.href} onClick={() => setOpen(false)} className="hover:text-blue transition-colors">{l.label}</a>
+          ))}
+        </nav>
+        <div className="px-6 mt-12">
+          <a href="#" onClick={() => setOpen(false)} className="inline-flex rounded-full bg-paper text-ink px-6 py-3 text-base font-medium">Get Started</a>
+        </div>
+      </motion.div>
     </header>
   );
 }
