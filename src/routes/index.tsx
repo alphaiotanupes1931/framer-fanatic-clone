@@ -558,9 +558,9 @@ function ChatMessage({ avatar, name, time, emoji, text, replies, newCount }: {
 
 function Features() {
   const items = [
-    { title: "Memberships", body: "Free, paid, and one-time. Stack tiers however your work moves.", img: musician },
-    { title: "Commerce", body: "Sell digital downloads, merch, and one-off drops next to your monthly memberships.", img: illustrator },
-    { title: "Community", body: "Posts, chats, comments, and DMs that reach the people who pay attention.", img: filmmaker },
+    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: musician },
+    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: illustrator },
+    { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: filmmaker },
   ];
   return (
     <section id="features" className="bg-blue px-6 md:px-10 py-32">
