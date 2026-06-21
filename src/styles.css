@@ -62,26 +62,35 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --radius: 0.75rem;
+  /* Warm cream canvas, deep ink type, signature coral accent */
+  --background: oklch(0.965 0.018 80);
+  --foreground: oklch(0.16 0.01 60);
+  --card: oklch(0.98 0.012 80);
+  --card-foreground: oklch(0.16 0.01 60);
+  --popover: oklch(0.98 0.012 80);
+  --popover-foreground: oklch(0.16 0.01 60);
+  --primary: oklch(0.16 0.01 60);
+  --primary-foreground: oklch(0.965 0.018 80);
+  --secondary: oklch(0.92 0.025 75);
+  --secondary-foreground: oklch(0.16 0.01 60);
+  --muted: oklch(0.92 0.022 78);
+  --muted-foreground: oklch(0.42 0.02 60);
+  --accent: oklch(0.68 0.19 30);
+  --accent-foreground: oklch(0.98 0.012 80);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.86 0.02 70);
+  --input: oklch(0.86 0.02 70);
+  --ring: oklch(0.68 0.19 30);
+  --coral: oklch(0.68 0.19 30);
+  --olive: oklch(0.45 0.06 110);
+  --plum: oklch(0.35 0.09 350);
+  --ink: oklch(0.16 0.01 60);
+  --cream: oklch(0.965 0.018 80);
+
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +149,29 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--coral);
+    color: var(--cream);
+  }
+}
+
+@theme inline {
+  --color-coral: var(--coral);
+  --color-olive: var(--olive);
+  --color-plum: var(--plum);
+  --color-ink: var(--ink);
+  --color-cream: var(--cream);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
 }
