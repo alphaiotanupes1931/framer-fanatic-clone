@@ -168,15 +168,6 @@ function Hero() {
         <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
       </div>
 
-      {/* Scroll cue */}
-      <motion.a
-        href="#creators"
-        animate={{ y: [0, 6, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-8 left-6 md:left-10 w-12 h-12 rounded-full border border-paper/70 text-paper flex items-center justify-center hover:bg-paper hover:text-ink transition-colors"
-      >
-        <ArrowDown className="w-5 h-5" />
-      </motion.a>
     </section>
   );
 }
