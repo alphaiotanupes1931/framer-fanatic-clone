@@ -10,6 +10,7 @@ import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
 import terrellStage from "@/assets/terrell-stage.png.asset.json";
+import baltimoreBg from "@/assets/baltimore-bg.jpeg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -355,12 +356,21 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden px-6 md:px-10 pt-10 pb-12 bg-[radial-gradient(120%_80%_at_50%_0%,#a8c3ff_0%,#6b8df0_55%,#4a6fd8_100%)]"
+      className="relative overflow-hidden px-6 md:px-10 pt-10 pb-12"
     >
-      <div className="mx-auto max-w-[1400px]">
+      {/* Background image */}
+      <img
+        src={baltimoreBg.url}
+        alt="Baltimore skyline"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/60" />
+
+      <div className="relative mx-auto max-w-[1400px]">
         <ScrollHeadline
           lines={["Turning passions", "into communities"]}
-          className="font-display text-ink font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.05em] text-center"
+          className="font-display text-paper font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.05em] text-center"
         />
 
         <div className="mt-6">
@@ -372,8 +382,8 @@ function CreatorsFans() {
             className="grid sm:grid-cols-2 gap-8 lg:gap-12"
           >
             <div className="space-y-5">
-              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">Build Your Community</h3>
-              <p className="text-ink/85 text-base md:text-lg leading-relaxed">
+              <h3 className="font-display text-3xl md:text-4xl font-semibold text-paper tracking-tight">Build Your Community</h3>
+              <p className="text-paper/85 text-base md:text-lg leading-relaxed">
                 Connect directly with Baltimore. No algorithms. No middlemen. Just you and the people who support what you do.
               </p>
               <motion.a
@@ -381,15 +391,15 @@ function CreatorsFans() {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 href="#"
-                className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
+                className="inline-flex rounded-full bg-paper text-ink px-7 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors"
               >
                 Start Building
               </motion.a>
             </div>
 
             <div className="space-y-5">
-              <h3 className="font-display text-3xl md:text-4xl font-semibold text-ink tracking-tight">Everything in One Place</h3>
-              <p className="text-ink/85 text-base md:text-lg leading-relaxed">
+              <h3 className="font-display text-3xl md:text-4xl font-semibold text-paper tracking-tight">Everything in One Place</h3>
+              <p className="text-paper/85 text-base md:text-lg leading-relaxed">
                 Artists, businesses, neighborhoods, events. Follow what moves you. Support what matters. All of Baltimore, together.
               </p>
               <motion.a
@@ -397,7 +407,7 @@ function CreatorsFans() {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 href="#"
-                className="inline-flex rounded-full border border-ink/80 text-ink px-7 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors"
+                className="inline-flex rounded-full border border-paper/80 text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
               >
                 Explore
               </motion.a>
