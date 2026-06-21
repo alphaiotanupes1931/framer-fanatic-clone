@@ -1,15 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { motion } from "motion/react";
+import { Search, ArrowDown, ArrowLeft, Heart, BookOpen, PartyPopper, MessageCircle } from "lucide-react";
+import heroSinger from "@/assets/hero-singer.jpg";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
+import chelsea from "@/assets/avatar-chelsea.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Patreon — Creativity, powered by membership" },
+      { title: "Patreon — Your wildest creative reality" },
       { name: "description", content: "Where creators and fans build something meaningful together." },
     ],
   }),
@@ -18,14 +20,13 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen bg-blue text-ink overflow-x-hidden font-sans">
       <Nav />
       <Hero />
+      <CreatorsFans />
       <Marquee />
-      <Creators />
       <Features />
       <Stats />
-      <Testimonial />
       <CTA />
       <Footer />
     </div>
@@ -34,23 +35,24 @@ function Index() {
 
 function Nav() {
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-background/70 border-b border-border/60">
-      <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2 font-display text-2xl font-bold tracking-tight">
-          <span className="inline-block w-6 h-6 rounded-full bg-coral" />
-          patreon
-        </a>
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <a href="#creators" className="hover:text-coral transition-colors">Creators</a>
-          <a href="#features" className="hover:text-coral transition-colors">Features</a>
-          <a href="#pricing" className="hover:text-coral transition-colors">Pricing</a>
-          <a href="#" className="hover:text-coral transition-colors">Explore</a>
+    <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
+      <div className="flex items-center justify-between text-paper">
+        <nav className="hidden md:flex items-center gap-8 text-base font-medium">
+          <a href="#creators" className="hover:opacity-70 transition-opacity">Creators</a>
+          <a href="#features" className="hover:opacity-70 transition-opacity">Features</a>
+          <a href="#" className="hover:opacity-70 transition-opacity">Pricing</a>
+          <a href="#" className="hover:opacity-70 transition-opacity">Resources</a>
+          <a href="#" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Updates</a>
         </nav>
+        <a href="#" className="absolute left-1/2 -translate-x-1/2 font-display text-2xl md:text-[28px] font-extrabold tracking-tight">
+          PATREON
+        </a>
         <div className="flex items-center gap-3">
-          <a href="#" className="hidden sm:inline text-sm font-medium hover:text-coral transition-colors">Log in</a>
-          <a href="#" className="inline-flex items-center justify-center rounded-full bg-ink text-cream px-5 py-2.5 text-sm font-semibold hover:bg-coral transition-colors">
-            Create on Patreon
+          <a href="#" className="hidden md:inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
+            <Search className="w-4 h-4" /> Find a Creator
           </a>
+          <a href="#" className="hidden md:inline-flex rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Log in</a>
+          <a href="#" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors">Get Started</a>
         </div>
       </div>
     </header>
@@ -58,91 +60,226 @@ function Nav() {
 }
 
 function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
   return (
-    <section ref={ref} className="relative pt-20 pb-32 px-6">
-      <motion.div style={{ y, opacity }} className="mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-coral animate-pulse" />
-          Built for the next era of creators
-        </motion.div>
+    <section className="relative min-h-screen w-full overflow-hidden">
+      <img
+        src={heroSinger}
+        alt="A musician singing into a microphone bathed in blue studio light"
+        width={1920}
+        height={1080}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-blue-deep/35 mix-blend-multiply" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue/40" />
 
-        <h1 className="font-display font-medium text-[clamp(3rem,9vw,9rem)] leading-[0.9] tracking-tight max-w-6xl">
-          Creativity,{" "}
-          <span className="italic text-coral">powered</span>
-          <br />
-          by membership.
-        </h1>
+      {/* Headline */}
+      <motion.h1
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute bottom-24 md:bottom-20 left-0 right-0 px-6 md:px-10 text-paper font-display font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-[-0.045em]"
+      >
+        Your wildest<br />creative reality
+      </motion.h1>
 
-        <div className="mt-12 grid md:grid-cols-[1.2fr_1fr] gap-12 items-end">
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-xl leading-snug">
-            A home for creators and the people who love what they make. Build recurring income, share the messy in-between, and grow a community that actually shows up.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <a href="#" className="inline-flex items-center justify-center rounded-full bg-coral text-accent-foreground px-7 py-4 text-base font-semibold hover:bg-ink transition-colors">
-              Get started — it's free
-            </a>
-            <a href="#" className="inline-flex items-center justify-center rounded-full border border-ink text-ink px-7 py-4 text-base font-semibold hover:bg-ink hover:text-cream transition-colors">
-              Find a creator
+      {/* Featured creator card */}
+      <motion.a
+        href="#"
+        initial={{ opacity: 0, x: 30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.9, delay: 0.4 }}
+        className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-3 group"
+      >
+        <img src={podcaster} alt="" width={64} height={64} loading="lazy" className="w-14 h-14 rounded-full object-cover ring-2 ring-paper/50" />
+        <span className="text-paper text-sm leading-snug max-w-[180px]">
+          Jade Novah is fusing her loves of music, writing, and comedy <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+        </span>
+      </motion.a>
+
+      {/* Scroll cue */}
+      <a href="#creators" className="absolute bottom-8 left-6 md:left-10 w-12 h-12 rounded-full border border-paper/70 text-paper flex items-center justify-center hover:bg-paper hover:text-ink transition-colors">
+        <ArrowDown className="w-5 h-5" />
+      </a>
+    </section>
+  );
+}
+
+function CreatorsFans() {
+  return (
+    <section id="creators" className="bg-blue px-6 md:px-10 pt-32 pb-40">
+      <div className="mx-auto max-w-[1400px] grid lg:grid-cols-[1.4fr_1fr] gap-16 items-start">
+        <div>
+          <motion.h2
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="font-display text-ink font-medium text-[clamp(3rem,9vw,9.5rem)] leading-[0.9] tracking-[-0.05em]"
+          >
+            Creators. Fans.<br />Nothing in<br />between.
+          </motion.h2>
+
+          <div className="mt-20 max-w-md space-y-6 text-ink/90 text-lg leading-relaxed">
+            <p>
+              Patreon gives you a direct line of access to your fan community, with no ads or gatekeepers in the way.
+            </p>
+            <p>
+              Through real-time group chats, comments, DMs, and even directly over email, you can connect more deeply and directly with your community here than anywhere else.
+            </p>
+            <a href="#" className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors">
+              Build real community
             </a>
           </div>
         </div>
-      </motion.div>
 
-      {/* Floating image collage */}
-      <div className="mx-auto max-w-7xl mt-24 grid grid-cols-12 gap-4 md:gap-6">
-        <FloatingCard src={musician} alt="Musician recording" className="col-span-6 md:col-span-4 aspect-[3/4] rotate-[-2deg]" delay={0} tag="Indie folk" priceColor="bg-coral" />
-        <FloatingCard src={podcaster} alt="Podcaster" className="col-span-6 md:col-span-3 aspect-[3/4] mt-12 rotate-[1.5deg]" delay={0.1} tag="Weekly podcast" priceColor="bg-olive" />
-        <FloatingCard src={illustrator} alt="Illustrator" className="col-span-6 md:col-span-3 aspect-[3/4] rotate-[-1deg]" delay={0.2} tag="Illustration" priceColor="bg-plum" />
-        <FloatingCard src={filmmaker} alt="Filmmaker" className="col-span-6 md:col-span-2 aspect-[3/4] mt-8 rotate-[2deg]" delay={0.3} tag="Short films" priceColor="bg-ink" />
+        <ChatMockup />
       </div>
     </section>
   );
 }
 
-function FloatingCard({
-  src, alt, className, delay, tag, priceColor,
-}: { src: string; alt: string; className: string; delay: number; tag: string; priceColor: string }) {
+function ChatMockup() {
   return (
-    <motion.figure
+    <motion.div
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -8, rotate: 0 }}
-      className={`relative overflow-hidden rounded-2xl bg-muted shadow-[0_30px_60px_-20px_rgba(20,15,10,0.25)] ${className}`}
+      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-3xl bg-chat-bg p-5 shadow-[0_30px_80px_-20px_rgba(0,0,30,0.35)] max-w-md mx-auto w-full"
     >
-      <img src={src} alt={alt} loading="lazy" width={1024} height={1024} className="w-full h-full object-cover" />
-      <figcaption className={`absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-full px-3 py-1.5 text-xs font-medium text-cream ${priceColor}`}>
-        <span>{tag}</span>
-        <span className="opacity-80">$5 / mo</span>
-      </figcaption>
-    </motion.figure>
+      {/* Header */}
+      <div className="flex items-center gap-3 pb-4 border-b border-ink/10">
+        <button className="w-9 h-9 rounded-full bg-paper/70 flex items-center justify-center">
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <div className="flex-1">
+          <div className="font-semibold text-ink">Chelsea Devantez's chat</div>
+          <div className="text-xs text-ink/60">Chelsea Devantez · View Details</div>
+        </div>
+        <img src={chelsea} alt="" width={40} height={40} loading="lazy" className="w-10 h-10 rounded-lg object-cover" />
+      </div>
+
+      <div className="pt-5 space-y-5">
+        <ChatBubble
+          name=""
+          avatar={chelsea}
+          color="bg-paper"
+          text="started this and cant wait to hear your book reccs!!!!"
+          reactions={["❤️", "📕"]}
+          replies="2 replies"
+          newCount={1}
+          align="left"
+        />
+        <ChatMessage avatar={chelsea} name="Maya Joseph" time="3m" emoji="🎉" />
+        <ChatBubble
+          name="Chelsea Devantez"
+          tag="CREATOR"
+          time="3m"
+          avatar={chelsea}
+          color="bg-[#9bb0a3]"
+          text="so glad everyone is here 😌"
+          reactions={["💬", "❤️"]}
+          replies="6 replies"
+          newCount={2}
+          align="left"
+          dark
+        />
+        <ChatMessage avatar={chelsea} name="Kai Nady" time="3m" text="ok, who's seen a movie thats better than the book?" replies="2 replies" newCount={1} />
+        <div className="flex gap-3">
+          <img src={chelsea} alt="" width={36} height={36} loading="lazy" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+          <div className="flex-1">
+            <div className="flex items-baseline gap-2">
+              <span className="font-semibold text-sm text-ink">Susie Kennedy</span>
+              <span className="text-xs text-ink/50">· 3m</span>
+            </div>
+            <div className="mt-1 text-sm text-ink">after your last review i HAD to read this!</div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function ChatBubble({
+  name, tag, time, avatar, color, text, reactions, replies, newCount, dark,
+}: {
+  name: string; tag?: string; time?: string; avatar: string; color: string;
+  text: string; reactions: string[]; replies: string; newCount: number;
+  align?: string; dark?: boolean;
+}) {
+  return (
+    <div className="flex gap-3">
+      <img src={avatar} alt="" width={36} height={36} loading="lazy" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        {name && (
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="font-semibold text-sm text-ink">{name}</span>
+            {tag && <span className="text-[10px] font-bold tracking-wider bg-ink/80 text-paper px-1.5 py-0.5 rounded">{tag}</span>}
+            {time && <span className="text-xs text-ink/50">· {time}</span>}
+          </div>
+        )}
+        <div className={`${color} ${dark ? "text-paper" : "text-ink"} rounded-2xl rounded-tl-md px-4 py-3 text-sm inline-block max-w-full`}>
+          {text}
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="flex -space-x-1 bg-paper rounded-full px-2 py-1 text-sm">
+            {reactions.map((r, i) => <span key={i}>{r}</span>)}
+          </div>
+        </div>
+        <div className="flex items-center gap-3 mt-2 text-xs">
+          <div className="flex -space-x-1.5">
+            <img src={chelsea} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
+            <img src={podcaster} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
+          </div>
+          <span className="text-ink/60">{replies}</span>
+          <span className="text-emerald-700 font-medium">· {newCount} New</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChatMessage({ avatar, name, time, emoji, text, replies, newCount }: {
+  avatar: string; name: string; time: string; emoji?: string; text?: string; replies?: string; newCount?: number;
+}) {
+  return (
+    <div className="flex gap-3">
+      <img src={avatar} alt="" width={36} height={36} loading="lazy" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+      <div className="flex-1">
+        <div className="flex items-baseline gap-2">
+          <span className="font-semibold text-sm text-ink">{name}</span>
+          <span className="text-xs text-ink/50">· {time}</span>
+        </div>
+        {emoji && <div className="mt-1 text-3xl"><PartyPopper className="w-7 h-7 text-amber-500 inline" /></div>}
+        {text && <div className="mt-1 text-sm text-ink">{text}</div>}
+        {replies && (
+          <div className="flex items-center gap-3 mt-2 text-xs">
+            <div className="flex -space-x-1.5">
+              <img src={chelsea} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
+              <img src={podcaster} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
+            </div>
+            <span className="text-ink/60">{replies}</span>
+            {newCount && <span className="text-emerald-700 font-medium">· {newCount} New</span>}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
 function Marquee() {
   const items = ["Musicians", "Podcasters", "Illustrators", "Writers", "Game devs", "Filmmakers", "Educators", "Photographers", "Comedians"];
   return (
-    <section className="border-y border-border bg-cream py-6 overflow-hidden">
+    <section className="bg-ink text-paper py-8 overflow-hidden border-y border-ink">
       <motion.div
-        className="flex gap-12 whitespace-nowrap"
+        className="flex gap-16 whitespace-nowrap"
         animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
       >
         {[...items, ...items, ...items].map((it, i) => (
-          <span key={i} className="font-display text-3xl md:text-5xl font-medium tracking-tight flex items-center gap-12">
+          <span key={i} className="font-display text-4xl md:text-6xl font-medium tracking-[-0.04em] flex items-center gap-16">
             {it}
-            <span className="text-coral">✦</span>
+            <span className="text-blue">●</span>
           </span>
         ))}
       </motion.div>
@@ -150,85 +287,42 @@ function Marquee() {
   );
 }
 
-function Creators() {
+function Features() {
   const items = [
-    { kicker: "01 / Musicians", title: "Release the album behind the album.", body: "Demos, voice memos, B-sides, and the live takes that didn't make the cut. Your real ones want all of it.", img: musician },
-    { kicker: "02 / Podcasters", title: "Run the show ad-free, on your terms.", body: "Bonus episodes, ad-free feeds, and a private Discord where the conversation keeps going after the credits roll.", img: podcaster },
-    { kicker: "03 / Visual artists", title: "Get paid for the process, not just the post.", body: "Share works-in-progress, timelapses, and PSDs. Sell originals and prints from the same place fans already follow you.", img: illustrator },
-    { kicker: "04 / Filmmakers", title: "Fund the next short before the festival circuit.", body: "Sustain production with monthly support, drop director's cuts, and screen new work for your inner circle first.", img: filmmaker },
+    { title: "Memberships", body: "Free, paid, and one-time. Stack tiers however your work moves.", img: musician },
+    { title: "Commerce", body: "Sell digital downloads, merch, and one-off drops next to your monthly memberships.", img: illustrator },
+    { title: "Community", body: "Posts, chats, comments, and DMs that reach the people who pay attention.", img: filmmaker },
   ];
   return (
-    <section id="creators" className="px-6 py-32">
-      <div className="mx-auto max-w-7xl">
+    <section id="features" className="bg-blue px-6 md:px-10 py-32">
+      <div className="mx-auto max-w-[1400px]">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="font-display text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95] max-w-4xl"
+          transition={{ duration: 0.8 }}
+          className="font-display text-ink font-medium text-[clamp(2.5rem,7vw,7rem)] leading-[0.9] tracking-[-0.05em] max-w-5xl"
         >
-          For every kind of <span className="italic text-coral">maker</span>.
+          Everything you need.<br />Nothing you don't.
         </motion.h2>
-        <div className="mt-24 space-y-32">
+
+        <div className="mt-20 grid md:grid-cols-3 gap-6">
           {items.map((it, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 60 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className={`grid md:grid-cols-2 gap-12 items-center ${i % 2 ? "md:[&>figure]:order-2" : ""}`}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              className="group rounded-3xl bg-ink text-paper overflow-hidden hover:-translate-y-2 transition-transform duration-500"
             >
-              <figure className="aspect-[4/5] rounded-3xl overflow-hidden bg-muted">
-                <img src={it.img} alt={it.title} loading="lazy" width={1024} height={1024} className="w-full h-full object-cover" />
-              </figure>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-coral font-semibold mb-6">{it.kicker}</div>
-                <h3 className="font-display text-4xl md:text-6xl leading-[0.95]">{it.title}</h3>
-                <p className="mt-6 text-lg text-muted-foreground max-w-md leading-relaxed">{it.body}</p>
-                <a href="#" className="inline-flex items-center gap-2 mt-8 text-base font-semibold border-b-2 border-ink pb-1 hover:text-coral hover:border-coral transition-colors">
-                  See examples →
-                </a>
+              <div className="aspect-[4/5] overflow-hidden">
+                <img src={it.img} alt="" loading="lazy" width={1024} height={1280} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Features() {
-  const features = [
-    { title: "Memberships that fit", body: "Free, paid, and one-time. Stack tiers however your work moves.", icon: "◐" },
-    { title: "Built-in commerce", body: "Sell digital downloads, merch, and one-off drops next to your monthly memberships.", icon: "◇" },
-    { title: "A community, not a feed", body: "Posts, chats, comments, and DMs that actually reach the people who pay attention.", icon: "✦" },
-    { title: "You own the relationship", body: "Email addresses, no algorithm in the middle, and tools to message anytime.", icon: "✱" },
-    { title: "Insights worth reading", body: "See what's landing, who's leaving, and what to make next — without the dashboard fatigue.", icon: "◈" },
-    { title: "Bring your fans with you", body: "Import from anywhere and link your existing socials in one click.", icon: "↗" },
-  ];
-  return (
-    <section id="features" className="bg-ink text-cream px-6 py-32 rounded-t-[3rem]">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid md:grid-cols-[1fr_1.2fr] gap-12 items-end mb-20">
-          <div className="text-xs uppercase tracking-[0.2em] text-coral font-semibold">What you get</div>
-          <h2 className="font-display text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95]">
-            Everything you need to run an independent creative business.
-          </h2>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-cream/10 rounded-3xl overflow-hidden">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.05 }}
-              className="bg-ink p-10 hover:bg-cream/5 transition-colors group"
-            >
-              <div className="text-4xl text-coral mb-6 group-hover:rotate-12 transition-transform">{f.icon}</div>
-              <h3 className="font-display text-2xl mb-3">{f.title}</h3>
-              <p className="text-cream/60 leading-relaxed">{f.body}</p>
+              <div className="p-8">
+                <h3 className="font-display text-3xl font-medium tracking-tight">{it.title}</h3>
+                <p className="mt-3 text-paper/70 leading-relaxed">{it.body}</p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -245,8 +339,8 @@ function Stats() {
     { n: "190", l: "Countries" },
   ];
   return (
-    <section className="bg-ink text-cream px-6 pb-32">
-      <div className="mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-cream/10 pt-16">
+    <section className="bg-ink text-paper px-6 md:px-10 py-32">
+      <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-12">
         {stats.map((s, i) => (
           <motion.div
             key={i}
@@ -255,8 +349,8 @@ function Stats() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: i * 0.08 }}
           >
-            <div className="font-display text-5xl md:text-7xl font-medium">{s.n}</div>
-            <div className="mt-2 text-sm text-cream/60 uppercase tracking-widest">{s.l}</div>
+            <div className="font-display text-6xl md:text-8xl font-medium tracking-[-0.05em]">{s.n}</div>
+            <div className="mt-3 text-sm text-paper/60 uppercase tracking-widest">{s.l}</div>
           </motion.div>
         ))}
       </div>
@@ -264,59 +358,26 @@ function Stats() {
   );
 }
 
-function Testimonial() {
-  return (
-    <section className="px-6 py-32 bg-background">
-      <motion.blockquote
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="mx-auto max-w-5xl text-center"
-      >
-        <div className="text-coral text-6xl font-display leading-none mb-8">"</div>
-        <p className="font-display text-3xl md:text-5xl leading-tight">
-          Patreon let me quit my day job. Not in the cliché way — in the boring, beautiful way where rent gets paid on the same day every month and I get to make the work I actually want to make.
-        </p>
-        <footer className="mt-12 flex items-center justify-center gap-4">
-          <img src={podcaster} alt="" loading="lazy" width={64} height={64} className="w-14 h-14 rounded-full object-cover" />
-          <div className="text-left">
-            <div className="font-semibold">Maya Okonkwo</div>
-            <div className="text-sm text-muted-foreground">Host, The Long Way Home</div>
-          </div>
-        </footer>
-      </motion.blockquote>
-    </section>
-  );
-}
-
 function CTA() {
   return (
-    <section id="pricing" className="px-6 pb-32">
+    <section className="bg-blue px-6 md:px-10 py-32">
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="mx-auto max-w-7xl rounded-[3rem] bg-coral text-cream px-8 md:px-20 py-24 md:py-32 relative overflow-hidden"
+        transition={{ duration: 0.9 }}
+        className="mx-auto max-w-[1400px] text-center"
       >
-        <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-cream/10 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-ink/20 blur-3xl" />
-        <div className="relative">
-          <h2 className="font-display text-[clamp(2.5rem,7vw,6.5rem)] leading-[0.95] max-w-4xl">
-            Start free. Get paid <span className="italic">tomorrow.</span>
-          </h2>
-          <p className="mt-6 max-w-xl text-lg md:text-xl text-cream/85">
-            No setup fees, no contracts, no algorithms deciding who sees your work. Just you, your fans, and the work.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <a href="#" className="inline-flex items-center justify-center rounded-full bg-cream text-ink px-8 py-4 text-base font-semibold hover:bg-ink hover:text-cream transition-colors">
-              Create your page
-            </a>
-            <a href="#" className="inline-flex items-center justify-center rounded-full border border-cream/40 text-cream px-8 py-4 text-base font-semibold hover:bg-cream hover:text-ink transition-colors">
-              Talk to our team
-            </a>
-          </div>
+        <h2 className="font-display text-ink font-medium text-[clamp(3rem,10vw,10rem)] leading-[0.88] tracking-[-0.05em]">
+          Start free.<br />Get paid tomorrow.
+        </h2>
+        <div className="mt-12 flex flex-wrap gap-3 justify-center">
+          <a href="#" className="inline-flex rounded-full bg-ink text-paper px-8 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors">
+            Get Started
+          </a>
+          <a href="#" className="inline-flex rounded-full border border-ink text-ink px-8 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors">
+            Find a Creator
+          </a>
         </div>
       </motion.div>
     </section>
@@ -325,34 +386,31 @@ function CTA() {
 
 function Footer() {
   const cols = [
-    { h: "Product", l: ["Features", "Pricing", "Mobile apps", "Brand guidelines"] },
-    { h: "Creators", l: ["Podcasters", "Video creators", "Musicians", "Writers", "Artists"] },
+    { h: "Product", l: ["Features", "Pricing", "Mobile apps", "Brand"] },
+    { h: "Creators", l: ["Podcasters", "Video", "Musicians", "Writers", "Artists"] },
     { h: "Company", l: ["About", "Press", "Careers", "Newsroom"] },
-    { h: "Resources", l: ["Help center", "Creator handbook", "Community guidelines", "Privacy"] },
+    { h: "Resources", l: ["Help center", "Handbook", "Community", "Privacy"] },
   ];
   return (
-    <footer className="border-t border-border px-6 py-16">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid md:grid-cols-[1.5fr_repeat(4,1fr)] gap-12 mb-16">
+    <footer className="bg-ink text-paper px-6 md:px-10 py-16">
+      <div className="mx-auto max-w-[1400px]">
+        <div className="grid md:grid-cols-[1.5fr_repeat(4,1fr)] gap-12 mb-20">
           <div>
-            <div className="flex items-center gap-2 font-display text-2xl font-bold tracking-tight">
-              <span className="inline-block w-6 h-6 rounded-full bg-coral" />
-              patreon
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-              Creativity, powered by membership. © {new Date().getFullYear()}
+            <div className="font-display text-3xl font-extrabold tracking-tight">PATREON</div>
+            <p className="mt-4 text-sm text-paper/60 max-w-xs">
+              Your wildest creative reality. © {new Date().getFullYear()}
             </p>
           </div>
           {cols.map((c) => (
             <div key={c.h}>
-              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-4">{c.h}</div>
+              <div className="text-xs uppercase tracking-widest text-paper/50 mb-4">{c.h}</div>
               <ul className="space-y-3 text-sm">
-                {c.l.map((i) => (<li key={i}><a href="#" className="hover:text-coral transition-colors">{i}</a></li>))}
+                {c.l.map((i) => (<li key={i}><a href="#" className="hover:text-blue transition-colors">{i}</a></li>))}
               </ul>
             </div>
           ))}
         </div>
-        <div className="font-display text-[clamp(3rem,15vw,15rem)] leading-[0.85] text-ink/90 tracking-tighter">
+        <div className="font-display text-[clamp(4rem,20vw,22rem)] leading-[0.8] tracking-[-0.06em] font-medium">
           patreon
         </div>
       </div>
