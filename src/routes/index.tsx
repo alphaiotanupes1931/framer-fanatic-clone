@@ -8,7 +8,7 @@ import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
-import quoteCreator from "@/assets/quote-creator.jpg";
+import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
 import chelsea from "@/assets/avatar-chelsea.jpg";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 
