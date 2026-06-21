@@ -590,7 +590,7 @@ function Features() {
 
 function CTA() {
   return (
-    <section className="bg-blue px-6 md:px-10 py-32">
+    <section className="bg-blue px-6 md:px-10 py-16">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
