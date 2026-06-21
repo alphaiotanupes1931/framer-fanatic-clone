@@ -173,6 +173,46 @@ function Hero() {
   );
 }
 
+function QuoteSection() {
+  return (
+    <section className="relative w-full overflow-hidden" style={{ height: "clamp(500px, 70vh, 900px)" }}>
+      <img
+        src={quoteCreator}
+        alt="Baltimore creator performing"
+        width={1920}
+        height={1080}
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent" />
+
+      <div className="absolute bottom-0 left-0 right-0 px-6 md:px-10 pb-10 md:pb-14">
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <motion.blockquote
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="text-paper font-display text-[clamp(1.5rem,3.5vw,3.5rem)] leading-[1.1] tracking-[-0.02em] max-w-4xl"
+          >
+            "Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
+          </motion.blockquote>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="text-paper font-display text-xl md:text-2xl tracking-widest uppercase shrink-0"
+          >
+            KAMAUU
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HeroParallax() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
