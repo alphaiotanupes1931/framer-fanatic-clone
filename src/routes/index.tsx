@@ -376,9 +376,7 @@ function CreatorsFans() {
           className="font-display text-ink font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.05em] text-center"
         />
 
-        <div className="mt-6 grid lg:grid-cols-[1fr_1.2fr] gap-10 lg:gap-16 items-center">
-          <EventsMockup />
-
+        <div className="mt-6">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
