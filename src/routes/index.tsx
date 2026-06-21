@@ -194,6 +194,52 @@ function ScrollHeadline({ lines, className }: { lines: string[]; className?: str
   );
 }
 
+function TiltCard({ index, img, title, body }: { index: number; img: string; title: string; body: string }) {
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const sx = useSpring(rx, { stiffness: 200, damping: 18 });
+  const sy = useSpring(ry, { stiffness: 200, damping: 18 });
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    ry.set(px * 12);
+    rx.set(-py * 12);
+  }
+  function onLeave() { rx.set(0); ry.set(0); }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.8, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{ rotateX: sx, rotateY: sy, transformPerspective: 1000 }}
+      className="group rounded-3xl bg-ink text-paper overflow-hidden will-change-transform"
+    >
+      <div className="aspect-[4/5] overflow-hidden">
+        <motion.img
+          src={img}
+          alt=""
+          loading="lazy"
+          width={1024}
+          height={1280}
+          className="w-full h-full object-cover"
+          whileHover={{ scale: 1.08 }}
+          transition={{ duration: 0.6 }}
+        />
+      </div>
+      <div className="p-8">
+        <h3 className="font-display text-3xl font-medium tracking-tight">{title}</h3>
+        <p className="mt-3 text-paper/70 leading-relaxed">{body}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 function CreatorsFans() {
   return (
     <section id="creators" className="bg-blue px-6 md:px-10 pt-32 pb-40">
