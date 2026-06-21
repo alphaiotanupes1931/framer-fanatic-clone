@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring } from "moti
 import { useRef } from "react";
 import { Search, ArrowDown, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
 import { useState } from "react";
-import heroSinger from "@/assets/hero-singer.jpg";
+import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
@@ -188,8 +188,8 @@ function HeroParallax() {
   return (
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
       <img
-        src={heroSinger}
-        alt="A musician singing into a microphone bathed in blue studio light"
+        src={heroBaltimore.url}
+        alt="A vibrant event space filled with people connecting in Baltimore"
         width={1920}
         height={1080}
         className="absolute inset-0 w-full h-full object-cover"
