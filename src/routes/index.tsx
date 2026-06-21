@@ -408,6 +408,8 @@ function Features() {
 }
 
 function Stats() {
+
+}
   const stats = [
     { n: "250k+", l: "Creators earning" },
     { n: "$8B+", l: "Paid to creators" },
