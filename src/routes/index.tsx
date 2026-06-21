@@ -1,18 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { Search, ArrowDown, ArrowLeft, Heart, BookOpen, PartyPopper, MessageCircle } from "lucide-react";
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
+import { useRef } from "react";
+import { Search, ArrowDown, ArrowLeft, PartyPopper } from "lucide-react";
 import heroSinger from "@/assets/hero-singer.jpg";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
 import chelsea from "@/assets/avatar-chelsea.jpg";
+import pbLogo from "@/assets/pb-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Patreon — Your wildest creative reality" },
-      { name: "description", content: "Where creators and fans build something meaningful together." },
+      { title: "Planet Baltimore — Your wildest creative reality" },
+      { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
   }),
   component: Index,
@@ -38,15 +40,30 @@ function Nav() {
     <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
       <div className="flex items-center justify-between text-paper">
         <nav className="hidden md:flex items-center gap-8 text-base font-medium">
-          <a href="#creators" className="hover:opacity-70 transition-opacity">Creators</a>
-          <a href="#features" className="hover:opacity-70 transition-opacity">Features</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Pricing</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Resources</a>
+          <NavLink href="#creators">Creators</NavLink>
+          <NavLink href="#features">Features</NavLink>
+          <NavLink href="#">Pricing</NavLink>
+          <NavLink href="#">Resources</NavLink>
           <a href="#" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Updates</a>
         </nav>
-        <a href="#" className="absolute left-1/2 -translate-x-1/2 font-display text-2xl md:text-[28px] font-extrabold tracking-tight">
-          PATREON
-        </a>
+        <motion.a
+          href="#"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
+        >
+          <motion.img
+            src={pbLogo.url}
+            alt="Planet Baltimore"
+            width={36}
+            height={36}
+            className="w-9 h-9 invert"
+            animate={{ rotate: [0, 360] }}
+            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+          />
+          <span className="font-display text-lg md:text-xl font-extrabold tracking-tight uppercase hidden sm:inline">Planet Baltimore</span>
+        </motion.a>
         <div className="flex items-center gap-3">
           <a href="#" className="hidden md:inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
             <Search className="w-4 h-4" /> Find a Creator
@@ -59,35 +76,36 @@ function Nav() {
   );
 }
 
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} className="group relative">
+      <span className="relative inline-block overflow-hidden">
+        <span className="block transition-transform duration-300 group-hover:-translate-y-full">{children}</span>
+        <span className="absolute inset-0 block translate-y-full transition-transform duration-300 group-hover:translate-y-0">{children}</span>
+      </span>
+    </a>
+  );
+}
+
 function Hero() {
   return (
     <section className="relative min-h-screen w-full overflow-hidden">
-      <img
-        src={heroSinger}
-        alt="A musician singing into a microphone bathed in blue studio light"
-        width={1920}
-        height={1080}
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      <HeroParallax />
       <div className="absolute inset-0 bg-blue-deep/35 mix-blend-multiply" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue/40" />
 
-      {/* Headline */}
-      <motion.h1
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute bottom-24 md:bottom-20 left-0 right-0 px-6 md:px-10 text-paper font-display font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-[-0.045em]"
-      >
-        Your wildest<br />creative reality
-      </motion.h1>
+      {/* Headline with per-word stagger */}
+      <div className="absolute bottom-24 md:bottom-20 left-0 right-0 px-6 md:px-10 text-paper font-display font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-[-0.045em]">
+        <AnimatedHeadline lines={["Your wildest", "creative reality"]} />
+      </div>
 
       {/* Featured creator card */}
       <motion.a
         href="#"
         initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.9, delay: 0.4 }}
+        transition={{ duration: 0.9, delay: 1.2 }}
+        whileHover={{ x: -4 }}
         className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-3 group"
       >
         <img src={podcaster} alt="" width={64} height={64} loading="lazy" className="w-14 h-14 rounded-full object-cover ring-2 ring-paper/50" />
@@ -97,10 +115,128 @@ function Hero() {
       </motion.a>
 
       {/* Scroll cue */}
-      <a href="#creators" className="absolute bottom-8 left-6 md:left-10 w-12 h-12 rounded-full border border-paper/70 text-paper flex items-center justify-center hover:bg-paper hover:text-ink transition-colors">
+      <motion.a
+        href="#creators"
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-8 left-6 md:left-10 w-12 h-12 rounded-full border border-paper/70 text-paper flex items-center justify-center hover:bg-paper hover:text-ink transition-colors"
+      >
         <ArrowDown className="w-5 h-5" />
-      </a>
+      </motion.a>
     </section>
+  );
+}
+
+function HeroParallax() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1.05, 1.2]);
+  return (
+    <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
+      <img
+        src={heroSinger}
+        alt="A musician singing into a microphone bathed in blue studio light"
+        width={1920}
+        height={1080}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+    </motion.div>
+  );
+}
+
+function AnimatedHeadline({ lines }: { lines: string[] }) {
+  return (
+    <h1>
+      {lines.map((line, li) => (
+        <span key={li} className="block overflow-hidden">
+          <span className="block">
+            {line.split(" ").map((word, wi) => (
+              <span key={wi} className="inline-block overflow-hidden align-baseline mr-[0.25em]">
+                <motion.span
+                  initial={{ y: "110%" }}
+                  animate={{ y: "0%" }}
+                  transition={{ duration: 0.9, delay: 0.2 + (li * line.split(" ").length + wi) * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-block"
+                >
+                  {word}
+                </motion.span>
+              </span>
+            ))}
+          </span>
+        </span>
+      ))}
+    </h1>
+  );
+}
+
+function ScrollHeadline({ lines, className }: { lines: string[]; className?: string }) {
+  return (
+    <h2 className={className}>
+      {lines.map((line, li) => (
+        <span key={li} className="block overflow-hidden">
+          {line.split(" ").map((word, wi) => (
+            <span key={wi} className="inline-block overflow-hidden mr-[0.25em] align-baseline">
+              <motion.span
+                initial={{ y: "110%" }}
+                whileInView={{ y: "0%" }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.9, delay: 0.05 * wi + li * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className="inline-block"
+              >
+                {word}
+              </motion.span>
+            </span>
+          ))}
+        </span>
+      ))}
+    </h2>
+  );
+}
+
+function TiltCard({ index, img, title, body }: { index: number; img: string; title: string; body: string }) {
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const sx = useSpring(rx, { stiffness: 200, damping: 18 });
+  const sy = useSpring(ry, { stiffness: 200, damping: 18 });
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    ry.set(px * 12);
+    rx.set(-py * 12);
+  }
+  function onLeave() { rx.set(0); ry.set(0); }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.8, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{ rotateX: sx, rotateY: sy, transformPerspective: 1000 }}
+      className="group rounded-3xl bg-ink text-paper overflow-hidden will-change-transform"
+    >
+      <div className="aspect-[4/5] overflow-hidden">
+        <motion.img
+          src={img}
+          alt=""
+          loading="lazy"
+          width={1024}
+          height={1280}
+          className="w-full h-full object-cover"
+          whileHover={{ scale: 1.08 }}
+          transition={{ duration: 0.6 }}
+        />
+      </div>
+      <div className="p-8">
+        <h3 className="font-display text-3xl font-medium tracking-tight">{title}</h3>
+        <p className="mt-3 text-paper/70 leading-relaxed">{body}</p>
+      </div>
+    </motion.div>
   );
 }
 
@@ -109,26 +245,27 @@ function CreatorsFans() {
     <section id="creators" className="bg-blue px-6 md:px-10 pt-32 pb-40">
       <div className="mx-auto max-w-[1400px] grid lg:grid-cols-[1.4fr_1fr] gap-16 items-start">
         <div>
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          <ScrollHeadline
+            lines={["Creators. Fans.", "Nothing in", "between."]}
             className="font-display text-ink font-medium text-[clamp(3rem,9vw,9.5rem)] leading-[0.9] tracking-[-0.05em]"
-          >
-            Creators. Fans.<br />Nothing in<br />between.
-          </motion.h2>
+          />
 
           <div className="mt-20 max-w-md space-y-6 text-ink/90 text-lg leading-relaxed">
             <p>
-              Patreon gives you a direct line of access to your fan community, with no ads or gatekeepers in the way.
+              Planet Baltimore gives you a direct line of access to your fan community, with no ads or gatekeepers in the way.
             </p>
             <p>
               Through real-time group chats, comments, DMs, and even directly over email, you can connect more deeply and directly with your community here than anywhere else.
             </p>
-            <a href="#" className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors">
+            <motion.a
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              href="#"
+              className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
+            >
               Build real community
-            </a>
+            </motion.a>
           </div>
         </div>
 
@@ -308,22 +445,7 @@ function Features() {
 
         <div className="mt-20 grid md:grid-cols-3 gap-6">
           {items.map((it, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="group rounded-3xl bg-ink text-paper overflow-hidden hover:-translate-y-2 transition-transform duration-500"
-            >
-              <div className="aspect-[4/5] overflow-hidden">
-                <img src={it.img} alt="" loading="lazy" width={1024} height={1280} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              </div>
-              <div className="p-8">
-                <h3 className="font-display text-3xl font-medium tracking-tight">{it.title}</h3>
-                <p className="mt-3 text-paper/70 leading-relaxed">{it.body}</p>
-              </div>
-            </motion.div>
+            <TiltCard key={i} index={i} img={it.img} title={it.title} body={it.body} />
           ))}
         </div>
       </div>
@@ -396,7 +518,10 @@ function Footer() {
       <div className="mx-auto max-w-[1400px]">
         <div className="grid md:grid-cols-[1.5fr_repeat(4,1fr)] gap-12 mb-20">
           <div>
-            <div className="font-display text-3xl font-extrabold tracking-tight">PATREON</div>
+            <div className="flex items-center gap-3">
+              <img src={pbLogo.url} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 invert" />
+              <div className="font-display text-2xl font-extrabold tracking-tight uppercase">Planet Baltimore</div>
+            </div>
             <p className="mt-4 text-sm text-paper/60 max-w-xs">
               Your wildest creative reality. © {new Date().getFullYear()}
             </p>
@@ -410,9 +535,15 @@ function Footer() {
             </div>
           ))}
         </div>
-        <div className="font-display text-[clamp(4rem,20vw,22rem)] leading-[0.8] tracking-[-0.06em] font-medium">
-          patreon
-        </div>
+        <motion.div
+          initial={{ y: 60, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          className="font-display text-[clamp(4rem,18vw,20rem)] leading-[0.8] tracking-[-0.06em] font-medium uppercase"
+        >
+          Planet Baltimore
+        </motion.div>
       </div>
     </footer>
   );
