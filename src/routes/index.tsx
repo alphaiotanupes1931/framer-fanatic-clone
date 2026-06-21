@@ -11,6 +11,7 @@ import pbLogo from "@/assets/pb-logo.png.asset.json";
 import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
 import terrellStage from "@/assets/terrell-stage.png.asset.json";
 import baltimoreBg from "@/assets/baltimore-bg.jpeg.asset.json";
+import baltimoreCommunityBg from "@/assets/baltimore-community-bg.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -360,7 +361,7 @@ function CreatorsFans() {
     >
       {/* Background image */}
       <img
-        src={baltimoreBg.url}
+        src={baltimoreCommunityBg.url}
         alt="Baltimore skyline"
         className="absolute inset-0 w-full h-full object-cover"
       />
