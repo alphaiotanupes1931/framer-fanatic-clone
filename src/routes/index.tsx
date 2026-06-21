@@ -10,6 +10,7 @@ import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
+import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -559,7 +560,7 @@ function EventsMockup() {
 function Features() {
   const items = [
     { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: musician },
-    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: illustrator },
+    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: nannyDarkYellow.url },
     { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: filmmaker },
   ];
   return (
