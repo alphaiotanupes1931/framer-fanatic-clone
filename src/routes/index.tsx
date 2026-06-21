@@ -171,27 +171,16 @@ function Hero() {
 }
 
 function StaggeredQuote({ text, className }: { text: string; className?: string }) {
-  const words = text.split(" ");
   return (
-    <blockquote className={className}>
-      {words.map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden mr-[0.25em]">
-          <motion.span
-            initial={{ y: "110%" }}
-            whileInView={{ y: "0%" }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{
-              duration: 0.8,
-              delay: 0.04 * i,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="inline-block"
-          >
-            {word}
-          </motion.span>
-        </span>
-      ))}
-    </blockquote>
+    <motion.blockquote
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      className={className}
+    >
+      {text}
+    </motion.blockquote>
   );
 }
 
