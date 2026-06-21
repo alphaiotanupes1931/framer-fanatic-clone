@@ -175,26 +175,27 @@ function CreatorsFans() {
     <section id="creators" className="bg-blue px-6 md:px-10 pt-32 pb-40">
       <div className="mx-auto max-w-[1400px] grid lg:grid-cols-[1.4fr_1fr] gap-16 items-start">
         <div>
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          <ScrollHeadline
+            lines={["Creators. Fans.", "Nothing in", "between."]}
             className="font-display text-ink font-medium text-[clamp(3rem,9vw,9.5rem)] leading-[0.9] tracking-[-0.05em]"
-          >
-            Creators. Fans.<br />Nothing in<br />between.
-          </motion.h2>
+          />
 
           <div className="mt-20 max-w-md space-y-6 text-ink/90 text-lg leading-relaxed">
             <p>
-              Patreon gives you a direct line of access to your fan community, with no ads or gatekeepers in the way.
+              Planet Baltimore gives you a direct line of access to your fan community, with no ads or gatekeepers in the way.
             </p>
             <p>
               Through real-time group chats, comments, DMs, and even directly over email, you can connect more deeply and directly with your community here than anywhere else.
             </p>
-            <a href="#" className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors">
+            <motion.a
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              href="#"
+              className="inline-flex rounded-full bg-ink text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
+            >
               Build real community
-            </a>
+            </motion.a>
           </div>
         </div>
 
