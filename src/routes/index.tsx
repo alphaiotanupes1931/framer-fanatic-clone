@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring } from "moti
 import { useRef } from "react";
 import { Search, ArrowDown, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
 import { useState } from "react";
-import heroSinger from "@/assets/hero-singer.jpg";
+import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
