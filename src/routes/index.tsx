@@ -31,7 +31,7 @@ function Index() {
       <QuoteSection />
       <CreatorsFans />
       <Features />
-      <Stats />
+      
       <CTA />
       <Footer />
     </div>
@@ -587,32 +587,6 @@ function Features() {
   );
 }
 
-function Stats() {
-  const stats = [
-    { n: "250k+", l: "Creators earning" },
-    { n: "$8B+", l: "Paid to creators" },
-    { n: "8M+", l: "Active members" },
-    { n: "190", l: "Countries" },
-  ];
-  return (
-    <section className="bg-ink text-paper px-6 md:px-10 py-32">
-      <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-12">
-        {stats.map((s, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: i * 0.08 }}
-          >
-            <div className="font-display text-6xl md:text-8xl font-medium tracking-[-0.05em]">{s.n}</div>
-            <div className="mt-3 text-sm text-paper/60 uppercase tracking-widest">{s.l}</div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function CTA() {
   return (
