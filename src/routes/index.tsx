@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
 import { useRef } from "react";
-import { Search, ArrowDown, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
+import { Search, ArrowLeft, PartyPopper, Menu, X } from "lucide-react";
 import { useState } from "react";
 import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
 import musician from "@/assets/creator-musician.jpg";
 import podcaster from "@/assets/creator-podcaster.jpg";
 import illustrator from "@/assets/creator-illustrator.jpg";
 import filmmaker from "@/assets/creator-filmmaker.jpg";
+import quoteCreator from "@/assets/quote-creator.jpg";
 import chelsea from "@/assets/avatar-chelsea.jpg";
 import pbLogo from "@/assets/pb-logo.png.asset.json";
 
@@ -26,6 +27,7 @@ function Index() {
     <div className="min-h-screen bg-blue text-ink overflow-x-hidden font-sans">
       <Nav />
       <Hero />
+      <QuoteSection />
       <CreatorsFans />
       <Marquee />
       <Features />
@@ -167,15 +169,46 @@ function Hero() {
         <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
       </div>
 
-      {/* Scroll cue */}
-      <motion.a
-        href="#creators"
-        animate={{ y: [0, 6, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-8 left-6 md:left-10 w-12 h-12 rounded-full border border-paper/70 text-paper flex items-center justify-center hover:bg-paper hover:text-ink transition-colors"
-      >
-        <ArrowDown className="w-5 h-5" />
-      </motion.a>
+    </section>
+  );
+}
+
+function QuoteSection() {
+  return (
+    <section className="relative w-full overflow-hidden" style={{ height: "clamp(500px, 70vh, 900px)" }}>
+      <img
+        src={quoteCreator}
+        alt="Baltimore creator performing"
+        width={1920}
+        height={1080}
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent" />
+
+      <div className="absolute bottom-0 left-0 right-0 px-6 md:px-10 pb-10 md:pb-14">
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <motion.blockquote
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="text-paper font-display text-[clamp(1.5rem,3.5vw,3.5rem)] leading-[1.1] tracking-[-0.02em] max-w-4xl"
+          >
+            "Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
+          </motion.blockquote>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="text-paper font-display text-xl md:text-2xl tracking-widest uppercase shrink-0"
+          >
+            KAMAUU
+          </motion.div>
+        </div>
+      </div>
     </section>
   );
 }
