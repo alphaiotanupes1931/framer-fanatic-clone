@@ -361,7 +361,7 @@ function CreatorsFans() {
     >
       {/* Background image */}
       <img
-        src={baltimoreBg.url}
+        src={baltimoreCommunityBg.url}
         alt="Baltimore skyline"
         className="absolute inset-0 w-full h-full object-cover"
       />
