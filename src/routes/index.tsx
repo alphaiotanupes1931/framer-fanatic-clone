@@ -204,10 +204,7 @@ function QuoteSection() {
   const imageY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
 
   return (
-    <section ref={ref} className="relative w-full overflow-hidden bg-ink">
-      {/* Bridge gradient from hero blue tones */}
-      <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-blue-deep/40 to-transparent pointer-events-none" />
-
+    <section ref={ref} className="relative w-full overflow-hidden bg-paper">
       <div className="relative max-w-[1200px] mx-auto px-6 md:px-10 py-24 md:py-32 lg:py-40">
         <div className="grid lg:grid-cols-[1fr_1.5fr] gap-14 lg:gap-20 items-center">
           {/* Portrait with parallax */}
@@ -219,7 +216,7 @@ function QuoteSection() {
             className="relative mx-auto lg:mx-0 max-w-[340px]"
           >
             <motion.div style={{ y: imageY }}>
-              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
+              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)]">
                 <img
                   src={terrellSpeaks.url}
                   alt="Terrell Speaks"
@@ -230,7 +227,7 @@ function QuoteSection() {
           </motion.div>
 
           {/* Quote */}
-          <div className="text-paper">
+          <div className="text-ink">
             <StaggeredQuote
               text="Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
               className="font-display text-[clamp(1.5rem,3.2vw,3.2rem)] leading-[1.15] tracking-[-0.02em]"
@@ -240,7 +237,7 @@ function QuoteSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 md:mt-10 font-display text-base md:text-lg tracking-wide text-paper/60"
+              className="mt-8 md:mt-10 font-display text-base md:text-lg tracking-wide text-ink/60"
             >
               Terrell Speaks
             </motion.div>
