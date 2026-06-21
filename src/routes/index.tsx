@@ -90,32 +90,22 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 function Hero() {
   return (
     <section className="relative min-h-screen w-full overflow-hidden">
-      <img
-        src={heroSinger}
-        alt="A musician singing into a microphone bathed in blue studio light"
-        width={1920}
-        height={1080}
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      <HeroParallax />
       <div className="absolute inset-0 bg-blue-deep/35 mix-blend-multiply" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue/40" />
 
-      {/* Headline */}
-      <motion.h1
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute bottom-24 md:bottom-20 left-0 right-0 px-6 md:px-10 text-paper font-display font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-[-0.045em]"
-      >
-        Your wildest<br />creative reality
-      </motion.h1>
+      {/* Headline with per-word stagger */}
+      <div className="absolute bottom-24 md:bottom-20 left-0 right-0 px-6 md:px-10 text-paper font-display font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-[-0.045em]">
+        <AnimatedHeadline lines={["Your wildest", "creative reality"]} />
+      </div>
 
       {/* Featured creator card */}
       <motion.a
         href="#"
         initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.9, delay: 0.4 }}
+        transition={{ duration: 0.9, delay: 1.2 }}
+        whileHover={{ x: -4 }}
         className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-3 group"
       >
         <img src={podcaster} alt="" width={64} height={64} loading="lazy" className="w-14 h-14 rounded-full object-cover ring-2 ring-paper/50" />
@@ -125,10 +115,58 @@ function Hero() {
       </motion.a>
 
       {/* Scroll cue */}
-      <a href="#creators" className="absolute bottom-8 left-6 md:left-10 w-12 h-12 rounded-full border border-paper/70 text-paper flex items-center justify-center hover:bg-paper hover:text-ink transition-colors">
+      <motion.a
+        href="#creators"
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-8 left-6 md:left-10 w-12 h-12 rounded-full border border-paper/70 text-paper flex items-center justify-center hover:bg-paper hover:text-ink transition-colors"
+      >
         <ArrowDown className="w-5 h-5" />
-      </a>
+      </motion.a>
     </section>
+  );
+}
+
+function HeroParallax() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1.05, 1.2]);
+  return (
+    <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
+      <img
+        src={heroSinger}
+        alt="A musician singing into a microphone bathed in blue studio light"
+        width={1920}
+        height={1080}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+    </motion.div>
+  );
+}
+
+function AnimatedHeadline({ lines }: { lines: string[] }) {
+  return (
+    <h1>
+      {lines.map((line, li) => (
+        <span key={li} className="block overflow-hidden">
+          <span className="block">
+            {line.split(" ").map((word, wi) => (
+              <span key={wi} className="inline-block overflow-hidden align-baseline mr-[0.25em]">
+                <motion.span
+                  initial={{ y: "110%" }}
+                  animate={{ y: "0%" }}
+                  transition={{ duration: 0.9, delay: 0.2 + (li * line.split(" ").length + wi) * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-block"
+                >
+                  {word}
+                </motion.span>
+              </span>
+            ))}
+          </span>
+        </span>
+      ))}
+    </h1>
   );
 }
 
