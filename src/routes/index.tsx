@@ -425,132 +425,148 @@ function CreatorsFans() {
   );
 }
 
-function ChatMockup() {
+function EventsMockup() {
+  const events = [
+    {
+      day: "FRI",
+      date: "27",
+      month: "JUN",
+      title: "First Friday Art Walk",
+      where: "Station North",
+      time: "6:00 PM",
+      tag: "Art",
+      img: illustrator,
+      accent: "bg-[#ff6b35]",
+    },
+    {
+      day: "SAT",
+      date: "28",
+      month: "JUN",
+      title: "Baltimore Club Music Night",
+      where: "Ottobar · Remington",
+      time: "9:00 PM",
+      tag: "Music",
+      img: musician,
+      accent: "bg-[#3b6fa0]",
+    },
+    {
+      day: "SUN",
+      date: "29",
+      month: "JUN",
+      title: "On Replay Podcast — Live Taping",
+      where: "Peabody Heights Brewery",
+      time: "4:00 PM",
+      tag: "Podcast",
+      img: podcaster,
+      accent: "bg-[#c9a84c]",
+    },
+    {
+      day: "THU",
+      date: "03",
+      month: "JUL",
+      title: "Maroons Series — Artist Talk",
+      where: "Waverly Studios",
+      time: "7:30 PM",
+      tag: "Talk",
+      img: filmmaker,
+      accent: "bg-[#e85d3a]",
+    },
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-3xl bg-chat-bg p-5 shadow-[0_30px_80px_-20px_rgba(0,0,30,0.35)] max-w-md mx-auto w-full"
+      className="mx-auto w-full max-w-[340px]"
     >
-      {/* Header */}
-      <div className="flex items-center gap-3 pb-4 border-b border-ink/10">
-        <button className="w-9 h-9 rounded-full bg-paper/70 flex items-center justify-center">
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <div className="flex-1">
-          <div className="font-semibold text-ink">Chelsea Devantez's chat</div>
-          <div className="text-xs text-ink/60">Chelsea Devantez · View Details</div>
-        </div>
-        <img src={chelsea} alt="" width={40} height={40} loading="lazy" className="w-10 h-10 rounded-lg object-cover" />
-      </div>
+      {/* Phone frame */}
+      <div className="relative rounded-[2.75rem] bg-ink p-3 shadow-[0_40px_90px_-20px_rgba(0,0,30,0.45)]">
+        <div className="relative rounded-[2.25rem] bg-paper overflow-hidden">
+          {/* Notch */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-5 bg-ink rounded-full z-10" />
 
-      <div className="pt-5 space-y-5">
-        <ChatBubble
-          name=""
-          avatar={chelsea}
-          color="bg-paper"
-          text="started this and cant wait to hear your book reccs!!!!"
-          reactions={["❤️", "📕"]}
-          replies="2 replies"
-          newCount={1}
-          align="left"
-        />
-        <ChatMessage avatar={chelsea} name="Maya Joseph" time="3m" emoji="🎉" />
-        <ChatBubble
-          name="Chelsea Devantez"
-          tag="CREATOR"
-          time="3m"
-          avatar={chelsea}
-          color="bg-[#9bb0a3]"
-          text="so glad everyone is here 😌"
-          reactions={["💬", "❤️"]}
-          replies="6 replies"
-          newCount={2}
-          align="left"
-          dark
-        />
-        <ChatMessage avatar={chelsea} name="Kai Nady" time="3m" text="ok, who's seen a movie thats better than the book?" replies="2 replies" newCount={1} />
-        <div className="flex gap-3">
-          <img src={chelsea} alt="" width={36} height={36} loading="lazy" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-          <div className="flex-1">
-            <div className="flex items-baseline gap-2">
-              <span className="font-semibold text-sm text-ink">Susie Kennedy</span>
-              <span className="text-xs text-ink/50">· 3m</span>
+          {/* Status bar */}
+          <div className="flex items-center justify-between px-6 pt-3 pb-2 text-[11px] font-semibold text-ink">
+            <span>9:41</span>
+            <span />
+          </div>
+
+          {/* App header */}
+          <div className="px-5 pt-3 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-ink/50 font-semibold">This Week</div>
+                <h4 className="font-display text-2xl font-extrabold tracking-tight text-ink">Events</h4>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-ink/70 bg-ink/5 rounded-full px-3 py-1.5">
+                <MapPin className="w-3 h-3" />
+                Baltimore
+              </div>
             </div>
-            <div className="mt-1 text-sm text-ink">after your last review i HAD to read this!</div>
+
+            {/* Filter chips */}
+            <div className="mt-4 flex gap-2 overflow-hidden">
+              {["All", "Music", "Art", "Talks", "Pods"].map((c, i) => (
+                <span
+                  key={c}
+                  className={`text-[11px] font-medium px-3 py-1.5 rounded-full whitespace-nowrap ${
+                    i === 0 ? "bg-ink text-paper" : "bg-ink/5 text-ink/70"
+                  }`}
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Feed */}
+          <div className="px-4 pb-6 space-y-3 max-h-[460px] overflow-hidden">
+            {events.map((e, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.15 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="flex gap-3 bg-ink/[0.03] hover:bg-ink/[0.06] transition-colors rounded-2xl p-2.5"
+              >
+                <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                  <img src={e.img} alt="" className="w-full h-full object-cover" />
+                  <div className={`absolute top-1 left-1 ${e.accent} text-paper rounded-md px-1.5 py-0.5 text-[8px] font-bold leading-none flex flex-col items-center`}>
+                    <span>{e.month}</span>
+                    <span className="text-[11px] mt-0.5">{e.date}</span>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] uppercase tracking-wider font-bold text-ink/50">{e.day} · {e.time}</span>
+                  </div>
+                  <div className="font-semibold text-[13px] text-ink leading-tight mt-0.5 truncate">{e.title}</div>
+                  <div className="flex items-center gap-1 text-[11px] text-ink/60 mt-1">
+                    <MapPin className="w-3 h-3" />
+                    <span className="truncate">{e.where}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end justify-center">
+                  <span className="text-[9px] font-bold text-ink/40 uppercase tracking-wider">{e.tag}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Tab bar */}
+          <div className="border-t border-ink/5 px-6 py-3 flex items-center justify-between text-[10px] text-ink/50 font-medium">
+            <span>Home</span>
+            <span>Artists</span>
+            <span className="text-ink font-bold flex items-center gap-1"><Calendar className="w-3 h-3" /> Events</span>
+            <span>Feed</span>
+            <span>You</span>
           </div>
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function ChatBubble({
-  name, tag, time, avatar, color, text, reactions, replies, newCount, dark,
-}: {
-  name: string; tag?: string; time?: string; avatar: string; color: string;
-  text: string; reactions: string[]; replies: string; newCount: number;
-  align?: string; dark?: boolean;
-}) {
-  return (
-    <div className="flex gap-3">
-      <img src={avatar} alt="" width={36} height={36} loading="lazy" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-      <div className="flex-1 min-w-0">
-        {name && (
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="font-semibold text-sm text-ink">{name}</span>
-            {tag && <span className="text-[10px] font-bold tracking-wider bg-ink/80 text-paper px-1.5 py-0.5 rounded">{tag}</span>}
-            {time && <span className="text-xs text-ink/50">· {time}</span>}
-          </div>
-        )}
-        <div className={`${color} ${dark ? "text-paper" : "text-ink"} rounded-2xl rounded-tl-md px-4 py-3 text-sm inline-block max-w-full`}>
-          {text}
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-          <div className="flex -space-x-1 bg-paper rounded-full px-2 py-1 text-sm">
-            {reactions.map((r, i) => <span key={i}>{r}</span>)}
-          </div>
-        </div>
-        <div className="flex items-center gap-3 mt-2 text-xs">
-          <div className="flex -space-x-1.5">
-            <img src={chelsea} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
-            <img src={podcaster} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
-          </div>
-          <span className="text-ink/60">{replies}</span>
-          <span className="text-emerald-700 font-medium">· {newCount} New</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ChatMessage({ avatar, name, time, emoji, text, replies, newCount }: {
-  avatar: string; name: string; time: string; emoji?: string; text?: string; replies?: string; newCount?: number;
-}) {
-  return (
-    <div className="flex gap-3">
-      <img src={avatar} alt="" width={36} height={36} loading="lazy" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-      <div className="flex-1">
-        <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-sm text-ink">{name}</span>
-          <span className="text-xs text-ink/50">· {time}</span>
-        </div>
-        {emoji && <div className="mt-1 text-3xl"><PartyPopper className="w-7 h-7 text-amber-500 inline" /></div>}
-        {text && <div className="mt-1 text-sm text-ink">{text}</div>}
-        {replies && (
-          <div className="flex items-center gap-3 mt-2 text-xs">
-            <div className="flex -space-x-1.5">
-              <img src={chelsea} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
-              <img src={podcaster} alt="" className="w-4 h-4 rounded-full ring-2 ring-chat-bg" />
-            </div>
-            <span className="text-ink/60">{replies}</span>
-            {newCount && <span className="text-emerald-700 font-medium">· {newCount} New</span>}
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
 
