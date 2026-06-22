@@ -63,31 +63,31 @@
 
 :root {
   --radius: 0.75rem;
-  /* Patreon-style: signature electric blue + black */
-  --background: oklch(0.72 0.16 265);
-  --foreground: oklch(0.08 0 0);
-  --card: oklch(0.98 0 0);
+  /* Light, minimal, modern */
+  --background: oklch(0.99 0.002 90);
+  --foreground: oklch(0.12 0 0);
+  --card: oklch(1 0 0);
   --card-foreground: oklch(0.08 0 0);
-  --popover: oklch(0.98 0 0);
+  --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.08 0 0);
   --primary: oklch(0.08 0 0);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.85 0.09 265);
-  --secondary-foreground: oklch(0.08 0 0);
-  --muted: oklch(0.85 0.09 265);
-  --muted-foreground: oklch(0.25 0.05 265);
-  --accent: oklch(0.08 0 0);
-  --accent-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0.003 90);
+  --secondary-foreground: oklch(0.12 0 0);
+  --muted: oklch(0.96 0.003 90);
+  --muted-foreground: oklch(0.45 0.005 90);
+  --accent: oklch(0.94 0.005 90);
+  --accent-foreground: oklch(0.12 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.65 0.14 265);
-  --input: oklch(0.85 0.09 265);
+  --border: oklch(0.92 0.003 90);
+  --input: oklch(0.94 0.003 90);
   --ring: oklch(0.08 0 0);
-  --blue: oklch(0.72 0.16 265);
+  --blue: oklch(0.55 0.18 265);
   --blue-deep: oklch(0.45 0.22 268);
   --ink: oklch(0.08 0 0);
-  --paper: oklch(0.98 0 0);
-  --chat-bg: oklch(0.92 0.02 200);
+  --paper: oklch(0.99 0.002 90);
+  --chat-bg: oklch(0.97 0.005 200);
 
   --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
