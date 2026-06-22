@@ -37,7 +37,6 @@ const NAV = [
   { to: "/groups", icon: Users, label: "Groups/Communities" },
   { to: "/messages", icon: MessageSquare, label: "Messages" },
   { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
-  { to: "/notifications", icon: Bell, label: "Notifications" },
   { to: "/profile", icon: User, label: "Profile" },
   { to: "/search", icon: Search, label: "Search" },
   { to: "/stories", icon: BookOpen, label: "Stories" },
