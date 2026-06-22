@@ -60,12 +60,8 @@ function StoriesPage() {
   };
 
   return (
-    <AppLayout title="Stories" subtitle="Discover stories from Baltimore's writing community."
-      cta="Write A Story" ctaTo="#">
+    <AppLayout title="Stories" subtitle="Discover stories from Baltimore's writing community.">
       <div className="space-y-6">
-        <div className="hidden">
-          {/* CTA actually opens modal */}
-        </div>
         <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-700">
           <Plus className="h-4 w-4" /> Write A Story
         </button>
