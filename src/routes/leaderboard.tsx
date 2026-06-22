@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
+import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FileText, MessageCircle, Heart } from "lucide-react";
 
@@ -16,8 +17,11 @@ type Row = {
 };
 
 function LeaderboardPage() {
+  const auth = useAuthState();
   const [rows, setRows] = useState<Row[]>([]);
-  useEffect(() => { (async () => {
+  useEffect(() => {
+    if (!auth.signedIn) return;
+    (async () => {
     const { data: profs } = await supabase.from("profiles").select("id, display_name, username, avatar_url").limit(100);
     const list = profs || [];
     const results: Row[] = await Promise.all(list.map(async (p: any) => {
@@ -30,7 +34,11 @@ function LeaderboardPage() {
     }));
     results.sort((a, b) => b.points - a.points);
     setRows(results.slice(0, 100));
-  })(); }, []);
+    })();
+  }, [auth.signedIn]);
+
+  if (auth.loading) return null;
+  if (!auth.signedIn) return <AnonLeaderboard />;
 
   return (
     <AppLayout title="Baltimore 100" subtitle="Top 100 people who keep Planet Baltimore moving.">
@@ -63,5 +71,47 @@ function LeaderboardPage() {
         ))}
       </div>
     </AppLayout>
+  );
+}
+
+function AnonLeaderboard() {
+  type C = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null };
+  const [list, setList] = useState<C[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.rpc("search_creators", { q: "", lim: 30 });
+      setList((data as C[] | null) ?? []); setLoading(false);
+    })();
+  }, []);
+  return (
+    <PublicShell title="Baltimore 100" subtitle="Top creators keeping Planet Baltimore moving." signedIn={false}>
+      {loading ? <div className="text-paper/60 text-sm">Loading…</div> :
+        <PreviewGrid
+          items={list}
+          unlockedCount={3}
+          signedIn={false}
+          thing="leaderboard"
+          className="space-y-3"
+          render={(c, _locked) => {
+            const idx = list.indexOf(c as C);
+            return (
+              <div className="flex items-center gap-4 rounded-2xl border border-paper/15 bg-paper/5 px-5 py-3">
+                <div className="w-8 text-lg font-bold text-paper/40">#{idx + 1}</div>
+                <Avatar className="h-10 w-10">
+                  {(c as C).avatar_url && <AvatarImage src={(c as C).avatar_url!} />}
+                  <AvatarFallback className="bg-paper/10 text-paper text-xs">{((c as C).display_name || (c as C).username || "U")[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold truncate">{(c as C).display_name || (c as C).username}</div>
+                  {(c as C).neighborhood && <div className="text-xs text-paper/60">{(c as C).neighborhood}</div>}
+                </div>
+              </div>
+            );
+          }}
+          emptyLabel="No creators yet."
+        />
+      }
+    </PublicShell>
   );
 }
