@@ -3,15 +3,13 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring } from "moti
 import { useRef } from "react";
 import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
-import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
-import boomSelecta from "@/assets/boom-selecta.png.asset.json";
-import queenForADay from "@/assets/queen-for-a-day.png.asset.json";
-import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
-import pbLogo from "@/assets/pb-logo.png.asset.json";
-import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
-import terrellStage from "@/assets/terrell-stage.png.asset.json";
-import baltimoreBg from "@/assets/baltimore-bg.jpeg.asset.json";
-import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg.asset.json";
+import heroBaltimore from "@/assets/hero-baltimore.jpg";
+import boomSelecta from "@/assets/boom-selecta.png";
+import queenForADay from "@/assets/queen-for-a-day.png";
+import terrellSpeaks from "@/assets/terrell-speaks.jpg";
+import pbLogo from "@/assets/pb-logo.png";
+import terrellStage from "@/assets/terrell-stage.png";
+import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -60,7 +58,7 @@ function Nav() {
           className="flex md:hidden items-center gap-2"
         >
           <img
-            src={pbLogo.url}
+            src={pbLogo}
             alt="Planet Baltimore"
             width={32}
             height={32}
@@ -78,7 +76,7 @@ function Nav() {
           className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2"
         >
           <img
-            src={pbLogo.url}
+            src={pbLogo}
             alt="Planet Baltimore"
             width={36}
             height={36}
@@ -115,7 +113,7 @@ function Nav() {
       >
         <div className="flex items-center justify-between px-6 pt-6">
           <div className="flex items-center gap-2">
-            <img src={pbLogo.url} alt="" width={32} height={32} className="w-8 h-8 invert" />
+            <img src={pbLogo} alt="" width={32} height={32} className="w-8 h-8 invert" />
             <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </div>
           <button
@@ -210,7 +208,7 @@ function QuoteSection() {
             <motion.div style={{ y: imageY }}>
               <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)]">
                 <img
-                  src={terrellSpeaks.url}
+                  src={terrellSpeaks}
                   alt="Terrell Speaks"
                   className="w-full h-full object-cover"
                 />
@@ -248,7 +246,7 @@ function HeroParallax() {
   return (
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
       <img
-        src={heroBaltimore.url}
+        src={heroBaltimore}
         alt="A vibrant event space filled with people connecting in Baltimore"
         width={1920}
         height={1080}
@@ -361,7 +359,7 @@ function CreatorsFans() {
     >
       {/* Background image */}
       <img
-        src={baltimoreCommunityBg.url}
+        src={baltimoreCommunityBg}
         alt="Baltimore skyline"
         className="absolute inset-0 w-full h-full object-cover"
       />
@@ -424,9 +422,9 @@ function CreatorsFans() {
 
 function Features() {
   const items = [
-    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: terrellStage.url },
-    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: boomSelecta.url },
-    { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay.url },
+    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: terrellStage },
+    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: boomSelecta },
+    { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay },
   ];
   return (
     <section id="features" className="bg-blue px-6 md:px-10 py-16">
@@ -491,7 +489,7 @@ function Footer() {
         <div className="grid md:grid-cols-[1.5fr_repeat(4,1fr)] gap-12 mb-20">
           <div>
             <div className="flex items-center gap-3">
-              <img src={pbLogo.url} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 invert" />
+              <img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 invert" />
               <div className="font-display text-2xl font-extrabold tracking-tight uppercase">Planet Baltimore</div>
             </div>
           </div>
