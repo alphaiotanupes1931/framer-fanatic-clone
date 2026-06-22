@@ -65,6 +65,8 @@ function Dashboard() {
     load();
   };
 
+  if (!checked) return null;
+
   return (
     <AppLayout
       title="Planet Baltimore"
