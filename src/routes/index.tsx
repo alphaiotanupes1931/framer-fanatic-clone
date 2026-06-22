@@ -493,6 +493,15 @@ function CTA() {
 }
 
 function Footer() {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   const cols: { h: string; l: { label: string; to: string }[] }[] = [
     { h: "Explore", l: [
       { label: "Discover", to: "/discover" },
@@ -512,11 +521,13 @@ function Footer() {
       { label: "Leaderboard", to: "/leaderboard" },
       { label: "Associations", to: "/community-associations" },
     ]},
-    { h: "Account", l: [
-      { label: "Sign in", to: "/auth" },
+    { h: "Account", l: signedIn ? [
       { label: "Dashboard", to: "/dashboard" },
       { label: "Settings", to: "/settings" },
       { label: "Notifications", to: "/notifications" },
+    ] : [
+      { label: "Sign in", to: "/auth" },
+      { label: "Sign up", to: "/auth" },
     ]},
   ];
   return (
