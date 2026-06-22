@@ -18,6 +18,8 @@ type Post = {
 };
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const [checked, setChecked] = useState(false);
   const [tab, setTab] = useState<"for-you" | "following" | "nearby">("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
   const [content, setContent] = useState("");
