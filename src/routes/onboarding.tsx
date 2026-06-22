@@ -3,6 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Camera, Upload } from "lucide-react";
@@ -19,6 +27,8 @@ function Onboarding() {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
+  const [neighborhood, setNeighborhood] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -31,6 +41,16 @@ function Onboarding() {
     });
   }, [navigate]);
 
+  useEffect(() => {
+    supabase
+      .from("neighborhoods")
+      .select("name")
+      .order("name", { ascending: true })
+      .then(({ data }) => {
+        if (data) setNeighborhoods(data.map((n: { name: string }) => n.name));
+      });
+  }, []);
+
   const onPick = (f: File) => {
     if (!f.type.startsWith("image/")) return toast.error("Please choose an image file.");
     if (f.size > 5 * 1024 * 1024) return toast.error("Max image size is 5MB.");
@@ -40,6 +60,9 @@ function Onboarding() {
 
   const finish = async (skip: boolean) => {
     if (!userId) return;
+    if (!neighborhood) {
+      return toast.error("Please choose your neighborhood.");
+    }
     setBusy(true);
     try {
       let avatar_url: string | null = null;
@@ -53,7 +76,7 @@ function Onboarding() {
       }
       const { error } = await supabase
         .from("profiles")
-        .update({ avatar_url, onboarded: true })
+        .update({ avatar_url, neighborhood, onboarded: true })
         .eq("id", userId);
       if (error) throw error;
       navigate({ to: "/dashboard" });
@@ -107,15 +130,35 @@ function Onboarding() {
               <Upload className="h-4 w-4" /> {file ? "Change photo" : "Choose photo"}
             </Button>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="neighborhood">Your Baltimore neighborhood</Label>
+            <Select value={neighborhood} onValueChange={setNeighborhood}>
+              <SelectTrigger id="neighborhood">
+                <SelectValue placeholder="Select your neighborhood" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {neighborhoods.map((n) => (
+                  <SelectItem key={n} value={n}>
+                    {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-col gap-2">
             <Button
               onClick={() => finish(false)}
-              disabled={busy || !file}
+              disabled={busy || !file || !neighborhood}
               className="w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               {busy ? "Saving…" : "Continue"}
             </Button>
-            <Button variant="ghost" onClick={() => finish(true)} disabled={busy} className="w-full">
+            <Button
+              variant="ghost"
+              onClick={() => finish(true)}
+              disabled={busy || !neighborhood}
+              className="w-full"
+            >
               Skip for now
             </Button>
           </div>
