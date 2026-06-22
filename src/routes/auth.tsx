@@ -21,6 +21,37 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [role, setRole] = useState<"artist" | "attendee">("attendee");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  const inBaltimore =
+    !!coords &&
+    coords.lat >= 39.2 &&
+    coords.lat <= 39.38 &&
+    coords.lng >= -76.72 &&
+    coords.lng <= -76.52;
+
+  const detectLocation = () => {
+    setLocError(null);
+    if (!("geolocation" in navigator)) {
+      setLocError("Geolocation is not supported by your browser.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      (err) => {
+        setLocError(err.message || "Unable to retrieve your location.");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -40,18 +71,31 @@ function AuthPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!coords) {
+      return toast.error("Please share your location to continue.");
+    }
+    const finalRole = role === "artist" && inBaltimore ? "artist" : "attendee";
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
-        data: { display_name: displayName || email.split("@")[0] },
+        data: {
+          display_name: displayName || email.split("@")[0],
+          role: finalRole,
+          latitude: coords.lat,
+          longitude: coords.lng,
+        },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Account created");
+    toast.success(
+      finalRole === "artist"
+        ? "Account created — welcome, artist!"
+        : "Account created as attendee.",
+    );
     navigate({ to: "/" });
   };
 
