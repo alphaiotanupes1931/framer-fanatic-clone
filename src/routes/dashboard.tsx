@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -18,6 +18,8 @@ type Post = {
 };
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const [checked, setChecked] = useState(false);
   const [tab, setTab] = useState<"for-you" | "following" | "nearby">("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
   const [content, setContent] = useState("");
@@ -44,10 +46,15 @@ function Dashboard() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
-      setMe(data.session?.user.id || null);
-      await load();
+      if (!data.session) {
+        navigate({ to: "/auth" });
+      } else {
+        setMe(data.session.user.id);
+        await load();
+      }
+      setChecked(true);
     })();
-  }, []);
+  }, [navigate]);
 
   const createPost = async () => {
     if (!content.trim() || !me) return;
@@ -57,6 +64,8 @@ function Dashboard() {
     toast.success("Posted");
     load();
   };
+
+  if (!checked) return null;
 
   return (
     <AppLayout
