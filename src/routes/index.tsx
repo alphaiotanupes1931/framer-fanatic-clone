@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import boomSelecta from "@/assets/boom-selecta.png";
 import queenForADay from "@/assets/queen-for-a-day.png";
@@ -38,6 +39,19 @@ function Index() {
 
 function Nav() {
   const [open, setOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setUserEmail(data.session?.user.email ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserEmail(session?.user.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
   return (
     <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
       <div className="flex items-center justify-between text-paper">
