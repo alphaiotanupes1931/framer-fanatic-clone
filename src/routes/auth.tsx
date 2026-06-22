@@ -55,7 +55,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/" });
+      if (data.session) navigate({ to: "/dashboard" });
     });
   }, [navigate]);
 
@@ -66,7 +66,14 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Signed in");
-    navigate({ to: "/" });
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (uid) {
+      const { data: p } = await supabase.from("profiles").select("onboarded").eq("id", uid).maybeSingle();
+      navigate({ to: p?.onboarded ? "/dashboard" : "/onboarding" });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -96,7 +103,7 @@ function AuthPage() {
         ? "Account created — welcome, artist!"
         : "Account created as attendee.",
     );
-    navigate({ to: "/" });
+    navigate({ to: "/onboarding" });
   };
 
   return (
