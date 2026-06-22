@@ -61,12 +61,13 @@ export function useCurrentProfile() {
 }
 
 export function AppLayout({
-  title, subtitle, cta, ctaTo, hero = true, children,
+  title, subtitle, cta, ctaTo, onCta, hero = true, children,
 }: {
   title: string;
   subtitle?: string;
   cta?: string;
   ctaTo?: string;
+  onCta?: () => void;
   hero?: boolean;
   children: React.ReactNode;
 }) {
@@ -145,14 +146,21 @@ export function AppLayout({
                   <h1 className="text-3xl font-extrabold tracking-tight text-orange-600 sm:text-4xl">{title}</h1>
                   {subtitle && <p className="mt-2 max-w-xl text-neutral-600">{subtitle}</p>}
                 </div>
-                {cta && (
+                {cta && (onCta ? (
+                  <button
+                    onClick={onCta}
+                    className="inline-flex items-center gap-2 self-start rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-700"
+                  >
+                    <Plus className="h-4 w-4" /> {cta}
+                  </button>
+                ) : (
                   <Link
                     to={ctaTo || "#"}
                     className="inline-flex items-center gap-2 self-start rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-700"
                   >
                     <Plus className="h-4 w-4" /> {cta}
                   </Link>
-                )}
+                ))}
               </div>
             </div>
           )}
