@@ -74,6 +74,7 @@ function AuthPage() {
       <Toaster richColors />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>Sign in or create a new account</CardDescription>
         </CardHeader>
