@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
+import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Clock, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -22,6 +23,51 @@ const FORMATS = ["All","poetry","blog","essay","resource"];
 const TABS = ["Discover","Trending","Featured"] as const;
 
 function StoriesPage() {
+  const auth = useAuthState();
+  if (auth.loading) return null;
+  if (!auth.signedIn) return <AnonStories />;
+  return <StoriesSignedIn />;
+}
+
+function AnonStories() {
+  const [list, setList] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("stories")
+        .select("id, user_id, title, excerpt, cover_url, format, read_minutes, likes_count, comments_count, created_at")
+        .order("created_at", { ascending: false }).limit(24);
+      setList((data || []) as Story[]); setLoading(false);
+    })();
+  }, []);
+  return (
+    <PublicShell title="Stories" subtitle="Poetry, essays, blogs and resources from Baltimore's writing community." signedIn={false}>
+      {loading ? <div className="text-paper/60 text-sm">Loading…</div> :
+        <PreviewGrid
+          items={list}
+          unlockedCount={1}
+          signedIn={false}
+          thing="story"
+          render={(s) => (
+            <article className="rounded-2xl border border-paper/10 bg-paper/5 p-5 h-full">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-paper/60">{(s as Story).format}</div>
+              <h3 className="font-display text-lg font-bold mt-1">{(s as Story).title}</h3>
+              {(s as Story).excerpt && <p className="text-sm text-paper/70 mt-2 line-clamp-3">{(s as Story).excerpt}</p>}
+              <div className="mt-3 flex items-center gap-3 text-xs text-paper/60">
+                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {(s as Story).read_minutes || 1} min</span>
+                <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {(s as Story).likes_count}</span>
+                <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {(s as Story).comments_count}</span>
+              </div>
+            </article>
+          )}
+          emptyLabel="No stories yet."
+        />
+      }
+    </PublicShell>
+  );
+}
+
+function StoriesSignedIn() {
   const me = useCurrentProfile();
   const [stories, setStories] = useState<Story[]>([]);
   const [filter, setFilter] = useState("All");
