@@ -85,6 +85,7 @@
   --ring: oklch(0.08 0 0);
   --blue: oklch(0.55 0.18 265);
   --blue-deep: oklch(0.45 0.22 268);
+  --orange: oklch(0.65 0.17 55);
   --ink: oklch(0.12 0 0);
   --paper: oklch(0.99 0.002 90);
   --chat-bg: oklch(0.97 0.005 200);
@@ -169,6 +170,7 @@
 @theme inline {
   --color-blue: var(--blue);
   --color-blue-deep: var(--blue-deep);
+  --color-orange: var(--orange);
   --color-ink: var(--ink);
   --color-paper: var(--paper);
   --color-chat-bg: var(--chat-bg);
