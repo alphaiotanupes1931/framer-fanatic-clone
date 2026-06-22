@@ -145,6 +145,51 @@ function AuthPage() {
                   <Label htmlFor="signup-password">Password</Label>
                   <Input id="signup-password" type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
+                <div className="space-y-2">
+                  <Label>Your location</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={detectLocation}
+                    disabled={locating}
+                  >
+                    {locating
+                      ? "Detecting…"
+                      : coords
+                        ? `Location set (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})`
+                        : "Share my location"}
+                  </Button>
+                  {locError && <p className="text-sm text-destructive">{locError}</p>}
+                  {coords && (
+                    <p className="text-xs text-muted-foreground">
+                      {inBaltimore
+                        ? "✓ You're in the Baltimore area — you can sign up as an artist or attendee."
+                        : "You're outside Baltimore — artist sign-up is restricted to Baltimore-area residents only. You can still join as an attendee."}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>I'm signing up as</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setRole("attendee")}
+                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "attendee" ? "border-primary bg-primary/10" : "border-input"}`}
+                    >
+                      Attendee
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => inBaltimore && setRole("artist")}
+                      disabled={!inBaltimore}
+                      title={!inBaltimore ? "Artist sign-up requires a Baltimore location" : ""}
+                      className={`rounded-md border px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${role === "artist" ? "border-primary bg-primary/10" : "border-input"}`}
+                    >
+                      Artist
+                    </button>
+                  </div>
+                </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Creating…" : "Create account"}
                 </Button>
