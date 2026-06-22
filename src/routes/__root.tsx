@@ -11,10 +11,10 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import pbLogo from "../assets/pb-logo.png.asset.json";
+import pbLogo from "../assets/pb-logo.png";
 
 const SITE_ORIGIN = "https://framer-fanatic-clone.lovable.app";
-const LOGO_URL = `${SITE_ORIGIN}${pbLogo.url}`;
+const LOGO_URL = `${SITE_ORIGIN}${pbLogo}`;
 
 function NotFoundComponent() {
   return (
@@ -91,8 +91,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
-      { rel: "icon", type: "image/png", href: pbLogo.url },
-      { rel: "apple-touch-icon", href: pbLogo.url },
+      { rel: "icon", type: "image/png", href: pbLogo },
+      { rel: "apple-touch-icon", href: pbLogo },
       {
         rel: "stylesheet",
         href: appCss,
