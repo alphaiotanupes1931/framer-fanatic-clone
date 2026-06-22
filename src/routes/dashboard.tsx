@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share2, Bookmark, MapPin, Send } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -52,9 +52,9 @@ function Dashboard() {
   const createPost = async () => {
     if (!content.trim() || !me) return;
     const { error } = await supabase.from("posts").insert({ user_id: me, content: content.trim() });
-    if (error) { toast({ title: "Could not post", description: error.message, variant: "destructive" }); return; }
+    if (error) { toast.error(error.message); return; }
     setContent("");
-    toast({ title: "Posted" });
+    toast.success("Posted");
     load();
   };
 
