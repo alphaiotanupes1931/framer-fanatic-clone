@@ -13,6 +13,7 @@ import { Route as VideosRouteImport } from './routes/videos'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -36,6 +37,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NeighborhoodsRoute = NeighborhoodsRouteImport.update({
+  id: '/neighborhoods',
+  path: '/neighborhoods',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/messages': typeof MessagesRoute
+  '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/stories': typeof StoriesRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/messages': typeof MessagesRoute
+  '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/stories': typeof StoriesRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/messages': typeof MessagesRoute
+  '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/stories': typeof StoriesRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/messages'
+    | '/neighborhoods'
     | '/onboarding'
     | '/profile'
     | '/stories'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/messages'
+    | '/neighborhoods'
     | '/onboarding'
     | '/profile'
     | '/stories'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/messages'
+    | '/neighborhoods'
     | '/onboarding'
     | '/profile'
     | '/stories'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
   MessagesRoute: typeof MessagesRoute
+  NeighborhoodsRoute: typeof NeighborhoodsRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
   StoriesRoute: typeof StoriesRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/neighborhoods': {
+      id: '/neighborhoods'
+      path: '/neighborhoods'
+      fullPath: '/neighborhoods'
+      preLoaderRoute: typeof NeighborhoodsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
   MessagesRoute: MessagesRoute,
+  NeighborhoodsRoute: NeighborhoodsRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
   StoriesRoute: StoriesRoute,
