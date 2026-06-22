@@ -104,8 +104,17 @@ function Nav() {
           <a href="#" className="inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
             <Search className="w-4 h-4" /> Find a Creator
           </a>
-          <a href="#" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Log in</a>
-          <a href="#" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors">Get Started</a>
+          {userEmail ? (
+            <>
+              <span className="text-sm text-paper/80">{userEmail}</span>
+              <button onClick={handleSignOut} className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Sign out</button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Log in</Link>
+              <Link to="/auth" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors">Get Started</Link>
+            </>
+          )}
         </div>
 
         {/* Mobile hamburger */}
