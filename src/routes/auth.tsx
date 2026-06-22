@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import pbLogo from "@/assets/pb-logo.png";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -73,6 +74,7 @@ function AuthPage() {
       <Toaster richColors />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>Sign in or create a new account</CardDescription>
         </CardHeader>
