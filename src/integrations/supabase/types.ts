@@ -14,9 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      neighborhoods: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          region: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          region: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          region?: string
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          comments_count: number
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          likes_count: number
+          neighborhood: string | null
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          neighborhood?: string | null
+          user_id: string
+        }
+        Update: {
+          comments_count?: number
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          neighborhood?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          banner_url: string | null
+          bio: string | null
           created_at: string
           display_name: string | null
           email: string | null
@@ -24,12 +160,17 @@ export type Database = {
           in_baltimore: boolean
           latitude: number | null
           longitude: number | null
+          neighborhood: string | null
           onboarded: boolean
           role: string
           updated_at: string
+          username: string | null
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -37,12 +178,17 @@ export type Database = {
           in_baltimore?: boolean
           latitude?: number | null
           longitude?: number | null
+          neighborhood?: string | null
           onboarded?: boolean
           role?: string
           updated_at?: string
+          username?: string | null
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -50,9 +196,90 @@ export type Database = {
           in_baltimore?: boolean
           latitude?: number | null
           longitude?: number | null
+          neighborhood?: string | null
           onboarded?: boolean
           role?: string
           updated_at?: string
+          username?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      stories: {
+        Row: {
+          comments_count: number
+          content: string | null
+          cover_url: string | null
+          created_at: string
+          excerpt: string | null
+          featured: boolean
+          format: string
+          id: string
+          likes_count: number
+          read_minutes: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number
+          content?: string | null
+          cover_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          featured?: boolean
+          format?: string
+          id?: string
+          likes_count?: number
+          read_minutes?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          comments_count?: number
+          content?: string | null
+          cover_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          featured?: boolean
+          format?: string
+          id?: string
+          likes_count?: number
+          read_minutes?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          thumbnail_url: string | null
+          title: string
+          user_id: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          thumbnail_url?: string | null
+          title: string
+          user_id: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          thumbnail_url?: string | null
+          title?: string
+          user_id?: string
+          video_url?: string
         }
         Relationships: []
       }

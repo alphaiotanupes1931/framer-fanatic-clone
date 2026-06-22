@@ -9,14 +9,91 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VideosRouteImport } from './routes/videos'
+import { Route as StoriesRouteImport } from './routes/stories'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
+import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as GroupsRouteImport } from './routes/groups'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
+import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ArtsOrgsRouteImport } from './routes/arts-orgs'
+import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoriesRoute = StoriesRouteImport.update({
+  id: '/stories',
+  path: '/stories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NeighborhoodsRoute = NeighborhoodsRouteImport.update({
+  id: '/neighborhoods',
+  path: '/neighborhoods',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsRoute = GroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -24,9 +101,34 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityAssociationsRoute = CommunityAssociationsRouteImport.update({
+  id: '/community-associations',
+  path: '/community-associations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessesRoute = BusinessesRouteImport.update({
+  id: '/businesses',
+  path: '/businesses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtsOrgsRoute = ArtsOrgsRouteImport.update({
+  id: '/arts-orgs',
+  path: '/arts-orgs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtistsRoute = ArtistsRouteImport.update({
+  id: '/artists',
+  path: '/artists',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,45 +139,261 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/artists': typeof ArtistsRoute
+  '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
+  '/businesses': typeof BusinessesRoute
+  '/calendar': typeof CalendarRoute
+  '/community-associations': typeof CommunityAssociationsRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
+  '/events': typeof EventsRoute
+  '/groups': typeof GroupsRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/messages': typeof MessagesRoute
+  '/neighborhoods': typeof NeighborhoodsRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/stories': typeof StoriesRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/artists': typeof ArtistsRoute
+  '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
+  '/businesses': typeof BusinessesRoute
+  '/calendar': typeof CalendarRoute
+  '/community-associations': typeof CommunityAssociationsRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
+  '/events': typeof EventsRoute
+  '/groups': typeof GroupsRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/messages': typeof MessagesRoute
+  '/neighborhoods': typeof NeighborhoodsRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/stories': typeof StoriesRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/artists': typeof ArtistsRoute
+  '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
+  '/businesses': typeof BusinessesRoute
+  '/calendar': typeof CalendarRoute
+  '/community-associations': typeof CommunityAssociationsRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
+  '/events': typeof EventsRoute
+  '/groups': typeof GroupsRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/messages': typeof MessagesRoute
+  '/neighborhoods': typeof NeighborhoodsRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/stories': typeof StoriesRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/onboarding'
+  fullPaths:
+    | '/'
+    | '/artists'
+    | '/arts-orgs'
+    | '/auth'
+    | '/businesses'
+    | '/calendar'
+    | '/community-associations'
+    | '/dashboard'
+    | '/discover'
+    | '/events'
+    | '/groups'
+    | '/leaderboard'
+    | '/messages'
+    | '/neighborhoods'
+    | '/notifications'
+    | '/onboarding'
+    | '/profile'
+    | '/search'
+    | '/settings'
+    | '/stories'
+    | '/videos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/onboarding'
-  id: '__root__' | '/' | '/auth' | '/dashboard' | '/onboarding'
+  to:
+    | '/'
+    | '/artists'
+    | '/arts-orgs'
+    | '/auth'
+    | '/businesses'
+    | '/calendar'
+    | '/community-associations'
+    | '/dashboard'
+    | '/discover'
+    | '/events'
+    | '/groups'
+    | '/leaderboard'
+    | '/messages'
+    | '/neighborhoods'
+    | '/notifications'
+    | '/onboarding'
+    | '/profile'
+    | '/search'
+    | '/settings'
+    | '/stories'
+    | '/videos'
+  id:
+    | '__root__'
+    | '/'
+    | '/artists'
+    | '/arts-orgs'
+    | '/auth'
+    | '/businesses'
+    | '/calendar'
+    | '/community-associations'
+    | '/dashboard'
+    | '/discover'
+    | '/events'
+    | '/groups'
+    | '/leaderboard'
+    | '/messages'
+    | '/neighborhoods'
+    | '/notifications'
+    | '/onboarding'
+    | '/profile'
+    | '/search'
+    | '/settings'
+    | '/stories'
+    | '/videos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArtistsRoute: typeof ArtistsRoute
+  ArtsOrgsRoute: typeof ArtsOrgsRoute
   AuthRoute: typeof AuthRoute
+  BusinessesRoute: typeof BusinessesRoute
+  CalendarRoute: typeof CalendarRoute
+  CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   DashboardRoute: typeof DashboardRoute
+  DiscoverRoute: typeof DiscoverRoute
+  EventsRoute: typeof EventsRoute
+  GroupsRoute: typeof GroupsRoute
+  LeaderboardRoute: typeof LeaderboardRoute
+  MessagesRoute: typeof MessagesRoute
+  NeighborhoodsRoute: typeof NeighborhoodsRoute
+  NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
+  ProfileRoute: typeof ProfileRoute
+  SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRoute
+  StoriesRoute: typeof StoriesRoute
+  VideosRoute: typeof VideosRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stories': {
+      id: '/stories'
+      path: '/stories'
+      fullPath: '/stories'
+      preLoaderRoute: typeof StoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/neighborhoods': {
+      id: '/neighborhoods'
+      path: '/neighborhoods'
+      fullPath: '/neighborhoods'
+      preLoaderRoute: typeof NeighborhoodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/groups': {
+      id: '/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof GroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -85,11 +403,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community-associations': {
+      id: '/community-associations'
+      path: '/community-associations'
+      fullPath: '/community-associations'
+      preLoaderRoute: typeof CommunityAssociationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/businesses': {
+      id: '/businesses'
+      path: '/businesses'
+      fullPath: '/businesses'
+      preLoaderRoute: typeof BusinessesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arts-orgs': {
+      id: '/arts-orgs'
+      path: '/arts-orgs'
+      fullPath: '/arts-orgs'
+      preLoaderRoute: typeof ArtsOrgsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artists': {
+      id: '/artists'
+      path: '/artists'
+      fullPath: '/artists'
+      preLoaderRoute: typeof ArtistsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -104,9 +457,26 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArtistsRoute: ArtistsRoute,
+  ArtsOrgsRoute: ArtsOrgsRoute,
   AuthRoute: AuthRoute,
+  BusinessesRoute: BusinessesRoute,
+  CalendarRoute: CalendarRoute,
+  CommunityAssociationsRoute: CommunityAssociationsRoute,
   DashboardRoute: DashboardRoute,
+  DiscoverRoute: DiscoverRoute,
+  EventsRoute: EventsRoute,
+  GroupsRoute: GroupsRoute,
+  LeaderboardRoute: LeaderboardRoute,
+  MessagesRoute: MessagesRoute,
+  NeighborhoodsRoute: NeighborhoodsRoute,
+  NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
+  ProfileRoute: ProfileRoute,
+  SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRoute,
+  StoriesRoute: StoriesRoute,
+  VideosRoute: VideosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
