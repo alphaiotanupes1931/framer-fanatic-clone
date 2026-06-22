@@ -101,7 +101,7 @@ export function AppLayout({
                   to={item.to}
                   className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
                     active
-                      ? "bg-neutral-900 text-white"
+                      ? "bg-orange text-white"
                       : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
                   }`}
                 >
