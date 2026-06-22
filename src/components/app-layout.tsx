@@ -236,9 +236,6 @@ function RightRail() {
           Planet Baltimore
         </div>
         <Globe size={280} />
-        <p className="mt-4 text-center text-xs text-neutral-500">
-          One city. One signal. Drag to spin.
-        </p>
       </section>
 
       <section>
