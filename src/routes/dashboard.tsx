@@ -115,7 +115,7 @@ function Dashboard() {
                 <button
                   onClick={createPost}
                   disabled={!content.trim()}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-1.5 text-[13px] font-medium text-white transition disabled:opacity-40 hover:bg-neutral-700"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-1.5 text-[13px] font-medium text-white transition disabled:opacity-40 hover:brightness-110"
                 >
                   <Send className="h-3.5 w-3.5" /> Post
                 </button>

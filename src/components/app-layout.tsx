@@ -153,16 +153,16 @@ export function AppLayout({
                 {subtitle && <p className="mt-1.5 max-w-xl text-sm text-neutral-500">{subtitle}</p>}
               </div>
               {cta && (onCta ? (
-                <button
+              <button
                   onClick={onCta}
-                  className="inline-flex items-center gap-2 self-start rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
+                  className="inline-flex items-center gap-2 self-start rounded-full bg-orange px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
                 >
                   <Plus className="h-4 w-4" /> {cta}
                 </button>
               ) : (
                 <Link
                   to={ctaTo || "#"}
-                  className="inline-flex items-center gap-2 self-start rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
+                  className="inline-flex items-center gap-2 self-start rounded-full bg-orange px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
                 >
                   <Plus className="h-4 w-4" /> {cta}
                 </Link>
