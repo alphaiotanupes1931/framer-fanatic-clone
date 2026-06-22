@@ -1,10 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Bookmark, MapPin, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Send } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "motion/react";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/dashboard")({
 
 type Post = {
   id: string; user_id: string; content: string; image_url: string | null;
-  likes_count: number; comments_count: number; neighborhood: string | null; created_at: string;
+  likes_count: number | null; comments_count: number | null; neighborhood: string | null; created_at: string;
   author?: { display_name: string | null; avatar_url: string | null; username: string | null; neighborhood: string | null };
 };
 
@@ -25,6 +26,7 @@ function Dashboard() {
   const [content, setContent] = useState("");
   const [me, setMe] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [myProfile, setMyProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -50,6 +52,12 @@ function Dashboard() {
         navigate({ to: "/auth" });
       } else {
         setMe(data.session.user.id);
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("display_name, avatar_url")
+          .eq("id", data.session.user.id)
+          .maybeSingle();
+        if (prof) setMyProfile(prof as typeof myProfile);
         await load();
       }
       setChecked(true);
@@ -69,72 +77,108 @@ function Dashboard() {
 
   return (
     <AppLayout
-      title="Planet Baltimore"
-      subtitle="Your city. Your community. Your feed."
+      title="Home"
+      subtitle="What's moving in Baltimore right now."
     >
-      <div className="space-y-6">
-        <div className="flex flex-wrap gap-2">
-          {([["for-you","For You"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
-            <button key={k} onClick={() => setTab(k)}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${tab===k ? "bg-orange-600 text-white" : "bg-white text-neutral-600 hover:bg-neutral-100"}`}>
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-4 inline-flex items-center gap-1 rounded-full border border-neutral-100 bg-neutral-50 p-1">
+          {([["for-you","For you"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              className={`rounded-full px-4 py-1.5 text-[12px] font-medium transition ${
+                tab===k ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-900"
+              }`}
+            >
               {l}
             </button>
           ))}
         </div>
 
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-          <textarea value={content} onChange={(e) => setContent(e.target.value)}
-            placeholder="Share something with Baltimore..."
-            className="w-full resize-none rounded-xl border border-neutral-200 p-3 text-sm focus:border-orange-400 focus:outline-none" rows={3} />
-          <div className="mt-2 flex justify-end">
-            <button onClick={createPost} disabled={!content.trim()}
-              className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-5 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-orange-700">
-              <Send className="h-4 w-4" /> Post
-            </button>
+        <div className="rounded-2xl border border-neutral-100 bg-white p-4 transition focus-within:border-neutral-300">
+          <div className="flex gap-3">
+            <Avatar className="h-9 w-9 shrink-0">
+              {myProfile?.avatar_url && <AvatarImage src={myProfile.avatar_url} />}
+              <AvatarFallback className="bg-neutral-900 text-[11px] text-white">
+                {(myProfile?.display_name || "U").slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Share something with Baltimore…"
+                className="w-full resize-none border-0 bg-transparent p-0 text-[15px] placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+                rows={2}
+              />
+              <div className="mt-2 flex justify-end">
+                <button
+                  onClick={createPost}
+                  disabled={!content.trim()}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-1.5 text-[13px] font-medium text-white transition disabled:opacity-40 hover:bg-neutral-700"
+                >
+                  <Send className="h-3.5 w-3.5" /> Post
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl border border-dashed border-orange-300 bg-orange-50/60 px-5 py-4 text-sm">
-          <span className="flex items-center gap-2 text-orange-700">
-            <MapPin className="h-4 w-4" /> Add your neighborhood to see local content
-          </span>
-          <Link to="/settings" className="font-semibold text-orange-700 hover:underline">Set up →</Link>
-        </div>
+        <div className="mt-6 divide-y divide-neutral-100">
+          {loading && <div className="py-10 text-center text-sm text-neutral-400">Loading…</div>}
+          {!loading && posts.length === 0 && (
+            <div className="py-16 text-center text-sm text-neutral-400">
+              No posts yet. Be the first to share something.
+            </div>
+          )}
 
-        {loading && <div className="text-center text-sm text-neutral-500">Loading feed…</div>}
-        {!loading && posts.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">
-            No posts yet. Be the first to share something with Baltimore.
-          </div>
-        )}
-
-        {posts.map((p) => (
-          <article key={p.id} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-            <header className="flex items-center gap-3 px-5 pt-5">
-              <Avatar className="h-10 w-10">
-                {p.author?.avatar_url && <AvatarImage src={p.author.avatar_url} />}
-                <AvatarFallback className="bg-orange-100 text-orange-700">
-                  {(p.author?.display_name || p.author?.username || "U").slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">{p.author?.display_name || p.author?.username || "Anonymous"}</div>
-                <div className="text-xs text-neutral-500">
-                  {p.author?.neighborhood || "Baltimore"} · {new Date(p.created_at).toLocaleDateString()}
+          {posts.map((p, i) => (
+            <motion.article
+              key={p.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: Math.min(i * 0.04, 0.4), ease: [0.22, 1, 0.36, 1] }}
+              className="group py-5"
+            >
+              <header className="flex items-center gap-3">
+                <Avatar className="h-9 w-9">
+                  {p.author?.avatar_url && <AvatarImage src={p.author.avatar_url} />}
+                  <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
+                    {(p.author?.display_name || p.author?.username || "U").slice(0, 1).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[13.5px] font-medium text-neutral-900">
+                    {p.author?.display_name || p.author?.username || "Anonymous"}
+                  </div>
+                  <div className="text-[11.5px] text-neutral-400">
+                    {p.author?.neighborhood || "Baltimore"} · {new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </div>
                 </div>
-              </div>
-            </header>
-            <div className="px-5 py-4 text-[15px] leading-relaxed text-neutral-800">{p.content}</div>
-            <footer className="flex items-center justify-between border-t border-neutral-100 px-5 py-3 text-neutral-500">
-              <div className="flex items-center gap-5 text-sm">
-                <button className="flex items-center gap-1.5 hover:text-orange-600"><Heart className="h-4 w-4" /> {p.likes_count}</button>
-                <button className="flex items-center gap-1.5 hover:text-orange-600"><MessageCircle className="h-4 w-4" /> {p.comments_count}</button>
-                <button className="hover:text-orange-600"><Share2 className="h-4 w-4" /></button>
-              </div>
-              <button className="hover:text-orange-600"><Bookmark className="h-4 w-4" /></button>
-            </footer>
-          </article>
-        ))}
+              </header>
+              <div className="mt-3 pl-12 text-[15px] leading-relaxed text-neutral-800">{p.content}</div>
+              {p.image_url && (
+                <div className="mt-3 overflow-hidden rounded-xl pl-12">
+                  <img src={p.image_url} alt="" className="w-full" loading="lazy" />
+                </div>
+              )}
+              <footer className="mt-3 flex items-center gap-6 pl-12 text-[12.5px] text-neutral-400">
+                <button className="flex items-center gap-1.5 transition hover:text-neutral-900">
+                  <Heart className="h-4 w-4" strokeWidth={1.75} /> {p.likes_count ?? 0}
+                </button>
+                <button className="flex items-center gap-1.5 transition hover:text-neutral-900">
+                  <MessageCircle className="h-4 w-4" strokeWidth={1.75} /> {p.comments_count ?? 0}
+                </button>
+                <button className="transition hover:text-neutral-900">
+                  <Share2 className="h-4 w-4" strokeWidth={1.75} />
+                </button>
+                <button className="ml-auto transition hover:text-neutral-900">
+                  <Bookmark className="h-4 w-4" strokeWidth={1.75} />
+                </button>
+              </footer>
+            </motion.article>
+          ))}
+        </div>
       </div>
     </AppLayout>
   );
