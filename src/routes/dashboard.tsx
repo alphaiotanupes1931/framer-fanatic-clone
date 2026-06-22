@@ -9,7 +9,7 @@ import { motion } from "motion/react";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
-  head: () => ({ meta: [{ title: "Planet Baltimore — Your feed" }] }),
+  head: () => ({ meta: [{ title: "Planet Baltimore - Your feed" }] }),
 });
 
 type Post = {

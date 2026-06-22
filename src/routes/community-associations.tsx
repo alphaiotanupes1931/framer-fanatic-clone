@@ -6,5 +6,5 @@ export const Route = createFileRoute("/community-associations")({
       <PlaceholderGrid label="Association" />
     </AppLayout>
   ),
-  head: () => ({ meta: [{ title: "Community Associations — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Community Associations - Planet Baltimore" }] }),
 });

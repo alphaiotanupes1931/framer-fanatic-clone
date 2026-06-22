@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/stories")({
   component: StoriesPage,
-  head: () => ({ meta: [{ title: "Stories — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Stories - Planet Baltimore" }] }),
 });
 
 type Story = {

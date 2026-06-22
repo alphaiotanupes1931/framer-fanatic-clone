@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
-  head: () => ({ meta: [{ title: "Profile — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
 });
 
 const TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages"] as const;

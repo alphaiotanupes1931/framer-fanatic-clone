@@ -8,7 +8,7 @@ import { BaltimoreMap } from "@/components/baltimore-map";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
-  head: () => ({ meta: [{ title: "Neighborhoods — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Neighborhoods - Planet Baltimore" }] }),
 });
 
 type N = { id: string; name: string; region: string };
@@ -24,7 +24,7 @@ function NeighborhoodsPage() {
   if (auth.loading) return null;
   if (!auth.signedIn) {
     return (
-      <PublicShell title="Neighborhoods" subtitle="Every corner of Baltimore — from Hampden to Highlandtown." signedIn={false}>
+      <PublicShell title="Neighborhoods" subtitle="Every corner of Baltimore - from Hampden to Highlandtown." signedIn={false}>
         <PreviewGrid
           items={list}
           unlockedCount={3}
@@ -47,7 +47,7 @@ function NeighborhoodsPage() {
   }
 
   return (
-    <AppLayout title="Neighborhoods" subtitle="Explore Baltimore's communities — click a pin to discover what's happening nearby.">
+    <AppLayout title="Neighborhoods" subtitle="Explore Baltimore's communities - click a pin to discover what's happening nearby.">
       <div className="space-y-6">
         <BaltimoreMap />
         <div className="flex flex-wrap gap-3 text-xs text-neutral-600">

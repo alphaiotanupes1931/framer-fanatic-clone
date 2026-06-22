@@ -15,7 +15,7 @@ import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Planet Baltimore — Support what makes Baltimore" },
+      { title: "Planet Baltimore - Support what makes Baltimore" },
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
     links: [

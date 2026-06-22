@@ -6,5 +6,5 @@ export const Route = createFileRoute("/notifications")({
       <PlaceholderGrid label="Notification" />
     </AppLayout>
   ),
-  head: () => ({ meta: [{ title: "Notifications — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Notifications - Planet Baltimore" }] }),
 });

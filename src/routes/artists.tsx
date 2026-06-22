@@ -125,7 +125,7 @@ export const Route = createFileRoute("/artists")({
   component: FindCreatorPage,
   head: () => ({
     meta: [
-      { title: "Find a Creator — Planet Baltimore" },
+      { title: "Find a Creator - Planet Baltimore" },
       { name: "description", content: "Search Baltimore artists, musicians, writers and makers on Planet Baltimore." },
     ],
   }),

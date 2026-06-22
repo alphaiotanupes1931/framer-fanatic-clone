@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
-  head: () => ({ meta: [{ title: "Settings — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Settings - Planet Baltimore" }] }),
 });
 
 const SECTIONS = [

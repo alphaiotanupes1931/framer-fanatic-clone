@@ -8,7 +8,7 @@ import { FileText, MessageCircle, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/leaderboard")({
   component: LeaderboardPage,
-  head: () => ({ meta: [{ title: "Baltimore 100 — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Baltimore 100 - Planet Baltimore" }] }),
 });
 
 type Row = {

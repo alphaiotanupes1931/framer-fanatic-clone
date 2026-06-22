@@ -15,8 +15,8 @@ export const Route = createFileRoute("/events")({
   component: EventsPage,
   head: () => ({
     meta: [
-      { title: "Events — Planet Baltimore" },
-      { name: "description", content: "What's happening next in Baltimore — concerts, openings, meetups and more." },
+      { title: "Events - Planet Baltimore" },
+      { name: "description", content: "What's happening next in Baltimore - concerts, openings, meetups and more." },
     ],
   }),
 });
@@ -69,7 +69,7 @@ function EventsPage() {
         {dataLoading ? (
           <div className="text-paper/60 text-sm">Loading events…</div>
         ) : events.length === 0 ? (
-          <div className="text-paper/60 text-sm">No upcoming events yet — sign up to be the first to post one.</div>
+          <div className="text-paper/60 text-sm">No upcoming events yet - sign up to be the first to post one.</div>
         ) : (
           <>
             {next && (

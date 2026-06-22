@@ -18,7 +18,7 @@ import pbLogo from "@/assets/pb-logo.png";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
-  head: () => ({ meta: [{ title: "Welcome — set up your profile" }] }),
+  head: () => ({ meta: [{ title: "Welcome - set up your profile" }] }),
 });
 
 function Onboarding() {
@@ -95,7 +95,7 @@ function Onboarding() {
         <CardHeader className="text-center">
           <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Add a profile photo</CardTitle>
-          <CardDescription>Help your neighbors recognize you — or skip for now.</CardDescription>
+          <CardDescription>Help your neighbors recognize you - or skip for now.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
