@@ -89,7 +89,7 @@ export function AppLayout({
       <div className="mx-auto flex max-w-[1600px]">
         <aside className={`sticky top-0 hidden h-screen ${collapsed ? "w-16" : "w-60"} shrink-0 flex-col border-r border-neutral-100 bg-white px-3 py-6 md:flex transition-all`}>
           <Link to="/dashboard" className="mb-8 flex items-center justify-center px-1">
-            <img src={pbLogo} alt="Planet Baltimore" className="h-9 w-9 shrink-0" />
+            <img src={pbLogo} alt="Planet Baltimore" className="h-14 w-14 shrink-0" />
           </Link>
 
           <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
