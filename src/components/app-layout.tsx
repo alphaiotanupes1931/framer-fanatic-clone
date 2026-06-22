@@ -89,7 +89,7 @@ export function AppLayout({
       <div className="mx-auto flex max-w-[1600px]">
         <aside className={`sticky top-0 hidden h-screen ${collapsed ? "w-16" : "w-60"} shrink-0 flex-col border-r border-neutral-100 bg-white px-3 py-6 md:flex transition-all`}>
           <Link to="/dashboard" className="mb-8 flex items-center justify-center px-1">
-            <img src={pbLogo} alt="Planet Baltimore" className="h-9 w-9 shrink-0" />
+            <img src={pbLogo} alt="Planet Baltimore" className="h-14 w-14 shrink-0" />
           </Link>
 
           <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
@@ -101,7 +101,7 @@ export function AppLayout({
                   to={item.to}
                   className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
                     active
-                      ? "bg-neutral-900 text-white"
+                      ? "bg-orange text-white"
                       : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
                   }`}
                 >
@@ -153,16 +153,16 @@ export function AppLayout({
                 {subtitle && <p className="mt-1.5 max-w-xl text-sm text-neutral-500">{subtitle}</p>}
               </div>
               {cta && (onCta ? (
-                <button
+              <button
                   onClick={onCta}
-                  className="inline-flex items-center gap-2 self-start rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
+                  className="inline-flex items-center gap-2 self-start rounded-full bg-orange px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
                 >
                   <Plus className="h-4 w-4" /> {cta}
                 </button>
               ) : (
                 <Link
                   to={ctaTo || "#"}
-                  className="inline-flex items-center gap-2 self-start rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
+                  className="inline-flex items-center gap-2 self-start rounded-full bg-orange px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
                 >
                   <Plus className="h-4 w-4" /> {cta}
                 </Link>
