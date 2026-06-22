@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/videos")({
   component: VideosPage,
-  head: () => ({ meta: [{ title: "Videos — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Videos - Planet Baltimore" }] }),
 });
 
 type Video = {

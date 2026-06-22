@@ -6,5 +6,5 @@ export const Route = createFileRoute("/arts-orgs")({
       <PlaceholderGrid label="Arts Org" />
     </AppLayout>
   ),
-  head: () => ({ meta: [{ title: "Arts Organizations — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Arts Organizations - Planet Baltimore" }] }),
 });

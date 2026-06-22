@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/messages")({
   component: MessagesPage,
-  head: () => ({ meta: [{ title: "Messages — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Messages - Planet Baltimore" }] }),
 });
 
 type Conv = {

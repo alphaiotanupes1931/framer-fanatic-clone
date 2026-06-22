@@ -81,9 +81,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Patreon — Creativity, powered by membership" },
+      { title: "Patreon - Creativity, powered by membership" },
       { name: "description", content: "Where creators and fans build something meaningful together. Earn recurring income, share work-in-progress, and grow a community that gets it." },
-      { property: "og:title", content: "Patreon — Creativity, powered by membership" },
+      { property: "og:title", content: "Patreon - Creativity, powered by membership" },
       { property: "og:description", content: "Where creators and fans build something meaningful together." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: LOGO_URL },

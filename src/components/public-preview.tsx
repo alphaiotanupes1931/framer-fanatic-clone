@@ -85,7 +85,7 @@ export function SignUpDialog({
         </DialogHeader>
         <DialogFooter className="mt-4">
           <Link to="/auth" className="rounded-full border border-paper/30 px-5 py-2 text-sm">Log in</Link>
-          <Link to="/auth" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium">Sign up — it's free</Link>
+          <Link to="/auth" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium">Sign up - it's free</Link>
         </DialogFooter>
       </DialogContent>
     </Dialog>

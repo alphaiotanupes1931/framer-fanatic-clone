@@ -6,5 +6,5 @@ export const Route = createFileRoute("/groups")({
       <PlaceholderGrid label="Group" />
     </AppLayout>
   ),
-  head: () => ({ meta: [{ title: "Groups / Communities — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Groups / Communities - Planet Baltimore" }] }),
 });

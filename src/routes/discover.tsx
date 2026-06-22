@@ -6,5 +6,5 @@ export const Route = createFileRoute("/discover")({
       <PlaceholderGrid label="Item" />
     </AppLayout>
   ),
-  head: () => ({ meta: [{ title: "Discover Baltimore — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Discover Baltimore - Planet Baltimore" }] }),
 });

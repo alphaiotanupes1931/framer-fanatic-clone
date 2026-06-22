@@ -303,7 +303,7 @@ export function PlaceholderGrid({ label }: { label: string }) {
           <div className="h-40 bg-gradient-to-br from-neutral-100 to-white" />
           <div className="p-4">
             <div className="text-sm font-semibold">{label} #{i + 1}</div>
-            <div className="mt-1 text-xs text-neutral-500">Coming soon — full {label.toLowerCase()} experience.</div>
+            <div className="mt-1 text-xs text-neutral-500">Coming soon - full {label.toLowerCase()} experience.</div>
           </div>
         </div>
       ))}

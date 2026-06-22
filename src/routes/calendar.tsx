@@ -6,5 +6,5 @@ export const Route = createFileRoute("/calendar")({
       <PlaceholderGrid label="Event" />
     </AppLayout>
   ),
-  head: () => ({ meta: [{ title: "Calendar — Planet Baltimore" }] }),
+  head: () => ({ meta: [{ title: "Calendar - Planet Baltimore" }] }),
 });
