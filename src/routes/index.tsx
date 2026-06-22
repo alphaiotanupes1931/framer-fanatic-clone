@@ -18,6 +18,9 @@ export const Route = createFileRoute("/")({
       { title: "Planet Baltimore — Support what makes Baltimore" },
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
+    links: [
+      { rel: "preload", as: "image", href: heroBaltimore, fetchpriority: "high" },
+    ],
   }),
   component: Index,
 });
