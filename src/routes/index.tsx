@@ -261,7 +261,7 @@ function HeroParallax() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1.05, 1.2]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
   return (
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
       <img
@@ -269,6 +269,9 @@ function HeroParallax() {
         alt="A vibrant event space filled with people connecting in Baltimore"
         width={1920}
         height={1080}
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
         className="absolute inset-0 w-full h-full object-cover"
       />
     </motion.div>
@@ -286,7 +289,7 @@ function AnimatedHeadline({ lines }: { lines: string[] }) {
                 <motion.span
                   initial={{ y: "110%" }}
                   animate={{ y: "0%" }}
-                  transition={{ duration: 0.9, delay: 0.2 + (li * line.split(" ").length + wi) * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.55, delay: 0.05 + (li * line.split(" ").length + wi) * 0.04, ease: [0.22, 1, 0.36, 1] }}
                   className="inline-block"
                 >
                   {word}
@@ -311,7 +314,7 @@ function ScrollHeadline({ lines, className }: { lines: string[]; className?: str
                 initial={{ y: "110%" }}
                 whileInView={{ y: "0%" }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.9, delay: 0.05 * wi + li * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.55, delay: 0.03 * wi + li * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 className="inline-block"
               >
                 {word}
