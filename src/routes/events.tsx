@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { PublicShell, PreviewGrid, useAuthState, SignUpDialog } from "@/components/public-preview";
+import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { Calendar, MapPin, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
