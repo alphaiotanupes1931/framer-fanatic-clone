@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,20 +51,7 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Account created. Check your email to confirm.");
-  };
-
-  const handleGoogle = async () => {
-    setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      setLoading(false);
-      return toast.error(result.error.message ?? "Google sign-in failed");
-    }
-    if (result.redirected) return;
-    setLoading(false);
+    toast.success("Account created");
     navigate({ to: "/" });
   };
 
@@ -121,17 +107,6 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">or</span>
-            </div>
-          </div>
-
-          <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={loading}>
-            Continue with Google
-          </Button>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             <Link to="/" className="hover:underline">Back to home</Link>
