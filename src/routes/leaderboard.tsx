@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
+import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FileText, MessageCircle, Heart } from "lucide-react";
 
@@ -16,8 +17,11 @@ type Row = {
 };
 
 function LeaderboardPage() {
+  const auth = useAuthState();
   const [rows, setRows] = useState<Row[]>([]);
-  useEffect(() => { (async () => {
+  useEffect(() => {
+    if (!auth.signedIn) return;
+    (async () => {
     const { data: profs } = await supabase.from("profiles").select("id, display_name, username, avatar_url").limit(100);
     const list = profs || [];
     const results: Row[] = await Promise.all(list.map(async (p: any) => {
@@ -30,7 +34,11 @@ function LeaderboardPage() {
     }));
     results.sort((a, b) => b.points - a.points);
     setRows(results.slice(0, 100));
-  })(); }, []);
+    })();
+  }, [auth.signedIn]);
+
+  if (auth.loading) return null;
+  if (!auth.signedIn) return <AnonLeaderboard />;
 
   return (
     <AppLayout title="Baltimore 100" subtitle="Top 100 people who keep Planet Baltimore moving.">
