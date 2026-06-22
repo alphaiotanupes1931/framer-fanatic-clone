@@ -46,10 +46,15 @@ function Dashboard() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
-      setMe(data.session?.user.id || null);
-      await load();
+      if (!data.session) {
+        navigate({ to: "/auth" });
+      } else {
+        setMe(data.session.user.id);
+        await load();
+      }
+      setChecked(true);
     })();
-  }, []);
+  }, [navigate]);
 
   const createPost = async () => {
     if (!content.trim() || !me) return;
