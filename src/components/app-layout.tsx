@@ -207,7 +207,7 @@ export function AppLayout({
 
 function RightRail() {
   const [artists, setArtists] = useState<{ id: string; display_name: string | null; username: string | null; neighborhood: string | null; avatar_url: string | null }[]>([]);
-  const [events, setEvents] = useState<{ id: string; title: string; starts_at: string | null; neighborhood: string | null }[]>([]);
+  const [events, setEvents] = useState<{ id: string; title: string; starts_at: string | null; location: string | null }[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -219,7 +219,7 @@ function RightRail() {
           .limit(5),
         supabase
           .from("events")
-          .select("id, title, starts_at, neighborhood")
+          .select("id, title, starts_at, location")
           .gte("starts_at", new Date().toISOString())
           .order("starts_at", { ascending: true })
           .limit(3),
@@ -286,7 +286,7 @@ function RightRail() {
                 <div className="text-[13px] font-medium">{e.title}</div>
                 <div className="mt-0.5 text-[11px] text-neutral-500">
                   {e.starts_at ? new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : ""}
-                  {e.neighborhood ? ` · ${e.neighborhood}` : ""}
+                  {e.location ? ` · ${e.location}` : ""}
                 </div>
               </li>
             ))}
