@@ -9,6 +9,7 @@ export function Globe({ size = 320 }: { size?: number }) {
 
   useEffect(() => {
     let width = 0;
+    let raf = 0;
     const onResize = () => {
       if (canvasRef.current) width = canvasRef.current.offsetWidth;
     };
@@ -26,21 +27,26 @@ export function Globe({ size = 320 }: { size?: number }) {
       mapSamples: 16000,
       mapBrightness: 6,
       baseColor: [0.96, 0.96, 0.96],
-      markerColor: [249 / 255, 115 / 255, 22 / 255], // orange-500
+      markerColor: [249 / 255, 115 / 255, 22 / 255],
       glowColor: [1, 0.85, 0.7],
       markers: [
-        // Baltimore
         { location: [39.2904, -76.6122], size: 0.12 },
       ],
-      onRender: (state) => {
-        if (!pointerInteracting.current) phiRef.current += 0.003;
-        state.phi = phiRef.current + pointerInteractionMovement.current;
-        state.width = width * 2;
-        state.height = width * 2;
-      },
     });
 
+    const tick = () => {
+      if (!pointerInteracting.current) phiRef.current += 0.003;
+      globe.update({
+        phi: phiRef.current + pointerInteractionMovement.current,
+        width: width * 2,
+        height: width * 2,
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
     return () => {
+      cancelAnimationFrame(raf);
       globe.destroy();
       window.removeEventListener("resize", onResize);
     };
