@@ -480,12 +480,12 @@ function CTA() {
           Start free.<br />Get paid tomorrow.
         </h2>
         <div className="mt-12 flex flex-wrap gap-3 justify-center">
-          <a href="#" className="inline-flex rounded-full bg-ink text-paper px-8 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors">
+          <Link to="/auth" className="inline-flex rounded-full bg-ink text-paper px-8 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors">
             Get Started
-          </a>
-          <a href="#" className="inline-flex rounded-full border border-ink text-ink px-8 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors">
+          </Link>
+          <Link to="/artists" className="inline-flex rounded-full border border-ink text-ink px-8 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors">
             Find a Creator
-          </a>
+          </Link>
         </div>
       </motion.div>
     </section>
@@ -493,11 +493,31 @@ function CTA() {
 }
 
 function Footer() {
-  const cols = [
-    { h: "Product", l: ["Features"] },
-    { h: "Creators", l: ["Musicians", "Writers", "Artists"] },
-    { h: "Company", l: ["About"] },
-    { h: "Resources", l: ["Help center", "Handbook", "Community", "Privacy"] },
+  const cols: { h: string; l: { label: string; to: string }[] }[] = [
+    { h: "Explore", l: [
+      { label: "Discover", to: "/discover" },
+      { label: "Events", to: "/events" },
+      { label: "Calendar", to: "/calendar" },
+      { label: "Neighborhoods", to: "/neighborhoods" },
+    ]},
+    { h: "Creators", l: [
+      { label: "Artists", to: "/artists" },
+      { label: "Arts Orgs", to: "/arts-orgs" },
+      { label: "Businesses", to: "/businesses" },
+      { label: "Groups", to: "/groups" },
+    ]},
+    { h: "Community", l: [
+      { label: "Stories", to: "/stories" },
+      { label: "Videos", to: "/videos" },
+      { label: "Leaderboard", to: "/leaderboard" },
+      { label: "Associations", to: "/community-associations" },
+    ]},
+    { h: "Account", l: [
+      { label: "Sign in", to: "/auth" },
+      { label: "Dashboard", to: "/dashboard" },
+      { label: "Settings", to: "/settings" },
+      { label: "Notifications", to: "/notifications" },
+    ]},
   ];
   return (
     <footer className="bg-ink text-paper px-6 md:px-10 py-16">
@@ -513,7 +533,7 @@ function Footer() {
             <div key={c.h}>
               <div className="text-xs uppercase tracking-widest text-paper/50 mb-4">{c.h}</div>
               <ul className="space-y-3 text-sm">
-                {c.l.map((i) => (<li key={i}><a href="#" className="hover:text-blue transition-colors">{i}</a></li>))}
+                {c.l.map((i) => (<li key={i.label}><Link to={i.to} className="hover:text-blue transition-colors">{i.label}</Link></li>))}
               </ul>
             </div>
           ))}
