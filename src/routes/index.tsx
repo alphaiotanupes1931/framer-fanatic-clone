@@ -3,15 +3,13 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring } from "moti
 import { useRef } from "react";
 import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
-import heroBaltimore from "@/assets/hero-baltimore.jpg.asset.json";
-import boomSelecta from "@/assets/boom-selecta.png.asset.json";
-import queenForADay from "@/assets/queen-for-a-day.png.asset.json";
-import terrellSpeaks from "@/assets/terrell-speaks.jpg.asset.json";
-import pbLogo from "@/assets/pb-logo.png.asset.json";
-import nannyDarkYellow from "@/assets/nanny-dark-yellow.jpg.asset.json";
-import terrellStage from "@/assets/terrell-stage.png.asset.json";
-import baltimoreBg from "@/assets/baltimore-bg.jpeg.asset.json";
-import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg.asset.json";
+import heroBaltimore from "@/assets/hero-baltimore.jpg";
+import boomSelecta from "@/assets/boom-selecta.png";
+import queenForADay from "@/assets/queen-for-a-day.png";
+import terrellSpeaks from "@/assets/terrell-speaks.jpg";
+import pbLogo from "@/assets/pb-logo.png";
+import terrellStage from "@/assets/terrell-stage.png";
+import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
