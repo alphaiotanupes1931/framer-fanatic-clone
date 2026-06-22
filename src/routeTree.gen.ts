@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as StoriesRouteImport } from './routes/stories'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
@@ -28,6 +29,11 @@ const VideosRoute = VideosRouteImport.update({
 const StoriesRoute = StoriesRouteImport.update({
   id: '/stories',
   path: '/stories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
   '/videos': typeof VideosRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
   '/videos': typeof VideosRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
   '/videos': typeof VideosRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/neighborhoods'
     | '/onboarding'
     | '/profile'
+    | '/settings'
     | '/stories'
     | '/videos'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/neighborhoods'
     | '/onboarding'
     | '/profile'
+    | '/settings'
     | '/stories'
     | '/videos'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/neighborhoods'
     | '/onboarding'
     | '/profile'
+    | '/settings'
     | '/stories'
     | '/videos'
   fileRoutesById: FileRoutesById
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   NeighborhoodsRoute: typeof NeighborhoodsRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRoute
   StoriesRoute: typeof StoriesRoute
   VideosRoute: typeof VideosRoute
 }
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/stories'
       fullPath: '/stories'
       preLoaderRoute: typeof StoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   NeighborhoodsRoute: NeighborhoodsRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRoute,
   StoriesRoute: StoriesRoute,
   VideosRoute: VideosRoute,
 }
