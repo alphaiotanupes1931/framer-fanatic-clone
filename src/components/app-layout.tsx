@@ -140,6 +140,16 @@ export function AppLayout({
         </aside>
 
         <main className="min-w-0 flex-1 px-5 py-8 md:px-10 pb-24 md:pb-10">
+          <div className="mb-4 flex justify-end">
+            <Link
+              to="/notifications"
+              aria-label="Notifications"
+              className={`relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-600 transition hover:border-orange hover:text-orange ${pathname === "/notifications" ? "border-orange text-orange" : ""}`}
+            >
+              <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-orange" />
+            </Link>
+          </div>
           {hero && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
