@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { MapPin } from "lucide-react";
+import { BaltimoreMap } from "@/components/baltimore-map";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
@@ -48,14 +49,18 @@ function NeighborhoodsPage() {
   return (
     <AppLayout title="Neighborhoods" subtitle="Explore Baltimore's communities — click a pin to discover what's happening nearby.">
       <div className="space-y-6">
-        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-neutral-200 bg-gradient-to-br from-emerald-100 via-yellow-50 to-orange-100">
-          <div className="absolute inset-0 flex items-center justify-center text-neutral-600">
-            <div className="text-center">
-              <MapPin className="mx-auto mb-2 h-12 w-12 text-orange-500" />
-              <div className="font-semibold">Baltimore Map</div>
-              <div className="text-sm text-neutral-500">Interactive map coming soon</div>
-            </div>
-          </div>
+        <BaltimoreMap />
+        <div className="flex flex-wrap gap-3 text-xs text-neutral-600">
+          {[
+            ["North Baltimore","#f59e0b"],["South Baltimore","#ef4444"],
+            ["East Baltimore","#10b981"],["West Baltimore","#6366f1"],
+            ["Central Baltimore","#f97316"],
+          ].map(([label,c]) => (
+            <span key={label} className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />
+              {label}
+            </span>
+          ))}
         </div>
 
         <div>
