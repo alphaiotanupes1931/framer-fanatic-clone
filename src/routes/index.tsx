@@ -11,6 +11,7 @@ import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import terrellStage from "@/assets/terrell-stage.png";
 import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg";
+import aboutFounders from "@/assets/about-founders.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,6 +33,7 @@ function Index() {
       <Nav />
       <Hero />
       <Marquee />
+      <About />
       <StatStrip />
       <CreatorsFans />
       <Features />
