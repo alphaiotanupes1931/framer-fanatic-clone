@@ -111,7 +111,10 @@ function MessagesPage() {
             <button onClick={openNew} className="flex w-full items-center justify-center gap-2 rounded-full bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">
               <Plus className="h-4 w-4" /> New Message
             </button>
-            <button className="flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold hover:bg-neutral-50">
+            <button
+              onClick={() => toast.info("Broadcast to followers is coming soon")}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold hover:bg-neutral-50"
+            >
               <Users className="h-4 w-4" /> Message All Followers
             </button>
           </div>
