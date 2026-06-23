@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion, useScroll, useTransform, useMotionValue, useSpring, useInView, animate } from "motion/react";
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
 import { useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -31,7 +31,6 @@ function Index() {
       <ScrollProgress />
       <Nav />
       <Hero />
-      <StatStrip />
       <CreatorsFans />
       <Features />
       <QuoteSection />
@@ -54,51 +53,6 @@ function ScrollProgress() {
   );
 }
 
-function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  useEffect(() => {
-    if (!inView || !ref.current) return;
-    const node = ref.current;
-    const controls = animate(0, to, {
-      duration: 1.8,
-      ease: [0.22, 1, 0.36, 1],
-      onUpdate: (v) => { node.textContent = `${Math.round(v).toLocaleString()}${suffix}`; },
-    });
-    return () => controls.stop();
-  }, [inView, to, suffix]);
-  return <span ref={ref}>0{suffix}</span>;
-}
-
-
-function StatStrip() {
-  const stats = [
-    { n: 220, s: "+", label: "Baltimore creators" },
-    { n: 14, s: "", label: "Active neighborhoods" },
-    { n: 96, s: "%", label: "Goes straight to artists" },
-  ];
-  return (
-    <section className="bg-paper text-ink px-5 md:px-10 py-14 md:py-20">
-      <div className="mx-auto max-w-[1400px] grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-6">
-        {stats.map((st, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="text-center sm:text-left"
-          >
-            <div className="font-display font-medium text-[clamp(3rem,8vw,6rem)] leading-none tracking-[-0.04em]">
-              <Counter to={st.n} suffix={st.s} />
-            </div>
-            <div className="mt-3 text-xs md:text-sm uppercase tracking-[0.18em] text-ink/55">{st.label}</div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function Magnetic({ children, className }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
