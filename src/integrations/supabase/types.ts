@@ -40,37 +40,58 @@ export type Database = {
       }
       events: {
         Row: {
+          address: string | null
+          capacity: number | null
           created_at: string
           description: string | null
+          ends_at: string | null
           id: string
           image_url: string | null
+          is_published: boolean
           location: string | null
+          neighborhood: string | null
+          price_cents: number
           starts_at: string
           title: string
           updated_at: string
           user_id: string
+          venue_name: string | null
         }
         Insert: {
+          address?: string | null
+          capacity?: number | null
           created_at?: string
           description?: string | null
+          ends_at?: string | null
           id?: string
           image_url?: string | null
+          is_published?: boolean
           location?: string | null
+          neighborhood?: string | null
+          price_cents?: number
           starts_at: string
           title: string
           updated_at?: string
           user_id: string
+          venue_name?: string | null
         }
         Update: {
+          address?: string | null
+          capacity?: number | null
           created_at?: string
           description?: string | null
+          ends_at?: string | null
           id?: string
           image_url?: string | null
+          is_published?: boolean
           location?: string | null
+          neighborhood?: string | null
+          price_cents?: number
           starts_at?: string
           title?: string
           updated_at?: string
           user_id?: string
+          venue_name?: string | null
         }
         Relationships: []
       }
@@ -189,16 +210,23 @@ export type Database = {
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
+          city: string | null
           created_at: string
           display_name: string | null
           email: string | null
+          geo_lat: number | null
+          geo_lng: number | null
           id: string
           in_baltimore: boolean
+          is_baltimore_verified: boolean
           latitude: number | null
           longitude: number | null
           neighborhood: string | null
           onboarded: boolean
           role: string
+          stripe_account_id: string | null
+          stripe_account_status: string | null
+          stripe_charges_enabled: boolean
           updated_at: string
           username: string | null
           website: string | null
@@ -207,16 +235,23 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          city?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          geo_lat?: number | null
+          geo_lng?: number | null
           id: string
           in_baltimore?: boolean
+          is_baltimore_verified?: boolean
           latitude?: number | null
           longitude?: number | null
           neighborhood?: string | null
           onboarded?: boolean
           role?: string
+          stripe_account_id?: string | null
+          stripe_account_status?: string | null
+          stripe_charges_enabled?: boolean
           updated_at?: string
           username?: string | null
           website?: string | null
@@ -225,16 +260,23 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          city?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          geo_lat?: number | null
+          geo_lng?: number | null
           id?: string
           in_baltimore?: boolean
+          is_baltimore_verified?: boolean
           latitude?: number | null
           longitude?: number | null
           neighborhood?: string | null
           onboarded?: boolean
           role?: string
+          stripe_account_id?: string | null
+          stripe_account_status?: string | null
+          stripe_charges_enabled?: boolean
           updated_at?: string
           username?: string | null
           website?: string | null
@@ -286,6 +328,83 @@ export type Database = {
         }
         Relationships: []
       }
+      tickets: {
+        Row: {
+          artist_id: string
+          artist_net_cents: number
+          buyer_id: string
+          buyer_total_cents: number
+          created_at: string
+          event_id: string
+          id: string
+          platform_tax_cents: number
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_fee_cents: number
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          artist_net_cents: number
+          buyer_id: string
+          buyer_total_cents: number
+          created_at?: string
+          event_id: string
+          id?: string
+          platform_tax_cents: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_fee_cents?: number
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          artist_net_cents?: number
+          buyer_id?: string
+          buyer_total_cents?: number
+          created_at?: string
+          event_id?: string
+          id?: string
+          platform_tax_cents?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_fee_cents?: number
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           created_at: string
@@ -324,6 +443,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       search_creators: {
         Args: { lim?: number; q?: string }
         Returns: {
@@ -339,7 +465,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "attendee" | "artist" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -466,6 +592,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["attendee", "artist", "admin"],
+    },
   },
 } as const

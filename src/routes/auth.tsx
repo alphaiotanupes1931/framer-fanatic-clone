@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import pbLogo from "@/assets/pb-logo.png";
+import { useServerFn } from "@tanstack/react-start";
+import { becomeArtist } from "@/lib/stripe.functions";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const becomeArtistFn = useServerFn(becomeArtist);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -103,6 +106,10 @@ function AuthPage() {
         ? "Account created - welcome, artist!"
         : "Account created as attendee.",
     );
+    // If artist + verified Baltimore, immediately upgrade their role in user_roles.
+    if (finalRole === "artist") {
+      try { await becomeArtistFn(); } catch { /* harmless — they can also upgrade from profile */ }
+    }
     navigate({ to: "/onboarding" });
   };
 

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -20,6 +21,7 @@ type Post = {
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { isArtist, loading: roleLoading } = useUserRole();
   const [checked, setChecked] = useState(false);
   const [tab, setTab] = useState<"for-you" | "following" | "nearby">("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
@@ -66,6 +68,10 @@ function Dashboard() {
 
   const createPost = async () => {
     if (!content.trim() || !me) return;
+    if (!isArtist) {
+      toast.error("Only Artists can post. Become an Artist in your profile to share posts.");
+      return;
+    }
     const { error } = await supabase.from("posts").insert({ user_id: me, content: content.trim() });
     if (error) { toast.error(error.message); return; }
     setContent("");
@@ -97,6 +103,12 @@ function Dashboard() {
           ))}
         </div>
 
+        {!roleLoading && !isArtist ? (
+          <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-4 text-center text-[13px] text-neutral-600">
+            You're signed in as an <strong>Attendee</strong> — you can view posts and buy event tickets.
+            To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">profile</Link> and become an Artist.
+          </div>
+        ) : (
         <div className="rounded-2xl border border-neutral-100 bg-white p-4 transition focus-within:border-neutral-300">
           <div className="flex gap-3">
             <Avatar className="h-9 w-9 shrink-0">
@@ -125,6 +137,7 @@ function Dashboard() {
             </div>
           </div>
         </div>
+        )}
 
         <div className="mt-6 divide-y divide-neutral-100">
           {loading && <div className="py-10 text-center text-sm text-neutral-400">Loading…</div>}
