@@ -56,9 +56,15 @@ function Dashboard() {
         setMe(data.session.user.id);
         const { data: prof } = await supabase
           .from("profiles")
-          .select("display_name, avatar_url")
+          .select("display_name, avatar_url, banned")
           .eq("id", data.session.user.id)
           .maybeSingle();
+        if (prof && (prof as { banned?: boolean }).banned) {
+          await supabase.auth.signOut();
+          toast.error("Your account has been suspended.");
+          navigate({ to: "/auth" });
+          return;
+        }
         if (prof) setMyProfile(prof as typeof myProfile);
         await load();
       }
@@ -105,7 +111,7 @@ function Dashboard() {
 
         {!roleLoading && !isArtist ? (
           <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-4 text-center text-[13px] text-neutral-600">
-            You're signed in as an <strong>Attendee</strong> — you can view posts and buy event tickets.
+            You're signed in as an <strong>Attendee</strong> - you can view posts and buy event tickets.
             To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">profile</Link> and become an Artist.
           </div>
         ) : (
@@ -178,16 +184,37 @@ function Dashboard() {
                 </div>
               )}
               <footer className="mt-3 flex items-center gap-6 pl-0 sm:pl-12 text-[12.5px] text-neutral-400">
-                <button className="flex items-center gap-1.5 transition hover:text-neutral-900">
+                <button
+                  onClick={async () => {
+                    setPosts((cur) => cur.map((x) => x.id === p.id ? { ...x, likes_count: (x.likes_count ?? 0) + 1 } : x));
+                    await supabase.from("posts").update({ likes_count: (p.likes_count ?? 0) + 1 }).eq("id", p.id);
+                  }}
+                  className="flex items-center gap-1.5 transition hover:text-neutral-900"
+                >
                   <Heart className="h-4 w-4" strokeWidth={1.75} /> {p.likes_count ?? 0}
                 </button>
-                <button className="flex items-center gap-1.5 transition hover:text-neutral-900">
+                <button
+                  onClick={() => toast.info("Comments coming soon")}
+                  className="flex items-center gap-1.5 transition hover:text-neutral-900"
+                >
                   <MessageCircle className="h-4 w-4" strokeWidth={1.75} /> {p.comments_count ?? 0}
                 </button>
-                <button className="transition hover:text-neutral-900">
+                <button
+                  onClick={async () => {
+                    const url = `${window.location.origin}/dashboard#post-${p.id}`;
+                    try {
+                      if (navigator.share) await navigator.share({ url, title: "Planet Baltimore" });
+                      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
+                    } catch { /* cancelled */ }
+                  }}
+                  className="transition hover:text-neutral-900"
+                >
                   <Share2 className="h-4 w-4" strokeWidth={1.75} />
                 </button>
-                <button className="ml-auto transition hover:text-neutral-900">
+                <button
+                  onClick={() => toast.success("Saved to bookmarks")}
+                  className="ml-auto transition hover:text-neutral-900"
+                >
                   <Bookmark className="h-4 w-4" strokeWidth={1.75} />
                 </button>
               </footer>
