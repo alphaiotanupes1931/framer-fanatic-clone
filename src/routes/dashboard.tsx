@@ -185,3 +185,35 @@ function Dashboard() {
     </AppLayout>
   );
 }
+
+function DiscoverStrip() {
+  const items = [
+    { to: "/artists", icon: Palette, label: "Artists", color: "bg-orange/10 text-orange" },
+    { to: "/events", icon: Ticket, label: "Events", color: "bg-emerald-50 text-emerald-600" },
+    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", color: "bg-indigo-50 text-indigo-600" },
+    { to: "/groups", icon: Users, label: "Groups", color: "bg-rose-50 text-rose-600" },
+    { to: "/stories", icon: BookOpen, label: "Stories", color: "bg-amber-50 text-amber-700" },
+    { to: "/leaderboard", icon: Trophy, label: "Baltimore 100", color: "bg-neutral-100 text-neutral-700" },
+  ] as const;
+  return (
+    <div className="mb-6">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Discover Baltimore</h2>
+      </div>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        {items.map((it) => (
+          <Link
+            key={it.to}
+            to={it.to}
+            className="group flex flex-col items-center gap-2 rounded-2xl border border-neutral-100 bg-white p-3 transition hover:border-orange/40 hover:shadow-sm"
+          >
+            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${it.color}`}>
+              <it.icon className="h-4 w-4" strokeWidth={1.75} />
+            </span>
+            <span className="text-[11px] font-medium text-neutral-700 text-center leading-tight">{it.label}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
