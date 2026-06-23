@@ -110,6 +110,8 @@ function AuthPage() {
     if (finalRole === "artist") {
       try { await becomeArtistFn(); } catch { /* harmless - they can also upgrade from profile */ }
     }
+    // Flag this session as a fresh signup so the onboarding tour auto-runs once.
+    try { localStorage.setItem("pb_new_signup", "1"); } catch { /* ignore */ }
     navigate({ to: "/onboarding" });
   };
 
