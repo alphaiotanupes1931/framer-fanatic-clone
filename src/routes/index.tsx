@@ -193,18 +193,18 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
+    <section className="relative min-h-[75vh] md:min-h-screen w-full overflow-hidden">
       <HeroParallax />
       <div className="absolute inset-0 bg-blue-deep/35 mix-blend-multiply" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue/40" />
 
       {/* Headline with per-word stagger */}
-      <div className="absolute bottom-28 md:bottom-20 left-0 right-0 px-5 md:px-10 text-paper font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
+      <div className="absolute bottom-20 md:bottom-20 left-0 right-0 px-5 md:px-10 text-paper font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
         <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
       </div>
 
       {/* Mobile-only inline CTA so visitors aren't fishing for the hamburger */}
-      <div className="absolute bottom-8 left-0 right-0 px-5 md:hidden flex items-center gap-3">
+      <div className="absolute bottom-6 left-0 right-0 px-5 md:hidden flex items-center gap-3">
         <Link to="/auth" className="flex-1 inline-flex justify-center rounded-full bg-paper text-ink px-5 py-3 text-sm font-medium">Get Started</Link>
         <Link to="/leaderboard" className="flex-1 inline-flex justify-center rounded-full border border-paper/80 text-paper px-5 py-3 text-sm font-medium">Baltimore 100</Link>
       </div>
