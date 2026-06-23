@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "motion/react";
 import { useEffect, useRef } from "react";
-import { Search, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
@@ -55,11 +55,8 @@ function Nav() {
     <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
       <div className="flex items-center justify-between text-paper">
         {/* Desktop left nav */}
-        <nav className="hidden md:flex items-center gap-8 text-base font-medium">
-          <NavLink href="#creators">Creators</NavLink>
-          <NavLink href="#features">Features</NavLink>
-          <Link to="/discover" className="group relative"><span className="relative inline-block overflow-hidden"><span className="block transition-transform duration-300 group-hover:-translate-y-full">Discover</span><span className="absolute inset-0 block translate-y-full transition-transform duration-300 group-hover:translate-y-0">Discover</span></span></Link>
-          <Link to="/events" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Events</Link>
+        <nav className="hidden md:flex items-center gap-6 text-base font-medium">
+          <Link to="/artists" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Find a Creator</Link>
         </nav>
 
         {/* Mobile/tablet logo (left-aligned) */}
@@ -100,9 +97,6 @@ function Nav() {
 
         {/* Desktop right actions */}
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/artists" className="inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
-            <Search className="w-4 h-4" /> Find a Creator
-          </Link>
           {signedIn ? (
             <Link to="/dashboard" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors">Dashboard</Link>
           ) : (
@@ -145,10 +139,6 @@ function Nav() {
         </div>
         <nav className="px-6 mt-16 flex flex-col gap-6 font-display text-4xl tracking-[-0.04em]">
           {[
-            { href: "#creators", label: "Creators" },
-            { href: "#features", label: "Features" },
-            { href: "/discover", label: "Discover" },
-            { href: "/events", label: "Events" },
             { href: "/artists", label: "Find a Creator" },
             { href: signedIn ? "/dashboard" : "/auth", label: signedIn ? "Dashboard" : "Log in" },
           ].map((l) => (
@@ -163,16 +153,6 @@ function Nav() {
   );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a href={href} className="group relative">
-      <span className="relative inline-block overflow-hidden">
-        <span className="block transition-transform duration-300 group-hover:-translate-y-full">{children}</span>
-        <span className="absolute inset-0 block translate-y-full transition-transform duration-300 group-hover:translate-y-0">{children}</span>
-      </span>
-    </a>
-  );
-}
 
 function Hero() {
   return (

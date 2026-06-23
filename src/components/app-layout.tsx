@@ -26,22 +26,31 @@ export type Profile = {
   banner_url: string | null;
 };
 
+const HOME = { to: "/dashboard", icon: Home, label: "Home" } as const;
+
 const NAV = [
-  { to: "/dashboard", icon: Home, label: "Home" },
-  { to: "/search", icon: Search, label: "Search" },
-  { to: "/events", icon: Ticket, label: "Events" },
-  { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
-  { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
-  { to: "/artists", icon: Palette, label: "Artists" },
-  { to: "/arts-orgs", icon: Landmark, label: "Arts Orgs" },
-  { to: "/businesses", icon: Building2, label: "Businesses" },
-  { to: "/community-associations", icon: ShieldCheck, label: "Community Associations" },
-  { to: "/groups", icon: Users, label: "Groups/Communities" },
-  { to: "/stories", icon: BookOpen, label: "Stories" },
-  { to: "/videos", icon: VideoIcon, label: "Videos" },
-  { to: "/leaderboard", icon: Trophy, label: "Baltimore 100" },
-  { to: "/profile", icon: User, label: "Profile" },
-  { to: "/settings", icon: SettingsIcon, label: "Settings" },
+  { section: "Explore", items: [
+    { to: "/search", icon: Search, label: "Search" },
+    { to: "/events", icon: Ticket, label: "Events" },
+    { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
+    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
+  ]},
+  { section: "Community", items: [
+    { to: "/artists", icon: Palette, label: "Artists" },
+    { to: "/arts-orgs", icon: Landmark, label: "Arts Orgs" },
+    { to: "/businesses", icon: Building2, label: "Businesses" },
+    { to: "/community-associations", icon: ShieldCheck, label: "Community Associations" },
+    { to: "/groups", icon: Users, label: "Groups" },
+  ]},
+  { section: "Content", items: [
+    { to: "/stories", icon: BookOpen, label: "Stories" },
+    { to: "/videos", icon: VideoIcon, label: "Videos" },
+    { to: "/leaderboard", icon: Trophy, label: "Baltimore 100" },
+  ]},
+  { section: "Account", items: [
+    { to: "/profile", icon: User, label: "Profile" },
+    { to: "/settings", icon: SettingsIcon, label: "Settings" },
+  ]},
 ] as const;
 
 export function useCurrentProfile() {
@@ -90,24 +99,47 @@ export function AppLayout({
             <img src={pbLogo} alt="Planet Baltimore" className="h-14 w-14 shrink-0" />
           </Link>
 
-          <nav className="flex-1 space-y-0.5 overflow-y-auto pr-1">
-            {NAV.map((item) => {
-              const active = pathname === item.to;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
-                    active
-                      ? "bg-orange text-white"
-                      : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
-                  }`}
-                >
-                  <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 space-y-4 overflow-y-auto pr-1">
+            <Link
+              key={HOME.to}
+              to={HOME.to}
+              className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
+                pathname === HOME.to
+                  ? "bg-orange text-white"
+                  : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+              }`}
+            >
+              <Home className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+              {!collapsed && <span className="truncate">{HOME.label}</span>}
+            </Link>
+            {NAV.map((section) => (
+              <div key={section.section}>
+                {!collapsed && (
+                  <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                    {section.section}
+                  </div>
+                )}
+                <div className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const active = pathname === item.to;
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
+                          active
+                            ? "bg-orange text-white"
+                            : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                        }`}
+                      >
+                        <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+                        {!collapsed && <span className="truncate">{item.label}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           <div className="mt-4 border-t border-neutral-100 pt-3">
