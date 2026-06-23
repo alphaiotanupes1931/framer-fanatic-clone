@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import pbLogo from "@/assets/pb-logo.png";
 import aboutFounders from "@/assets/about-founders.png.asset.json";
+import heroBaltimore from "@/assets/hero-baltimore.jpg";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -89,45 +90,42 @@ function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-16 md:pt-28 pb-10 md:pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-ink/15 px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink/70"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-orange" />
-          About Planet Baltimore
-        </motion.div>
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="font-display text-[clamp(2.5rem,8vw,6rem)] font-semibold leading-[0.95] tracking-[-0.04em] max-w-5xl"
-        >
-          A platform built by Baltimore,
-          <span className="block italic text-ink/55">for the people making it.</span>
-        </motion.h1>
-      </div>
+        <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-ink/15 px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink/70"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-orange" />
+              About Planet Baltimore
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
+            >
+              A platform built by Baltimore,
+              <span className="block italic text-ink/55">for the people making it.</span>
+            </motion.h1>
+          </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="relative mx-auto max-w-[1280px] px-5 md:px-10"
-      >
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5">
-          <img
-            src={aboutFounders.url}
-            alt="Planet Baltimore founders and creators"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-x-0 bottom-0 h-1/2"
-            style={{ background: "linear-gradient(180deg, rgba(245,243,238,0) 0%, var(--color-paper) 100%)" }}
-          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
+          >
+            <img
+              src={heroBaltimore}
+              alt="Planet Baltimore"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
