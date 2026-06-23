@@ -3,12 +3,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
-import { Calendar, MapPin, Plus, X } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket } from "lucide-react";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/use-user-role";
+import { useServerFn } from "@tanstack/react-start";
+import { createTicketCheckout } from "@/lib/stripe.functions";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
   location: string | null; image_url: string | null; starts_at: string;
+  price_cents?: number | null;
 };
 
 export const Route = createFileRoute("/events")({
@@ -26,7 +30,8 @@ function fmtDate(iso: string) {
   return d.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-function EventCard({ e }: { e: EventRow }) {
+function EventCard({ e, onBuy }: { e: EventRow; onBuy?: (id: string) => void }) {
+  const priced = (e.price_cents ?? 0) > 0;
   return (
     <div className="rounded-2xl overflow-hidden border border-paper/10 bg-paper/5 h-full">
       <div className="aspect-[16/10] bg-paper/10 overflow-hidden">
@@ -39,6 +44,19 @@ function EventCard({ e }: { e: EventRow }) {
         <div className="font-semibold mt-1 line-clamp-2">{e.title}</div>
         {e.location && <div className="text-xs text-paper/60 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {e.location}</div>}
         {e.description && <p className="text-sm text-paper/70 mt-2 line-clamp-2">{e.description}</p>}
+        <div className="mt-3 flex items-center justify-between">
+          <div className="text-sm font-semibold">
+            {priced ? `$${((e.price_cents ?? 0)/100).toFixed(2)}` : "Free"}
+          </div>
+          {priced && onBuy && (
+            <button
+              onClick={() => onBuy(e.id)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+            >
+              <Ticket className="h-3 w-3" /> Buy ticket
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -118,12 +136,28 @@ function EventsPage() {
 
 function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; dataLoading: boolean; reload: () => void }) {
   const me = useCurrentProfile();
+  const { isArtist } = useUserRole();
+  const checkoutFn = useServerFn(createTicketCheckout);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "" });
+  const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
+  const [buying, setBuying] = useState<string | null>(null);
+
+  const buy = async (eventId: string) => {
+    setBuying(eventId);
+    try {
+      const { url } = await checkoutFn({ data: { eventId, returnOrigin: window.location.origin } });
+      if (url) window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not start checkout");
+    } finally {
+      setBuying(null);
+    }
+  };
 
   const submit = async () => {
     if (!me) return;
     if (!form.title || !form.starts_at) { toast.error("Title and date required"); return; }
+    const priceCents = Math.max(0, Math.round(parseFloat(form.price || "0") * 100));
     const { error } = await supabase.from("events").insert({
       user_id: me.id,
       title: form.title,
@@ -131,23 +165,39 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       location: form.location || null,
       image_url: form.image_url || null,
       starts_at: new Date(form.starts_at).toISOString(),
+      price_cents: priceCents,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message.includes("row-level security")
+        ? "Only Artists can post events. Upgrade in your profile."
+        : error.message);
+      return;
+    }
     toast.success("Event posted");
     setOpen(false);
-    setForm({ title: "", description: "", location: "", image_url: "", starts_at: "" });
+    setForm({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
     reload();
   };
 
   return (
-    <AppLayout title="What's happening next" subtitle="Tickets for the best events in Baltimore." cta="Create Event" ctaTo="#" onCta={() => setOpen(true)}>
+    <AppLayout
+      title="What's happening next"
+      subtitle="Tickets for the best events in Baltimore."
+      cta={isArtist ? "Create Event" : undefined}
+      ctaTo="#"
+      onCta={isArtist ? () => setOpen(true) : undefined}
+    >
       {dataLoading ? (
         <div className="text-muted-foreground text-sm">Loading events…</div>
       ) : events.length === 0 ? (
         <div className="text-muted-foreground text-sm">No upcoming events. Be the first to post one!</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {events.map((e) => <EventCard key={e.id} e={e} />)}
+          {events.map((e) => (
+            <div key={e.id} className={buying === e.id ? "opacity-60 pointer-events-none" : ""}>
+              <EventCard e={e} onBuy={buy} />
+            </div>
+          ))}
         </div>
       )}
 
@@ -162,6 +212,19 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
               <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
               <input type="datetime-local" className="w-full rounded-lg border bg-transparent px-3 py-2" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} />
               <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+              <div>
+                <input
+                  type="number" step="0.01" min="0"
+                  className="w-full rounded-lg border bg-transparent px-3 py-2"
+                  placeholder="Ticket price you want to NET in USD (0 = free)"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Stripe fees + Baltimore's 10% admissions tax are added on top automatically — you net the
+                  exact amount you enter.
+                </p>
+              </div>
               <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Image URL (optional)" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
               <textarea className="w-full rounded-lg border bg-transparent px-3 py-2 min-h-[100px]" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               <button onClick={submit} className="w-full rounded-full bg-foreground text-background px-5 py-2 font-medium inline-flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Post event</button>
