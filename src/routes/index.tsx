@@ -91,7 +91,7 @@ function Nav() {
       <div className="flex items-center justify-between text-paper">
         {/* Desktop left nav */}
         <nav className="hidden md:flex items-center gap-6 text-base font-medium">
-          <Link to="/artists" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Find a Creator</Link>
+          <Link to="/leaderboard" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Baltimore 100</Link>
           <Link to="/about" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">About</Link>
         </nav>
 
@@ -175,7 +175,7 @@ function Nav() {
         </div>
         <nav className="px-6 mt-16 flex flex-col gap-6 font-display text-4xl tracking-[-0.04em]">
           {[
-            { href: "/artists", label: "Find a Creator" },
+            { href: "/leaderboard", label: "Baltimore 100" },
             { href: "/about", label: "About" },
             { href: signedIn ? "/dashboard" : "/auth", label: signedIn ? "Dashboard" : "Log in" },
           ].map((l) => (
@@ -206,7 +206,7 @@ function Hero() {
       {/* Mobile-only inline CTA so visitors aren't fishing for the hamburger */}
       <div className="absolute bottom-8 left-0 right-0 px-5 md:hidden flex items-center gap-3">
         <Link to="/auth" className="flex-1 inline-flex justify-center rounded-full bg-paper text-ink px-5 py-3 text-sm font-medium">Get Started</Link>
-        <Link to="/artists" className="flex-1 inline-flex justify-center rounded-full border border-paper/80 text-paper px-5 py-3 text-sm font-medium">Find a Creator</Link>
+        <Link to="/leaderboard" className="flex-1 inline-flex justify-center rounded-full border border-paper/80 text-paper px-5 py-3 text-sm font-medium">Baltimore 100</Link>
       </div>
 
     </section>
@@ -528,8 +528,8 @@ function CTA() {
             </Link>
           </Magnetic>
           <Magnetic className="sm:inline-flex">
-            <Link to="/artists" className="inline-flex w-full sm:w-auto justify-center rounded-full border border-ink text-ink px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors">
-              Find a Creator
+            <Link to="/leaderboard" className="inline-flex w-full sm:w-auto justify-center rounded-full border border-ink text-ink px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors">
+              Baltimore 100
             </Link>
           </Magnetic>
         </div>
