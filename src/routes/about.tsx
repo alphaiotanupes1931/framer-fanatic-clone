@@ -89,8 +89,8 @@ function AboutNav() {
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-16 md:pt-28 pb-10 md:pb-16">
-        <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
+      <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-10 md:pt-28 pb-6 md:pb-16">
+        <div className="grid gap-8 md:grid-cols-2 md:items-center md:gap-16">
           <div>
             <motion.div
               initial={{ opacity: 0, y: 18 }}
@@ -116,7 +116,7 @@ function Hero() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
+            className="relative aspect-[16/10] md:aspect-[4/3] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
           >
             <img
               src={heroBaltimore}
