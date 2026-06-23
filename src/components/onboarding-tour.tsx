@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
+import { Joyride, EVENTS, STATUS, type EventData, type Step } from "react-joyride";
 import { HelpCircle } from "lucide-react";
 
 const STORAGE_KEY = "pb_onboarding_tour_v1";
@@ -11,7 +11,6 @@ const STEPS: Step[] = [
     title: "Welcome to Planet Baltimore",
     content:
       "A 60-second tour of everything you can do here — discover artists, attend events, and connect with your neighborhood.",
-    disableBeacon: true,
   },
   {
     target: '[data-tour="nav-home"]',
@@ -91,11 +90,13 @@ export function OnboardingTour() {
     (window as any).__pbStartTour = () => setRun(true);
   }, []);
 
-  const handleCallback = (data: CallBackProps) => {
-    const { status } = data;
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-      localStorage.setItem(STORAGE_KEY, "1");
-      setRun(false);
+  const handleEvent = (data: EventData) => {
+    if (data.type === EVENTS.TOUR_END) {
+      const s = data.status;
+      if (s === STATUS.FINISHED || s === STATUS.SKIPPED) {
+        localStorage.setItem(STORAGE_KEY, "1");
+        setRun(false);
+      }
     }
   };
 
@@ -105,11 +106,9 @@ export function OnboardingTour() {
         steps={STEPS}
         run={run}
         continuous
-        showSkipButton
-        showProgress
         scrollToFirstStep
-        disableScrolling={false}
-        callback={handleCallback}
+        onEvent={handleEvent}
+        options={{ showProgress: true, skipBeacon: true, zIndex: 10000, primaryColor: "#FF6A1A", textColor: "#0a0a0a" }}
         locale={{ last: "Done", skip: "Skip tour" }}
         styles={{
           options: {
