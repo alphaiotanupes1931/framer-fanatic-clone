@@ -69,8 +69,8 @@ function FindCreatorPage() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name, username, neighborhood…"
-            className="pl-11 h-12 rounded-full bg-neutral-50 border-neutral-200"
+            placeholder="Search creators"
+            className="pl-11 h-12 rounded-full bg-neutral-50 border-neutral-200 text-[14px]"
           />
         </div>
         {loading ? (

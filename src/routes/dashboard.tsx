@@ -83,12 +83,12 @@ function Dashboard() {
       <div className="mx-auto max-w-2xl">
         <DiscoverStrip />
 
-        <div className="mb-4 inline-flex items-center gap-1 rounded-full border border-neutral-100 bg-neutral-50 p-1">
+        <div className="mb-4 flex w-full items-center gap-1 rounded-full border border-neutral-100 bg-neutral-50 p-1 sm:inline-flex sm:w-auto">
           {([["for-you","For you"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
             <button
               key={k}
               onClick={() => setTab(k)}
-              className={`rounded-full px-4 py-1.5 text-[12px] font-medium transition ${
+              className={`flex-1 rounded-full px-4 py-1.5 text-[12.5px] font-medium transition sm:flex-none ${
                 tab===k ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-900"
               }`}
             >

@@ -59,15 +59,15 @@ function CalendarPage() {
       cta="Create Event"
       ctaTo="/events"
     >
-      <div className="grid gap-8 lg:grid-cols-[auto_1fr]">
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:gap-8">
+        <div className="mx-auto w-fit rounded-2xl border border-neutral-200 bg-white p-2 shadow-sm sm:p-4 lg:mx-0">
           <Calendar
             mode="single"
             selected={selected}
             onSelect={setSelected}
             modifiers={{ hasEvent: eventDays }}
             modifiersClassNames={{ hasEvent: "relative font-semibold text-orange after:absolute after:bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-orange" }}
-            className="pointer-events-auto"
+            className="pointer-events-auto mx-auto"
           />
         </div>
 
@@ -89,7 +89,7 @@ function CalendarPage() {
         </div>
       </div>
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-2">
+      <div className="mt-10 grid gap-8 lg:mt-12 lg:grid-cols-2 lg:gap-10">
         <section>
           <h2 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-500">
             <CalendarDays className="h-3.5 w-3.5 text-orange" /> Upcoming
