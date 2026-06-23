@@ -80,20 +80,30 @@ function ProfilePage() {
               <AvatarFallback className="bg-orange-100 text-2xl text-orange-700">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex items-center gap-2">
-              <button className="rounded-full bg-orange-100 p-2.5 text-orange-700 hover:bg-orange-200"><BookOpen className="h-4 w-4" /></button>
-              <button className="rounded-full bg-orange-100 p-2.5 text-orange-700 hover:bg-orange-200">+</button>
+              <Link to="/stories" aria-label="My stories" className="rounded-full bg-orange-100 p-2.5 text-orange-700 hover:bg-orange-200"><BookOpen className="h-4 w-4" /></Link>
+              <Link to="/events" aria-label="Create event" className="rounded-full bg-orange-100 p-2.5 text-orange-700 hover:bg-orange-200">+</Link>
               <Link to="/settings" className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><Pencil className="h-4 w-4" /></Link>
-              <button className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><MessageCircle className="h-4 w-4" /></button>
-              <button className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><UserPlus className="h-4 w-4" /></button>
-              <button className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><Share2 className="h-4 w-4" /></button>
+              <Link to="/messages" aria-label="Messages" className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><MessageCircle className="h-4 w-4" /></Link>
+              <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><UserPlus className="h-4 w-4" /></Link>
+              <button
+                aria-label="Share profile"
+                onClick={async () => {
+                  const url = `${window.location.origin}/profile`;
+                  try {
+                    if (navigator.share) await navigator.share({ title: "Planet Baltimore", url });
+                    else { await navigator.clipboard.writeText(url); toast.success("Profile link copied"); }
+                  } catch { /* user cancelled */ }
+                }}
+                className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"
+              ><Share2 className="h-4 w-4" /></button>
             </div>
           </div>
 
           <div className="mt-4">
             <div className="flex items-center gap-2 text-xl font-bold">{profile?.username || profile?.display_name}</div>
-            <button className="mt-1 flex items-center gap-1 text-sm text-neutral-500 hover:text-orange-600">
+            <Link to="/settings" className="mt-1 flex items-center gap-1 text-sm text-neutral-500 hover:text-orange-600">
               <MapPin className="h-3.5 w-3.5" /> {profile?.neighborhood || "Add neighborhood"}
-            </button>
+            </Link>
             <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-neutral-200 px-2.5 py-1 text-xs font-medium capitalize">
               {roleLabel}
             </span>
