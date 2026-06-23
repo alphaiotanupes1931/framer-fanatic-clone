@@ -177,3 +177,8 @@
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
 }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
