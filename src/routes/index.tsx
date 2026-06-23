@@ -52,7 +52,7 @@ function Nav() {
     return () => sub.subscription.unsubscribe();
   }, []);
   return (
-    <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
+    <header className="absolute top-0 inset-x-0 z-50 px-5 md:px-10 pt-5 md:pt-6">
       <div className="flex items-center justify-between text-paper">
         {/* Desktop left nav */}
         <nav className="hidden md:flex items-center gap-6 text-base font-medium">
@@ -162,8 +162,14 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue/40" />
 
       {/* Headline with per-word stagger */}
-      <div className="absolute bottom-24 md:bottom-20 left-0 right-0 px-6 md:px-10 text-paper font-display font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-[-0.045em]">
+      <div className="absolute bottom-28 md:bottom-20 left-0 right-0 px-5 md:px-10 text-paper font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
         <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
+      </div>
+
+      {/* Mobile-only inline CTA so visitors aren't fishing for the hamburger */}
+      <div className="absolute bottom-8 left-0 right-0 px-5 md:hidden flex items-center gap-3">
+        <Link to="/auth" className="flex-1 inline-flex justify-center rounded-full bg-paper text-ink px-5 py-3 text-sm font-medium">Get Started</Link>
+        <Link to="/artists" className="flex-1 inline-flex justify-center rounded-full border border-paper/80 text-paper px-5 py-3 text-sm font-medium">Find a Creator</Link>
       </div>
 
     </section>
@@ -194,15 +200,15 @@ function QuoteSection() {
 
   return (
     <section ref={ref} className="relative w-full overflow-hidden bg-paper">
-      <div className="relative max-w-[1200px] mx-auto px-6 md:px-10 py-24 md:py-32 lg:py-40">
-        <div className="grid lg:grid-cols-[1fr_1.5fr] gap-14 lg:gap-20 items-center">
+      <div className="relative max-w-[1200px] mx-auto px-5 md:px-10 py-16 md:py-32 lg:py-40">
+        <div className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center">
           {/* Portrait with parallax */}
           <motion.div
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative mx-auto lg:mx-0 max-w-[340px]"
+            className="relative mx-auto lg:mx-0 w-full max-w-[260px] sm:max-w-[340px]"
           >
             <motion.div style={{ y: imageY }}>
               <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)]">
@@ -219,14 +225,14 @@ function QuoteSection() {
           <div className="text-ink">
             <StaggeredQuote
               text="Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
-              className="font-display text-[clamp(1.5rem,3.2vw,3.2rem)] leading-[1.15] tracking-[-0.02em]"
+              className="font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"
             />
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 md:mt-10 font-display text-base md:text-lg tracking-wide text-ink/60"
+              className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60"
             >
               Terrell Speaks
             </motion.div>
@@ -357,7 +363,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden px-6 md:px-10 pt-10 pb-12"
+      className="relative overflow-hidden px-5 md:px-10 py-20 md:py-24"
     >
       {/* Background image */}
       <img
@@ -371,20 +377,20 @@ function CreatorsFans() {
       <div className="relative mx-auto max-w-[1400px]">
         <ScrollHeadline
           lines={["Turning passions", "into communities"]}
-          className="font-display text-paper font-medium text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.05em] text-center"
+          className="font-display text-paper font-medium text-[clamp(2.5rem,10vw,11rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center"
         />
 
-        <div className="mt-6">
+        <div className="mt-10 md:mt-14">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="grid sm:grid-cols-2 gap-8 lg:gap-12"
+            className="grid sm:grid-cols-2 gap-12 sm:gap-10 lg:gap-12"
           >
-            <div className="space-y-5">
-              <h3 className="font-display text-3xl md:text-4xl font-semibold text-paper tracking-tight">Build Your Community</h3>
-              <p className="text-paper/85 text-base md:text-lg leading-relaxed">
+            <div className="space-y-4 md:space-y-5">
+              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-paper tracking-tight">Build Your Community</h3>
+              <p className="text-paper/85 text-[15px] md:text-lg leading-relaxed">
                 Connect directly with Baltimore. No algorithms. No middlemen. Just you and the people who support what you do.
               </p>
               <motion.a
@@ -392,15 +398,15 @@ function CreatorsFans() {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 href="#"
-                className="inline-flex rounded-full bg-paper text-ink px-7 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors"
+                className="inline-flex rounded-full bg-paper text-ink px-6 py-3.5 md:px-7 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors"
               >
                 Start Building
               </motion.a>
             </div>
 
-            <div className="space-y-5">
-              <h3 className="font-display text-3xl md:text-4xl font-semibold text-paper tracking-tight">Everything in One Place</h3>
-              <p className="text-paper/85 text-base md:text-lg leading-relaxed">
+            <div className="space-y-4 md:space-y-5">
+              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-paper tracking-tight">Everything in One Place</h3>
+              <p className="text-paper/85 text-[15px] md:text-lg leading-relaxed">
                 Artists, businesses, neighborhoods, events. Follow what moves you. Support what matters. All of Baltimore, together.
               </p>
               <motion.a
@@ -408,7 +414,7 @@ function CreatorsFans() {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 href="#"
-                className="inline-flex rounded-full border border-paper/80 text-paper px-7 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors"
+                className="inline-flex rounded-full border border-paper/80 text-paper px-6 py-3.5 md:px-7 md:py-4 text-sm md:text-base font-medium hover:bg-paper hover:text-ink transition-colors"
               >
                 Explore
               </motion.a>
@@ -429,19 +435,19 @@ function Features() {
     { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay },
   ];
   return (
-    <section id="features" className="bg-blue px-6 md:px-10 py-16">
+    <section id="features" className="bg-blue px-5 md:px-10 py-16 md:py-24">
       <div className="mx-auto max-w-[1400px]">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="font-display text-ink font-medium text-[clamp(2.5rem,7vw,7rem)] leading-[0.9] tracking-[-0.05em] max-w-5xl"
+          className="font-display text-ink font-medium text-[clamp(2.25rem,7vw,7rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] max-w-5xl"
         >
           Baltimore, fully connected.
         </motion.h2>
 
-        <div className="mt-20 grid md:grid-cols-3 gap-6">
+        <div className="mt-10 md:mt-20 grid md:grid-cols-3 gap-5 md:gap-6">
           {items.map((it, i) => (
             <TiltCard key={i} index={i} img={it.img} title={it.title} body={it.body} />
           ))}
@@ -454,7 +460,7 @@ function Features() {
 
 function CTA() {
   return (
-    <section className="bg-blue px-6 md:px-10 py-16">
+    <section className="bg-blue px-5 md:px-10 py-20 md:py-24">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -462,14 +468,14 @@ function CTA() {
         transition={{ duration: 0.9 }}
         className="mx-auto max-w-[1400px] text-center"
       >
-        <h2 className="font-display text-ink font-medium text-[clamp(3rem,10vw,10rem)] leading-[0.88] tracking-[-0.05em]">
+        <h2 className="font-display text-ink font-medium text-[clamp(2.75rem,10vw,10rem)] leading-[0.92] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.05em]">
           Start free.<br />Get paid tomorrow.
         </h2>
-        <div className="mt-12 flex flex-wrap gap-3 justify-center">
-          <Link to="/auth" className="inline-flex rounded-full bg-ink text-paper px-8 py-4 text-base font-medium hover:bg-paper hover:text-ink transition-colors">
+        <div className="mt-10 md:mt-12 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:justify-center">
+          <Link to="/auth" className="inline-flex justify-center rounded-full bg-ink text-paper px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-paper hover:text-ink transition-colors">
             Get Started
           </Link>
-          <Link to="/artists" className="inline-flex rounded-full border border-ink text-ink px-8 py-4 text-base font-medium hover:bg-ink hover:text-paper transition-colors">
+          <Link to="/artists" className="inline-flex justify-center rounded-full border border-ink text-ink px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors">
             Find a Creator
           </Link>
         </div>
@@ -517,19 +523,19 @@ function Footer() {
     ]},
   ];
   return (
-    <footer className="bg-ink text-paper px-6 md:px-10 py-16">
+    <footer className="bg-ink text-paper px-5 md:px-10 py-14 md:py-16">
       <div className="mx-auto max-w-[1400px]">
-        <div className="grid md:grid-cols-[1.5fr_repeat(4,1fr)] gap-12 mb-20">
-          <div>
+        <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(4,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
+          <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-3">
-              <img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 invert" />
-              <div className="font-display text-2xl font-extrabold tracking-tight uppercase">Planet Baltimore</div>
+              <img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0 invert" />
+              <div className="font-display text-xl md:text-2xl font-extrabold tracking-tight uppercase truncate">Planet Baltimore</div>
             </div>
           </div>
           {cols.map((c) => (
-            <div key={c.h}>
-              <div className="text-xs uppercase tracking-widest text-paper/50 mb-4">{c.h}</div>
-              <ul className="space-y-3 text-sm">
+            <div key={c.h} className="min-w-0">
+              <div className="text-[10px] md:text-xs uppercase tracking-widest text-paper/50 mb-3 md:mb-4">{c.h}</div>
+              <ul className="space-y-2.5 md:space-y-3 text-sm">
                 {c.l.map((i) => (<li key={i.label}><Link to={i.to} className="hover:text-blue transition-colors">{i.label}</Link></li>))}
               </ul>
             </div>
@@ -540,7 +546,7 @@ function Footer() {
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="font-display text-[clamp(4rem,18vw,20rem)] leading-[0.8] tracking-[-0.06em] font-medium uppercase"
+          className="font-display text-[clamp(2.75rem,18vw,20rem)] leading-[0.85] md:leading-[0.8] tracking-[-0.05em] md:tracking-[-0.06em] font-medium uppercase break-words"
         >
           Planet Baltimore
         </motion.div>
