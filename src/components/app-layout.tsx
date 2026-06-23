@@ -171,6 +171,17 @@ export function AppLayout({
                 <Home className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
                 <span className="truncate">{HOME.label}</span>
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className={`mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition ${
+                    pathname === "/admin" ? "bg-orange text-white" : "text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                >
+                  <Shield className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+                  <span className="truncate">Admin</span>
+                </Link>
+              )}
               {NAV.map((section) => (
                 <div key={section.section}>
                   <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
@@ -227,6 +238,19 @@ export function AppLayout({
               <Home className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
               {!collapsed && <span className="truncate">{HOME.label}</span>}
             </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`group mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
+                  pathname === "/admin"
+                    ? "bg-orange text-white"
+                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                }`}
+              >
+                <Shield className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+                {!collapsed && <span className="truncate">Admin</span>}
+              </Link>
+            )}
             {NAV.map((section) => (
               <div key={section.section}>
                 {!collapsed && (
