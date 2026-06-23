@@ -422,6 +422,9 @@ function TiltCard({ index, img, title, body }: { index: number; img: string; tit
   const sy = useSpring(ry, { stiffness: 200, damping: 18 });
   const gx = useMotionValue(50);
   const gy = useMotionValue(50);
+  const glow = useTransform([gx, gy], ([x, y]) =>
+    `radial-gradient(420px circle at ${x}% ${y}%, rgba(255,255,255,0.18), transparent 55%)`
+  );
 
   function onMove(e: React.MouseEvent<HTMLDivElement>) {
     const r = e.currentTarget.getBoundingClientRect();
@@ -448,11 +451,7 @@ function TiltCard({ index, img, title, body }: { index: number; img: string; tit
       {/* Cursor-follow spotlight */}
       <motion.div
         aria-hidden
-        style={{
-          background: useTransform([gx, gy], ([x, y]) =>
-            `radial-gradient(420px circle at ${x}% ${y}%, rgba(255,255,255,0.18), transparent 55%)`
-          ),
-        }}
+        style={{ background: glow }}
         className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       />
       <div className="aspect-[4/5] overflow-hidden">
