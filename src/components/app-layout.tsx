@@ -97,19 +97,21 @@ export function AppLayout({
   return (
     <div className="min-h-screen bg-white text-neutral-900">
       {/* Mobile top header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
+      <header className="sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-neutral-100 bg-white/90 px-3 py-2.5 backdrop-blur md:hidden">
         <button
           onClick={() => setMobileNavOpen(true)}
           aria-label="Open menu"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-700"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-5 w-5" strokeWidth={1.75} />
         </button>
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <img src={pbLogo} alt="Planet Baltimore" className="h-8 w-8" />
-          <span className="text-[13px] font-semibold uppercase tracking-wide">Planet Baltimore</span>
+        <Link to="/dashboard" className="flex items-center justify-center gap-1.5">
+          <img src={pbLogo} alt="Planet Baltimore" className="h-7 w-7" />
+          <span className="text-[12px] font-semibold uppercase tracking-[0.14em]">Planet Baltimore</span>
         </Link>
-        <NotificationsBell />
+        <div className="justify-self-end">
+          <NotificationsBell compact />
+        </div>
       </header>
 
       {/* Mobile nav drawer */}
@@ -261,7 +263,7 @@ export function AppLayout({
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 md:px-10 md:py-8 md:pb-10">
+        <main className="min-w-0 flex-1 px-4 pb-28 pt-4 sm:px-6 md:px-10 md:py-8 md:pb-10">
           <div className="mb-4 hidden justify-end md:flex">
             <NotificationsBell />
           </div>
@@ -270,11 +272,11 @@ export function AppLayout({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-3 border-b border-neutral-100 pb-5 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
+              className="flex flex-col gap-3 border-b border-neutral-100 pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
             >
-              <div>
-                <h1 className="text-[24px] font-semibold tracking-tight text-neutral-900 sm:text-[34px]">{title}</h1>
-                {subtitle && <p className="mt-1.5 max-w-xl text-[13px] text-neutral-500 sm:text-sm">{subtitle}</p>}
+              <div className="min-w-0">
+                <h1 className="text-[22px] font-semibold leading-tight tracking-tight text-neutral-900 sm:text-[34px]">{title}</h1>
+                {subtitle && <p className="mt-1 max-w-xl text-[12.5px] leading-snug text-neutral-500 sm:mt-1.5 sm:text-sm">{subtitle}</p>}
               </div>
               {cta && (onCta ? (
               <button
@@ -297,7 +299,7 @@ export function AppLayout({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className={hero ? "mt-6 md:mt-8" : ""}
+            className={hero ? "mt-5 md:mt-8" : ""}
           >
             {children}
           </motion.div>
