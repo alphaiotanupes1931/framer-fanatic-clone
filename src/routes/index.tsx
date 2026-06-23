@@ -526,11 +526,6 @@ function CTA() {
               Get Started
             </Link>
           </Magnetic>
-          <Magnetic className="sm:inline-flex">
-            <Link to="/leaderboard" className="inline-flex w-full sm:w-auto justify-center rounded-full border border-ink text-ink px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors">
-              Baltimore 100
-            </Link>
-          </Magnetic>
         </div>
       </motion.div>
     </section>
