@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Planet Baltimore - A platform built by Baltimore, for the people making it" },
       { name: "description", content: "Where creators and fans build something meaningful together. Earn recurring income, share work-in-progress, and grow a community that gets it." },
-      { property: "og:title", content: "Patreon - Creativity, powered by membership" },
+      { property: "og:title", content: "Planet Baltimore - A platform built by Baltimore, for the people making it" },
       { property: "og:description", content: "Where creators and fans build something meaningful together." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: LOGO_URL },
