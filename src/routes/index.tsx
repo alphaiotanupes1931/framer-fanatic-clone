@@ -204,9 +204,8 @@ function Hero() {
       </div>
 
       {/* Mobile-only inline CTA so visitors aren't fishing for the hamburger */}
-      <div className="absolute bottom-6 left-0 right-0 px-5 md:hidden flex items-center gap-3">
-        <Link to="/auth" className="flex-1 inline-flex justify-center rounded-full bg-paper text-ink px-5 py-3 text-sm font-medium">Get Started</Link>
-        <Link to="/leaderboard" className="flex-1 inline-flex justify-center rounded-full border border-paper/80 text-paper px-5 py-3 text-sm font-medium">Baltimore 100</Link>
+      <div className="absolute bottom-6 left-0 right-0 px-5 md:hidden flex items-center justify-center">
+        <Link to="/auth" className="inline-flex justify-center rounded-full bg-paper text-ink px-6 py-3 text-sm font-medium">Get Started</Link>
       </div>
 
     </section>
@@ -525,11 +524,6 @@ function CTA() {
           <Magnetic className="sm:inline-flex">
             <Link to="/auth" className="inline-flex w-full sm:w-auto justify-center rounded-full bg-ink text-paper px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.45)] hover:bg-paper hover:text-ink transition-all">
               Get Started
-            </Link>
-          </Magnetic>
-          <Magnetic className="sm:inline-flex">
-            <Link to="/leaderboard" className="inline-flex w-full sm:w-auto justify-center rounded-full border border-ink text-ink px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors">
-              Baltimore 100
             </Link>
           </Magnetic>
         </div>
