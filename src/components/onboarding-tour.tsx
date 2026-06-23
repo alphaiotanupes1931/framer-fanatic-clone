@@ -133,7 +133,6 @@ export function OnboardingTour() {
         run={run}
         continuous
         scrollToFirstStep
-        disableScrolling={false}
         onEvent={handleEvent}
         options={{ showProgress: true, skipBeacon: true, zIndex: 10000, primaryColor: "#FF6A1A", textColor: "#0a0a0a", closeButtonAction: "skip", dismissKeyAction: false, overlayClickAction: false }}
         locale={{ last: "Done", skip: "Skip tour" }}
