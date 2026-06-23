@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Planet Baltimore - A platform built by Baltimore, for the people making it" },
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together. Find local artists, hire talent, buy tickets, and support the people shaping the city." },
       { property: "og:title", content: "Planet Baltimore - A platform built by Baltimore, for the people making it" },
-      { property: "og:description", content: "Where creators and fans build something meaningful together." },
+      { property: "og:description", content: "Where Baltimore creators and fans build something meaningful together." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: LOGO_URL },
       { name: "twitter:image", content: LOGO_URL },
