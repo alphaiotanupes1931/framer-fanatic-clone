@@ -205,19 +205,6 @@ function Hero() {
         style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }}
       />
 
-      {/* Eyebrow */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute top-24 md:top-32 left-0 right-0 px-5 md:px-10 text-paper/80"
-      >
-        <div className="flex items-center gap-3 text-[11px] md:text-xs tracking-[0.22em] uppercase font-medium">
-          <span className="h-px w-8 bg-paper/60" />
-          <span>Planet Baltimore · Est. 2024</span>
-        </div>
-      </motion.div>
-
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10 text-paper">
         <div className="font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
@@ -269,21 +256,6 @@ function Hero() {
         </motion.div>
       </div>
 
-      {/* Scroll cue */}
-      <motion.div
-        aria-hidden
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 1 }}
-        className="hidden md:flex absolute top-1/2 right-6 -translate-y-1/2 flex-col items-center gap-3 text-paper/60"
-      >
-        <span className="text-[10px] tracking-[0.3em] uppercase [writing-mode:vertical-rl]">Scroll</span>
-        <motion.span
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          className="block w-px h-10 bg-paper/40"
-        />
-      </motion.div>
     </section>
   );
 }
