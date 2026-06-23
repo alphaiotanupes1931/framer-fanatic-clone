@@ -24,6 +24,9 @@ export type Profile = {
   bio: string | null;
   website: string | null;
   banner_url: string | null;
+  stripe_account_id: string | null;
+  stripe_account_status: string | null;
+  stripe_charges_enabled: boolean;
 };
 
 const HOME = { to: "/dashboard", icon: Home, label: "Home" } as const;
@@ -61,7 +64,7 @@ export function useCurrentProfile() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) { navigate({ to: "/auth" }); return; }
       const { data: p } = await supabase.from("profiles")
-        .select("id, display_name, username, email, avatar_url, role, neighborhood, bio, website, banner_url")
+        .select("id, display_name, username, email, avatar_url, role, neighborhood, bio, website, banner_url, stripe_account_id, stripe_account_status, stripe_charges_enabled")
         .eq("id", data.session.user.id).maybeSingle();
       if (p) setProfile(p as Profile);
     })();
