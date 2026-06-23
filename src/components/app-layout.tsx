@@ -3,14 +3,15 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
-  Compass, Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
+  Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, ChevronLeft,
+  Plus, Sparkles, ChevronLeft, X,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Globe } from "@/components/globe";
 import { motion } from "motion/react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export type Profile = {
   id: string;
@@ -27,21 +28,19 @@ export type Profile = {
 
 const NAV = [
   { to: "/dashboard", icon: Home, label: "Home" },
+  { to: "/search", icon: Search, label: "Search" },
+  { to: "/events", icon: Ticket, label: "Events" },
+  { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
+  { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
   { to: "/artists", icon: Palette, label: "Artists" },
   { to: "/arts-orgs", icon: Landmark, label: "Arts Orgs" },
   { to: "/businesses", icon: Building2, label: "Businesses" },
-  { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
   { to: "/community-associations", icon: ShieldCheck, label: "Community Associations" },
-  { to: "/discover", icon: Compass, label: "Discover" },
-  { to: "/events", icon: Ticket, label: "Events" },
   { to: "/groups", icon: Users, label: "Groups/Communities" },
-  { to: "/messages", icon: MessageSquare, label: "Messages" },
-  { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
-  { to: "/profile", icon: User, label: "Profile" },
-  { to: "/search", icon: Search, label: "Search" },
   { to: "/stories", icon: BookOpen, label: "Stories" },
   { to: "/videos", icon: VideoIcon, label: "Videos" },
   { to: "/leaderboard", icon: Trophy, label: "Baltimore 100" },
+  { to: "/profile", icon: User, label: "Profile" },
   { to: "/settings", icon: SettingsIcon, label: "Settings" },
 ] as const;
 
@@ -141,14 +140,7 @@ export function AppLayout({
 
         <main className="min-w-0 flex-1 px-5 py-8 md:px-10 pb-24 md:pb-10">
           <div className="mb-4 flex justify-end">
-            <Link
-              to="/notifications"
-              aria-label="Notifications"
-              className={`relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-600 transition hover:border-orange hover:text-orange ${pathname === "/notifications" ? "border-orange text-orange" : ""}`}
-            >
-              <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-orange" />
-            </Link>
+            <NotificationsBell />
           </div>
           {hero && (
             <motion.div
@@ -196,9 +188,9 @@ export function AppLayout({
       <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-neutral-100 bg-white py-2 md:hidden">
         {[
           { to: "/dashboard", icon: Home, label: "Home" },
-          { to: "/discover", icon: Compass, label: "Discover" },
+          { to: "/search", icon: Search, label: "Search" },
           { to: "/events", icon: Ticket, label: "Events" },
-          { to: "/messages", icon: MessageSquare, label: "Inbox" },
+          { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
           { to: "/profile", icon: User, label: "Me" },
         ].map((t) => {
           const active = pathname === t.to;
@@ -210,7 +202,92 @@ export function AppLayout({
           );
         })}
       </nav>
+      <MessageBubble />
     </div>
+  );
+}
+
+function NotificationsBell() {
+  const [items] = useState<{ id: string; title: string; body: string; time: string }[]>([]);
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          aria-label="Notifications"
+          className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-600 transition hover:border-orange hover:text-orange"
+        >
+          <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
+          {items.length > 0 && (
+            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-orange" />
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 p-0">
+        <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
+          <h3 className="text-sm font-semibold">Notifications</h3>
+          <span className="text-[11px] text-neutral-400">{items.length} new</span>
+        </div>
+        <div className="max-h-80 overflow-y-auto">
+          {items.length === 0 ? (
+            <div className="px-4 py-10 text-center text-xs text-neutral-400">
+              You're all caught up.
+            </div>
+          ) : (
+            <ul className="divide-y divide-neutral-100">
+              {items.map((n) => (
+                <li key={n.id} className="px-4 py-3 hover:bg-neutral-50">
+                  <div className="text-sm font-medium text-neutral-900">{n.title}</div>
+                  <div className="text-xs text-neutral-500">{n.body}</div>
+                  <div className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">{n.time}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function MessageBubble() {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  return (
+    <>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Messages"
+        className="fixed bottom-20 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-orange text-white shadow-lg transition hover:brightness-110 md:bottom-6 md:right-6"
+      >
+        {open ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
+      </button>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: 12, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.18 }}
+          className="fixed bottom-36 right-5 z-50 w-80 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl md:bottom-24 md:right-6"
+        >
+          <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
+            <h3 className="text-sm font-semibold">Messages</h3>
+            <button onClick={() => setOpen(false)} className="text-neutral-400 hover:text-neutral-900">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="px-4 py-10 text-center text-xs text-neutral-400">
+            No messages yet.
+          </div>
+          <div className="border-t border-neutral-100 p-3">
+            <button
+              onClick={() => { setOpen(false); navigate({ to: "/messages" }); }}
+              className="w-full rounded-full bg-neutral-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-neutral-800"
+            >
+              Open inbox
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </>
   );
 }
 
