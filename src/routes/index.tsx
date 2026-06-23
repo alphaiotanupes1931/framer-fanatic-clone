@@ -587,12 +587,16 @@ function CTA() {
           Start free.<br />Get paid tomorrow.
         </h2>
         <div className="mt-10 md:mt-12 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:justify-center">
-          <Link to="/auth" className="inline-flex justify-center rounded-full bg-ink text-paper px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-paper hover:text-ink transition-colors">
-            Get Started
-          </Link>
-          <Link to="/artists" className="inline-flex justify-center rounded-full border border-ink text-ink px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors">
-            Find a Creator
-          </Link>
+          <Magnetic className="sm:inline-flex">
+            <Link to="/auth" className="inline-flex w-full sm:w-auto justify-center rounded-full bg-ink text-paper px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.45)] hover:bg-paper hover:text-ink transition-all">
+              Get Started
+            </Link>
+          </Magnetic>
+          <Magnetic className="sm:inline-flex">
+            <Link to="/artists" className="inline-flex w-full sm:w-auto justify-center rounded-full border border-ink text-ink px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors">
+              Find a Creator
+            </Link>
+          </Magnetic>
         </div>
       </motion.div>
     </section>
