@@ -31,7 +31,6 @@ function Index() {
       <ScrollProgress />
       <Nav />
       <Hero />
-      <StatStrip />
       <CreatorsFans />
       <Features />
       <QuoteSection />
