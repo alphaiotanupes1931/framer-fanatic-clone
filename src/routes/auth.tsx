@@ -114,7 +114,7 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-6 sm:py-12">
       <Toaster richColors />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
