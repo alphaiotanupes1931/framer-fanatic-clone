@@ -5,7 +5,7 @@ import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
   Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, ChevronLeft, X,
+  Plus, Sparkles, ChevronLeft, X, Menu,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -84,6 +84,9 @@ export function AppLayout({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const profile = useCurrentProfile();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => { setMobileNavOpen(false); }, [pathname]);
 
   const signOut = async () => { await supabase.auth.signOut(); navigate({ to: "/" }); };
   const initials = useMemo(() => {
@@ -93,6 +96,94 @@ export function AppLayout({
 
   return (
     <div className="min-h-screen bg-white text-neutral-900">
+      {/* Mobile top header */}
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
+        <button
+          onClick={() => setMobileNavOpen(true)}
+          aria-label="Open menu"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-700"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <img src={pbLogo} alt="Planet Baltimore" className="h-8 w-8" />
+          <span className="text-[13px] font-semibold uppercase tracking-wide">Planet Baltimore</span>
+        </Link>
+        <NotificationsBell />
+      </header>
+
+      {/* Mobile nav drawer */}
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog">
+          <button
+            aria-label="Close menu"
+            onClick={() => setMobileNavOpen(false)}
+            className="absolute inset-0 bg-black/40"
+          />
+          <motion.aside
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="relative flex h-full w-[82%] max-w-[320px] flex-col bg-white px-4 py-5"
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileNavOpen(false)}>
+                <img src={pbLogo} alt="Planet Baltimore" className="h-10 w-10" />
+                <span className="text-sm font-semibold uppercase tracking-wide">Planet Baltimore</span>
+              </Link>
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                aria-label="Close"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="flex-1 space-y-4 overflow-y-auto pr-1">
+              <Link
+                to={HOME.to}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition ${
+                  pathname === HOME.to ? "bg-orange text-white" : "text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <Home className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+                <span className="truncate">{HOME.label}</span>
+              </Link>
+              {NAV.map((section) => (
+                <div key={section.section}>
+                  <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                    {section.section}
+                  </div>
+                  <div className="space-y-0.5">
+                    {section.items.map((item) => {
+                      const active = pathname === item.to;
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition ${
+                            active ? "bg-orange text-white" : "text-neutral-700 hover:bg-neutral-100"
+                          }`}
+                        >
+                          <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </nav>
+            <button
+              onClick={signOut}
+              className="mt-3 flex w-full items-center gap-3 rounded-lg border-t border-neutral-100 px-3 pt-4 text-[14px] font-medium text-neutral-600"
+            >
+              <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} /> Sign out
+            </button>
+          </motion.aside>
+        </div>
+      )}
+
       <div className="mx-auto flex max-w-[1600px]">
         <aside className={`sticky top-0 hidden h-screen ${collapsed ? "w-16" : "w-60"} shrink-0 flex-col border-r border-neutral-100 bg-white px-3 py-6 md:flex transition-all`}>
           <Link to="/dashboard" className="mb-8 flex items-center justify-center px-1">
@@ -170,8 +261,8 @@ export function AppLayout({
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-5 py-8 md:px-10 pb-24 md:pb-10">
-          <div className="mb-4 flex justify-end">
+        <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 md:px-10 md:py-8 md:pb-10">
+          <div className="mb-4 hidden justify-end md:flex">
             <NotificationsBell />
           </div>
           {hero && (
@@ -179,11 +270,11 @@ export function AppLayout({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-3 border-b border-neutral-100 pb-6 sm:flex-row sm:items-end sm:justify-between"
+              className="flex flex-col gap-3 border-b border-neutral-100 pb-5 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
             >
               <div>
-                <h1 className="text-[28px] font-semibold tracking-tight text-neutral-900 sm:text-[34px]">{title}</h1>
-                {subtitle && <p className="mt-1.5 max-w-xl text-sm text-neutral-500">{subtitle}</p>}
+                <h1 className="text-[24px] font-semibold tracking-tight text-neutral-900 sm:text-[34px]">{title}</h1>
+                {subtitle && <p className="mt-1.5 max-w-xl text-[13px] text-neutral-500 sm:text-sm">{subtitle}</p>}
               </div>
               {cta && (onCta ? (
               <button
@@ -206,7 +297,7 @@ export function AppLayout({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className={hero ? "mt-8" : ""}
+            className={hero ? "mt-6 md:mt-8" : ""}
           >
             {children}
           </motion.div>
@@ -289,7 +380,7 @@ function MessageBubble() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Messages"
-        className="fixed bottom-20 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-orange text-white shadow-lg transition hover:brightness-110 md:bottom-6 md:right-6"
+        className="fixed bottom-[68px] right-4 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-white shadow-lg transition hover:brightness-110 md:bottom-6 md:right-6 md:h-14 md:w-14"
       >
         {open ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
       </button>
@@ -298,7 +389,7 @@ function MessageBubble() {
           initial={{ opacity: 0, y: 12, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.18 }}
-          className="fixed bottom-36 right-5 z-50 w-80 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl md:bottom-24 md:right-6"
+          className="fixed bottom-32 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl md:bottom-24 md:right-6 md:w-80"
         >
           <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
             <h3 className="text-sm font-semibold">Messages</h3>

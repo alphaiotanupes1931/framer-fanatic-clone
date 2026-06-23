@@ -158,13 +158,13 @@ function Dashboard() {
                   </div>
                 </div>
               </header>
-              <div className="mt-3 pl-12 text-[15px] leading-relaxed text-neutral-800">{p.content}</div>
+              <div className="mt-3 pl-0 sm:pl-12 text-[15px] leading-relaxed text-neutral-800">{p.content}</div>
               {p.image_url && (
-                <div className="mt-3 overflow-hidden rounded-xl pl-12">
+                <div className="mt-3 overflow-hidden rounded-xl sm:pl-12">
                   <img src={p.image_url} alt="" className="w-full" loading="lazy" />
                 </div>
               )}
-              <footer className="mt-3 flex items-center gap-6 pl-12 text-[12.5px] text-neutral-400">
+              <footer className="mt-3 flex items-center gap-6 pl-0 sm:pl-12 text-[12.5px] text-neutral-400">
                 <button className="flex items-center gap-1.5 transition hover:text-neutral-900">
                   <Heart className="h-4 w-4" strokeWidth={1.75} /> {p.likes_count ?? 0}
                 </button>
