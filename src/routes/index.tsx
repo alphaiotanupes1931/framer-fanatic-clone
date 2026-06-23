@@ -153,16 +153,6 @@ function Nav() {
   );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a href={href} className="group relative">
-      <span className="relative inline-block overflow-hidden">
-        <span className="block transition-transform duration-300 group-hover:-translate-y-full">{children}</span>
-        <span className="absolute inset-0 block translate-y-full transition-transform duration-300 group-hover:translate-y-0">{children}</span>
-      </span>
-    </a>
-  );
-}
 
 function Hero() {
   return (
