@@ -35,7 +35,6 @@ const HOME = { to: "/dashboard", icon: Home, label: "Home", tour: "nav-home" } a
 
 const NAV = [
   { section: "Explore", items: [
-    { to: "/search", icon: Search, label: "Search", tour: "nav-search" },
     { to: "/events", icon: Ticket, label: "Events", tour: "nav-events" },
     { to: "/calendar", icon: CalendarIcon, label: "Calendar", tour: "nav-calendar" },
     { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", tour: "nav-neighborhoods" },
@@ -53,7 +52,6 @@ const NAV = [
     { to: "/leaderboard", icon: Trophy, label: "Baltimore 100", tour: "nav-leaderboard" },
   ]},
   { section: "Account", items: [
-    { to: "/profile", icon: User, label: "Profile", tour: "nav-profile" },
     { to: "/settings", icon: SettingsIcon, label: "Settings" },
   ]},
 ] as const;
