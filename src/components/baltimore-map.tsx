@@ -47,12 +47,15 @@ export function BaltimoreMap({ onSelect }: { onSelect?: (n: N) => void }) {
   const points = neighborhoods.filter((n) => n.latitude != null && n.longitude != null);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-neutral-200 shadow-sm">
+    <div
+      className="relative z-0 overflow-hidden rounded-2xl border border-neutral-200 shadow-sm"
+      style={{ isolation: "isolate" }}
+    >
       <MapContainer
         center={[39.299, -76.612]}
         zoom={12}
         scrollWheelZoom={false}
-        style={{ height: "560px", width: "100%" }}
+        style={{ height: "clamp(320px, 55vh, 560px)", width: "100%" }}
       >
         <TileLayer
           attribution='&copy; OpenStreetMap'
