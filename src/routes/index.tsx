@@ -97,9 +97,6 @@ function Nav() {
 
         {/* Desktop right actions */}
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/artists" className="inline-flex items-center gap-2 rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">
-            <Search className="w-4 h-4" /> Find a Creator
-          </Link>
           {signedIn ? (
             <Link to="/dashboard" className="rounded-full bg-paper text-ink px-5 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors">Dashboard</Link>
           ) : (
