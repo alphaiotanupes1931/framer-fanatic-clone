@@ -228,6 +228,86 @@ function Dashboard() {
 }
 
 function DiscoverStrip() {
+  return _DiscoverStripImpl();
+}
+
+type CreatorRow = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null };
+
+function CreatorSearch() {
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<CreatorRow[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!q.trim()) { setResults([]); return; }
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(async () => {
+      const { data } = await supabase.rpc("search_creators", { q, lim: 8 });
+      if (cancelled) return;
+      setResults((data as CreatorRow[] | null) ?? []);
+      setLoading(false);
+    }, 180);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [q]);
+
+  return (
+    <div className="relative mb-5">
+      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+      <input
+        value={q}
+        onChange={(e) => { setQ(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        placeholder="Search creators on Planet Baltimore"
+        className="h-11 w-full rounded-full border border-neutral-200 bg-neutral-50 pl-11 pr-10 text-[14px] outline-none transition focus:border-orange focus:bg-white"
+      />
+      {q && (
+        <button
+          onClick={() => { setQ(""); setResults([]); }}
+          aria-label="Clear search"
+          className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+      {open && q.trim() && (
+        <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-lg">
+          {loading && <div className="px-4 py-3 text-[13px] text-neutral-400">Searching…</div>}
+          {!loading && results.length === 0 && (
+            <div className="px-4 py-3 text-[13px] text-neutral-400">No creators found.</div>
+          )}
+          {!loading && results.map((c) => (
+            <Link
+              key={c.id}
+              to="/profile"
+              onMouseDown={(e) => e.preventDefault()}
+              className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-neutral-50"
+            >
+              <Avatar className="h-8 w-8">
+                {c.avatar_url && <AvatarImage src={c.avatar_url} />}
+                <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
+                  {(c.display_name || c.username || "U").slice(0, 1).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13.5px] font-medium text-neutral-900">
+                  {c.display_name || c.username || "Unnamed"}
+                </div>
+                <div className="truncate text-[11.5px] text-neutral-400">
+                  {c.neighborhood || "Baltimore"}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function _DiscoverStripImpl() {
   const items = [
     { to: "/artists", icon: Palette, label: "Artists", color: "bg-orange/10 text-orange" },
     { to: "/events", icon: Ticket, label: "Events", color: "bg-emerald-50 text-emerald-600" },
