@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
-  Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
+  Ticket, Users, MessageSquare, MapPin, Bell, User,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
   Plus, Sparkles, ChevronLeft, X, Menu, Shield,
 } from "lucide-react";
@@ -35,7 +35,6 @@ const HOME = { to: "/dashboard", icon: Home, label: "Home", tour: "nav-home" } a
 
 const NAV = [
   { section: "Explore", items: [
-    { to: "/search", icon: Search, label: "Search", tour: "nav-search" },
     { to: "/events", icon: Ticket, label: "Events", tour: "nav-events" },
     { to: "/calendar", icon: CalendarIcon, label: "Calendar", tour: "nav-calendar" },
     { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", tour: "nav-neighborhoods" },
@@ -53,7 +52,6 @@ const NAV = [
     { to: "/leaderboard", icon: Trophy, label: "Baltimore 100", tour: "nav-leaderboard" },
   ]},
   { section: "Account", items: [
-    { to: "/profile", icon: User, label: "Profile", tour: "nav-profile" },
     { to: "/settings", icon: SettingsIcon, label: "Settings" },
   ]},
 ] as const;
@@ -360,9 +358,9 @@ export function AppLayout({
       <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-neutral-100 bg-white py-2 md:hidden">
         {[
           { to: "/dashboard", icon: Home, label: "Home" },
-          { to: "/search", icon: Search, label: "Search" },
           { to: "/events", icon: Ticket, label: "Events" },
           { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
+          { to: "/leaderboard", icon: Trophy, label: "Top 100" },
           { to: "/profile", icon: User, label: "Me" },
         ].map((t) => {
           const active = pathname === t.to;
