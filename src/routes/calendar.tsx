@@ -60,7 +60,7 @@ function CalendarPage() {
       ctaTo="/events"
     >
       <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:gap-8">
-        <div className="rounded-2xl border border-neutral-200 bg-white p-2 shadow-sm sm:p-4">
+        <div className="mx-auto w-fit rounded-2xl border border-neutral-200 bg-white p-2 shadow-sm sm:p-4 lg:mx-0">
           <Calendar
             mode="single"
             selected={selected}
