@@ -54,27 +54,6 @@ function ScrollProgress() {
   );
 }
 
-function Marquee() {
-  const items = [
-    "Federal Hill", "Hampden", "Fells Point", "Mount Vernon", "Remington",
-    "Station North", "Charles Village", "Canton", "Pigtown", "Highlandtown",
-    "Bolton Hill", "Druid Hill", "Patterson Park", "Old Goucher",
-  ];
-  const row = [...items, ...items];
-  return (
-    <div className="relative bg-ink text-paper overflow-hidden border-y border-paper/10">
-      <div className="flex gap-10 py-4 md:py-5 whitespace-nowrap animate-[marquee_38s_linear_infinite] will-change-transform">
-        {row.map((n, i) => (
-          <span key={i} className="font-display text-lg md:text-2xl uppercase tracking-tight flex items-center gap-10">
-            {n}
-            <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-paper/40" />
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
