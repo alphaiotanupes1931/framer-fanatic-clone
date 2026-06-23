@@ -380,7 +380,7 @@ function MessageBubble() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Messages"
-        className="fixed bottom-20 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-orange text-white shadow-lg transition hover:brightness-110 md:bottom-6 md:right-6"
+        className="fixed bottom-[68px] right-4 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-white shadow-lg transition hover:brightness-110 md:bottom-6 md:right-6 md:h-14 md:w-14"
       >
         {open ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
       </button>
@@ -389,7 +389,7 @@ function MessageBubble() {
           initial={{ opacity: 0, y: 12, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.18 }}
-          className="fixed bottom-36 right-5 z-50 w-80 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl md:bottom-24 md:right-6"
+          className="fixed bottom-32 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl md:bottom-24 md:right-6 md:w-80"
         >
           <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
             <h3 className="text-sm font-semibold">Messages</h3>
