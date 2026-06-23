@@ -111,12 +111,6 @@ export function OnboardingTour() {
         options={{ showProgress: true, skipBeacon: true, zIndex: 10000, primaryColor: "#FF6A1A", textColor: "#0a0a0a" }}
         locale={{ last: "Done", skip: "Skip tour" }}
         styles={{
-          options: {
-            primaryColor: "#FF6A1A",
-            zIndex: 10000,
-            textColor: "#0a0a0a",
-            arrowColor: "#ffffff",
-          },
           tooltip: { borderRadius: 14, padding: 18 },
           tooltipTitle: { fontSize: 15, fontWeight: 600 },
           tooltipContent: { fontSize: 13, lineHeight: 1.5 },
