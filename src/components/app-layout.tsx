@@ -5,12 +5,13 @@ import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
   Compass, Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, ChevronLeft,
+  Plus, Sparkles, ChevronLeft, X,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Globe } from "@/components/globe";
 import { motion } from "motion/react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export type Profile = {
   id: string;
@@ -27,21 +28,19 @@ export type Profile = {
 
 const NAV = [
   { to: "/dashboard", icon: Home, label: "Home" },
+  { to: "/search", icon: Search, label: "Search" },
+  { to: "/events", icon: Ticket, label: "Events" },
+  { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
+  { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
   { to: "/artists", icon: Palette, label: "Artists" },
   { to: "/arts-orgs", icon: Landmark, label: "Arts Orgs" },
   { to: "/businesses", icon: Building2, label: "Businesses" },
-  { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
   { to: "/community-associations", icon: ShieldCheck, label: "Community Associations" },
-  { to: "/discover", icon: Compass, label: "Discover" },
-  { to: "/events", icon: Ticket, label: "Events" },
   { to: "/groups", icon: Users, label: "Groups/Communities" },
-  { to: "/messages", icon: MessageSquare, label: "Messages" },
-  { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
-  { to: "/profile", icon: User, label: "Profile" },
-  { to: "/search", icon: Search, label: "Search" },
   { to: "/stories", icon: BookOpen, label: "Stories" },
   { to: "/videos", icon: VideoIcon, label: "Videos" },
   { to: "/leaderboard", icon: Trophy, label: "Baltimore 100" },
+  { to: "/profile", icon: User, label: "Profile" },
   { to: "/settings", icon: SettingsIcon, label: "Settings" },
 ] as const;
 
