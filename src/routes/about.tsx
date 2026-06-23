@@ -163,8 +163,8 @@ function CTA() {
           <Link to="/auth" className="inline-flex rounded-full bg-paper text-ink px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-orange hover:text-paper transition-colors">
             Get Started
           </Link>
-          <Link to="/artists" className="inline-flex rounded-full border border-paper/60 px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-paper hover:text-ink transition-colors">
-            Meet the Creators
+          <Link to="/leaderboard" className="inline-flex rounded-full border border-paper/60 px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-paper hover:text-ink transition-colors">
+            Baltimore 100
           </Link>
         </div>
       </div>
