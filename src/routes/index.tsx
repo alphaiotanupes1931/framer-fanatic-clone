@@ -55,11 +55,8 @@ function Nav() {
     <header className="absolute top-0 inset-x-0 z-50 px-6 md:px-10 pt-6">
       <div className="flex items-center justify-between text-paper">
         {/* Desktop left nav */}
-        <nav className="hidden md:flex items-center gap-8 text-base font-medium">
-          <NavLink href="#creators">Creators</NavLink>
-          <NavLink href="#features">Features</NavLink>
-          <Link to="/discover" className="group relative"><span className="relative inline-block overflow-hidden"><span className="block transition-transform duration-300 group-hover:-translate-y-full">Discover</span><span className="absolute inset-0 block translate-y-full transition-transform duration-300 group-hover:translate-y-0">Discover</span></span></Link>
-          <Link to="/events" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Events</Link>
+        <nav className="hidden md:flex items-center gap-6 text-base font-medium">
+          <Link to="/artists" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Find a Creator</Link>
         </nav>
 
         {/* Mobile/tablet logo (left-aligned) */}
