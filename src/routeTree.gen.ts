@@ -15,13 +15,11 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as EventsRouteImport } from './routes/events'
-import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -61,11 +59,6 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const NeighborhoodsRoute = NeighborhoodsRouteImport.update({
   id: '/neighborhoods',
   path: '/neighborhoods',
@@ -89,11 +82,6 @@ const GroupsRoute = GroupsRouteImport.update({
 const EventsRoute = EventsRouteImport.update({
   id: '/events',
   path: '/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiscoverRoute = DiscoverRouteImport.update({
-  id: '/discover',
-  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -146,13 +134,11 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/dashboard': typeof DashboardRoute
-  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
-  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -169,13 +155,11 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/dashboard': typeof DashboardRoute
-  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
-  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -193,13 +177,11 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/dashboard': typeof DashboardRoute
-  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
-  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -218,13 +200,11 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/dashboard'
-    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
-    | '/notifications'
     | '/onboarding'
     | '/profile'
     | '/search'
@@ -241,13 +221,11 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/dashboard'
-    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
-    | '/notifications'
     | '/onboarding'
     | '/profile'
     | '/search'
@@ -264,13 +242,11 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/dashboard'
-    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
-    | '/notifications'
     | '/onboarding'
     | '/profile'
     | '/search'
@@ -288,13 +264,11 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   DashboardRoute: typeof DashboardRoute
-  DiscoverRoute: typeof DiscoverRoute
   EventsRoute: typeof EventsRoute
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
-  NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
@@ -347,13 +321,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/notifications': {
-      id: '/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/neighborhoods': {
       id: '/neighborhoods'
       path: '/neighborhoods'
@@ -387,13 +354,6 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/events'
       preLoaderRoute: typeof EventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/discover': {
-      id: '/discover'
-      path: '/discover'
-      fullPath: '/discover'
-      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -464,13 +424,11 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   DashboardRoute: DashboardRoute,
-  DiscoverRoute: DiscoverRoute,
   EventsRoute: EventsRoute,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
-  NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
