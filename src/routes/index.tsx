@@ -142,10 +142,6 @@ function Nav() {
         </div>
         <nav className="px-6 mt-16 flex flex-col gap-6 font-display text-4xl tracking-[-0.04em]">
           {[
-            { href: "#creators", label: "Creators" },
-            { href: "#features", label: "Features" },
-            { href: "/discover", label: "Discover" },
-            { href: "/events", label: "Events" },
             { href: "/artists", label: "Find a Creator" },
             { href: signedIn ? "/dashboard" : "/auth", label: signedIn ? "Dashboard" : "Log in" },
           ].map((l) => (
