@@ -251,7 +251,7 @@ function StripeTab() {
             <h3 className="text-base font-semibold">Payouts via Stripe</h3>
             <p className="mt-1 text-sm text-neutral-600">
               Connect your Stripe account to sell tickets on Planet Baltimore. We use Stripe Connect so payouts
-              go directly to your bank — Planet Baltimore never holds your money.
+              go directly to your bank - Planet Baltimore never holds your money.
             </p>
           </div>
         </div>
@@ -290,7 +290,7 @@ function StripeTab() {
           <li>
             <strong>Set ticket prices on your events.</strong> Enter the amount <em>you</em> want to receive
             per ticket. We automatically add Stripe's processing fee (2.9% + $0.30) and Baltimore City's
-            10% Admissions &amp; Amusement Tax on top — so the buyer pays the all-in total and you net your
+            10% Admissions &amp; Amusement Tax on top - so the buyer pays the all-in total and you net your
             advertised price.
           </li>
           <li>

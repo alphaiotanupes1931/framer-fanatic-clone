@@ -108,7 +108,7 @@ function AuthPage() {
     );
     // If artist + verified Baltimore, immediately upgrade their role in user_roles.
     if (finalRole === "artist") {
-      try { await becomeArtistFn(); } catch { /* harmless — they can also upgrade from profile */ }
+      try { await becomeArtistFn(); } catch { /* harmless - they can also upgrade from profile */ }
     }
     navigate({ to: "/onboarding" });
   };

@@ -105,7 +105,7 @@ function Dashboard() {
 
         {!roleLoading && !isArtist ? (
           <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-4 text-center text-[13px] text-neutral-600">
-            You're signed in as an <strong>Attendee</strong> — you can view posts and buy event tickets.
+            You're signed in as an <strong>Attendee</strong> - you can view posts and buy event tickets.
             To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">profile</Link> and become an Artist.
           </div>
         ) : (
