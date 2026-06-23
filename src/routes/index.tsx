@@ -193,21 +193,97 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative min-h-[75vh] md:min-h-screen w-full overflow-hidden">
+    <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden">
       <HeroParallax />
-      <div className="absolute inset-0 bg-blue-deep/35 mix-blend-multiply" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue/40" />
+      {/* Layered grading: softer top, deeper bottom for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-deep/20 via-blue-deep/10 to-blue-deep/70" />
+      <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_100%,rgba(0,0,0,0.45),transparent_60%)]" />
+      {/* Subtle grain */}
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.06] mix-blend-overlay pointer-events-none"
+        style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }}
+      />
 
-      {/* Headline with per-word stagger */}
-      <div className="absolute bottom-20 md:bottom-20 left-0 right-0 px-5 md:px-10 text-paper font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
-        <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
+      {/* Eyebrow */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute top-24 md:top-32 left-0 right-0 px-5 md:px-10 text-paper/80"
+      >
+        <div className="flex items-center gap-3 text-[11px] md:text-xs tracking-[0.22em] uppercase font-medium">
+          <span className="h-px w-8 bg-paper/60" />
+          <span>Planet Baltimore · Est. 2024</span>
+        </div>
+      </motion.div>
+
+      {/* Headline + sub + CTAs */}
+      <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10 text-paper">
+        <div className="font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
+          <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
+        >
+          <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed">
+            A home for the creators, organizers, and neighbors building the city — together.
+          </p>
+
+          <div className="hidden md:flex items-center gap-3">
+            <Magnetic>
+              <Link
+                to="/auth"
+                className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-6 pr-2 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors"
+              >
+                <span>Get Started</span>
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper group-hover:bg-paper group-hover:text-ink transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </span>
+              </Link>
+            </Magnetic>
+            <Link to="/about" className="text-sm text-paper/80 hover:text-paper underline-offset-4 hover:underline transition-colors">Learn more →</Link>
+          </div>
+        </motion.div>
+
+        {/* Mobile CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-6 md:hidden"
+        >
+          <Link
+            to="/auth"
+            className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-5 pr-1.5 py-1.5 text-sm font-medium"
+          >
+            <span>Get Started</span>
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+          </Link>
+        </motion.div>
       </div>
 
-      {/* Mobile-only inline CTA so visitors aren't fishing for the hamburger */}
-      <div className="absolute bottom-6 left-0 right-0 px-5 md:hidden flex items-center justify-center">
-        <Link to="/auth" className="inline-flex justify-center rounded-full bg-paper text-ink px-6 py-3 text-sm font-medium">Get Started</Link>
-      </div>
-
+      {/* Scroll cue */}
+      <motion.div
+        aria-hidden
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1 }}
+        className="hidden md:flex absolute top-1/2 right-6 -translate-y-1/2 flex-col items-center gap-3 text-paper/60"
+      >
+        <span className="text-[10px] tracking-[0.3em] uppercase [writing-mode:vertical-rl]">Scroll</span>
+        <motion.span
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          className="block w-px h-10 bg-paper/40"
+        />
+      </motion.div>
     </section>
   );
 }
