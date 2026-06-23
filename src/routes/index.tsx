@@ -422,7 +422,7 @@ function CreatorsFans() {
         className="absolute inset-0 w-full h-full object-cover"
       />
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-blue-deep/60" />
 
       <div className="relative mx-auto max-w-[1400px]">
         <ScrollHeadline
