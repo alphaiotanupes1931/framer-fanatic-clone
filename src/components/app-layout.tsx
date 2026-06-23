@@ -339,7 +339,7 @@ function NotificationsBell() {
       <PopoverTrigger asChild>
         <button
           aria-label="Notifications"
-          className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-600 transition hover:border-orange hover:text-orange"
+          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 transition hover:bg-neutral-100 hover:text-orange md:h-10 md:w-10 md:border md:border-neutral-200 md:bg-white md:text-neutral-600"
         >
           <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
           {items.length > 0 && (
