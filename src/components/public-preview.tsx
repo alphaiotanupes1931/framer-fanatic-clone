@@ -29,10 +29,10 @@ export function PublicShell({
   return (
     <div className="min-h-screen bg-ink text-paper">
       <header className="border-b border-paper/10 sticky top-0 z-40 bg-ink/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={pbLogo} alt="Planet Baltimore" className="w-8 h-8 invert" />
-            <span className="font-display text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 min-w-0">
+            <img src={pbLogo} alt="Planet Baltimore" className="w-8 h-8 invert shrink-0" />
+            <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase truncate hidden sm:inline">Planet Baltimore</span>
           </Link>
           <nav className="hidden md:flex items-center gap-5 text-sm text-paper/80">
             <Link to="/events" className="hover:text-paper">Events</Link>
@@ -41,21 +41,21 @@ export function PublicShell({
             <Link to="/videos" className="hover:text-paper">Videos</Link>
             <Link to="/leaderboard" className="hover:text-paper">Baltimore 100</Link>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {signedIn ? (
-              <Link to="/dashboard" className="rounded-full bg-paper text-ink px-4 py-2 text-sm font-medium">Dashboard</Link>
+              <Link to="/dashboard" className="rounded-full bg-paper text-ink px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium">Dashboard</Link>
             ) : (
               <>
-                <Link to="/auth" className="rounded-full border border-paper/40 px-4 py-2 text-sm">Log in</Link>
-                <Link to="/auth" className="rounded-full bg-paper text-ink px-4 py-2 text-sm font-medium">Sign up</Link>
+                <Link to="/auth" className="rounded-full border border-paper/40 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm">Log in</Link>
+                <Link to="/auth" className="rounded-full bg-paper text-ink px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium">Sign up</Link>
               </>
             )}
           </div>
         </div>
       </header>
-      <section className="max-w-6xl mx-auto px-6 pt-12 pb-6">
-        <h1 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-3 text-paper/70 max-w-2xl">{subtitle}</p>}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6">
+        <h1 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight">{title}</h1>
+        {subtitle && <p className="mt-2 sm:mt-3 text-paper/70 max-w-2xl text-sm sm:text-base">{subtitle}</p>}
       </section>
       <section className="max-w-6xl mx-auto px-6 pb-24">{children}</section>
     </div>
