@@ -204,9 +204,8 @@ function Hero() {
       </div>
 
       {/* Mobile-only inline CTA so visitors aren't fishing for the hamburger */}
-      <div className="absolute bottom-6 left-0 right-0 px-5 md:hidden flex items-center gap-3">
-        <Link to="/auth" className="flex-1 inline-flex justify-center rounded-full bg-paper text-ink px-5 py-3 text-sm font-medium">Get Started</Link>
-        <Link to="/leaderboard" className="flex-1 inline-flex justify-center rounded-full border border-paper/80 text-paper px-5 py-3 text-sm font-medium">Baltimore 100</Link>
+      <div className="absolute bottom-6 left-0 right-0 px-5 md:hidden flex items-center justify-center">
+        <Link to="/auth" className="inline-flex justify-center rounded-full bg-paper text-ink px-6 py-3 text-sm font-medium">Get Started</Link>
       </div>
 
     </section>
