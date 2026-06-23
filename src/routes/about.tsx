@@ -48,7 +48,7 @@ function AboutNav() {
         </Link>
         <nav className="hidden md:flex items-center gap-3 text-sm font-medium">
           <Link to="/" className="rounded-full px-4 py-2 hover:bg-ink/5 transition-colors">Home</Link>
-          <Link to="/artists" className="rounded-full px-4 py-2 hover:bg-ink/5 transition-colors">Find a Creator</Link>
+          <Link to="/leaderboard" className="rounded-full px-4 py-2 hover:bg-ink/5 transition-colors">Baltimore 100</Link>
           <Link to="/about" className="rounded-full px-4 py-2 bg-ink/5">About</Link>
           {signedIn ? (
             <Link to="/dashboard" className="rounded-full bg-ink text-paper px-5 py-2 hover:bg-orange transition-colors">Dashboard</Link>
@@ -77,7 +77,7 @@ function AboutNav() {
         </div>
         <nav className="px-6 mt-16 flex flex-col gap-6 font-display text-4xl tracking-[-0.04em]">
           <Link to="/" onClick={() => setOpen(false)} className="hover:text-blue transition-colors">Home</Link>
-          <Link to="/artists" onClick={() => setOpen(false)} className="hover:text-blue transition-colors">Find a Creator</Link>
+          <Link to="/leaderboard" onClick={() => setOpen(false)} className="hover:text-blue transition-colors">Baltimore 100</Link>
           <Link to="/about" onClick={() => setOpen(false)} className="hover:text-blue transition-colors">About</Link>
           <Link to={signedIn ? "/dashboard" : "/auth"} onClick={() => setOpen(false)} className="hover:text-blue transition-colors">{signedIn ? "Dashboard" : "Log in"}</Link>
         </nav>
