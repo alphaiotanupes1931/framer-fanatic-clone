@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
-  Compass, Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
+  Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
   Plus, Sparkles, ChevronLeft, X,
 } from "lucide-react";
