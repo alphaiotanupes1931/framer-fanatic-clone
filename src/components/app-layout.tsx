@@ -26,6 +26,8 @@ export type Profile = {
   banner_url: string | null;
 };
 
+const HOME = { to: "/dashboard", icon: Home, label: "Home" } as const;
+
 const NAV = [
   { section: "Explore", items: [
     { to: "/search", icon: Search, label: "Search" },
