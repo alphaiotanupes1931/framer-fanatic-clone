@@ -358,9 +358,9 @@ export function AppLayout({
       <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-neutral-100 bg-white py-2 md:hidden">
         {[
           { to: "/dashboard", icon: Home, label: "Home" },
-          { to: "/search", icon: Search, label: "Search" },
           { to: "/events", icon: Ticket, label: "Events" },
           { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
+          { to: "/leaderboard", icon: Trophy, label: "Top 100" },
           { to: "/profile", icon: User, label: "Me" },
         ].map((t) => {
           const active = pathname === t.to;
