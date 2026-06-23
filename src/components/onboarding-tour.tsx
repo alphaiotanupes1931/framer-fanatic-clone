@@ -3,6 +3,7 @@ import { Joyride, EVENTS, STATUS, type EventData, type Step } from "react-joyrid
 import { HelpCircle } from "lucide-react";
 
 const STORAGE_KEY = "pb_onboarding_tour_v1";
+const SIGNUP_FLAG = "pb_new_signup";
 
 const STEPS: Step[] = [
   {
@@ -76,18 +77,42 @@ const STEPS: Step[] = [
 
 export function OnboardingTour() {
   const [run, setRun] = useState(false);
+  const [steps, setSteps] = useState<Step[]>(STEPS);
+
+  const buildVisibleSteps = (): Step[] => {
+    if (typeof document === "undefined") return STEPS;
+    return STEPS.filter((s) => {
+      const t = s.target;
+      if (typeof t !== "string") return true;
+      if (t === "body") return true;
+      return !!document.querySelector(t);
+    });
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      const t = setTimeout(() => setRun(true), 600);
+    // Only auto-run for users who JUST signed up. Anyone else can replay
+    // via the help button in the bottom corner.
+    const justSignedUp = localStorage.getItem(SIGNUP_FLAG) === "1";
+    const alreadySeen = localStorage.getItem(STORAGE_KEY) === "1";
+    if (justSignedUp && !alreadySeen) {
+      const t = setTimeout(() => {
+        setSteps(buildVisibleSteps());
+        setRun(true);
+      }, 800);
       return () => clearTimeout(t);
     }
+    // Existing users who never logged in before this change: silently mark
+    // the tour as seen so it never auto-pops again.
+    if (!alreadySeen) localStorage.setItem(STORAGE_KEY, "1");
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    (window as any).__pbStartTour = () => setRun(true);
+    (window as any).__pbStartTour = () => {
+      setSteps(buildVisibleSteps());
+      setRun(true);
+    };
   }, []);
 
   const handleEvent = (data: EventData) => {
@@ -95,6 +120,7 @@ export function OnboardingTour() {
       const s = data.status;
       if (s === STATUS.FINISHED || s === STATUS.SKIPPED) {
         localStorage.setItem(STORAGE_KEY, "1");
+        try { localStorage.removeItem(SIGNUP_FLAG); } catch { /* ignore */ }
         setRun(false);
       }
     }
@@ -103,17 +129,19 @@ export function OnboardingTour() {
   return (
     <>
       <Joyride
-        steps={STEPS}
+        steps={steps}
         run={run}
         continuous
         scrollToFirstStep
+        disableScrolling={false}
         onEvent={handleEvent}
         options={{ showProgress: true, skipBeacon: true, zIndex: 10000, primaryColor: "#FF6A1A", textColor: "#0a0a0a", closeButtonAction: "skip", dismissKeyAction: false, overlayClickAction: false }}
         locale={{ last: "Done", skip: "Skip tour" }}
         styles={{
-          tooltip: { borderRadius: 14, padding: 18 },
-          tooltipTitle: { fontSize: 15, fontWeight: 600 },
-          tooltipContent: { fontSize: 13, lineHeight: 1.5 },
+          tooltip: { borderRadius: 14, padding: 16, maxWidth: "calc(100vw - 32px)", width: 320 },
+          tooltipContainer: { textAlign: "left" },
+          tooltipTitle: { fontSize: 15, fontWeight: 600, marginBottom: 6 },
+          tooltipContent: { fontSize: 13, lineHeight: 1.5, padding: 0 },
           buttonPrimary: { borderRadius: 999, padding: "8px 14px", fontSize: 13 },
           buttonBack: { color: "#6b6b6b", fontSize: 13 },
           buttonSkip: { color: "#9a9a9a", fontSize: 12 },
