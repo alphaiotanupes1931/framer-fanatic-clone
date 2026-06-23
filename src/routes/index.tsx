@@ -414,6 +414,11 @@ function CreatorsFans() {
       id="creators"
       className="relative overflow-hidden bg-black px-5 md:px-10 py-20 md:py-24"
     >
+      {/* Subtle glow behind content */}
+      <div
+        aria-hidden
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] max-w-[1200px] aspect-[16/10] bg-blue/[0.04] rounded-full blur-[120px] pointer-events-none"
+      />
 
       <div className="relative mx-auto max-w-[1400px]">
         <ScrollHeadline
