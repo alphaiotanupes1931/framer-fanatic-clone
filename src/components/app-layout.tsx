@@ -5,7 +5,7 @@ import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
   Ticket, Users, MessageSquare, MapPin, Bell, User, Search,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, ChevronLeft, X, Menu,
+  Plus, Sparkles, ChevronLeft, X, Menu, Shield,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +13,7 @@ import { Globe } from "@/components/globe";
 import { motion } from "motion/react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OnboardingTour } from "@/components/onboarding-tour";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export type Profile = {
   id: string;
@@ -89,6 +90,20 @@ export function AppLayout({
   const profile = useCurrentProfile();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { isAdmin } = useUserRole();
+
+  // Heartbeat: ping last_seen_at so admins can see who is live.
+  useEffect(() => {
+    let active = true;
+    const ping = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session || !active) return;
+      await supabase.rpc("touch_last_seen");
+    };
+    void ping();
+    const t = setInterval(ping, 60_000);
+    return () => { active = false; clearInterval(t); };
+  }, []);
 
   useEffect(() => { setMobileNavOpen(false); }, [pathname]);
 
