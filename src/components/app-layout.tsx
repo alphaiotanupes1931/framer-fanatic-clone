@@ -27,21 +27,28 @@ export type Profile = {
 };
 
 const NAV = [
-  { to: "/dashboard", icon: Home, label: "Home" },
-  { to: "/search", icon: Search, label: "Search" },
-  { to: "/events", icon: Ticket, label: "Events" },
-  { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
-  { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
-  { to: "/artists", icon: Palette, label: "Artists" },
-  { to: "/arts-orgs", icon: Landmark, label: "Arts Orgs" },
-  { to: "/businesses", icon: Building2, label: "Businesses" },
-  { to: "/community-associations", icon: ShieldCheck, label: "Community Associations" },
-  { to: "/groups", icon: Users, label: "Groups/Communities" },
-  { to: "/stories", icon: BookOpen, label: "Stories" },
-  { to: "/videos", icon: VideoIcon, label: "Videos" },
-  { to: "/leaderboard", icon: Trophy, label: "Baltimore 100" },
-  { to: "/profile", icon: User, label: "Profile" },
-  { to: "/settings", icon: SettingsIcon, label: "Settings" },
+  { section: "Explore", items: [
+    { to: "/search", icon: Search, label: "Search" },
+    { to: "/events", icon: Ticket, label: "Events" },
+    { to: "/calendar", icon: CalendarIcon, label: "Calendar" },
+    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods" },
+  ]},
+  { section: "Community", items: [
+    { to: "/artists", icon: Palette, label: "Artists" },
+    { to: "/arts-orgs", icon: Landmark, label: "Arts Orgs" },
+    { to: "/businesses", icon: Building2, label: "Businesses" },
+    { to: "/community-associations", icon: ShieldCheck, label: "Community Associations" },
+    { to: "/groups", icon: Users, label: "Groups" },
+  ]},
+  { section: "Content", items: [
+    { to: "/stories", icon: BookOpen, label: "Stories" },
+    { to: "/videos", icon: VideoIcon, label: "Videos" },
+    { to: "/leaderboard", icon: Trophy, label: "Baltimore 100" },
+  ]},
+  { section: "Account", items: [
+    { to: "/profile", icon: User, label: "Profile" },
+    { to: "/settings", icon: SettingsIcon, label: "Settings" },
+  ]},
 ] as const;
 
 export function useCurrentProfile() {
