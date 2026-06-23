@@ -208,6 +208,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned: boolean
           banner_url: string | null
           bio: string | null
           city: string | null
@@ -219,6 +220,7 @@ export type Database = {
           id: string
           in_baltimore: boolean
           is_baltimore_verified: boolean
+          last_seen_at: string | null
           latitude: number | null
           longitude: number | null
           neighborhood: string | null
@@ -233,6 +235,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          banned?: boolean
           banner_url?: string | null
           bio?: string | null
           city?: string | null
@@ -244,6 +247,7 @@ export type Database = {
           id: string
           in_baltimore?: boolean
           is_baltimore_verified?: boolean
+          last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
           neighborhood?: string | null
@@ -258,6 +262,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          banned?: boolean
           banner_url?: string | null
           bio?: string | null
           city?: string | null
@@ -269,6 +274,7 @@ export type Database = {
           id?: string
           in_baltimore?: boolean
           is_baltimore_verified?: boolean
+          last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
           neighborhood?: string | null
@@ -443,6 +449,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          banned: boolean
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          in_baltimore: boolean
+          is_admin: boolean
+          last_seen_at: string
+          neighborhood: string
+          role: string
+          username: string
+        }[]
+      }
+      admin_set_banned: {
+        Args: { _banned: boolean; _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -463,6 +490,7 @@ export type Database = {
           username: string
         }[]
       }
+      touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "attendee" | "artist" | "admin"
