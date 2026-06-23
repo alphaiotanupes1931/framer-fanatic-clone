@@ -114,7 +114,7 @@ export function OnboardingTour() {
           tooltip: { borderRadius: 14, padding: 18 },
           tooltipTitle: { fontSize: 15, fontWeight: 600 },
           tooltipContent: { fontSize: 13, lineHeight: 1.5 },
-          buttonNext: { borderRadius: 999, padding: "8px 14px", fontSize: 13 },
+          buttonPrimary: { borderRadius: 999, padding: "8px 14px", fontSize: 13 },
           buttonBack: { color: "#6b6b6b", fontSize: 13 },
           buttonSkip: { color: "#9a9a9a", fontSize: 12 },
         }}
