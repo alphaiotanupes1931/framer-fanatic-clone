@@ -201,15 +201,21 @@ export const becomeArtist = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: profile } = await supabase
       .from("profiles")
-      .select("is_baltimore_verified, geo_lat, geo_lng")
+      .select("in_baltimore, latitude, longitude, is_baltimore_verified, geo_lat, geo_lng")
       .eq("id", userId)
       .maybeSingle();
 
     // Treat any user with a captured Baltimore-area lat/lng as verified.
-    const lat = profile?.geo_lat ?? null;
-    const lng = profile?.geo_lng ?? null;
+    const lat = (profile as { latitude?: number | null; geo_lat?: number | null } | null)?.latitude
+      ?? (profile as { geo_lat?: number | null } | null)?.geo_lat
+      ?? null;
+    const lng = (profile as { longitude?: number | null; geo_lng?: number | null } | null)?.longitude
+      ?? (profile as { geo_lng?: number | null } | null)?.geo_lng
+      ?? null;
+    const inBaltimoreFlag = (profile as { in_baltimore?: boolean; is_baltimore_verified?: boolean } | null)?.in_baltimore
+      || (profile as { is_baltimore_verified?: boolean } | null)?.is_baltimore_verified;
     const inBaltimore =
-      profile?.is_baltimore_verified === true ||
+      inBaltimoreFlag === true ||
       (lat != null && lng != null && lat >= 39.2 && lat <= 39.38 && lng >= -76.72 && lng <= -76.52);
 
     if (!inBaltimore) {
