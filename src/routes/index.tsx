@@ -420,6 +420,8 @@ function TiltCard({ index, img, title, body }: { index: number; img: string; tit
   const ry = useMotionValue(0);
   const sx = useSpring(rx, { stiffness: 200, damping: 18 });
   const sy = useSpring(ry, { stiffness: 200, damping: 18 });
+  const gx = useMotionValue(50);
+  const gy = useMotionValue(50);
 
   function onMove(e: React.MouseEvent<HTMLDivElement>) {
     const r = e.currentTarget.getBoundingClientRect();
@@ -427,6 +429,8 @@ function TiltCard({ index, img, title, body }: { index: number; img: string; tit
     const py = (e.clientY - r.top) / r.height - 0.5;
     ry.set(px * 12);
     rx.set(-py * 12);
+    gx.set(((e.clientX - r.left) / r.width) * 100);
+    gy.set(((e.clientY - r.top) / r.height) * 100);
   }
   function onLeave() { rx.set(0); ry.set(0); }
 
@@ -439,8 +443,18 @@ function TiltCard({ index, img, title, body }: { index: number; img: string; tit
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       style={{ rotateX: sx, rotateY: sy, transformPerspective: 1000 }}
-      className="group rounded-3xl bg-ink text-paper overflow-hidden will-change-transform"
+      className="group relative rounded-3xl bg-ink text-paper overflow-hidden will-change-transform"
     >
+      {/* Cursor-follow spotlight */}
+      <motion.div
+        aria-hidden
+        style={{
+          background: useTransform([gx, gy], ([x, y]) =>
+            `radial-gradient(420px circle at ${x}% ${y}%, rgba(255,255,255,0.18), transparent 55%)`
+          ),
+        }}
+        className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
       <div className="aspect-[4/5] overflow-hidden">
         <motion.img
           src={img}
