@@ -13,7 +13,7 @@ export const Route = createFileRoute("/about")({
       { title: "About Planet Baltimore" },
       { name: "description", content: "Planet Baltimore is a platform built so Baltimore artists, makers, and organizers have a home of their own." },
       { property: "og:title", content: "About Planet Baltimore" },
-      { property: "og:description", content: "A platform built by Baltimore, for the people making it." },
+      { property: "og:description", content: "A platform for Baltimore artists, makers, and organizers." },
       { property: "og:image", content: aboutFounders.url },
     ],
   }),
@@ -92,23 +92,14 @@ function Hero() {
       <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-10 md:pt-28 pb-6 md:pb-16">
         <div className="grid gap-8 md:grid-cols-2 md:items-center md:gap-16">
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-ink/15 px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink/70"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-orange" />
-              About Planet Baltimore
-            </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
             >
-              A platform built by Baltimore,
-              <span className="block italic text-ink/55">for the people making it.</span>
+              A platform for Baltimore's
+              <span className="block italic text-ink/55">artists and makers.</span>
             </motion.h1>
           </div>
 
@@ -136,20 +127,6 @@ function Story() {
       <div className="mx-auto grid max-w-[1100px] gap-12 md:grid-cols-[1fr_1.4fr] md:gap-20">
         <div>
           <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">Our Story</h2>
-          <div className="mt-6 grid grid-cols-3 gap-4 max-w-md text-[11px] uppercase tracking-[0.18em] text-ink/55">
-            <div>
-              <div className="font-display text-xl font-semibold normal-case tracking-tight text-ink">100%</div>
-              <div className="mt-1">Baltimore based</div>
-            </div>
-            <div>
-              <div className="font-display text-xl font-semibold normal-case tracking-tight text-ink">0%</div>
-              <div className="mt-1">Middlemen</div>
-            </div>
-            <div>
-              <div className="font-display text-xl font-semibold normal-case tracking-tight text-ink">1</div>
-              <div className="mt-1">City, one home</div>
-            </div>
-          </div>
         </div>
         <div className="space-y-6 text-[16px] leading-[1.75] text-ink/80 md:text-[17.5px]">
           <p>
@@ -159,10 +136,10 @@ function Story() {
             organizers shaping this city block by block.
           </p>
           <p>
-            Baltimore is creativity. It always has been. From the murals in Station North to the
+            Baltimore runs on creativity. From the murals in Station North to the
             line cooks in Hampden, the harbor stages and the basement shows, the Sunday cookouts
-            and the Saturday markets, this city runs on people who make things. We built Planet
-            Baltimore so those people can find each other, hire each other, support each other,
+            and the Saturday markets, this city is made by people who make things. Planet
+            Baltimore exists so those people can find each other, hire each other, support each other,
             and get paid without a middleman taking the cut.
           </p>
           <p>
@@ -180,7 +157,7 @@ function CTA() {
     <section className="bg-ink text-paper px-5 md:px-10 py-20 md:py-28">
       <div className="mx-auto max-w-[1100px] text-center">
         <h2 className="font-display text-[clamp(2.25rem,7vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">
-          Join the platform Baltimore built.
+          Join the platform built for Baltimore.
         </h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/auth" className="inline-flex rounded-full bg-paper text-ink px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-orange hover:text-paper transition-colors">
