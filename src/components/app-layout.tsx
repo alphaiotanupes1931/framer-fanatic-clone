@@ -148,6 +148,7 @@ export function AppLayout({
             <nav className="flex-1 space-y-4 overflow-y-auto pr-1">
               <Link
                 to={HOME.to}
+                data-tour={HOME.tour}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition ${
                   pathname === HOME.to ? "bg-orange text-white" : "text-neutral-700 hover:bg-neutral-100"
                 }`}
@@ -167,6 +168,7 @@ export function AppLayout({
                         <Link
                           key={item.to}
                           to={item.to}
+                          data-tour={(item as { tour?: string }).tour}
                           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition ${
                             active ? "bg-orange text-white" : "text-neutral-700 hover:bg-neutral-100"
                           }`}
@@ -200,6 +202,7 @@ export function AppLayout({
             <Link
               key={HOME.to}
               to={HOME.to}
+              data-tour={HOME.tour}
               className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
                 pathname === HOME.to
                   ? "bg-orange text-white"
@@ -223,6 +226,7 @@ export function AppLayout({
                       <Link
                         key={item.to}
                         to={item.to}
+                        data-tour={(item as { tour?: string }).tour}
                         className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
                           active
                             ? "bg-orange text-white"
@@ -332,6 +336,7 @@ export function AppLayout({
         })}
       </nav>
       <MessageBubble />
+      <OnboardingTour />
     </div>
   );
 }
@@ -343,6 +348,7 @@ function NotificationsBell() {
       <PopoverTrigger asChild>
         <button
           aria-label="Notifications"
+          data-tour="notifications"
           className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 transition hover:bg-neutral-100 hover:text-orange md:h-10 md:w-10 md:border md:border-neutral-200 md:bg-white md:text-neutral-600"
         >
           <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
