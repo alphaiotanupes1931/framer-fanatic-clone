@@ -110,7 +110,7 @@ export function AppLayout({
           <span className="text-[12px] font-semibold uppercase tracking-[0.14em]">Planet Baltimore</span>
         </Link>
         <div className="justify-self-end">
-          <NotificationsBell compact />
+          <NotificationsBell />
         </div>
       </header>
 
