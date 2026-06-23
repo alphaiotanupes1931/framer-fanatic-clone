@@ -138,6 +138,7 @@ function Nav() {
         {/* Desktop left nav */}
         <nav className="hidden md:flex items-center gap-6 text-base font-medium">
           <Link to="/artists" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">Find a Creator</Link>
+          <Link to="/about" className="rounded-full border border-paper/70 px-5 py-2 text-sm hover:bg-paper hover:text-ink transition-colors">About</Link>
         </nav>
 
         {/* Mobile/tablet logo (left-aligned) */}
@@ -221,6 +222,7 @@ function Nav() {
         <nav className="px-6 mt-16 flex flex-col gap-6 font-display text-4xl tracking-[-0.04em]">
           {[
             { href: "/artists", label: "Find a Creator" },
+            { href: "/about", label: "About" },
             { href: signedIn ? "/dashboard" : "/auth", label: signedIn ? "Dashboard" : "Log in" },
           ].map((l) => (
             <a key={l.label} href={l.href} onClick={() => setOpen(false)} className="hover:text-blue transition-colors">{l.label}</a>
