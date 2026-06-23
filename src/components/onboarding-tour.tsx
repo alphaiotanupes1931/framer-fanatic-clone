@@ -108,7 +108,7 @@ export function OnboardingTour() {
         continuous
         scrollToFirstStep
         onEvent={handleEvent}
-        options={{ showProgress: true, skipBeacon: true, zIndex: 10000, primaryColor: "#FF6A1A", textColor: "#0a0a0a" }}
+        options={{ showProgress: true, skipBeacon: true, zIndex: 10000, primaryColor: "#FF6A1A", textColor: "#0a0a0a", closeButtonAction: "skip", dismissKeyAction: false, overlayClickAction: false }}
         locale={{ last: "Done", skip: "Skip tour" }}
         styles={{
           tooltip: { borderRadius: 14, padding: 18 },
