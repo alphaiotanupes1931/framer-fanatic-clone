@@ -460,61 +460,56 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-black px-5 md:px-10 py-20 md:py-24"
+      className="relative overflow-hidden bg-blue-deep px-5 md:px-10 py-24 md:py-36"
     >
-      {/* Subtle glow behind content */}
+      {/* Ambient glow */}
       <div
         aria-hidden
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] max-w-[1200px] aspect-[16/10] bg-blue/[0.04] rounded-full blur-[120px] pointer-events-none"
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] max-w-[1200px] aspect-[16/10] bg-paper/[0.06] rounded-full blur-[140px] pointer-events-none"
       />
+      {/* Top hairline to bridge from hero */}
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
 
-      <div className="relative mx-auto max-w-[1400px]">
+      <div className="relative mx-auto max-w-[1280px]">
         <ScrollHeadline
           lines={["Turning passions", "into communities"]}
-          className="font-display text-paper font-medium text-[clamp(2.5rem,10vw,11rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center"
+          className="font-display text-paper font-medium text-[clamp(2.5rem,9vw,9rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
         />
 
-        <div className="mt-10 md:mt-14">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="grid sm:grid-cols-2 gap-12 sm:gap-10 lg:gap-12"
-          >
-            <div className="space-y-4 md:space-y-5">
-              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-paper tracking-tight">Build Your Community</h3>
-              <p className="text-paper/85 text-[15px] md:text-lg leading-relaxed">
-                Connect directly with Baltimore. No algorithms. No middlemen. Just you and the people who support what you do.
-              </p>
-              <motion.a
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-14 md:mt-20 grid sm:grid-cols-2 gap-4 md:gap-5"
+        >
+          {[
+            { t: "Build Your Community", b: "Connect directly with Baltimore. No algorithms. No middlemen. Just you and the people who support what you do.", cta: "Start Building", primary: true },
+            { t: "Everything in One Place", b: "Artists, businesses, neighborhoods, events. Follow what moves you. Support what matters. All of Baltimore, together.", cta: "Explore", primary: false },
+          ].map((c) => (
+            <div
+              key={c.t}
+              className="group relative rounded-3xl border border-paper/10 bg-paper/[0.03] backdrop-blur-sm p-8 md:p-10 hover:border-paper/25 hover:bg-paper/[0.05] transition-colors"
+            >
+              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight">{c.t}</h3>
+              <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md">{c.b}</p>
+              <a
                 href="#"
-                className="inline-flex rounded-full bg-paper text-ink px-6 py-3.5 md:px-7 md:py-4 text-sm md:text-base font-medium hover:bg-ink hover:text-paper transition-colors"
+                className={
+                  "mt-8 inline-flex items-center gap-2 rounded-full pl-5 pr-1.5 py-1.5 text-sm font-medium transition-colors " +
+                  (c.primary
+                    ? "bg-paper text-ink hover:bg-ink hover:text-paper"
+                    : "border border-paper/30 text-paper hover:bg-paper hover:text-ink")
+                }
               >
-                Start Building
-              </motion.a>
+                <span>{c.cta}</span>
+                <span className={"inline-flex items-center justify-center w-7 h-7 rounded-full " + (c.primary ? "bg-ink text-paper" : "bg-paper/10 text-paper group-hover:bg-ink group-hover:text-paper")}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </span>
+              </a>
             </div>
-
-            <div className="space-y-4 md:space-y-5">
-              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-paper tracking-tight">Everything in One Place</h3>
-              <p className="text-paper/85 text-[15px] md:text-lg leading-relaxed">
-                Artists, businesses, neighborhoods, events. Follow what moves you. Support what matters. All of Baltimore, together.
-              </p>
-              <motion.a
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                href="#"
-                className="inline-flex rounded-full border border-paper/80 text-paper px-6 py-3.5 md:px-7 md:py-4 text-sm md:text-base font-medium hover:bg-paper hover:text-ink transition-colors"
-              >
-                Explore
-              </motion.a>
-            </div>
-          </motion.div>
-        </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
@@ -529,19 +524,19 @@ function Features() {
     { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay },
   ];
   return (
-    <section id="features" className="bg-blue px-5 md:px-10 py-16 md:py-24">
-      <div className="mx-auto max-w-[1400px]">
+    <section id="features" className="relative bg-blue px-5 md:px-10 py-24 md:py-32">
+      <div className="mx-auto max-w-[1280px]">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="font-display text-ink font-medium text-[clamp(2.25rem,7vw,7rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] max-w-5xl"
+          className="font-display text-ink font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] max-w-5xl"
         >
           Baltimore, fully connected.
         </motion.h2>
 
-        <div className="mt-10 md:mt-20 grid md:grid-cols-3 gap-5 md:gap-6">
+        <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5">
           {items.map((it, i) => (
             <TiltCard key={i} index={i} img={it.img} title={it.title} body={it.body} />
           ))}
@@ -554,21 +549,28 @@ function Features() {
 
 function CTA() {
   return (
-    <section className="bg-blue px-5 md:px-10 py-20 md:py-24">
+    <section className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-ink/10" />
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.9 }}
-        className="mx-auto max-w-[1400px] text-center"
+        className="mx-auto max-w-[1280px] text-center"
       >
-        <h2 className="font-display text-ink font-medium text-[clamp(2.75rem,10vw,10rem)] leading-[0.92] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.05em]">
+        <h2 className="font-display text-ink font-medium text-[clamp(2.5rem,9vw,9rem)] leading-[0.92] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.05em]">
           Start free.<br />Get paid tomorrow.
         </h2>
-        <div className="mt-10 md:mt-12 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:justify-center">
+        <div className="mt-10 md:mt-14 flex justify-center">
           <Magnetic className="sm:inline-flex">
-            <Link to="/auth" className="inline-flex w-full sm:w-auto justify-center rounded-full bg-ink text-paper px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base font-medium shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.45)] hover:bg-paper hover:text-ink transition-all">
-              Get Started
+            <Link
+              to="/auth"
+              className="group inline-flex items-center gap-2 rounded-full bg-ink text-paper pl-7 pr-2 py-2 text-sm md:text-base font-medium shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.45)] hover:bg-paper hover:text-ink transition-all"
+            >
+              <span>Get Started</span>
+              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-paper text-ink group-hover:bg-ink group-hover:text-paper transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </span>
             </Link>
           </Magnetic>
         </div>
