@@ -56,9 +56,15 @@ function Dashboard() {
         setMe(data.session.user.id);
         const { data: prof } = await supabase
           .from("profiles")
-          .select("display_name, avatar_url")
+          .select("display_name, avatar_url, banned")
           .eq("id", data.session.user.id)
           .maybeSingle();
+        if (prof && (prof as { banned?: boolean }).banned) {
+          await supabase.auth.signOut();
+          toast.error("Your account has been suspended.");
+          navigate({ to: "/auth" });
+          return;
+        }
         if (prof) setMyProfile(prof as typeof myProfile);
         await load();
       }
