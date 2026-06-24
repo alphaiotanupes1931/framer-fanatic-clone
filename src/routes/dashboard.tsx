@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -92,6 +92,7 @@ function Dashboard() {
       title="Home"
       subtitle="What's moving in Baltimore right now."
     >
+      <ShareAppButton />
       <div className="mx-auto max-w-2xl">
         <CreatorSearch />
         <DiscoverStrip />
@@ -229,6 +230,24 @@ function Dashboard() {
 
 function DiscoverStrip() {
   return _DiscoverStripImpl();
+}
+
+function ShareAppButton() {
+  return (
+    <button
+      onClick={async () => {
+        const url = `${window.location.origin}/`;
+        try {
+          if (navigator.share) await navigator.share({ title: "Planet Baltimore", text: "Join me on Planet Baltimore", url });
+          else { await navigator.clipboard.writeText(url); toast.success("Invite link copied"); }
+        } catch { /* cancelled */ }
+      }}
+      className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-orange-700"
+      aria-label="Share Planet Baltimore"
+    >
+      <LinkIcon className="h-4 w-4" /> Share
+    </button>
+  );
 }
 
 type CreatorRow = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null };

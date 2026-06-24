@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Camera, Upload } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
+import { CREATOR_CATEGORIES } from "@/lib/categories";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
@@ -29,6 +30,7 @@ function Onboarding() {
   const [busy, setBusy] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
   const [neighborhood, setNeighborhood] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,6 +68,9 @@ function Onboarding() {
     if (!neighborhood) {
       return toast.error("Please choose your neighborhood.");
     }
+    if (!category) {
+      return toast.error("Please choose what best describes you.");
+    }
     setBusy(true);
     try {
       let avatar_url: string | null = null;
@@ -77,7 +82,7 @@ function Onboarding() {
       avatar_url = signed?.signedUrl ?? null;
       const { error } = await supabase
         .from("profiles")
-        .update({ avatar_url, neighborhood, onboarded: true })
+        .update({ avatar_url, neighborhood, category, onboarded: true })
         .eq("id", userId);
       if (error) throw error;
       navigate({ to: "/dashboard" });
@@ -146,10 +151,24 @@ function Onboarding() {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">What best describes you?</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Choose a category" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {CREATOR_CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-neutral-500">This shapes your public profile (Gallery, Episodes, Tracks…).</p>
+          </div>
           <div className="flex flex-col gap-2">
             <Button
               onClick={() => finish()}
-              disabled={busy || !file || !neighborhood}
+              disabled={busy || !file || !neighborhood || !category}
               className="w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               {busy ? "Saving…" : "Continue"}

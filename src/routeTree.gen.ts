@@ -30,6 +30,7 @@ import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const VideosRoute = VideosRouteImport.update({
@@ -137,6 +138,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OSlugRoute = OSlugRouteImport.update({
+  id: '/o/$slug',
+  path: '/o/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
   '/videos': typeof VideosRoute
+  '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
   '/videos': typeof VideosRoute
+  '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
   '/videos': typeof VideosRoute
+  '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stories'
     | '/videos'
+    | '/o/$slug'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stories'
     | '/videos'
+    | '/o/$slug'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -288,6 +299,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stories'
     | '/videos'
+    | '/o/$slug'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StoriesRoute: typeof StoriesRoute
   VideosRoute: typeof VideosRoute
+  OSlugRoute: typeof OSlugRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -465,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$slug': {
+      id: '/o/$slug'
+      path: '/o/$slug'
+      fullPath: '/o/$slug'
+      preLoaderRoute: typeof OSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -497,18 +517,9 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StoriesRoute: StoriesRoute,
   VideosRoute: VideosRoute,
+  OSlugRoute: OSlugRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
