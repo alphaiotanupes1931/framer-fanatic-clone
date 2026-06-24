@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, Plus, Search, Send, Users } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArrowLeft, MessageSquare, Plus, Search, Send, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/messages")({
@@ -11,12 +11,47 @@ export const Route = createFileRoute("/messages")({
   head: () => ({ meta: [{ title: "Messages - Planet Baltimore" }] }),
 });
 
-type Conv = {
-  id: string; user_a: string; user_b: string; last_message_at: string;
-  other?: { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
-  preview?: string;
+type Profile = {
+  id: string;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
 };
-type Msg = { id: string; sender_id: string; content: string; created_at: string };
+
+type Conv = {
+  id: string;
+  user_a: string;
+  user_b: string;
+  last_message_at: string;
+  last_message_preview: string | null;
+  last_read_at_a: string;
+  last_read_at_b: string;
+  other?: Profile;
+  unread?: boolean;
+};
+
+type Msg = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+};
+
+function initials(p?: Profile | null) {
+  const s = p?.display_name || p?.username || "U";
+  return s.trim()[0]?.toUpperCase() || "U";
+}
+
+function formatWhen(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  if (sameDay) return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const yest = new Date(now); yest.setDate(now.getDate() - 1);
+  if (d.toDateString() === yest.toDateString()) return "Yesterday";
+  return d.toLocaleDateString();
+}
 
 function MessagesPage() {
   const me = useCurrentProfile();
@@ -26,129 +61,453 @@ function MessagesPage() {
   const [draft, setDraft] = useState("");
   const [search, setSearch] = useState("");
   const [newOpen, setNewOpen] = useState(false);
-  const [people, setPeople] = useState<{ id: string; username: string | null; display_name: string | null }[]>([]);
+  const [people, setPeople] = useState<Profile[]>([]);
+  const [peopleQuery, setPeopleQuery] = useState("");
+  const [broadcasting, setBroadcasting] = useState(false);
+  const [broadcastOpen, setBroadcastOpen] = useState(false);
+  const [broadcastText, setBroadcastText] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const loadConvs = async () => {
+  const decorate = useCallback(
+    (rows: Conv[], profilesById: Map<string, Profile>) => {
+      if (!me) return rows;
+      return rows.map((c) => {
+        const otherId = c.user_a === me.id ? c.user_b : c.user_a;
+        const myRead = c.user_a === me.id ? c.last_read_at_a : c.last_read_at_b;
+        return {
+          ...c,
+          other: profilesById.get(otherId),
+          unread: new Date(c.last_message_at).getTime() > new Date(myRead).getTime(),
+        };
+      });
+    },
+    [me],
+  );
+
+  const loadConvs = useCallback(async () => {
     if (!me) return;
-    const { data } = await supabase.from("conversations").select("*")
-      .or(`user_a.eq.${me.id},user_b.eq.${me.id}`).order("last_message_at", { ascending: false });
+    const { data } = await supabase
+      .from("conversations")
+      .select("*")
+      .or(`user_a.eq.${me.id},user_b.eq.${me.id}`)
+      .order("last_message_at", { ascending: false });
     const list = (data || []) as Conv[];
     const otherIds = list.map((c) => (c.user_a === me.id ? c.user_b : c.user_a));
+    let byId = new Map<string, Profile>();
     if (otherIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name, username, avatar_url").in("id", otherIds);
-      const byId = new Map((profs || []).map((p: any) => [p.id, p]));
-      list.forEach((c) => { c.other = byId.get(c.user_a === me.id ? c.user_b : c.user_a) as any; });
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, display_name, username, avatar_url")
+        .in("id", otherIds);
+      byId = new Map((profs || []).map((p) => [p.id, p as Profile]));
     }
-    setConvs(list);
-  };
+    setConvs(decorate(list, byId));
+  }, [me, decorate]);
 
-  const loadMsgs = async (c: Conv) => {
-    const { data } = await supabase.from("messages").select("*").eq("conversation_id", c.id).order("created_at");
+  const loadMsgs = useCallback(async (c: Conv) => {
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", c.id)
+      .order("created_at");
     setMsgs((data || []) as Msg[]);
-  };
+  }, []);
 
-  useEffect(() => { loadConvs(); }, [me]);
-  useEffect(() => { if (active) loadMsgs(active); }, [active]);
+  const markRead = useCallback(
+    async (c: Conv) => {
+      if (!me) return;
+      const now = new Date().toISOString();
+      const patch =
+        c.user_a === me.id ? { last_read_at_a: now } : { last_read_at_b: now };
+      await supabase.from("conversations").update(patch).eq("id", c.id);
+      setConvs((prev) =>
+        prev.map((row) => (row.id === c.id ? { ...row, unread: false } : row)),
+      );
+    },
+    [me],
+  );
 
-  const send = async () => {
-    if (!active || !me || !draft.trim()) return;
-    const { error } = await supabase.from("messages").insert({ conversation_id: active.id, sender_id: me.id, content: draft.trim() });
-    if (error) { toast.error(error.message); return; }
-    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id);
-    setDraft(""); loadMsgs(active); loadConvs();
-  };
+  useEffect(() => {
+    loadConvs();
+  }, [loadConvs]);
+
+  useEffect(() => {
+    if (active) {
+      loadMsgs(active);
+      markRead(active);
+    }
+  }, [active, loadMsgs, markRead]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [msgs.length, active?.id]);
+
+  // Realtime: messages
+  useEffect(() => {
+    if (!me) return;
+    const channel = supabase
+      .channel(`messages-${me.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          const m = payload.new as Msg;
+          if (active && m.conversation_id === active.id) {
+            setMsgs((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+            if (m.sender_id !== me.id) markRead(active);
+          }
+          loadConvs();
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [me, active, loadConvs, markRead]);
 
   const openNew = async () => {
     setNewOpen(true);
-    const { data } = await supabase.from("profiles").select("id, username, display_name").neq("id", me?.id || "").limit(50);
-    setPeople(data || []);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, display_name, username, avatar_url")
+      .neq("id", me?.id || "")
+      .order("display_name")
+      .limit(100);
+    setPeople((data || []) as Profile[]);
+  };
+
+  const filteredPeople = useMemo(() => {
+    const q = peopleQuery.trim().toLowerCase();
+    if (!q) return people;
+    return people.filter(
+      (p) =>
+        (p.display_name || "").toLowerCase().includes(q) ||
+        (p.username || "").toLowerCase().includes(q),
+    );
+  }, [people, peopleQuery]);
+
+  const filteredConvs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return convs;
+    return convs.filter(
+      (c) =>
+        (c.other?.display_name || "").toLowerCase().includes(q) ||
+        (c.other?.username || "").toLowerCase().includes(q) ||
+        (c.last_message_preview || "").toLowerCase().includes(q),
+    );
+  }, [convs, search]);
+
+  const send = async () => {
+    if (!active || !me || !draft.trim()) return;
+    const content = draft.trim();
+    setDraft("");
+    const { error } = await supabase
+      .from("messages")
+      .insert({ conversation_id: active.id, sender_id: me.id, content });
+    if (error) {
+      toast.error(error.message);
+      setDraft(content);
+      return;
+    }
+    await supabase
+      .from("conversations")
+      .update({
+        last_message_at: new Date().toISOString(),
+        last_message_preview: content.slice(0, 140),
+      })
+      .eq("id", active.id);
+    loadConvs();
   };
 
   const startConv = async (otherId: string) => {
     if (!me) return;
     const [a, b] = me.id < otherId ? [me.id, otherId] : [otherId, me.id];
-    const { data: existing } = await supabase.from("conversations").select("*").eq("user_a", a).eq("user_b", b).maybeSingle();
+    const { data: existing } = await supabase
+      .from("conversations")
+      .select("*")
+      .eq("user_a", a)
+      .eq("user_b", b)
+      .maybeSingle();
     let conv = existing as Conv | null;
     if (!conv) {
-      const { data: created, error } = await supabase.from("conversations").insert({ user_a: a, user_b: b }).select().single();
-      if (error) { toast.error(error.message); return; }
+      const { data: created, error } = await supabase
+        .from("conversations")
+        .insert({ user_a: a, user_b: b })
+        .select()
+        .single();
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       conv = created as Conv;
     }
-    setNewOpen(false); await loadConvs(); setActive(conv);
+    setNewOpen(false);
+    setPeopleQuery("");
+    await loadConvs();
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, display_name, username, avatar_url")
+      .eq("id", otherId)
+      .maybeSingle();
+    setActive({ ...conv, other: (profs || undefined) as Profile | undefined, unread: false });
   };
+
+  const broadcast = async () => {
+    if (!me || !broadcastText.trim()) return;
+    setBroadcasting(true);
+    try {
+      const { data: followers } = await supabase
+        .from("follows")
+        .select("follower_id")
+        .eq("following_id", me.id);
+      const ids = (followers || []).map((f: { follower_id: string }) => f.follower_id);
+      if (!ids.length) {
+        toast.info("You don't have any followers yet.");
+        return;
+      }
+      const content = broadcastText.trim();
+      for (const otherId of ids) {
+        const [a, b] = me.id < otherId ? [me.id, otherId] : [otherId, me.id];
+        const { data: existing } = await supabase
+          .from("conversations")
+          .select("id")
+          .eq("user_a", a)
+          .eq("user_b", b)
+          .maybeSingle();
+        let convId = existing?.id as string | undefined;
+        if (!convId) {
+          const { data: created } = await supabase
+            .from("conversations")
+            .insert({ user_a: a, user_b: b })
+            .select("id")
+            .single();
+          convId = created?.id;
+        }
+        if (!convId) continue;
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          sender_id: me.id,
+          content,
+        });
+        await supabase
+          .from("conversations")
+          .update({
+            last_message_at: new Date().toISOString(),
+            last_message_preview: content.slice(0, 140),
+          })
+          .eq("id", convId);
+      }
+      toast.success(`Sent to ${ids.length} follower${ids.length === 1 ? "" : "s"}`);
+      setBroadcastOpen(false);
+      setBroadcastText("");
+      loadConvs();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Broadcast failed");
+    } finally {
+      setBroadcasting(false);
+    }
+  };
+
+  const showList = !active;
 
   return (
     <AppLayout title="" hero={false}>
-      <div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white md:grid-cols-[340px_1fr]">
-        <div className="flex flex-col border-r border-neutral-200">
-          <div className="border-b border-neutral-200 p-4">
-            <h2 className="mb-3 text-2xl font-bold">Messages</h2>
+      <div className="grid h-[calc(100vh-8rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[340px_1fr]">
+        {/* Conversation list */}
+        <div
+          className={`${showList ? "flex" : "hidden"} flex-col border-r border-border md:flex`}
+        >
+          <div className="border-b border-border p-4">
+            <h2 className="mb-3 text-2xl font-bold text-foreground">Messages</h2>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search conversations…"
-                className="w-full rounded-full border border-neutral-200 bg-neutral-50 py-2 pl-10 pr-3 text-sm focus:border-orange-400 focus:outline-none" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search conversations"
+                className="w-full rounded-full border border-border bg-muted py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+              />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {convs.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-neutral-400">
-                <MessageSquare className="h-8 w-8" /> No conversations yet
+            {filteredConvs.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-muted-foreground">
+                <MessageSquare className="h-8 w-8" />
+                <p className="text-sm">No conversations yet</p>
               </div>
-            ) : convs
-              .filter((c) => !search || (c.other?.username || "").toLowerCase().includes(search.toLowerCase()) || (c.other?.display_name || "").toLowerCase().includes(search.toLowerCase()))
-              .map((c) => (
-              <button key={c.id} onClick={() => setActive(c)}
-                className={`flex w-full items-center gap-3 border-b border-neutral-100 px-4 py-3 text-left hover:bg-neutral-50 ${active?.id===c.id ? "bg-orange-50" : ""}`}>
-                <Avatar className="h-10 w-10"><AvatarFallback className="bg-orange-100 text-orange-700">{(c.other?.username || c.other?.display_name || "U")[0].toUpperCase()}</AvatarFallback></Avatar>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold">{c.other?.display_name || c.other?.username || "Unknown"}</div>
-                  <div className="text-xs text-neutral-500">{new Date(c.last_message_at).toLocaleDateString()}</div>
-                </div>
-              </button>
-            ))}
+            ) : (
+              filteredConvs.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setActive(c)}
+                  className={`flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left transition hover:bg-muted ${
+                    active?.id === c.id ? "bg-muted" : ""
+                  }`}
+                >
+                  <Avatar className="h-10 w-10">
+                    {c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {initials(c.other)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-sm font-semibold text-foreground">
+                        {c.other?.display_name || c.other?.username || "Unknown"}
+                      </span>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                        {formatWhen(c.last_message_at)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`truncate text-xs ${
+                          c.unread ? "font-semibold text-foreground" : "text-muted-foreground"
+                        }`}
+                      >
+                        {c.last_message_preview || "Say hello"}
+                      </span>
+                      {c.unread && (
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))
+            )}
           </div>
-          <div className="space-y-2 border-t border-neutral-200 p-3">
-            <button onClick={openNew} className="flex w-full items-center justify-center gap-2 rounded-full bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">
-              <Plus className="h-4 w-4" /> New Message
+          <div className="space-y-2 border-t border-border p-3">
+            <button
+              onClick={openNew}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" /> New message
             </button>
             <button
-              onClick={() => toast.info("Broadcast to followers is coming soon")}
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold hover:bg-neutral-50"
+              onClick={() => setBroadcastOpen(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted"
             >
-              <Users className="h-4 w-4" /> Message All Followers
+              <Users className="h-4 w-4" /> Message all followers
             </button>
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-col">
+        {/* Conversation pane */}
+        <div className={`${showList ? "hidden md:flex" : "flex"} min-h-0 flex-col`}>
           {!active ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-              <div className="rounded-full bg-neutral-100 p-4"><MessageSquare className="h-6 w-6 text-neutral-400" /></div>
-              <h3 className="text-lg font-bold">Select a conversation</h3>
-              <p className="max-w-xs text-sm text-neutral-500">Choose from your existing conversations or start a new one with an artist or arts organization.</p>
-              <button onClick={openNew} className="mt-2 inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">
-                <Plus className="h-4 w-4" /> Start a Conversation
+              <div className="rounded-full bg-muted p-4">
+                <MessageSquare className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">Select a conversation</h3>
+              <p className="max-w-xs text-sm text-muted-foreground">
+                Choose from your conversations or start a new one with an artist or organizer.
+              </p>
+              <button
+                onClick={openNew}
+                className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" /> Start a conversation
               </button>
             </div>
           ) : (
             <>
-              <div className="border-b border-neutral-200 px-5 py-3">
-                <div className="font-semibold">{active.other?.display_name || active.other?.username}</div>
-              </div>
-              <div className="flex-1 space-y-3 overflow-y-auto p-5">
-                {msgs.map((m) => (
-                  <div key={m.id} className={`flex ${m.sender_id===me?.id ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${m.sender_id===me?.id ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-800"}`}>
-                      {m.content}
-                    </div>
+              <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => setActive(null)}
+                  className="rounded-full p-1.5 text-muted-foreground hover:bg-muted md:hidden"
+                  aria-label="Back to conversations"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <Avatar className="h-9 w-9">
+                  {active.other?.avatar_url && (
+                    <AvatarImage src={active.other.avatar_url} alt="" />
+                  )}
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {initials(active.other)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="truncate font-semibold text-foreground">
+                    {active.other?.display_name || active.other?.username}
                   </div>
-                ))}
+                  {active.other?.username && (
+                    <div className="truncate text-xs text-muted-foreground">
+                      @{active.other.username}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="border-t border-neutral-200 p-4">
-                <div className="flex gap-2">
-                  <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => e.key==="Enter" && send()}
-                    placeholder="Type a message…" className="flex-1 rounded-full border border-neutral-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none" />
-                  <button onClick={send} className="rounded-full bg-orange-600 p-2.5 text-white hover:bg-orange-700"><Send className="h-4 w-4" /></button>
+              <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-4 sm:p-5">
+                {msgs.map((m, i) => {
+                  const mine = m.sender_id === me?.id;
+                  const prev = msgs[i - 1];
+                  const showAvatar = !mine && (!prev || prev.sender_id !== m.sender_id);
+                  return (
+                    <div
+                      key={m.id}
+                      className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
+                    >
+                      {!mine && (
+                        <div className="w-7 shrink-0">
+                          {showAvatar && (
+                            <Avatar className="h-7 w-7">
+                              {active.other?.avatar_url && (
+                                <AvatarImage src={active.other.avatar_url} alt="" />
+                              )}
+                              <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
+                                {initials(active.other)}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${
+                          mine
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-foreground"
+                        }`}
+                      >
+                        <div className="whitespace-pre-wrap break-words">{m.content}</div>
+                        <div
+                          className={`mt-0.5 text-[10px] ${
+                            mine ? "text-primary-foreground/70" : "text-muted-foreground"
+                          }`}
+                        >
+                          {formatWhen(m.created_at)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="border-t border-border p-3 sm:p-4">
+                <div className="flex items-end gap-2">
+                  <textarea
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        send();
+                      }
+                    }}
+                    rows={1}
+                    placeholder="Type a message"
+                    className="max-h-32 flex-1 resize-none rounded-2xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  />
+                  <button
+                    onClick={send}
+                    disabled={!draft.trim()}
+                    className="rounded-full bg-primary p-2.5 text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+                    aria-label="Send"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </>
@@ -157,20 +516,100 @@ function MessagesPage() {
       </div>
 
       {newOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setNewOpen(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="mb-4 text-xl font-bold">Start a Conversation</h2>
-            <div className="max-h-96 space-y-1 overflow-y-auto">
-              {people.map((p) => (
-                <button key={p.id} onClick={() => startConv(p.id)} className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-neutral-100">
-                  <Avatar className="h-8 w-8"><AvatarFallback className="bg-orange-100 text-orange-700">{(p.username || p.display_name || "U")[0].toUpperCase()}</AvatarFallback></Avatar>
-                  <div>
-                    <div className="text-sm font-semibold">{p.display_name || p.username}</div>
-                    <div className="text-xs text-neutral-500">@{p.username}</div>
-                  </div>
-                </button>
-              ))}
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+          onClick={() => setNewOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-2xl bg-card p-5 shadow-xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-foreground">Start a conversation</h2>
+              <button
+                onClick={() => setNewOpen(false)}
+                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={peopleQuery}
+                onChange={(e) => setPeopleQuery(e.target.value)}
+                autoFocus
+                placeholder="Search people"
+                className="w-full rounded-full border border-border bg-muted py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+              />
+            </div>
+            <div className="max-h-[60vh] space-y-1 overflow-y-auto">
+              {filteredPeople.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">No people found</p>
+              ) : (
+                filteredPeople.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => startConv(p.id)}
+                    className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-muted"
+                  >
+                    <Avatar className="h-9 w-9">
+                      {p.avatar_url && <AvatarImage src={p.avatar_url} alt="" />}
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {initials(p)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-foreground">
+                        {p.display_name || p.username}
+                      </div>
+                      {p.username && (
+                        <div className="truncate text-xs text-muted-foreground">@{p.username}</div>
+                      )}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {broadcastOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !broadcasting && setBroadcastOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-foreground">Message all followers</h2>
+              <button
+                onClick={() => !broadcasting && setBroadcastOpen(false)}
+                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Sends a direct message to every follower. They will see it in their inbox.
+            </p>
+            <textarea
+              value={broadcastText}
+              onChange={(e) => setBroadcastText(e.target.value)}
+              rows={4}
+              placeholder="Share an update with your followers"
+              className="w-full rounded-xl border border-border bg-muted p-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            />
+            <button
+              onClick={broadcast}
+              disabled={broadcasting || !broadcastText.trim()}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+            >
+              {broadcasting ? "Sending..." : "Send to followers"}
+            </button>
           </div>
         </div>
       )}
