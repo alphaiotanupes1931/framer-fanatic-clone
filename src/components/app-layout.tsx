@@ -326,11 +326,11 @@ export function AppLayout({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-3 border-b border-neutral-100 pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
+              className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
             >
               <div className="min-w-0">
-                <h1 className="text-[22px] font-semibold leading-tight tracking-tight text-neutral-900 sm:text-[34px]">{title}</h1>
-                {subtitle && <p className="mt-1 max-w-xl text-[12.5px] leading-snug text-neutral-500 sm:mt-1.5 sm:text-sm">{subtitle}</p>}
+                <h1 className="text-[22px] font-semibold leading-tight tracking-tight text-foreground sm:text-[34px]">{title}</h1>
+                {subtitle && <p className="mt-1 max-w-xl text-[12.5px] leading-snug text-muted-foreground sm:mt-1.5 sm:text-sm">{subtitle}</p>}
               </div>
               {cta && (onCta ? (
               <button
