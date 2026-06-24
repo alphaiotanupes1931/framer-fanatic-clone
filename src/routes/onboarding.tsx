@@ -58,22 +58,23 @@ function Onboarding() {
     setPreview(URL.createObjectURL(f));
   };
 
-  const finish = async (skip: boolean) => {
+  const finish = async () => {
     if (!userId) return;
+    if (!file) {
+      return toast.error("Please add a profile photo to continue.");
+    }
     if (!neighborhood) {
       return toast.error("Please choose your neighborhood.");
     }
     setBusy(true);
     try {
       let avatar_url: string | null = null;
-      if (!skip && file) {
-        const ext = file.name.split(".").pop() || "jpg";
-        const path = `${userId}/avatar-${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-        if (upErr) throw upErr;
-        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-        avatar_url = signed?.signedUrl ?? null;
-      }
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      avatar_url = signed?.signedUrl ?? null;
       const { error } = await supabase
         .from("profiles")
         .update({ avatar_url, neighborhood, onboarded: true })
@@ -95,7 +96,7 @@ function Onboarding() {
         <CardHeader className="text-center">
           <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Add a profile photo</CardTitle>
-          <CardDescription>Help your neighbors recognize you - or skip for now.</CardDescription>
+          <CardDescription>A profile photo is required so your neighbors can recognize you.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
@@ -147,19 +148,11 @@ function Onboarding() {
           </div>
           <div className="flex flex-col gap-2">
             <Button
-              onClick={() => finish(false)}
+              onClick={() => finish()}
               disabled={busy || !file || !neighborhood}
               className="w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               {busy ? "Saving…" : "Continue"}
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => finish(true)}
-              disabled={busy || !neighborhood}
-              className="w-full"
-            >
-              Skip for now
             </Button>
           </div>
         </CardContent>
