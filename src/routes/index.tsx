@@ -558,7 +558,7 @@ function CTA() {
         transition={{ duration: 0.9 }}
         className="mx-auto max-w-[1280px] text-center"
       >
-        <h2 className="font-display text-ink font-medium text-[clamp(2.5rem,9vw,9rem)] leading-[0.92] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.05em]">
+        <h2 className="font-display text-white font-medium text-[clamp(2.5rem,9vw,9rem)] leading-[0.92] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.05em]">
           Start free.<br />Get paid tomorrow.
         </h2>
         <div className="mt-10 md:mt-14 flex justify-center">
