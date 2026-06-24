@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2 } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -102,19 +102,42 @@ function AdminPage() {
         <Stat label="Banned" value={bannedCount} accent="bg-rose-500" />
       </div>
 
-      <div className="mt-6 flex items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2.5">
-        <SearchIcon className="h-4 w-4 text-neutral-400" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search by name, username, email, neighborhood"
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-neutral-400"
-        />
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div className="flex flex-1 items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2.5">
+          <SearchIcon className="h-4 w-4 text-neutral-400" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search by name, username, email, neighborhood"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-neutral-400"
+          />
+          <button
+            onClick={load}
+            className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+          >
+            Refresh
+          </button>
+        </div>
         <button
-          onClick={load}
-          className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+          onClick={() => {
+            const rows = [["Name", "Email"]];
+            filtered.forEach((u) => {
+              rows.push([u.display_name || u.username || "Unnamed", u.email || ""]);
+            });
+            const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "planet-baltimore-users.csv";
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success("Exported " + filtered.length + " users");
+          }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
         >
-          Refresh
+          <Download className="h-3.5 w-3.5" />
+          Export name and email
         </button>
       </div>
 
