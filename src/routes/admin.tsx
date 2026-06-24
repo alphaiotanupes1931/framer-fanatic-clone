@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2 } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
