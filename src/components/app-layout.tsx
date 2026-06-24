@@ -5,7 +5,7 @@ import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
   Ticket, Users, MessageSquare, MapPin, Bell, User,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, ChevronLeft, X, Menu, Shield,
+  Plus, Sparkles, ChevronLeft, X, Menu, Shield, Sun, Moon,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
