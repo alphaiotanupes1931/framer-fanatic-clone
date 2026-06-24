@@ -13,20 +13,24 @@ import {
   refreshConnectStatus,
   becomeArtist,
 } from "@/lib/stripe.functions";
+import { tabsForCategory } from "@/lib/categories";
+import { ProfileSectionTab } from "@/components/profile-sections";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
   head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
 });
 
-const TABS_ARTIST = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","Stripe","My Pages"] as const;
-const TABS_ATTENDEE = ["Saved","Attending","My Tickets"] as const;
+const TABS_ARTIST_BASE = ["Posts","Videos","Events","About","Saved","Organized","My Tickets","Stripe"] as const;
+const TABS_ATTENDEE_BASE = ["Videos","About","Saved","Attending","My Tickets"] as const;
 type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
   const { isArtist, isAttendee, loading: roleLoading } = useUserRole();
-  const TABS: readonly string[] = isArtist ? TABS_ARTIST : TABS_ATTENDEE;
+  const categoryTabs = tabsForCategory((profile as { category?: string | null } | null)?.category);
+  const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_ATTENDEE_BASE;
+  const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
 
@@ -130,6 +134,15 @@ function ProfilePage() {
               <StripeTab />
             ) : tab === "My Tickets" ? (
               <MyTicketsTab />
+            ) : categoryTabs.find((t) => t.label === tab) ? (
+              profile ? (
+                <ProfileSectionTab
+                  userId={profile.id}
+                  kind={categoryTabs.find((t) => t.label === tab)!.kind}
+                  label={tab}
+                  canEdit={true}
+                />
+              ) : null
             ) : (
               <div className="py-12 text-center text-neutral-500">
                 {!roleLoading && isAttendee ? (
