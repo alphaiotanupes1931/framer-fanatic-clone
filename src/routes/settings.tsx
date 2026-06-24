@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check } from "lucide-react";
+import { User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check, HelpCircle, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
@@ -17,6 +17,19 @@ const SECTIONS = [
   { id: "notifications", label: "Notifications", sub: "In-app & email preferences", icon: Bell },
   { id: "privacy", label: "Privacy & Safety", sub: "Visibility and data", icon: Lock },
   { id: "stripe", label: "Stripe Payments", sub: "Connect Stripe to sell tickets", icon: CreditCard },
+  { id: "help", label: "Help & FAQ", sub: "Guides, answers, and support", icon: HelpCircle },
+];
+
+const FAQS = [
+  { q: "How do I get started on Planet Baltimore?", a: "Sign up, complete your profile in Settings, pick your neighborhood, and follow the onboarding tour. You can replay the tour any time from this Help page." },
+  { q: "What is the difference between an Artist and an Attendee?", a: "Artists can post, create events, sell tickets, and appear on the Baltimore 100. Attendees can browse, follow, and buy tickets. You can request an artist upgrade from your Profile." },
+  { q: "How do I post or create an event?", a: "Go to the Dashboard and use the composer at the top to post. To create an event, open the Events tab and tap Create Event. Only artists can post and host events." },
+  { q: "How do I sell tickets?", a: "Open Settings, go to Stripe Payments, and connect your Stripe account. Once connected, you can set a ticket price on any event. Stripe fees and Baltimore city tax are added automatically." },
+  { q: "Why can I not see certain neighborhoods or artists?", a: "Planet Baltimore is Baltimore only. Make sure your neighborhood is set in Settings to Account. Use the Neighborhoods tab to explore artists and events by area." },
+  { q: "How do I switch between light and dark mode?", a: "Use the Sun or Moon button in the sidebar footer. Your preference is saved to this device." },
+  { q: "I forgot my password.", a: "Sign out, go to the Auth page, and use the reset link. A reset email will be sent to the address on your account." },
+  { q: "How do I delete my account?", a: "Email us at help@planetbaltimore.com and we will remove your data within 7 days." },
+  { q: "Something is broken or feels off.", a: "Tell us at help@planetbaltimore.com with a quick description and a screenshot. We read every message." },
 ];
 
 function SettingsPage() {
@@ -99,6 +112,7 @@ function SettingsPage() {
             </div>
           )}
           {!["profile","account"].includes(section) && (
+            section === "help" ? <HelpSection /> :
             <div className="py-12 text-center text-neutral-500">
               <h3 className="text-lg font-semibold">{SECTIONS.find((s) => s.id===section)?.label}</h3>
               <p className="mt-1 text-sm">Coming soon.</p>
@@ -115,6 +129,50 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <label className="mb-1.5 block text-sm font-semibold">{label}</label>
       {children}
+    </div>
+  );
+}
+
+function HelpSection() {
+  const [open, setOpen] = useState<number | null>(0);
+  const replayTour = () => {
+    try { localStorage.removeItem("pb_onboarding_done"); } catch {}
+    window.location.href = "/dashboard";
+  };
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-bold">Help & FAQ</h2>
+        <p className="text-sm text-muted-foreground">Quick answers to the things people ask the most. Still stuck? Reach out and we will help.</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button onClick={replayTour} className="rounded-xl border border-border bg-card p-4 text-left transition hover:bg-accent">
+          <div className="text-sm font-semibold text-foreground">Replay the onboarding tour</div>
+          <div className="mt-1 text-xs text-muted-foreground">Walk through every feature again, step by step.</div>
+        </button>
+        <a href="mailto:help@planetbaltimore.com" className="rounded-xl border border-border bg-card p-4 text-left transition hover:bg-accent">
+          <div className="text-sm font-semibold text-foreground">Contact support</div>
+          <div className="mt-1 text-xs text-muted-foreground">help@planetbaltimore.com — we usually reply within a day.</div>
+        </a>
+      </div>
+
+      <div className="divide-y divide-border rounded-xl border border-border bg-card">
+        {FAQS.map((f, i) => (
+          <div key={i}>
+            <button
+              onClick={() => setOpen(open === i ? null : i)}
+              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+            >
+              <span className="text-sm font-semibold text-foreground">{f.q}</span>
+              <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition ${open === i ? "rotate-180" : ""}`} />
+            </button>
+            {open === i && (
+              <div className="px-4 pb-4 text-sm leading-relaxed text-muted-foreground">{f.a}</div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
