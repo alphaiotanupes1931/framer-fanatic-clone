@@ -377,21 +377,7 @@ function ScrollHeadline({ lines, className }: { lines: string[]; className?: str
   return (
     <h2 className={className}>
       {lines.map((line, li) => (
-        <span key={li} className="block overflow-hidden">
-          {line.split(" ").map((word, wi) => (
-            <span key={wi} className="inline-block overflow-hidden mr-[0.25em] align-baseline">
-              <motion.span
-                initial={{ y: "110%" }}
-                whileInView={{ y: "0%" }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.55, delay: 0.03 * wi + li * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="inline-block"
-              >
-                {word}
-              </motion.span>
-            </span>
-          ))}
-        </span>
+        <span key={li} className="block">{line}</span>
       ))}
     </h2>
   );
