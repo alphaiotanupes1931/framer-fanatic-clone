@@ -116,7 +116,7 @@ export function AppLayout({
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Mobile top header */}
-      <header className="sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-neutral-100 bg-white/90 px-3 py-2.5 backdrop-blur md:hidden">
+      <header className="sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-background/90 px-3 py-2.5 backdrop-blur md:hidden">
         <button
           onClick={() => setMobileNavOpen(true)}
           aria-label="Open menu"
