@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useTheme } from "@/hooks/use-theme";
 
 export type Profile = {
   id: string;
