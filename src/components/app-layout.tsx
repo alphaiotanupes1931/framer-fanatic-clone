@@ -90,6 +90,7 @@ export function AppLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { isAdmin } = useUserRole();
+  const { theme, toggleTheme } = useTheme();
 
   // Heartbeat: ping last_seen_at so admins can see who is live.
   useEffect(() => {
