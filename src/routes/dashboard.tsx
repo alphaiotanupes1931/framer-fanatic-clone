@@ -232,6 +232,24 @@ function DiscoverStrip() {
   return _DiscoverStripImpl();
 }
 
+function ShareAppButton() {
+  return (
+    <button
+      onClick={async () => {
+        const url = `${window.location.origin}/`;
+        try {
+          if (navigator.share) await navigator.share({ title: "Planet Baltimore", text: "Join me on Planet Baltimore", url });
+          else { await navigator.clipboard.writeText(url); toast.success("Invite link copied"); }
+        } catch { /* cancelled */ }
+      }}
+      className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-orange-700"
+      aria-label="Share Planet Baltimore"
+    >
+      <LinkIcon className="h-4 w-4" /> Share
+    </button>
+  );
+}
+
 type CreatorRow = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null };
 
 function CreatorSearch() {
