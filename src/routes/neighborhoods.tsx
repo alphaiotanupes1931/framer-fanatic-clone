@@ -146,35 +146,94 @@ function NeighborhoodsPage() {
               <MapPin className="h-4 w-4 text-orange" />
               {selected?.name}
             </DialogTitle>
-            <p className="text-xs text-neutral-500">{selected?.region} · Artists in this neighborhood</p>
+            <p className="text-xs text-neutral-500">{selected?.region}</p>
           </DialogHeader>
+          <div className="mt-2 flex gap-2 border-b border-neutral-100">
+            {[
+              { key: "artists" as const, label: `Artists (${artists.length})` },
+              { key: "events" as const, label: `Events (${events.length})` },
+            ].map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`px-3 py-2 text-sm font-medium transition ${
+                  tab === t.key
+                    ? "text-orange border-b-2 border-orange -mb-[1px]"
+                    : "text-neutral-500 hover:text-neutral-700"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
           <div className="mt-2 max-h-[60vh] overflow-y-auto">
-            {loadingArtists ? (
+            {loading ? (
               <div className="py-8 text-center text-sm text-neutral-400">Loading…</div>
-            ) : artists.length === 0 ? (
+            ) : tab === "artists" ? (
+              artists.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">
+                  No artists listed in {selected?.name} yet.
+                </div>
+              ) : (
+                <ul className="divide-y divide-neutral-100">
+                  {artists.map((a) => (
+                    <li key={a.id}>
+                      <Link
+                        to="/profile"
+                        onClick={() => setSelected(null)}
+                        className="flex items-center gap-3 px-1 py-3 transition hover:bg-neutral-50"
+                      >
+                        <Avatar className="h-10 w-10">
+                          {a.avatar_url && <AvatarImage src={a.avatar_url} />}
+                          <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
+                            {(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold text-neutral-900">
+                            {a.display_name || a.username || "Unnamed artist"}
+                          </div>
+                          {a.bio && <div className="truncate text-xs text-neutral-500">{a.bio}</div>}
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )
+            ) : events.length === 0 ? (
               <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">
-                No artists listed in {selected?.name} yet.
+                No upcoming events in {selected?.name} yet.
               </div>
             ) : (
               <ul className="divide-y divide-neutral-100">
-                {artists.map((a) => (
-                  <li key={a.id}>
+                {events.map((ev) => (
+                  <li key={ev.id}>
                     <Link
-                      to="/profile"
+                      to="/events"
                       onClick={() => setSelected(null)}
-                      className="flex items-center gap-3 px-1 py-3 transition hover:bg-neutral-50"
+                      className="flex items-start gap-3 px-1 py-3 transition hover:bg-neutral-50"
                     >
-                      <Avatar className="h-10 w-10">
-                        {a.avatar_url && <AvatarImage src={a.avatar_url} />}
-                        <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
-                          {(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div className="h-10 w-10 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
+                        {ev.image_url ? (
+                          <img src={ev.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                        ) : (
+                          <Calendar className="h-4 w-4 text-neutral-500" />
+                        )}
+                      </div>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold text-neutral-900">
-                          {a.display_name || a.username || "Unnamed artist"}
+                        <div className="truncate text-sm font-semibold text-neutral-900">{ev.title}</div>
+                        <div className="text-xs text-neutral-500 flex items-center gap-1 mt-0.5">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(ev.starts_at).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                         </div>
-                        {a.bio && <div className="truncate text-xs text-neutral-500">{a.bio}</div>}
+                        {ev.location && (
+                          <div className="text-xs text-neutral-500 flex items-center gap-1 mt-0.5">
+                            <MapPin className="h-3 w-3" /> {ev.location}
+                          </div>
+                        )}
+                      </div>
+                      <div className="shrink-0 text-xs font-semibold text-orange flex items-center gap-1">
+                        {(ev.price_cents ?? 0) > 0 ? `$${((ev.price_cents ?? 0)/100).toFixed(2)}` : "Free"}
                       </div>
                     </Link>
                   </li>
