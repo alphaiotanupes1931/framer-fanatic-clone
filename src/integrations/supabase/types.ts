@@ -181,6 +181,145 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          org_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          org_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_comments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_posts: {
+        Row: {
+          author_id: string
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link_url: string | null
+          media_url: string | null
+          org_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link_url?: string | null
+          media_url?: string | null
+          org_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link_url?: string | null
+          media_url?: string | null
+          org_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          banner_url: string | null
+          bio: string | null
+          created_at: string
+          email: string | null
+          hours: Json | null
+          id: string
+          name: string
+          neighborhood: string | null
+          owner_id: string
+          phone: string | null
+          slug: string
+          subtype: string | null
+          type: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          hours?: Json | null
+          id?: string
+          name: string
+          neighborhood?: string | null
+          owner_id: string
+          phone?: string | null
+          slug: string
+          subtype?: string | null
+          type: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          hours?: Json | null
+          id?: string
+          name?: string
+          neighborhood?: string | null
+          owner_id?: string
+          phone?: string | null
+          slug?: string
+          subtype?: string | null
+          type?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           comments_count: number
@@ -214,12 +353,52 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_sections: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link_url: string | null
+          media_url: string | null
+          order_index: number
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link_url?: string | null
+          media_url?: string | null
+          order_index?: number
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link_url?: string | null
+          media_url?: string | null
+          order_index?: number
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           banned: boolean
           banner_url: string | null
           bio: string | null
+          category: string | null
           city: string | null
           created_at: string
           display_name: string | null
@@ -247,6 +426,7 @@ export type Database = {
           banned?: boolean
           banner_url?: string | null
           bio?: string | null
+          category?: string | null
           city?: string | null
           created_at?: string
           display_name?: string | null
@@ -274,6 +454,7 @@ export type Database = {
           banned?: boolean
           banner_url?: string | null
           bio?: string | null
+          category?: string | null
           city?: string | null
           created_at?: string
           display_name?: string | null
