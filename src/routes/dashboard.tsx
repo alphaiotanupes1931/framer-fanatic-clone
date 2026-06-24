@@ -96,13 +96,13 @@ function Dashboard() {
         <CreatorSearch />
         <DiscoverStrip />
 
-        <div className="mb-4 flex w-full items-center gap-1 rounded-full border border-neutral-100 bg-neutral-50 p-1 sm:inline-flex sm:w-auto">
+        <div className="mb-4 flex w-full items-center gap-1 rounded-full border border-border bg-muted p-1 sm:inline-flex sm:w-auto">
           {([["for-you","For you"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
             <button
               key={k}
               onClick={() => setTab(k)}
               className={`flex-1 rounded-full px-4 py-1.5 text-[12.5px] font-medium transition sm:flex-none ${
-                tab===k ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-900"
+                tab===k ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {l}
@@ -111,12 +111,12 @@ function Dashboard() {
         </div>
 
         {!roleLoading && !isArtist ? (
-          <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-4 text-center text-[13px] text-neutral-600">
+          <div className="rounded-2xl border border-dashed border-border bg-muted p-4 text-center text-[13px] text-muted-foreground">
             You're signed in as an <strong>Attendee</strong> - you can view posts and buy event tickets.
             To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">profile</Link> and become an Artist.
           </div>
         ) : (
-        <div className="rounded-2xl border border-neutral-100 bg-white p-4 transition focus-within:border-neutral-300">
+        <div className="rounded-2xl border border-border bg-card p-4 transition focus-within:border-ring">
           <div className="flex gap-3">
             <Avatar className="h-9 w-9 shrink-0">
               {myProfile?.avatar_url && <AvatarImage src={myProfile.avatar_url} />}
@@ -129,7 +129,7 @@ function Dashboard() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Share something with Baltimore…"
-                className="w-full resize-none border-0 bg-transparent p-0 text-[15px] placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+                className="w-full resize-none border-0 bg-transparent p-0 text-[15px] placeholder:text-muted-foreground focus:outline-none focus:ring-0"
                 rows={2}
               />
               <div className="mt-2 flex justify-end">
@@ -146,10 +146,10 @@ function Dashboard() {
         </div>
         )}
 
-        <div className="mt-6 divide-y divide-neutral-100">
-          {loading && <div className="py-10 text-center text-sm text-neutral-400">Loading…</div>}
+        <div className="mt-6 divide-y divide-border">
+          {loading && <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>}
           {!loading && posts.length === 0 && (
-            <div className="py-16 text-center text-sm text-neutral-400">
+            <div className="py-16 text-center text-sm text-muted-foreground">
               No posts yet. Be the first to share something.
             </div>
           )}
@@ -165,38 +165,38 @@ function Dashboard() {
               <header className="flex items-center gap-3">
                 <Avatar className="h-9 w-9">
                   {p.author?.avatar_url && <AvatarImage src={p.author.avatar_url} />}
-                  <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
+                  <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
                     {(p.author?.display_name || p.author?.username || "U").slice(0, 1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[13.5px] font-medium text-neutral-900">
+                  <div className="text-[13.5px] font-medium text-foreground">
                     {p.author?.display_name || p.author?.username || "Anonymous"}
                   </div>
-                  <div className="text-[11.5px] text-neutral-400">
+                  <div className="text-[11.5px] text-muted-foreground">
                     {p.author?.neighborhood || "Baltimore"} · {new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </div>
                 </div>
               </header>
-              <div className="mt-3 pl-0 sm:pl-12 text-[15px] leading-relaxed text-neutral-800">{p.content}</div>
+              <div className="mt-3 pl-0 sm:pl-12 text-[15px] leading-relaxed text-foreground">{p.content}</div>
               {p.image_url && (
                 <div className="mt-3 overflow-hidden rounded-xl sm:pl-12">
                   <img src={p.image_url} alt="" className="w-full" loading="lazy" />
                 </div>
               )}
-              <footer className="mt-3 flex items-center gap-6 pl-0 sm:pl-12 text-[12.5px] text-neutral-400">
+              <footer className="mt-3 flex items-center gap-6 pl-0 sm:pl-12 text-[12.5px] text-muted-foreground">
                 <button
                   onClick={async () => {
                     setPosts((cur) => cur.map((x) => x.id === p.id ? { ...x, likes_count: (x.likes_count ?? 0) + 1 } : x));
                     await supabase.from("posts").update({ likes_count: (p.likes_count ?? 0) + 1 }).eq("id", p.id);
                   }}
-                  className="flex items-center gap-1.5 transition hover:text-neutral-900"
+                  className="flex items-center gap-1.5 transition hover:text-foreground"
                 >
                   <Heart className="h-4 w-4" strokeWidth={1.75} /> {p.likes_count ?? 0}
                 </button>
                 <button
                   onClick={() => toast.info("Comments coming soon")}
-                  className="flex items-center gap-1.5 transition hover:text-neutral-900"
+                  className="flex items-center gap-1.5 transition hover:text-foreground"
                 >
                   <MessageCircle className="h-4 w-4" strokeWidth={1.75} /> {p.comments_count ?? 0}
                 </button>
@@ -208,13 +208,13 @@ function Dashboard() {
                       else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
                     } catch { /* cancelled */ }
                   }}
-                  className="transition hover:text-neutral-900"
+                  className="transition hover:text-foreground"
                 >
                   <Share2 className="h-4 w-4" strokeWidth={1.75} />
                 </button>
                 <button
                   onClick={() => toast.success("Saved to bookmarks")}
-                  className="ml-auto transition hover:text-neutral-900"
+                  className="ml-auto transition hover:text-foreground"
                 >
                   <Bookmark className="h-4 w-4" strokeWidth={1.75} />
                 </button>
@@ -254,48 +254,48 @@ function CreatorSearch() {
 
   return (
     <div className="relative mb-5">
-      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <input
         value={q}
         onChange={(e) => { setQ(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 120)}
         placeholder="Search creators on Planet Baltimore"
-        className="h-11 w-full rounded-full border border-neutral-200 bg-neutral-50 pl-11 pr-10 text-[14px] outline-none transition focus:border-orange focus:bg-white"
+        className="h-11 w-full rounded-full border border-border bg-muted pl-11 pr-10 text-[14px] outline-none transition focus:border-orange focus:bg-background"
       />
       {q && (
         <button
           onClick={() => { setQ(""); setResults([]); }}
           aria-label="Clear search"
-          className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+          className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <X className="h-3.5 w-3.5" />
         </button>
       )}
       {open && q.trim() && (
-        <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-lg">
-          {loading && <div className="px-4 py-3 text-[13px] text-neutral-400">Searching…</div>}
+        <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+          {loading && <div className="px-4 py-3 text-[13px] text-muted-foreground">Searching…</div>}
           {!loading && results.length === 0 && (
-            <div className="px-4 py-3 text-[13px] text-neutral-400">No creators found.</div>
+            <div className="px-4 py-3 text-[13px] text-muted-foreground">No creators found.</div>
           )}
           {!loading && results.map((c) => (
             <Link
               key={c.id}
               to="/profile"
               onMouseDown={(e) => e.preventDefault()}
-              className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-neutral-50"
+              className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-accent"
             >
               <Avatar className="h-8 w-8">
                 {c.avatar_url && <AvatarImage src={c.avatar_url} />}
-                <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
+                <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
                   {(c.display_name || c.username || "U").slice(0, 1).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[13.5px] font-medium text-neutral-900">
+                <div className="truncate text-[13.5px] font-medium text-foreground">
                   {c.display_name || c.username || "Unnamed"}
                 </div>
-                <div className="truncate text-[11.5px] text-neutral-400">
+                <div className="truncate text-[11.5px] text-muted-foreground">
                   {c.neighborhood || "Baltimore"}
                 </div>
               </div>
@@ -314,24 +314,24 @@ function _DiscoverStripImpl() {
     { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", color: "bg-indigo-50 text-indigo-600" },
     { to: "/groups", icon: Users, label: "Groups", color: "bg-rose-50 text-rose-600" },
     { to: "/stories", icon: BookOpen, label: "Stories", color: "bg-amber-50 text-amber-700" },
-    { to: "/leaderboard", icon: Trophy, label: "Baltimore 100", color: "bg-neutral-100 text-neutral-700" },
+    { to: "/leaderboard", icon: Trophy, label: "Baltimore 100", color: "bg-muted text-muted-foreground" },
   ] as const;
   return (
     <div className="mb-6">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Discover Baltimore</h2>
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Discover Baltimore</h2>
       </div>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {items.map((it) => (
           <Link
             key={it.to}
             to={it.to}
-            className="group flex flex-col items-center gap-2 rounded-2xl border border-neutral-100 bg-white p-3 transition hover:border-orange/40 hover:shadow-sm"
+            className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-3 transition hover:border-orange/40 hover:shadow-sm"
           >
             <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${it.color}`}>
               <it.icon className="h-4 w-4" strokeWidth={1.75} />
             </span>
-            <span className="text-[11px] font-medium text-neutral-700 text-center leading-tight">{it.label}</span>
+            <span className="text-[11px] font-medium text-foreground text-center leading-tight">{it.label}</span>
           </Link>
         ))}
       </div>

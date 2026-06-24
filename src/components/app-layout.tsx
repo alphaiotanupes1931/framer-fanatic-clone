@@ -5,7 +5,7 @@ import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
   Ticket, Users, MessageSquare, MapPin, Bell, User,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, ChevronLeft, X, Menu, Shield,
+  Plus, Sparkles, ChevronLeft, X, Menu, Shield, Sun, Moon,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useTheme } from "@/hooks/use-theme";
 
 export type Profile = {
   id: string;
@@ -89,6 +90,7 @@ export function AppLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { isAdmin } = useUserRole();
+  const { theme, toggleTheme } = useTheme();
 
   // Heartbeat: ping last_seen_at so admins can see who is live.
   useEffect(() => {
@@ -112,9 +114,9 @@ export function AppLayout({
   }, [profile]);
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Mobile top header */}
-      <header className="sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-neutral-100 bg-white/90 px-3 py-2.5 backdrop-blur md:hidden">
+      <header className="sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-background/90 px-3 py-2.5 backdrop-blur md:hidden">
         <button
           onClick={() => setMobileNavOpen(true)}
           aria-label="Open menu"
@@ -143,7 +145,7 @@ export function AppLayout({
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex h-full w-[82%] max-w-[320px] flex-col bg-white px-4 py-5"
+            className="relative flex h-full w-[82%] max-w-[320px] flex-col bg-background px-4 py-5"
           >
             <div className="mb-6 flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileNavOpen(false)}>
@@ -217,7 +219,7 @@ export function AppLayout({
       )}
 
       <div className="mx-auto flex max-w-[1600px]">
-        <aside className={`sticky top-0 hidden h-screen ${collapsed ? "w-16" : "w-60"} shrink-0 flex-col border-r border-neutral-100 bg-white px-3 py-6 md:flex transition-all`}>
+        <aside className={`sticky top-0 hidden h-screen ${collapsed ? "w-16" : "w-60"} shrink-0 flex-col border-r border-border bg-background px-3 py-6 md:flex transition-all`}>
           <Link to="/dashboard" className="mb-8 flex items-center justify-center px-1">
             <img src={pbLogo} alt="Planet Baltimore" className="h-14 w-14 shrink-0" />
           </Link>
@@ -294,21 +296,28 @@ export function AppLayout({
               </Link>
             )}
             <button
+              onClick={toggleTheme}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> : <Moon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />}
+              {!collapsed && (theme === "dark" ? "Light mode" : "Dark mode")}
+            </button>
+            <button
               onClick={signOut}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> {!collapsed && "Sign out"}
             </button>
             <button
               onClick={() => setCollapsed((c) => !c)}
-              className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2 text-neutral-300 hover:bg-neutral-50 hover:text-neutral-500"
+              className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <ChevronLeft className={`h-4 w-4 transition ${collapsed ? "rotate-180" : ""}`} />
             </button>
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-28 pt-4 sm:px-6 md:px-10 md:py-8 md:pb-10">
+        <main className="min-w-0 flex-1 px-4 pb-28 pt-4 sm:px-6 md:px-10 md:py-8 md:pb-10 bg-background">
           <div className="mb-4 hidden justify-end md:flex">
             <NotificationsBell />
           </div>
@@ -317,11 +326,11 @@ export function AppLayout({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-3 border-b border-neutral-100 pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
+              className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
             >
               <div className="min-w-0">
-                <h1 className="text-[22px] font-semibold leading-tight tracking-tight text-neutral-900 sm:text-[34px]">{title}</h1>
-                {subtitle && <p className="mt-1 max-w-xl text-[12.5px] leading-snug text-neutral-500 sm:mt-1.5 sm:text-sm">{subtitle}</p>}
+                <h1 className="text-[22px] font-semibold leading-tight tracking-tight text-foreground sm:text-[34px]">{title}</h1>
+                {subtitle && <p className="mt-1 max-w-xl text-[12.5px] leading-snug text-muted-foreground sm:mt-1.5 sm:text-sm">{subtitle}</p>}
               </div>
               {cta && (onCta ? (
               <button
@@ -350,12 +359,12 @@ export function AppLayout({
           </motion.div>
         </main>
 
-        <aside className="sticky top-0 hidden h-screen w-80 shrink-0 overflow-y-auto border-l border-neutral-100 bg-white px-5 py-8 xl:block">
+        <aside className="sticky top-0 hidden h-screen w-80 shrink-0 overflow-y-auto border-l border-border bg-background px-5 py-8 xl:block">
           <RightRail />
         </aside>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-neutral-100 bg-white py-2 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-border bg-background py-2 md:hidden">
         {[
           { to: "/dashboard", icon: Home, label: "Home" },
           { to: "/events", icon: Ticket, label: "Events" },

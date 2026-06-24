@@ -14,6 +14,17 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import pbLogo from "../assets/pb-logo.png";
 
+const themeScript = `
+  (function() {
+    try {
+      const t = localStorage.getItem('pb-theme');
+      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+`;
+
 const SITE_ORIGIN = "https://framer-fanatic-clone.lovable.app";
 const LOGO_URL = `${SITE_ORIGIN}${pbLogo}`;
 
@@ -116,6 +127,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <HeadContent />
       </head>
       <body>
