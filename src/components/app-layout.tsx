@@ -296,14 +296,21 @@ export function AppLayout({
               </Link>
             )}
             <button
+              onClick={toggleTheme}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> : <Moon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />}
+              {!collapsed && (theme === "dark" ? "Light mode" : "Dark mode")}
+            </button>
+            <button
               onClick={signOut}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> {!collapsed && "Sign out"}
             </button>
             <button
               onClick={() => setCollapsed((c) => !c)}
-              className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2 text-neutral-300 hover:bg-neutral-50 hover:text-neutral-500"
+              className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <ChevronLeft className={`h-4 w-4 transition ${collapsed ? "rotate-180" : ""}`} />
             </button>
