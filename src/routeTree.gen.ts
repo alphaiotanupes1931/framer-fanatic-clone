@@ -16,7 +16,6 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
-import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as EventsRouteImport } from './routes/events'
@@ -65,11 +64,6 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const NeighborhoodsRoute = NeighborhoodsRouteImport.update({
   id: '/neighborhoods',
   path: '/neighborhoods',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MessagesRoute = MessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -157,7 +151,6 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
@@ -181,7 +174,6 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
@@ -206,7 +198,6 @@ export interface FileRoutesById {
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
@@ -232,7 +223,6 @@ export interface FileRouteTypes {
     | '/events'
     | '/groups'
     | '/leaderboard'
-    | '/messages'
     | '/neighborhoods'
     | '/onboarding'
     | '/profile'
@@ -256,7 +246,6 @@ export interface FileRouteTypes {
     | '/events'
     | '/groups'
     | '/leaderboard'
-    | '/messages'
     | '/neighborhoods'
     | '/onboarding'
     | '/profile'
@@ -280,7 +269,6 @@ export interface FileRouteTypes {
     | '/events'
     | '/groups'
     | '/leaderboard'
-    | '/messages'
     | '/neighborhoods'
     | '/onboarding'
     | '/profile'
@@ -305,7 +293,6 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
-  MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
@@ -365,13 +352,6 @@ declare module '@tanstack/react-router' {
       path: '/neighborhoods'
       fullPath: '/neighborhoods'
       preLoaderRoute: typeof NeighborhoodsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/messages': {
-      id: '/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -489,7 +469,6 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
-  MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
