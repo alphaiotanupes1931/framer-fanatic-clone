@@ -24,12 +24,25 @@ type ArtistRow = {
   neighborhood: string | null;
 };
 
+type EventRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  image_url: string | null;
+  starts_at: string;
+  price_cents: number | null;
+};
+
 function NeighborhoodsPage() {
   const auth = useAuthState();
   const [list, setList] = useState<N[]>([]);
   const [selected, setSelected] = useState<N | null>(null);
   const [artists, setArtists] = useState<ArtistRow[]>([]);
-  const [loadingArtists, setLoadingArtists] = useState(false);
+  const [events, setEvents] = useState<EventRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState<"artists" | "events">("artists");
+
   useEffect(() => { (async () => {
     const { data } = await supabase.from("neighborhoods").select("id, name, region").order("name");
     setList((data || []) as N[]);
@@ -38,17 +51,28 @@ function NeighborhoodsPage() {
   useEffect(() => {
     if (!selected) return;
     let cancelled = false;
-    setLoadingArtists(true);
+    setLoading(true);
     setArtists([]);
+    setEvents([]);
+    setTab("artists");
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, neighborhood")
-        .eq("role", "artist")
-        .ilike("neighborhood", selected.name);
+      const [{ data: a }, { data: e }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, display_name, username, avatar_url, bio, neighborhood")
+          .eq("role", "artist")
+          .ilike("neighborhood", selected.name),
+        supabase
+          .from("events")
+          .select("id, title, description, location, image_url, starts_at, price_cents")
+          .ilike("neighborhood", selected.name)
+          .gte("starts_at", new Date().toISOString())
+          .order("starts_at", { ascending: true }),
+      ]);
       if (cancelled) return;
-      setArtists((data || []) as ArtistRow[]);
-      setLoadingArtists(false);
+      setArtists((a || []) as ArtistRow[]);
+      setEvents((e || []) as EventRow[]);
+      setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [selected]);
