@@ -310,7 +310,7 @@ export function AppLayout({
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-28 pt-4 sm:px-6 md:px-10 md:py-8 md:pb-10">
+        <main className="min-w-0 flex-1 px-4 pb-28 pt-4 sm:px-6 md:px-10 md:py-8 md:pb-10 bg-background">
           <div className="mb-4 hidden justify-end md:flex">
             <NotificationsBell />
           </div>
