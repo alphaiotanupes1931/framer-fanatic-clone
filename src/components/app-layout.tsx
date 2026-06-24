@@ -145,7 +145,7 @@ export function AppLayout({
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex h-full w-[82%] max-w-[320px] flex-col bg-white px-4 py-5"
+            className="relative flex h-full w-[82%] max-w-[320px] flex-col bg-background px-4 py-5"
           >
             <div className="mb-6 flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileNavOpen(false)}>
