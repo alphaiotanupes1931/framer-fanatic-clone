@@ -218,7 +218,7 @@ function Hero() {
           className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
         >
           <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed">
-            A home for the creators, organizers, and neighbors building the city — together.
+            A home for the creators, organizers, and neighbors building the city together.
           </p>
 
           <div className="hidden md:flex items-center gap-3">
