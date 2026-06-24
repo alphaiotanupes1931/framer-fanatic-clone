@@ -460,7 +460,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-blue-deep px-5 md:px-10 py-24 md:py-36"
+      className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36"
     >
       {/* Ambient glow */}
       <div
