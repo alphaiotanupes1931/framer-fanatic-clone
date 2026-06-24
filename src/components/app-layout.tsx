@@ -359,12 +359,12 @@ export function AppLayout({
           </motion.div>
         </main>
 
-        <aside className="sticky top-0 hidden h-screen w-80 shrink-0 overflow-y-auto border-l border-neutral-100 bg-white px-5 py-8 xl:block">
+        <aside className="sticky top-0 hidden h-screen w-80 shrink-0 overflow-y-auto border-l border-border bg-background px-5 py-8 xl:block">
           <RightRail />
         </aside>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-neutral-100 bg-white py-2 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-border bg-background py-2 md:hidden">
         {[
           { to: "/dashboard", icon: Home, label: "Home" },
           { to: "/events", icon: Ticket, label: "Events" },
