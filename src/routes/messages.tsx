@@ -116,11 +116,10 @@ function MessagesPage() {
   const markRead = useCallback(
     async (c: Conv) => {
       if (!me) return;
-      const field = c.user_a === me.id ? "last_read_at_a" : "last_read_at_b";
-      await supabase
-        .from("conversations")
-        .update({ [field]: new Date().toISOString() })
-        .eq("id", c.id);
+      const now = new Date().toISOString();
+      const patch =
+        c.user_a === me.id ? { last_read_at_a: now } : { last_read_at_b: now };
+      await supabase.from("conversations").update(patch).eq("id", c.id);
       setConvs((prev) =>
         prev.map((row) => (row.id === c.id ? { ...row, unread: false } : row)),
       );
