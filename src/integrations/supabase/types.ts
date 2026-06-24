@@ -19,6 +19,9 @@ export type Database = {
           created_at: string
           id: string
           last_message_at: string
+          last_message_preview: string | null
+          last_read_at_a: string
+          last_read_at_b: string
           user_a: string
           user_b: string
         }
@@ -26,6 +29,9 @@ export type Database = {
           created_at?: string
           id?: string
           last_message_at?: string
+          last_message_preview?: string | null
+          last_read_at_a?: string
+          last_read_at_b?: string
           user_a: string
           user_b: string
         }
@@ -33,6 +39,9 @@ export type Database = {
           created_at?: string
           id?: string
           last_message_at?: string
+          last_message_preview?: string | null
+          last_read_at_a?: string
+          last_read_at_b?: string
           user_a?: string
           user_b?: string
         }
