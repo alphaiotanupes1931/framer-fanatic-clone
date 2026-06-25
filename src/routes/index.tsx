@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
+import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
