@@ -540,11 +540,7 @@ function RightRail() {
   useEffect(() => {
     (async () => {
       const [{ data: a }, { data: e }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, display_name, username, neighborhood, avatar_url")
-          .eq("role", "artist")
-          .limit(5),
+        supabase.rpc("search_creators", { q: "", lim: 5 }),
         supabase
           .from("events")
           .select("id, title, starts_at, location")
@@ -578,17 +574,23 @@ function RightRail() {
         ) : (
           <ul className="space-y-3">
             {artists.map((a) => (
-              <li key={a.id} className="flex items-center gap-3">
-                <Avatar className="h-9 w-9">
-                  {a.avatar_url && <AvatarImage src={a.avatar_url} />}
-                  <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
-                    {(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[13px] font-medium">{a.display_name || a.username || "Anonymous"}</div>
-                  <div className="truncate text-[11px] text-neutral-500">{a.neighborhood || "Baltimore"}</div>
-                </div>
+              <li key={a.id}>
+                <Link
+                  to={a.username ? "/u/$username" : "/artists"}
+                  params={a.username ? { username: a.username } : undefined}
+                  className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent"
+                >
+                  <Avatar className="h-9 w-9">
+                    {a.avatar_url && <AvatarImage src={a.avatar_url} />}
+                    <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
+                      {(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[13px] font-medium text-foreground">{a.display_name || a.username || "Anonymous"}</div>
+                    <div className="truncate text-[11px] text-muted-foreground">{a.neighborhood || "Baltimore"}</div>
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>

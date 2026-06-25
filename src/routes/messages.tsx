@@ -95,14 +95,23 @@ function MessagesPage() {
     const otherIds = list.map((c) => (c.user_a === me.id ? c.user_b : c.user_a));
     let byId = new Map<string, Profile>();
     if (otherIds.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, display_name, username, avatar_url")
-        .in("id", otherIds);
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: otherIds });
       byId = new Map((profs || []).map((p) => [p.id, p as Profile]));
     }
-    setConvs(decorate(list, byId));
-  }, [me, decorate]);
+    const decorated = decorate(list, byId);
+    setConvs(decorated);
+    const pendingId = window.localStorage.getItem("pb_open_conversation");
+    if (pendingId) {
+      const pending = decorated.find((c) => c.id === pendingId);
+      if (pending) {
+        setActive(pending);
+        window.localStorage.removeItem("pb_open_conversation");
+      }
+    } else if (active) {
+      const freshActive = decorated.find((c) => c.id === active.id);
+      if (freshActive) setActive(freshActive);
+    }
+  }, [me, decorate, active?.id]);
 
   const loadMsgs = useCallback(async (c: Conv) => {
     const { data } = await supabase
@@ -168,13 +177,9 @@ function MessagesPage() {
 
   const openNew = async () => {
     setNewOpen(true);
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, display_name, username, avatar_url")
-      .neq("id", me?.id || "")
-      .order("display_name")
-      .limit(100);
-    setPeople((data || []) as Profile[]);
+    const { data, error } = await supabase.rpc("search_creators", { q: "", lim: 100 });
+    if (error) { toast.error(error.message); return; }
+    setPeople(((data || []) as Profile[]).filter((p) => p.id !== me?.id));
   };
 
   const filteredPeople = useMemo(() => {
@@ -266,12 +271,8 @@ function MessagesPage() {
     setNewOpen(false);
     setPeopleQuery("");
     await loadConvs();
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, display_name, username, avatar_url")
-      .eq("id", otherId)
-      .maybeSingle();
-    setActive({ ...conv, other: (profs || undefined) as Profile | undefined, unread: false });
+    const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: [otherId] });
+    setActive({ ...conv, other: (profs?.[0] || undefined) as Profile | undefined, unread: false });
   };
 
   const broadcast = async () => {

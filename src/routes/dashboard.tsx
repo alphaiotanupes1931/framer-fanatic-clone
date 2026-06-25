@@ -19,6 +19,15 @@ type Post = {
   author?: { display_name: string | null; avatar_url: string | null; username: string | null; neighborhood: string | null };
 };
 
+type PostComment = {
+  id: string;
+  post_id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  author?: { display_name: string | null; avatar_url: string | null; username: string | null };
+};
+
 function Dashboard() {
   const navigate = useNavigate();
   const { isArtist, loading: roleLoading } = useUserRole();
@@ -29,8 +38,10 @@ function Dashboard() {
   const [me, setMe] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [myProfile, setMyProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
+  const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
+  const [commentsFor, setCommentsFor] = useState<Post | null>(null);
 
-  const load = async () => {
+  const load = async (currentUserId?: string) => {
     setLoading(true);
     const { data: ps } = await supabase.from("posts")
       .select("id, user_id, content, image_url, likes_count, comments_count, neighborhood, created_at")
@@ -38,12 +49,19 @@ function Dashboard() {
     const list = (ps || []) as Post[];
     const ids = Array.from(new Set(list.map((p) => p.user_id)));
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles")
-        .select("id, display_name, avatar_url, username, neighborhood").in("id", ids);
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((p) => { p.author = byId.get(p.user_id) as any; });
     }
     setPosts(list);
+    if (currentUserId && list.length) {
+      const { data: likes } = await supabase
+        .from("post_likes")
+        .select("post_id")
+        .eq("user_id", currentUserId)
+        .in("post_id", list.map((p) => p.id));
+      setLikedPostIds(new Set((likes || []).map((l) => l.post_id)));
+    }
     setLoading(false);
   };
 
@@ -66,7 +84,7 @@ function Dashboard() {
           return;
         }
         if (prof) setMyProfile(prof as typeof myProfile);
-        await load();
+        await load(data.session.user.id);
       }
       setChecked(true);
     })();
@@ -82,7 +100,28 @@ function Dashboard() {
     if (error) { toast.error(error.message); return; }
     setContent("");
     toast.success("Posted");
-    load();
+    load(me);
+  };
+
+  const togglePostLike = async (post: Post) => {
+    if (!me) return;
+    const liked = likedPostIds.has(post.id);
+    setLikedPostIds((prev) => {
+      const next = new Set(prev);
+      if (liked) next.delete(post.id); else next.add(post.id);
+      return next;
+    });
+    setPosts((cur) => cur.map((x) => x.id === post.id ? {
+      ...x,
+      likes_count: Math.max(0, (x.likes_count ?? 0) + (liked ? -1 : 1)),
+    } : x));
+    const res = liked
+      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", me)
+      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: me });
+    if (res.error) {
+      toast.error(res.error.message);
+      await load(me);
+    }
   };
 
   if (!checked) return null;
@@ -186,16 +225,14 @@ function Dashboard() {
               )}
               <footer className="mt-3 flex items-center gap-6 pl-0 sm:pl-12 text-[12.5px] text-muted-foreground">
                 <button
-                  onClick={async () => {
-                    setPosts((cur) => cur.map((x) => x.id === p.id ? { ...x, likes_count: (x.likes_count ?? 0) + 1 } : x));
-                    await supabase.from("posts").update({ likes_count: (p.likes_count ?? 0) + 1 }).eq("id", p.id);
-                  }}
-                  className="flex items-center gap-1.5 transition hover:text-foreground"
+                  onClick={() => togglePostLike(p)}
+                  className={`flex items-center gap-1.5 transition ${likedPostIds.has(p.id) ? "text-red-500" : "hover:text-foreground"}`}
+                  aria-label={likedPostIds.has(p.id) ? "Unlike" : "Like"}
                 >
-                  <Heart className="h-4 w-4" strokeWidth={1.75} /> {p.likes_count ?? 0}
+                  <Heart className={`h-4 w-4 ${likedPostIds.has(p.id) ? "fill-current" : ""}`} strokeWidth={1.75} /> {p.likes_count ?? 0}
                 </button>
                 <button
-                  onClick={() => toast.info("Comments coming soon")}
+                  onClick={() => setCommentsFor(p)}
                   className="flex items-center gap-1.5 transition hover:text-foreground"
                 >
                   <MessageCircle className="h-4 w-4" strokeWidth={1.75} /> {p.comments_count ?? 0}
@@ -223,7 +260,118 @@ function Dashboard() {
           ))}
         </div>
       </div>
+      {commentsFor && me && (
+        <PostCommentsDialog
+          post={commentsFor}
+          me={me}
+          onClose={() => setCommentsFor(null)}
+          onCountChange={(count) => {
+            setPosts((cur) => cur.map((p) => p.id === commentsFor.id ? { ...p, comments_count: count } : p));
+          }}
+        />
+      )}
     </AppLayout>
+  );
+}
+
+function PostCommentsDialog({ post, me, onClose, onCountChange }: { post: Post; me: string; onClose: () => void; onCountChange: (count: number) => void }) {
+  const [items, setItems] = useState<PostComment[]>([]);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+
+  const loadComments = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("post_comments")
+      .select("id, post_id, user_id, body, created_at")
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: true });
+    if (error) { toast.error(error.message); setLoading(false); return; }
+    const list = (data || []) as PostComment[];
+    const ids = Array.from(new Set(list.map((c) => c.user_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+      const byId = new Map((profs || []).map((p: any) => [p.id, p]));
+      list.forEach((c) => { c.author = byId.get(c.user_id) as any; });
+    }
+    setItems(list);
+    onCountChange(list.length);
+    setLoading(false);
+  };
+
+  useEffect(() => { void loadComments(); }, [post.id]);
+
+  const sendComment = async () => {
+    if (!text.trim() || sending) return;
+    const body = text.trim();
+    setText("");
+    setSending(true);
+    const temp: PostComment = { id: `temp-${Date.now()}`, post_id: post.id, user_id: me, body, created_at: new Date().toISOString() };
+    setItems((cur) => [...cur, temp]);
+    onCountChange(items.length + 1);
+    const { error } = await supabase.from("post_comments").insert({ post_id: post.id, user_id: me, body });
+    setSending(false);
+    if (error) {
+      toast.error(error.message);
+      setItems((cur) => cur.filter((c) => c.id !== temp.id));
+      setText(body);
+      return;
+    }
+    await loadComments();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
+      <div className="flex max-h-[86vh] w-full max-w-lg flex-col rounded-t-2xl border border-border bg-card text-card-foreground shadow-xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-border p-4">
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Comments</div>
+            <div className="truncate text-sm font-semibold text-foreground">{post.author?.display_name || post.author?.username || "Post"}</div>
+          </div>
+          <button onClick={onClose} className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Close comments">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="border-b border-border px-4 py-3 text-sm text-foreground/90">
+          {post.content}
+        </div>
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+          {loading ? (
+            <div className="text-sm text-muted-foreground">Loading comments…</div>
+          ) : items.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">No comments yet. Be the first.</div>
+          ) : items.map((c) => (
+            <div key={c.id} className="flex gap-3">
+              <Avatar className="h-8 w-8 shrink-0">
+                {c.author?.avatar_url && <AvatarImage src={c.author.avatar_url} />}
+                <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
+                  {(c.author?.display_name || c.author?.username || "U").slice(0, 1).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1 rounded-2xl bg-muted px-3 py-2">
+                <div className="text-xs font-semibold text-foreground">{c.author?.display_name || c.author?.username || "You"}</div>
+                <div className="whitespace-pre-wrap break-words text-sm text-foreground/90">{c.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="border-t border-border p-3">
+          <div className="flex items-center gap-2">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendComment(); } }}
+              placeholder="Add a comment"
+              className="h-10 flex-1 rounded-full border border-border bg-muted px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-orange"
+            />
+            <button onClick={sendComment} disabled={!text.trim() || sending} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-orange text-white transition hover:brightness-110 disabled:opacity-40" aria-label="Send comment">
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -281,8 +429,9 @@ function CreatorSearch() {
           {!loading && results.map((c) => (
             <Link
               key={c.id}
-              to="/profile"
-              onMouseDown={(e) => e.preventDefault()}
+              to="/u/$username"
+              params={{ username: c.username || c.id }}
+              onClick={() => setOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-accent"
             >
               <Avatar className="h-8 w-8">

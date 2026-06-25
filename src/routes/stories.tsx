@@ -45,7 +45,7 @@ function CommentsDialog({ story, onClose, onCountChange }: { story: Story; onClo
     const list = (data || []) as Comment[];
     const ids = Array.from(new Set(list.map((c) => c.user_id)));
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids);
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((c) => { c.author = byId.get(c.user_id) as any; });
     }
@@ -57,10 +57,15 @@ function CommentsDialog({ story, onClose, onCountChange }: { story: Story; onClo
   const send = async () => {
     if (!me || !text.trim()) return;
     setSending(true);
-    const { error } = await supabase.from("story_comments").insert({ story_id: story.id, user_id: me.id, body: text.trim() });
+    const body = text.trim();
+    setText("");
+    const optimistic: Comment = { id: `temp-${Date.now()}`, story_id: story.id, user_id: me.id, body, created_at: new Date().toISOString(), author: { display_name: me.display_name, avatar_url: me.avatar_url } } as Comment;
+    setItems((cur) => [...cur, optimistic]);
+    onCountChange(items.length + 1);
+    const { error } = await supabase.from("story_comments").insert({ story_id: story.id, user_id: me.id, body });
     setSending(false);
-    if (error) { toast.error(error.message); return; }
-    setText(""); load();
+    if (error) { toast.error(error.message); setItems((cur) => cur.filter((c) => c.id !== optimistic.id)); setText(body); return; }
+    load();
   };
 
   return (
@@ -176,7 +181,7 @@ function StoriesSignedIn() {
     const list = (data || []) as Story[];
     const ids = Array.from(new Set(list.map((s) => s.user_id)));
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids);
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((s) => { s.author = byId.get(s.user_id) as any; });
     }
@@ -202,10 +207,12 @@ function StoriesSignedIn() {
       return n;
     });
     setStories((prev) => prev.map((x) => x.id === s.id ? { ...x, likes_count: Math.max(0, (x.likes_count || 0) + (liked ? -1 : 1)) } : x));
-    if (liked) {
-      await supabase.from("story_likes").delete().eq("story_id", s.id).eq("user_id", me.id);
-    } else {
-      await supabase.from("story_likes").insert({ story_id: s.id, user_id: me.id });
+    const res = liked
+      ? await supabase.from("story_likes").delete().eq("story_id", s.id).eq("user_id", me.id)
+      : await supabase.from("story_likes").insert({ story_id: s.id, user_id: me.id });
+    if (res.error) {
+      toast.error(res.error.message);
+      await load();
     }
   };
 
@@ -249,7 +256,7 @@ function StoriesSignedIn() {
 
         <div className="space-y-4">
           {stories.map((s) => (
-            <article key={s.id} className="flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4">
+            <article key={s.id} className="flex gap-4 rounded-2xl border border-border bg-card p-4 text-card-foreground">
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex items-center gap-2">
                   <Avatar className="h-7 w-7">
@@ -257,11 +264,11 @@ function StoriesSignedIn() {
                     <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(s.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <span className="text-sm font-medium">{s.author?.display_name || "Anonymous"}</span>
-                  <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange-700">{s.format}</span>
+                  <span className="rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange">{s.format}</span>
                 </div>
                 <h3 className="text-lg font-bold">{s.title}</h3>
-                {stripHtml(s.excerpt) && <p className="mt-1 line-clamp-3 text-sm text-neutral-600">{stripHtml(s.excerpt)}</p>}
-                <div className="mt-3 flex items-center gap-4 text-xs text-neutral-500">
+                {stripHtml(s.excerpt) && <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{stripHtml(s.excerpt)}</p>}
+                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {s.read_minutes || 1} min</span>
                   <button
                     onClick={() => toggleLike(s)}

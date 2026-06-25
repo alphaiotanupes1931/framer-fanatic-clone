@@ -39,25 +39,23 @@ function PublicProfilePage() {
     (async () => {
       setLoading(true);
       const { data } = await supabase
-        .from("profiles")
-        .select("id, display_name, username, avatar_url, banner_url, bio, neighborhood, role, category, website")
-        .eq("username", username)
-        .maybeSingle();
+        .rpc("public_profile_by_username", { _username: username });
+      const publicProfile = data?.[0] as PublicProfile | undefined;
       if (cancelled) return;
-      setProfile((data as PublicProfile) || null);
-      if (data) {
+      setProfile(publicProfile || null);
+      if (publicProfile) {
         const [{ count: followers }, { count: following }, { count: posts }] = await Promise.all([
-          supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", data.id),
-          supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", data.id),
-          supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", data.id),
+          supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
+          supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
+          supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id),
         ]);
         setStats({ followers: followers || 0, following: following || 0, posts: posts || 0 });
-        if (me && me.id !== data.id) {
+        if (me && me.id !== publicProfile.id) {
           const { data: f } = await supabase
             .from("follows")
             .select("follower_id")
             .eq("follower_id", me.id)
-            .eq("following_id", data.id)
+            .eq("following_id", publicProfile.id)
             .maybeSingle();
           setIsFollowing(!!f);
         }
@@ -96,9 +94,17 @@ function PublicProfilePage() {
       .from("conversations")
       .select("id")
       .eq("user_a", a).eq("user_b", b).maybeSingle();
+    let conversationId = existing?.id;
     if (!existing) {
-      await supabase.from("conversations").insert({ user_a: a, user_b: b });
+      const { data: created, error } = await supabase
+        .from("conversations")
+        .insert({ user_a: a, user_b: b })
+        .select("id")
+        .single();
+      if (error) { toast.error(error.message); return; }
+      conversationId = created?.id;
     }
+    if (conversationId) window.localStorage.setItem("pb_open_conversation", conversationId);
     navigate({ to: "/messages" });
   };
 
