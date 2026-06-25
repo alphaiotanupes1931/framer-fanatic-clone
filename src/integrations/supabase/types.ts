@@ -678,6 +678,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_creators: {
+        Args: { lim?: number }
+        Returns: {
+          avatar_url: string
+          category: string
+          display_name: string
+          id: string
+          role: string
+          username: string
+        }[]
+      }
       search_creators: {
         Args: { lim?: number; q?: string }
         Returns: {
