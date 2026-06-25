@@ -460,6 +460,35 @@ function NotificationsBell() {
 function MessageBubble() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const compute = async () => {
+      const { data: auth } = await supabase.auth.getSession();
+      const uid = auth.session?.user.id;
+      if (!uid) { if (!cancelled) setUnread(0); return; }
+      const { data: convos } = await supabase
+        .from("conversations")
+        .select("id, user_a, user_b, last_message_at, last_read_at_a, last_read_at_b")
+        .or(`user_a.eq.${uid},user_b.eq.${uid}`);
+      if (!convos || cancelled) return;
+      const count = convos.filter((c) => {
+        const mine = c.user_a === uid ? c.last_read_at_a : c.last_read_at_b;
+        return c.last_message_at && (!mine || new Date(c.last_message_at) > new Date(mine));
+      }).length;
+      setUnread(count);
+    };
+    void compute();
+    const ch = supabase
+      .channel("msg-bubble-unread")
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => void compute())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "conversations" }, () => void compute())
+      .subscribe();
+    const t = setInterval(compute, 30_000);
+    return () => { cancelled = true; clearInterval(t); void supabase.removeChannel(ch); };
+  }, []);
+
   return (
     <>
       <button
@@ -468,6 +497,11 @@ function MessageBubble() {
         className="fixed bottom-[68px] right-4 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-white shadow-lg transition hover:brightness-110 md:bottom-6 md:right-6 md:h-14 md:w-14"
       >
         {open ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
+        {!open && unread > 0 && (
+          <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white ring-2 ring-background">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
       </button>
       {open && (
         <motion.div
