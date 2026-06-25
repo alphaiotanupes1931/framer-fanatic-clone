@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import aboutFounders from "@/assets/about-founders.png.asset.json";
+import { assetUrl } from "@/lib/utils";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 
 export const Route = createFileRoute("/about")({
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "Planet Baltimore is a platform built so Baltimore artists, makers, and organizers have a home of their own." },
       { property: "og:title", content: "About Planet Baltimore" },
       { property: "og:description", content: "A platform for Baltimore artists, makers, and organizers." },
-      { property: "og:image", content: aboutFounders.url },
+      { property: "og:image", content: assetUrl(aboutFounders.url) },
     ],
   }),
   component: AboutPage,

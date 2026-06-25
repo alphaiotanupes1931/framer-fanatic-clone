@@ -6,6 +6,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
+import { assetUrl } from "@/lib/utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
@@ -370,7 +371,7 @@ function HeroParallax() {
       <div className="absolute inset-0 hidden md:block pointer-events-none">
         <video
           ref={videoRef}
-          src={heroVideoAsset.url}
+          src={assetUrl(heroVideoAsset.url)}
           autoPlay
           muted
           loop
