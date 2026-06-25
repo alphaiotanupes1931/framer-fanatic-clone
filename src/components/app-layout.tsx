@@ -395,7 +395,6 @@ function NotificationsBell() {
   if (profile) {
     if (!profile.avatar_url) missing.push({ key: "avatar", title: "Add a profile photo", body: "Help neighbors recognize you in the feed." });
     if (!profile.neighborhood) missing.push({ key: "neighborhood", title: "Set your neighborhood", body: "Show up on the Baltimore map." });
-    if (!profile.bio) missing.push({ key: "bio", title: "Write a short bio", body: "Tell people what you make and care about." });
     if (!profile.display_name) missing.push({ key: "name", title: "Add your display name", body: "Use your real name or stage name." });
   }
   const totalCount = items.length + missing.length;
