@@ -50,7 +50,6 @@ const NAV = [
   { section: "Content", items: [
     { to: "/stories", icon: BookOpen, label: "Stories", tour: "nav-stories" },
     { to: "/videos", icon: VideoIcon, label: "Videos" },
-    { to: "/leaderboard", icon: Trophy, label: "Baltimore 100", tour: "nav-leaderboard" },
   ]},
   { section: "Account", items: [
     { to: "/settings", icon: SettingsIcon, label: "Settings" },

@@ -301,8 +301,14 @@ function EditUserDialog({
       setUploading(false);
       return toast.error(error.message);
     }
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    setAvatarUrl(data.publicUrl);
+    const { data, error: signErr } = await supabase.storage
+      .from("avatars")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    if (signErr || !data) {
+      setUploading(false);
+      return toast.error(signErr?.message || "Could not sign URL");
+    }
+    setAvatarUrl(data.signedUrl);
     setUploading(false);
     toast.success("Photo uploaded");
   };
