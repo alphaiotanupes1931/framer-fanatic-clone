@@ -287,7 +287,7 @@ function StoriesSignedIn() {
       </div>
 
       {commentsFor && (
-        <CommentsDialog story={commentsFor} onClose={() => setCommentsFor(null)} onCountChange={(n) => {
+        <CommentsDialog story={commentsFor} onClose={() => setCommentsFor(null)} onCountChange={(n: number) => {
           setStories((prev) => prev.map((x) => x.id === commentsFor.id ? { ...x, comments_count: n } : x));
         }} />
       )}
