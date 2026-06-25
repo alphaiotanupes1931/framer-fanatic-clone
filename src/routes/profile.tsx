@@ -56,8 +56,11 @@ function ProfilePage() {
     const path = `${profile.id}/banner-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    await supabase.from("profiles").update({ banner_url: data.publicUrl }).eq("id", profile.id);
+    const { data, error: signErr } = await supabase.storage
+      .from("avatars")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    if (signErr || !data) { toast.error(signErr?.message || "Could not sign URL"); return; }
+    await supabase.from("profiles").update({ banner_url: data.signedUrl }).eq("id", profile.id);
     toast.success("Banner updated"); location.reload();
   };
 
