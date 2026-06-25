@@ -747,7 +747,7 @@ function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(5,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-3">
-              <img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0 invert" />
+              <img src={pbLogoDark} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0" />
               <div className="font-display text-xl md:text-2xl font-extrabold tracking-tight uppercase truncate">Planet Baltimore</div>
             </div>
           </div>
