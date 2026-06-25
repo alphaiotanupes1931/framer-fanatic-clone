@@ -103,8 +103,8 @@ function AuthPage() {
     if (error) return toast.error(error.message);
     toast.success(
       finalRole === "artist"
-        ? "Account created - welcome, artist!"
-        : "Account created as attendee.",
+        ? "Account created. Welcome, Artist!"
+        : "Account created as an Attendee.",
     );
     // If artist + verified Baltimore, immediately upgrade their role in user_roles.
     if (finalRole === "artist") {
@@ -180,8 +180,8 @@ function AuthPage() {
                   {coords && (
                     <p className="text-xs text-muted-foreground">
                       {inBaltimore
-                        ? "✓ You're in the Baltimore area - you can sign up as an artist or attendee."
-                        : "You're outside Baltimore - artist sign-up is restricted to Baltimore-area residents only. You can still join as an attendee."}
+                        ? "✓ You're in the Baltimore area. You can sign up as an Artist or an Attendee."
+                        : "You're outside Baltimore. Artist sign-up is restricted to Baltimore-area residents. You can still join as an Attendee."}
                     </p>
                   )}
                 </div>
@@ -199,7 +199,7 @@ function AuthPage() {
                       type="button"
                       onClick={() => inBaltimore && setRole("artist")}
                       disabled={!inBaltimore}
-                      title={!inBaltimore ? "Artist sign-up requires a Baltimore location" : ""}
+                      title={!inBaltimore ? "Artist sign-up requires a Baltimore location." : ""}
                       className={`rounded-md border px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${role === "artist" ? "border-primary bg-primary/10" : "border-input"}`}
                     >
                       Artist
