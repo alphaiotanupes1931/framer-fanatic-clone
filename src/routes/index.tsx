@@ -5,13 +5,9 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
-import boomSelecta from "@/assets/boom-selecta.png";
-import queenForADay from "@/assets/queen-for-a-day.png";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
-import terrellStage from "@/assets/terrell-stage.png";
-import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
