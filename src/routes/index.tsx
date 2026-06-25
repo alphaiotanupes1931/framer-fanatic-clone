@@ -647,10 +647,6 @@ function DailyCreators() {
 }
 
 
-function CTA() {
-  return CTAInner();
-}
-
 function NextRefreshCountdown() {
   const [label, setLabel] = useState("");
   useEffect(() => {
@@ -676,7 +672,7 @@ function NextRefreshCountdown() {
   );
 }
 
-function CTAInner() {
+function CTA() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-blue via-blue to-ink px-5 md:px-10 py-24 md:py-36">
       <motion.div
