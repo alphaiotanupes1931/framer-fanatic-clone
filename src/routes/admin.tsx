@@ -4,8 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -39,6 +44,7 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [editing, setEditing] = useState<AdminUser | null>(null);
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) navigate({ to: "/dashboard" });
@@ -79,6 +85,10 @@ function AdminPage() {
     if (error) return toast.error(error.message);
     toast.success(u.banned ? "Account unbanned" : "Account banned");
     setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, banned: !u.banned } : p)));
+  };
+
+  const onSaved = (id: string, patch: Partial<AdminUser>) => {
+    setUsers((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   };
 
   if (roleLoading || !isAdmin) {
@@ -204,6 +214,14 @@ function AdminPage() {
                     <span className="text-[11px] text-neutral-500">{live ? "Live" : "Offline"}</span>
                   </div>
                   <div className="flex justify-end">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      onClick={() => setEditing(u)}
+                      className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                      title="Edit user"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
                     <button
                       onClick={() => toggleBan(u)}
                       disabled={busy === u.id || u.is_admin}
@@ -222,12 +240,14 @@ function AdminPage() {
                       )}
                     </button>
                   </div>
+                  </div>
                 </li>
               );
             })}
           </ul>
         )}
       </div>
+      <EditUserDialog user={editing} onClose={() => setEditing(null)} onSaved={onSaved} />
     </AppLayout>
   );
 }
@@ -241,5 +261,128 @@ function Stat({ label, value, accent }: { label: string; value: number; accent?:
       </div>
       <div className="mt-1 text-2xl font-semibold text-neutral-900">{value}</div>
     </div>
+  );
+}
+
+function EditUserDialog({
+  user,
+  onClose,
+  onSaved,
+}: {
+  user: AdminUser | null;
+  onClose: () => void;
+  onSaved: (id: string, patch: Partial<AdminUser>) => void;
+}) {
+  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    setDisplayName(user.display_name ?? "");
+    setUsername(user.username ?? "");
+    setNeighborhood(user.neighborhood ?? "");
+    setBio("");
+    setAvatarUrl(user.avatar_url ?? "");
+  }, [user]);
+
+  if (!user) return null;
+
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (error) {
+      setUploading(false);
+      return toast.error(error.message);
+    }
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    setAvatarUrl(data.publicUrl);
+    setUploading(false);
+    toast.success("Photo uploaded");
+  };
+
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase.rpc("admin_update_profile", {
+      _user_id: user.id,
+      _display_name: displayName || undefined,
+      _username: username || undefined,
+      _avatar_url: avatarUrl || undefined,
+      _bio: bio || undefined,
+      _neighborhood: neighborhood || undefined,
+    });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    onSaved(user.id, {
+      display_name: displayName || null,
+      username: username || null,
+      neighborhood: neighborhood || null,
+      avatar_url: avatarUrl || null,
+    });
+    toast.success("Profile updated");
+    onClose();
+  };
+
+  const initials = (displayName || user.email || "U").slice(0, 2).toUpperCase();
+
+  return (
+    <Dialog open={!!user} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit user</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              <AvatarFallback className="bg-neutral-900 text-white">{initials}</AvatarFallback>
+            </Avatar>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent">
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+              {uploading ? "Uploading..." : "Change photo"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleUpload(f); }}
+              />
+            </label>
+          </div>
+          <div>
+            <Label htmlFor="adm-name">Display name</Label>
+            <Input id="adm-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="adm-username">Username</Label>
+            <Input id="adm-username" value={username} onChange={(e) => setUsername(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="adm-hood">Neighborhood</Label>
+            <Input id="adm-hood" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="adm-bio">Bio (leave empty to keep current)</Label>
+            <Textarea id="adm-bio" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="adm-avatar">Avatar URL</Label>
+            <Input id="adm-avatar" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={save} disabled={saving}>
+            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

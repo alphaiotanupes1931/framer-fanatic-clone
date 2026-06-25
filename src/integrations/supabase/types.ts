@@ -660,6 +660,17 @@ export type Database = {
         Args: { _banned: boolean; _user_id: string }
         Returns: undefined
       }
+      admin_update_profile: {
+        Args: {
+          _avatar_url?: string
+          _bio?: string
+          _display_name?: string
+          _neighborhood?: string
+          _user_id: string
+          _username?: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
