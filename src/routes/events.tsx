@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout } from "@/lib/stripe.functions";
+import { EventImage } from "@/components/event-image";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -41,7 +42,7 @@ function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: 
     <Link to="/events/$eventId" params={{ eventId: e.id }} className={`block rounded-2xl overflow-hidden border h-full transition hover:shadow-lg hover:-translate-y-0.5 ${wrap}`}>
       <div className={`aspect-[16/10] overflow-hidden flex items-center justify-center ${imgBg}`}>
         {e.image_url
-          ? <img src={e.image_url} alt={e.title} className="w-full h-full object-cover" />
+          ? <EventImage src={e.image_url} alt={e.title} className="w-full h-full object-cover" />
           : <Calendar className="w-10 h-10" />}
       </div>
       <div className="p-4">
@@ -101,7 +102,7 @@ function EventsPage() {
                 <div className="rounded-3xl overflow-hidden border border-paper/15 bg-paper/5 md:grid md:grid-cols-2">
                   <div className="aspect-[16/10] md:aspect-auto bg-paper/10 overflow-hidden">
                     {next.image_url
-                      ? <img src={next.image_url} alt={next.title} className="w-full h-full object-cover" />
+                      ? <EventImage src={next.image_url} alt={next.title} className="w-full h-full object-cover" />
                       : <div className="w-full h-full flex items-center justify-center text-paper/30"><Calendar className="w-16 h-16" /></div>}
                   </div>
                   <div className="p-6 md:p-10 flex flex-col justify-center">
@@ -157,8 +158,8 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data } = supabase.storage.from("event-images").getPublicUrl(path);
-      setForm((f) => ({ ...f, image_url: data.publicUrl }));
+      // Store the storage path; EventImage signs it on render.
+      setForm((f) => ({ ...f, image_url: path }));
       toast.success("Image uploaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -253,7 +254,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
               <div className="rounded-lg border bg-transparent p-3">
                 <div className="flex items-center gap-3">
                   {form.image_url ? (
-                    <img src={form.image_url} alt="" className="h-16 w-16 rounded-md object-cover border" />
+                    <EventImage src={form.image_url} alt="" className="h-16 w-16 rounded-md object-cover border" />
                   ) : (
                     <div className="h-16 w-16 rounded-md bg-muted flex items-center justify-center text-muted-foreground"><ImagePlus className="w-5 h-5" /></div>
                   )}
