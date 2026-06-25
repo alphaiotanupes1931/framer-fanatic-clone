@@ -197,7 +197,14 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
 /** Upgrade the signed-in user from attendee to artist (Baltimore-verified only). */
 export const becomeArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((data: unknown) => {
+    const d = (data ?? {}) as { lat?: number; lng?: number };
+    return {
+      lat: typeof d.lat === "number" ? d.lat : null,
+      lng: typeof d.lng === "number" ? d.lng : null,
+    };
+  })
+  .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: profile } = await supabase
       .from("profiles")
@@ -206,20 +213,27 @@ export const becomeArtist = createServerFn({ method: "POST" })
       .maybeSingle();
 
     // Treat any user with a captured Baltimore-area lat/lng as verified.
-    const lat = (profile as { latitude?: number | null; geo_lat?: number | null } | null)?.latitude
+    // Prefer fresh client-supplied coords (re-checks location at click time).
+    const lat = data.lat
+      ?? (profile as { latitude?: number | null; geo_lat?: number | null } | null)?.latitude
       ?? (profile as { geo_lat?: number | null } | null)?.geo_lat
       ?? null;
-    const lng = (profile as { longitude?: number | null; geo_lng?: number | null } | null)?.longitude
+    const lng = data.lng
+      ?? (profile as { longitude?: number | null; geo_lng?: number | null } | null)?.longitude
       ?? (profile as { geo_lng?: number | null } | null)?.geo_lng
       ?? null;
-    const inBaltimoreFlag = (profile as { in_baltimore?: boolean; is_baltimore_verified?: boolean } | null)?.in_baltimore
-      || (profile as { is_baltimore_verified?: boolean } | null)?.is_baltimore_verified;
-    const inBaltimore =
-      inBaltimoreFlag === true ||
-      (lat != null && lng != null && lat >= 39.2 && lat <= 39.38 && lng >= -76.72 && lng <= -76.52);
+    const inBox = lat != null && lng != null && lat >= 39.2 && lat <= 39.38 && lng >= -76.72 && lng <= -76.52;
 
-    if (!inBaltimore) {
-      throw new Error("Artist accounts are limited to Baltimore-area residents.");
+    if (!inBox) {
+      throw new Error("Artist accounts are limited to Baltimore-area residents. Please enable location access from within Baltimore to upgrade.");
+    }
+
+    // Persist verified location for future checks.
+    if (data.lat != null && data.lng != null) {
+      await supabase
+        .from("profiles")
+        .update({ latitude: data.lat, longitude: data.lng, in_baltimore: true } as never)
+        .eq("id", userId);
     }
 
     // Service-role insert to bypass user_roles RLS for self-upgrade.
