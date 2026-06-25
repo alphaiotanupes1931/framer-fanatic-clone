@@ -283,7 +283,7 @@ function QuoteSection() {
   const imageY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
 
   return (
-    <section ref={ref} className="relative w-full overflow-hidden bg-paper">
+    <section ref={ref} className="relative w-full overflow-hidden bg-gradient-to-b from-paper via-paper to-blue">
       <div className="relative max-w-[1200px] mx-auto px-5 md:px-10 py-16 md:py-32 lg:py-40">
         <div className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center">
           {/* Portrait with parallax */}
@@ -446,7 +446,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36"
+      className="relative overflow-hidden bg-gradient-to-b from-blue-deep via-blue to-[#3d68d9] px-5 md:px-10 py-24 md:py-36"
     >
       {/* Ambient glow */}
       <div
@@ -504,13 +504,8 @@ function CreatorsFans() {
 
 
 function Features() {
-  const items = [
-    { title: "Follow Local Creators", body: "Discover and follow Baltimore artists, musicians, podcasters, and makers. Stay in the loop with their latest work.", img: terrellStage },
-    { title: "Community Feed", body: "A dedicated space for posts, updates, and conversations that keep the whole Baltimore creative scene connected.", img: boomSelecta },
-    { title: "Direct Support", body: "Back the people shaping the city with free, paid, or one-time support. Your money goes straight to local creators.", img: queenForADay },
-  ];
   return (
-    <section id="features" className="relative bg-[#3d68d9] px-5 md:px-10 py-24 md:py-32">
+    <section id="features" className="relative bg-gradient-to-b from-[#3d68d9] via-[#3d68d9] to-paper px-5 md:px-10 py-24 md:py-32">
       <div className="mx-auto max-w-[1280px]">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -519,24 +514,137 @@ function Features() {
           transition={{ duration: 0.8 }}
           className="font-display text-white font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] max-w-5xl"
         >
-          Baltimore, fully connected.
+          Meet today's Baltimore.
         </motion.h2>
-
-        <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5">
-          {items.map((it, i) => (
-            <TiltCard key={i} index={i} img={it.img} title={it.title} body={it.body} />
-          ))}
-        </div>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="mt-5 max-w-xl text-white/80 text-base md:text-lg"
+        >
+          Three creators from the platform, refreshed every day.
+        </motion.p>
+        <DailyCreators />
       </div>
     </section>
+  );
+}
+
+type DailyCreator = {
+  id: string;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  category: string | null;
+};
+
+function DailyCreators() {
+  const [creators, setCreators] = useState<DailyCreator[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id,display_name,username,avatar_url,category,role")
+        .eq("role", "artist")
+        .not("avatar_url", "is", null)
+        .limit(200);
+      if (cancelled) return;
+      const pool = (data ?? []) as DailyCreator[];
+      const today = new Date();
+      const seedStr = `${today.getUTCFullYear()}-${today.getUTCMonth()}-${today.getUTCDate()}`;
+      let h = 2166136261;
+      for (let i = 0; i < seedStr.length; i++) {
+        h ^= seedStr.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      const rand = () => {
+        h += 0x6d2b79f5;
+        let t = h;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+      const arr = [...pool];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      setCreators(arr.slice(0, 3));
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="aspect-[4/5] rounded-3xl bg-white/10 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (creators.length === 0) {
+    return (
+      <div className="mt-12 md:mt-20 rounded-3xl border border-white/20 bg-white/5 p-10 text-center text-white/80">
+        New creators joining soon. Be one of the first.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5">
+      {creators.map((c, i) => (
+        <motion.a
+          key={c.id}
+          href={c.username ? `/u/${c.username}` : "#"}
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+          className="group relative rounded-3xl bg-ink text-paper overflow-hidden block"
+        >
+          <div className="aspect-[4/5] overflow-hidden bg-ink/60">
+            {c.avatar_url ? (
+              <motion.img
+                src={c.avatar_url}
+                alt={c.display_name ?? "Creator"}
+                loading="lazy"
+                className="w-full h-full object-cover"
+                whileHover={{ scale: 1.06 }}
+                transition={{ duration: 0.6 }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-paper/40 text-6xl font-display">
+                {(c.display_name ?? "?").slice(0, 1).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="p-6 md:p-7">
+            <h3 className="font-display text-2xl md:text-3xl font-medium tracking-tight">
+              {c.display_name ?? c.username ?? "Baltimore creator"}
+            </h3>
+            <p className="mt-2 text-paper/70 text-sm md:text-base">
+              {c.category ?? "Creator"}
+            </p>
+          </div>
+        </motion.a>
+      ))}
+    </div>
   );
 }
 
 
 function CTA() {
   return (
-    <section className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-ink/10" />
+    <section className="relative overflow-hidden bg-gradient-to-b from-blue via-blue to-ink px-5 md:px-10 py-24 md:py-36">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
