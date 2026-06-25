@@ -405,6 +405,7 @@ export type Database = {
           email: string | null
           geo_lat: number | null
           geo_lng: number | null
+          hidden_from_showcase: boolean
           id: string
           in_baltimore: boolean
           is_baltimore_verified: boolean
@@ -433,6 +434,7 @@ export type Database = {
           email?: string | null
           geo_lat?: number | null
           geo_lng?: number | null
+          hidden_from_showcase?: boolean
           id: string
           in_baltimore?: boolean
           is_baltimore_verified?: boolean
@@ -461,6 +463,7 @@ export type Database = {
           email?: string | null
           geo_lat?: number | null
           geo_lng?: number | null
+          hidden_from_showcase?: boolean
           id?: string
           in_baltimore?: boolean
           is_baltimore_verified?: boolean
@@ -647,6 +650,7 @@ export type Database = {
           created_at: string
           display_name: string
           email: string
+          hidden_from_showcase: boolean
           id: string
           in_baltimore: boolean
           is_admin: boolean
@@ -658,6 +662,10 @@ export type Database = {
       }
       admin_set_banned: {
         Args: { _banned: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_set_showcase_hidden: {
+        Args: { _hidden: boolean; _user_id: string }
         Returns: undefined
       }
       admin_update_profile: {
