@@ -132,6 +132,13 @@ function Dashboard() {
       subtitle="What's moving in Baltimore right now."
     >
       <div className="mx-auto max-w-2xl">
+        {myProfile?.display_name && (
+          <div className="mb-3">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              Welcome back, {myProfile.display_name.split(" ")[0]}.
+            </h2>
+          </div>
+        )}
         <CreatorSearch />
         <DiscoverStrip />
 
