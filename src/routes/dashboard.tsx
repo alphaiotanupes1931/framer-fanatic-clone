@@ -92,7 +92,6 @@ function Dashboard() {
       title="Home"
       subtitle="What's moving in Baltimore right now."
     >
-      <ShareAppButton />
       <div className="mx-auto max-w-2xl">
         <CreatorSearch />
         <DiscoverStrip />
