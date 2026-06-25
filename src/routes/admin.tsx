@@ -311,11 +311,11 @@ function EditUserDialog({
     setSaving(true);
     const { error } = await supabase.rpc("admin_update_profile", {
       _user_id: user.id,
-      _display_name: displayName || null,
-      _username: username || null,
-      _avatar_url: avatarUrl || null,
-      _bio: bio || null,
-      _neighborhood: neighborhood || null,
+      _display_name: displayName || undefined,
+      _username: username || undefined,
+      _avatar_url: avatarUrl || undefined,
+      _bio: bio || undefined,
+      _neighborhood: neighborhood || undefined,
     });
     setSaving(false);
     if (error) return toast.error(error.message);
