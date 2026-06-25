@@ -54,20 +54,32 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  // Silently auto-retry once for transient errors before showing the fallback.
-  const autoRetriedRef = (typeof window !== "undefined" ? (window as any) : ({} as any));
+  // Silently auto-retry transient errors. Show a loader during the retry
+  // attempt so users don't see the failure screen on flaky page loads.
+  const [retrying, setRetrying] = useState(true);
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
-    const key = "__pb_auto_retry_at";
-    const now = Date.now();
-    const last = Number(autoRetriedRef[key] ?? 0);
-    // Only auto-retry once per 10s window to avoid loops.
-    if (now - last > 10_000) {
-      autoRetriedRef[key] = now;
-      router.invalidate();
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      try {
+        await router.invalidate();
+      } catch {}
+      if (cancelled) return;
       reset();
-    }
-  }, [error]);
+      // If the error persists, surface the fallback after a short delay.
+      setTimeout(() => { if (!cancelled) setRetrying(false); }, 1500);
+    }, 100);
+    return () => { cancelled = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (retrying) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
