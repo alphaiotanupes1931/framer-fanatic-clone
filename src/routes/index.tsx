@@ -294,6 +294,8 @@ function QuoteSection() {
                 <img
                   src={terrellSpeaks}
                   alt="Terrell Speaks"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </div>
