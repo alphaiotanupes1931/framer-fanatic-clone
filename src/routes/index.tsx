@@ -375,7 +375,6 @@ function HeroParallax() {
           src={assetUrl(heroVideoAsset.url)}
           autoPlay
           muted
-          loop
           playsInline
           preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
