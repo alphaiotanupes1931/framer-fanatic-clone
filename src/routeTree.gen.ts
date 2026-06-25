@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
@@ -37,6 +38,11 @@ import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/
 const VideosRoute = VideosRouteImport.update({
   id: '/videos',
   path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoriesRoute = StoriesRouteImport.update({
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/stories'
+    | '/terms'
     | '/videos'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/stories'
+    | '/terms'
     | '/videos'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/stories'
+    | '/terms'
     | '/videos'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
@@ -337,6 +349,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   StoriesRoute: typeof StoriesRoute
+  TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
   OSlugRoute: typeof OSlugRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       path: '/videos'
       fullPath: '/videos'
       preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stories': {
@@ -537,6 +557,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   StoriesRoute: StoriesRoute,
+  TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
   OSlugRoute: OSlugRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
