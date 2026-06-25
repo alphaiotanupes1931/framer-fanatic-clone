@@ -313,12 +313,7 @@ export function AppLayout({
             <NotificationsBell />
           </div>
           {hero && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-6"
-            >
+            <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-6">
               <div className="min-w-0">
                 <h1 className="text-[22px] font-semibold leading-tight tracking-tight text-foreground sm:text-[34px]">{title}</h1>
                 {subtitle && <p className="mt-1 max-w-xl text-[12.5px] leading-snug text-muted-foreground sm:mt-1.5 sm:text-sm">{subtitle}</p>}
@@ -338,16 +333,11 @@ export function AppLayout({
                   <Plus className="h-4 w-4" /> {cta}
                 </Link>
               ))}
-            </motion.div>
+            </div>
           )}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className={hero ? "mt-5 md:mt-8" : ""}
-          >
+          <div className={hero ? "mt-5 md:mt-8" : ""}>
             {children}
-          </motion.div>
+          </div>
         </main>
 
         <aside className="sticky top-0 hidden h-screen w-80 shrink-0 overflow-y-auto border-l border-border bg-background px-5 py-8 xl:block">
