@@ -648,6 +648,35 @@ function DailyCreators() {
 
 
 function CTA() {
+  return CTAInner();
+}
+
+function NextRefreshCountdown() {
+  const [label, setLabel] = useState("");
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const next = new Date(now);
+      next.setUTCHours(24, 0, 0, 0);
+      const ms = next.getTime() - now.getTime();
+      const h = Math.floor(ms / 3_600_000);
+      const m = Math.floor((ms % 3_600_000) / 60_000);
+      const s = Math.floor((ms % 60_000) / 1000);
+      setLabel(`${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="mt-8 md:mt-10 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs md:text-sm text-white/85 backdrop-blur">
+      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+      Next creators in <span className="font-mono tabular-nums">{label}</span>
+    </div>
+  );
+}
+
+function CTAInner() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-blue via-blue to-ink px-5 md:px-10 py-24 md:py-36">
       <motion.div
