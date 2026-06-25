@@ -314,7 +314,6 @@ function _DiscoverStripImpl() {
     { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", color: "bg-indigo-50 text-indigo-600" },
     { to: "/groups", icon: Users, label: "Groups", color: "bg-rose-50 text-rose-600" },
     { to: "/stories", icon: BookOpen, label: "Stories", color: "bg-amber-50 text-amber-700" },
-    { to: "/leaderboard", icon: Trophy, label: "Baltimore 100", color: "bg-muted text-muted-foreground" },
   ] as const;
   return (
     <div className="mb-6">
