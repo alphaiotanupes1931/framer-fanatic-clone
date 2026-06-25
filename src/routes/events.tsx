@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
-import { Calendar, MapPin, Plus, X, Ticket } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useServerFn } from "@tanstack/react-start";
@@ -38,7 +38,7 @@ function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: 
   const meta = dark ? "text-paper/60" : "text-muted-foreground";
   const body = dark ? "text-paper/70" : "text-muted-foreground";
   return (
-    <div className={`rounded-2xl overflow-hidden border h-full ${wrap}`}>
+    <Link to="/events/$eventId" params={{ eventId: e.id }} className={`block rounded-2xl overflow-hidden border h-full transition hover:shadow-lg hover:-translate-y-0.5 ${wrap}`}>
       <div className={`aspect-[16/10] overflow-hidden flex items-center justify-center ${imgBg}`}>
         {e.image_url
           ? <img src={e.image_url} alt={e.title} className="w-full h-full object-cover" />
@@ -55,7 +55,7 @@ function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: 
           </div>
           {priced && onBuy && (
             <button
-              onClick={() => onBuy(e.id)}
+              onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); onBuy(e.id); }}
               className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
             >
               <Ticket className="h-3 w-3" /> Buy ticket
@@ -63,7 +63,7 @@ function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: 
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -146,6 +146,26 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
   const [buying, setBuying] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const onPickImage = async (file: File) => {
+    if (!me) return;
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("event-images").getPublicUrl(path);
+      setForm((f) => ({ ...f, image_url: data.publicUrl }));
+      toast.success("Image uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const buy = async (eventId: string) => {
     setBuying(eventId);
@@ -230,7 +250,36 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
                   exact amount you enter.
                 </p>
               </div>
-              <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Image URL (optional)" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+              <div className="rounded-lg border bg-transparent p-3">
+                <div className="flex items-center gap-3">
+                  {form.image_url ? (
+                    <img src={form.image_url} alt="" className="h-16 w-16 rounded-md object-cover border" />
+                  ) : (
+                    <div className="h-16 w-16 rounded-md bg-muted flex items-center justify-center text-muted-foreground"><ImagePlus className="w-5 h-5" /></div>
+                  )}
+                  <div className="flex-1">
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-60"
+                    >
+                      {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
+                      {form.image_url ? "Replace image" : "Upload event image"}
+                    </button>
+                    {form.image_url && (
+                      <button type="button" onClick={() => setForm({ ...form, image_url: "" })} className="ml-2 text-xs text-muted-foreground hover:text-foreground">Remove</button>
+                    )}
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickImage(f); e.target.value = ""; }}
+                    />
+                  </div>
+                </div>
+              </div>
               <textarea className="w-full rounded-lg border bg-transparent px-3 py-2 min-h-[100px]" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               <button onClick={submit} className="w-full rounded-full bg-foreground text-background px-5 py-2 font-medium inline-flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Post event</button>
             </div>
