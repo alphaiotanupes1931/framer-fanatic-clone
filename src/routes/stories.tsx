@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Clock, Plus, X } from "lucide-react";
+import { Heart, MessageCircle, Clock, Plus, X, Send } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/stories")({
@@ -16,11 +16,16 @@ type Story = {
   id: string; user_id: string; title: string; excerpt: string | null;
   cover_url: string | null; format: string; read_minutes: number | null;
   likes_count: number; comments_count: number; created_at: string;
-  author?: { display_name: string | null; avatar_url: string | null; username: string | null };
+  author?: { display_name: string | null; avatar_url: string | null };
 };
 
 const FORMATS = ["All","poetry","blog","essay","resource"];
 const TABS = ["Discover","Trending","Featured"] as const;
+
+function stripHtml(s: string | null | undefined) {
+  if (!s) return "";
+  return s.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+}
 
 function StoriesPage() {
   const auth = useAuthState();
@@ -52,7 +57,7 @@ function AnonStories() {
             <article className="rounded-2xl border border-paper/10 bg-paper/5 p-5 h-full">
               <div className="text-[10px] font-bold uppercase tracking-wider text-paper/60">{(s as Story).format}</div>
               <h3 className="font-display text-lg font-bold mt-1">{(s as Story).title}</h3>
-              {(s as Story).excerpt && <p className="text-sm text-paper/70 mt-2 line-clamp-3">{(s as Story).excerpt}</p>}
+              {stripHtml((s as Story).excerpt) && <p className="text-sm text-paper/70 mt-2 line-clamp-3">{stripHtml((s as Story).excerpt)}</p>}
               <div className="mt-3 flex items-center gap-3 text-xs text-paper/60">
                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {(s as Story).read_minutes || 1} min</span>
                 <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {(s as Story).likes_count}</span>
