@@ -80,18 +80,14 @@ function FindCreatorPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.map((c) => (
-              c.username ? (
-                <Link
-                  key={c.id}
-                  to="/u/$username"
-                  params={{ username: c.username }}
-                  className="text-left"
-                >
-                  <Card c={c} />
-                </Link>
-              ) : (
-                <div key={c.id}><Card c={c} /></div>
-              )
+              <Link
+                key={c.id}
+                to="/u/$username"
+                params={{ username: c.username || c.id }}
+                className="text-left"
+              >
+                <Card c={c} />
+              </Link>
             ))}
           </div>
         )}
