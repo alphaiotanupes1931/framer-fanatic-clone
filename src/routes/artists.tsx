@@ -37,25 +37,25 @@ function FindCreatorPage() {
   }, [q]);
 
   const Card = ({ c }: { c: Creator }) => (
-    <div className="rounded-2xl border border-neutral-100 bg-white hover:border-neutral-200 transition-colors p-5 h-full">
+    <div className="rounded-2xl border border-border bg-card hover:border-foreground/20 transition-colors p-5 h-full">
       <div className="flex items-center gap-3">
         <Avatar className="w-12 h-12">
           <AvatarImage src={c.avatar_url ?? undefined} />
-          <AvatarFallback className="bg-neutral-100 text-neutral-700">
+          <AvatarFallback className="bg-muted text-foreground">
             {(c.display_name ?? c.username ?? "?").slice(0, 1).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <div className="font-semibold truncate text-neutral-900">{c.display_name ?? c.username ?? "Unnamed creator"}</div>
-          {c.username && <div className="text-xs text-neutral-500 truncate">@{c.username}</div>}
+          <div className="font-semibold truncate text-foreground">{c.display_name ?? c.username ?? "Unnamed creator"}</div>
+          {c.username && <div className="text-xs text-muted-foreground truncate">@{c.username}</div>}
         </div>
       </div>
       {c.neighborhood && (
-        <div className="mt-3 inline-flex items-center gap-1 text-xs text-neutral-500">
+        <div className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="w-3 h-3" /> {c.neighborhood}
         </div>
       )}
-      {c.bio && <p className="mt-3 text-sm text-neutral-600 line-clamp-3">{c.bio}</p>}
+      {c.bio && <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{c.bio}</p>}
     </div>
   );
 
@@ -74,19 +74,24 @@ function FindCreatorPage() {
           />
         </div>
         {loading ? (
-          <div className="text-neutral-500 text-sm">Searching…</div>
+          <div className="text-muted-foreground text-sm">Searching…</div>
         ) : results.length === 0 ? (
-          <div className="text-neutral-500 text-sm">No creators found{q ? ` for "${q}"` : ""}.</div>
+          <div className="text-muted-foreground text-sm">No creators found{q ? ` for "${q}"` : ""}.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.map((c) => (
-              <Link
-                key={c.id}
-                to="/profile"
-                className="text-left"
-              >
-                <Card c={c} />
-              </Link>
+              c.username ? (
+                <Link
+                  key={c.id}
+                  to="/u/$username"
+                  params={{ username: c.username }}
+                  className="text-left"
+                >
+                  <Card c={c} />
+                </Link>
+              ) : (
+                <div key={c.id}><Card c={c} /></div>
+              )
             ))}
           </div>
         )}
