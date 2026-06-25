@@ -59,7 +59,7 @@ const STEPS: Step[] = [
     target: '[data-tour="nav-profile"]',
     title: "Your Profile",
     content:
-      "Manage your profile, become an artist, set up Stripe payouts, and view tickets you've purchased.",
+      "Manage your profile, become an Artist, set up Stripe payouts, and view tickets you've purchased.",
   },
   {
     target: '[data-tour="notifications"]',
