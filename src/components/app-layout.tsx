@@ -575,22 +575,19 @@ function RightRail() {
           <ul className="space-y-3">
             {artists.map((a) => (
               <li key={a.id}>
-                <Link
-                  to={a.username ? "/u/$username" : "/artists"}
-                  params={a.username ? { username: a.username } : undefined}
-                  className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent"
-                >
-                  <Avatar className="h-9 w-9">
-                    {a.avatar_url && <AvatarImage src={a.avatar_url} />}
-                    <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
-                      {(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[13px] font-medium text-foreground">{a.display_name || a.username || "Anonymous"}</div>
-                    <div className="truncate text-[11px] text-muted-foreground">{a.neighborhood || "Baltimore"}</div>
-                  </div>
-                </Link>
+                {a.username ? (
+                  <Link
+                    to="/u/$username"
+                    params={{ username: a.username }}
+                    className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent"
+                  >
+                    <ArtistMiniRow artist={a} />
+                  </Link>
+                ) : (
+                  <Link to="/artists" className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent">
+                    <ArtistMiniRow artist={a} />
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -621,6 +618,23 @@ function RightRail() {
         )}
       </section>
     </div>
+  );
+}
+
+function ArtistMiniRow({ artist }: { artist: { display_name: string | null; username: string | null; neighborhood: string | null; avatar_url: string | null } }) {
+  return (
+    <>
+      <Avatar className="h-9 w-9">
+        {artist.avatar_url && <AvatarImage src={artist.avatar_url} />}
+        <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
+          {(artist.display_name || artist.username || "?").slice(0, 1).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[13px] font-medium text-foreground">{artist.display_name || artist.username || "Anonymous"}</div>
+        <div className="truncate text-[11px] text-muted-foreground">{artist.neighborhood || "Baltimore"}</div>
+      </div>
+    </>
   );
 }
 
