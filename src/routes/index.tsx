@@ -710,11 +710,16 @@ function Footer() {
       { label: "Sign in", to: "/auth" },
       { label: "Sign up", to: "/auth" },
     ]},
+    { h: "Legal", l: [
+      { label: "Privacy Policy", to: "/privacy" },
+      { label: "Terms of Service", to: "/terms" },
+      { label: "Cookie Policy", to: "/cookies" },
+    ]},
   ];
   return (
     <footer className="bg-ink text-paper px-5 md:px-10 py-14 md:py-16">
       <div className="mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(4,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
+        <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(5,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-3">
               <img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0 invert" />
@@ -739,6 +744,14 @@ function Footer() {
         >
           Planet Baltimore
         </motion.div>
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-paper/15 pt-6 text-xs text-paper/60">
+          <div>© {new Date().getFullYear()} Planet Baltimore. All rights reserved.</div>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/privacy" className="hover:text-paper">Privacy</Link>
+            <Link to="/terms" className="hover:text-paper">Terms</Link>
+            <Link to="/cookies" className="hover:text-paper">Cookies</Link>
+          </div>
+        </div>
       </div>
     </footer>
   );
