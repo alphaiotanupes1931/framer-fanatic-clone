@@ -537,6 +537,7 @@ type DailyCreator = {
   username: string | null;
   avatar_url: string | null;
   category: string | null;
+  role: string | null;
 };
 
 function DailyCreators() {
