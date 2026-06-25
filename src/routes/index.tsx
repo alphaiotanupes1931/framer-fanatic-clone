@@ -535,8 +535,7 @@ function Features() {
 
 function CTA() {
   return (
-    <section className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-ink/10" />
+    <section className="relative overflow-hidden bg-gradient-to-b from-blue via-blue to-ink px-5 md:px-10 py-24 md:py-36">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
