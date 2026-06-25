@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Clock, Plus, X } from "lucide-react";
+import { Heart, MessageCircle, Clock, Plus, X, Send } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/stories")({
@@ -16,11 +16,101 @@ type Story = {
   id: string; user_id: string; title: string; excerpt: string | null;
   cover_url: string | null; format: string; read_minutes: number | null;
   likes_count: number; comments_count: number; created_at: string;
-  author?: { display_name: string | null; avatar_url: string | null; username: string | null };
+  author?: { display_name: string | null; avatar_url: string | null };
 };
 
 const FORMATS = ["All","poetry","blog","essay","resource"];
 const TABS = ["Discover","Trending","Featured"] as const;
+
+function stripHtml(s: string | null | undefined) {
+  if (!s) return "";
+  return s.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+}
+
+type Comment = {
+  id: string; user_id: string; body: string; created_at: string;
+  author?: { display_name: string | null; avatar_url: string | null };
+};
+
+function CommentsDialog({ story, onClose, onCountChange }: { story: Story; onClose: () => void; onCountChange: (n: number) => void }) {
+  const me = useCurrentProfile();
+  const [items, setItems] = useState<Comment[]>([]);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("story_comments")
+      .select("*").eq("story_id", story.id).order("created_at", { ascending: true });
+    const list = (data || []) as Comment[];
+    const ids = Array.from(new Set(list.map((c) => c.user_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids);
+      const byId = new Map((profs || []).map((p: any) => [p.id, p]));
+      list.forEach((c) => { c.author = byId.get(c.user_id) as any; });
+    }
+    setItems(list); setLoading(false); onCountChange(list.length);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [story.id]);
+
+  const send = async () => {
+    if (!me || !text.trim()) return;
+    setSending(true);
+    const { error } = await supabase.from("story_comments").insert({ story_id: story.id, user_id: me.id, body: text.trim() });
+    setSending(false);
+    if (error) { toast.error(error.message); return; }
+    setText(""); load();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl bg-background text-foreground shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b p-4">
+          <div className="min-w-0">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Comments</div>
+            <div className="truncate font-semibold">{story.title}</div>
+          </div>
+          <button onClick={onClose}><X className="h-5 w-5" /></button>
+        </div>
+        <div className="flex-1 space-y-3 overflow-y-auto p-4">
+          {loading ? (
+            <div className="text-sm text-muted-foreground">Loading…</div>
+          ) : items.length === 0 ? (
+            <div className="text-sm text-muted-foreground">No comments yet. Be the first.</div>
+          ) : items.map((c) => (
+            <div key={c.id} className="flex gap-3">
+              <Avatar className="h-8 w-8 shrink-0">
+                {c.author?.avatar_url && <img src={c.author.avatar_url} alt="" className="h-full w-full object-cover" />}
+                <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(c.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium">{c.author?.display_name || "Anonymous"}</div>
+                <div className="text-sm text-muted-foreground">{c.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {me ? (
+          <div className="flex gap-2 border-t p-3">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+              placeholder="Add a comment…"
+              className="flex-1 rounded-full border bg-transparent px-4 py-2 text-sm"
+            />
+            <button onClick={send} disabled={sending || !text.trim()} className="inline-flex items-center gap-1 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="border-t p-3 text-center text-sm text-muted-foreground">Sign in to comment.</div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function StoriesPage() {
   const auth = useAuthState();
@@ -52,7 +142,7 @@ function AnonStories() {
             <article className="rounded-2xl border border-paper/10 bg-paper/5 p-5 h-full">
               <div className="text-[10px] font-bold uppercase tracking-wider text-paper/60">{(s as Story).format}</div>
               <h3 className="font-display text-lg font-bold mt-1">{(s as Story).title}</h3>
-              {(s as Story).excerpt && <p className="text-sm text-paper/70 mt-2 line-clamp-3">{(s as Story).excerpt}</p>}
+              {stripHtml((s as Story).excerpt) && <p className="text-sm text-paper/70 mt-2 line-clamp-3">{stripHtml((s as Story).excerpt)}</p>}
               <div className="mt-3 flex items-center gap-3 text-xs text-paper/60">
                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {(s as Story).read_minutes || 1} min</span>
                 <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {(s as Story).likes_count}</span>
@@ -74,6 +164,8 @@ function StoriesSignedIn() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", excerpt: "", content: "", format: "blog" });
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [commentsFor, setCommentsFor] = useState<Story | null>(null);
 
   const load = async () => {
     let q = supabase.from("stories").select("*").order("created_at", { ascending: false }).limit(50);
@@ -84,14 +176,38 @@ function StoriesSignedIn() {
     const list = (data || []) as Story[];
     const ids = Array.from(new Set(list.map((s) => s.user_id)));
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url, username").in("id", ids);
+      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids);
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((s) => { s.author = byId.get(s.user_id) as any; });
     }
     setStories(list);
+    if (me && list.length) {
+      const { data: likes } = await supabase
+        .from("story_likes").select("story_id")
+        .eq("user_id", me.id)
+        .in("story_id", list.map((s) => s.id));
+      setLikedIds(new Set((likes || []).map((l: any) => l.story_id)));
+    }
   };
 
-  useEffect(() => { load(); }, [filter, tab]);
+  useEffect(() => { load(); }, [filter, tab, me?.id]);
+
+  const toggleLike = async (s: Story) => {
+    if (!me) { toast.error("Sign in to like"); return; }
+    const liked = likedIds.has(s.id);
+    // optimistic
+    setLikedIds((prev) => {
+      const n = new Set(prev);
+      if (liked) n.delete(s.id); else n.add(s.id);
+      return n;
+    });
+    setStories((prev) => prev.map((x) => x.id === s.id ? { ...x, likes_count: Math.max(0, (x.likes_count || 0) + (liked ? -1 : 1)) } : x));
+    if (liked) {
+      await supabase.from("story_likes").delete().eq("story_id", s.id).eq("user_id", me.id);
+    } else {
+      await supabase.from("story_likes").insert({ story_id: s.id, user_id: me.id });
+    }
+  };
 
   const submit = async () => {
     if (!me || !form.title.trim()) return;
@@ -136,23 +252,45 @@ function StoriesSignedIn() {
             <article key={s.id} className="flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4">
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex items-center gap-2">
-                  <Avatar className="h-7 w-7"><AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(s.author?.username || "U")[0].toUpperCase()}</AvatarFallback></Avatar>
-                  <span className="text-sm font-medium">{s.author?.username || s.author?.display_name || "Anonymous"}</span>
+                  <Avatar className="h-7 w-7">
+                    {s.author?.avatar_url && <img src={s.author.avatar_url} alt="" className="h-full w-full object-cover" />}
+                    <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(s.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{s.author?.display_name || "Anonymous"}</span>
                   <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange-700">{s.format}</span>
                 </div>
                 <h3 className="text-lg font-bold">{s.title}</h3>
-                {s.excerpt && <p className="mt-1 text-sm text-neutral-600">{s.excerpt}</p>}
+                {stripHtml(s.excerpt) && <p className="mt-1 line-clamp-3 text-sm text-neutral-600">{stripHtml(s.excerpt)}</p>}
                 <div className="mt-3 flex items-center gap-4 text-xs text-neutral-500">
                   <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {s.read_minutes || 1} min</span>
-                  <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {s.likes_count}</span>
-                  <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {s.comments_count}</span>
+                  <button
+                    onClick={() => toggleLike(s)}
+                    className={`inline-flex items-center gap-1 transition ${likedIds.has(s.id) ? "text-red-500" : "hover:text-neutral-800"}`}
+                    aria-label={likedIds.has(s.id) ? "Unlike" : "Like"}
+                  >
+                    <Heart className={`h-3.5 w-3.5 ${likedIds.has(s.id) ? "fill-current" : ""}`} /> {s.likes_count}
+                  </button>
+                  <button
+                    onClick={() => setCommentsFor(s)}
+                    className="inline-flex items-center gap-1 hover:text-neutral-800"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" /> {s.comments_count}
+                  </button>
                 </div>
               </div>
-              <div className="h-24 w-32 shrink-0 rounded-lg bg-gradient-to-br from-orange-200 to-orange-400" style={s.cover_url ? { backgroundImage: `url(${s.cover_url})`, backgroundSize: "cover" } : undefined} />
+              {s.cover_url && (
+                <img src={s.cover_url} alt="" className="h-24 w-32 shrink-0 rounded-lg object-cover" />
+              )}
             </article>
           ))}
         </div>
       </div>
+
+      {commentsFor && (
+        <CommentsDialog story={commentsFor} onClose={() => setCommentsFor(null)} onCountChange={(n: number) => {
+          setStories((prev) => prev.map((x) => x.id === commentsFor.id ? { ...x, comments_count: n } : x));
+        }} />
+      )}
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setOpen(false)}>
