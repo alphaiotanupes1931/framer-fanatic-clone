@@ -242,7 +242,7 @@ function ShareAppButton() {
           else { await navigator.clipboard.writeText(url); toast.success("Invite link copied"); }
         } catch { /* cancelled */ }
       }}
-      className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-orange-700"
+      className="fixed bottom-5 left-5 z-30 inline-flex items-center gap-2 rounded-full bg-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-orange-700 md:bottom-6 md:left-6"
       aria-label="Share Planet Baltimore"
     >
       <LinkIcon className="h-4 w-4" /> Share
