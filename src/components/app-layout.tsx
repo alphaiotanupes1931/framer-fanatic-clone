@@ -575,19 +575,13 @@ function RightRail() {
           <ul className="space-y-3">
             {artists.map((a) => (
               <li key={a.id}>
-                {a.username ? (
-                  <Link
-                    to="/u/$username"
-                    params={{ username: a.username }}
-                    className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent"
-                  >
-                    <ArtistMiniRow artist={a} />
-                  </Link>
-                ) : (
-                  <Link to="/artists" className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent">
-                    <ArtistMiniRow artist={a} />
-                  </Link>
-                )}
+                <Link
+                  to="/u/$username"
+                  params={{ username: a.username || a.id }}
+                  className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent"
+                >
+                  <ArtistMiniRow artist={a} />
+                </Link>
               </li>
             ))}
           </ul>
