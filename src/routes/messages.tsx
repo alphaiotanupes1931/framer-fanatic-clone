@@ -424,7 +424,7 @@ function MessagesPage() {
               </div>
               <h3 className="text-lg font-bold text-foreground">Select a conversation</h3>
               <p className="max-w-xs text-sm text-muted-foreground">
-                Choose from your conversations or start a new one with an artist or organizer.
+                Choose from your conversations or start a new one with an Artist or organizer.
               </p>
               <button
                 onClick={openNew}
