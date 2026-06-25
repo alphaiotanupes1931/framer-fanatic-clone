@@ -27,6 +27,7 @@ type AdminUser = {
   neighborhood: string | null;
   in_baltimore: boolean;
   banned: boolean;
+  hidden_from_showcase: boolean;
   created_at: string;
   last_seen_at: string | null;
   is_admin: boolean;
@@ -85,6 +86,18 @@ function AdminPage() {
     if (error) return toast.error(error.message);
     toast.success(u.banned ? "Account unbanned" : "Account banned");
     setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, banned: !u.banned } : p)));
+  };
+
+  const toggleShowcase = async (u: AdminUser) => {
+    setBusy(u.id);
+    const { error } = await supabase.rpc("admin_set_showcase_hidden", {
+      _user_id: u.id,
+      _hidden: !u.hidden_from_showcase,
+    });
+    setBusy(null);
+    if (error) return toast.error(error.message);
+    toast.success(u.hidden_from_showcase ? "Now visible in showcase" : "Hidden from showcase");
+    setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, hidden_from_showcase: !u.hidden_from_showcase } : p)));
   };
 
   const onSaved = (id: string, patch: Partial<AdminUser>) => {
@@ -221,6 +234,18 @@ function AdminPage() {
                       title="Edit user"
                     >
                       <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toggleShowcase(u)}
+                      disabled={busy === u.id}
+                      title={u.hidden_from_showcase ? "Show in Baltimore showcase" : "Hide from Baltimore showcase"}
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
+                        u.hidden_from_showcase
+                          ? "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:bg-neutral-100"
+                          : "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                      }`}
+                    >
+                      {u.hidden_from_showcase ? "Show" : "Hide"}
                     </button>
                     <button
                       onClick={() => toggleBan(u)}
