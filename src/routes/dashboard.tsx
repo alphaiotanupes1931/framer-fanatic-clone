@@ -158,8 +158,8 @@ function Dashboard() {
 
         {!roleLoading && !isArtist ? (
           <div className="rounded-2xl border border-dashed border-border bg-muted p-4 text-center text-[13px] text-muted-foreground">
-            You're signed in as an <strong>Attendee</strong> - you can view posts and buy event tickets.
-            To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">profile</Link> and become an Artist.
+            You're signed in as an <strong>Attendee</strong>. You can view posts and buy event tickets.
+            To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">Profile</Link> and become an Artist.
           </div>
         ) : (
         <div className="rounded-2xl border border-border bg-card p-4 transition focus-within:border-ring">

@@ -5,13 +5,9 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
-import boomSelecta from "@/assets/boom-selecta.png";
-import queenForADay from "@/assets/queen-for-a-day.png";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
-import terrellStage from "@/assets/terrell-stage.png";
-import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -298,6 +294,8 @@ function QuoteSection() {
                 <img
                   src={terrellSpeaks}
                   alt="Terrell Speaks"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -547,7 +545,7 @@ function DailyCreators() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.rpc("public_creators", { lim: 200 });
+      const { data } = await supabase.rpc("public_creators", { lim: 60 });
       if (cancelled) return;
       // Show whoever's on the platform. If there are fewer than 3 users total,
       // show all of them. Prefer photos when we have enough to choose from.

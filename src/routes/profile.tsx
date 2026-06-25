@@ -65,7 +65,7 @@ function ProfilePage() {
   };
 
   const initials = (profile?.display_name || profile?.email || "U").slice(0, 2).toUpperCase();
-  const roleLabel = isArtist ? "artist" : isAttendee ? "attendee" : (profile?.role || "attendee");
+  const roleLabel = isArtist ? "Artist" : isAttendee ? "Attendee" : ((profile?.role || "attendee").replace(/\b\w/g, (c) => c.toUpperCase()));
 
   return (
     <AppLayout title="" hero={false}>

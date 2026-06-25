@@ -191,7 +191,7 @@ function NeighborhoodsPage() {
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-sm font-semibold text-foreground">
-                            {a.display_name || a.username || "Unnamed artist"}
+                            {a.display_name || a.username || "Unnamed Artist"}
                           </div>
                           {a.bio && <div className="truncate text-xs text-muted-foreground">{a.bio}</div>}
                         </div>
