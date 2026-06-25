@@ -177,8 +177,20 @@ function BecomeArtistCTA() {
         onClick={async () => {
           setLoading(true);
           try {
-            await become();
-            toast.success("You're now an Artist - reloading…");
+            const coords = await new Promise<{ lat: number; lng: number } | null>((resolve) => {
+              if (!("geolocation" in navigator)) return resolve(null);
+              navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                () => resolve(null),
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 },
+              );
+            });
+            if (!coords) {
+              toast.error("We need your location to verify you're in Baltimore. Please enable location access and try again.");
+              return;
+            }
+            await become({ data: { lat: coords.lat, lng: coords.lng } });
+            toast.success("You're now an Artist, reloading...");
             setTimeout(() => location.reload(), 700);
           } catch (e) {
             toast.error(e instanceof Error ? e.message : "Failed to upgrade");
