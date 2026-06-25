@@ -106,7 +106,7 @@ function NeighborhoodsPage() {
     <AppLayout title="Neighborhoods" subtitle="Explore Baltimore's communities - click a pin to discover what's happening nearby.">
       <div className="space-y-6">
         <BaltimoreMap onSelect={(n) => setSelected({ id: n.id, name: n.name, region: n.region })} />
-        <div className="flex flex-wrap gap-3 text-xs text-neutral-600">
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
           {[
             ["North Baltimore","#f59e0b"],["South Baltimore","#ef4444"],
             ["East Baltimore","#10b981"],["West Baltimore","#6366f1"],
@@ -120,18 +120,18 @@ function NeighborhoodsPage() {
         </div>
 
         <div>
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-500">All Neighborhoods</h2>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">All Neighborhoods</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((n) => (
               <button
                 key={n.id}
                 onClick={() => setSelected(n)}
-                className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 text-left transition hover:border-orange/50 hover:bg-orange/5"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card text-card-foreground p-4 text-left transition hover:border-orange/50 hover:bg-orange/5"
               >
                 <MapPin className="h-4 w-4 text-orange" />
                 <div>
                   <div className="font-semibold">{n.name}</div>
-                  <div className="text-xs text-neutral-500">{n.region}</div>
+                  <div className="text-xs text-muted-foreground">{n.region}</div>
                 </div>
               </button>
             ))}
@@ -146,9 +146,9 @@ function NeighborhoodsPage() {
               <MapPin className="h-4 w-4 text-orange" />
               {selected?.name}
             </DialogTitle>
-            <p className="text-xs text-neutral-500">{selected?.region}</p>
+            <p className="text-xs text-muted-foreground">{selected?.region}</p>
           </DialogHeader>
-          <div className="mt-2 flex gap-2 border-b border-neutral-100">
+          <div className="mt-2 flex gap-2 border-b border-border">
             {[
               { key: "artists" as const, label: `Artists (${artists.length})` },
               { key: "events" as const, label: `Events (${events.length})` },
@@ -159,7 +159,7 @@ function NeighborhoodsPage() {
                 className={`px-3 py-2 text-sm font-medium transition ${
                   tab === t.key
                     ? "text-orange border-b-2 border-orange -mb-[1px]"
-                    : "text-neutral-500 hover:text-neutral-700"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {t.label}
@@ -168,32 +168,32 @@ function NeighborhoodsPage() {
           </div>
           <div className="mt-2 max-h-[60vh] overflow-y-auto">
             {loading ? (
-              <div className="py-8 text-center text-sm text-neutral-400">Loading…</div>
+              <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
             ) : tab === "artists" ? (
               artists.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">
+                <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
                   No artists listed in {selected?.name} yet.
                 </div>
               ) : (
-                <ul className="divide-y divide-neutral-100">
+                <ul className="divide-y divide-border">
                   {artists.map((a) => (
                     <li key={a.id}>
                       <Link
                         to="/profile"
                         onClick={() => setSelected(null)}
-                        className="flex items-center gap-3 px-1 py-3 transition hover:bg-neutral-50"
+                        className="flex items-center gap-3 px-1 py-3 transition hover:bg-accent"
                       >
                         <Avatar className="h-10 w-10">
                           {a.avatar_url && <AvatarImage src={a.avatar_url} />}
-                          <AvatarFallback className="bg-neutral-100 text-[11px] text-neutral-700">
+                          <AvatarFallback className="bg-muted text-[11px] text-foreground">
                             {(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-semibold text-neutral-900">
+                          <div className="truncate text-sm font-semibold text-foreground">
                             {a.display_name || a.username || "Unnamed artist"}
                           </div>
-                          {a.bio && <div className="truncate text-xs text-neutral-500">{a.bio}</div>}
+                          {a.bio && <div className="truncate text-xs text-muted-foreground">{a.bio}</div>}
                         </div>
                       </Link>
                     </li>
@@ -201,33 +201,33 @@ function NeighborhoodsPage() {
                 </ul>
               )
             ) : events.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">
+              <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
                 No upcoming events in {selected?.name} yet.
               </div>
             ) : (
-              <ul className="divide-y divide-neutral-100">
+              <ul className="divide-y divide-border">
                 {events.map((ev) => (
                   <li key={ev.id}>
                     <Link
                       to="/events"
                       onClick={() => setSelected(null)}
-                      className="flex items-start gap-3 px-1 py-3 transition hover:bg-neutral-50"
+                      className="flex items-start gap-3 px-1 py-3 transition hover:bg-accent"
                     >
-                      <div className="h-10 w-10 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                         {ev.image_url ? (
                           <img src={ev.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
                         ) : (
-                          <Calendar className="h-4 w-4 text-neutral-500" />
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold text-neutral-900">{ev.title}</div>
-                        <div className="text-xs text-neutral-500 flex items-center gap-1 mt-0.5">
+                        <div className="truncate text-sm font-semibold text-foreground">{ev.title}</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                           <Calendar className="h-3 w-3" />
                           {new Date(ev.starts_at).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                         </div>
                         {ev.location && (
-                          <div className="text-xs text-neutral-500 flex items-center gap-1 mt-0.5">
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <MapPin className="h-3 w-3" /> {ev.location}
                           </div>
                         )}
