@@ -108,38 +108,39 @@
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(1 0 0);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.96 0.005 247);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
+  /* Softer, warmer dark palette — easier on the eyes than pure black/white */
+  --background: oklch(0.18 0.018 260);
+  --foreground: oklch(0.92 0.01 250);
+  --card: oklch(0.22 0.02 262);
+  --card-foreground: oklch(0.92 0.01 250);
+  --popover: oklch(0.22 0.02 262);
+  --popover-foreground: oklch(0.92 0.01 250);
+  --primary: oklch(0.88 0.015 255);
+  --primary-foreground: oklch(0.2 0.02 262);
+  --secondary: oklch(0.27 0.025 260);
+  --secondary-foreground: oklch(0.92 0.01 250);
+  --muted: oklch(0.26 0.022 260);
+  --muted-foreground: oklch(0.72 0.015 255);
+  --accent: oklch(0.28 0.03 260);
+  --accent-foreground: oklch(0.92 0.01 250);
+  --destructive: oklch(0.66 0.18 22);
+  --destructive-foreground: oklch(0.96 0.01 250);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.55 0.03 260);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(1 0 0);
+  --sidebar: oklch(0.2 0.02 262);
+  --sidebar-foreground: oklch(0.92 0.01 250);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --sidebar-accent: oklch(0.27 0.025 260);
+  --sidebar-accent-foreground: oklch(0.92 0.01 250);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0.03 260);
 }
 
 @layer base {
@@ -196,21 +197,37 @@
   }
 }
 
-/* Dark mode readability: lift hardcoded neutral grays toward white */
+/* Dark mode readability: soften hardcoded neutrals so nothing glares.
+   Pure white on dark causes eye strain — keep body text near 0.9 and
+   secondary text around 0.75 lightness. */
 .dark .text-neutral-400,
 .dark .text-neutral-500,
+.dark .text-gray-400,
+.dark .text-gray-500 {
+  color: oklch(0.75 0.01 255) !important;
+}
 .dark .text-neutral-600,
 .dark .text-neutral-700,
 .dark .text-neutral-800,
 .dark .text-neutral-900,
-.dark .text-gray-400,
-.dark .text-gray-500,
 .dark .text-gray-600,
-.dark .text-gray-700 {
-  color: oklch(0.98 0 0) !important;
+.dark .text-gray-700,
+.dark .text-gray-800,
+.dark .text-gray-900 {
+  color: oklch(0.9 0.01 250) !important;
 }
 .dark .text-muted-foreground {
-  color: oklch(0.96 0.005 247) !important;
+  color: oklch(0.75 0.015 255) !important;
+}
+/* Don't let bright white surfaces blast through in dark mode */
+.dark .bg-white {
+  background-color: oklch(0.22 0.02 262) !important;
+}
+.dark .bg-neutral-50,
+.dark .bg-neutral-100,
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: oklch(0.24 0.02 262) !important;
 }
 
 @theme inline {
