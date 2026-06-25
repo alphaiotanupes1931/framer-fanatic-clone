@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Trash2, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -273,6 +274,7 @@ function AdminPage() {
         )}
       </div>
       <EditUserDialog user={editing} onClose={() => setEditing(null)} onSaved={onSaved} />
+      <DangerZone onUserDeleted={(id: string) => setUsers((prev) => prev.filter((p) => p.id !== id))} />
     </AppLayout>
   );
 }
@@ -415,5 +417,136 @@ function EditUserDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+type EventLite = { id: string; title: string; starts_at: string | null; host_name: string | null };
+type OrgLite = { id: string; name: string; type: string; slug: string };
+
+function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) {
+  const [tab, setTab] = useState<"events" | "users" | "orgs">("events");
+  const [events, setEvents] = useState<EventLite[]>([]);
+  const [orgs, setOrgs] = useState<OrgLite[]>([]);
+  const [profiles, setProfiles] = useState<{ id: string; display_name: string | null; email: string | null }[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [pwOpen, setPwOpen] = useState<null | { kind: "event" | "user" | "org"; id: string; label: string }>(null);
+  const [pw, setPw] = useState("");
+  const [q, setQ] = useState("");
+
+  const reload = async () => {
+    const [{ data: e }, { data: o }, { data: p }] = await Promise.all([
+      supabase.rpc("admin_list_events"),
+      supabase.rpc("admin_list_organizations"),
+      supabase.rpc("admin_list_users"),
+    ]);
+    setEvents((e as EventLite[]) ?? []);
+    setOrgs((o as OrgLite[]) ?? []);
+    setProfiles(((p as { id: string; display_name: string | null; email: string | null }[]) ?? []));
+  };
+  useEffect(() => { void reload(); }, []);
+
+  const confirmDelete = async () => {
+    if (!pwOpen) return;
+    if (pw !== "admin123") { toast.error("Incorrect password"); return; }
+    setBusy(pwOpen.id);
+    const rpc = pwOpen.kind === "event" ? "admin_delete_event" : pwOpen.kind === "org" ? "admin_delete_organization" : "admin_delete_profile";
+    const { error } = await supabase.rpc(rpc, { _id: pwOpen.id });
+    setBusy(null);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted " + pwOpen.label);
+    if (pwOpen.kind === "event") setEvents((prev) => prev.filter((x) => x.id !== pwOpen.id));
+    if (pwOpen.kind === "org") setOrgs((prev) => prev.filter((x) => x.id !== pwOpen.id));
+    if (pwOpen.kind === "user") { setProfiles((prev) => prev.filter((x) => x.id !== pwOpen.id)); onUserDeleted(pwOpen.id); }
+    setPwOpen(null);
+    setPw("");
+  };
+
+  const filterFn = (s: string) => !q.trim() || s.toLowerCase().includes(q.trim().toLowerCase());
+
+  return (
+    <div className="mt-10 rounded-2xl border border-rose-200 bg-rose-50/40 p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <Lock className="h-4 w-4 text-rose-700" />
+        <h3 className="font-semibold text-rose-700">Danger zone</h3>
+        <span className="text-xs text-rose-700/70">Password required for every delete</span>
+      </div>
+      <div className="mb-3 flex flex-wrap gap-2">
+        {(["events", "users", "orgs"] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3 py-1 text-xs font-medium ${tab === t ? "bg-rose-600 text-white" : "border border-rose-200 bg-white text-rose-700"}`}>
+            {t === "orgs" ? "Organizations / Businesses" : t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
+        ))}
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter..." className="flex-1 min-w-[180px] rounded-full border border-rose-200 bg-white px-3 py-1 text-xs outline-none" />
+      </div>
+
+      <div className="max-h-80 overflow-y-auto rounded-lg border border-rose-100 bg-white">
+        {tab === "events" && (
+          <ul className="divide-y divide-rose-50">
+            {events.filter((e) => filterFn(e.title)).map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                <div className="min-w-0">
+                  <div className="truncate font-medium">{e.title}</div>
+                  <div className="truncate text-xs text-neutral-500">{e.host_name || "Unknown host"} {e.starts_at ? "- " + new Date(e.starts_at).toLocaleDateString() : ""}</div>
+                </div>
+                <button disabled={busy === e.id} onClick={() => { setPw(""); setPwOpen({ kind: "event", id: e.id, label: e.title }); }} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </li>
+            ))}
+            {events.length === 0 && <li className="px-3 py-6 text-center text-xs text-neutral-500">No events</li>}
+          </ul>
+        )}
+        {tab === "users" && (
+          <ul className="divide-y divide-rose-50">
+            {profiles.filter((p) => filterFn((p.display_name || "") + " " + (p.email || ""))).map((p) => (
+              <li key={p.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                <div className="min-w-0">
+                  <div className="truncate font-medium">{p.display_name || "Unnamed"}</div>
+                  <div className="truncate text-xs text-neutral-500">{p.email}</div>
+                </div>
+                <button disabled={busy === p.id} onClick={() => { setPw(""); setPwOpen({ kind: "user", id: p.id, label: p.display_name || p.email || "user" }); }} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </li>
+            ))}
+            {profiles.length === 0 && <li className="px-3 py-6 text-center text-xs text-neutral-500">No profiles</li>}
+          </ul>
+        )}
+        {tab === "orgs" && (
+          <ul className="divide-y divide-rose-50">
+            {orgs.filter((o) => filterFn(o.name)).map((o) => (
+              <li key={o.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                <div className="min-w-0">
+                  <div className="truncate font-medium">{o.name}</div>
+                  <div className="truncate text-xs text-neutral-500">{o.type} - /{o.slug}</div>
+                </div>
+                <button disabled={busy === o.id} onClick={() => { setPw(""); setPwOpen({ kind: "org", id: o.id, label: o.name }); }} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </li>
+            ))}
+            {orgs.length === 0 && <li className="px-3 py-6 text-center text-xs text-neutral-500">No organizations</li>}
+          </ul>
+        )}
+      </div>
+
+      <Dialog open={!!pwOpen} onOpenChange={(o) => { if (!o) { setPwOpen(null); setPw(""); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Lock className="h-4 w-4 text-rose-600" /> Confirm delete</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">You are about to permanently delete <b>{pwOpen?.label}</b>. Enter the admin password to confirm.</p>
+            <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Admin password" autoFocus onKeyDown={(e) => { if (e.key === "Enter") void confirmDelete(); }} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setPwOpen(null); setPw(""); }}>Cancel</Button>
+            <Button onClick={confirmDelete} disabled={busy !== null} className="bg-rose-600 text-white hover:bg-rose-700">
+              {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
