@@ -768,6 +768,7 @@ export type Database = {
           username: string
         }[]
       }
+      titlecase_name: { Args: { s: string }; Returns: string }
       touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {
