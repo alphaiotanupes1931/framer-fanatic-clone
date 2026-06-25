@@ -644,7 +644,7 @@ function DailyCreators() {
               {c.display_name ?? c.username ?? "Baltimore creator"}
             </h3>
             <p className="mt-2 text-paper/70 text-sm md:text-base max-md:text-xs">
-              {c.category ?? "Creator"}
+              {formatCreatorLabel(c.category)}
             </p>
           </div>
         </motion.a>
