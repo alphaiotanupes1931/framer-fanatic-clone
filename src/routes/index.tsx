@@ -526,6 +526,7 @@ function Features() {
           Three creators from the platform, refreshed every day.
         </motion.p>
         <DailyCreators />
+        <NextRefreshCountdown />
       </div>
     </section>
   );
@@ -549,20 +550,15 @@ function DailyCreators() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id,display_name,username,avatar_url,category,role")
-        .eq("banned", false)
+        .select("id,display_name,username,avatar_url,category,role,banned")
+        .or("banned.is.null,banned.eq.false")
         .limit(200);
       if (cancelled) return;
-      // Prefer artists with a photo, then anyone with a photo, then anyone.
+      // Show whoever's on the platform. If there are fewer than 3 users total,
+      // show all of them. Prefer photos when we have enough to choose from.
       const all = (data ?? []) as DailyCreator[];
-      const artistsWithPhoto = all.filter((p) => p.role === "artist" && p.avatar_url);
       const withPhoto = all.filter((p) => p.avatar_url);
-      const pool =
-        artistsWithPhoto.length >= 3
-          ? artistsWithPhoto
-          : withPhoto.length >= 1
-            ? withPhoto
-            : all;
+      const pool = withPhoto.length >= 3 ? withPhoto : all;
       const today = new Date();
       const seedStr = `${today.getUTCFullYear()}-${today.getUTCMonth()}-${today.getUTCDate()}`;
       let h = 2166136261;
@@ -582,7 +578,7 @@ function DailyCreators() {
         const j = Math.floor(rand() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
-      setCreators(arr.slice(0, 3));
+      setCreators(arr.slice(0, Math.min(3, arr.length)));
       setLoading(false);
     })();
     return () => {
@@ -650,6 +646,31 @@ function DailyCreators() {
   );
 }
 
+
+function NextRefreshCountdown() {
+  const [label, setLabel] = useState("");
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const next = new Date(now);
+      next.setUTCHours(24, 0, 0, 0);
+      const ms = next.getTime() - now.getTime();
+      const h = Math.floor(ms / 3_600_000);
+      const m = Math.floor((ms % 3_600_000) / 60_000);
+      const s = Math.floor((ms % 60_000) / 1000);
+      setLabel(`${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="mt-8 md:mt-10 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs md:text-sm text-white/85 backdrop-blur">
+      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+      Next creators in <span className="font-mono tabular-nums">{label}</span>
+    </div>
+  );
+}
 
 function CTA() {
   return (

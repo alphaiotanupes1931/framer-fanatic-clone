@@ -219,23 +219,30 @@
 .dark .text-muted-foreground {
   color: oklch(0.75 0.015 255) !important;
 }
-/* Don't let bright white surfaces blast through in dark mode */
-.dark .bg-white {
+/* Don't let bright white / near-white surfaces blast through in dark mode.
+   Covers base, hover:, focus:, group-hover:, and md:/sm:/lg: responsive
+   variants that Tailwind generates as separate class names. */
+.dark [class*="bg-white"],
+.dark [class*="bg-neutral-50"],
+.dark [class*="bg-neutral-100"],
+.dark [class*="bg-neutral-200"],
+.dark [class*="bg-gray-50"],
+.dark [class*="bg-gray-100"],
+.dark [class*="bg-gray-200"] {
   background-color: oklch(0.22 0.02 262) !important;
 }
-.dark .bg-neutral-50,
-.dark .bg-neutral-100,
-.dark .bg-neutral-200,
-.dark .bg-gray-50,
-.dark .bg-gray-100,
-.dark .bg-gray-200 {
-  background-color: oklch(0.24 0.02 262) !important;
+.dark [class*="bg-white"]:hover,
+.dark [class*="hover\\:bg-neutral-50"]:hover,
+.dark [class*="hover\\:bg-neutral-100"]:hover,
+.dark [class*="hover\\:bg-gray-50"]:hover,
+.dark [class*="hover\\:bg-gray-100"]:hover {
+  background-color: oklch(0.28 0.025 262) !important;
 }
 /* Light borders/dividers become invisible on dark — lift them. */
-.dark .border-neutral-100,
-.dark .border-neutral-200,
-.dark .border-gray-100,
-.dark .border-gray-200,
+.dark [class*="border-neutral-100"],
+.dark [class*="border-neutral-200"],
+.dark [class*="border-gray-100"],
+.dark [class*="border-gray-200"],
 .dark .divide-neutral-100 > :not([hidden]) ~ :not([hidden]),
 .dark .divide-neutral-200 > :not([hidden]) ~ :not([hidden]),
 .dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
