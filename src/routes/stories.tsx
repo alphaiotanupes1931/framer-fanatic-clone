@@ -27,6 +27,91 @@ function stripHtml(s: string | null | undefined) {
   return s.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 }
 
+type Comment = {
+  id: string; user_id: string; body: string; created_at: string;
+  author?: { display_name: string | null; avatar_url: string | null };
+};
+
+function CommentsDialog({ story, onClose, onCountChange }: { story: Story; onClose: () => void; onCountChange: (n: number) => void }) {
+  const me = useCurrentProfile();
+  const [items, setItems] = useState<Comment[]>([]);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("story_comments")
+      .select("*").eq("story_id", story.id).order("created_at", { ascending: true });
+    const list = (data || []) as Comment[];
+    const ids = Array.from(new Set(list.map((c) => c.user_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids);
+      const byId = new Map((profs || []).map((p: any) => [p.id, p]));
+      list.forEach((c) => { c.author = byId.get(c.user_id) as any; });
+    }
+    setItems(list); setLoading(false); onCountChange(list.length);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [story.id]);
+
+  const send = async () => {
+    if (!me || !text.trim()) return;
+    setSending(true);
+    const { error } = await supabase.from("story_comments").insert({ story_id: story.id, user_id: me.id, body: text.trim() });
+    setSending(false);
+    if (error) { toast.error(error.message); return; }
+    setText(""); load();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl bg-background text-foreground shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b p-4">
+          <div className="min-w-0">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Comments</div>
+            <div className="truncate font-semibold">{story.title}</div>
+          </div>
+          <button onClick={onClose}><X className="h-5 w-5" /></button>
+        </div>
+        <div className="flex-1 space-y-3 overflow-y-auto p-4">
+          {loading ? (
+            <div className="text-sm text-muted-foreground">Loading…</div>
+          ) : items.length === 0 ? (
+            <div className="text-sm text-muted-foreground">No comments yet. Be the first.</div>
+          ) : items.map((c) => (
+            <div key={c.id} className="flex gap-3">
+              <Avatar className="h-8 w-8 shrink-0">
+                {c.author?.avatar_url && <img src={c.author.avatar_url} alt="" className="h-full w-full object-cover" />}
+                <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(c.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium">{c.author?.display_name || "Anonymous"}</div>
+                <div className="text-sm text-muted-foreground">{c.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {me ? (
+          <div className="flex gap-2 border-t p-3">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+              placeholder="Add a comment…"
+              className="flex-1 rounded-full border bg-transparent px-4 py-2 text-sm"
+            />
+            <button onClick={send} disabled={sending || !text.trim()} className="inline-flex items-center gap-1 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="border-t p-3 text-center text-sm text-muted-foreground">Sign in to comment.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function StoriesPage() {
   const auth = useAuthState();
   if (auth.loading) return null;
