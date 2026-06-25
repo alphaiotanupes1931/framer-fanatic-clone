@@ -6,6 +6,7 @@ import { Calendar, MapPin, Ticket, ArrowLeft, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout } from "@/lib/stripe.functions";
+import { EventImage } from "@/components/event-image";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -79,7 +80,7 @@ function EventDetail() {
       <div className="rounded-3xl overflow-hidden border border-border bg-card">
         {evt.image_url ? (
           <div className="aspect-[16/9] bg-muted overflow-hidden">
-            <img src={evt.image_url} alt={evt.title} className="w-full h-full object-cover" />
+            <EventImage src={evt.image_url} alt={evt.title} className="w-full h-full object-cover" />
           </div>
         ) : (
           <div className="aspect-[16/9] bg-muted flex items-center justify-center text-muted-foreground">
