@@ -537,6 +537,7 @@ type DailyCreator = {
   username: string | null;
   avatar_url: string | null;
   category: string | null;
+  role: string | null;
 };
 
 function DailyCreators() {
@@ -549,11 +550,19 @@ function DailyCreators() {
       const { data } = await supabase
         .from("profiles")
         .select("id,display_name,username,avatar_url,category,role")
-        .eq("role", "artist")
-        .not("avatar_url", "is", null)
+        .eq("banned", false)
         .limit(200);
       if (cancelled) return;
-      const pool = (data ?? []) as DailyCreator[];
+      // Prefer artists with a photo, then anyone with a photo, then anyone.
+      const all = (data ?? []) as DailyCreator[];
+      const artistsWithPhoto = all.filter((p) => p.role === "artist" && p.avatar_url);
+      const withPhoto = all.filter((p) => p.avatar_url);
+      const pool =
+        artistsWithPhoto.length >= 3
+          ? artistsWithPhoto
+          : withPhoto.length >= 1
+            ? withPhoto
+            : all;
       const today = new Date();
       const seedStr = `${today.getUTCFullYear()}-${today.getUTCMonth()}-${today.getUTCDate()}`;
       let h = 2166136261;
