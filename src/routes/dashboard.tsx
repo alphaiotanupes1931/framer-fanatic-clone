@@ -309,11 +309,11 @@ function CreatorSearch() {
 
 function _DiscoverStripImpl() {
   const items = [
-    { to: "/artists", icon: Palette, label: "Artists", from: "#fb923c", end: "#ea580c" },
-    { to: "/events", icon: Ticket, label: "Events", from: "#34d399", end: "#059669" },
-    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", from: "#818cf8", end: "#4338ca" },
-    { to: "/groups", icon: Users, label: "Groups", from: "#fb7185", end: "#e11d48" },
-    { to: "/stories", icon: BookOpen, label: "Stories", from: "#fbbf24", end: "#b45309" },
+    { to: "/artists", icon: Palette, label: "Artists", tint: "#f97316" },
+    { to: "/events", icon: Ticket, label: "Events", tint: "#10b981" },
+    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", tint: "#6366f1" },
+    { to: "/groups", icon: Users, label: "Groups", tint: "#f43f5e" },
+    { to: "/stories", icon: BookOpen, label: "Stories", tint: "#f59e0b" },
   ] as const;
   return (
     <div className="mb-6">
@@ -325,18 +325,19 @@ function _DiscoverStripImpl() {
           <Link
             key={it.to}
             to={it.to}
-            className="group flex flex-col items-center gap-2 py-1"
+            className="group flex flex-col items-center gap-2.5 py-1"
           >
             <span
-              className="relative inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl text-white transition-transform duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0"
+              className="relative inline-flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl transition-all duration-300 group-hover:-translate-y-0.5"
               style={{
-                backgroundImage: `linear-gradient(160deg, ${it.from}, ${it.end})`,
-                boxShadow: `0 6px 14px -4px ${it.end}80, 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 4px rgba(0,0,0,0.18)`,
+                backgroundColor: `color-mix(in oklab, ${it.tint} 12%, transparent)`,
+                color: it.tint,
+                boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${it.tint} 22%, transparent), 0 1px 0 rgba(255,255,255,0.6), 0 8px 20px -12px ${it.tint}`,
               }}
             >
-              <it.icon className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]" strokeWidth={2} />
+              <it.icon className="h-[18px] w-[18px] sm:h-5 sm:w-5" strokeWidth={1.75} />
             </span>
-            <span className="text-[11px] font-medium text-foreground text-center leading-tight">{it.label}</span>
+            <span className="text-[11px] font-medium tracking-tight text-foreground text-center leading-tight">{it.label}</span>
           </Link>
         ))}
       </div>

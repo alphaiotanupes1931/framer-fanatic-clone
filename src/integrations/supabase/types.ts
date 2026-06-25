@@ -737,6 +737,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      generate_unique_username: {
+        Args: { _base: string; _self: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -768,6 +772,7 @@ export type Database = {
           username: string
         }[]
       }
+      slugify_username: { Args: { s: string }; Returns: string }
       titlecase_name: { Args: { s: string }; Returns: string }
       touch_last_seen: { Args: never; Returns: undefined }
     }
