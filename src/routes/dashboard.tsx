@@ -309,11 +309,11 @@ function CreatorSearch() {
 
 function _DiscoverStripImpl() {
   const items = [
-    { to: "/artists", icon: Palette, label: "Artists", from: "#fb923c", to: "#ea580c" },
-    { to: "/events", icon: Ticket, label: "Events", from: "#34d399", to: "#059669" },
-    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", from: "#818cf8", to: "#4338ca" },
-    { to: "/groups", icon: Users, label: "Groups", from: "#fb7185", to: "#e11d48" },
-    { to: "/stories", icon: BookOpen, label: "Stories", from: "#fbbf24", to: "#b45309" },
+    { to: "/artists", icon: Palette, label: "Artists", from: "#fb923c", end: "#ea580c" },
+    { to: "/events", icon: Ticket, label: "Events", from: "#34d399", end: "#059669" },
+    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", from: "#818cf8", end: "#4338ca" },
+    { to: "/groups", icon: Users, label: "Groups", from: "#fb7185", end: "#e11d48" },
+    { to: "/stories", icon: BookOpen, label: "Stories", from: "#fbbf24", end: "#b45309" },
   ] as const;
   return (
     <div className="mb-6">
@@ -330,8 +330,8 @@ function _DiscoverStripImpl() {
             <span
               className="relative inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl text-white transition-transform duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0"
               style={{
-                backgroundImage: `linear-gradient(160deg, ${it.from}, ${it.to})`,
-                boxShadow: `0 6px 14px -4px ${it.to}80, 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 4px rgba(0,0,0,0.18)`,
+                backgroundImage: `linear-gradient(160deg, ${it.from}, ${it.end})`,
+                boxShadow: `0 6px 14px -4px ${it.end}80, 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 4px rgba(0,0,0,0.18)`,
               }}
             >
               <it.icon className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]" strokeWidth={2} />
