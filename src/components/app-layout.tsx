@@ -5,7 +5,7 @@ import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
   Ticket, Users, MessageSquare, MapPin, Bell, User,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, ChevronLeft, X, Menu, Shield, Sun, Moon,
+  Plus, Sparkles, X, Menu, Shield, Sun, Moon,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
@@ -87,7 +87,6 @@ export function AppLayout({
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const profile = useCurrentProfile();
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { isAdmin } = useUserRole();
   const { theme, toggleTheme } = useTheme();
@@ -219,7 +218,7 @@ export function AppLayout({
       )}
 
       <div className="mx-auto flex max-w-[1600px]">
-        <aside className={`sticky top-0 hidden h-screen ${collapsed ? "w-16" : "w-60"} shrink-0 flex-col border-r border-border bg-background px-3 py-6 md:flex transition-all`}>
+        <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-background px-3 py-6 md:flex">
           <Link to="/dashboard" className="mb-8 flex items-center justify-center px-1">
             <img src={theme === "dark" ? pbLogoDark : pbLogo} alt="Planet Baltimore" className="h-14 w-14 shrink-0" />
           </Link>
@@ -236,7 +235,7 @@ export function AppLayout({
               }`}
             >
               <Home className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-              {!collapsed && <span className="truncate">{HOME.label}</span>}
+              <span className="truncate">{HOME.label}</span>
             </Link>
             {isAdmin && (
               <Link
@@ -248,16 +247,14 @@ export function AppLayout({
                 }`}
               >
                 <Shield className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-                {!collapsed && <span className="truncate">Admin</span>}
+                <span className="truncate">Admin</span>
               </Link>
             )}
             {NAV.map((section) => (
               <div key={section.section}>
-                {!collapsed && (
-                  <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
-                    {section.section}
-                  </div>
-                )}
+                <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                  {section.section}
+                </div>
                 <div className="space-y-0.5">
                   {section.items.map((item) => {
                     const active = pathname === item.to;
@@ -266,14 +263,14 @@ export function AppLayout({
                         key={item.to}
                         to={item.to}
                         data-tour={(item as { tour?: string }).tour}
-                        className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
+                        className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors duration-150 ${
                           active
                             ? "bg-orange text-white"
                             : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
                         }`}
                       >
                         <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-                        {!collapsed && <span className="truncate">{item.label}</span>}
+                        <span className="truncate">{item.label}</span>
                       </Link>
                     );
                   })}
@@ -283,7 +280,7 @@ export function AppLayout({
           </nav>
 
           <div className="mt-4 border-t border-neutral-100 pt-3">
-            {!collapsed && profile && (
+            {profile && (
               <Link to="/profile" className="mb-2 flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-neutral-50">
                 <Avatar className="h-8 w-8">
                   {profile.avatar_url && <AvatarImage src={profile.avatar_url} />}
@@ -300,19 +297,13 @@ export function AppLayout({
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               {theme === "dark" ? <Sun className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> : <Moon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />}
-              {!collapsed && (theme === "dark" ? "Light mode" : "Dark mode")}
+              {theme === "dark" ? "Light mode" : "Dark mode"}
             </button>
             <button
               onClick={signOut}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
             >
-              <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> {!collapsed && "Sign out"}
-            </button>
-            <button
-              onClick={() => setCollapsed((c) => !c)}
-              className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <ChevronLeft className={`h-4 w-4 transition ${collapsed ? "rotate-180" : ""}`} />
+              <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> Sign out
             </button>
           </div>
         </aside>
