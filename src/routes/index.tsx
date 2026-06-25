@@ -9,6 +9,7 @@ import boomSelecta from "@/assets/boom-selecta.png";
 import queenForADay from "@/assets/queen-for-a-day.png";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
+import pbLogoDark from "@/assets/pb-logo-dark.png";
 import terrellStage from "@/assets/terrell-stage.png";
 import baltimoreCommunityBg from "@/assets/baltimore-mural-v2.jpg";
 
@@ -103,11 +104,11 @@ function Nav() {
           className="flex md:hidden items-center gap-2"
         >
           <img
-            src={pbLogo}
+            src={pbLogoDark}
             alt="Planet Baltimore"
             width={32}
             height={32}
-            className="w-8 h-8 invert"
+            className="w-8 h-8"
           />
           <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
         </motion.a>
@@ -121,11 +122,11 @@ function Nav() {
           className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2"
         >
           <img
-            src={pbLogo}
+            src={pbLogoDark}
             alt="Planet Baltimore"
             width={36}
             height={36}
-            className="w-9 h-9 invert"
+            className="w-9 h-9"
           />
           <span className="font-display text-lg md:text-xl font-extrabold tracking-tight uppercase">Planet Baltimore</span>
         </motion.a>
@@ -161,7 +162,7 @@ function Nav() {
       >
         <div className="flex items-center justify-between px-6 pt-6">
           <div className="flex items-center gap-2">
-            <img src={pbLogo} alt="" width={32} height={32} className="w-8 h-8 invert" />
+            <img src={pbLogoDark} alt="" width={32} height={32} className="w-8 h-8" />
             <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </div>
           <button
@@ -746,7 +747,7 @@ function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(5,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-3">
-              <img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0 invert" />
+              <img src={pbLogoDark} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0" />
               <div className="font-display text-xl md:text-2xl font-extrabold tracking-tight uppercase truncate">Planet Baltimore</div>
             </div>
           </div>
