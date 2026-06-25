@@ -4,8 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -39,6 +44,7 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [editing, setEditing] = useState<AdminUser | null>(null);
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) navigate({ to: "/dashboard" });
@@ -79,6 +85,10 @@ function AdminPage() {
     if (error) return toast.error(error.message);
     toast.success(u.banned ? "Account unbanned" : "Account banned");
     setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, banned: !u.banned } : p)));
+  };
+
+  const onSaved = (id: string, patch: Partial<AdminUser>) => {
+    setUsers((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   };
 
   if (roleLoading || !isAdmin) {
@@ -204,6 +214,14 @@ function AdminPage() {
                     <span className="text-[11px] text-neutral-500">{live ? "Live" : "Offline"}</span>
                   </div>
                   <div className="flex justify-end">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      onClick={() => setEditing(u)}
+                      className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                      title="Edit user"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
                     <button
                       onClick={() => toggleBan(u)}
                       disabled={busy === u.id || u.is_admin}
@@ -222,12 +240,14 @@ function AdminPage() {
                       )}
                     </button>
                   </div>
+                  </div>
                 </li>
               );
             })}
           </ul>
         )}
       </div>
+      <EditUserDialog user={editing} onClose={() => setEditing(null)} onSaved={onSaved} />
     </AppLayout>
   );
 }
