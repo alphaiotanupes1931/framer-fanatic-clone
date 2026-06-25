@@ -309,26 +309,32 @@ function CreatorSearch() {
 
 function _DiscoverStripImpl() {
   const items = [
-    { to: "/artists", icon: Palette, label: "Artists", color: "bg-orange/10 text-orange" },
-    { to: "/events", icon: Ticket, label: "Events", color: "bg-emerald-50 text-emerald-600" },
-    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", color: "bg-indigo-50 text-indigo-600" },
-    { to: "/groups", icon: Users, label: "Groups", color: "bg-rose-50 text-rose-600" },
-    { to: "/stories", icon: BookOpen, label: "Stories", color: "bg-amber-50 text-amber-700" },
+    { to: "/artists", icon: Palette, label: "Artists", from: "#fb923c", to: "#ea580c" },
+    { to: "/events", icon: Ticket, label: "Events", from: "#34d399", to: "#059669" },
+    { to: "/neighborhoods", icon: MapPin, label: "Neighborhoods", from: "#818cf8", to: "#4338ca" },
+    { to: "/groups", icon: Users, label: "Groups", from: "#fb7185", to: "#e11d48" },
+    { to: "/stories", icon: BookOpen, label: "Stories", from: "#fbbf24", to: "#b45309" },
   ] as const;
   return (
     <div className="mb-6">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Discover Baltimore</h2>
       </div>
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+      <div className="grid grid-cols-5 gap-3 sm:gap-5">
         {items.map((it) => (
           <Link
             key={it.to}
             to={it.to}
-            className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-3 transition hover:border-orange/40 hover:shadow-sm"
+            className="group flex flex-col items-center gap-2 py-1"
           >
-            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${it.color}`}>
-              <it.icon className="h-4 w-4" strokeWidth={1.75} />
+            <span
+              className="relative inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl text-white transition-transform duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0"
+              style={{
+                backgroundImage: `linear-gradient(160deg, ${it.from}, ${it.to})`,
+                boxShadow: `0 6px 14px -4px ${it.to}80, 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 4px rgba(0,0,0,0.18)`,
+              }}
+            >
+              <it.icon className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]" strokeWidth={2} />
             </span>
             <span className="text-[11px] font-medium text-foreground text-center leading-tight">{it.label}</span>
           </Link>
