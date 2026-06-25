@@ -54,8 +54,19 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  // Silently auto-retry once for transient errors before showing the fallback.
+  const autoRetriedRef = (typeof window !== "undefined" ? (window as any) : ({} as any));
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    const key = "__pb_auto_retry_at";
+    const now = Date.now();
+    const last = Number(autoRetriedRef[key] ?? 0);
+    // Only auto-retry once per 10s window to avoid loops.
+    if (now - last > 10_000) {
+      autoRetriedRef[key] = now;
+      router.invalidate();
+      reset();
+    }
   }, [error]);
 
   return (
