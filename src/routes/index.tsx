@@ -546,11 +546,7 @@ function DailyCreators() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id,display_name,username,avatar_url,category,role,banned")
-        .or("banned.is.null,banned.eq.false")
-        .limit(200);
+      const { data } = await supabase.rpc("public_creators", { lim: 200 });
       if (cancelled) return;
       // Show whoever's on the platform. If there are fewer than 3 users total,
       // show all of them. Prefer photos when we have enough to choose from.
