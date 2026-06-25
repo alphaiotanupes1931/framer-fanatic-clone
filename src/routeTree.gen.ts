@@ -34,6 +34,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
+import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const VideosRoute = VideosRouteImport.update({
@@ -161,6 +162,11 @@ const OSlugRoute = OSlugRouteImport.update({
   path: '/o/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsEventIdRoute = EventsEventIdRouteImport.update({
+  id: '/$eventId',
+  path: '/$eventId',
+  getParentRoute: () => EventsRoute,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -179,7 +185,7 @@ export interface FileRoutesByFullPath {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
-  '/events': typeof EventsRoute
+  '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/stories': typeof StoriesRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -207,7 +214,7 @@ export interface FileRoutesByTo {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
-  '/events': typeof EventsRoute
+  '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/stories': typeof StoriesRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -236,7 +244,7 @@ export interface FileRoutesById {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
-  '/events': typeof EventsRoute
+  '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/stories': typeof StoriesRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/stories'
     | '/terms'
     | '/videos'
+    | '/events/$eventId'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/stories'
     | '/terms'
     | '/videos'
+    | '/events/$eventId'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
   id:
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/stories'
     | '/terms'
     | '/videos'
+    | '/events/$eventId'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
@@ -351,7 +363,7 @@ export interface RootRouteChildren {
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
-  EventsRoute: typeof EventsRoute
+  EventsRoute: typeof EventsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
@@ -545,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$eventId': {
+      id: '/events/$eventId'
+      path: '/$eventId'
+      fullPath: '/events/$eventId'
+      preLoaderRoute: typeof EventsEventIdRouteImport
+      parentRoute: typeof EventsRoute
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -554,6 +573,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface EventsRouteChildren {
+  EventsEventIdRoute: typeof EventsEventIdRoute
+}
+
+const EventsRouteChildren: EventsRouteChildren = {
+  EventsEventIdRoute: EventsEventIdRoute,
+}
+
+const EventsRouteWithChildren =
+  EventsRoute._addFileChildren(EventsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -567,7 +597,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
-  EventsRoute: EventsRoute,
+  EventsRoute: EventsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,

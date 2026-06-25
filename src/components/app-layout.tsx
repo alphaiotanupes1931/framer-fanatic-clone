@@ -388,7 +388,17 @@ export function AppLayout({
 }
 
 function NotificationsBell() {
+  const profile = useCurrentProfile();
+  const navigate = useNavigate();
   const [items] = useState<{ id: string; title: string; body: string; time: string }[]>([]);
+  const missing: { key: string; title: string; body: string }[] = [];
+  if (profile) {
+    if (!profile.avatar_url) missing.push({ key: "avatar", title: "Add a profile photo", body: "Help neighbors recognize you in the feed." });
+    if (!profile.neighborhood) missing.push({ key: "neighborhood", title: "Set your neighborhood", body: "Show up on the Baltimore map." });
+    if (!profile.bio) missing.push({ key: "bio", title: "Write a short bio", body: "Tell people what you make and care about." });
+    if (!profile.display_name) missing.push({ key: "name", title: "Add your display name", body: "Use your real name or stage name." });
+  }
+  const totalCount = items.length + missing.length;
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -398,23 +408,41 @@ function NotificationsBell() {
           className="relative inline-flex h-9 w-9 items-center justify-center rounded-full bg-card text-card-foreground/80 transition hover:bg-accent hover:text-orange md:h-10 md:w-10 md:border md:border-border"
         >
           <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
-          {items.length > 0 && (
-            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-orange" />
+          {totalCount > 0 && (
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-card" />
           )}
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
           <h3 className="text-sm font-semibold">Notifications</h3>
-          <span className="text-[11px] text-neutral-400">{items.length} new</span>
+          <span className="text-[11px] text-neutral-400">{totalCount} new</span>
         </div>
         <div className="max-h-80 overflow-y-auto">
-          {items.length === 0 ? (
+          {totalCount === 0 ? (
             <div className="px-4 py-10 text-center text-xs text-neutral-400">
               You're all caught up.
             </div>
           ) : (
-            <ul className="divide-y divide-neutral-100">
+            <ul className="divide-y divide-neutral-100 dark:divide-white/10">
+              {missing.length > 0 && (
+                <li className="bg-red-500/5 px-4 py-3">
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-red-500">Complete your profile</div>
+                  <ul className="mt-2 space-y-2">
+                    {missing.map((m) => (
+                      <li key={m.key}>
+                        <button
+                          onClick={() => navigate({ to: "/profile" })}
+                          className="w-full text-left rounded-md px-2 py-1.5 hover:bg-red-500/10"
+                        >
+                          <div className="text-sm font-medium">{m.title}</div>
+                          <div className="text-xs text-muted-foreground">{m.body}</div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )}
               {items.map((n) => (
                 <li key={n.id} className="px-4 py-3 hover:bg-neutral-50">
                   <div className="text-sm font-medium text-neutral-900">{n.title}</div>
