@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -21,6 +23,7 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BusinessesRouteImport } from './routes/businesses'
@@ -36,6 +39,11 @@ import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/
 const VideosRoute = VideosRouteImport.update({
   id: '/videos',
   path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoriesRoute = StoriesRouteImport.update({
@@ -56,6 +64,11 @@ const SearchRoute = SearchRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -91,6 +104,11 @@ const EventsRoute = EventsRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityAssociationsRoute = CommunityAssociationsRouteImport.update({
@@ -159,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
@@ -166,10 +185,12 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -184,6 +205,7 @@ export interface FileRoutesByTo {
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
@@ -191,10 +213,12 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -210,6 +234,7 @@ export interface FileRoutesById {
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRoute
   '/groups': typeof GroupsRoute
@@ -217,10 +242,12 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/o/$slug': typeof OSlugRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -237,6 +264,7 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/calendar'
     | '/community-associations'
+    | '/cookies'
     | '/dashboard'
     | '/events'
     | '/groups'
@@ -244,10 +272,12 @@ export interface FileRouteTypes {
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/settings'
     | '/stories'
+    | '/terms'
     | '/videos'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
@@ -262,6 +292,7 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/calendar'
     | '/community-associations'
+    | '/cookies'
     | '/dashboard'
     | '/events'
     | '/groups'
@@ -269,10 +300,12 @@ export interface FileRouteTypes {
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/settings'
     | '/stories'
+    | '/terms'
     | '/videos'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
@@ -287,6 +320,7 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/calendar'
     | '/community-associations'
+    | '/cookies'
     | '/dashboard'
     | '/events'
     | '/groups'
@@ -294,10 +328,12 @@ export interface FileRouteTypes {
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/settings'
     | '/stories'
+    | '/terms'
     | '/videos'
     | '/o/$slug'
     | '/api/public/stripe-webhook'
@@ -313,6 +349,7 @@ export interface RootRouteChildren {
   BusinessesRoute: typeof BusinessesRoute
   CalendarRoute: typeof CalendarRoute
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
+  CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
   EventsRoute: typeof EventsRoute
   GroupsRoute: typeof GroupsRoute
@@ -320,10 +357,12 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   StoriesRoute: typeof StoriesRoute
+  TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
   OSlugRoute: typeof OSlugRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
@@ -336,6 +375,13 @@ declare module '@tanstack/react-router' {
       path: '/videos'
       fullPath: '/videos'
       preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stories': {
@@ -364,6 +410,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -413,6 +466,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community-associations': {
@@ -505,6 +565,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessesRoute: BusinessesRoute,
   CalendarRoute: CalendarRoute,
   CommunityAssociationsRoute: CommunityAssociationsRoute,
+  CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
   EventsRoute: EventsRoute,
   GroupsRoute: GroupsRoute,
@@ -512,10 +573,12 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   StoriesRoute: StoriesRoute,
+  TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
   OSlugRoute: OSlugRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,

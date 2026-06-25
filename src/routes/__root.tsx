@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "motion/react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import pbLogo from "../assets/pb-logo.png";
+import { CookieBanner } from "../components/cookie-banner";
 
 const themeScript = `
   (function() {
@@ -157,6 +158,7 @@ function RootComponent() {
           <Outlet />
         </motion.div>
       </AnimatePresence>
+      <CookieBanner />
     </QueryClientProvider>
   );
 }
