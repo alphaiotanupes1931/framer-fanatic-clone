@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Lock } from "lucide-react";
-import pbLogo from "@/assets/pb-logo.png";
+import pbLogoDark from "@/assets/pb-logo-dark.png";
 
 export function useAuthState() {
   const [state, setState] = useState<{ loading: boolean; signedIn: boolean }>({ loading: true, signedIn: false });
@@ -31,7 +31,7 @@ export function PublicShell({
       <header className="border-b border-paper/10 sticky top-0 z-40 bg-ink/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 min-w-0">
-            <img src={pbLogo} alt="Planet Baltimore" className="w-8 h-8 invert shrink-0" />
+            <img src={pbLogoDark} alt="Planet Baltimore" className="w-8 h-8 shrink-0" />
             <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase truncate hidden sm:inline">Planet Baltimore</span>
           </Link>
           <nav className="hidden md:flex items-center gap-5 text-sm text-paper/80">
