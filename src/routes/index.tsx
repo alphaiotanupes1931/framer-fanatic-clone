@@ -344,12 +344,14 @@ function HeroParallax() {
       />
       {/* Video: desktop only */}
       <div className="absolute inset-0 hidden md:block pointer-events-none">
-        <iframe
-          allow="fullscreen;autoplay"
-          allowFullScreen
-          src="https://streamable.com/e/wn6e88?autoplay=1&nocontrols=1"
-          title="Planet Baltimore hero video"
-          className="absolute inset-0 w-full h-full border-none"
+        <video
+          src={heroVideoAsset.url}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
     </motion.div>
