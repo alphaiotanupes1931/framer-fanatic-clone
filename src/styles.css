@@ -196,6 +196,23 @@
   }
 }
 
+/* Dark mode readability: lift hardcoded neutral grays toward white */
+.dark .text-neutral-400,
+.dark .text-neutral-500,
+.dark .text-neutral-600,
+.dark .text-neutral-700,
+.dark .text-neutral-800,
+.dark .text-neutral-900,
+.dark .text-gray-400,
+.dark .text-gray-500,
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: oklch(0.98 0 0) !important;
+}
+.dark .text-muted-foreground {
+  color: oklch(0.96 0.005 247) !important;
+}
+
 @theme inline {
   --color-blue: var(--blue);
   --color-blue-deep: var(--blue-deep);
