@@ -700,6 +700,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_event: { Args: { _id: string }; Returns: undefined }
+      admin_delete_organization: { Args: { _id: string }; Returns: undefined }
+      admin_delete_profile: { Args: { _id: string }; Returns: undefined }
+      admin_list_events: {
+        Args: never
+        Returns: {
+          host_name: string
+          id: string
+          starts_at: string
+          title: string
+          user_id: string
+        }[]
+      }
+      admin_list_organizations: {
+        Args: never
+        Returns: {
+          id: string
+          name: string
+          slug: string
+          type: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
