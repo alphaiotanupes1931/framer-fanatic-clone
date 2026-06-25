@@ -395,7 +395,7 @@ function NotificationsBell() {
         <button
           aria-label="Notifications"
           data-tour="notifications"
-          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 transition hover:bg-neutral-100 hover:text-orange md:h-10 md:w-10 md:border md:border-neutral-200 md:bg-white md:text-neutral-600"
+          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full bg-card text-card-foreground/80 transition hover:bg-accent hover:text-orange md:h-10 md:w-10 md:border md:border-border"
         >
           <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
           {items.length > 0 && (
