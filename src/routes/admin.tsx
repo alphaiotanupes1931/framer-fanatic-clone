@@ -274,6 +274,7 @@ function AdminPage() {
         )}
       </div>
       <EditUserDialog user={editing} onClose={() => setEditing(null)} onSaved={onSaved} />
+      <DangerZone onUserDeleted={(id) => setUsers((prev) => prev.filter((p) => p.id !== id))} />
     </AppLayout>
   );
 }
