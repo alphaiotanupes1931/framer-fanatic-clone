@@ -30,20 +30,25 @@ function fmtDate(iso: string) {
   return d.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-function EventCard({ e, onBuy }: { e: EventRow; onBuy?: (id: string) => void }) {
+function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: string) => void; variant?: "light" | "dark" }) {
   const priced = (e.price_cents ?? 0) > 0;
+  const dark = variant === "dark";
+  const wrap = dark ? "border-paper/10 bg-paper/5" : "border-border bg-card text-card-foreground";
+  const imgBg = dark ? "bg-paper/10 text-paper/30" : "bg-muted text-muted-foreground";
+  const meta = dark ? "text-paper/60" : "text-muted-foreground";
+  const body = dark ? "text-paper/70" : "text-muted-foreground";
   return (
-    <div className="rounded-2xl overflow-hidden border border-paper/10 bg-paper/5 h-full">
-      <div className="aspect-[16/10] bg-paper/10 overflow-hidden">
+    <div className={`rounded-2xl overflow-hidden border h-full ${wrap}`}>
+      <div className={`aspect-[16/10] overflow-hidden flex items-center justify-center ${imgBg}`}>
         {e.image_url
           ? <img src={e.image_url} alt={e.title} className="w-full h-full object-cover" />
-          : <div className="w-full h-full flex items-center justify-center text-paper/30"><Calendar className="w-10 h-10" /></div>}
+          : <Calendar className="w-10 h-10" />}
       </div>
       <div className="p-4">
-        <div className="text-xs text-paper/60 flex items-center gap-1"><Calendar className="w-3 h-3" /> {fmtDate(e.starts_at)}</div>
+        <div className={`text-xs flex items-center gap-1 ${meta}`}><Calendar className="w-3 h-3" /> {fmtDate(e.starts_at)}</div>
         <div className="font-semibold mt-1 line-clamp-2">{e.title}</div>
-        {e.location && <div className="text-xs text-paper/60 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {e.location}</div>}
-        {e.description && <p className="text-sm text-paper/70 mt-2 line-clamp-2">{e.description}</p>}
+        {e.location && <div className={`text-xs mt-1 flex items-center gap-1 ${meta}`}><MapPin className="w-3 h-3" /> {e.location}</div>}
+        {e.description && <p className={`text-sm mt-2 line-clamp-2 ${body}`}>{e.description}</p>}
         <div className="mt-3 flex items-center justify-between">
           <div className="text-sm font-semibold">
             {priced ? `$${((e.price_cents ?? 0)/100).toFixed(2)}` : "Free"}
@@ -116,7 +121,7 @@ function EventsPage() {
                   unlockedCount={0}
                   signedIn={false}
                   thing="event"
-                  render={(e) => <EventCard e={e as EventRow} />}
+              render={(e) => <EventCard e={e as EventRow} variant="dark" />}
                 />
               </>
             )}
