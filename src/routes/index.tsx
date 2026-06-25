@@ -552,6 +552,13 @@ type DailyCreator = {
   role: string | null;
 };
 
+function formatCreatorLabel(category?: string | null) {
+  if (!category) return "Artist";
+  const c = category.trim().toLowerCase();
+  if (!c || c === "attendee") return "Artist";
+  return c.replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
 function DailyCreators() {
   const [creators, setCreators] = useState<DailyCreator[]>([]);
   const [loading, setLoading] = useState(true);
@@ -644,7 +651,7 @@ function DailyCreators() {
               {c.display_name ?? c.username ?? "Baltimore creator"}
             </h3>
             <p className="mt-2 text-paper/70 text-sm md:text-base max-md:text-xs">
-              {c.category ?? "Creator"}
+              {formatCreatorLabel(c.category)}
             </p>
           </div>
         </motion.a>
