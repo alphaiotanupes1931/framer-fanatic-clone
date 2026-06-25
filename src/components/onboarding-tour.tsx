@@ -148,12 +148,22 @@ export function OnboardingTour() {
         }}
       />
       <button
-        onClick={() => setRun(true)}
-        aria-label="Replay onboarding tour"
-        title="Take a tour"
-        className="fixed bottom-[132px] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-md transition hover:bg-neutral-50 hover:text-orange md:bottom-24 md:right-6 md:h-12 md:w-12"
+        onClick={async () => {
+          const url = `${window.location.origin}/`;
+          try {
+            if (navigator.share) {
+              await navigator.share({ title: "Planet Baltimore", text: "Join me on Planet Baltimore", url });
+            } else {
+              await navigator.clipboard.writeText(url);
+              toast.success("Invite link copied");
+            }
+          } catch { /* cancelled */ }
+        }}
+        aria-label="Share Planet Baltimore"
+        title="Share Planet Baltimore"
+        className="fixed bottom-[132px] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-card-foreground shadow-md transition hover:bg-accent hover:text-orange md:bottom-24 md:right-6 md:h-12 md:w-12"
       >
-        <HelpCircle className="h-5 w-5" strokeWidth={1.75} />
+        <Share2 className="h-5 w-5" strokeWidth={1.75} />
       </button>
     </>
   );
