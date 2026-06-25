@@ -547,7 +547,7 @@ function DailyCreators() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.rpc("public_creators", { lim: 200 });
+      const { data } = await supabase.rpc("public_creators", { lim: 60 });
       if (cancelled) return;
       // Show whoever's on the platform. If there are fewer than 3 users total,
       // show all of them. Prefer photos when we have enough to choose from.
