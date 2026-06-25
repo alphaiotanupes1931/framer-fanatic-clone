@@ -526,6 +526,7 @@ function Features() {
           Three creators from the platform, refreshed every day.
         </motion.p>
         <DailyCreators />
+        <NextRefreshCountdown />
       </div>
     </section>
   );
