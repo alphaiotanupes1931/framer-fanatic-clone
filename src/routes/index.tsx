@@ -578,7 +578,7 @@ function DailyCreators() {
         const j = Math.floor(rand() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
-      setCreators(arr.slice(0, 3));
+      setCreators(arr.slice(0, Math.min(3, arr.length)));
       setLoading(false);
     })();
     return () => {
