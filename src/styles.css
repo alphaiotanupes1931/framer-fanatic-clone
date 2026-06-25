@@ -225,9 +225,28 @@
 }
 .dark .bg-neutral-50,
 .dark .bg-neutral-100,
+.dark .bg-neutral-200,
 .dark .bg-gray-50,
-.dark .bg-gray-100 {
+.dark .bg-gray-100,
+.dark .bg-gray-200 {
   background-color: oklch(0.24 0.02 262) !important;
+}
+/* Light borders/dividers become invisible on dark — lift them. */
+.dark .border-neutral-100,
+.dark .border-neutral-200,
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .divide-neutral-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-neutral-200 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: oklch(1 0 0 / 12%) !important;
+}
+/* Stark black text on (now dark) surfaces becomes invisible — lift it. */
+.dark .text-black,
+.dark .text-neutral-950,
+.dark .text-gray-950 {
+  color: oklch(0.92 0.01 250) !important;
 }
 
 @theme inline {
