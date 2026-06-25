@@ -588,9 +588,9 @@ function DailyCreators() {
 
   if (loading) {
     return (
-      <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5">
+      <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5 max-md:flex max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:-mx-5 max-md:px-5 max-md:gap-4 max-md:pb-2">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="aspect-[4/5] rounded-3xl bg-white/10 animate-pulse" />
+          <div key={i} className="aspect-[4/5] max-md:aspect-[3/4] max-md:w-[82vw] max-md:shrink-0 rounded-3xl bg-white/10 animate-pulse" />
         ))}
       </div>
     );
@@ -598,14 +598,14 @@ function DailyCreators() {
 
   if (creators.length === 0) {
     return (
-      <div className="mt-12 md:mt-20 rounded-3xl border border-white/20 bg-white/5 p-10 text-center text-white/80">
+      <div className="mt-12 md:mt-20 rounded-3xl border border-white/20 bg-white/5 p-10 max-md:p-6 text-center text-white/80">
         New creators joining soon. Be one of the first.
       </div>
     );
   }
 
   return (
-    <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5">
+    <div className="mt-12 md:mt-20 grid md:grid-cols-3 gap-4 md:gap-5 max-md:flex max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:-mx-5 max-md:px-5 max-md:gap-4 max-md:pb-2">
       {creators.map((c, i) => (
         <motion.a
           key={c.id}
@@ -614,9 +614,9 @@ function DailyCreators() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="group relative rounded-3xl bg-ink text-paper overflow-hidden block"
+          className="group relative rounded-3xl bg-ink text-paper overflow-hidden block max-md:w-[82vw] max-md:shrink-0 max-md:snap-start"
         >
-          <div className="aspect-[4/5] overflow-hidden bg-ink/60">
+          <div className="aspect-[4/5] max-md:aspect-[3/4] overflow-hidden bg-ink/60">
             {c.avatar_url ? (
               <motion.img
                 src={c.avatar_url}
@@ -627,16 +627,16 @@ function DailyCreators() {
                 transition={{ duration: 0.6 }}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-paper/40 text-6xl font-display">
+              <div className="w-full h-full flex items-center justify-center text-paper/40 text-6xl max-md:text-4xl font-display">
                 {(c.display_name ?? "?").slice(0, 1).toUpperCase()}
               </div>
             )}
           </div>
-          <div className="p-6 md:p-7">
-            <h3 className="font-display text-2xl md:text-3xl font-medium tracking-tight">
+          <div className="p-6 md:p-7 max-md:p-4">
+            <h3 className="font-display text-2xl md:text-3xl max-md:text-xl font-medium tracking-tight">
               {c.display_name ?? c.username ?? "Baltimore creator"}
             </h3>
-            <p className="mt-2 text-paper/70 text-sm md:text-base">
+            <p className="mt-2 text-paper/70 text-sm md:text-base max-md:text-xs">
               {c.category ?? "Creator"}
             </p>
           </div>
