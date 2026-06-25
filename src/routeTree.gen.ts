@@ -33,6 +33,7 @@ import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -157,6 +158,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OSlugRoute = OSlugRouteImport.update({
   id: '/o/$slug',
   path: '/o/$slug',
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -229,6 +236,7 @@ export interface FileRoutesByTo {
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/events/$eventId'
     | '/o/$slug'
+    | '/u/$username'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/events/$eventId'
     | '/o/$slug'
+    | '/u/$username'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/events/$eventId'
     | '/o/$slug'
+    | '/u/$username'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -377,6 +389,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
   OSlugRoute: typeof OSlugRoute
+  UUsernameRoute: typeof UUsernameRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -550,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/o/$slug': {
       id: '/o/$slug'
       path: '/o/$slug'
@@ -611,6 +631,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
   OSlugRoute: OSlugRoute,
+  UUsernameRoute: UUsernameRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

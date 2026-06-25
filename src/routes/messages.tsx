@@ -202,22 +202,43 @@ function MessagesPage() {
     if (!active || !me || !draft.trim()) return;
     const content = draft.trim();
     setDraft("");
-    const { error } = await supabase
+    // Optimistic: render immediately so chat feels instant.
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimistic: Msg = {
+      id: tempId,
+      conversation_id: active.id,
+      sender_id: me.id,
+      content,
+      created_at: new Date().toISOString(),
+    };
+    setMsgs((prev) => [...prev, optimistic]);
+    const { data: inserted, error } = await supabase
       .from("messages")
-      .insert({ conversation_id: active.id, sender_id: me.id, content });
+      .insert({ conversation_id: active.id, sender_id: me.id, content })
+      .select()
+      .single();
     if (error) {
       toast.error(error.message);
+      setMsgs((prev) => prev.filter((m) => m.id !== tempId));
       setDraft(content);
       return;
     }
-    await supabase
+    // Replace temp row with the real one (or drop the temp if realtime beat us).
+    if (inserted) {
+      setMsgs((prev) => {
+        const withoutTemp = prev.filter((m) => m.id !== tempId);
+        if (withoutTemp.some((m) => m.id === (inserted as Msg).id)) return withoutTemp;
+        return [...withoutTemp, inserted as Msg];
+      });
+    }
+    void supabase
       .from("conversations")
       .update({
         last_message_at: new Date().toISOString(),
         last_message_preview: content.slice(0, 140),
       })
       .eq("id", active.id);
-    loadConvs();
+    void loadConvs();
   };
 
   const startConv = async (otherId: string) => {
