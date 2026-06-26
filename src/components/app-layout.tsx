@@ -5,7 +5,7 @@ import {
   Home, Palette, Landmark, Building2, Calendar as CalendarIcon, ShieldCheck,
   Ticket, Users, MessageSquare, MapPin, Bell, User,
   BookOpen, Video as VideoIcon, Trophy, Settings as SettingsIcon, LogOut,
-  Plus, Sparkles, X, Menu, Shield, Sun, Moon, Bookmark,
+  Plus, Sparkles, X, Menu, Shield, Sun, Moon, Bookmark, HandHeart,
 } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
@@ -54,6 +54,7 @@ const NAV = [
   ]},
   { section: "Account", items: [
     { to: "/saved", icon: Bookmark, label: "Saved" },
+    { to: "/support", icon: HandHeart, label: "Support" },
     { to: "/settings", icon: SettingsIcon, label: "Settings" },
   ]},
 ] as const;
