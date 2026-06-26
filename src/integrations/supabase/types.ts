@@ -908,6 +908,18 @@ export type Database = {
       }
       slugify_username: { Args: { s: string }; Returns: string }
       titlecase_name: { Args: { s: string }; Returns: string }
+      top_creators: {
+        Args: { lim?: number }
+        Returns: {
+          avatar_url: string
+          category: string
+          display_name: string
+          id: string
+          role: string
+          score: number
+          username: string
+        }[]
+      }
       touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {
