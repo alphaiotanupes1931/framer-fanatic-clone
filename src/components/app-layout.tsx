@@ -548,7 +548,7 @@ function RightRail() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-            <Sparkles className="h-3 w-3" /> Top 20 Creators
+            <Trophy className="h-3 w-3" /> Top 20 Creators
           </h3>
           <Link to="/artists" className="text-[11px] font-medium text-neutral-500 hover:text-neutral-900">All</Link>
         </div>
