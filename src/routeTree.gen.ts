@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
@@ -47,6 +48,11 @@ const VideosRoute = VideosRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoriesRoute = StoriesRouteImport.update({
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -305,6 +314,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/stories'
+    | '/support'
     | '/terms'
     | '/videos'
     | '/events/$eventId'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/stories'
+    | '/support'
     | '/terms'
     | '/videos'
     | '/events/$eventId'
@@ -367,6 +378,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/stories'
+    | '/support'
     | '/terms'
     | '/videos'
     | '/events/$eventId'
@@ -399,6 +411,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   StoriesRoute: typeof StoriesRoute
+  SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
   OSlugRoute: typeof OSlugRoute
@@ -420,6 +433,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stories': {
@@ -649,6 +669,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   StoriesRoute: StoriesRoute,
+  SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
   OSlugRoute: OSlugRoute,

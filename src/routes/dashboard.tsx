@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Pencil, Trash2, Check } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Pencil, Trash2, Check, BadgeCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/dashboard")({
 type Post = {
   id: string; user_id: string; content: string; image_url: string | null;
   likes_count: number | null; comments_count: number | null; neighborhood: string | null; created_at: string;
-  author?: { display_name: string | null; avatar_url: string | null; username: string | null; neighborhood: string | null };
+  author?: { display_name: string | null; avatar_url: string | null; username: string | null; neighborhood: string | null; is_founder?: boolean };
 };
 
 type PostComment = {
