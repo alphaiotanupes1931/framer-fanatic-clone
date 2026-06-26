@@ -207,6 +207,7 @@ function Dashboard() {
         )}
         <CreatorSearch />
         <DiscoverStrip />
+        <TopCreatorsLeaderboard />
 
         <div className="mb-4 flex w-full items-center gap-1 rounded-full border border-border bg-muted p-1 sm:inline-flex sm:w-auto">
           {([["for-you","For you"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
