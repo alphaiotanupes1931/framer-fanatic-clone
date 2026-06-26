@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Pencil, Trash2, Check, BadgeCheck, Sparkles } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Pencil, Trash2, Check, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -280,7 +280,7 @@ function Dashboard() {
             >
               {p.author?.is_founder && (
                 <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange/15 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-orange">
-                  <Sparkles className="h-3 w-3" strokeWidth={2} /> Founder message
+                  <BadgeCheck className="h-3 w-3" strokeWidth={2} /> Founder message
                 </div>
               )}
               <header className="flex items-center gap-3">
