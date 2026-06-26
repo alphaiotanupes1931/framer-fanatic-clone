@@ -7,6 +7,7 @@ import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, 
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useUserRole } from "@/hooks/use-user-role";
+import { formatCategory } from "@/lib/format-category";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
