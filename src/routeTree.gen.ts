@@ -14,6 +14,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -61,6 +62,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavedRoute = SavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
@@ -229,6 +236,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/stories': typeof StoriesRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/profile'
+    | '/saved'
     | '/search'
     | '/settings'
     | '/stories'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/profile'
+    | '/saved'
     | '/search'
     | '/settings'
     | '/stories'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/profile'
+    | '/saved'
     | '/search'
     | '/settings'
     | '/stories'
@@ -383,6 +395,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  SavedRoute: typeof SavedRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   StoriesRoute: typeof StoriesRoute
@@ -428,6 +441,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saved': {
+      id: '/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof SavedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -625,6 +645,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  SavedRoute: SavedRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   StoriesRoute: StoriesRoute,
