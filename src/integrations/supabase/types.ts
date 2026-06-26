@@ -892,6 +892,7 @@ export type Database = {
           avatar_url: string
           display_name: string
           id: string
+          is_founder: boolean
           neighborhood: string
           username: string
         }[]
