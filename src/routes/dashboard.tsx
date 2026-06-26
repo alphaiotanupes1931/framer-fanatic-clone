@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Pencil, Trash2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -40,6 +40,8 @@ function Dashboard() {
   const [myProfile, setMyProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Post | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
 
   const load = async (currentUserId?: string) => {
     setLoading(true);
@@ -121,6 +123,40 @@ function Dashboard() {
     if (res.error) {
       toast.error(res.error.message);
       await load(me);
+    }
+  };
+
+  const startEdit = (p: Post) => {
+    setEditingId(p.id);
+    setEditingText(p.content);
+  };
+
+  const saveEdit = async (p: Post) => {
+    const next = editingText.trim();
+    if (!next || !me) return;
+    const prev = p.content;
+    setPosts((cur) => cur.map((x) => x.id === p.id ? { ...x, content: next } : x));
+    setEditingId(null);
+    const { error } = await supabase.from("posts").update({ content: next }).eq("id", p.id).eq("user_id", me);
+    if (error) {
+      toast.error(error.message);
+      setPosts((cur) => cur.map((x) => x.id === p.id ? { ...x, content: prev } : x));
+    } else {
+      toast.success("Post updated");
+    }
+  };
+
+  const deletePost = async (p: Post) => {
+    if (!me) return;
+    if (!confirm("Delete this post? This cannot be undone.")) return;
+    const prev = posts;
+    setPosts((cur) => cur.filter((x) => x.id !== p.id));
+    const { error } = await supabase.from("posts").delete().eq("id", p.id).eq("user_id", me);
+    if (error) {
+      toast.error(error.message);
+      setPosts(prev);
+    } else {
+      toast.success("Post deleted");
     }
   };
 
@@ -223,8 +259,56 @@ function Dashboard() {
                     {p.author?.neighborhood || "Baltimore"} · {new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </div>
                 </div>
+                {me === p.user_id && (
+                  <div className="ml-auto flex items-center gap-1">
+                    {editingId === p.id ? (
+                      <>
+                        <button
+                          onClick={() => saveEdit(p)}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                          aria-label="Save edit"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => { setEditingId(null); setEditingText(""); }}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                          aria-label="Cancel edit"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => startEdit(p)}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                          aria-label="Edit post"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => deletePost(p)}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-red-500"
+                          aria-label="Delete post"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </header>
-              <div className="mt-3 pl-0 sm:pl-12 text-[15px] leading-relaxed text-foreground">{p.content}</div>
+              {editingId === p.id ? (
+                <textarea
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                  rows={3}
+                  className="mt-3 ml-0 sm:ml-12 w-[calc(100%-0px)] sm:w-[calc(100%-3rem)] resize-none rounded-xl border border-border bg-muted p-3 text-[15px] leading-relaxed text-foreground outline-none focus:border-orange"
+                />
+              ) : (
+                <div className="mt-3 pl-0 sm:pl-12 text-[15px] leading-relaxed text-foreground">{p.content}</div>
+              )}
               {p.image_url && (
                 <div className="mt-3 overflow-hidden rounded-xl sm:pl-12">
                   <img src={p.image_url} alt="" className="w-full" loading="lazy" />
