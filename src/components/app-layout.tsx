@@ -517,13 +517,13 @@ function MessageBubble() {
 }
 
 function RightRail() {
-  const [artists, setArtists] = useState<{ id: string; display_name: string | null; username: string | null; neighborhood: string | null; avatar_url: string | null }[]>([]);
+  const [leaders, setLeaders] = useState<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null; category: string | null; score: number }[]>([]);
   const [events, setEvents] = useState<{ id: string; title: string; starts_at: string | null; location: string | null }[]>([]);
 
   useEffect(() => {
     (async () => {
       const [{ data: a }, { data: e }] = await Promise.all([
-        supabase.rpc("search_creators", { q: "", lim: 5 }),
+        supabase.rpc("top_creators", { lim: 20 }),
         supabase
           .from("events")
           .select("id, title, starts_at, location")
@@ -531,7 +531,7 @@ function RightRail() {
           .order("starts_at", { ascending: true })
           .limit(3),
       ]);
-      setArtists((a as typeof artists) || []);
+      setLeaders((a as typeof leaders) || []);
       setEvents((e as typeof events) || []);
     })();
   }, []);
@@ -548,26 +548,45 @@ function RightRail() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-            <Sparkles className="h-3 w-3" /> Artists nearby
+            <Sparkles className="h-3 w-3" /> Top 20 Creators
           </h3>
           <Link to="/artists" className="text-[11px] font-medium text-neutral-500 hover:text-neutral-900">All</Link>
         </div>
-        {artists.length === 0 ? (
-          <p className="text-xs text-neutral-400">No artists yet.</p>
+        {leaders.length === 0 ? (
+          <p className="text-xs text-neutral-400">No creators yet.</p>
         ) : (
-          <ul className="space-y-3">
-            {artists.map((a) => (
-              <li key={a.id}>
-                <Link
-                  to="/u/$username"
-                  params={{ username: a.username || a.id }}
-                  className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-accent"
-                >
-                  <ArtistMiniRow artist={a} />
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <ol className="space-y-2">
+            {leaders.map((a, i) => {
+              const medal =
+                i === 0 ? "bg-amber-400 text-amber-950"
+                : i === 1 ? "bg-zinc-300 text-zinc-800"
+                : i === 2 ? "bg-orange-400 text-orange-950"
+                : "bg-muted text-muted-foreground";
+              return (
+                <li key={a.id}>
+                  <Link
+                    to="/u/$username"
+                    params={{ username: a.username || a.id }}
+                    className="flex items-center gap-2.5 rounded-xl p-1.5 transition hover:bg-accent"
+                  >
+                    <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${medal}`}>
+                      {i + 1}
+                    </span>
+                    <Avatar className="h-8 w-8">
+                      {a.avatar_url && <AvatarImage src={a.avatar_url} />}
+                      <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
+                        {(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[12.5px] font-medium text-foreground">{a.display_name || a.username || "Anonymous"}</div>
+                      <div className="truncate text-[10.5px] capitalize text-muted-foreground">{(a.category || "Artist").replace(/_/g, " ")}</div>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
         )}
       </section>
 
