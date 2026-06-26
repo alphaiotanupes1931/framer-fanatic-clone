@@ -207,6 +207,7 @@ function Dashboard() {
         )}
         <CreatorSearch />
         <DiscoverStrip />
+        <TopCreatorsLeaderboard />
 
         <div className="mb-4 flex w-full items-center gap-1 rounded-full border border-border bg-muted p-1 sm:inline-flex sm:w-auto">
           {([["for-you","For you"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
@@ -626,6 +627,90 @@ function _DiscoverStripImpl() {
           </Link>
         ))}
       </div>
+    </div>
+  );
+}
+
+type LeaderRow = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; category: string | null; role: string | null; score: number };
+
+function TopCreatorsLeaderboard() {
+  const [rows, setRows] = useState<LeaderRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.rpc("top_creators", { lim: 20 });
+      setRows(((data as LeaderRow[] | null) ?? []));
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return null;
+  if (!rows.length) return null;
+
+  const visible = expanded ? rows : rows.slice(0, 5);
+
+  const medal = (i: number) => {
+    if (i === 0) return "bg-amber-400 text-amber-950";
+    if (i === 1) return "bg-zinc-300 text-zinc-800";
+    if (i === 2) return "bg-orange-400 text-orange-950";
+    return "bg-muted text-muted-foreground";
+  };
+
+  return (
+    <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-orange/15 text-orange">
+            <Trophy className="h-3.5 w-3.5" strokeWidth={2.25} />
+          </span>
+          <div>
+            <div className="text-[13px] font-semibold text-foreground">Top 20 Creators</div>
+            <div className="text-[11px] text-muted-foreground">Ranked by engagement on Planet Baltimore</div>
+          </div>
+        </div>
+        {rows.length > 5 && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="rounded-full border border-border px-3 py-1 text-[11.5px] font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            {expanded ? "Show less" : `See all ${rows.length}`}
+          </button>
+        )}
+      </div>
+      <ol className="divide-y divide-border">
+        {visible.map((c, i) => (
+          <li key={c.id}>
+            <Link
+              to="/u/$username"
+              params={{ username: c.username || c.id }}
+              className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-accent"
+            >
+              <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${medal(i)}`}>
+                {i + 1}
+              </span>
+              <Avatar className="h-9 w-9">
+                {c.avatar_url && <AvatarImage src={c.avatar_url} />}
+                <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
+                  {(c.display_name || c.username || "U").slice(0, 1).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13.5px] font-medium text-foreground">
+                  {c.display_name || c.username || "Unnamed"}
+                </div>
+                <div className="truncate text-[11.5px] capitalize text-muted-foreground">
+                  {(c.category || "Artist").replace(/_/g, " ")}
+                </div>
+              </div>
+              <div className="shrink-0 text-[11.5px] font-semibold tabular-nums text-muted-foreground">
+                {c.score}
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
