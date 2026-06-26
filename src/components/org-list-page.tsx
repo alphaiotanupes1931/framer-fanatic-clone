@@ -87,7 +87,7 @@ export function OrgListPage({
                 <div className="p-4">
                   <div className="flex items-start gap-3">
                     <div className="-mt-8 h-12 w-12 shrink-0 overflow-hidden rounded-full border-4 border-white bg-neutral-100">
-                      {o.avatar_url && <img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" / loading="lazy" decoding="async">}
+                      {o.avatar_url && <img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                     </div>
                     <div className="min-w-0">
                       <div className="font-semibold truncate">{o.name}</div>

@@ -70,7 +70,7 @@ function OrgProfile() {
           <div className="-mt-12 flex items-end justify-between gap-3 flex-wrap">
             <div className="flex items-end gap-4">
               <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-neutral-100 shrink-0">
-                {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" / loading="lazy" decoding="async">}
+                {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
               </div>
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-orange-600">
@@ -293,7 +293,7 @@ function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportu
         <div className="space-y-3">
           {items.map((p) => (
             <div key={p.id} className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-              {p.media_url && <img src={p.media_url} alt={p.title} className="h-48 w-full object-cover" / loading="lazy" decoding="async">}
+              {p.media_url && <img src={p.media_url} alt={p.title} className="h-48 w-full object-cover" loading="lazy" decoding="async" />}
               <div className="p-4">
                 <div className="font-semibold">{p.title}</div>
                 <div className="text-xs text-neutral-500">{new Date(p.created_at).toLocaleDateString()}</div>
@@ -366,7 +366,7 @@ function CommentsTab({ orgId, me, canManage }: { orgId: string; me: string | nul
           {comments.map((c) => (
             <div key={c.id} className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-3">
               <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-neutral-100">
-                {c.profiles?.avatar_url && <img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" / loading="lazy" decoding="async">}
+                {c.profiles?.avatar_url && <img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold">{c.profiles?.display_name ?? "User"}</div>

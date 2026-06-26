@@ -44,7 +44,7 @@ export function EventImage({ src, alt, className }: { src: string | null | undef
   }, [src]);
 
   if (!url) return null;
-  return <img src={url} alt={alt} className={className} / loading="lazy" decoding="async">;
+  return <img src={url} alt={alt} className={className} loading="lazy" decoding="async" />;
 }
 
 export { SUPABASE_HOST };

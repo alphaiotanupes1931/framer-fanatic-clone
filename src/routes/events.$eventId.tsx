@@ -118,7 +118,7 @@ function EventDetail() {
             <div className="mt-10 flex items-center gap-3 border-t border-border pt-6">
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Hosted by</div>
               <Link to="/artists" className="flex items-center gap-2 text-sm font-medium hover:text-orange">
-                {host.avatar_url && <img src={host.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover" / loading="lazy" decoding="async">}
+                {host.avatar_url && <img src={host.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover" loading="lazy" decoding="async" />}
                 {host.display_name || host.username || "Artist"}
               </Link>
             </div>
