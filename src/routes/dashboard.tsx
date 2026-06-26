@@ -39,6 +39,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [myProfile, setMyProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
+  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Post | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
@@ -63,6 +64,12 @@ function Dashboard() {
         .eq("user_id", currentUserId)
         .in("post_id", list.map((p) => p.id));
       setLikedPostIds(new Set((likes || []).map((l) => l.post_id)));
+      const { data: saves } = await supabase
+        .from("post_saves")
+        .select("post_id")
+        .eq("user_id", currentUserId)
+        .in("post_id", list.map((p) => p.id));
+      setSavedPostIds(new Set((saves || []).map((s) => s.post_id)));
     }
     setLoading(false);
   };
@@ -157,6 +164,29 @@ function Dashboard() {
       setPosts(prev);
     } else {
       toast.success("Post deleted");
+    }
+  };
+
+  const toggleSave = async (post: Post) => {
+    if (!me) return;
+    const saved = savedPostIds.has(post.id);
+    setSavedPostIds((prev) => {
+      const next = new Set(prev);
+      if (saved) next.delete(post.id); else next.add(post.id);
+      return next;
+    });
+    const res = saved
+      ? await supabase.from("post_saves").delete().eq("post_id", post.id).eq("user_id", me)
+      : await supabase.from("post_saves").insert({ post_id: post.id, user_id: me });
+    if (res.error) {
+      toast.error(res.error.message);
+      setSavedPostIds((prev) => {
+        const next = new Set(prev);
+        if (saved) next.add(post.id); else next.delete(post.id);
+        return next;
+      });
+    } else {
+      toast.success(saved ? "Removed from saved" : "Saved");
     }
   };
 
@@ -341,10 +371,11 @@ function Dashboard() {
                   <Share2 className="h-4 w-4" strokeWidth={1.75} />
                 </button>
                 <button
-                  onClick={() => toast.success("Saved to bookmarks")}
-                  className="ml-auto transition hover:text-foreground"
+                  onClick={() => toggleSave(p)}
+                  aria-label={savedPostIds.has(p.id) ? "Unsave" : "Save"}
+                  className={`ml-auto transition ${savedPostIds.has(p.id) ? "text-orange" : "hover:text-foreground"}`}
                 >
-                  <Bookmark className="h-4 w-4" strokeWidth={1.75} />
+                  <Bookmark className={`h-4 w-4 ${savedPostIds.has(p.id) ? "fill-current" : ""}`} strokeWidth={1.75} />
                 </button>
               </footer>
             </motion.article>
