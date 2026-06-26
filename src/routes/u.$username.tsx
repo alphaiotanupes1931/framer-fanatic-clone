@@ -151,9 +151,12 @@ function PublicProfilePage() {
                   {profile.neighborhood && (
                     <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {profile.neighborhood}</span>
                   )}
-                  {profile.category && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 capitalize">{profile.category}</span>
-                  )}
+                  {(() => {
+                    const label = formatCategory(profile.category, profile.role);
+                    return label ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5">{label}</span>
+                    ) : null;
+                  })()}
                   {profile.role && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 capitalize">{profile.role}</span>
                   )}
