@@ -272,18 +272,32 @@ function Dashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: Math.min(i * 0.04, 0.4), ease: [0.22, 1, 0.36, 1] }}
-              className="group py-5"
+              className={`group my-4 rounded-2xl border p-5 transition-shadow hover:shadow-sm ${
+                p.author?.is_founder
+                  ? "border-orange/40 bg-gradient-to-br from-orange/10 via-card to-card shadow-[0_0_0_1px_rgba(255,140,50,0.15)]"
+                  : "border-border bg-card"
+              }`}
             >
+              {p.author?.is_founder && (
+                <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange/15 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-orange">
+                  <Sparkles className="h-3 w-3" strokeWidth={2} /> Founder message
+                </div>
+              )}
               <header className="flex items-center gap-3">
-                <Avatar className="h-9 w-9">
+                <Avatar className={`h-10 w-10 ${p.author?.is_founder ? "ring-2 ring-orange/60 ring-offset-2 ring-offset-card" : ""}`}>
                   {p.author?.avatar_url && <AvatarImage src={p.author.avatar_url} />}
                   <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">
                     {(p.author?.display_name || p.author?.username || "U").slice(0, 1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[13.5px] font-medium text-foreground">
-                    {p.author?.display_name || p.author?.username || "Anonymous"}
+                  <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground">
+                    <span className="truncate">{p.author?.display_name || p.author?.username || "Anonymous"}</span>
+                    {p.author?.is_founder && (
+                      <span title="Founder" className="inline-flex items-center gap-1 rounded-full bg-orange px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider text-white">
+                        <BadgeCheck className="h-3 w-3" strokeWidth={2.5} /> Founder
+                      </span>
+                    )}
                   </div>
                   <div className="text-[11.5px] text-muted-foreground">
                     {p.author?.neighborhood || "Baltimore"} · {new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
