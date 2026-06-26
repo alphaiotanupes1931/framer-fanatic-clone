@@ -280,7 +280,7 @@ function Dashboard() {
             >
               {p.author?.is_founder && (
                 <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange/15 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-orange">
-                  <Sparkles className="h-3 w-3" strokeWidth={2} /> Founder message
+                  <BadgeCheck className="h-3 w-3" strokeWidth={2} /> Founder message
                 </div>
               )}
               <header className="flex items-center gap-3">
