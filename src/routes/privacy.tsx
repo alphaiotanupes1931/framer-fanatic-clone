@@ -14,7 +14,7 @@ function PrivacyPage() {
   return (
     <main className="min-h-screen bg-background text-foreground px-5 md:px-10 py-12 md:py-16">
       <div className="mx-auto max-w-3xl">
-        <Link to="/" className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground">← Back home</Link>
+        <Link to="/dashboard" className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground">← Back to dashboard</Link>
         <h1 className="mt-6 text-3xl md:text-5xl font-bold tracking-tight">Privacy Policy</h1>
         <p className="mt-3 text-sm text-muted-foreground">Last updated: June 25, 2026</p>
         <div className="prose prose-neutral dark:prose-invert mt-8 space-y-6 text-[15px] leading-relaxed">
