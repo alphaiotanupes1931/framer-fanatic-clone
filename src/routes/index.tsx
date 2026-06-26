@@ -581,6 +581,15 @@ function formatCreatorLabel(category?: string | null) {
   if (!category) return "Artist";
   const c = category.trim().toLowerCase();
   if (!c || c === "attendee") return "Artist";
+  // Only show recognized creator categories; everything else (legacy
+  // imports like "resident", "business_owner") collapses to "Artist".
+  const allowed = new Set([
+    "musician","podcaster","visual artist","photographer","videographer",
+    "filmmaker","fashion designer","graphic designer","writer","poet",
+    "dancer","dj","producer","comedian","chef / culinary","tattoo artist",
+    "muralist","curator","event organizer","artist",
+  ]);
+  if (!allowed.has(c)) return "Artist";
   return c.replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
