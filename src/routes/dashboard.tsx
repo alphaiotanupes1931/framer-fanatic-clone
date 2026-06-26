@@ -7,6 +7,7 @@ import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, 
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useUserRole } from "@/hooks/use-user-role";
+import { formatCategory } from "@/lib/format-category";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -699,8 +700,8 @@ function _TopCreatorsLeaderboard() {
                 <div className="truncate text-[13.5px] font-medium text-foreground">
                   {c.display_name || c.username || "Unnamed"}
                 </div>
-                <div className="truncate text-[11.5px] capitalize text-muted-foreground">
-                  {(c.category || "Artist").replace(/_/g, " ")}
+                <div className="truncate text-[11.5px] text-muted-foreground">
+                  {formatCategory(c.category, c.role) || "Artist"}
                 </div>
               </div>
               <div className="shrink-0 text-[11.5px] font-semibold tabular-nums text-muted-foreground">

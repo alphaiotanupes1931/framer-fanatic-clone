@@ -15,6 +15,10 @@ export const THEMES: Theme[] = ["light", "dark", "midnight", "sunset", "forest",
 // Themes that should also activate the existing `.dark` overrides.
 const DARKISH: Theme[] = ["dark", "midnight", "forest", "ocean", "mono"];
 
+export function isDarkTheme(theme: Theme): boolean {
+  return DARKISH.includes(theme);
+}
+
 const STORAGE_KEY = "pb-theme";
 
 function isTheme(v: string | null): v is Theme {

@@ -15,7 +15,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { useUserRole } from "@/hooks/use-user-role";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme, isDarkTheme } from "@/hooks/use-theme";
+import { formatCategory } from "@/lib/format-category";
 
 export type Profile = {
   id: string;
@@ -126,7 +127,7 @@ export function AppLayout({
           <Menu className="h-5 w-5" strokeWidth={1.75} />
         </button>
       <Link to="/dashboard" className="flex items-center justify-center gap-1.5">
-          <img src={theme === "dark" ? pbLogoDark : pbLogo} alt="Planet Baltimore" className="h-7 w-7" />
+          <img src={isDarkTheme(theme) ? pbLogoDark : pbLogo} alt="Planet Baltimore" className="h-7 w-7" />
           <span className="text-[12px] font-semibold uppercase tracking-[0.14em]">Planet Baltimore</span>
         </Link>
         <div className="justify-self-end">
@@ -150,7 +151,7 @@ export function AppLayout({
           >
             <div className="mb-6 flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileNavOpen(false)}>
-                <img src={theme === "dark" ? pbLogoDark : pbLogo} alt="Planet Baltimore" className="h-10 w-10" />
+                <img src={isDarkTheme(theme) ? pbLogoDark : pbLogo} alt="Planet Baltimore" className="h-10 w-10" />
                 <span className="text-sm font-semibold uppercase tracking-wide">Planet Baltimore</span>
               </Link>
               <button
@@ -222,7 +223,7 @@ export function AppLayout({
       <div className="mx-auto flex max-w-[1600px]">
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-background px-3 py-6 md:flex">
           <Link to="/dashboard" className="mb-8 flex items-center justify-center px-1">
-            <img src={theme === "dark" ? pbLogoDark : pbLogo} alt="Planet Baltimore" className="h-14 w-14 shrink-0" />
+            <img src={isDarkTheme(theme) ? pbLogoDark : pbLogo} alt="Planet Baltimore" className="h-14 w-14 shrink-0" />
           </Link>
 
           <nav className="flex-1 space-y-4 overflow-y-auto pr-1">
@@ -589,7 +590,7 @@ function RightRail() {
                     </Avatar>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[12.5px] font-medium text-foreground">{a.display_name || a.username || "Anonymous"}</div>
-                      <div className="truncate text-[10.5px] capitalize text-muted-foreground">{(a.category || "Artist").replace(/_/g, " ")}</div>
+                      <div className="truncate text-[10.5px] text-muted-foreground">{formatCategory(a.category) || "Artist"}</div>
                     </div>
                   </Link>
                 </li>

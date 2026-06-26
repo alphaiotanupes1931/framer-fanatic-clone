@@ -5,6 +5,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { formatCategory } from "@/lib/format-category";
 
 type PublicProfile = {
   id: string;
@@ -151,9 +152,12 @@ function PublicProfilePage() {
                   {profile.neighborhood && (
                     <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {profile.neighborhood}</span>
                   )}
-                  {profile.category && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 capitalize">{profile.category}</span>
-                  )}
+                  {(() => {
+                    const label = formatCategory(profile.category, profile.role);
+                    return label ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5">{label}</span>
+                    ) : null;
+                  })()}
                   {profile.role && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 capitalize">{profile.role}</span>
                   )}
