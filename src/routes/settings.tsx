@@ -121,13 +121,11 @@ function SettingsPage() {
               </button>
             </div>
           )}
-          {!["profile","account"].includes(section) && (
-            section === "help" ? <HelpSection /> :
-            <div className="py-12 text-center text-muted-foreground">
-              <h3 className="text-lg font-semibold text-foreground">{SECTIONS.find((s) => s.id===section)?.label}</h3>
-              <p className="mt-1 text-sm">Coming soon.</p>
-            </div>
-          )}
+          {section === "appearance" && <AppearanceSection />}
+          {section === "notifications" && <NotificationsSection />}
+          {section === "privacy" && <PrivacySafetySection />}
+          {section === "stripe" && <StripeSection />}
+          {section === "help" && <HelpSection />}
         </div>
       </div>
     </AppLayout>
