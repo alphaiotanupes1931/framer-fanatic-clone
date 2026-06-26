@@ -271,3 +271,142 @@
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Extra themes. Each palette overrides the same tokens defined
+   in :root / .dark so the entire app re-skins instantly.
+   Cover/about routes use literal color tokens (ink/paper/blue)
+   that are not in this list, so they stay visually untouched.
+   ───────────────────────────────────────────────────────────── */
+
+/* Sunset — warm peach + crimson accents, light surface */
+html.theme-sunset {
+  --background: oklch(0.96 0.03 55);
+  --foreground: oklch(0.18 0.04 30);
+  --card: oklch(0.98 0.025 60);
+  --card-foreground: oklch(0.16 0.04 30);
+  --popover: oklch(0.98 0.025 60);
+  --popover-foreground: oklch(0.16 0.04 30);
+  --primary: oklch(0.55 0.18 32);
+  --primary-foreground: oklch(0.98 0.02 60);
+  --secondary: oklch(0.92 0.04 55);
+  --secondary-foreground: oklch(0.2 0.05 30);
+  --muted: oklch(0.93 0.03 55);
+  --muted-foreground: oklch(0.42 0.04 35);
+  --accent: oklch(0.9 0.06 50);
+  --accent-foreground: oklch(0.2 0.05 30);
+  --border: oklch(0.88 0.04 50);
+  --input: oklch(0.91 0.04 50);
+  --ring: oklch(0.55 0.18 32);
+  --orange: oklch(0.6 0.2 30);
+}
+
+/* Midnight — deep indigo, electric violet accent */
+html.theme-midnight {
+  --background: oklch(0.16 0.04 280);
+  --foreground: oklch(0.94 0.02 280);
+  --card: oklch(0.21 0.05 280);
+  --card-foreground: oklch(0.94 0.02 280);
+  --popover: oklch(0.21 0.05 280);
+  --popover-foreground: oklch(0.94 0.02 280);
+  --primary: oklch(0.72 0.18 295);
+  --primary-foreground: oklch(0.14 0.04 280);
+  --secondary: oklch(0.26 0.05 280);
+  --secondary-foreground: oklch(0.94 0.02 280);
+  --muted: oklch(0.24 0.05 280);
+  --muted-foreground: oklch(0.74 0.03 280);
+  --accent: oklch(0.3 0.08 290);
+  --accent-foreground: oklch(0.96 0.02 280);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.6 0.15 290);
+  --orange: oklch(0.72 0.18 320);
+}
+
+/* Forest — deep evergreen with mossy gold accents */
+html.theme-forest {
+  --background: oklch(0.18 0.03 155);
+  --foreground: oklch(0.93 0.02 145);
+  --card: oklch(0.22 0.035 155);
+  --card-foreground: oklch(0.93 0.02 145);
+  --popover: oklch(0.22 0.035 155);
+  --popover-foreground: oklch(0.93 0.02 145);
+  --primary: oklch(0.78 0.12 100);
+  --primary-foreground: oklch(0.16 0.03 155);
+  --secondary: oklch(0.26 0.04 155);
+  --secondary-foreground: oklch(0.93 0.02 145);
+  --muted: oklch(0.24 0.035 155);
+  --muted-foreground: oklch(0.72 0.02 150);
+  --accent: oklch(0.3 0.05 150);
+  --accent-foreground: oklch(0.93 0.02 145);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.55 0.1 150);
+  --orange: oklch(0.72 0.16 80);
+}
+
+/* Rose — soft blush light theme, ruby accent */
+html.theme-rose {
+  --background: oklch(0.97 0.018 20);
+  --foreground: oklch(0.16 0.02 15);
+  --card: oklch(0.985 0.015 20);
+  --card-foreground: oklch(0.14 0.02 15);
+  --popover: oklch(0.985 0.015 20);
+  --popover-foreground: oklch(0.14 0.02 15);
+  --primary: oklch(0.55 0.2 15);
+  --primary-foreground: oklch(0.98 0.015 20);
+  --secondary: oklch(0.93 0.025 15);
+  --secondary-foreground: oklch(0.18 0.02 15);
+  --muted: oklch(0.94 0.02 15);
+  --muted-foreground: oklch(0.45 0.025 10);
+  --accent: oklch(0.91 0.035 15);
+  --accent-foreground: oklch(0.18 0.02 15);
+  --border: oklch(0.88 0.025 15);
+  --input: oklch(0.91 0.025 15);
+  --ring: oklch(0.55 0.2 15);
+  --orange: oklch(0.62 0.22 10);
+}
+
+/* Ocean — deep teal with cyan accents */
+html.theme-ocean {
+  --background: oklch(0.17 0.04 220);
+  --foreground: oklch(0.94 0.015 210);
+  --card: oklch(0.21 0.045 220);
+  --card-foreground: oklch(0.94 0.015 210);
+  --popover: oklch(0.21 0.045 220);
+  --popover-foreground: oklch(0.94 0.015 210);
+  --primary: oklch(0.75 0.13 200);
+  --primary-foreground: oklch(0.14 0.04 220);
+  --secondary: oklch(0.26 0.05 220);
+  --secondary-foreground: oklch(0.94 0.015 210);
+  --muted: oklch(0.24 0.045 220);
+  --muted-foreground: oklch(0.74 0.025 215);
+  --accent: oklch(0.3 0.06 215);
+  --accent-foreground: oklch(0.94 0.015 210);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.6 0.12 210);
+  --orange: oklch(0.78 0.14 195);
+}
+
+/* Mono — pure grayscale, high-contrast */
+html.theme-mono {
+  --background: oklch(0.15 0 0);
+  --foreground: oklch(0.96 0 0);
+  --card: oklch(0.2 0 0);
+  --card-foreground: oklch(0.96 0 0);
+  --popover: oklch(0.2 0 0);
+  --popover-foreground: oklch(0.96 0 0);
+  --primary: oklch(0.96 0 0);
+  --primary-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.25 0 0);
+  --secondary-foreground: oklch(0.96 0 0);
+  --muted: oklch(0.23 0 0);
+  --muted-foreground: oklch(0.72 0 0);
+  --accent: oklch(0.28 0 0);
+  --accent-foreground: oklch(0.96 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.8 0 0);
+  --orange: oklch(0.85 0 0);
+}
