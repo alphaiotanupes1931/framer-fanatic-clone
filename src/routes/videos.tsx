@@ -47,7 +47,7 @@ function AnonVideos() {
             <div className="rounded-2xl overflow-hidden border border-paper/10 bg-paper/5 h-full">
               <div className="aspect-video bg-paper/10 relative overflow-hidden">
                 {(v as Video).thumbnail_url
-                  ? <img src={(v as Video).thumbnail_url!} alt={(v as Video).title} className="w-full h-full object-cover" />
+                  ? <img src={(v as Video).thumbnail_url!} alt={(v as Video).title} className="w-full h-full object-cover" / loading="lazy" decoding="async">
                   : <div className="w-full h-full flex items-center justify-center text-paper/30"><Play className="w-10 h-10" /></div>}
               </div>
               <div className="p-4">

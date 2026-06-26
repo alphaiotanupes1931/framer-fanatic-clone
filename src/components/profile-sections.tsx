@@ -113,7 +113,7 @@ export function ProfileSectionTab({
             <div key={it.id} className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white">
               {it.media_url && (
                 <div className="aspect-video bg-neutral-100">
-                  <img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" />
+                  <img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" / loading="lazy" decoding="async">
                 </div>
               )}
               <div className="p-4">

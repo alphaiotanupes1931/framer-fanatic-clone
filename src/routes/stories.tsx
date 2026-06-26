@@ -86,7 +86,7 @@ function CommentsDialog({ story, onClose, onCountChange }: { story: Story; onClo
           ) : items.map((c) => (
             <div key={c.id} className="flex gap-3">
               <Avatar className="h-8 w-8 shrink-0">
-                {c.author?.avatar_url && <img src={c.author.avatar_url} alt="" className="h-full w-full object-cover" />}
+                {c.author?.avatar_url && <img src={c.author.avatar_url} alt="" className="h-full w-full object-cover" / loading="lazy" decoding="async">}
                 <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(c.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
@@ -260,7 +260,7 @@ function StoriesSignedIn() {
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex items-center gap-2">
                   <Avatar className="h-7 w-7">
-                    {s.author?.avatar_url && <img src={s.author.avatar_url} alt="" className="h-full w-full object-cover" />}
+                    {s.author?.avatar_url && <img src={s.author.avatar_url} alt="" className="h-full w-full object-cover" / loading="lazy" decoding="async">}
                     <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(s.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <span className="text-sm font-medium">{s.author?.display_name || "Anonymous"}</span>
@@ -286,7 +286,7 @@ function StoriesSignedIn() {
                 </div>
               </div>
               {s.cover_url && (
-                <img src={s.cover_url} alt="" className="h-24 w-32 shrink-0 rounded-lg object-cover" />
+                <img src={s.cover_url} alt="" className="h-24 w-32 shrink-0 rounded-lg object-cover" / loading="lazy" decoding="async">
               )}
             </article>
           ))}
