@@ -632,7 +632,7 @@ function _DiscoverStripImpl() {
 
 type LeaderRow = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; category: string | null; role: string | null; score: number };
 
-function TopCreatorsLeaderboard() {
+function _TopCreatorsLeaderboard() {
   const [rows, setRows] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
