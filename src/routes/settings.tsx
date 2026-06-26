@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check, HelpCircle,
-  ChevronDown, ExternalLink, CheckCircle2, AlertCircle, Sun, Monitor,
+  ChevronDown, ExternalLink, CheckCircle2, AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -13,7 +13,7 @@ import {
   createConnectOnboardingLink,
   refreshConnectStatus,
 } from "@/lib/stripe.functions";
-import { useTheme, type Theme } from "@/hooks/use-theme";
+import { useTheme, THEMES, type Theme } from "@/hooks/use-theme";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -187,51 +187,52 @@ function HelpSection() {
     </div>
   );
 }
+const THEME_META: Record<Theme, { label: string; desc: string; swatch: string; bg: string; fg: string; accent: string }> = {
+  light:    { label: "Cream",    desc: "Warm cream surfaces, orange accents.",  swatch: "from-[#fdf6e8] to-[#f3e4c5]", bg: "#fdf6e8", fg: "#181410", accent: "#e8761e" },
+  dark:     { label: "Midnight Blue", desc: "Deep navy, soft contrast.",       swatch: "from-[#1a2538] to-[#0a1320]", bg: "#1a2538", fg: "#e8edf5", accent: "#5b8def" },
+  midnight: { label: "Violet",   desc: "Indigo backdrop, electric violet pop.", swatch: "from-[#1f1a40] to-[#0d0a1f]", bg: "#1f1a40", fg: "#ebe7f7", accent: "#9b6cff" },
+  sunset:   { label: "Sunset",   desc: "Warm peach with crimson highlights.",   swatch: "from-[#ffe6c8] to-[#ffb693]", bg: "#ffe6c8", fg: "#2b1410", accent: "#d83a2e" },
+  forest:   { label: "Forest",   desc: "Deep evergreen with mossy gold.",       swatch: "from-[#1c2e22] to-[#0b1611]", bg: "#1c2e22", fg: "#e7efe5", accent: "#c8b76b" },
+  rose:     { label: "Rose",     desc: "Soft blush light theme, ruby accents.", swatch: "from-[#fde2e8] to-[#f6b8c4]", bg: "#fde2e8", fg: "#26101a", accent: "#d33a55" },
+  ocean:    { label: "Ocean",    desc: "Deep teal with cyan highlights.",       swatch: "from-[#0f2a3a] to-[#06141d]", bg: "#0f2a3a", fg: "#dff1f5", accent: "#3fc2d9" },
+  mono:     { label: "Mono",     desc: "Pure grayscale, high contrast.",        swatch: "from-[#1a1a1a] to-[#000000]", bg: "#1a1a1a", fg: "#f5f5f5", accent: "#ffffff" },
+};
+
 function AppearanceSection() {
   const { theme, setTheme } = useTheme();
-  const [mode, setMode] = useState<"light" | "dark" | "system">(() => {
-    if (typeof window === "undefined") return "system";
-    const stored = window.localStorage.getItem("pb-theme-mode");
-    return (stored === "light" || stored === "dark" || stored === "system") ? stored : "system";
-  });
-
-  const apply = (m: "light" | "dark" | "system") => {
-    setMode(m);
-    window.localStorage.setItem("pb-theme-mode", m);
-    const resolved: Theme = m === "system"
-      ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-      : m;
-    setTheme(resolved);
-  };
-
-  const options = [
-    { id: "light" as const, label: "Light", desc: "Warm cream surfaces, orange accents.", icon: Sun,
-      swatch: "bg-[#fff8ef] border-[#e8d6b8]" },
-    { id: "dark" as const, label: "Dark", desc: "Deep blue surfaces, easy on the eyes.", icon: Moon,
-      swatch: "bg-[#0a1a2e] border-white/10" },
-    { id: "system" as const, label: "System", desc: "Match your device setting automatically.", icon: Monitor,
-      swatch: "bg-gradient-to-br from-[#fff8ef] to-[#0a1a2e] border-border" },
-  ];
-
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-bold text-foreground">Appearance</h2>
-        <p className="text-sm text-muted-foreground">Pick how Planet Baltimore looks on this device. Current theme: <span className="font-medium text-foreground capitalize">{theme}</span>.</p>
+        <p className="text-sm text-muted-foreground">
+          Pick how Planet Baltimore looks on this device. Themes affect the whole app except the public landing page. Current theme: <span className="font-medium text-foreground capitalize">{THEME_META[theme]?.label || theme}</span>.
+        </p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
-        {options.map((o) => {
-          const active = mode === o.id;
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {THEMES.map((id) => {
+          const meta = THEME_META[id];
+          const active = theme === id;
           return (
-            <button key={o.id} onClick={() => apply(o.id)}
-              className={`rounded-xl border p-4 text-left transition ${active ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}>
-              <div className={`mb-3 h-16 w-full rounded-lg border ${o.swatch}`} />
+            <button
+              key={id}
+              onClick={() => setTheme(id)}
+              className={`group rounded-xl border p-3 text-left transition ${active ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}
+            >
+              <div
+                className="relative mb-3 h-20 w-full overflow-hidden rounded-lg border border-border"
+                style={{ background: `linear-gradient(135deg, ${meta.bg}, ${meta.bg})` }}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${meta.swatch}`} />
+                <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5">
+                  <span className="h-3 w-3 rounded-full" style={{ background: meta.accent }} />
+                  <span className="h-2 flex-1 rounded-full" style={{ background: meta.fg, opacity: 0.85 }} />
+                </div>
+              </div>
               <div className="flex items-center gap-2">
-                <o.icon className="h-4 w-4 text-orange" />
-                <span className="text-sm font-semibold text-foreground">{o.label}</span>
+                <span className="text-sm font-semibold text-foreground">{meta.label}</span>
                 {active && <Check className="ml-auto h-4 w-4 text-orange" />}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{o.desc}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{meta.desc}</p>
             </button>
           );
         })}

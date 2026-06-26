@@ -17,9 +17,12 @@ const themeScript = `
   (function() {
     try {
       const t = localStorage.getItem('pb-theme');
-      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      }
+      var darkish = ['dark','midnight','forest','ocean','mono'];
+      var all = ['light','dark','midnight','sunset','forest','rose','ocean','mono'];
+      var theme = (all.indexOf(t) !== -1) ? t
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.classList.add('theme-' + theme);
+      if (darkish.indexOf(theme) !== -1) document.documentElement.classList.add('dark');
     } catch (e) {}
   })();
 `;

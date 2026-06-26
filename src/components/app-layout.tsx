@@ -11,7 +11,7 @@ import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Globe } from "@/components/globe";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -337,9 +337,18 @@ export function AppLayout({
               ))}
             </div>
           )}
-          <div className={hero ? "mt-5 md:mt-8" : ""}>
-            {children}
-          </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className={hero ? "mt-5 md:mt-8" : ""}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         <aside className="sticky top-0 hidden h-screen w-80 shrink-0 overflow-y-auto border-l border-border bg-background px-5 py-8 xl:block">
