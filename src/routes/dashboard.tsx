@@ -258,7 +258,7 @@ function Dashboard() {
         </div>
         )}
 
-        <div className="mt-6 divide-y divide-border">
+        <div className="mt-6">
           {loading && <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>}
           {!loading && posts.length === 0 && (
             <div className="py-16 text-center text-sm text-muted-foreground">
