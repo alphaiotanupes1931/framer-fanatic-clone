@@ -329,9 +329,22 @@ function QuoteSection() {
 function HeroParallax() {
   const ref = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [showVideo, setShowVideo] = useState(false);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
+
+  useEffect(() => {
+    // Defer video mount to after LCP / first paint so the hero image isn't blocked.
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 767px)").matches) return;
+    const idle = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 600));
+    const handle = idle(() => setShowVideo(true));
+    return () => {
+      const cancel = (window as any).cancelIdleCallback;
+      if (cancel && typeof handle === "number") cancel(handle);
+    };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -353,7 +366,7 @@ function HeroParallax() {
       video.removeEventListener("loadedmetadata", onLoaded);
       video.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, []);
+  }, [showVideo]);
 
   return (
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
@@ -369,17 +382,19 @@ function HeroParallax() {
         className="absolute inset-0 w-full h-full object-cover"
       />
       {/* Video: desktop only */}
-      <div className="absolute inset-0 hidden md:block pointer-events-none">
-        <video
-          ref={videoRef}
-          src={assetUrl(heroVideoAsset.url)}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      </div>
+      {showVideo && (
+        <div className="absolute inset-0 hidden md:block pointer-events-none">
+          <video
+            ref={videoRef}
+            src={assetUrl(heroVideoAsset.url)}
+            autoPlay
+            muted
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
+      )}
     </motion.div>
   );
 }
