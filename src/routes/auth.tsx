@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import pbLogo from "@/assets/pb-logo.png";
 import { useServerFn } from "@tanstack/react-start";
 import { becomeArtist } from "@/lib/stripe.functions";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -23,6 +24,8 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showSignInPw, setShowSignInPw] = useState(false);
+  const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"artist" | "attendee">("attendee");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -139,7 +142,24 @@ function AuthPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
-                  <Input id="signin-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <div className="relative">
+                    <Input
+                      id="signin-password"
+                      type={showSignInPw ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignInPw((v) => !v)}
+                      aria-label={showSignInPw ? "Hide password" : "Show password"}
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    >
+                      {showSignInPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Signing in…" : "Sign in"}
@@ -159,7 +179,25 @@ function AuthPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input id="signup-password" type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      type={showSignUpPw ? "text" : "password"}
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignUpPw((v) => !v)}
+                      aria-label={showSignUpPw ? "Hide password" : "Show password"}
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    >
+                      {showSignUpPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Your location</Label>
