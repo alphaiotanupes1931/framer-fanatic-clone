@@ -2,8 +2,18 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check, HelpCircle, ChevronDown } from "lucide-react";
+import {
+  User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check, HelpCircle,
+  ChevronDown, ExternalLink, CheckCircle2, AlertCircle, Sun, Monitor,
+} from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  ensureConnectAccount,
+  createConnectOnboardingLink,
+  refreshConnectStatus,
+} from "@/lib/stripe.functions";
+import { useTheme, type Theme } from "@/hooks/use-theme";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
