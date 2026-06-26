@@ -40,7 +40,7 @@ function CalendarPage() {
       events
         .filter((e) => e.starts_at && new Date(e.starts_at) < now)
         .sort((a, b) => new Date(b.starts_at!).getTime() - new Date(a.starts_at!).getTime())
-        .slice(0, 8),
+        .slice(0, 5),
     [events],
   );
   const eventDays = useMemo(
