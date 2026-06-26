@@ -187,3 +187,256 @@ function HelpSection() {
     </div>
   );
 }
+function AppearanceSection() {
+  const { theme, setTheme } = useTheme();
+  const [mode, setMode] = useState<"light" | "dark" | "system">(() => {
+    if (typeof window === "undefined") return "system";
+    const stored = window.localStorage.getItem("pb-theme-mode");
+    return (stored === "light" || stored === "dark" || stored === "system") ? stored : "system";
+  });
+
+  const apply = (m: "light" | "dark" | "system") => {
+    setMode(m);
+    window.localStorage.setItem("pb-theme-mode", m);
+    const resolved: Theme = m === "system"
+      ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+      : m;
+    setTheme(resolved);
+  };
+
+  const options = [
+    { id: "light" as const, label: "Light", desc: "Warm cream surfaces, orange accents.", icon: Sun,
+      swatch: "bg-[#fff8ef] border-[#e8d6b8]" },
+    { id: "dark" as const, label: "Dark", desc: "Deep blue surfaces, easy on the eyes.", icon: Moon,
+      swatch: "bg-[#0a1a2e] border-white/10" },
+    { id: "system" as const, label: "System", desc: "Match your device setting automatically.", icon: Monitor,
+      swatch: "bg-gradient-to-br from-[#fff8ef] to-[#0a1a2e] border-border" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-bold text-foreground">Appearance</h2>
+        <p className="text-sm text-muted-foreground">Pick how Planet Baltimore looks on this device. Current theme: <span className="font-medium text-foreground capitalize">{theme}</span>.</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {options.map((o) => {
+          const active = mode === o.id;
+          return (
+            <button key={o.id} onClick={() => apply(o.id)}
+              className={`rounded-xl border p-4 text-left transition ${active ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}>
+              <div className={`mb-3 h-16 w-full rounded-lg border ${o.swatch}`} />
+              <div className="flex items-center gap-2">
+                <o.icon className="h-4 w-4 text-orange" />
+                <span className="text-sm font-semibold text-foreground">{o.label}</span>
+                {active && <Check className="ml-auto h-4 w-4 text-orange" />}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">{o.desc}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+type NotifPrefs = {
+  email_events: boolean;
+  email_messages: boolean;
+  email_followers: boolean;
+  push_likes: boolean;
+  push_comments: boolean;
+  push_tickets: boolean;
+  digest_weekly: boolean;
+};
+const NOTIF_KEY = "pb-notif-prefs";
+const DEFAULT_NOTIFS: NotifPrefs = {
+  email_events: true, email_messages: true, email_followers: false,
+  push_likes: true, push_comments: true, push_tickets: true, digest_weekly: true,
+};
+
+function NotificationsSection() {
+  const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_NOTIFS);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(NOTIF_KEY);
+      if (raw) setPrefs({ ...DEFAULT_NOTIFS, ...JSON.parse(raw) });
+    } catch {}
+  }, []);
+  const toggle = (k: keyof NotifPrefs) => {
+    const next = { ...prefs, [k]: !prefs[k] };
+    setPrefs(next);
+    window.localStorage.setItem(NOTIF_KEY, JSON.stringify(next));
+    toast.success("Preference saved");
+  };
+
+  const groups: { title: string; items: { k: keyof NotifPrefs; label: string; sub: string }[] }[] = [
+    { title: "Email", items: [
+      { k: "email_events", label: "New events near me", sub: "Get an email when an Artist posts an event in your neighborhood." },
+      { k: "email_messages", label: "Direct messages", sub: "Email when someone sends you a message and you are offline." },
+      { k: "email_followers", label: "New followers", sub: "Email when someone new follows your profile." },
+    ]},
+    { title: "In-app", items: [
+      { k: "push_likes", label: "Likes on my posts", sub: "Show a notification when someone likes your post." },
+      { k: "push_comments", label: "Comments and replies", sub: "Show a notification for new comments on your posts and events." },
+      { k: "push_tickets", label: "Ticket sales", sub: "Show a notification when someone buys a ticket to your event." },
+    ]},
+    { title: "Digest", items: [
+      { k: "digest_weekly", label: "Weekly Baltimore digest", sub: "A summary of the week in Baltimore - top Artists, events, and stories." },
+    ]},
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-bold text-foreground">Notifications</h2>
+        <p className="text-sm text-muted-foreground">Choose how Planet Baltimore reaches you. Preferences save automatically.</p>
+      </div>
+      {groups.map((g) => (
+        <div key={g.title} className="rounded-xl border border-border">
+          <div className="border-b border-border px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{g.title}</div>
+          <div className="divide-y divide-border">
+            {g.items.map((it) => (
+              <div key={it.k} className="flex items-start gap-3 px-4 py-3">
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-foreground">{it.label}</div>
+                  <div className="text-xs text-muted-foreground">{it.sub}</div>
+                </div>
+                <button
+                  onClick={() => toggle(it.k)}
+                  aria-pressed={prefs[it.k]}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition ${prefs[it.k] ? "bg-orange" : "bg-muted"}`}
+                >
+                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${prefs[it.k] ? "left-[22px]" : "left-0.5"}`} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PrivacySafetySection() {
+  const items = [
+    { title: "Who can see your profile",
+      body: "Your display name, username, bio, neighborhood, photos, posts, and events are visible to anyone on Planet Baltimore. Your email and phone are never shown publicly." },
+    { title: "Who can message you",
+      body: "Any signed-in member of Planet Baltimore can start a conversation with you. We are working on per-account message controls. Until then, you can block individual users by reporting them." },
+    { title: "Location and Baltimore verification",
+      body: "We use your device location once, at sign-up and when you upgrade to Artist, to confirm you are inside Baltimore City. We do not track your live location, and your coordinates are never shown to other members." },
+    { title: "Payments and tickets",
+      body: "Ticket payments are processed by Stripe. Planet Baltimore never sees your full card number. Artists receive payouts directly to their own Stripe-connected bank account." },
+    { title: "Your data",
+      body: "You own your content. You can edit or delete any post, event, message, or photo from your profile at any time. To delete your full account and all associated data, email help@planetbaltimore.com and we will remove everything within 7 days." },
+    { title: "Safety and reporting",
+      body: "If you see harassment, spam, impersonation, or anything that does not belong on Planet Baltimore, email help@planetbaltimore.com with a screenshot. Admins review reports daily and can ban accounts that break community rules." },
+    { title: "Children",
+      body: "Planet Baltimore is for people 13 and older. We remove any account we learn belongs to a child under 13." },
+  ];
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-bold text-foreground">Privacy & Safety</h2>
+        <p className="text-sm text-muted-foreground">How we handle your information and keep Planet Baltimore safe for everyone.</p>
+      </div>
+      <div className="divide-y divide-border rounded-xl border border-border bg-card">
+        {items.map((it) => (
+          <div key={it.title} className="px-4 py-4">
+            <div className="text-sm font-semibold text-foreground">{it.title}</div>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{it.body}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-3 text-sm">
+        <a href="/privacy" className="rounded-full border border-border px-4 py-2 font-medium text-foreground hover:bg-accent">Read full Privacy Policy</a>
+        <a href="/terms" className="rounded-full border border-border px-4 py-2 font-medium text-foreground hover:bg-accent">Terms of Service</a>
+        <a href="mailto:help@planetbaltimore.com" className="rounded-full bg-orange px-4 py-2 font-semibold text-white hover:brightness-110">Contact safety team</a>
+      </div>
+    </div>
+  );
+}
+
+function StripeSection() {
+  const profile = useCurrentProfile();
+  const ensureFn = useServerFn(ensureConnectAccount);
+  const linkFn = useServerFn(createConnectOnboardingLink);
+  const refreshFn = useServerFn(refreshConnectStatus);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<{ connected: boolean; chargesEnabled: boolean; status?: string } | null>(null);
+
+  useEffect(() => {
+    if (!profile?.stripe_account_id) { setStatus({ connected: false, chargesEnabled: false }); return; }
+    refreshFn().then((s) => setStatus(s)).catch(() => setStatus({
+      connected: !!profile?.stripe_account_id,
+      chargesEnabled: !!profile?.stripe_charges_enabled,
+    }));
+  }, [profile?.id, profile?.stripe_account_id, profile?.stripe_charges_enabled, refreshFn]);
+
+  const onboard = async () => {
+    setBusy(true);
+    try {
+      await ensureFn();
+      const { url } = await linkFn({ data: {
+        returnUrl: `${window.location.origin}/settings?stripe=ok`,
+        refreshUrl: `${window.location.origin}/settings?stripe=refresh`,
+      }});
+      window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not start onboarding");
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-bold text-foreground">Stripe Payments</h2>
+        <p className="text-sm text-muted-foreground">Connect Stripe so you can sell tickets and get paid directly. Planet Baltimore never holds your money.</p>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="flex items-start gap-3">
+          <CreditCard className="mt-0.5 h-5 w-5 text-orange" />
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-foreground">Your payout account</div>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              {status?.chargesEnabled ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Connected & active
+                </span>
+              ) : status?.connected ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                  <AlertCircle className="h-3.5 w-3.5" /> Onboarding incomplete
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                  Not connected
+                </span>
+              )}
+              <button onClick={onboard} disabled={busy}
+                className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
+                {busy ? "Opening Stripe…" : status?.chargesEnabled ? "Update Stripe account" : "Connect Stripe"} <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground">
+        <h4 className="mb-3 text-base font-semibold">How to connect Stripe (3 minutes)</h4>
+        <ol className="list-decimal space-y-3 pl-5 text-muted-foreground">
+          <li><span className="font-semibold text-foreground">Tap "Connect Stripe"</span> above. A new tab opens to Stripe, the company that handles payments for us.</li>
+          <li><span className="font-semibold text-foreground">Enter your info.</span> Stripe will ask for your legal name, date of birth, address, and the last 4 of your SSN. This is required by US law for anyone receiving money online. We never see this information.</li>
+          <li><span className="font-semibold text-foreground">Add your bank account.</span> Choose the checking account where you want your ticket money to land. Stripe sends payouts every 2 business days.</li>
+          <li><span className="font-semibold text-foreground">Come back to Planet Baltimore.</span> Stripe will send you back here automatically. The badge above turns green when you're ready to sell tickets.</li>
+          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add Stripe's fee (2.9% + $0.30) and Baltimore's 10% admissions tax on top, so the buyer pays the total and you keep the full price you set.</li>
+        </ol>
+        <div className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
+          Need help? Email <a href="mailto:help@planetbaltimore.com" className="font-semibold text-orange hover:underline">help@planetbaltimore.com</a> and we'll walk you through it over the phone.
+        </div>
+      </div>
+    </div>
+  );
+}
