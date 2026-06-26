@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
-import { HandHeart, Building2, Users, Sparkles } from "lucide-react";
+import { HandHeart, Building2, Users, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/support")({
   component: SupportPage,
@@ -23,7 +23,7 @@ function SupportPage() {
           </div>
           <div>
             <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              <Sparkles className="h-3 w-3" /> Coming soon
+              <Clock className="h-3 w-3" /> Coming soon
             </div>
             <h2 className="mt-4 font-display text-3xl sm:text-4xl font-medium tracking-tight text-foreground">
               Sponsor or donate to Planet Baltimore.
