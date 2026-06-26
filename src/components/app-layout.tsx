@@ -15,7 +15,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { useUserRole } from "@/hooks/use-user-role";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme, isDarkTheme } from "@/hooks/use-theme";
+import { formatCategory } from "@/lib/format-category";
 
 export type Profile = {
   id: string;
@@ -589,7 +590,7 @@ function RightRail() {
                     </Avatar>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[12.5px] font-medium text-foreground">{a.display_name || a.username || "Anonymous"}</div>
-                      <div className="truncate text-[10.5px] capitalize text-muted-foreground">{(a.category || "Artist").replace(/_/g, " ")}</div>
+                      <div className="truncate text-[10.5px] text-muted-foreground">{formatCategory(a.category) || "Artist"}</div>
                     </div>
                   </Link>
                 </li>
