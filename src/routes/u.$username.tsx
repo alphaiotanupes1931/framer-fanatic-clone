@@ -5,6 +5,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { formatCategory } from "@/lib/format-category";
 
 type PublicProfile = {
   id: string;
