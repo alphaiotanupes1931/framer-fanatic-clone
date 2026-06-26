@@ -615,9 +615,10 @@ function DailyCreators() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.rpc("top_creators", { lim: 3 });
+      const { data } = await supabase.rpc("top_creators", { lim: 20 });
       if (cancelled) return;
-      setCreators(((data ?? []) as DailyCreator[]).slice(0, 3));
+      const withAvatars = ((data ?? []) as DailyCreator[]).filter((c) => !!c.avatar_url);
+      setCreators(withAvatars.slice(0, 3));
       setLoading(false);
     })();
     return () => {
