@@ -600,53 +600,9 @@ function DailyCreators() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.rpc("public_creators", { lim: 60 });
+      const { data } = await supabase.rpc("top_creators", { lim: 3 });
       if (cancelled) return;
-      // Show whoever's on the platform. If there are fewer than 3 users total,
-      // show all of them. Prefer photos when we have enough to choose from.
-      const all = (data ?? []) as DailyCreator[];
-      const withPhoto = all.filter((p) => p.avatar_url);
-      const pool = withPhoto.length >= 3 ? withPhoto : all;
-      // Daily rotation: deterministic per UTC day, but rotates each day and
-      // also shifts if the user reloads later in the day (cache-buster).
-      const today = new Date();
-      const dayKey = `${today.getUTCFullYear()}-${today.getUTCMonth()}-${today.getUTCDate()}`;
-      // Remember yesterday's pick so today's never repeats it.
-      const prevKey = "pb:daily-creators";
-      let prevIds: string[] = [];
-      try {
-        const raw = typeof localStorage !== "undefined" ? localStorage.getItem(prevKey) : null;
-        if (raw) {
-          const parsed = JSON.parse(raw) as { day: string; ids: string[] };
-          if (parsed.day !== dayKey) prevIds = parsed.ids ?? [];
-        }
-      } catch {}
-      let h = 2166136261;
-      for (let i = 0; i < dayKey.length; i++) {
-        h ^= dayKey.charCodeAt(i);
-        h = Math.imul(h, 16777619);
-      }
-      const rand = () => {
-        h += 0x6d2b79f5;
-        let t = h;
-        t = Math.imul(t ^ (t >>> 15), t | 1);
-        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-      const arr = [...pool];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(rand() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      // Prefer artists not shown yesterday when we have enough fresh ones.
-      const fresh = arr.filter((c) => !prevIds.includes(c.id));
-      const picks = (fresh.length >= 3 ? fresh : arr).slice(0, Math.min(3, arr.length));
-      try {
-        if (typeof localStorage !== "undefined") {
-          localStorage.setItem(prevKey, JSON.stringify({ day: dayKey, ids: picks.map((p) => p.id) }));
-        }
-      } catch {}
-      setCreators(picks);
+      setCreators(((data ?? []) as DailyCreator[]).slice(0, 3));
       setLoading(false);
     })();
     return () => {
