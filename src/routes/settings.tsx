@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check, HelpCircle,
-  ChevronDown, ExternalLink, CheckCircle2, AlertCircle, Sun, Monitor,
+  ChevronDown, ExternalLink, CheckCircle2, AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
