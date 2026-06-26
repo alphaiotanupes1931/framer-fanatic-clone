@@ -496,6 +496,7 @@ export type Database = {
           id: string
           in_baltimore: boolean
           is_baltimore_verified: boolean
+          is_founder: boolean
           last_seen_at: string | null
           latitude: number | null
           longitude: number | null
@@ -525,6 +526,7 @@ export type Database = {
           id: string
           in_baltimore?: boolean
           is_baltimore_verified?: boolean
+          is_founder?: boolean
           last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
@@ -554,6 +556,7 @@ export type Database = {
           id?: string
           in_baltimore?: boolean
           is_baltimore_verified?: boolean
+          is_founder?: boolean
           last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
@@ -889,6 +892,7 @@ export type Database = {
           avatar_url: string
           display_name: string
           id: string
+          is_founder: boolean
           neighborhood: string
           username: string
         }[]
