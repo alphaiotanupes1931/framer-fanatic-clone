@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS must_reset_password boolean NOT NULL DEFAULT false;
+UPDATE public.profiles SET must_reset_password = true WHERE id = 'd0baf11e-7023-4190-8547-7a04fc085a04';
