@@ -500,6 +500,7 @@ export type Database = {
           last_seen_at: string | null
           latitude: number | null
           longitude: number | null
+          must_reset_password: boolean
           neighborhood: string | null
           onboarded: boolean
           role: string
@@ -530,6 +531,7 @@ export type Database = {
           last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
+          must_reset_password?: boolean
           neighborhood?: string | null
           onboarded?: boolean
           role?: string
@@ -560,6 +562,7 @@ export type Database = {
           last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
+          must_reset_password?: boolean
           neighborhood?: string | null
           onboarded?: boolean
           role?: string
