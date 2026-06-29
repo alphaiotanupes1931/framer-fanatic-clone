@@ -317,7 +317,7 @@ export function AppLayout({
             <div className="absolute -top-32 -left-24 h-[420px] w-[420px] rounded-full bg-orange/20 blur-3xl opacity-60 dark:opacity-40" />
             <div className="absolute top-1/3 -right-32 h-[520px] w-[520px] rounded-full bg-blue/25 blur-3xl opacity-50 dark:opacity-35" />
             <div className="absolute bottom-0 left-1/3 h-[380px] w-[380px] rounded-full bg-primary/15 blur-3xl opacity-40" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_40%,hsl(var(--background))_85%)]" />
+            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at top, transparent 35%, var(--background) 85%)" }} />
           </div>
           <div className="mb-4 hidden justify-end md:flex">
             <NotificationsBell />
