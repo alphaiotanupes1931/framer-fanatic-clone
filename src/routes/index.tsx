@@ -279,7 +279,7 @@ function QuoteSection() {
   const imageY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
 
   return (
-    <section ref={ref} className="relative w-full overflow-hidden bg-gradient-to-b from-paper via-paper to-blue">
+    <section ref={ref} className="relative w-full overflow-hidden bg-paper">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-ink/10" />
       <div className="relative max-w-[1200px] mx-auto px-5 md:px-10 py-16 md:py-32 lg:py-40">
         <div className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center">
