@@ -703,7 +703,7 @@ function NextRefreshCountdown() {
   return (
     <div className="mt-8 md:mt-10 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs md:text-sm text-white/85 backdrop-blur">
       <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-      Next creators in <span className="font-mono tabular-nums">{label}</span>
+      Next change in <span className="font-mono tabular-nums">{label}</span>
     </div>
   );
 }
