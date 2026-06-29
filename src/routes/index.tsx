@@ -281,6 +281,7 @@ function QuoteSection() {
 
   return (
     <section ref={ref} className="relative w-full overflow-hidden bg-gradient-to-b from-paper via-paper to-blue">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-ink/10" />
       <div className="relative max-w-[1200px] mx-auto px-5 md:px-10 py-16 md:py-32 lg:py-40">
         <div className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center">
           {/* Portrait with parallax */}
@@ -557,6 +558,7 @@ function CreatorsFans() {
 function Features() {
   return (
     <section id="features" className="relative bg-gradient-to-b from-[#3d68d9] via-[#3d68d9] to-paper px-5 md:px-10 py-24 md:py-32">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <div className="mx-auto max-w-[1280px]">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -715,6 +717,7 @@ function NextRefreshCountdown() {
 function CTA() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-blue via-blue to-ink px-5 md:px-10 py-24 md:py-36">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -788,6 +791,7 @@ function Footer() {
   ];
   return (
     <footer className="bg-ink text-paper px-5 md:px-10 py-14 md:py-16">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(5,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
           <div className="col-span-2 md:col-span-1">
