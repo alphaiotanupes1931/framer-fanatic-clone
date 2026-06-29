@@ -14,7 +14,7 @@ import pbLogoDark from "@/assets/pb-logo-dark.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Planet Baltimore - Support what makes Baltimore" },
+      { title: "Planet Baltimore - Baltimore is extraordinary" },
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
     links: [
