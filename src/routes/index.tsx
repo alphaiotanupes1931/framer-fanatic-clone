@@ -497,7 +497,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36"
+      className="relative overflow-hidden bg-blue-deep px-5 md:px-10 py-24 md:py-36"
     >
       {/* Top hairline to bridge from hero */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -505,7 +505,7 @@ function CreatorsFans() {
       <div className="relative mx-auto max-w-[1280px]">
         <ScrollHeadline
           lines={["Turning passions", "into communities"]}
-          className="font-display text-paper font-medium text-[clamp(2.5rem,9vw,9rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
+          className="font-display text-paper font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
         />
 
         <motion.div
