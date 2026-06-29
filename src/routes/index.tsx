@@ -497,13 +497,8 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-gradient-to-b from-blue-deep via-blue to-[#3d68d9] px-5 md:px-10 py-24 md:py-36"
+      className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36"
     >
-      {/* Ambient glow */}
-      <div
-        aria-hidden
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] max-w-[1200px] aspect-[16/10] bg-paper/[0.06] rounded-full blur-[140px] pointer-events-none"
-      />
       {/* Top hairline to bridge from hero */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
 
