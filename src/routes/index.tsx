@@ -14,7 +14,7 @@ import pbLogoDark from "@/assets/pb-logo-dark.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Planet Baltimore - Support what makes Baltimore" },
+      { title: "Planet Baltimore - Baltimore is extraordinary" },
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
     links: [
@@ -192,9 +192,8 @@ function Hero() {
   return (
     <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden">
       <HeroParallax />
-      {/* Layered grading: softer top, deeper bottom for legibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-deep/20 via-blue-deep/10 to-blue-deep/70" />
-      <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_100%,rgba(0,0,0,0.45),transparent_60%)]" />
+      {/* Solid overlay for legibility */}
+      <div className="absolute inset-0 bg-ink/30" />
       {/* Subtle grain */}
       <div
         aria-hidden
@@ -205,7 +204,7 @@ function Hero() {
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10 text-paper">
         <div className="font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
-          <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
+          <AnimatedHeadline lines={["Baltimore is", "extraordinary"]} />
         </div>
 
         <motion.div
@@ -215,7 +214,7 @@ function Hero() {
           className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
         >
           <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed">
-            A home for the creators, organizers, and neighbors building the city together.
+            We all deserve to experience more of it.
           </p>
 
           <div className="hidden md:flex items-center gap-3">
@@ -280,7 +279,7 @@ function QuoteSection() {
   const imageY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
 
   return (
-    <section ref={ref} className="relative w-full overflow-hidden bg-gradient-to-b from-paper via-paper to-blue">
+    <section ref={ref} className="relative w-full overflow-hidden bg-paper">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-ink/10" />
       <div className="relative max-w-[1200px] mx-auto px-5 md:px-10 py-16 md:py-32 lg:py-40">
         <div className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center">
@@ -498,13 +497,8 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-gradient-to-b from-blue-deep via-blue to-[#3d68d9] px-5 md:px-10 py-24 md:py-36"
+      className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36"
     >
-      {/* Ambient glow */}
-      <div
-        aria-hidden
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] max-w-[1200px] aspect-[16/10] bg-paper/[0.06] rounded-full blur-[140px] pointer-events-none"
-      />
       {/* Top hairline to bridge from hero */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
 
@@ -557,7 +551,7 @@ function CreatorsFans() {
 
 function Features() {
   return (
-    <section id="features" className="relative bg-gradient-to-b from-[#3d68d9] via-[#3d68d9] to-paper px-5 md:px-10 py-24 md:py-32">
+    <section id="features" className="relative bg-blue px-5 md:px-10 py-24 md:py-32">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <div className="mx-auto max-w-[1280px]">
         <motion.h2
@@ -716,7 +710,7 @@ function NextRefreshCountdown() {
 
 function CTA() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-blue via-blue to-ink px-5 md:px-10 py-24 md:py-36">
+    <section className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <motion.div
         initial={{ opacity: 0, y: 40 }}
