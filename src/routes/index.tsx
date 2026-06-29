@@ -192,9 +192,8 @@ function Hero() {
   return (
     <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden">
       <HeroParallax />
-      {/* Layered grading: softer top, deeper bottom for legibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-deep/20 via-blue-deep/10 to-blue-deep/70" />
-      <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_100%,rgba(0,0,0,0.45),transparent_60%)]" />
+      {/* Solid overlay for legibility */}
+      <div className="absolute inset-0 bg-ink/30" />
       {/* Subtle grain */}
       <div
         aria-hidden
