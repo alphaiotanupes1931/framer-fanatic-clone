@@ -276,10 +276,10 @@ function Dashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: Math.min(i * 0.04, 0.4), ease: [0.22, 1, 0.36, 1] }}
-              className={`group my-4 rounded-2xl border p-5 transition-shadow hover:shadow-sm ${
+              className={`group my-4 rounded-2xl border p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.35)] ${
                 p.author?.is_founder
-                  ? "border-orange/40 bg-gradient-to-br from-orange/10 via-card to-card shadow-[0_0_0_1px_rgba(255,140,50,0.15)]"
-                  : "border-border bg-card"
+                  ? "border-orange/40 bg-gradient-to-br from-orange/10 via-card/80 to-card/70 shadow-[0_0_0_1px_rgba(255,140,50,0.15)]"
+                  : "border-border/60 bg-card/70 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]"
               }`}
             >
               {p.author?.is_founder && (
