@@ -790,7 +790,7 @@ function Footer() {
     ]},
   ];
   return (
-    <footer className="bg-ink text-paper px-5 md:px-10 py-14 md:py-16">
+    <footer className="relative bg-ink text-paper px-5 md:px-10 py-14 md:py-16">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(5,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
