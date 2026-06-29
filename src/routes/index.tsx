@@ -551,7 +551,7 @@ function CreatorsFans() {
 
 function Features() {
   return (
-    <section id="features" className="relative bg-gradient-to-b from-[#3d68d9] via-[#3d68d9] to-paper px-5 md:px-10 py-24 md:py-32">
+    <section id="features" className="relative bg-blue px-5 md:px-10 py-24 md:py-32">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <div className="mx-auto max-w-[1280px]">
         <motion.h2
