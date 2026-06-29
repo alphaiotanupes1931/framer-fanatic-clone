@@ -204,7 +204,7 @@ function Hero() {
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10 text-paper">
         <div className="font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
-          <AnimatedHeadline lines={["Support what", "makes Baltimore"]} />
+          <AnimatedHeadline lines={["Baltimore is", "extraordinary"]} />
         </div>
 
         <motion.div
@@ -214,7 +214,7 @@ function Hero() {
           className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
         >
           <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed">
-            A home for the creators, organizers, and neighbors building the city together.
+            We all deserve to experience more of it.
           </p>
 
           <div className="hidden md:flex items-center gap-3">
