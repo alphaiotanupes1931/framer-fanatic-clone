@@ -200,9 +200,12 @@ function Dashboard() {
     >
       <div className="mx-auto max-w-2xl">
         {myProfile?.display_name && (
-          <div className="mb-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Welcome back, {myProfile.display_name.split(" ")[0]}.
+          <div className="mb-4">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              <span className="text-foreground">Welcome back, </span>
+              <span className="bg-gradient-to-r from-orange via-orange to-blue bg-clip-text text-transparent">
+                {myProfile.display_name.split(" ")[0]}.
+              </span>
             </h2>
           </div>
         )}
@@ -229,7 +232,7 @@ function Dashboard() {
             To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">Profile</Link> and become an Artist.
           </div>
         ) : (
-        <div className="rounded-2xl border border-border bg-card p-4 transition focus-within:border-ring">
+        <div className="rounded-2xl border border-border/60 bg-card/70 p-4 backdrop-blur-xl shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,0_20px_50px_-24px_rgba(0,0,0,0.25)] transition focus-within:border-ring">
           <div className="flex gap-3">
             <Avatar className="h-9 w-9 shrink-0">
               {myProfile?.avatar_url && <AvatarImage src={myProfile.avatar_url} />}
