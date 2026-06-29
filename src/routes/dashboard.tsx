@@ -200,9 +200,12 @@ function Dashboard() {
     >
       <div className="mx-auto max-w-2xl">
         {myProfile?.display_name && (
-          <div className="mb-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Welcome back, {myProfile.display_name.split(" ")[0]}.
+          <div className="mb-4">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              <span className="text-foreground">Welcome back, </span>
+              <span className="bg-gradient-to-r from-orange via-orange to-blue bg-clip-text text-transparent">
+                {myProfile.display_name.split(" ")[0]}.
+              </span>
             </h2>
           </div>
         )}
@@ -229,7 +232,7 @@ function Dashboard() {
             To post, head to your <Link to="/profile" className="text-orange font-semibold hover:underline">Profile</Link> and become an Artist.
           </div>
         ) : (
-        <div className="rounded-2xl border border-border bg-card p-4 transition focus-within:border-ring">
+        <div className="rounded-2xl border border-border/60 bg-card/70 p-4 backdrop-blur-xl shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,0_20px_50px_-24px_rgba(0,0,0,0.25)] transition focus-within:border-ring">
           <div className="flex gap-3">
             <Avatar className="h-9 w-9 shrink-0">
               {myProfile?.avatar_url && <AvatarImage src={myProfile.avatar_url} />}
@@ -273,10 +276,10 @@ function Dashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: Math.min(i * 0.04, 0.4), ease: [0.22, 1, 0.36, 1] }}
-              className={`group my-4 rounded-2xl border p-5 transition-shadow hover:shadow-sm ${
+              className={`group my-4 rounded-2xl border p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.35)] ${
                 p.author?.is_founder
-                  ? "border-orange/40 bg-gradient-to-br from-orange/10 via-card to-card shadow-[0_0_0_1px_rgba(255,140,50,0.15)]"
-                  : "border-border bg-card"
+                  ? "border-orange/40 bg-gradient-to-br from-orange/10 via-card/80 to-card/70 shadow-[0_0_0_1px_rgba(255,140,50,0.15)]"
+                  : "border-border/60 bg-card/70 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]"
               }`}
             >
               {p.author?.is_founder && (
