@@ -311,7 +311,14 @@ export function AppLayout({
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-28 pt-4 sm:px-6 md:px-10 md:py-8 md:pb-10 bg-background">
+        <main className="relative isolate min-w-0 flex-1 overflow-hidden px-4 pb-28 pt-4 sm:px-6 md:px-10 md:py-8 md:pb-10 bg-background">
+          {/* Ambient modern background */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute -top-32 -left-24 h-[420px] w-[420px] rounded-full bg-orange/20 blur-3xl opacity-60 dark:opacity-40" />
+            <div className="absolute top-1/3 -right-32 h-[520px] w-[520px] rounded-full bg-blue/25 blur-3xl opacity-50 dark:opacity-35" />
+            <div className="absolute bottom-0 left-1/3 h-[380px] w-[380px] rounded-full bg-primary/15 blur-3xl opacity-40" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_40%,hsl(var(--background))_85%)]" />
+          </div>
           <div className="mb-4 hidden justify-end md:flex">
             <NotificationsBell />
           </div>
