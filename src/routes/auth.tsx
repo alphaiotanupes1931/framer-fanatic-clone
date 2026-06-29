@@ -75,11 +75,23 @@ function AuthPage() {
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (uid) {
-      const { data: p } = await supabase.from("profiles").select("onboarded").eq("id", uid).maybeSingle();
+      const { data: p } = await supabase.from("profiles").select("onboarded, must_reset_password").eq("id", uid).maybeSingle();
+      if (p?.must_reset_password) {
+        return navigate({ to: "/reset-password" });
+      }
       navigate({ to: p?.onboarded ? "/dashboard" : "/onboarding" });
     } else {
       navigate({ to: "/dashboard" });
     }
+  };
+
+  const handleForgot = async () => {
+    if (!email) return toast.error("Enter your email above first.");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Password reset email sent. Check your inbox.");
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -164,6 +176,13 @@ function AuthPage() {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Signing in…" : "Sign in"}
                 </Button>
+                <button
+                  type="button"
+                  onClick={handleForgot}
+                  className="block w-full text-center text-sm text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  Forgot password?
+                </button>
               </form>
             </TabsContent>
 
