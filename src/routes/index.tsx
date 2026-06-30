@@ -614,7 +614,28 @@ function DailyCreators() {
       const { data } = await supabase.rpc("top_creators", { lim: 20 });
       if (cancelled) return;
       const withAvatars = ((data ?? []) as DailyCreator[]).filter((c) => !!c.avatar_url);
-      setCreators(withAvatars.slice(0, 3));
+      // Deterministic daily rotation: pick 3 from the top 20 based on day-of-year.
+      const pool = withAvatars;
+      if (pool.length <= 3) {
+        setCreators(pool);
+      } else {
+        const now = new Date();
+        const start = Date.UTC(now.getUTCFullYear(), 0, 0);
+        const dayOfYear = Math.floor((now.getTime() - start) / 86_400_000);
+        const picked: DailyCreator[] = [];
+        const used = new Set<number>();
+        let i = 0;
+        while (picked.length < 3 && used.size < pool.length) {
+          const idx = (dayOfYear * 3 + i * 7) % pool.length;
+          if (!used.has(idx)) {
+            used.add(idx);
+            picked.push(pool[idx]);
+          }
+          i++;
+          if (i > pool.length * 2) break;
+        }
+        setCreators(picked);
+      }
       setLoading(false);
     })();
     return () => {
