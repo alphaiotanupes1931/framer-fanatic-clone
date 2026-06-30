@@ -309,7 +309,7 @@ function Dashboard() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground">
+                  <div className="flex items-center gap-1.5 text-[14.5px] font-semibold tracking-tight text-foreground">
                     <span className="truncate">{p.author?.display_name || p.author?.username || "Anonymous"}</span>
                     {p.author?.is_founder && (
                       <span title="Founder" className="inline-flex items-center gap-1 rounded-full bg-orange px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider text-white">
@@ -317,7 +317,7 @@ function Dashboard() {
                       </span>
                     )}
                   </div>
-                  <div className="text-[11.5px] text-muted-foreground">
+                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     {p.author?.neighborhood || "Baltimore"} · {new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </div>
                 </div>
