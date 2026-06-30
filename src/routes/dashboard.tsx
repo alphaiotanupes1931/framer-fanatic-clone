@@ -200,28 +200,42 @@ function Dashboard() {
     >
       <div className="mx-auto max-w-2xl">
         {myProfile?.display_name && (
-          <div className="mb-4">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              <span className="text-foreground">Welcome back, </span>
-              <span className="bg-gradient-to-r from-orange via-orange to-blue bg-clip-text text-transparent">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center gap-3 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              <span>{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</span>
+              <span className="h-px flex-1 bg-border" />
+              <span>Baltimore</span>
+            </div>
+            <h2 className="mt-3 font-serif text-[40px] leading-[1.02] tracking-tight text-foreground sm:text-[56px]">
+              Welcome back,{" "}
+              <em className="font-serif italic text-blue">
                 {myProfile.display_name.split(" ")[0]}.
-              </span>
+              </em>
             </h2>
+            <p className="mt-3 max-w-md text-[14px] leading-relaxed text-muted-foreground">
+              What's moving in the city today.
+            </p>
           </div>
         )}
         <CreatorSearch />
         <DiscoverStrip />
 
-        <div className="mb-4 flex w-full items-center gap-1 rounded-full border border-border bg-muted p-1 sm:inline-flex sm:w-auto">
+        <div className="mb-5 flex items-center gap-6 border-b border-border">
           {([["for-you","For you"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
             <button
               key={k}
               onClick={() => setTab(k)}
-              className={`flex-1 rounded-full px-4 py-1.5 text-[12.5px] font-medium transition sm:flex-none ${
-                tab===k ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              className={`relative -mb-px px-1 py-3 text-[13px] font-medium transition ${
+                tab===k ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {l}
+              {tab===k && (
+                <motion.span
+                  layoutId="dashTabUnderline"
+                  className="absolute inset-x-0 -bottom-px h-[2px] bg-blue"
+                />
+              )}
             </button>
           ))}
         </div>
