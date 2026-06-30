@@ -586,6 +586,8 @@ type DailyCreator = {
   avatar_url: string | null;
   category: string | null;
   role: string | null;
+  is_founder?: boolean | null;
+  score?: number;
 };
 
 function formatCreatorLabel(category?: string | null) {
