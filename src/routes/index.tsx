@@ -615,7 +615,7 @@ function DailyCreators() {
     (async () => {
       const { data } = await supabase.rpc("top_creators", { lim: 20 });
       if (cancelled) return;
-      const withAvatars = ((data ?? []) as DailyCreator[]).filter((c) => !!c.avatar_url);
+      const withAvatars = ((data ?? []) as DailyCreator[]).filter((c) => !!c.avatar_url && !c.is_founder);
       // Deterministic daily rotation: pick 3 from the top 20 based on day-of-year.
       const pool = withAvatars;
       if (pool.length <= 3) {
