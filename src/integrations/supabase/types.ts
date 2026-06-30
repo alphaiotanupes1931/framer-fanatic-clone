@@ -922,6 +922,7 @@ export type Database = {
           category: string
           display_name: string
           id: string
+          is_founder: boolean
           role: string
           score: number
           username: string
