@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FileText, MessageCircle, Heart } from "lucide-react";
 
@@ -41,7 +42,9 @@ function LeaderboardPage() {
   if (!auth.signedIn) return <AnonLeaderboard />;
 
   return (
-    <AppLayout title="Baltimore 100" subtitle="Top 100 people who keep Planet Baltimore moving.">
+    <AppLayout>
+      <HeroBanner title="Baltimore 100" subtitle="Top 100 people who keep Planet Baltimore moving." />
+      <div className="h-6" />
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-neutral-200 bg-white px-6 py-4 text-sm text-neutral-600">
           <span className="flex items-center gap-1.5"><FileText className="h-4 w-4" /> <b>5</b> / post</span>
