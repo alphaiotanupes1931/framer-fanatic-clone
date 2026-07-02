@@ -1,13 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Pencil, Trash2, Check, BadgeCheck } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Send, Palette, Ticket, MapPin, Users, BookOpen, Trophy, Search, X, Pencil, Trash2, Check, BadgeCheck, Compass, Sparkles, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useUserRole } from "@/hooks/use-user-role";
 import { formatCategory } from "@/lib/format-category";
+import { OnboardingCard } from "@/components/onboarding-card";
+import { DiscoverBadge } from "@/components/feed-badges";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -29,16 +31,46 @@ type PostComment = {
   author?: { display_name: string | null; avatar_url: string | null; username: string | null };
 };
 
+type StoryRow = {
+  id: string; user_id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string;
+  author?: { display_name: string | null; username: string | null };
+};
+type EventRow = {
+  id: string; user_id: string; title: string; description: string | null; image_url: string | null;
+  starts_at: string; venue_name: string | null; neighborhood: string | null; created_at: string;
+  author?: { display_name: string | null; username: string | null };
+};
+
+type FilterKey = "for-you" | "following" | "nearby" | "discover";
+type FeedItem =
+  | { key: string; type: "post"; date: string; data: Post; isNew?: boolean; reason?: string }
+  | { key: string; type: "story"; date: string; data: StoryRow; isNew?: boolean; reason?: string }
+  | { key: string; type: "event"; date: string; data: EventRow; isNew?: boolean; reason?: string };
+
+function shuffleSeed<T>(arr: T[], seed: number): T[] {
+  const a = [...arr];
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.abs((s * 1103515245 + 12345) % (i + 1));
+    s = j;
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function Dashboard() {
   const navigate = useNavigate();
   const { isArtist, loading: roleLoading } = useUserRole();
   const [checked, setChecked] = useState(false);
-  const [tab, setTab] = useState<"for-you" | "following" | "nearby">("for-you");
+  const [tab, setTab] = useState<FilterKey>("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
+  const [stories, setStories] = useState<StoryRow[]>([]);
+  const [events, setEvents] = useState<EventRow[]>([]);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [content, setContent] = useState("");
   const [me, setMe] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [myProfile, setMyProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
+  const [myProfile, setMyProfile] = useState<{ display_name: string | null; avatar_url: string | null; neighborhood: string | null } | null>(null);
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Post | null>(null);
@@ -47,17 +79,37 @@ function Dashboard() {
 
   const load = async (currentUserId?: string) => {
     setLoading(true);
-    const { data: ps } = await supabase.from("posts")
-      .select("id, user_id, content, image_url, likes_count, comments_count, neighborhood, created_at")
-      .order("created_at", { ascending: false }).limit(50);
-    const list = (ps || []) as Post[];
-    const ids = Array.from(new Set(list.map((p) => p.user_id)));
+    const [postsRes, storiesRes, eventsRes] = await Promise.all([
+      supabase.from("posts")
+        .select("id, user_id, content, image_url, likes_count, comments_count, neighborhood, created_at")
+        .order("created_at", { ascending: false }).limit(50),
+      supabase.from("stories")
+        .select("id, user_id, title, excerpt, cover_url, created_at")
+        .order("created_at", { ascending: false }).limit(15),
+      supabase.from("events")
+        .select("id, user_id, title, description, image_url, starts_at, venue_name, neighborhood, created_at")
+        .eq("is_published", true)
+        .gte("starts_at", new Date().toISOString())
+        .order("starts_at", { ascending: true }).limit(15),
+    ]);
+    const list = (postsRes.data || []) as Post[];
+    const sList = (storiesRes.data || []) as StoryRow[];
+    const eList = (eventsRes.data || []) as EventRow[];
+    const ids = Array.from(new Set<string>([
+      ...list.map((p) => p.user_id),
+      ...sList.map((s) => s.user_id),
+      ...eList.map((e) => e.user_id),
+    ]));
     if (ids.length) {
       const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-      const byId = new Map((profs || []).map((p: any) => [p.id, p]));
-      list.forEach((p) => { p.author = byId.get(p.user_id) as any; });
+      const byId = new Map<string, any>((profs || []).map((p: any) => [p.id, p]));
+      list.forEach((p) => { p.author = byId.get(p.user_id); });
+      sList.forEach((s) => { s.author = byId.get(s.user_id); });
+      eList.forEach((e) => { e.author = byId.get(e.user_id); });
     }
     setPosts(list);
+    setStories(sList);
+    setEvents(eList);
     if (currentUserId && list.length) {
       const { data: likes } = await supabase
         .from("post_likes")
@@ -72,6 +124,13 @@ function Dashboard() {
         .in("post_id", list.map((p) => p.id));
       setSavedPostIds(new Set((saves || []).map((s) => s.post_id)));
     }
+    if (currentUserId) {
+      const { data: follows } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", currentUserId);
+      setFollowingIds(new Set((follows || []).map((f: any) => f.following_id)));
+    }
     setLoading(false);
   };
 
@@ -84,7 +143,7 @@ function Dashboard() {
         setMe(data.session.user.id);
         const { data: prof } = await supabase
           .from("profiles")
-          .select("display_name, avatar_url, banned")
+          .select("display_name, avatar_url, neighborhood, banned")
           .eq("id", data.session.user.id)
           .maybeSingle();
         if (prof && (prof as { banned?: boolean }).banned) {
@@ -99,6 +158,56 @@ function Dashboard() {
       setChecked(true);
     })();
   }, [navigate]);
+
+  const feedItems = useMemo<FeedItem[]>(() => {
+    const followed = followingIds;
+    const postItems = posts.map<FeedItem>((p) => ({ key: `post-${p.id}`, type: "post", date: p.created_at, data: p }));
+    const storyItems = stories.map<FeedItem>((s) => ({ key: `story-${s.id}`, type: "story", date: s.created_at, data: s }));
+    const eventItems = events.map<FeedItem>((e) => ({ key: `event-${e.id}`, type: "event", date: e.created_at, data: e }));
+
+    if (tab === "for-you") {
+      const followedPosts = postItems.filter((i) => followed.has((i.data as Post).user_id)).map((i) => ({ ...i, reason: "Following" }));
+      const otherPosts = postItems.filter((i) => !followed.has((i.data as Post).user_id)).map((i) => ({ ...i, isNew: true }));
+      const followedEvents = eventItems.filter((i) => followed.has((i.data as EventRow).user_id)).map((i) => ({ ...i, reason: "From someone you follow" }));
+      const discoverEvents = eventItems.filter((i) => !followed.has((i.data as EventRow).user_id)).map((i) => ({ ...i, isNew: true }));
+      const followedFeed = [...followedPosts, ...storyItems.slice(0, 10), ...followedEvents]
+        .sort((a, b) => +new Date(b.date) - +new Date(a.date));
+      const discover = [...otherPosts.slice(0, 20), ...discoverEvents.slice(0, 8)];
+      const merged: FeedItem[] = [];
+      let di = 0;
+      followedFeed.forEach((item, idx) => {
+        merged.push(item);
+        if ((idx + 1) % 3 === 0 && di < discover.length) merged.push(discover[di++]);
+      });
+      while (di < discover.length) merged.push(discover[di++]);
+      return merged.slice(0, 50);
+    }
+    if (tab === "following") {
+      return [
+        ...postItems.filter((i) => followed.has((i.data as Post).user_id)),
+        ...storyItems.filter((i) => followed.has((i.data as StoryRow).user_id)),
+        ...eventItems.filter((i) => followed.has((i.data as EventRow).user_id)),
+      ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
+    }
+    if (tab === "nearby") {
+      const hood = myProfile?.neighborhood;
+      if (!hood) return [];
+      return [
+        ...postItems.filter((i) => (i.data as Post).neighborhood === hood),
+        ...eventItems.filter((i) => (i.data as EventRow).neighborhood === hood),
+      ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
+    }
+    // discover
+    const all: FeedItem[] = [
+      ...postItems.map((i) => ({ ...i, isNew: true })),
+      ...storyItems.map((i) => ({ ...i, isNew: true })),
+      ...eventItems.map((i) => ({ ...i, isNew: true })),
+    ];
+    const dayOfYear = Math.floor(Date.now() / 86400000);
+    return shuffleSeed(all, dayOfYear).slice(0, 40);
+  }, [tab, posts, stories, events, followingIds, myProfile]);
+
+  const showOnboarding = !loading && followingIds.size === 0;
 
   const createPost = async () => {
     if (!content.trim() || !me) return;
@@ -220,25 +329,71 @@ function Dashboard() {
         <CreatorSearch />
         <DiscoverStrip />
 
-        <div className="mb-5 flex items-center gap-6 border-b border-border">
-          {([["for-you","For you"],["following","Following"],["nearby","Nearby"]] as const).map(([k,l]) => (
+        {/* Planet Baltimore hero banner */}
+        <div className="relative mb-5 overflow-hidden rounded-2xl border-2 bg-transparent p-5 sm:p-8" style={{ borderColor: "#d4580a" }}>
+          <div className="relative z-10">
+            <h1 className="mb-1.5 text-2xl font-bold sm:text-3xl" style={{ color: "#d4580a" }}>
+              Planet Baltimore
+            </h1>
+            <p className="text-sm" style={{ color: "#d4580a" }}>Your city. Your community. Your feed.</p>
+          </div>
+          <div className="pointer-events-none absolute inset-0 opacity-5">
+            <div className="absolute right-0 top-0 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full" style={{ backgroundColor: "#d4580a" }} />
+            <div className="absolute bottom-0 left-0 h-48 w-48 -translate-x-1/2 translate-y-1/2 rounded-full" style={{ backgroundColor: "#d4580a" }} />
+          </div>
+        </div>
+
+        {/* Filter chips */}
+        <div className="scrollbar-hide -mx-3 mb-4 flex gap-2 overflow-x-auto px-3 pb-2 sm:-mx-4 sm:px-4">
+          {([["for-you","For You"],["following","Following"],["nearby","Nearby"],["discover","Discover"]] as const).map(([k,l]) => (
             <button
               key={k}
               onClick={() => setTab(k)}
-              className={`relative -mb-px px-1 py-3 text-[13px] font-medium transition ${
-                tab===k ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-150 active:scale-95 ${
+                tab===k ? "bg-[#d4580a] text-white shadow-sm" : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
               }`}
             >
+              {k === "discover" && <Compass className="h-4 w-4" />}
               {l}
-              {tab===k && (
-                <motion.span
-                  layoutId="dashTabUnderline"
-                  className="absolute inset-x-0 -bottom-px h-[2px] bg-blue"
-                />
-              )}
             </button>
           ))}
         </div>
+
+        {/* My Neighborhood quick filter */}
+        {me && (
+          myProfile?.neighborhood ? (
+            <button
+              onClick={() => setTab("nearby")}
+              className={`mb-4 flex w-full items-center gap-2 rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-all ${
+                tab === "nearby"
+                  ? "border-[#d4580a] bg-[#d4580a] text-white"
+                  : "border-border bg-secondary/60 text-foreground hover:border-[#d4580a] hover:text-[#d4580a]"
+              }`}
+            >
+              <MapPin className="h-4 w-4 flex-shrink-0" />
+              <span>My Neighborhood: <span className="font-semibold">{myProfile.neighborhood}</span></span>
+              {tab !== "nearby" && <span className="ml-auto text-xs text-muted-foreground">See local feed →</span>}
+            </button>
+          ) : (
+            <Link
+              to="/profile"
+              className="mb-4 flex w-full items-center gap-2 rounded-xl border border-dashed border-border bg-secondary/40 px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-[#d4580a] hover:text-[#d4580a]"
+            >
+              <MapPin className="h-4 w-4 flex-shrink-0" />
+              <span>Add your neighborhood to see local content</span>
+              <span className="ml-auto text-xs">Set up →</span>
+            </Link>
+          )
+        )}
+
+        {showOnboarding && <div className="mb-4"><OnboardingCard /></div>}
+
+        {tab === "discover" && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl border border-orange/20 bg-orange/5 p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">
+            <Sparkles className="h-4 w-4 flex-shrink-0 text-orange sm:h-5 sm:w-5" />
+            <span>Broadening your world, content from across Baltimore you haven't seen yet.</span>
+          </div>
+        )}
 
         {!roleLoading && !isArtist ? (
           <div className="rounded-2xl border border-dashed border-border bg-muted p-4 text-center text-[13px] text-muted-foreground">
@@ -278,13 +433,25 @@ function Dashboard() {
 
         <div className="mt-6">
           {loading && <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>}
-          {!loading && posts.length === 0 && (
+          {!loading && feedItems.length === 0 && tab !== "nearby" && (
             <div className="py-16 text-center text-sm text-muted-foreground">
-              No posts yet. Be the first to share something.
+              {tab === "following"
+                ? "No activity from people you follow yet."
+                : "Your feed is quiet. Explore Baltimore to fill it up."}
+            </div>
+          )}
+          {!loading && feedItems.length === 0 && tab === "nearby" && (
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              {myProfile?.neighborhood
+                ? "No local posts or events yet. Be the first to share something."
+                : "Add your neighborhood to your profile to see local content."}
             </div>
           )}
 
-          {posts.map((p, i) => (
+          {feedItems.map((item, i) => {
+            if (item.type === "post") {
+              const p = item.data;
+              const card = (
             <motion.article
               key={p.id}
               initial={{ opacity: 0, y: 8 }}
