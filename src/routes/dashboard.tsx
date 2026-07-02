@@ -181,10 +181,11 @@ function Dashboard() {
         {/* Hero Banner */}
         <div className="relative overflow-hidden rounded-2xl border-2 bg-transparent p-5 sm:p-8 lg:p-12" style={{ borderColor: "#d4580a" }}>
           <div className="relative z-10">
-            <h1 className="mb-1.5 text-2xl font-bold sm:text-3xl lg:text-4xl" style={{ color: "#d4580a" }}>
-              Planet <span style={{ color: "#d4580a" }}>Baltimore</span>
+            <h1 className="mb-1.5 text-2xl font-bold sm:text-3xl lg:text-4xl">
+              <span style={{ color: "#d4580a" }}>Planet</span>{" "}
+              <span className="text-foreground">Baltimore</span>
             </h1>
-            <p className="text-sm" style={{ color: "#d4580a" }}>Your city. Your community. Your feed.</p>
+            <p className="text-sm text-muted-foreground">Your city. Your community. Your feed.</p>
           </div>
           <div className="pointer-events-none absolute inset-0 opacity-5">
             <div className="absolute right-0 top-0 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full" style={{ backgroundColor: "#d4580a" }} />
