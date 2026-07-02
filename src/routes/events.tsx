@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { HeroBanner } from "@/components/shared/hero-banner";
+import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -207,12 +209,25 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
 
   return (
     <AppLayout
-      title="What's happening next"
-      subtitle="Tickets for the best events in Baltimore."
-      cta={isArtist ? "Create Event" : undefined}
-      ctaTo="#"
-      onCta={isArtist ? () => setOpen(true) : undefined}
     >
+      <HeroBanner
+        title="Main Stage"
+        subtitle="Tickets for the best events in Baltimore."
+        cta={
+          isArtist ? (
+            <Button
+              onClick={() => setOpen(true)}
+              variant="outline"
+              className="gap-2 rounded-lg"
+              style={{ borderColor: "#d4580a", color: "#d4580a" }}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Create Event</span>
+            </Button>
+          ) : undefined
+        }
+      />
+      <div className="h-6" />
       {dataLoading ? (
         <div className="text-muted-foreground text-sm">Loading events…</div>
       ) : events.length === 0 ? (
