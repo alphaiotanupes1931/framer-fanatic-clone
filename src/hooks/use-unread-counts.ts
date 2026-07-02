@@ -15,7 +15,7 @@ export function useUnreadCounts() {
       const { count } = await supabase
         .from("messages")
         .select("id", { count: "exact", head: true })
-        .neq("user_id", uid);
+        .neq("sender_id", uid);
       if (!cancelled && typeof count === "number") setUnreadMessages(Math.min(count, 99));
     })();
     return () => { cancelled = true; };
