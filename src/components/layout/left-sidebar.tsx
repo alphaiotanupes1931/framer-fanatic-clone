@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
-  BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic,
+  BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic, ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
   { icon: Users, label: "Groups/Communities", to: "/groups" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
+  { icon: ShoppingBag, label: "Marketplace", to: "/marketplace" },
   { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: Mic, label: "Podcasts", to: "/podcasts" },
   { icon: User, label: "Profile", to: "/profile" },
