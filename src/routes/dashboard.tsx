@@ -111,48 +111,50 @@ function Dashboard() {
     const filteredPosts = (posts as any[]).filter((p) => !p.is_deleted);
 
     if (activeFilter === "For You") {
-      // Posts lead the feed. Events and stories are interleaved as accents
-      // so a burst of freshly imported events cannot dominate the top.
-      const followedPosts = filteredPosts
-        .filter((p) => followedIds.has(p.user_id))
-        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
-      const otherPosts = filteredPosts
-        .filter((p) => !followedIds.has(p.user_id))
-        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
-      const followedEvents = (events as any[]).filter((e) => followedIds.has(e.user_id));
-      const discoverEvents = (events as any[]).filter((e) => !followedIds.has(e.user_id));
+      // Reference site: stories lead the home feed, posts and events interleaved.
+      // Order: story, story, post, story, post, event, story, post, ...
+      const storyStream: FeedItem[] = (stories as any[])
+        .slice(0, 20)
+        .map((s) => ({
+          type: "story" as const,
+          date: s.created_at,
+          data: s,
+          reason: followedIds.has(s.user_id) ? "From someone you follow" : undefined,
+          isNew: !followedIds.has(s.user_id) && !followedIds.size ? false : !followedIds.has(s.user_id),
+        }));
 
-      // Build an alternating post stream: followed, discover, followed, discover...
-      const postStream: FeedItem[] = [];
-      const fp = followedPosts.map((p) => ({ type: "post" as const, date: p.created_at, data: p, reason: "Following" }));
-      const op = otherPosts.slice(0, 25).map((p) => ({ type: "post" as const, date: p.created_at, data: p, isNew: true }));
-      let i = 0;
-      while (i < fp.length || i < op.length) {
-        if (i < fp.length) postStream.push(fp[i]);
-        if (i < op.length) postStream.push(op[i]);
-        i++;
-      }
+      const postStream: FeedItem[] = filteredPosts
+        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+        .slice(0, 25)
+        .map((p) => ({
+          type: "post" as const,
+          date: p.created_at,
+          data: p,
+          reason: followedIds.has(p.user_id) ? "Following" : undefined,
+          isNew: !followedIds.has(p.user_id),
+        }));
 
-      const storyItems: FeedItem[] = (stories as any[]).slice(0, 6).map((s) => ({
-        type: "story" as const, date: s.created_at, data: s,
-        reason: followedIds.has(s.user_id) ? "From someone you follow" : undefined,
-        isNew: !followedIds.has(s.user_id),
-      }));
-      const eventItems: FeedItem[] = [
-        ...followedEvents.slice(0, 3).map((e) => ({ type: "event" as const, date: e.created_at, data: e, reason: "From someone you follow" })),
-        ...discoverEvents.slice(0, 3).map((e) => ({ type: "event" as const, date: e.created_at, data: e, isNew: true })),
-      ];
+      const eventStream: FeedItem[] = (events as any[])
+        .slice(0, 8)
+        .map((e) => ({
+          type: "event" as const,
+          date: e.created_at,
+          data: e,
+          reason: followedIds.has(e.user_id) ? "From someone you follow" : undefined,
+          isNew: !followedIds.has(e.user_id),
+        }));
 
-      // Weave: every 4 posts, insert a story; every 6 posts, insert an event.
+      // Weave: stories dominate. Every 3 stories drop a post; every 6 stories drop an event.
       const merged: FeedItem[] = [];
-      let si = 0, ei = 0;
-      postStream.forEach((item, idx) => {
+      let pi = 0, ei = 0;
+      storyStream.forEach((item, idx) => {
         merged.push(item);
-        if ((idx + 1) % 4 === 0 && si < storyItems.length) merged.push(storyItems[si++]);
-        if ((idx + 1) % 6 === 0 && ei < eventItems.length) merged.push(eventItems[ei++]);
+        if ((idx + 1) % 3 === 0 && pi < postStream.length) merged.push(postStream[pi++]);
+        if ((idx + 1) % 3 === 0 && pi < postStream.length) merged.push(postStream[pi++]);
+        if ((idx + 1) % 6 === 0 && ei < eventStream.length) merged.push(eventStream[ei++]);
       });
-      while (si < storyItems.length) merged.push(storyItems[si++]);
-      while (ei < eventItems.length) merged.push(eventItems[ei++]);
+      while (pi < postStream.length) merged.push(postStream[pi++]);
+      while (ei < eventStream.length) merged.push(eventStream[ei++]);
       return merged.slice(0, 60);
     }
 

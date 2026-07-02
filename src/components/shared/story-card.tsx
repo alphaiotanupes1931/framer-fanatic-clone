@@ -19,7 +19,7 @@ type Story = {
 export function StoryCard({ story, featured = false }: { story: Story; featured?: boolean }) {
   if (featured) {
     return (
-      <Link to="/stories" className="group block overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0">
+      <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group block overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0">
         <div className="relative aspect-[2/1] overflow-hidden bg-muted">
           {story.cover_url ? (
             <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -54,7 +54,7 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
   }
 
   return (
-    <Link to="/stories" className="group flex gap-3 rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 sm:gap-4 sm:p-4">
+    <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group flex gap-3 rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 sm:gap-4 sm:p-4">
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Avatar className="h-6 w-6">

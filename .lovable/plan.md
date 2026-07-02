@@ -1,80 +1,59 @@
-# Full rebuild plan: planet-baltimore repo → this app
+## Goal
+Make Planet Baltimore an exact structural / visual replica of https://planetbaltimore.us across every page. All data continues to come from Base44 (no data-layer changes).
 
-Goal: the app looks and behaves like the GitHub repo (`AinsleyBurrows/planet-baltimore`), not the current editorial design. All routes, chrome, cards, and colors come from the repo. Backend stays on your Supabase; missing tables/columns get added.
+## Method
+Work page-by-page. For each page I will:
+1. Fetch the reference at that URL.
+2. Diff structure vs the current implementation.
+3. Rewrite only the layout / presentation of that route.
+4. Confirm visually before moving on.
 
-Because this touches ~50 pages and ~40 components, I'll ship it in phases. Each phase ends with a working preview and I check in before starting the next.
+No changes to data fetching, entities, or auth flows.
 
-## Phase 0 — Schema deltas (this turn, needs your approval)
+## Order of work (one page per turn — you'll see progress after each)
 
-Repo assumes some tables/columns you don't have. Adding the missing ones now avoids ugly workarounds later.
+**1. Home (`/dashboard`)**
+- Keep orange hero banner (already correct).
+- Feed order: Stories dominate (matches reference), then Posts, then Events — not the current post-heavy weave.
+- Story item layout: `STORY` chip label above card, avatar + name + colored category tag (Poetry / Blog / Essay), title, one-line excerpt, `min · likes · comments`, right-side square thumbnail. Replace current `StoryCard`.
+- Welcome onboarding: 4-tile grid (Follow artists / Join community / Share something / Explore events) with dismiss X — replace current `OnboardingCard`.
+- Filter pills: `For You · Following · Nearby · Discover` (already present, restyle to match).
 
-- New table `public.ephemeral_stories` — 24-hour "Story bar" items (author, media_url, expires_at). Not the same as `stories` (long-form).
-- New column `public.posts.is_deleted boolean default false` — repo filters soft-deletes.
-- New column `public.stories.status text default 'published'` — repo filters by `status='published'`.
-- New column `public.events.status text default 'upcoming'` — repo filters by `status='upcoming'`. Kept alongside your existing `is_published`.
-- New column `public.profiles.neighborhood_names text[] default '{}'` — repo supports multiple neighborhoods; will backfill from existing `neighborhood`.
+**2. Right sidebar**
+- Add `UPCOMING EVENTS` section under `ARTISTS TO FOLLOW` (currently missing).
+- Match spacing / header treatment (small icon + uppercase label + See all link).
 
-RLS + GRANTs included. Existing tables unchanged in shape.
+**3. Left sidebar**
+- Already close. Confirm order matches reference exactly: Home, Artists, Arts Orgs, Businesses, Calendar, Community Associations, Discover, Events, Groups/Communities, Messages, Neighborhoods, Notifications, Profile, Search, Stories, Videos, Baltimore 100, Settings.
+- Login button pinned to bottom above chevron.
 
-Where the repo uses fields I *won't* add (e.g. `follows.target_name`, `posts.author_name`, `posts.page_id`), I adapt the ported code to use the equivalent join through `public_profiles_by_ids` / `follows.following_id`. This keeps the DB clean.
+**4. Stories (`/stories`)**
+- Orange hero banner "Stories — Discover stories from Baltimore's writing community" + `Write A Story` button on the right.
+- `BROWSE BY FORMAT` dropdown (All Formats).
+- Tabs: Discover · Trending · Featured (orange underline for active).
+- Category pills: All / Poetry / Blog / Essay / Resource.
+- List layout matching reference (same as home story cards).
 
-## Phase 1 — App shell + Dashboard
+**5. Artists (`/artists`)**
+- Hero banner + `Create Artist Page` button (already present, refine spacing).
+- Search input full-width left, `Newest` sort dropdown right (currently a pill, needs to be a select).
+- Category pills: All / Visual Art / Music / Video / Photography / Performance / Literary / Fashion / Podcaster.
+- Card: square image with rounded corners, name below, category, neighborhood.
 
-Replace `AppLayout` and rebuild `/dashboard` (the repo's `Home.jsx`).
+**6. Events (`/events`)**
+- Hero banner "Events — Find what's happening in Baltimore" + `Create Event` button.
+- Match card layout (image, date chip, title, venue, neighborhood).
 
-Chrome, all ported from the repo:
-- `LeftSidebar` — nav (Home, Discover, Communities, Events, Marketplace, Messages, Notifications, Profile, Settings) with brand mark
-- `RightSidebar` — trending, artists to follow, upcoming events
-- `TopMenuBar` — top bar with search + avatar
-- `MobileNav` — bottom tab bar for mobile
+**7. Remaining pages** (Arts Orgs, Businesses, Calendar, Community Associations, Discover, Groups, Neighborhoods, Videos, Baltimore 100)
+- Each gets the same hero-banner + filter-pills + card-grid pattern as above.
+- One turn per page so you can approve as we go.
 
-Dashboard:
-- Orange-bordered "Planet Baltimore" hero
-- 4 filter chips: For You / Following / Nearby / Discover
-- `StoryBar` (ephemeral stories with Add-Story modal + viewer)
-- My Neighborhood quick-filter button
-- `OnboardingCard` for 0-follow users
-- Mixed feed of `PostCard`, `StoryCard`, `EventCard` wrapped in `DiscoverCard` badges
-- Composer via repo's `CreatePost` flow
+## Out of scope for this plan
+- Data model changes (Base44 API stays as-is).
+- Detail pages (`/o/$slug`, `/u/$username`, `/stories/$storyId`, `/events/$eventId`) — I'll flag those for a follow-up after list pages are aligned.
+- Auth, admin, onboarding wizard, settings, notifications details.
 
-Delete/replace: current `src/components/app-layout.tsx`, current `dashboard.tsx` implementation, current welcome-hero + CreatorSearch styling.
-
-## Phase 2 — Content routes
-
-Rebuild page-by-page using the repo's designs and shared cards:
-- `Home` (done in Phase 1)
-- `Discover`, `Artists` + `ArtistDetail`, `Businesses` + `BusinessDetail`
-- `ArtsOrganizations` + `ArtsOrgDetail`, `CommunityAssociations` + detail, `Communities` + `CommunityDetail`
-- `Events` + `EventDetail`, `Stories` + `StoryDetail`, `Podcasts`, `Videos`
-- `Marketplace` + detail + sell + confirmation
-- `Neighborhoods`, `CommunityCalendar`, `Leaderboard`, `Search`
-
-Create flows: `CreatePost`, `CreateArtist`, `CreateBusiness`, `CreateArtsOrg`, `CreateCommunity`, `CreateCommunityAssociation`, `CreateEvent`, `CreateStory`.
-
-## Phase 3 — User surfaces
-
-`Profile`, `Messages` (real-time), `Notifications`, `NotificationSettings`, `Settings`, `OrganizerStudio`, `PromoterDashboard`, `TicketingHub`, `TicketSalesDashboard`, `EventCheckIn`, `WritingDashboardV2`, `AdminDashboard`, `AdminReports`.
-
-## Phase 4 — Polish
-
-Theme tokens matched to repo's `index.css` (the `#d4580a` orange, radii, shadows). Fonts, spacing, dark mode. Any remaining repo pages (BannerPreview, MarketplaceConfirmation, StoriesV2, StoryDetailV2).
-
-## Technical details
-
-**Data adapter layer**: repo code uses `base44.entities.Post/Story/Event/Follow`. I'm replacing every entity call with Supabase equivalents in a thin adapter (`src/lib/entities.ts`) so ported components need almost no changes — `Post.list('-created_date', 50)` becomes `supabase.from('posts').select().order('created_at', {ascending:false}).limit(50)`.
-
-**Column renames** the adapter handles: `created_date`→`created_at`, `author_id`→`user_id`, `organizer_id`→`user_id`, `neighborhood_name`→`neighborhood`, `is_deleted` (new column above), `target_id`→`following_id`.
-
-**Auth**: keep current Supabase auth. `base44.auth.me()` maps to `supabase.auth.getUser()` + `profiles` join.
-
-**Routing**: repo uses `react-router-dom`. Rewriting imports to `@tanstack/react-router` and using `to`/`params` shape. Each page becomes a file under `src/routes/`.
-
-**Deletes**: current `src/components/app-layout.tsx`, `src/components/globe.tsx` (not in repo), and any welcome-hero/editorial styling get removed as they're replaced.
-
-**Not touching**: `src/integrations/supabase/*` (managed), `src/routeTree.gen.ts` (generated), auth flow.
-
-## What I need from you before Phase 1
-
-Approve the Phase 0 migration (I'll submit it right after this plan). Once it runs, I start on shell + dashboard. Expect Phase 1 to take one full turn; Phases 2–4 will each take multiple turns.
-
-Sound good, or want to trim scope (skip admin pages, skip marketplace, etc.)?
+## Confirm before I start
+- OK to change the home feed so **Stories lead** instead of Posts? (Reference does this; you previously asked for posts to be visible — they'll still appear, just further down.)
+- OK to remove the current `OnboardingCard` in favor of the reference's 4-tile Welcome card?
+- Any page you want done first out of order?
