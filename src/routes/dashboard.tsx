@@ -111,30 +111,49 @@ function Dashboard() {
     const filteredPosts = (posts as any[]).filter((p) => !p.is_deleted);
 
     if (activeFilter === "For You") {
-      const followedPosts = filteredPosts.filter((p) => followedIds.has(p.user_id));
-      const otherPosts = filteredPosts.filter((p) => !followedIds.has(p.user_id));
+      // Posts lead the feed. Events and stories are interleaved as accents
+      // so a burst of freshly imported events cannot dominate the top.
+      const followedPosts = filteredPosts
+        .filter((p) => followedIds.has(p.user_id))
+        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+      const otherPosts = filteredPosts
+        .filter((p) => !followedIds.has(p.user_id))
+        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
       const followedEvents = (events as any[]).filter((e) => followedIds.has(e.user_id));
       const discoverEvents = (events as any[]).filter((e) => !followedIds.has(e.user_id));
 
-      const followed: FeedItem[] = [
-        ...followedPosts.map((p) => ({ type: "post" as const, date: p.created_at, data: p, reason: "Following" })),
-        ...(stories as any[]).slice(0, 10).map((s) => ({ type: "story" as const, date: s.created_at, data: s })),
-        ...followedEvents.map((e) => ({ type: "event" as const, date: e.created_at, data: e, reason: "From someone you follow" })),
-      ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
+      // Build an alternating post stream: followed, discover, followed, discover...
+      const postStream: FeedItem[] = [];
+      const fp = followedPosts.map((p) => ({ type: "post" as const, date: p.created_at, data: p, reason: "Following" }));
+      const op = otherPosts.slice(0, 25).map((p) => ({ type: "post" as const, date: p.created_at, data: p, isNew: true }));
+      let i = 0;
+      while (i < fp.length || i < op.length) {
+        if (i < fp.length) postStream.push(fp[i]);
+        if (i < op.length) postStream.push(op[i]);
+        i++;
+      }
 
-      const discover: FeedItem[] = [
-        ...otherPosts.slice(0, 20).map((p) => ({ type: "post" as const, date: p.created_at, data: p, isNew: true })),
-        ...discoverEvents.slice(0, 8).map((e) => ({ type: "event" as const, date: e.created_at, data: e, isNew: true })),
+      const storyItems: FeedItem[] = (stories as any[]).slice(0, 6).map((s) => ({
+        type: "story" as const, date: s.created_at, data: s,
+        reason: followedIds.has(s.user_id) ? "From someone you follow" : undefined,
+        isNew: !followedIds.has(s.user_id),
+      }));
+      const eventItems: FeedItem[] = [
+        ...followedEvents.slice(0, 3).map((e) => ({ type: "event" as const, date: e.created_at, data: e, reason: "From someone you follow" })),
+        ...discoverEvents.slice(0, 3).map((e) => ({ type: "event" as const, date: e.created_at, data: e, isNew: true })),
       ];
 
+      // Weave: every 4 posts, insert a story; every 6 posts, insert an event.
       const merged: FeedItem[] = [];
-      let di = 0;
-      followed.forEach((item, idx) => {
+      let si = 0, ei = 0;
+      postStream.forEach((item, idx) => {
         merged.push(item);
-        if ((idx + 1) % 3 === 0 && di < discover.length) merged.push(discover[di++]);
+        if ((idx + 1) % 4 === 0 && si < storyItems.length) merged.push(storyItems[si++]);
+        if ((idx + 1) % 6 === 0 && ei < eventItems.length) merged.push(eventItems[ei++]);
       });
-      while (di < discover.length) merged.push(discover[di++]);
-      return merged.slice(0, 50);
+      while (si < storyItems.length) merged.push(storyItems[si++]);
+      while (ei < eventItems.length) merged.push(eventItems[ei++]);
+      return merged.slice(0, 60);
     }
 
     if (activeFilter === "Following") {
