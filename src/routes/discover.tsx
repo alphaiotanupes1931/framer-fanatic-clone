@@ -9,8 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Sparkles, TrendingUp, Users, Building2, MapPin } from "lucide-react";
 
 type EventRow = { id: string; title: string; description: string | null; image_url: string | null; starts_at: string; location: string | null; category?: string | null };
-type Creator = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null; role: string | null };
-type Org = { id: string; name: string; slug: string; type: string; image_url: string | null; neighborhood: string | null };
+type Creator = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood?: string | null; role?: string | null };
+type Org = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
 type N = { id: string; name: string; region: string | null };
 
 const CATS = ["All", "Events", "Artists", "Groups", "Businesses", "Neighborhoods"] as const;
@@ -30,15 +30,15 @@ function DiscoverPage() {
       const [ev, ar, gr, bu, ne] = await Promise.all([
         supabase.from("events").select("id,title,description,image_url,starts_at,location").gte("starts_at", new Date().toISOString()).order("starts_at", { ascending: true }).limit(8),
         supabase.rpc("public_creators", { lim: 12 }),
-        supabase.from("organizations").select("id,name,slug,type,image_url,neighborhood").eq("type", "group").limit(8),
-        supabase.from("organizations").select("id,name,slug,type,image_url,neighborhood").eq("type", "business").limit(8),
+        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "group").limit(8),
+        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(8),
         supabase.from("neighborhoods").select("id,name,region").order("name").limit(24),
       ]);
       setEvents((ev.data ?? []) as EventRow[]);
-      setArtists((ar.data ?? []) as Creator[]);
-      setGroups((gr.data ?? []) as Org[]);
-      setBusinesses((bu.data ?? []) as Org[]);
-      setNeighborhoods((ne.data ?? []) as N[]);
+      setArtists(((ar.data ?? []) as unknown) as Creator[]);
+      setGroups(((gr.data ?? []) as unknown) as Org[]);
+      setBusinesses(((bu.data ?? []) as unknown) as Org[]);
+      setNeighborhoods(((ne.data ?? []) as unknown) as N[]);
     })();
   }, []);
 
@@ -120,7 +120,7 @@ function DiscoverPage() {
                 <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }}
                   className="bg-card border border-border rounded-xl p-4 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
                   <Avatar className="w-14 h-14 mx-auto mb-2 rounded-xl">
-                    <AvatarImage src={b.image_url ?? undefined} className="rounded-xl" />
+                    <AvatarImage src={b.avatar_url ?? undefined} className="rounded-xl" />
                     <AvatarFallback className="rounded-xl bg-[#d4580a]/10 text-[#d4580a] font-bold">{b.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <p className="text-sm font-semibold truncate group-hover:text-[#d4580a] transition-colors">{b.name}</p>
