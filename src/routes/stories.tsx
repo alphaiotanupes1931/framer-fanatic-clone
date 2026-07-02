@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { HeroBanner } from "@/components/shared/hero-banner";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Clock, Plus, X, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -229,11 +231,23 @@ function StoriesSignedIn() {
   };
 
   return (
-    <AppLayout title="Stories" subtitle="Discover stories from Baltimore's writing community.">
+    <AppLayout>
       <div className="space-y-6">
-        <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-700">
-          <Plus className="h-4 w-4" /> Write A Story
-        </button>
+        <HeroBanner
+          title="Stories"
+          subtitle="Discover stories from Baltimore's writing community."
+          cta={
+            <Button
+              onClick={() => setOpen(true)}
+              variant="outline"
+              className="gap-2 rounded-lg"
+              style={{ borderColor: "#d4580a", color: "#d4580a" }}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Write A Story</span>
+            </Button>
+          }
+        />
 
         <div>
           <div className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Browse by format</div>
