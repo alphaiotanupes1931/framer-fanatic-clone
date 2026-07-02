@@ -578,7 +578,67 @@ function Dashboard() {
                 </button>
               </footer>
             </motion.article>
-          ))}
+              );
+              return (
+                <DiscoverBadge key={item.key} isNew={item.isNew} reason={item.reason}>
+                  {card}
+                </DiscoverBadge>
+              );
+            }
+            if (item.type === "story") {
+              const s = item.data;
+              return (
+                <DiscoverBadge key={item.key} isNew={item.isNew} reason={item.reason}>
+                  <Link
+                    to="/stories"
+                    className="group my-4 flex gap-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.35)]"
+                  >
+                    {s.cover_url && (
+                      <img src={s.cover_url} alt="" className="h-24 w-24 flex-shrink-0 rounded-xl object-cover" loading="lazy" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 inline-flex items-center gap-1 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-orange">
+                        <BookOpen className="h-3 w-3" /> Story
+                      </div>
+                      <div className="line-clamp-2 text-[15px] font-semibold leading-tight text-foreground">{s.title}</div>
+                      {s.excerpt && <div className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">{s.excerpt}</div>}
+                      <div className="mt-2 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                        {s.author?.display_name || s.author?.username || "Baltimore"}
+                      </div>
+                    </div>
+                  </Link>
+                </DiscoverBadge>
+              );
+            }
+            const e = item.data;
+            return (
+              <DiscoverBadge key={item.key} isNew={item.isNew} reason={item.reason}>
+                <Link
+                  to="/events/$eventId"
+                  params={{ eventId: e.id }}
+                  className="group my-4 flex gap-4 overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.35)]"
+                >
+                  {e.image_url ? (
+                    <img src={e.image_url} alt="" className="h-24 w-24 flex-shrink-0 rounded-xl object-cover" loading="lazy" />
+                  ) : (
+                    <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-xl bg-orange/10 text-orange">
+                      <Calendar className="h-8 w-8" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 inline-flex items-center gap-1 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-orange">
+                      <Ticket className="h-3 w-3" /> Event
+                    </div>
+                    <div className="line-clamp-2 text-[15px] font-semibold leading-tight text-foreground">{e.title}</div>
+                    <div className="mt-1 text-[12.5px] text-muted-foreground">
+                      {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                      {e.venue_name ? ` · ${e.venue_name}` : e.neighborhood ? ` · ${e.neighborhood}` : ""}
+                    </div>
+                  </div>
+                </Link>
+              </DiscoverBadge>
+            );
+          })}
         </div>
       </div>
       {commentsFor && me && (
