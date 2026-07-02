@@ -6,6 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
+import { PostCard } from "@/components/shared/post-card";
+import { StoryCard } from "@/components/shared/story-card";
+import { EventCard } from "@/components/shared/event-card";
 
 type PublicProfile = {
   id: string;
@@ -34,6 +37,11 @@ function PublicProfilePage() {
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
   const [working, setWorking] = useState(false);
+  const [tab, setTab] = useState<"posts" | "stories" | "events">("posts");
+  const [posts, setPosts] = useState<any[]>([]);
+  const [stories, setStories] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [contentLoading, setContentLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +68,23 @@ function PublicProfilePage() {
             .maybeSingle();
           setIsFollowing(!!f);
         }
+        // Load their content
+        setContentLoading(true);
+        const [postsRes, storiesRes, eventsRes] = await Promise.all([
+          supabase.from("posts").select("*").eq("user_id", publicProfile.id).order("created_at", { ascending: false }).limit(30),
+          supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("created_at", { ascending: false }).limit(30),
+          supabase.from("events").select("*").eq("user_id", publicProfile.id).order("starts_at", { ascending: false }).limit(30),
+        ]);
+        if (cancelled) return;
+        const authorMeta = {
+          author_name: publicProfile.display_name || publicProfile.username || "",
+          author_avatar: publicProfile.avatar_url,
+          author_username: publicProfile.username,
+        };
+        setPosts((postsRes.data || []).map((p) => ({ ...p, ...authorMeta })));
+        setStories((storiesRes.data || []).map((s) => ({ ...s, ...authorMeta })));
+        setEvents(eventsRes.data || []);
+        setContentLoading(false);
       }
       setLoading(false);
     })();
@@ -218,6 +243,60 @@ function PublicProfilePage() {
             </a>
           )}
         </div>
+      </div>
+
+      {/* Content tabs */}
+      <div className="mt-6">
+        <div className="mb-4 flex gap-6 border-b border-border">
+          {(["posts", "stories", "events"] as const).map((t) => {
+            const count = t === "posts" ? posts.length : t === "stories" ? stories.length : events.length;
+            return (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`-mb-px border-b-2 pb-2.5 text-sm font-semibold capitalize transition ${
+                  tab === t ? "border-[#d4580a] text-[#d4580a]" : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t} {count > 0 && <span className="ml-1 text-xs">({count})</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {contentLoading ? (
+          <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : tab === "posts" ? (
+          posts.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-sm text-muted-foreground">
+              {profile.display_name || profile.username} hasn't posted yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}
+            </div>
+          )
+        ) : tab === "stories" ? (
+          stories.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-sm text-muted-foreground">
+              No stories yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {stories.map((s) => <StoryCard key={s.id} story={s} />)}
+            </div>
+          )
+        ) : (
+          events.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-sm text-muted-foreground">
+              No events yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {events.map((e) => <EventCard key={e.id} event={e} />)}
+            </div>
+          )
+        )}
       </div>
     </AppLayout>
   );
