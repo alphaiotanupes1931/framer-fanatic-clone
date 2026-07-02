@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
+import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useServerFn } from "@tanstack/react-start";
@@ -33,6 +34,9 @@ function ProfilePage() {
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
+  const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
+  const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
+  const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
 
   useEffect(() => {
     if (!TABS.includes(tab)) setTab(TABS[0]);
@@ -50,6 +54,36 @@ function ProfilePage() {
       setStats({ posts: posts || 0, followers: followers || 0, following: following || 0 });
     })();
   }, [profile]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("neighborhoods").select("id, name").order("name").limit(200);
+      if (data) setNeighborhoods(data as Array<{ id: string; name: string }>);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!profile) return;
+    (async () => {
+      const { data: fs } = await supabase.from("follows").select("follower_id").eq("following_id", profile.id).limit(3);
+      const ids = (fs || []).map((f: { follower_id: string }) => f.follower_id);
+      if (!ids.length) { setFollowerPreview([]); return; }
+      const { data: ps } = await supabase.from("profiles").select("id, display_name, username").in("id", ids);
+      setFollowerPreview((ps as Array<{ id: string; display_name: string | null; username: string | null }>) || []);
+    })();
+  }, [profile]);
+
+  const primaryHood = useMemo(() => {
+    const names = (profile as unknown as { neighborhood_names?: string[] } | null)?.neighborhood_names;
+    return names?.[0] || profile?.neighborhood || "";
+  }, [profile]);
+
+  const selectNeighborhood = async (n: { id: string; name: string }) => {
+    if (!profile) return;
+    await supabase.from("profiles").update({ neighborhood: n.name, neighborhood_names: [n.name] }).eq("id", profile.id);
+    setShowNeighborhoodPicker(false);
+    location.reload();
+  };
 
   const uploadBanner = async (file: File) => {
     if (!profile) return;
@@ -107,13 +141,44 @@ function ProfilePage() {
           </div>
 
           <div className="mt-4">
-            <div className="flex items-center gap-2 text-xl font-bold">{profile?.username || profile?.display_name}</div>
-            <Link to="/settings" className="mt-1 flex items-center gap-1 text-sm text-muted-foreground hover:text-[#d4580a]">
-              <MapPin className="h-3.5 w-3.5" /> {profile?.neighborhood || "Add neighborhood"}
-            </Link>
-            <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium capitalize">
-              {roleLabel}
-            </span>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">{profile?.display_name || profile?.username}</div>
+            {profile?.website && (
+              <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer" className="mt-1 flex items-center gap-1 text-sm hover:underline" style={{ color: "#d4580a" }}>
+                <LinkIcon className="h-3.5 w-3.5" />{profile.website.replace(/https?:\/\//, "")}
+              </a>
+            )}
+            <div className="relative mt-1">
+              <button
+                onClick={() => setShowNeighborhoodPicker((v) => !v)}
+                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-[#d4580a] transition-colors"
+              >
+                <MapPin className="h-3.5 w-3.5" />
+                <span>{primaryHood || "Add neighborhood"}</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              {showNeighborhoodPicker && (
+                <div className="absolute top-7 left-0 z-30 bg-card border border-border rounded-xl shadow-xl w-56 max-h-60 overflow-y-auto">
+                  {neighborhoods.map((n) => (
+                    <button key={n.id} onClick={() => selectNeighborhood(n)}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors ${primaryHood === n.name ? "font-medium" : "text-foreground"}`}
+                      style={primaryHood === n.name ? { color: "#d4580a" } : undefined}
+                    >{n.name}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {profile?.bio && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{profile.bio}</p>}
+            <div className="mt-2">
+              {isArtist ? (
+                <Badge className="gap-1.5 border text-xs font-medium" style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a", borderColor: "rgba(212,88,10,0.2)" }}>
+                  <Mic2 className="w-3 h-3" /> Artist
+                </Badge>
+              ) : (
+                <Badge className="gap-1.5 bg-secondary text-secondary-foreground border border-border text-xs font-medium">
+                  <Users className="w-3 h-3" /> {roleLabel}
+                </Badge>
+              )}
+            </div>
           </div>
 
           <div className="mt-5 flex gap-8 text-sm">
@@ -122,6 +187,22 @@ function ProfilePage() {
             <div><div className="text-lg font-bold">{stats.following}</div><div className="text-muted-foreground">Following</div></div>
             <div><div className="text-lg font-bold">0</div><div className="text-muted-foreground">Referrals</div></div>
           </div>
+
+          {followerPreview.length > 0 && (
+            <div className="mt-3 pb-3 border-b border-border">
+              <p className="text-xs text-muted-foreground">
+                <span>Followed by </span>
+                {followerPreview.map((u, i) => (
+                  <span key={u.id}>
+                    <Link to="/u/$username" params={{ username: u.username || u.id }} className="font-semibold text-foreground hover:text-[#d4580a] transition-colors">
+                      {(u.display_name || u.username || "user").split(" ")[0]}
+                    </Link>
+                    {i < followerPreview.length - 1 && <span>, </span>}
+                  </span>
+                ))}
+              </p>
+            </div>
+          )}
 
           <div className="mt-6 flex gap-1 overflow-x-auto border-b border-border">
             {TABS.map((t) => (

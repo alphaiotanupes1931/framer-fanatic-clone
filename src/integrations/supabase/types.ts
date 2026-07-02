@@ -214,6 +214,78 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          email_digest: boolean
+          event_reminders: boolean
+          new_follower: boolean
+          new_message: boolean
+          post_comments: boolean
+          post_likes: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email_digest?: boolean
+          event_reminders?: boolean
+          new_follower?: boolean
+          new_message?: boolean
+          post_comments?: boolean
+          post_likes?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email_digest?: boolean
+          event_reminders?: boolean
+          new_follower?: boolean
+          new_message?: boolean
+          post_comments?: boolean
+          post_likes?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       organization_comments: {
         Row: {
           body: string

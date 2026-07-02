@@ -21,6 +21,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PodcastsRouteImport } from './routes/podcasts'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -101,6 +102,11 @@ const PodcastsRoute = PodcastsRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NeighborhoodsRoute = NeighborhoodsRouteImport.update({
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
@@ -298,6 +306,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
@@ -335,6 +344,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
+    | '/notifications'
     | '/onboarding'
     | '/podcasts'
     | '/privacy'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
+    | '/notifications'
     | '/onboarding'
     | '/podcasts'
     | '/privacy'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
+    | '/notifications'
     | '/onboarding'
     | '/podcasts'
     | '/privacy'
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
+  NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   PodcastsRoute: typeof PodcastsRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -542,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/neighborhoods': {
@@ -723,6 +743,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
+  NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   PodcastsRoute: PodcastsRoute,
   PrivacyRoute: PrivacyRoute,

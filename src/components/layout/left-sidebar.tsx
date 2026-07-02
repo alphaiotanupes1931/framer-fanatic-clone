@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
   { icon: Users, label: "Groups/Communities", to: "/groups" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
-  { icon: Bell, label: "Notifications", to: "/dashboard" },
+  { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: Mic, label: "Podcasts", to: "/podcasts" },
   { icon: User, label: "Profile", to: "/profile" },
   { icon: Search, label: "Search", to: "/search" },
