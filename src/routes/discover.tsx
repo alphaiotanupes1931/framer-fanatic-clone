@@ -155,7 +155,7 @@ function OrgRow({ o }: { o: Org }) {
     <Link to="/o/$slug" params={{ slug: o.slug }}
       className="flex items-center gap-3 bg-card border border-border rounded-xl p-3 hover:shadow-md hover:-translate-y-[1px] transition-all duration-200">
       <Avatar className="w-12 h-12 rounded-xl flex-shrink-0">
-        <AvatarImage src={o.image_url ?? undefined} className="rounded-xl" />
+        <AvatarImage src={o.avatar_url ?? undefined} className="rounded-xl" />
         <AvatarFallback className="rounded-xl bg-[#d4580a]/10 text-[#d4580a] font-bold">{o.name.charAt(0)}</AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
