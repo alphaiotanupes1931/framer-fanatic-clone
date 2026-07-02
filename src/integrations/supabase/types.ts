@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ephemeral_stories: {
+        Row: {
+          caption: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          media_type: string
+          media_url: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media_type?: string
+          media_url: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media_type?: string
+          media_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           address: string | null
@@ -61,6 +91,7 @@ export type Database = {
           neighborhood: string | null
           price_cents: number
           starts_at: string
+          status: string
           title: string
           updated_at: string
           user_id: string
@@ -79,6 +110,7 @@ export type Database = {
           neighborhood?: string | null
           price_cents?: number
           starts_at: string
+          status?: string
           title: string
           updated_at?: string
           user_id: string
@@ -97,6 +129,7 @@ export type Database = {
           neighborhood?: string | null
           price_cents?: number
           starts_at?: string
+          status?: string
           title?: string
           updated_at?: string
           user_id?: string
@@ -414,6 +447,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          is_deleted: boolean
           likes_count: number
           neighborhood: string | null
           user_id: string
@@ -424,6 +458,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_deleted?: boolean
           likes_count?: number
           neighborhood?: string | null
           user_id: string
@@ -434,6 +469,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_deleted?: boolean
           likes_count?: number
           neighborhood?: string | null
           user_id?: string
@@ -502,6 +538,7 @@ export type Database = {
           longitude: number | null
           must_reset_password: boolean
           neighborhood: string | null
+          neighborhood_names: string[]
           onboarded: boolean
           role: string
           stripe_account_id: string | null
@@ -533,6 +570,7 @@ export type Database = {
           longitude?: number | null
           must_reset_password?: boolean
           neighborhood?: string | null
+          neighborhood_names?: string[]
           onboarded?: boolean
           role?: string
           stripe_account_id?: string | null
@@ -564,6 +602,7 @@ export type Database = {
           longitude?: number | null
           must_reset_password?: boolean
           neighborhood?: string | null
+          neighborhood_names?: string[]
           onboarded?: boolean
           role?: string
           stripe_account_id?: string | null
@@ -587,6 +626,7 @@ export type Database = {
           id: string
           likes_count: number
           read_minutes: number | null
+          status: string
           title: string
           user_id: string
         }
@@ -601,6 +641,7 @@ export type Database = {
           id?: string
           likes_count?: number
           read_minutes?: number | null
+          status?: string
           title: string
           user_id: string
         }
@@ -615,6 +656,7 @@ export type Database = {
           id?: string
           likes_count?: number
           read_minutes?: number | null
+          status?: string
           title?: string
           user_id?: string
         }
