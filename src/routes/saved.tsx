@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
+import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bookmark, ImageIcon, Heart, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -77,8 +78,9 @@ function SavedPage() {
   };
 
   return (
-    <AppLayout title="Saved" subtitle="Posts you've bookmarked across Planet Baltimore.">
-      <div className="mx-auto max-w-4xl">
+    <AppLayout>
+      <div className="mx-auto max-w-4xl space-y-6">
+        <HeroBanner title="Saved" subtitle="Posts you've bookmarked across Planet Baltimore." />
         {loading ? (
           <div className="py-16 text-center text-sm text-muted-foreground">Loading…</div>
         ) : items.length === 0 ? (
