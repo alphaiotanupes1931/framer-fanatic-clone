@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, BadgeCheck } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 
 type Post = {
   id: string;
@@ -61,34 +61,27 @@ export function PostCard({ post, currentUserId, onDelete }: {
   const initial = authorName.slice(0, 1).toUpperCase();
 
   return (
-    <article className={`rounded-xl border bg-card p-4 transition-all duration-200 hover:shadow-md ${
-      post.is_founder ? "border-[#d4580a]/40 bg-gradient-to-br from-[#d4580a]/5 via-card to-card" : "border-border"
-    }`}>
-      {post.is_founder && (
-        <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[#d4580a]/15 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#d4580a]">
-          <BadgeCheck className="h-3 w-3" strokeWidth={2} /> Founder message
-        </div>
-      )}
+    <article className="rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:shadow-md">
       <header className="flex items-center gap-3">
         <Link to="/u/$username" params={{ username: post.author_username || post.user_id }}>
-          <Avatar className={`h-10 w-10 ${post.is_founder ? "ring-2 ring-[#d4580a]/60 ring-offset-2 ring-offset-card" : ""}`}>
+          <Avatar className="h-10 w-10">
             {post.author_avatar && <AvatarImage src={post.author_avatar} />}
             <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">{initial}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
             <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="truncate hover:text-[#d4580a]">
               {authorName}
             </Link>
             {post.is_founder && (
-              <span title="Founder" className="inline-flex items-center gap-1 rounded-full bg-[#d4580a] px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider text-white">
-                <BadgeCheck className="h-3 w-3" strokeWidth={2.5} /> Founder
+              <span title="Founding Member" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                <Star className="h-3 w-3" strokeWidth={2} /> Founding Member
               </span>
             )}
           </div>
-          <div className="text-[11px] text-muted-foreground">
-            {post.neighborhood_name || post.neighborhood || "Baltimore"} · {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+          <div className="text-[12px] text-muted-foreground">
+            {post.neighborhood_name || post.neighborhood || "Baltimore"} · {format(new Date(post.created_at), "MMM d")}
           </div>
         </div>
         {isMine && onDelete && (
@@ -112,15 +105,18 @@ export function PostCard({ post, currentUserId, onDelete }: {
           <img src={post.image_url} alt="" className="w-full" loading="lazy" />
         </div>
       )}
-      <footer className="mt-3 flex items-center gap-6 border-t border-border pt-3 text-[12.5px] text-muted-foreground">
+      <footer className="mt-3 flex items-center gap-6 pt-3 text-[12.5px] text-muted-foreground">
         <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
           <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
         <button className="flex items-center gap-1.5 transition hover:text-foreground">
           <MessageCircle className="h-4 w-4" /> {post.comments_count ?? 0}
         </button>
-        <button onClick={share} className="ml-auto flex items-center gap-1.5 transition hover:text-foreground">
+        <button onClick={share} className="flex items-center gap-1.5 transition hover:text-foreground">
           <Share2 className="h-4 w-4" />
+        </button>
+        <button className="ml-auto flex items-center gap-1.5 transition hover:text-foreground" aria-label="Save">
+          <Bookmark className="h-4 w-4" />
         </button>
       </footer>
     </article>
