@@ -19,6 +19,7 @@ import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PodcastsRouteImport } from './routes/podcasts'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -90,6 +91,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PodcastsRoute = PodcastsRouteImport.update({
+  id: '/podcasts',
+  path: '/podcasts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -256,6 +263,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -291,6 +299,7 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/podcasts'
     | '/privacy'
     | '/profile'
     | '/reset-password'
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/podcasts'
     | '/privacy'
     | '/profile'
     | '/reset-password'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/podcasts'
     | '/privacy'
     | '/profile'
     | '/reset-password'
@@ -430,6 +442,7 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
   OnboardingRoute: typeof OnboardingRoute
+  PodcastsRoute: typeof PodcastsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -515,6 +528,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/podcasts': {
+      id: '/podcasts'
+      path: '/podcasts'
+      fullPath: '/podcasts'
+      preLoaderRoute: typeof PodcastsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -704,6 +724,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
   OnboardingRoute: OnboardingRoute,
+  PodcastsRoute: PodcastsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
