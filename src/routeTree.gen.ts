@@ -40,6 +40,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -199,6 +200,11 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoriesStoryIdRoute = StoriesStoryIdRouteImport.update({
+  id: '/$storyId',
+  path: '/$storyId',
+  getParentRoute: () => StoriesRoute,
+} as any)
 const OSlugRoute = OSlugRouteImport.update({
   id: '/o/$slug',
   path: '/o/$slug',
@@ -242,12 +248,13 @@ export interface FileRoutesByFullPath {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
-  '/stories': typeof StoriesRoute
+  '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -278,12 +285,13 @@ export interface FileRoutesByTo {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
-  '/stories': typeof StoriesRoute
+  '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -315,12 +323,13 @@ export interface FileRoutesById {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
-  '/stories': typeof StoriesRoute
+  '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/events/$eventId'
     | '/o/$slug'
+    | '/stories/$storyId'
     | '/u/$username'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/events/$eventId'
     | '/o/$slug'
+    | '/stories/$storyId'
     | '/u/$username'
     | '/api/public/stripe-webhook'
   id:
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/events/$eventId'
     | '/o/$slug'
+    | '/stories/$storyId'
     | '/u/$username'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
@@ -462,7 +474,7 @@ export interface RootRouteChildren {
   SavedRoute: typeof SavedRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
-  StoriesRoute: typeof StoriesRoute
+  StoriesRoute: typeof StoriesRouteWithChildren
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
@@ -690,6 +702,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stories/$storyId': {
+      id: '/stories/$storyId'
+      path: '/$storyId'
+      fullPath: '/stories/$storyId'
+      preLoaderRoute: typeof StoriesStoryIdRouteImport
+      parentRoute: typeof StoriesRoute
+    }
     '/o/$slug': {
       id: '/o/$slug'
       path: '/o/$slug'
@@ -725,6 +744,17 @@ const EventsRouteChildren: EventsRouteChildren = {
 const EventsRouteWithChildren =
   EventsRoute._addFileChildren(EventsRouteChildren)
 
+interface StoriesRouteChildren {
+  StoriesStoryIdRoute: typeof StoriesStoryIdRoute
+}
+
+const StoriesRouteChildren: StoriesRouteChildren = {
+  StoriesStoryIdRoute: StoriesStoryIdRoute,
+}
+
+const StoriesRouteWithChildren =
+  StoriesRoute._addFileChildren(StoriesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -752,7 +782,7 @@ const rootRouteChildren: RootRouteChildren = {
   SavedRoute: SavedRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
-  StoriesRoute: StoriesRoute,
+  StoriesRoute: StoriesRouteWithChildren,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
