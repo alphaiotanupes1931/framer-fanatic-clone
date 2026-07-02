@@ -25,6 +25,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
@@ -121,6 +122,11 @@ const EventsRoute = EventsRouteImport.update({
   path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -311,6 +320,7 @@ export interface FileRouteTypes {
     | '/community-associations'
     | '/cookies'
     | '/dashboard'
+    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/community-associations'
     | '/cookies'
     | '/dashboard'
+    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/community-associations'
     | '/cookies'
     | '/dashboard'
+    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
@@ -411,6 +423,7 @@ export interface RootRouteChildren {
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
+  DiscoverRoute: typeof DiscoverRoute
   EventsRoute: typeof EventsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -546,6 +559,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -677,6 +697,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
+  DiscoverRoute: DiscoverRoute,
   EventsRoute: EventsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
