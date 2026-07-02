@@ -25,6 +25,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -120,6 +121,11 @@ const EventsRoute = EventsRouteImport.update({
   path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
+  '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
+  '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
+  '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -301,6 +310,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
+    | '/dashboard'
     | '/events'
     | '/groups'
     | '/leaderboard'
@@ -333,6 +343,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
+    | '/dashboard'
     | '/events'
     | '/groups'
     | '/leaderboard'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
+    | '/dashboard'
     | '/events'
     | '/groups'
     | '/leaderboard'
@@ -398,6 +410,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   CookiesRoute: typeof CookiesRoute
+  DashboardRoute: typeof DashboardRoute
   EventsRoute: typeof EventsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -533,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cookies': {
       id: '/cookies'
       path: '/cookies'
@@ -656,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   CookiesRoute: CookiesRoute,
+  DashboardRoute: DashboardRoute,
   EventsRoute: EventsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
