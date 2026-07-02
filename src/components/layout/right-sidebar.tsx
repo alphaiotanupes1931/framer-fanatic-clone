@@ -51,13 +51,13 @@ export function RightSidebar() {
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any) => (
-              <Link key={s.id} to="/stories" className="group flex items-center gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
-                <Avatar className="h-9 w-9 flex-shrink-0 rounded-lg">
-                  <AvatarImage src={s.cover_url} className="rounded-lg" />
-                  <AvatarFallback className="rounded-lg bg-accent/10 text-xs font-bold text-accent-foreground">{s.title?.charAt(0)}</AvatarFallback>
+              <Link key={s.id} to="/stories" className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
+                <Avatar className="h-12 w-12 flex-shrink-0 rounded-xl">
+                  <AvatarImage src={s.cover_url} className="rounded-xl object-cover" />
+                  <AvatarFallback className="rounded-xl bg-accent/10 text-sm font-bold text-accent-foreground">{s.title?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground transition-colors group-hover:text-[#d4580a]">{s.title}</p>
+                  <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{s.title}</p>
                   <p className="truncate text-xs text-muted-foreground">by {s.author_name}</p>
                 </div>
               </Link>
@@ -72,14 +72,14 @@ export function RightSidebar() {
                 key={a.id}
                 to="/u/$username"
                 params={{ username: a.username || a.id }}
-                className="group flex items-center gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
+                className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
               >
-                <Avatar className="h-9 w-9 flex-shrink-0 rounded-lg">
-                  <AvatarImage src={a.avatar_url} />
-                  <AvatarFallback className="rounded-lg bg-accent/10 text-xs font-bold text-accent-foreground">{a.display_name?.charAt(0)}</AvatarFallback>
+                <Avatar className="h-12 w-12 flex-shrink-0">
+                  <AvatarImage src={a.avatar_url} className="object-cover" />
+                  <AvatarFallback className="bg-accent/10 text-sm font-bold text-accent-foreground">{a.display_name?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground transition-colors group-hover:text-[#d4580a]">{a.display_name || a.username}</p>
+                  <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{a.display_name || a.username}</p>
                   <p className="truncate text-xs capitalize text-muted-foreground">{(a.category || a.role || "Artist").replace("_", " ")}</p>
                 </div>
               </Link>
@@ -90,13 +90,13 @@ export function RightSidebar() {
         {events.length > 0 && (
           <SuggestionSection title="Upcoming Events" icon={Calendar} seeAllLink="/events">
             {events.map((e: any) => (
-              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
-                <Avatar className="h-9 w-9 flex-shrink-0 rounded-lg">
-                  <AvatarImage src={e.image_url} className="rounded-lg" />
-                  <AvatarFallback className="rounded-lg bg-accent/10 text-xs font-bold text-accent-foreground">{e.title?.charAt(0)}</AvatarFallback>
+              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
+                <Avatar className="h-12 w-12 flex-shrink-0 rounded-xl">
+                  <AvatarImage src={e.image_url} className="rounded-xl object-cover" />
+                  <AvatarFallback className="rounded-xl bg-accent/10 text-sm font-bold text-accent-foreground">{e.title?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground transition-colors group-hover:text-[#d4580a]">{e.title}</p>
+                  <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{e.title}</p>
                   <p className="truncate text-xs text-muted-foreground">
                     {e.starts_at ? new Date(e.starts_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""}
                     {e.venue_name ? ` · ${e.venue_name}` : ""}
