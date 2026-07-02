@@ -7,7 +7,6 @@ import { PostCard } from "@/components/shared/post-card";
 import { StoryCard } from "@/components/shared/story-card";
 import { EventCard } from "@/components/shared/event-card";
 import { DiscoverCard } from "@/components/discovery/discover-card";
-import { StoryBar } from "@/components/stories/story-bar";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
