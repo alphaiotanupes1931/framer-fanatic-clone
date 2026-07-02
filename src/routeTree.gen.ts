@@ -43,6 +43,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
+import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
@@ -216,6 +217,11 @@ const OSlugRoute = OSlugRouteImport.update({
   path: '/o/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketplaceListingIdRoute = MarketplaceListingIdRouteImport.update({
+  id: '/$listingId',
+  path: '/$listingId',
+  getParentRoute: () => MarketplaceRoute,
+} as any)
 const EventsEventIdRoute = EventsEventIdRouteImport.update({
   id: '/$eventId',
   path: '/$eventId',
@@ -243,7 +249,7 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/marketplace': typeof MarketplaceRoute
+  '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/notifications': typeof NotificationsRoute
@@ -260,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
+  '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -281,7 +288,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/marketplace': typeof MarketplaceRoute
+  '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/notifications': typeof NotificationsRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
+  '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -320,7 +328,7 @@ export interface FileRoutesById {
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/marketplace': typeof MarketplaceRoute
+  '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/notifications': typeof NotificationsRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/events/$eventId': typeof EventsEventIdRoute
+  '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -377,6 +386,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/videos'
     | '/events/$eventId'
+    | '/marketplace/$listingId'
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/videos'
     | '/events/$eventId'
+    | '/marketplace/$listingId'
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/videos'
     | '/events/$eventId'
+    | '/marketplace/$listingId'
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
@@ -475,7 +487,7 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
-  MarketplaceRoute: typeof MarketplaceRoute
+  MarketplaceRoute: typeof MarketplaceRouteWithChildren
   MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
   NotificationsRoute: typeof NotificationsRoute
@@ -736,6 +748,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace/$listingId': {
+      id: '/marketplace/$listingId'
+      path: '/$listingId'
+      fullPath: '/marketplace/$listingId'
+      preLoaderRoute: typeof MarketplaceListingIdRouteImport
+      parentRoute: typeof MarketplaceRoute
+    }
     '/events/$eventId': {
       id: '/events/$eventId'
       path: '/$eventId'
@@ -764,6 +783,18 @@ const EventsRouteChildren: EventsRouteChildren = {
 const EventsRouteWithChildren =
   EventsRoute._addFileChildren(EventsRouteChildren)
 
+interface MarketplaceRouteChildren {
+  MarketplaceListingIdRoute: typeof MarketplaceListingIdRoute
+}
+
+const MarketplaceRouteChildren: MarketplaceRouteChildren = {
+  MarketplaceListingIdRoute: MarketplaceListingIdRoute,
+}
+
+const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
+  MarketplaceRouteChildren,
+)
+
 interface StoriesRouteChildren {
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
 }
@@ -791,7 +822,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
-  MarketplaceRoute: MarketplaceRoute,
+  MarketplaceRoute: MarketplaceRouteWithChildren,
   MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
   NotificationsRoute: NotificationsRoute,
