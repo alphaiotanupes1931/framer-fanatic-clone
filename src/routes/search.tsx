@@ -13,7 +13,7 @@ export const Route = createFileRoute("/search")({
 
 type Person = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null; role: string | null };
 type Org = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
-type Ev = { id: string; title: string; starts_at: string; venue: string | null; image_url: string | null };
+type Ev = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
 type PostLite = { id: string; content: string | null; image_url: string | null; user_id: string; created_at: string };
 
 const TABS = ["All", "People", "Organizations", "Events", "Posts"] as const;
@@ -43,7 +43,7 @@ function SearchPage() {
       const [pplRes, orgRes, evRes, postRes] = await Promise.all([
         supabase.rpc("search_creators", { q: debounced, lim: 24 }),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").ilike("name", like).limit(24),
-        supabase.from("events").select("id,title,starts_at,venue,image_url").ilike("title", like).order("starts_at", { ascending: true }).limit(24),
+        supabase.from("events").select("id,title,starts_at,venue_name,image_url").ilike("title", like).order("starts_at", { ascending: true }).limit(24),
         supabase.from("posts").select("id,content,image_url,user_id,created_at").ilike("content", like).order("created_at", { ascending: false }).limit(24),
       ]);
       if (cancelled) return;
@@ -154,7 +154,7 @@ function SearchPage() {
                         <div className="text-sm font-semibold text-foreground line-clamp-1">{e.title}</div>
                         <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" /> {new Date(e.starts_at).toLocaleDateString()}
-                          {e.venue && <span className="truncate">· {e.venue}</span>}
+                          {e.venue_name && <span className="truncate">· {e.venue_name}</span>}
                         </div>
                       </div>
                     </Link>
