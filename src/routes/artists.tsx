@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Search, MapPin } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { HeroBanner } from "@/components/shared/hero-banner";
 
 type Creator = {
   id: string;
@@ -63,8 +64,12 @@ function FindCreatorPage() {
 
   if (signedIn) {
     return (
-      <AppLayout title="Find a Creator" subtitle="Search Baltimore artists, musicians, photographers, writers and makers.">
-        <div className="mb-6 relative max-w-xl">
+      <AppLayout>
+        <HeroBanner
+          title="Artists"
+          subtitle="Discover Baltimore's creative voices, visual art, music, photography and more."
+        />
+        <div className="my-6 relative max-w-xl">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
           <Input
             value={q}
