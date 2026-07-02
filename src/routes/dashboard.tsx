@@ -7,7 +7,6 @@ import { PostCard } from "@/components/shared/post-card";
 import { StoryCard } from "@/components/shared/story-card";
 import { EventCard } from "@/components/shared/event-card";
 import { DiscoverCard } from "@/components/discovery/discover-card";
-import { StoryBar } from "@/components/stories/story-bar";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -179,18 +178,20 @@ function Dashboard() {
     <AppLayout>
       <div className="space-y-5 overflow-x-hidden sm:space-y-7">
         {/* Hero Banner */}
-        <div className="relative overflow-hidden rounded-2xl border-2 bg-transparent p-5 sm:p-8 lg:p-12" style={{ borderColor: "#d4580a" }}>
+        <div
+          className="relative overflow-hidden rounded-2xl border-2 p-6 sm:p-10 lg:p-14"
+          style={{ borderColor: "#d4580a", backgroundColor: "#fdf5ee" }}
+        >
           <div className="relative z-10">
-            <h1 className="mb-1.5 text-2xl font-bold sm:text-3xl lg:text-4xl">
-              <span style={{ color: "#d4580a" }}>Planet</span>{" "}
-              <span className="text-foreground">Baltimore</span>
+            <h1 className="mb-2 text-3xl font-bold sm:text-4xl lg:text-5xl" style={{ color: "#d4580a" }}>
+              Planet Baltimore
             </h1>
-            <p className="text-sm text-muted-foreground">Your city. Your community. Your feed.</p>
+            <p className="text-sm sm:text-base" style={{ color: "#d4580a" }}>
+              Your city. Your community. Your feed.
+            </p>
           </div>
-          <div className="pointer-events-none absolute inset-0 opacity-5">
-            <div className="absolute right-0 top-0 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full" style={{ backgroundColor: "#d4580a" }} />
-            <div className="absolute bottom-0 left-0 h-48 w-48 -translate-x-1/2 translate-y-1/2 rounded-full" style={{ backgroundColor: "#d4580a" }} />
-          </div>
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full" style={{ backgroundColor: "#f5d9c2", opacity: 0.6 }} />
+          <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full" style={{ backgroundColor: "#f5d9c2", opacity: 0.5 }} />
         </div>
 
         {/* Filters */}
@@ -209,30 +210,27 @@ function Dashboard() {
           ))}
         </div>
 
-        {/* Story Bar */}
-        <div className="-mx-3 border-b border-border px-3 pb-3 sm:-mx-4 sm:px-4 sm:pb-4">
-          <StoryBar currentUser={currentUser} />
-        </div>
+        <div className="border-b border-border" />
 
         {/* Neighborhood quick-filter */}
         {currentUser && !userLoading && (
           hoodPrimary ? (
             <button
               onClick={() => { setActiveFilter("Nearby"); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
-              className={`flex w-full items-center gap-2 rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-all ${
+              className={`flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left text-sm transition-all ${
                 activeFilter === "Nearby"
-                  ? "border-[#d4580a] bg-[#d4580a] text-white"
-                  : "border-border bg-secondary/60 text-foreground hover:border-[#d4580a] hover:text-[#d4580a]"
+                  ? "bg-[#d4580a] text-white"
+                  : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
               }`}
             >
               <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>My Neighborhood: <span className="font-semibold">{hoodPrimary}</span></span>
-              {activeFilter !== "Nearby" && <span className="ml-auto text-xs text-muted-foreground">See local feed →</span>}
+              <span>My Neighborhood: <span className="font-semibold text-foreground">{hoodPrimary}</span></span>
+              {activeFilter !== "Nearby" && <span className="ml-auto text-xs">See local feed →</span>}
             </button>
           ) : (
             <Link
               to="/profile"
-              className="flex w-full items-center gap-2 rounded-xl border border-dashed border-border bg-secondary/40 px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-[#d4580a] hover:text-[#d4580a]"
+              className="flex w-full items-center gap-2 rounded-xl bg-secondary/60 px-4 py-3 text-sm text-muted-foreground transition-all hover:bg-secondary"
             >
               <MapPin className="h-4 w-4 flex-shrink-0" />
               <span>Add your neighborhood to see local content</span>

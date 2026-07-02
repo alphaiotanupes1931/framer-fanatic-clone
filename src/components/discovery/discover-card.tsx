@@ -3,21 +3,12 @@ import { Sparkles, TrendingUp } from "lucide-react";
 
 export function DiscoverCard({ children, isNew = false, reason = "" }: { children: ReactNode; isNew?: boolean; reason?: string }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       {(reason || isNew) && (
-        <div className="flex items-center gap-1.5 px-1 text-[11px] font-medium text-muted-foreground">
-          {reason ? (
-            <>
-              <TrendingUp className="h-3 w-3" />
-              <span>{reason}</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-3 w-3" />
-              <span>New to you</span>
-            </>
-          )}
-        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          {reason ? <TrendingUp className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
+          <span>{reason || "New to you"}</span>
+        </span>
       )}
       {children}
     </div>
