@@ -110,7 +110,7 @@ function FindCreatorPage() {
           <HeroBanner
             title="Artists"
             subtitle="Discover Baltimore's creative voices, visual art, music, photography & more."
-            action={
+            cta={
               <Link to="/profile">
                 <Button className="rounded-full text-white shadow-sm" style={{ backgroundColor: "#d4580a" }}>
                   <Plus className="mr-1 h-4 w-4" /> Create Artist Page
