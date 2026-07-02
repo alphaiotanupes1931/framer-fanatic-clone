@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { HeroBanner } from "@/components/shared/hero-banner";
 import { MapPin, Calendar, Ticket } from "lucide-react";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -103,8 +104,12 @@ function NeighborhoodsPage() {
   }
 
   return (
-    <AppLayout title="Neighborhoods" subtitle="Explore Baltimore's communities - click a pin to discover what's happening nearby.">
+    <AppLayout>
       <div className="space-y-6">
+        <HeroBanner
+          title="Neighborhoods"
+          subtitle="Explore Baltimore's communities, click a pin to discover what's happening nearby."
+        />
         <BaltimoreMap onSelect={(n) => setSelected({ id: n.id, name: n.name, region: n.region })} />
         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
           {[
