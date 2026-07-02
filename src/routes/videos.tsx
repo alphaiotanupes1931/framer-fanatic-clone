@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { HeroBanner } from "@/components/shared/hero-banner";
+import { Button } from "@/components/ui/button";
 import { Play, Search, Star, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -99,17 +101,24 @@ function VideosSignedIn() {
   };
 
   return (
-    <AppLayout title="Videos" subtitle="Watch videos shared across Planet Baltimore.">
+    <AppLayout>
       <div className="space-y-6">
+        <HeroBanner
+          title="Videos"
+          subtitle="Watch videos shared across Planet Baltimore."
+          cta={
+            <Button onClick={() => setOpen(true)} variant="outline" className="gap-2 rounded-lg" style={{ borderColor: "#d4580a", color: "#d4580a" }}>
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Add Video</span>
+            </Button>
+          }
+        />
         <div className="flex items-center gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search videos…"
               className="w-full rounded-full border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-orange-400 focus:outline-none" />
           </div>
-          <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">
-            <Plus className="h-4 w-4" /> Add Video
-          </button>
         </div>
 
         {featured.length > 0 && (

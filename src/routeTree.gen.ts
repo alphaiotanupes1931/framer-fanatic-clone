@@ -19,12 +19,14 @@ import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PodcastsRouteImport } from './routes/podcasts'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
@@ -91,6 +93,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PodcastsRoute = PodcastsRouteImport.update({
+  id: '/podcasts',
+  path: '/podcasts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -119,6 +126,11 @@ const GroupsRoute = GroupsRouteImport.update({
 const EventsRoute = EventsRouteImport.update({
   id: '/events',
   path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -209,12 +221,14 @@ export interface FileRoutesByFullPath {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -242,12 +256,14 @@ export interface FileRoutesByTo {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -276,12 +292,14 @@ export interface FileRoutesById {
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/discover': typeof DiscoverRoute
   '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
   '/onboarding': typeof OnboardingRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -311,12 +329,14 @@ export interface FileRouteTypes {
     | '/community-associations'
     | '/cookies'
     | '/dashboard'
+    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/podcasts'
     | '/privacy'
     | '/profile'
     | '/reset-password'
@@ -344,12 +364,14 @@ export interface FileRouteTypes {
     | '/community-associations'
     | '/cookies'
     | '/dashboard'
+    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/podcasts'
     | '/privacy'
     | '/profile'
     | '/reset-password'
@@ -377,12 +399,14 @@ export interface FileRouteTypes {
     | '/community-associations'
     | '/cookies'
     | '/dashboard'
+    | '/discover'
     | '/events'
     | '/groups'
     | '/leaderboard'
     | '/messages'
     | '/neighborhoods'
     | '/onboarding'
+    | '/podcasts'
     | '/privacy'
     | '/profile'
     | '/reset-password'
@@ -411,12 +435,14 @@ export interface RootRouteChildren {
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
+  DiscoverRoute: typeof DiscoverRoute
   EventsRoute: typeof EventsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
   OnboardingRoute: typeof OnboardingRoute
+  PodcastsRoute: typeof PodcastsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -504,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/podcasts': {
+      id: '/podcasts'
+      path: '/podcasts'
+      fullPath: '/podcasts'
+      preLoaderRoute: typeof PodcastsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -544,6 +577,13 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/events'
       preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -677,12 +717,14 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
+  DiscoverRoute: DiscoverRoute,
   EventsRoute: EventsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
   OnboardingRoute: OnboardingRoute,
+  PodcastsRoute: PodcastsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
