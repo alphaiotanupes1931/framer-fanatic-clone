@@ -69,7 +69,7 @@ function ProfilePage() {
 
   return (
     <AppLayout title="" hero={false}>
-      <div className="rounded-3xl border border-neutral-200 bg-white overflow-hidden">
+      <div className="rounded-3xl border border-border bg-card overflow-hidden">
         <div
           className="relative h-56 bg-gradient-to-br from-neutral-200 to-neutral-300"
           style={profile?.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
@@ -82,16 +82,16 @@ function ProfilePage() {
 
         <div className="relative px-6 pb-6">
           <div className="-mt-12 flex items-end justify-between gap-4">
-            <Avatar className="h-24 w-24 ring-4 ring-white">
+            <Avatar className="h-24 w-24 ring-4 ring-background">
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-              <AvatarFallback className="bg-orange-100 text-2xl text-orange-700">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex items-center gap-2">
-              <Link to="/stories" aria-label="My stories" className="rounded-full bg-orange-100 p-2.5 text-orange-700 hover:bg-orange-200"><BookOpen className="h-4 w-4" /></Link>
-              <Link to="/events" aria-label="Create event" className="rounded-full bg-orange-100 p-2.5 text-orange-700 hover:bg-orange-200">+</Link>
-              <Link to="/settings" className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><Pencil className="h-4 w-4" /></Link>
-              <Link to="/messages" aria-label="Messages" className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><MessageCircle className="h-4 w-4" /></Link>
-              <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"><UserPlus className="h-4 w-4" /></Link>
+              <Link to="/stories" aria-label="My stories" className="rounded-full bg-[#d4580a]/10 p-2.5 text-[#d4580a] hover:bg-[#d4580a]/20"><BookOpen className="h-4 w-4" /></Link>
+              <Link to="/events" aria-label="Create event" className="rounded-full bg-[#d4580a]/10 p-2.5 text-[#d4580a] hover:bg-[#d4580a]/20">+</Link>
+              <Link to="/settings" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><Pencil className="h-4 w-4" /></Link>
+              <Link to="/messages" aria-label="Messages" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><MessageCircle className="h-4 w-4" /></Link>
+              <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><UserPlus className="h-4 w-4" /></Link>
               <button
                 aria-label="Share profile"
                 onClick={async () => {
@@ -101,32 +101,32 @@ function ProfilePage() {
                     else { await navigator.clipboard.writeText(url); toast.success("Profile link copied"); }
                   } catch { /* user cancelled */ }
                 }}
-                className="rounded-full bg-neutral-100 p-2.5 hover:bg-neutral-200"
+                className="rounded-full bg-secondary p-2.5 hover:bg-secondary"
               ><Share2 className="h-4 w-4" /></button>
             </div>
           </div>
 
           <div className="mt-4">
             <div className="flex items-center gap-2 text-xl font-bold">{profile?.username || profile?.display_name}</div>
-            <Link to="/settings" className="mt-1 flex items-center gap-1 text-sm text-neutral-500 hover:text-orange-600">
+            <Link to="/settings" className="mt-1 flex items-center gap-1 text-sm text-muted-foreground hover:text-[#d4580a]">
               <MapPin className="h-3.5 w-3.5" /> {profile?.neighborhood || "Add neighborhood"}
             </Link>
-            <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-neutral-200 px-2.5 py-1 text-xs font-medium capitalize">
+            <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium capitalize">
               {roleLabel}
             </span>
           </div>
 
           <div className="mt-5 flex gap-8 text-sm">
-            <div><div className="text-lg font-bold">{stats.posts}</div><div className="text-neutral-500">Posts</div></div>
-            <div><div className="text-lg font-bold">{stats.followers}</div><div className="text-neutral-500">Followers</div></div>
-            <div><div className="text-lg font-bold">{stats.following}</div><div className="text-neutral-500">Following</div></div>
-            <div><div className="text-lg font-bold">0</div><div className="text-neutral-500">Referrals</div></div>
+            <div><div className="text-lg font-bold">{stats.posts}</div><div className="text-muted-foreground">Posts</div></div>
+            <div><div className="text-lg font-bold">{stats.followers}</div><div className="text-muted-foreground">Followers</div></div>
+            <div><div className="text-lg font-bold">{stats.following}</div><div className="text-muted-foreground">Following</div></div>
+            <div><div className="text-lg font-bold">0</div><div className="text-muted-foreground">Referrals</div></div>
           </div>
 
-          <div className="mt-6 flex gap-1 overflow-x-auto border-b border-neutral-200">
+          <div className="mt-6 flex gap-1 overflow-x-auto border-b border-border">
             {TABS.map((t) => (
               <button key={t} onClick={() => setTab(t)}
-                className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition ${tab===t ? "border-orange-600 text-orange-600" : "border-transparent text-neutral-500 hover:text-neutral-800"}`}>
+                className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition ${tab===t ? "border-[#d4580a] text-[#d4580a]" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
                 {t}
               </button>
             ))}
@@ -147,7 +147,7 @@ function ProfilePage() {
                 />
               ) : null
             ) : (
-              <div className="py-12 text-center text-neutral-500">
+              <div className="py-12 text-center text-muted-foreground">
                 {!roleLoading && isAttendee ? (
                   <BecomeArtistCTA />
                 ) : (
@@ -166,9 +166,9 @@ function BecomeArtistCTA() {
   const become = useServerFn(becomeArtist);
   const [loading, setLoading] = useState(false);
   return (
-    <div className="mx-auto max-w-md space-y-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-6 text-left">
-      <h3 className="text-base font-semibold text-neutral-900">Want to host events or post?</h3>
-      <p className="text-sm text-neutral-600">
+    <div className="mx-auto max-w-md space-y-3 rounded-2xl border border-border bg-neutral-50 p-6 text-left">
+      <h3 className="text-base font-semibold text-foreground">Want to host events or post?</h3>
+      <p className="text-sm text-muted-foreground">
         Attendees can view content and buy tickets. To create events, post, or sell tickets, upgrade to an
         Artist account. Artist accounts are limited to verified Baltimore-area residents.
       </p>
@@ -198,7 +198,7 @@ function BecomeArtistCTA() {
             setLoading(false);
           }
         }}
-        className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
       >
         {loading ? "Upgrading…" : "Become an Artist"}
       </button>
@@ -226,15 +226,15 @@ function MyTicketsTab() {
       setLoading(false);
     })();
   }, []);
-  if (loading) return <div className="py-12 text-center text-neutral-500">Loading tickets…</div>;
-  if (tickets.length === 0) return <div className="py-12 text-center text-neutral-500">No tickets yet.</div>;
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading tickets…</div>;
+  if (tickets.length === 0) return <div className="py-12 text-center text-muted-foreground">No tickets yet.</div>;
   return (
     <div className="space-y-3">
       {tickets.map((t) => (
-        <div key={t.id} className="flex items-center justify-between rounded-xl border border-neutral-200 p-4">
+        <div key={t.id} className="flex items-center justify-between rounded-xl border border-border p-4">
           <div>
             <div className="font-semibold">{t.events?.title ?? "Event"}</div>
-            <div className="text-xs text-neutral-500">
+            <div className="text-xs text-muted-foreground">
               {t.events?.starts_at ? new Date(t.events.starts_at).toLocaleString() : ""}
               {t.events?.location ? ` · ${t.events.location}` : ""}
             </div>
@@ -282,12 +282,12 @@ function StripeTab() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div className="rounded-2xl border border-neutral-200 p-6">
+      <div className="rounded-2xl border border-border p-6">
         <div className="flex items-start gap-3">
-          <CreditCard className="mt-0.5 h-5 w-5 text-orange-600" />
+          <CreditCard className="mt-0.5 h-5 w-5 text-[#d4580a]" />
           <div>
             <h3 className="text-base font-semibold">Payouts via Stripe</h3>
-            <p className="mt-1 text-sm text-neutral-600">
+            <p className="mt-1 text-sm text-muted-foreground">
               Connect your Stripe account to sell tickets on Planet Baltimore. We use Stripe Connect so payouts
               go directly to your bank - Planet Baltimore never holds your money.
             </p>
@@ -304,22 +304,22 @@ function StripeTab() {
               <AlertCircle className="h-3.5 w-3.5" /> Onboarding incomplete
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-muted-foreground">
               Not connected
             </span>
           )}
           <button
             onClick={onboard}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
           >
             {busy ? "Opening Stripe…" : status?.chargesEnabled ? "Update Stripe account" : "Connect Stripe"} <ExternalLink className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-neutral-200 p-6 text-sm leading-relaxed text-neutral-700">
-        <h4 className="mb-3 text-base font-semibold text-neutral-900">How payments work</h4>
+      <div className="rounded-2xl border border-border p-6 text-sm leading-relaxed text-neutral-700">
+        <h4 className="mb-3 text-base font-semibold text-foreground">How payments work</h4>
         <ol className="list-decimal space-y-2 pl-5">
           <li>
             <strong>Click "Connect Stripe"</strong> above. You'll be redirected to Stripe to enter your
@@ -342,7 +342,7 @@ function StripeTab() {
           </li>
         </ol>
 
-        <h4 className="mt-6 mb-2 text-sm font-semibold text-neutral-900">Example: $20 ticket</h4>
+        <h4 className="mt-6 mb-2 text-sm font-semibold text-foreground">Example: $20 ticket</h4>
         <ul className="space-y-1 text-sm">
           <li>You set price: <strong>$20.00</strong> (what you keep)</li>
           <li>Baltimore A&amp;A tax (10%): <strong>$2.00</strong> (routed to Planet Baltimore)</li>

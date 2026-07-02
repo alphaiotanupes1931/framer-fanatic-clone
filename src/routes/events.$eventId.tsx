@@ -2,16 +2,22 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
-import { Calendar, MapPin, Ticket, ArrowLeft, Share2 } from "lucide-react";
+import { MapPin, Navigation, Ticket, ArrowLeft, Share2, Trash2, Edit3, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout } from "@/lib/stripe.functions";
 import { EventImage } from "@/components/event-image";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
-  location: string | null; image_url: string | null; starts_at: string;
-  price_cents: number | null;
+  venue_name: string | null; address: string | null; location: string | null;
+  image_url: string | null; starts_at: string; ends_at: string | null;
+  price_cents: number | null; status: string; is_published: boolean;
+  neighborhood: string | null;
 };
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
@@ -21,10 +27,6 @@ export const Route = createFileRoute("/events/$eventId")({
   head: () => ({ meta: [{ title: "Event - Planet Baltimore" }] }),
 });
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
-}
-
 function EventDetail() {
   const { eventId } = Route.useParams();
   const navigate = useNavigate();
@@ -32,10 +34,13 @@ function EventDetail() {
   const [host, setHost] = useState<Host | null>(null);
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
+  const [me, setMe] = useState<string | null>(null);
   const checkoutFn = useServerFn(createTicketCheckout);
 
   useEffect(() => {
     (async () => {
+      const { data: s } = await supabase.auth.getSession();
+      setMe(s.session?.user.id ?? null);
       const { data } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
       if (data) {
         setEvt(data as EventRow);
@@ -67,63 +72,143 @@ function EventDetail() {
     } catch { /* user cancelled */ }
   };
 
-  if (loading) return <AppLayout title="Loading…" hero={false}><div className="text-muted-foreground text-sm">Loading event…</div></AppLayout>;
-  if (!evt) return <AppLayout title="Event not found" hero={false}>
-    <button onClick={() => navigate({ to: "/events" })} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back to events</button>
-  </AppLayout>;
+  const remove = async () => {
+    if (!evt || !window.confirm("Delete this event?")) return;
+    const { error } = await supabase.from("events").delete().eq("id", evt.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Event deleted");
+    navigate({ to: "/events" });
+  };
+
+  if (loading) return (
+    <AppLayout>
+      <div className="space-y-4">
+        <Skeleton className="aspect-[16/9] rounded-xl" />
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+    </AppLayout>
+  );
+  if (!evt) return (
+    <AppLayout>
+      <div className="text-center py-16">
+        <h3 className="font-semibold text-foreground mb-1">Event not found</h3>
+        <Button variant="ghost" onClick={() => navigate({ to: "/events" })} className="mt-4">Back to Events</Button>
+      </div>
+    </AppLayout>
+  );
 
   const priced = (evt.price_cents ?? 0) > 0;
+  const eventDate = evt.starts_at ? new Date(evt.starts_at) : null;
+  const endsDate = evt.ends_at ? new Date(evt.ends_at) : null;
+  const locationText = evt.address || evt.location;
+  const mapsUrl = locationText ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationText)}` : "";
+  const isOwner = me && evt.user_id === me;
+
+  const monthShort = eventDate ? eventDate.toLocaleString(undefined, { month: "short" }).toUpperCase() : "";
+  const dayNum = eventDate ? eventDate.getDate() : "";
+  const fullDate = eventDate ? eventDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : "Date TBD";
+  const startTime = eventDate ? eventDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "";
+  const endTime = endsDate ? endsDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "";
 
   return (
-    <AppLayout title={evt.title} hero={false}>
-      <Link to="/events" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-5"><ArrowLeft className="h-4 w-4" /> All events</Link>
-      <div className="rounded-3xl overflow-hidden border border-border bg-card">
-        {evt.image_url ? (
-          <div className="aspect-[16/9] bg-muted overflow-hidden">
+    <AppLayout>
+      <div className="space-y-6">
+        <button onClick={() => navigate({ to: "/events" })} aria-label="Go back" className="p-2 rounded-full hover:bg-secondary active:scale-90 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+
+        {evt.image_url && (
+          <div className="aspect-[16/9] rounded-xl overflow-hidden">
             <EventImage src={evt.image_url} alt={evt.title} className="w-full h-full object-cover" />
           </div>
-        ) : (
-          <div className="aspect-[16/9] bg-muted flex items-center justify-center text-muted-foreground">
-            <Calendar className="w-16 h-16" />
+        )}
+
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            {!priced && <Badge className="bg-green-500/10 text-green-600 border-0">Free</Badge>}
+            {!evt.is_published && isOwner && (
+              <Badge className="bg-muted text-muted-foreground border-0 flex items-center gap-1">
+                <EyeOff className="w-3 h-3" />Hidden from public
+              </Badge>
+            )}
+            {evt.neighborhood && <Badge variant="outline" className="border-0 bg-accent/10 text-accent">{evt.neighborhood}</Badge>}
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">{evt.title}</h1>
+        </div>
+
+        <div className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl">
+          <div className="w-14 h-14 bg-accent/10 rounded-xl flex flex-col items-center justify-center flex-shrink-0" style={{ backgroundColor: "rgba(212,88,10,0.1)" }}>
+            <span className="text-xs font-bold uppercase" style={{ color: "#d4580a" }}>{monthShort}</span>
+            <span className="text-xl font-bold text-foreground">{dayNum}</span>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">{fullDate}</p>
+            <p className="text-sm text-muted-foreground">{startTime}{endTime ? ` – ${endTime}` : ""}</p>
+          </div>
+        </div>
+
+        {(evt.venue_name || locationText) && (
+          <div className="flex items-start gap-3 p-4 bg-secondary/50 rounded-xl">
+            <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "#d4580a" }} />
+            <div className="flex-1 min-w-0">
+              {evt.venue_name && <p className="font-medium text-foreground">{evt.venue_name}</p>}
+              {locationText && <p className="text-sm text-muted-foreground">{locationText}</p>}
+            </div>
+            {mapsUrl && (
+              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm hover:underline flex-shrink-0" style={{ color: "#d4580a" }}>
+                <Navigation className="w-4 h-4" />Directions
+              </a>
+            )}
           </div>
         )}
-        <div className="p-6 md:p-10">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h1 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight">{evt.title}</h1>
-              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {fmtDate(evt.starts_at)}</span>
-                {evt.location && <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {evt.location}</span>}
-              </div>
+
+        {host && (
+          <Link to="/u/$username" params={{ username: host.username || host.id }} className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors">
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={host.avatar_url ?? undefined} />
+              <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>{(host.display_name || host.username || "?").charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm text-muted-foreground">Hosted by</p>
+              <p className="font-medium text-foreground transition-colors">{host.display_name || host.username || "Organizer"}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={share} className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-accent"><Share2 className="w-4 h-4" /> Share</button>
-              {priced ? (
-                <button onClick={buy} disabled={buying} className="inline-flex items-center gap-1.5 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
-                  <Ticket className="w-4 h-4" /> {buying ? "Loading…" : `Buy ticket · $${((evt.price_cents ?? 0)/100).toFixed(2)}`}
-                </button>
-              ) : (
-                <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-600">Free</span>
-              )}
-            </div>
+          </Link>
+        )}
+
+        {evt.description && (
+          <div>
+            <h2 className="font-semibold text-foreground mb-2">About this event</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{evt.description}</p>
           </div>
+        )}
 
-          {evt.description && (
-            <div className="mt-8 max-w-3xl whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
-              {evt.description}
-            </div>
+        <div className="flex flex-col gap-3 border-t border-border pt-6">
+          {priced ? (
+            <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+              <Ticket className="w-4 h-4" />
+              {buying ? "Loading…" : `Buy Ticket · $${((evt.price_cents ?? 0) / 100).toFixed(2)}`}
+            </Button>
+          ) : (
+            <Button onClick={share} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+              I'm going
+            </Button>
           )}
-
-          {host && (
-            <div className="mt-10 flex items-center gap-3 border-t border-border pt-6">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Hosted by</div>
-              <Link to="/artists" className="flex items-center gap-2 text-sm font-medium hover:text-orange">
-                {host.avatar_url && <img src={host.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover" loading="lazy" decoding="async" />}
-                {host.display_name || host.username || "Artist"}
-              </Link>
-            </div>
-          )}
+          <Button onClick={share} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2">
+            <Share2 className="w-4 h-4" />Share Event
+          </Button>
         </div>
+
+        {isOwner && (
+          <div className="flex gap-3">
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Edit coming soon")}>
+              <Edit3 className="w-4 h-4" />Edit Event
+            </Button>
+            <Button variant="outline" size="sm" onClick={remove} className="text-destructive hover:bg-destructive/10 hover:border-destructive transition-all duration-150">
+              <Trash2 className="w-4 h-4 mr-2" />Delete Event
+            </Button>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
