@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
+import { HeroBanner } from "@/components/shared/hero-banner";
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, CalendarDays } from "lucide-react";
@@ -53,12 +57,20 @@ function CalendarPage() {
   );
 
   return (
-    <AppLayout
-      title="Calendar"
-      subtitle="Events from local businesses, organizations and communities."
-      cta="Create Event"
-      ctaTo="/events"
-    >
+    <AppLayout>
+      <HeroBanner
+        title="Calendar"
+        subtitle="Events from local businesses, organizations and communities."
+        cta={
+          <Link to="/events">
+            <Button variant="outline" className="gap-2 rounded-lg" style={{ borderColor: "#d4580a", color: "#d4580a" }}>
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Create Event</span>
+            </Button>
+          </Link>
+        }
+      />
+      <div className="h-6" />
       <div className="grid gap-6 lg:grid-cols-[auto_1fr] lg:gap-8">
         <div className="mx-auto w-fit rounded-2xl border border-neutral-200 bg-white p-2 shadow-sm sm:p-4 lg:mx-0">
           <Calendar
