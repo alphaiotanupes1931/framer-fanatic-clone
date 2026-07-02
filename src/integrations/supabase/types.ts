@@ -155,6 +155,57 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_listings: {
+        Row: {
+          category: string
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          neighborhood: string | null
+          photos: string[]
+          price_cents: number
+          seller_id: string
+          status: string
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          category?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          neighborhood?: string | null
+          photos?: string[]
+          price_cents?: number
+          seller_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          category?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          neighborhood?: string | null
+          photos?: string[]
+          price_cents?: number
+          seller_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
