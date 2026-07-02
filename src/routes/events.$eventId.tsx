@@ -27,10 +27,6 @@ export const Route = createFileRoute("/events/$eventId")({
   head: () => ({ meta: [{ title: "Event - Planet Baltimore" }] }),
 });
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
-}
-
 function EventDetail() {
   const { eventId } = Route.useParams();
   const navigate = useNavigate();
