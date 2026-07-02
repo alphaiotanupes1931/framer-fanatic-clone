@@ -1,70 +1,80 @@
-## What you get
+# Full rebuild plan: planet-baltimore repo → this app
 
-### 1. Onboarding categories (20 options)
-Add a required "What best describes you?" step in `/onboarding`. Options:
+Goal: the app looks and behaves like the GitHub repo (`AinsleyBurrows/planet-baltimore`), not the current editorial design. All routes, chrome, cards, and colors come from the repo. Backend stays on your Supabase; missing tables/columns get added.
 
-Attendee, Musician, Podcaster, Visual Artist, Photographer, Videographer, Filmmaker, Fashion Designer, Graphic Designer, Writer, Poet, Dancer, DJ, Producer, Comedian, Chef / Culinary, Tattoo Artist, Muralist, Curator, Event Organizer.
+Because this touches ~50 pages and ~40 components, I'll ship it in phases. Each phase ends with a working preview and I check in before starting the next.
 
-Stored on `profiles.category` (new column). Used everywhere to shape the public profile.
+## Phase 0 — Schema deltas (this turn, needs your approval)
 
-### 2. Everyone can post videos
-- Loosen the `/videos` page so any signed-in user sees Add Video (DB policy already allows it).
-- Attendees keep the no-posts/no-events restriction; videos become the universal creative outlet.
+Repo assumes some tables/columns you don't have. Adding the missing ones now avoids ugly workarounds later.
 
-### 3. Category-specific public profile tabs
-The base tabs (Posts, Videos, Events, About) stay. On top, smart-defaults add tabs per category:
+- New table `public.ephemeral_stories` — 24-hour "Story bar" items (author, media_url, expires_at). Not the same as `stories` (long-form).
+- New column `public.posts.is_deleted boolean default false` — repo filters soft-deletes.
+- New column `public.stories.status text default 'published'` — repo filters by `status='published'`.
+- New column `public.events.status text default 'upcoming'` — repo filters by `status='upcoming'`. Kept alongside your existing `is_published`.
+- New column `public.profiles.neighborhood_names text[] default '{}'` — repo supports multiple neighborhoods; will backfill from existing `neighborhood`.
 
-- Visual Artist / Muralist / Photographer: Gallery, Studio
-- Podcaster: Episodes, Series
-- Musician / DJ / Producer: Tracks, Shows
-- Videographer / Filmmaker: Reels, Projects
-- Writer / Poet: Writings
-- Fashion / Graphic Designer: Lookbook, Shop
-- Dancer / Comedian: Performances
-- Chef: Menu, Pop-ups
-- Tattoo Artist: Portfolio, Booking
-- Curator / Event Organizer: Curated, Upcoming
-- Attendee: just base tabs
+RLS + GRANTs included. Existing tables unchanged in shape.
 
-New table `profile_sections` (user_id, kind, title, body, media_url, link_url, order_index) feeds these tabs. Owners can add/edit cards in each tab; visitors just view.
+Where the repo uses fields I *won't* add (e.g. `follows.target_name`, `posts.author_name`, `posts.page_id`), I adapt the ported code to use the equivalent join through `public_profiles_by_ids` / `follows.following_id`. This keeps the DB clean.
 
-### 4. Arts Orgs / Businesses / Community Assocs / Groups
-- New table `organizations` with columns: id, owner_id, type (`arts_org` | `business` | `community_assoc` | `group`), subtype, name, slug, bio, avatar_url, banner_url, website, phone, email, address, neighborhood, hours (jsonb), created_at.
-- Arts org subtypes (filter chips on `/arts-orgs`): Museum, Gallery, Studio, Collective, Residency, Non-profit, Cultural Center, Performance Venue, Education, Public Art.
-- Each org has a public profile at `/o/$slug` with tabs: About, Events, Opportunities, Press, Updates, Comments. Owner can post into Opportunities / Press / Updates; anyone signed-in can comment.
-- Supporting tables: `organization_posts` (kind, title, body, link_url, media_url) and `organization_comments` (org_id, user_id, body).
-- Creation restricted to artists + admins via RLS using `has_role`.
-- `/arts-orgs`, `/businesses`, `/community-associations`, `/groups` become real list pages with search + (arts-orgs only) subtype filter chips + Create button (artist/admin only).
+## Phase 1 — App shell + Dashboard
 
-### 5. Dashboard share button
-A floating "Share Planet Baltimore" button in the dashboard corner. Uses Web Share API where available, otherwise copies the site URL with a toast.
+Replace `AppLayout` and rebuild `/dashboard` (the repo's `Home.jsx`).
 
----
+Chrome, all ported from the repo:
+- `LeftSidebar` — nav (Home, Discover, Communities, Events, Marketplace, Messages, Notifications, Profile, Settings) with brand mark
+- `RightSidebar` — trending, artists to follow, upcoming events
+- `TopMenuBar` — top bar with search + avatar
+- `MobileNav` — bottom tab bar for mobile
 
-## Technical detail
+Dashboard:
+- Orange-bordered "Planet Baltimore" hero
+- 4 filter chips: For You / Following / Nearby / Discover
+- `StoryBar` (ephemeral stories with Add-Story modal + viewer)
+- My Neighborhood quick-filter button
+- `OnboardingCard` for 0-follow users
+- Mixed feed of `PostCard`, `StoryCard`, `EventCard` wrapped in `DiscoverCard` badges
+- Composer via repo's `CreatePost` flow
 
-### Migrations (one batch)
-1. `ALTER TABLE profiles ADD COLUMN category text;`
-2. `CREATE TABLE profile_sections (...)` + grants + RLS (owner write, public read).
-3. `CREATE TABLE organizations (...)` + slug unique + grants + RLS (insert/update gated by `has_role(auth.uid(),'artist') OR has_role(auth.uid(),'admin')`, public read).
-4. `CREATE TABLE organization_posts (...)` + RLS (owner write, public read).
-5. `CREATE TABLE organization_comments (...)` + RLS (authenticated insert as self, public read, owner/author delete).
-6. Indexes on org `(type, subtype, neighborhood)` and `organization_posts(org_id, kind)`.
+Delete/replace: current `src/components/app-layout.tsx`, current `dashboard.tsx` implementation, current welcome-hero + CreatorSearch styling.
 
-### Files touched / created
-- `src/routes/onboarding.tsx` — add category step.
-- `src/routes/profile.tsx` — render category tabs from `profile_sections` with an inline editor for owners.
-- `src/routes/o.$slug.tsx` — new public org profile page with tabs.
-- `src/routes/arts-orgs.tsx`, `businesses.tsx`, `community-associations.tsx`, `groups.tsx` — real list pages with search/filter/create.
-- `src/components/org-create-dialog.tsx` — shared create form (artist/admin gated).
-- `src/routes/dashboard.tsx` — fixed share button.
-- `src/routes/videos.tsx` — confirm Add Video visible for everyone signed-in.
-- `src/hooks/use-user-role.ts` — no change.
+## Phase 2 — Content routes
 
-### Out of scope (call out so you know)
-- No payments/ticketing on opportunities — just listings.
-- "Hours" stored as simple `{mon:{open,close}, ...}` jsonb; UI is a compact day-by-day editor, not a calendar widget.
-- Org photos use existing `avatars` storage bucket.
+Rebuild page-by-page using the repo's designs and shared cards:
+- `Home` (done in Phase 1)
+- `Discover`, `Artists` + `ArtistDetail`, `Businesses` + `BusinessDetail`
+- `ArtsOrganizations` + `ArtsOrgDetail`, `CommunityAssociations` + detail, `Communities` + `CommunityDetail`
+- `Events` + `EventDetail`, `Stories` + `StoryDetail`, `Podcasts`, `Videos`
+- `Marketplace` + detail + sell + confirmation
+- `Neighborhoods`, `CommunityCalendar`, `Leaderboard`, `Search`
 
-### Estimated migrations
-1 migration with everything above (CREATE TABLE + GRANT + RLS + indexes), then several file writes.
+Create flows: `CreatePost`, `CreateArtist`, `CreateBusiness`, `CreateArtsOrg`, `CreateCommunity`, `CreateCommunityAssociation`, `CreateEvent`, `CreateStory`.
+
+## Phase 3 — User surfaces
+
+`Profile`, `Messages` (real-time), `Notifications`, `NotificationSettings`, `Settings`, `OrganizerStudio`, `PromoterDashboard`, `TicketingHub`, `TicketSalesDashboard`, `EventCheckIn`, `WritingDashboardV2`, `AdminDashboard`, `AdminReports`.
+
+## Phase 4 — Polish
+
+Theme tokens matched to repo's `index.css` (the `#d4580a` orange, radii, shadows). Fonts, spacing, dark mode. Any remaining repo pages (BannerPreview, MarketplaceConfirmation, StoriesV2, StoryDetailV2).
+
+## Technical details
+
+**Data adapter layer**: repo code uses `base44.entities.Post/Story/Event/Follow`. I'm replacing every entity call with Supabase equivalents in a thin adapter (`src/lib/entities.ts`) so ported components need almost no changes — `Post.list('-created_date', 50)` becomes `supabase.from('posts').select().order('created_at', {ascending:false}).limit(50)`.
+
+**Column renames** the adapter handles: `created_date`→`created_at`, `author_id`→`user_id`, `organizer_id`→`user_id`, `neighborhood_name`→`neighborhood`, `is_deleted` (new column above), `target_id`→`following_id`.
+
+**Auth**: keep current Supabase auth. `base44.auth.me()` maps to `supabase.auth.getUser()` + `profiles` join.
+
+**Routing**: repo uses `react-router-dom`. Rewriting imports to `@tanstack/react-router` and using `to`/`params` shape. Each page becomes a file under `src/routes/`.
+
+**Deletes**: current `src/components/app-layout.tsx`, `src/components/globe.tsx` (not in repo), and any welcome-hero/editorial styling get removed as they're replaced.
+
+**Not touching**: `src/integrations/supabase/*` (managed), `src/routeTree.gen.ts` (generated), auth flow.
+
+## What I need from you before Phase 1
+
+Approve the Phase 0 migration (I'll submit it right after this plan). Once it runs, I start on shell + dashboard. Expect Phase 1 to take one full turn; Phases 2–4 will each take multiple turns.
+
+Sound good, or want to trim scope (skip admin pages, skip marketplace, etc.)?
