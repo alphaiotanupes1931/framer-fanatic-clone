@@ -296,19 +296,15 @@ function Dashboard() {
               const inner = (() => {
                 if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} />;
                 if (item.type === "story") return (
-                  <div className="relative">
-                    <div className="absolute -top-1 left-4 z-10">
-                      <span className="rounded-full bg-[#d4580a]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#d4580a]">Story</span>
-                    </div>
-                    <div className="pt-3"><StoryCard story={item.data} /></div>
+                  <div className="space-y-1.5">
+                    <span className="inline-block rounded-full bg-[#d4580a]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#d4580a]">Story</span>
+                    <StoryCard story={item.data} />
                   </div>
                 );
                 return (
-                  <div className="relative">
-                    <div className="absolute -top-1 left-4 z-10">
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Event</span>
-                    </div>
-                    <div className="pt-3"><EventCard event={item.data} /></div>
+                  <div className="space-y-1.5">
+                    <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Event</span>
+                    <EventCard event={item.data} />
                   </div>
                 );
               })();
