@@ -202,38 +202,40 @@ function Dashboard() {
       <div className="space-y-5 overflow-x-hidden sm:space-y-7">
         {/* Hero Banner */}
         <div
-          className="relative overflow-hidden rounded-2xl border-2 p-6 sm:p-10 lg:p-14"
-          style={{ borderColor: "#d4580a", backgroundColor: "#fdf5ee" }}
+          className="relative overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-12"
+          style={{ backgroundColor: "#FFF7F2" }}
         >
+          <div className="pointer-events-none absolute -right-8 -top-16 h-40 w-40 rounded-full blur-2xl" style={{ backgroundColor: "rgba(212, 88, 10, 0.18)" }} />
+          <div className="pointer-events-none absolute -bottom-16 -right-24 h-64 w-64 rounded-full blur-3xl" style={{ backgroundColor: "rgba(212, 88, 10, 0.10)" }} />
           <div className="relative z-10">
-            <h1 className="mb-2 text-3xl font-bold sm:text-4xl lg:text-5xl" style={{ color: "#d4580a" }}>
+            <h1 className="mb-1.5 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl" style={{ color: "#D4580A" }}>
               Planet Baltimore
             </h1>
-            <p className="text-sm sm:text-base" style={{ color: "#d4580a" }}>
+            <p className="text-sm font-medium sm:text-base" style={{ color: "rgba(212, 88, 10, 0.75)" }}>
               Your city. Your community. Your feed.
             </p>
           </div>
-          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full" style={{ backgroundColor: "#f5d9c2", opacity: 0.6 }} />
-          <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full" style={{ backgroundColor: "#f5d9c2", opacity: 0.5 }} />
         </div>
 
         {/* Filters */}
-        <div className="scrollbar-hide -mx-3 flex gap-2 overflow-x-auto px-3 pb-2 sm:-mx-4 sm:px-4">
+        <div className="scrollbar-hide -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:-mx-4 sm:px-4">
           {FILTERS.map((filter) => (
             <button
               key={filter}
               onClick={() => { setActiveFilter(filter); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-xs font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 sm:px-4 sm:text-sm ${
-                activeFilter === filter ? "bg-[#d4580a] text-white shadow-sm" : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold tracking-tight transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 sm:px-5 sm:text-sm ${
+                activeFilter === filter
+                  ? "bg-[#d4580a] text-white shadow-sm"
+                  : "border border-border/60 bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
-              {filter === "Discover" && <Compass className="h-4 w-4 sm:h-5 sm:w-5" />}
+              {filter === "Discover" && <Compass className="h-3.5 w-3.5" />}
               {filter}
             </button>
           ))}
         </div>
 
-        <div className="border-b border-border" />
+        <div className="border-b border-border/60" />
 
         {/* Neighborhood quick-filter */}
         {currentUser && !userLoading && (
@@ -274,6 +276,10 @@ function Dashboard() {
 
         {/* Feed */}
         <div className="space-y-4 sm:space-y-5">
+          <div className="flex items-center gap-2 px-1">
+            <div className="h-3 w-1 rounded-full bg-[#d4580a]" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Latest in your feed</span>
+          </div>
           {isLoading || filterLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
