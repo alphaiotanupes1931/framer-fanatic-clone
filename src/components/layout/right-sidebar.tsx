@@ -59,7 +59,7 @@ export function RightSidebar() {
                 className="group flex items-start gap-4 rounded-lg p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
               >
                 <span className="w-6 flex-shrink-0 pt-0.5 text-xl font-black italic leading-none text-muted-foreground/30">
-                  {String(i + 1).padStart(2, "0")}
+                  {i + 1}
                 </span>
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <p className="truncate text-sm font-bold leading-tight text-foreground transition-colors group-hover:text-[#d4580a]">{s.title}</p>
