@@ -150,6 +150,8 @@ function HelpSection() {
     try {
       localStorage.removeItem("pb_onboarding_done");
       localStorage.removeItem("pb_onboarding_tour_v1");
+      // Signal the OnboardingTour component to auto-run when dashboard mounts.
+      localStorage.setItem("pb_new_signup", "1");
     } catch {}
     window.location.href = "/dashboard";
   };
