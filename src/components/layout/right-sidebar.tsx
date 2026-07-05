@@ -8,17 +8,17 @@ import type { ReactNode, ComponentType } from "react";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
   return (
-    <div className="mb-6">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="mb-7">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-foreground" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">{title}</h3>
+          <div className="h-3 w-1 rounded-full bg-[#d4580a]" />
+          <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">{title}</h3>
         </div>
         {seeAllLink && (
-          <Link to={seeAllLink} className="text-[11px] font-medium" style={{ color: "#d4580a" }}>See all</Link>
+          <Link to={seeAllLink} className="text-[11px] font-bold" style={{ color: "#d4580a" }}>See all</Link>
         )}
       </div>
-      <div className="space-y-2">{children}</div>
+      <div className="space-y-1">{children}</div>
     </div>
   );
 }
@@ -50,15 +50,19 @@ export function RightSidebar() {
       <div className="space-y-5 p-4 pt-20 sm:p-5 sm:pt-24">
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
-            {stories.map((s: any) => (
-              <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
-                <Avatar className="h-12 w-12 flex-shrink-0 rounded-xl">
-                  <AvatarImage src={s.cover_url} className="rounded-xl object-cover" />
-                  <AvatarFallback className="rounded-xl bg-accent/10 text-sm font-bold text-accent-foreground">{s.title?.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{s.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">by {s.author_name}</p>
+            {stories.map((s: any, i: number) => (
+              <Link
+                key={s.id}
+                to="/stories/$storyId"
+                params={{ storyId: s.id }}
+                className="group flex items-start gap-4 rounded-lg p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
+              >
+                <span className="w-6 flex-shrink-0 pt-0.5 text-xl font-black italic leading-none text-muted-foreground/30">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <p className="truncate text-sm font-bold leading-tight text-foreground transition-colors group-hover:text-[#d4580a]">{s.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">{s.author_name}</p>
                 </div>
               </Link>
             ))}
@@ -72,12 +76,14 @@ export function RightSidebar() {
                 key={a.id}
                 to="/u/$username"
                 params={{ username: a.username || a.id }}
-                className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
+                className="group flex items-center gap-3 rounded-xl p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
               >
-                <Avatar className="h-12 w-12 flex-shrink-0">
-                  <AvatarImage src={a.avatar_url} className="object-cover" />
-                  <AvatarFallback className="bg-accent/10 text-sm font-bold text-accent-foreground">{a.display_name?.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <div className="flex-shrink-0 rounded-2xl bg-gradient-to-br from-[#d4580a]/40 to-[#d4580a]/5 p-[2px] ring-1 ring-border/60">
+                  <Avatar className="h-11 w-11 rounded-2xl">
+                    <AvatarImage src={a.avatar_url} className="rounded-2xl object-cover" />
+                    <AvatarFallback className="rounded-2xl bg-card text-sm font-bold text-foreground">{a.display_name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{a.display_name || a.username}</p>
                   <p className="truncate text-xs capitalize text-muted-foreground">{(a.category || a.role || "Artist").replace("_", " ")}</p>
