@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Joyride, EVENTS, STATUS, type EventData, type Step } from "react-joyride";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { useLocation } from "@tanstack/react-router";
 
 const STORAGE_KEY = "pb_onboarding_tour_v1";
 const SIGNUP_FLAG = "pb_new_signup";
