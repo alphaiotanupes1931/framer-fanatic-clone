@@ -13,19 +13,19 @@ export function HeroBanner({
 }) {
   return (
     <div
-      className="relative rounded-2xl overflow-hidden p-8 sm:p-12 bg-transparent border-2"
-      style={{ borderColor: "#d4580a" }}
+      className="relative overflow-hidden rounded-3xl border bg-[#d4580a]/[0.04] p-6 sm:p-10"
+      style={{ borderColor: "rgba(212, 88, 10, 0.35)" }}
     >
-      <div className="relative z-10 flex items-start justify-between gap-4">
-        <div className="min-w-0">
+      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 max-w-2xl">
           <h1
-            className="text-3xl sm:text-4xl font-bold font-display mb-2"
+            className="mb-1.5 font-display text-2xl font-bold tracking-tight sm:text-4xl"
             style={{ color: "#d4580a" }}
           >
             {title}
           </h1>
           {subtitle && (
-            <p className="text-muted-foreground text-sm sm:text-base">{subtitle}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{subtitle}</p>
           )}
         </div>
         {cta && <div className="flex-shrink-0">{cta}</div>}

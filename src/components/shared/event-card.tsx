@@ -23,7 +23,7 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
 
   if (compact) {
     return (
-      <Link to="/events/$eventId" params={{ eventId: event.id }} className="group flex gap-3 rounded-xl border border-border bg-card p-2.5 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 sm:p-3">
+      <Link to="/events/$eventId" params={{ eventId: event.id }} className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0 sm:p-3.5">
         <div className="flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center overflow-hidden rounded-lg bg-[#d4580a]/10 sm:h-16 sm:w-16">
           {eventDate ? (
             <>
@@ -47,7 +47,7 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
   }
 
   return (
-    <Link to="/events/$eventId" params={{ eventId: event.id }} className="group block overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0">
+    <Link to="/events/$eventId" params={{ eventId: event.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">
         {event.image_url ? (
           <img src={event.image_url} alt={event.title} className="h-full w-full object-cover" loading="lazy" />
@@ -63,7 +63,7 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
           <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">{event.category}</Badge>
         )}
       </div>
-      <div className="p-3 sm:p-4">
+      <div className="p-4 sm:p-5">
         <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
           <Clock className="h-3.5 w-3.5" />
           <span className="truncate">{eventDate ? format(eventDate, "EEE, MMM d · h:mm a") : "Date TBD"}</span>

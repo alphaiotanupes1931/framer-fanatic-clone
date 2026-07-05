@@ -61,7 +61,7 @@ export function PostCard({ post, currentUserId, onDelete }: {
   const initial = authorName.slice(0, 1).toUpperCase();
 
   return (
-    <article className="rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:shadow-md">
+    <article className="rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-border/80 hover:shadow-sm">
       <header className="flex items-center gap-3">
         <Link to="/u/$username" params={{ username: post.author_username || post.user_id }}>
           <Avatar className="h-10 w-10">
