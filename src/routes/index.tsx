@@ -717,7 +717,7 @@ function NextRefreshCountdown() {
       const h = Math.floor(ms / 3_600_000);
       const m = Math.floor((ms % 3_600_000) / 60_000);
       const s = Math.floor((ms % 60_000) / 1000);
-      setLabel(`${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`);
+      setLabel(`${h}h ${m}m ${s}s`);
     };
     tick();
     const id = setInterval(tick, 1000);
