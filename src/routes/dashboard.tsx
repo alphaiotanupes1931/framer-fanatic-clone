@@ -191,7 +191,9 @@ function Dashboard() {
   }, [activeFilter, posts, stories, events, follows, currentUser]);
 
   const isEmpty = !isLoading && feedItems.length === 0;
-  const hoodPrimary = currentUser?.neighborhood_names?.[0] || currentUser?.neighborhood;
+  const rawHood = currentUser?.neighborhood_names?.[0] || currentUser?.neighborhood;
+  // "Baltimore" is the city, not a neighborhood — treat as unset so the user is prompted to pick one.
+  const hoodPrimary = rawHood && rawHood.trim().toLowerCase() !== "baltimore" ? rawHood : null;
 
   if (!checked) return null;
 
