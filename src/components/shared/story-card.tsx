@@ -17,6 +17,9 @@ type Story = {
 };
 
 export function StoryCard({ story, featured = false }: { story: Story; featured?: boolean }) {
+  const cleanExcerpt = story.excerpt
+    ? story.excerpt.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/\s+/g, " ").trim()
+    : "";
   if (featured) {
     return (
       <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group block overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0">
@@ -34,7 +37,7 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
         </div>
         <div className="p-5">
           <h2 className="line-clamp-2 font-serif text-xl font-bold text-foreground transition-colors group-hover:text-[#d4580a]">{story.title}</h2>
-          {story.excerpt && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{story.excerpt}</p>}
+          {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{cleanExcerpt}</p>}
           <div className="mt-4 flex items-center gap-3">
             <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
               <AvatarImage src={story.author_avatar ?? undefined} />
@@ -67,7 +70,7 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
           {story.category && <Badge variant="secondary" className="text-[9px] capitalize sm:text-[10px]">{story.category}</Badge>}
         </div>
         <h3 className="line-clamp-2 font-serif text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{story.title}</h3>
-        {story.excerpt && <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground sm:text-xs">{story.excerpt}</p>}
+        {cleanExcerpt && <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground sm:text-xs">{cleanExcerpt}</p>}
         <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground sm:text-xs">
           <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{story.read_minutes || 5} min</span>
           <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{story.likes_count || 0}</span>
