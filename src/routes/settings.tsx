@@ -147,8 +147,18 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function HelpSection() {
   const [open, setOpen] = useState<number | null>(0);
   const replayTour = () => {
-    try { localStorage.removeItem("pb_onboarding_done"); } catch {}
+    try {
+      localStorage.removeItem("pb_onboarding_done");
+      localStorage.removeItem("pb_onboarding_tour_v1");
+    } catch {}
     window.location.href = "/dashboard";
+  };
+  const redoOnboarding = () => {
+    try {
+      localStorage.removeItem("pb_onboarding_done");
+      localStorage.removeItem("pb_onboarding_tour_v1");
+    } catch {}
+    window.location.href = "/onboarding";
   };
   return (
     <div className="space-y-6">
@@ -158,6 +168,10 @@ function HelpSection() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
+        <button onClick={redoOnboarding} className="rounded-xl border border-[#d4580a]/30 bg-[#d4580a]/5 p-4 text-left transition hover:bg-[#d4580a]/10">
+          <div className="text-sm font-semibold text-[#d4580a]">Redo onboarding</div>
+          <div className="mt-1 text-xs text-muted-foreground">Restart the full welcome flow, pick your neighborhood, and follow suggested artists again.</div>
+        </button>
         <button onClick={replayTour} className="rounded-xl border border-border bg-card p-4 text-left transition hover:bg-accent">
           <div className="text-sm font-semibold text-foreground">Replay the onboarding tour</div>
           <div className="mt-1 text-xs text-muted-foreground">Walk through every feature again, step by step.</div>
