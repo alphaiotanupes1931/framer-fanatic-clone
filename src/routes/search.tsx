@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { EventImage } from "@/components/event-image";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -149,7 +150,7 @@ function SearchPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   {events.slice(0, tab === "All" ? 6 : 24).map((e) => (
                     <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="overflow-hidden rounded-xl border border-border bg-card hover:bg-accent">
-                      {e.image_url && <img src={e.image_url} alt="" className="h-32 w-full object-cover" />}
+                      {e.image_url && <EventImage src={e.image_url} alt="" className="h-32 w-full object-cover" />}
                       <div className="p-3">
                         <div className="text-sm font-semibold text-foreground line-clamp-1">{e.title}</div>
                         <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { EventImage } from "@/components/event-image";
 
 type EventRow = {
   id: string;
@@ -50,7 +51,7 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
     <Link to="/events/$eventId" params={{ eventId: event.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">
         {event.image_url ? (
-          <img src={event.image_url} alt={event.title} className="h-full w-full object-cover" loading="lazy" />
+          <EventImage src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#d4580a]/20 to-primary/10">
             <Calendar className="h-12 w-12 text-[#d4580a]/40" />

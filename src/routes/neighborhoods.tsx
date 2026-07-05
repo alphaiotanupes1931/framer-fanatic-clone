@@ -8,6 +8,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { MapPin, Calendar, Ticket } from "lucide-react";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EventImage } from "@/components/event-image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/neighborhoods")({
@@ -220,7 +221,7 @@ function NeighborhoodsPage() {
                     >
                       <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                         {ev.image_url ? (
-                          <img src={ev.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" loading="lazy" decoding="async" />
+                          <EventImage src={ev.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
                         ) : (
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                         )}
