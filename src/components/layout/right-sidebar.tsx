@@ -51,7 +51,7 @@ export function RightSidebar() {
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any) => (
-              <Link key={s.id} to="/stories" className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
+              <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
                 <Avatar className="h-12 w-12 flex-shrink-0 rounded-xl">
                   <AvatarImage src={s.cover_url} className="rounded-xl object-cover" />
                   <AvatarFallback className="rounded-xl bg-accent/10 text-sm font-bold text-accent-foreground">{s.title?.charAt(0)}</AvatarFallback>
