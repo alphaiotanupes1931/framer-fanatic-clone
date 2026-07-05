@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { Story, Event } from "@/lib/entities";
 import { supabase } from "@/integrations/supabase/client";
+import { EventImage } from "@/components/event-image";
 import type { ReactNode, ComponentType } from "react";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
@@ -97,10 +98,13 @@ export function RightSidebar() {
           <SuggestionSection title="Upcoming Events" icon={Calendar} seeAllLink="/events">
             {events.map((e: any) => (
               <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
-                <Avatar className="h-12 w-12 flex-shrink-0 rounded-xl">
-                  <AvatarImage src={e.image_url} className="rounded-xl object-cover" />
-                  <AvatarFallback className="rounded-xl bg-accent/10 text-sm font-bold text-accent-foreground">{e.title?.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-accent/10">
+                  {e.image_url ? (
+                    <EventImage src={e.image_url} alt={e.title} className="h-full w-full rounded-xl object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm font-bold text-accent-foreground">{e.title?.charAt(0)}</div>
+                  )}
+                </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{e.title}</p>
                   <p className="truncate text-xs text-muted-foreground">
