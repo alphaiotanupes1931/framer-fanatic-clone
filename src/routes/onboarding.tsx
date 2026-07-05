@@ -16,6 +16,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Camera, Upload } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { CREATOR_CATEGORIES } from "@/lib/categories";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
@@ -31,6 +32,7 @@ function Onboarding() {
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
   const [neighborhood, setNeighborhood] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [otherReason, setOtherReason] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -71,6 +73,9 @@ function Onboarding() {
     if (!category) {
       return toast.error("Please choose what best describes you.");
     }
+    if (category === "Other" && !otherReason.trim()) {
+      return toast.error("Please tell us a bit about what you do.");
+    }
     setBusy(true);
     try {
       let avatar_url: string | null = null;
@@ -80,9 +85,10 @@ function Onboarding() {
       if (upErr) throw upErr;
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
       avatar_url = signed?.signedUrl ?? null;
+      const finalCategory = category === "Other" ? `Other: ${otherReason.trim()}` : category;
       const { error } = await supabase
         .from("profiles")
-        .update({ avatar_url, neighborhood, category, onboarded: true })
+        .update({ avatar_url, neighborhood, category: finalCategory, onboarded: true })
         .eq("id", userId);
       if (error) throw error;
       navigate({ to: "/dashboard" });
@@ -101,10 +107,11 @@ function Onboarding() {
         <CardHeader className="text-center">
           <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Add a profile photo</CardTitle>
-          <CardDescription>A profile photo is required so your neighbors can recognize you.</CardDescription>
+          <CardDescription>All fields below are required so your neighbors can recognize you.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
+            <p className="text-xs font-medium text-orange-600">Profile photo (required)</p>
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -135,9 +142,12 @@ function Onboarding() {
             >
               <Upload className="h-4 w-4" /> {file ? "Change photo" : "Choose photo"}
             </Button>
+            {!file && (
+              <p className="text-xs text-neutral-500">A photo is required to continue.</p>
+            )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="neighborhood">Your Baltimore neighborhood</Label>
+            <Label htmlFor="neighborhood">Your Baltimore neighborhood <span className="text-orange-600">*</span></Label>
             <Select value={neighborhood} onValueChange={setNeighborhood}>
               <SelectTrigger id="neighborhood">
                 <SelectValue placeholder="Select your neighborhood" />
@@ -152,7 +162,7 @@ function Onboarding() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="category">What best describes you?</Label>
+            <Label htmlFor="category">What best describes you? <span className="text-orange-600">*</span></Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger id="category">
                 <SelectValue placeholder="Choose a category" />
@@ -161,18 +171,42 @@ function Onboarding() {
                 {CREATOR_CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
+                <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-neutral-500">This shapes your public profile (Gallery, Episodes, Tracks…).</p>
+            {category === "Other" && (
+              <div className="space-y-1 pt-2">
+                <Label htmlFor="otherReason" className="text-sm">Tell us what you do <span className="text-orange-600">*</span></Label>
+                <Textarea
+                  id="otherReason"
+                  placeholder="e.g. Baker, urban farmer, community organizer..."
+                  value={otherReason}
+                  onChange={(e) => setOtherReason(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <Button
               onClick={() => finish()}
-              disabled={busy || !file || !neighborhood || !category}
+              disabled={busy || !file || !neighborhood || !category || (category === "Other" && !otherReason.trim())}
               className="w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               {busy ? "Saving…" : "Continue"}
             </Button>
+            {(!file || !neighborhood || !category || (category === "Other" && !otherReason.trim())) && (
+              <p className="text-center text-xs text-neutral-500">
+                {!file
+                  ? "Add a profile photo to continue."
+                  : !neighborhood
+                  ? "Choose your neighborhood to continue."
+                  : !category
+                  ? "Choose what best describes you to continue."
+                  : "Tell us what you do to continue."}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

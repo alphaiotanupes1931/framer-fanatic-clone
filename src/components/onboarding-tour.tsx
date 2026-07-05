@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Joyride, EVENTS, STATUS, type EventData, type Step } from "react-joyride";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { useLocation } from "@tanstack/react-router";
 
 const STORAGE_KEY = "pb_onboarding_tour_v1";
 const SIGNUP_FLAG = "pb_new_signup";
@@ -127,6 +128,11 @@ export function OnboardingTour() {
     }
   };
 
+  const location = useLocation();
+  const hideShare =
+    location.pathname.startsWith("/onboarding") ||
+    location.pathname.startsWith("/auth");
+
   return (
     <>
       <Joyride
@@ -147,7 +153,7 @@ export function OnboardingTour() {
           buttonSkip: { color: "#9a9a9a", fontSize: 12 },
         }}
       />
-      <button
+      {!hideShare && <button
         onClick={async () => {
           const url = `${window.location.origin}/`;
           try {
@@ -164,7 +170,7 @@ export function OnboardingTour() {
         className="fixed bottom-[132px] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-card-foreground shadow-md transition hover:bg-accent hover:text-orange md:bottom-24 md:right-6 md:h-12 md:w-12"
       >
         <Share2 className="h-5 w-5" strokeWidth={1.75} />
-      </button>
+      </button>}
     </>
   );
 }
