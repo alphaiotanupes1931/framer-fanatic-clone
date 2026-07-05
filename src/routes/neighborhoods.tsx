@@ -8,6 +8,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { MapPin, Calendar, Ticket } from "lucide-react";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EventImage } from "@/components/event-image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/neighborhoods")({
