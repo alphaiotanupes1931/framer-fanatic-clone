@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import pbLogo from "../assets/pb-logo.png";
 import { CookieBanner } from "../components/cookie-banner";
+import { OnboardingTour } from "../components/onboarding-tour";
 
 const themeScript = `
   (function() {
