@@ -191,7 +191,9 @@ function Dashboard() {
   }, [activeFilter, posts, stories, events, follows, currentUser]);
 
   const isEmpty = !isLoading && feedItems.length === 0;
-  const hoodPrimary = currentUser?.neighborhood_names?.[0] || currentUser?.neighborhood;
+  const rawHood = currentUser?.neighborhood_names?.[0] || currentUser?.neighborhood;
+  // "Baltimore" is the city, not a neighborhood — treat as unset so the user is prompted to pick one.
+  const hoodPrimary = rawHood && rawHood.trim().toLowerCase() !== "baltimore" ? rawHood : null;
 
   if (!checked) return null;
 
@@ -316,13 +318,13 @@ function Dashboard() {
                 if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} />;
                 if (item.type === "story") return (
                   <div className="space-y-1.5">
-                    <span className="inline-block rounded-full bg-[#d4580a]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#d4580a]">Story</span>
+                    <span className="inline-flex items-center rounded-full bg-[#d4580a]/10 px-2.5 py-1 text-[10px] font-semibold uppercase leading-none tracking-wider text-[#d4580a]">Story</span>
                     <StoryCard story={item.data} />
                   </div>
                 );
                 return (
                   <div className="space-y-1.5">
-                    <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Event</span>
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase leading-none tracking-wider text-primary">Event</span>
                     <EventCard event={item.data} />
                   </div>
                 );
