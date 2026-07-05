@@ -220,7 +220,7 @@ function NeighborhoodsPage() {
                     >
                       <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                         {ev.image_url ? (
-                          <img src={ev.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" loading="lazy" decoding="async" />
+                          <EventImage src={ev.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
                         ) : (
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                         )}
