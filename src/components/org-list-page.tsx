@@ -18,10 +18,14 @@ export function OrgListPage({
   type,
   title,
   subtitle,
+  showMap = true,
+  showSort = false,
 }: {
   type: "arts_org" | "business" | "community_assoc" | "group";
   title: string;
   subtitle: string;
+  showMap?: boolean;
+  showSort?: boolean;
 }) {
   const { isArtist, isAdmin } = useUserRole();
   const canCreate = isArtist || isAdmin;
@@ -31,10 +35,13 @@ export function OrgListPage({
   const [sub, setSub] = useState<string>("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState<"newest" | "oldest" | "name">("newest");
 
   const load = async () => {
     setLoading(true);
-    let qb = supabase.from("organizations").select("*").eq("type", type).order("created_at", { ascending: false });
+    let qb = supabase.from("organizations").select("*").eq("type", type);
+    if (sort === "name") qb = qb.order("name", { ascending: true });
+    else qb = qb.order("created_at", { ascending: sort === "oldest" });
     if (sub) qb = qb.eq("subtype", sub);
     const { data } = await qb;
     let list = (data ?? []) as Org[];
@@ -44,7 +51,7 @@ export function OrgListPage({
     }
     setItems(list); setLoading(false);
   };
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sub]);
+  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sub, sort]);
   useEffect(() => { const t = setTimeout(() => void load(), 200); return () => clearTimeout(t); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [q]);
 
   return (
@@ -55,12 +62,14 @@ export function OrgListPage({
           subtitle={subtitle}
           cta={
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-              >
-                <MapPin className="h-4 w-4" /> Map
-              </button>
+              {showMap && (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+                >
+                  <MapPin className="h-4 w-4" /> Map
+                </button>
+              )}
               {canCreate && (
                 <button
                   type="button"
@@ -74,14 +83,27 @@ export function OrgListPage({
           }
         />
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={`Search ${title.toLowerCase()}...`}
-            className="w-full rounded-full border border-neutral-200 bg-neutral-100/70 py-3 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:bg-white focus:outline-none"
-          />
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative min-w-[220px] flex-1">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={`Search ${title.toLowerCase()}...`}
+              className="w-full rounded-full border border-neutral-200 bg-neutral-100/70 py-3 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:bg-white focus:outline-none"
+            />
+          </div>
+          {showSort && (
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as "newest" | "oldest" | "name")}
+              className="rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none"
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="name">Name</option>
+            </select>
+          )}
         </div>
 
         {subs.length > 0 && (
@@ -128,23 +150,22 @@ export function OrgListPage({
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((o) => (
               <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }}
-                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300">
-                <div className="h-24 bg-gradient-to-br from-orange-200 to-orange-400"
-                  style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined} />
-                <div className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="-mt-8 h-12 w-12 shrink-0 overflow-hidden rounded-full border-4 border-white bg-neutral-100">
-                      {o.avatar_url && <img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-semibold truncate">{o.name}</div>
-                      {o.subtype && <div className="text-xs text-orange-600">{o.subtype}</div>}
-                    </div>
+                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
+                <div className="relative h-40 bg-neutral-100"
+                  style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+                  <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+                    {o.avatar_url && <img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
-                  {o.bio && <p className="mt-2 text-sm text-neutral-600 line-clamp-2">{o.bio}</p>}
+                </div>
+                <div className="px-4 pb-4 pt-8">
+                  <div className="flex items-center gap-1.5">
+                    <div className="truncate text-base font-bold text-neutral-900">{o.name}</div>
+                    <span className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-neutral-300" aria-hidden />
+                  </div>
+                  {o.subtype && <div className="mt-1 text-sm text-neutral-600">{o.subtype}</div>}
                   {o.neighborhood && (
-                    <div className="mt-2 inline-flex items-center gap-1 text-xs text-neutral-500">
-                      <MapPin className="h-3 w-3" /> {o.neighborhood}
+                    <div className="mt-3 inline-flex items-center gap-1 text-sm text-neutral-500">
+                      <MapPin className="h-3.5 w-3.5" /> {o.neighborhood}
                     </div>
                   )}
                 </div>
