@@ -222,35 +222,7 @@ function Dashboard() {
 
         <div className="border-b border-slate-200" />
 
-        {/* Neighborhood quick-filter */}
-        {currentUser && !userLoading && (
-          hoodPrimary ? (
-            <button
-              onClick={() => { setActiveFilter("Nearby"); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
-              className={`flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left text-sm transition-all ${
-                activeFilter === "Nearby"
-                  ? "bg-[#d4580a] text-white"
-                  : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
-              }`}
-            >
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>My Neighborhood: <span className="font-semibold text-foreground">{hoodPrimary}</span></span>
-              {activeFilter !== "Nearby" && <span className="ml-auto text-xs">See local feed →</span>}
-            </button>
-          ) : (
-            <Link
-              to="/profile"
-              className="flex w-full items-center gap-2 rounded-xl bg-secondary/60 px-4 py-3 text-sm text-muted-foreground transition-all hover:bg-secondary"
-            >
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>Add your neighborhood to see local content</span>
-              <span className="ml-auto text-xs">Set up →</span>
-            </Link>
-          )
-        )}
-
-        {/* Onboarding for zero-follow users */}
-        {!loadingFollows && follows.length === 0 && <OnboardingCard />}
+        <OnboardingCard />
 
         {activeFilter === "Discover" && (
           <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent/5 p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">

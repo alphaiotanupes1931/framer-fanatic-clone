@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, Sparkles, Users, PenLine, Calendar } from "lucide-react";
 
-const STORAGE_KEY = "pb_onboarding_v2_dismissed";
+const STORAGE_KEY = "pb_onboarding_v3_dismissed";
 
 const steps = [
   { icon: Sparkles, color: "#d4580a", title: "Follow artists & creators", description: "Discover Baltimore talent and see their updates in your feed.", to: "/artists", cta: "Browse Artists" },
