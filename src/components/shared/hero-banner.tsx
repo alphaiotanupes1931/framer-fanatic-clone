@@ -13,30 +13,30 @@ export function HeroBanner({
 }) {
   return (
     <div
-      className="relative overflow-hidden rounded-3xl border bg-[#d4580a]/[0.04] p-6 sm:p-10"
-      style={{ borderColor: "rgba(212, 88, 10, 0.35)" }}
+      className="relative min-h-[118px] overflow-hidden rounded-xl border-2 bg-[#fffdfb] px-8 py-7 sm:px-9 sm:py-8"
+      style={{ borderColor: "#d4580a" }}
     >
       <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 max-w-2xl">
           <h1
-            className="mb-1.5 font-display text-2xl font-bold tracking-tight sm:text-4xl"
+            className="mb-1 font-display text-[26px] font-extrabold leading-tight sm:text-[28px]"
             style={{ color: "#d4580a" }}
           >
             {title}
           </h1>
           {subtitle && (
-            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{subtitle}</p>
+            <p className="text-xs font-medium leading-relaxed" style={{ color: "#d4580a" }}>{subtitle}</p>
           )}
         </div>
         {cta && <div className="flex-shrink-0">{cta}</div>}
       </div>
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.055]">
         <div
-          className="absolute top-0 right-0 w-64 h-64 rounded-full -translate-y-1/2 translate-x-1/2"
+          className="absolute right-[-58px] top-[-84px] h-48 w-48 rounded-full"
           style={{ backgroundColor: "#d4580a" }}
         />
         <div
-          className="absolute bottom-0 left-0 w-48 h-48 rounded-full translate-y-1/2 -translate-x-1/2"
+          className="absolute bottom-[-74px] left-[-70px] h-36 w-36 rounded-full"
           style={{ backgroundColor: "#d4580a" }}
         />
       </div>
