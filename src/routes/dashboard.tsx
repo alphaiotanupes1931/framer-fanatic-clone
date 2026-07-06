@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { PostCard } from "@/components/shared/post-card";
+import { HeroBanner } from "@/components/shared/hero-banner";
 import { StoryCard } from "@/components/shared/story-card";
 import { EventCard } from "@/components/shared/event-card";
 import { DiscoverCard } from "@/components/discovery/discover-card";
@@ -200,36 +201,21 @@ function Dashboard() {
   return (
     <AppLayout>
       <div className="space-y-5 overflow-x-hidden sm:space-y-7">
-        {/* Hero Banner */}
-        <div
-          className="relative overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-12"
-          style={{ backgroundColor: "#FFF7F2" }}
-        >
-          <div className="pointer-events-none absolute -right-8 -top-16 h-40 w-40 rounded-full blur-2xl" style={{ backgroundColor: "rgba(212, 88, 10, 0.18)" }} />
-          <div className="pointer-events-none absolute -bottom-16 -right-24 h-64 w-64 rounded-full blur-3xl" style={{ backgroundColor: "rgba(212, 88, 10, 0.10)" }} />
-          <div className="relative z-10">
-            <h1 className="mb-1.5 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl" style={{ color: "#D4580A" }}>
-              Planet Baltimore
-            </h1>
-            <p className="text-sm font-medium sm:text-base" style={{ color: "rgba(212, 88, 10, 0.75)" }}>
-              Your city. Your community. Your feed.
-            </p>
-          </div>
-        </div>
+        <HeroBanner title="Planet Baltimore" subtitle="Your city. Your community. Your feed." />
 
         {/* Filters */}
-        <div className="scrollbar-hide -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:-mx-4 sm:px-4">
+        <div className="scrollbar-hide -mx-3 flex flex-wrap gap-2 overflow-x-auto px-3 pb-1 sm:-mx-4 sm:px-4">
           {FILTERS.map((filter) => (
             <button
               key={filter}
               onClick={() => { setActiveFilter(filter); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold tracking-tight transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 sm:px-5 sm:text-sm ${
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
                 activeFilter === filter
-                  ? "bg-[#d4580a] text-white shadow-sm"
-                  : "border border-border/60 bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  ? "bg-[#d4580a] text-white"
+                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
               }`}
             >
-              {filter === "Discover" && <Compass className="h-3.5 w-3.5" />}
+              {filter === "Discover" && <Compass className="h-4 w-4" />}
               {filter}
             </button>
           ))}
@@ -276,10 +262,6 @@ function Dashboard() {
 
         {/* Feed */}
         <div className="space-y-4 sm:space-y-5">
-          <div className="flex items-center gap-2 px-1">
-            <div className="h-3 w-1 rounded-full bg-[#d4580a]" />
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Latest in your feed</span>
-          </div>
           {isLoading || filterLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
