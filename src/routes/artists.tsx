@@ -112,9 +112,12 @@ function FindCreatorPage() {
             subtitle="Discover Baltimore's creative voices, visual art, music, photography & more."
             cta={
               <Link to="/profile">
-                <Button className="rounded-full text-white shadow-sm" style={{ backgroundColor: "#d4580a" }}>
-                  <Plus className="mr-1 h-4 w-4" /> Create Artist Page
-                </Button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+                >
+                  <Plus className="h-4 w-4" /> Create Artist Page
+                </button>
               </Link>
             }
           />
@@ -140,15 +143,15 @@ function FindCreatorPage() {
             </Select>
           </div>
 
-          <div className="scrollbar-hide -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0">
+          <div className="scrollbar-hide -mx-3 flex flex-wrap gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0">
             {CATEGORIES.map((c) => (
               <button
                 key={c}
                 onClick={() => setCategory(c)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition ${
                   category === c
-                    ? "bg-[#d4580a] text-white shadow-sm"
-                    : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                    ? "bg-[#d4580a] text-white"
+                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
                 }`}
               >
                 {c}
