@@ -5,7 +5,8 @@ import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ORG_TYPE_LABEL, subtypesFor } from "@/lib/categories";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
-import { Plus, MapPin, Search } from "lucide-react";
+import { Plus, MapPin, Search, Building2 } from "lucide-react";
+import { HeroBanner } from "@/components/shared/hero-banner";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -48,34 +49,80 @@ export function OrgListPage({
 
   return (
     <AppLayout title={title} subtitle={subtitle}>
-      <div className="space-y-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative max-w-md flex-1 min-w-[220px]">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${title.toLowerCase()}…`}
-              className="w-full rounded-full border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-orange-400 focus:outline-none" />
-          </div>
-          {canCreate && (
-            <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">
-              <Plus className="h-4 w-4" /> Create {ORG_TYPE_LABEL[type]}
-            </button>
-          )}
+      <div className="space-y-6">
+        <HeroBanner
+          title={title}
+          subtitle={subtitle}
+          cta={
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+              >
+                <MapPin className="h-4 w-4" /> Map
+              </button>
+              {canCreate && (
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+                >
+                  <Plus className="h-4 w-4" /> Create {ORG_TYPE_LABEL[type]} Page
+                </button>
+              )}
+            </div>
+          }
+        />
+
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={`Search ${title.toLowerCase()}...`}
+            className="w-full rounded-full border border-neutral-200 bg-neutral-100/70 py-3 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:bg-white focus:outline-none"
+          />
         </div>
 
         {subs.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => setSub("")} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${sub === "" ? "border-orange-600 bg-orange-600 text-white" : "border-neutral-200 bg-white text-neutral-700"}`}>All</button>
+            <button
+              onClick={() => setSub("")}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                sub === ""
+                  ? "bg-[#d4580a] text-white"
+                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+              }`}
+            >
+              All
+            </button>
             {subs.map((s) => (
-              <button key={s} onClick={() => setSub(s)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${sub === s ? "border-orange-600 bg-orange-600 text-white" : "border-neutral-200 bg-white text-neutral-700 hover:border-orange-300"}`}>{s}</button>
+              <button
+                key={s}
+                onClick={() => setSub(s)}
+                className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                  sub === s
+                    ? "bg-[#d4580a] text-white"
+                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                }`}
+              >
+                {s}
+              </button>
             ))}
           </div>
         )}
 
         {loading ? (
-          <div className="py-12 text-center text-neutral-500">Loading…</div>
+          <div className="py-16 text-center text-neutral-500">Loading…</div>
         ) : items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">
-            No {title.toLowerCase()} yet{canCreate ? ". Be the first to add one." : "."}
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+              <Building2 className="h-7 w-7 text-neutral-400" />
+            </div>
+            <div className="text-base font-semibold text-neutral-900">No {title.toLowerCase()} found</div>
+            <div className="mt-1 text-sm text-neutral-500">
+              Be the first to add a Baltimore {ORG_TYPE_LABEL[type].toLowerCase()}.
+            </div>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
