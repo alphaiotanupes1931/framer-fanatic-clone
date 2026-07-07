@@ -24,14 +24,14 @@ export function GroupsPage() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState<"newest" | "oldest" | "name">("newest");
+  const [sort, setSort] = useState<"newest" | "members">("newest");
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("All");
 
   const load = async () => {
     setLoading(true);
     let qb = supabase.from("organizations").select("*").eq("type", "group");
-    if (sort === "name") qb = qb.order("name", { ascending: true });
-    else qb = qb.order("created_at", { ascending: sort === "oldest" });
+    if (sort === "members") qb = qb.order("member_count", { ascending: false, nullsFirst: false });
+    else qb = qb.order("created_at", { ascending: false });
     const { data } = await qb;
     setItems((data ?? []) as Org[]);
     setLoading(false);
@@ -95,12 +95,11 @@ export function GroupsPage() {
           </div>
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as "newest" | "oldest" | "name")}
+            onChange={(e) => setSort(e.target.value as "newest" | "members")}
             className="rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none"
           >
             <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="name">Name</option>
+            <option value="members">Most Members</option>
           </select>
         </div>
 
