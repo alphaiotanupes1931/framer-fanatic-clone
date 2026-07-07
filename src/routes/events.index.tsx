@@ -310,26 +310,30 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-5 py-4 text-sm font-semibold text-neutral-700 hover:border-orange-300">
-            <TrendingUp className="h-4 w-4 text-neutral-500" /> Organizer Studio
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <button className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-2 py-3 text-[12px] font-semibold text-neutral-700 hover:border-orange-300 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm">
+            <TrendingUp className="h-4 w-4 text-neutral-500" />
+            <span className="hidden sm:inline">Organizer Studio</span>
+            <span className="sm:hidden">Studio</span>
           </button>
-          <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-5 py-4 text-sm font-semibold text-neutral-700 hover:border-orange-300">
-            <LayoutDashboard className="h-4 w-4 text-neutral-500" /> Promoter Dashboard
+          <button className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-2 py-3 text-[12px] font-semibold text-neutral-700 hover:border-orange-300 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm">
+            <LayoutDashboard className="h-4 w-4 text-neutral-500" />
+            <span className="hidden sm:inline">Promoter Dashboard</span>
+            <span className="sm:hidden">Promoter</span>
           </button>
           {isArtist ? (
             <Link
               to="/events/new"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d4580a] px-5 py-4 text-sm font-semibold text-white shadow-sm hover:brightness-110"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#d4580a] px-2 py-3 text-[12px] font-semibold text-white shadow-sm hover:brightness-110 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm"
             >
-              <Plus className="h-4 w-4" /> Create Event
+              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create Event</span><span className="sm:hidden">Create</span>
             </Link>
           ) : (
             <button
               onClick={() => setOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d4580a] px-5 py-4 text-sm font-semibold text-white shadow-sm hover:brightness-110"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#d4580a] px-2 py-3 text-[12px] font-semibold text-white shadow-sm hover:brightness-110 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm"
             >
-              <Plus className="h-4 w-4" /> Create Event
+              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create Event</span><span className="sm:hidden">Create</span>
             </button>
           )}
         </div>

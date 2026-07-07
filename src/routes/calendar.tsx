@@ -41,6 +41,65 @@ const EVENT_TYPES = [
   "Wellness", "Nightlife", "Family", "Festival", "Networking", "Activism", "Sports",
 ];
 
+function MobileDateStrip({
+  selected,
+  onSelect,
+  eventDays,
+}: {
+  selected: Date | undefined;
+  onSelect: (d: Date | undefined) => void;
+  eventDays: Date[];
+}) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    return d;
+  });
+  const eventSet = new Set(eventDays.map((d) => d.toDateString()));
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+      <div className="mb-2 flex items-center justify-between px-1 text-xs font-semibold text-neutral-500">
+        <span>{today.toLocaleString(undefined, { month: "long", year: "numeric" })}</span>
+        <button
+          onClick={() => onSelect(today)}
+          className="rounded-full border border-neutral-200 px-2.5 py-0.5 text-[11px] font-semibold text-neutral-600"
+        >
+          Today
+        </button>
+      </div>
+      <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+        {days.map((d) => {
+          const isSel = selected && d.toDateString() === selected.toDateString();
+          const hasEvent = eventSet.has(d.toDateString());
+          return (
+            <button
+              key={d.toISOString()}
+              onClick={() => onSelect(d)}
+              className={`relative flex min-w-[52px] flex-col items-center rounded-xl border px-2 py-2 transition ${
+                isSel
+                  ? "border-[#d4580a] bg-[#d4580a] text-white"
+                  : "border-neutral-200 bg-white text-neutral-700 hover:border-orange-300"
+              }`}
+            >
+              <span className={`text-[10px] font-semibold uppercase ${isSel ? "text-white/80" : "text-neutral-500"}`}>
+                {d.toLocaleString(undefined, { weekday: "short" })}
+              </span>
+              <span className="mt-0.5 text-lg font-bold leading-none">{d.getDate()}</span>
+              {hasEvent && (
+                <span
+                  className={`mt-1 h-1 w-1 rounded-full ${isSel ? "bg-white" : "bg-[#d4580a]"}`}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function CalendarPage() {
   const [events, setEvents] = useState<Ev[]>([]);
   const [selected, setSelected] = useState<Date | undefined>(new Date());
@@ -126,7 +185,7 @@ function CalendarPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[340px_1fr] lg:gap-8">
         {/* Left column: calendar + filters */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm sm:p-4">
+          <div className="hidden rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm sm:block sm:p-4">
             <Calendar
               mode="single"
               selected={selected}
@@ -138,6 +197,10 @@ function CalendarPage() {
               }}
               className="pointer-events-auto mx-auto"
             />
+          </div>
+          {/* Mobile: horizontal date strip */}
+          <div className="sm:hidden">
+            <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
           </div>
 
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">

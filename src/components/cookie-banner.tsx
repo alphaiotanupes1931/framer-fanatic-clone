@@ -18,26 +18,31 @@ export function CookieBanner() {
     setShow(false);
   };
   return (
-    <div className="fixed inset-x-3 bottom-3 z-[80] md:inset-x-auto md:right-5 md:bottom-5 md:max-w-md">
-      <div className="rounded-2xl border border-white/10 bg-neutral-900 text-white shadow-2xl p-4 md:p-5 dark:bg-card dark:text-card-foreground dark:border-border">
-        <div className="text-sm leading-snug">
-          We use cookies to keep you signed in and improve Planet Baltimore. See our{" "}
-          <Link to="/privacy" className="underline">Privacy Policy</Link> and{" "}
-          <Link to="/cookies" className="underline">Cookie Policy</Link>.
-        </div>
-        <div className="mt-3 flex gap-2 justify-end">
-          <button
-            onClick={() => decide("declined")}
-            className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-medium hover:bg-white/10 dark:border-border dark:hover:bg-accent"
-          >
-            Decline
-          </button>
-          <button
-            onClick={() => decide("accepted")}
-            className="rounded-full bg-white !text-neutral-900 px-4 py-1.5 text-xs font-semibold hover:brightness-95 dark:bg-orange dark:!text-white"
-          >
-            Accept
-          </button>
+    <div
+      className="fixed inset-x-2 z-[80] md:inset-x-auto md:right-5 md:bottom-5 md:max-w-md"
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 4.75rem)" }}
+    >
+      <div className="rounded-xl border border-white/10 bg-neutral-900 p-3 text-white shadow-2xl md:rounded-2xl md:p-5 dark:bg-card dark:text-card-foreground dark:border-border">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1 text-[12px] leading-snug md:text-sm">
+            We use cookies to keep you signed in. See our{" "}
+            <Link to="/privacy" className="underline">Privacy</Link> and{" "}
+            <Link to="/cookies" className="underline">Cookies</Link>.
+          </div>
+          <div className="flex flex-shrink-0 gap-1.5">
+            <button
+              onClick={() => decide("declined")}
+              className="rounded-full border border-white/20 px-3 py-1 text-[11px] font-medium hover:bg-white/10 md:px-4 md:py-1.5 md:text-xs dark:border-border dark:hover:bg-accent"
+            >
+              Decline
+            </button>
+            <button
+              onClick={() => decide("accepted")}
+              className="rounded-full bg-white !text-neutral-900 px-3 py-1 text-[11px] font-semibold hover:brightness-95 md:px-4 md:py-1.5 md:text-xs dark:bg-orange dark:!text-white"
+            >
+              Accept
+            </button>
+          </div>
         </div>
       </div>
     </div>
