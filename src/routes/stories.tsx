@@ -351,6 +351,37 @@ function StoriesSignedIn() {
               <select value={form.format} onChange={(e) => setForm({...form, format: e.target.value})} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">
                 {["blog","poetry","essay","resource"].map((f) => <option key={f}>{f}</option>)}
               </select>
+              <div className="rounded-lg border border-neutral-200 p-3">
+                <div className="flex items-center gap-3">
+                  {form.cover_url ? (
+                    <img src={form.cover_url} alt="" className="h-16 w-16 rounded-md object-cover border" />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-md bg-neutral-100 text-neutral-400"><ImagePlus className="h-5 w-5" /></div>
+                  )}
+                  <div className="flex-1">
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold hover:bg-neutral-50 disabled:opacity-60"
+                    >
+                      {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImagePlus className="h-3 w-3" />}
+                      {form.cover_url ? "Replace cover image" : "Upload cover image"}
+                    </button>
+                    {form.cover_url && (
+                      <button type="button" onClick={() => setForm({ ...form, cover_url: "" })} className="ml-2 text-xs text-neutral-500 hover:text-neutral-800">Remove</button>
+                    )}
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickCover(f); e.target.value = ""; }}
+                    />
+                    <p className="mt-1 text-[11px] text-neutral-500">Optional. Shown on the story card and detail page.</p>
+                  </div>
+                </div>
+              </div>
               <input value={form.excerpt} onChange={(e) => setForm({...form, excerpt: e.target.value})} placeholder="Excerpt (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <textarea value={form.content} onChange={(e) => setForm({...form, content: e.target.value})} placeholder="Your story…" rows={10} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <button onClick={submit} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">Publish</button>
