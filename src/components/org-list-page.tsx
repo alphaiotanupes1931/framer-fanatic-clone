@@ -21,12 +21,14 @@ export function OrgListPage({
   subtitle,
   showMap = true,
   showSort = false,
+  showFeatured = false,
 }: {
   type: "arts_org" | "business" | "community_assoc" | "group";
   title: string;
   subtitle: string;
   showMap?: boolean;
   showSort?: boolean;
+  showFeatured?: boolean;
 }) {
   const { isArtist, isAdmin } = useUserRole();
   const canCreate = isArtist || isAdmin;
@@ -139,6 +141,36 @@ export function OrgListPage({
           <div className="overflow-hidden rounded-2xl border border-neutral-200">
             <BaltimoreMap />
           </div>
+        )}
+
+        {showFeatured && !loading && items.length > 0 && (
+          <section>
+            <h2 className="mb-3 text-lg font-bold text-neutral-900">Featured</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {items.slice(0, 3).map((o) => (
+                <Link key={`f-${o.id}`} to="/o/$slug" params={{ slug: o.slug }}
+                  className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
+                  <div className="relative h-40 bg-neutral-100"
+                    style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+                    <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+                      {o.avatar_url && <img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4 pt-8">
+                    <div className="truncate text-base font-bold text-neutral-900">{o.name}</div>
+                    {o.subtype && <div className="mt-1 text-sm text-neutral-600">{o.subtype}</div>}
+                    {o.bio && <p className="mt-2 line-clamp-3 text-sm text-neutral-600">{o.bio}</p>}
+                    {o.neighborhood && (
+                      <div className="mt-3 inline-flex items-center gap-1 text-sm text-neutral-500">
+                        <MapPin className="h-3.5 w-3.5" /> {o.neighborhood}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <h2 className="mt-8 mb-3 text-lg font-bold text-neutral-900">All Organizations</h2>
+          </section>
         )}
 
         {loading ? (
