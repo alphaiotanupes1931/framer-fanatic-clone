@@ -122,15 +122,13 @@ function NotificationsPage() {
         />
 
         {loading ? (
-          <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
+          <ListSkeleton count={5} />
         ) : items.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: "rgba(212,88,10,0.1)" }}>
-              <Bell className="h-8 w-8" style={{ color: "#d4580a" }} />
-            </div>
-            <h3 className="mb-1 font-semibold text-foreground">No notifications yet</h3>
-            <p className="text-sm text-muted-foreground">When people interact with you, you'll see it here.</p>
-          </div>
+          <EmptyState
+            icon={Bell}
+            title="No notifications yet"
+            description="When people interact with you, you'll see it here."
+          />
         ) : (
           <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
             {items.map((n) => {
