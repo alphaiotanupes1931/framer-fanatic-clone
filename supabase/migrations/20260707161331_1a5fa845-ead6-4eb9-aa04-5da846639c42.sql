@@ -1,0 +1,1 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS tagline text, ADD COLUMN IF NOT EXISTS mission text;
