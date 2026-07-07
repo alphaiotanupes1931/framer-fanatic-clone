@@ -65,11 +65,11 @@ function Shell({ children }: { children: ReactNode }) {
       <LeftSidebar />
       <RightSidebar />
       <div
-        className={`flex min-h-[100dvh] flex-col transition-all duration-300 xl:mr-[280px] ${collapsed ? "lg:ml-[78px]" : "lg:ml-[250px]"}`}
+        className={`flex min-h-[100dvh] flex-col transition-all duration-300 2xl:mr-[300px] ${collapsed ? "lg:ml-[78px]" : "lg:ml-[240px]"}`}
       >
         <TopMenuBar />
         <main className="w-full flex-1">
-          <div className="w-full px-4 py-4 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-5 sm:py-6 lg:px-8 lg:py-8 lg:pb-8">
+          <div className="mx-auto w-full max-w-[1100px] px-4 py-4 pb-[calc(5rem+env(safe-area-inset-bottom))] text-[15px] sm:px-6 sm:py-6 lg:px-10 lg:py-10 lg:pb-10 lg:text-base">
             {children}
           </div>
         </main>

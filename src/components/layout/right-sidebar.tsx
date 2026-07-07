@@ -47,7 +47,7 @@ export function RightSidebar() {
   });
 
   return (
-    <aside className="fixed right-0 top-0 z-30 hidden h-screen w-[280px] overflow-y-auto border-l border-slate-200 bg-white xl:block">
+    <aside className="fixed right-0 top-0 z-30 hidden h-screen w-[300px] overflow-y-auto border-l border-slate-200 bg-white 2xl:block">
       <div className="space-y-4 px-5 pb-6 pt-[70px]">
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
