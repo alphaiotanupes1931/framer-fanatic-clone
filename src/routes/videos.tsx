@@ -6,6 +6,7 @@ import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-prev
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
 import { Play, Search, Star, Plus, X } from "lucide-react";
+import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
@@ -86,7 +87,9 @@ function VideosSignedIn() {
       list.forEach((v) => { v.author = byId.get(v.user_id) as any; });
     }
     setVids(list);
+    setLoaded(true);
   };
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => { load(); }, []);
 
   const filtered = vids.filter((v) => v.title.toLowerCase().includes(query.toLowerCase()));
@@ -148,10 +151,24 @@ function VideosSignedIn() {
 
         <section>
           <h2 className="mb-3 text-sm font-bold">All Videos</h2>
-          {rest.length === 0 && <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">No videos yet.</div>}
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {rest.map((v) => <VideoCard key={v.id} v={v} />)}
-          </div>
+          {!loaded ? (
+            <CardGridSkeleton count={6} />
+          ) : rest.length === 0 ? (
+            <EmptyState
+              icon={Play}
+              title="No videos yet"
+              description="Add the first video from Baltimore creators."
+              action={
+                <button onClick={() => setOpen(true)} className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
+                  Add Video
+                </button>
+              }
+            />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {rest.map((v) => <VideoCard key={v.id} v={v} />)}
+            </div>
+          )}
         </section>
       </div>
 
