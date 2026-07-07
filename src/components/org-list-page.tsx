@@ -137,11 +137,13 @@ export function OrgListPage({
           </div>
         )}
 
-        {view === "map" ? (
+        {view === "map" && (
           <div className="overflow-hidden rounded-2xl border border-neutral-200">
             <BaltimoreMap />
           </div>
-        ) : loading ? (
+        )}
+
+        {loading ? (
           <div className="py-16 text-center text-neutral-500">Loading…</div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
