@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { OrgListPage } from "@/components/org-list-page";
+import { CommunityAssociationsPage } from "@/components/community-associations-page";
 export const Route = createFileRoute("/community-associations")({
-  component: () => <OrgListPage type="community_assoc" title="Community Associations" subtitle="Official community governance hubs for Baltimore neighborhoods." />,
-  head: () => ({ meta: [{ title: "Community Associations - Planet Baltimore" }] }),
+  component: CommunityAssociationsPage,
+  head: () => ({
+    meta: [
+      { title: "Community Associations - Planet Baltimore" },
+      { name: "description", content: "Official community governance hubs for Baltimore neighborhoods." },
+    ],
+  }),
 });
