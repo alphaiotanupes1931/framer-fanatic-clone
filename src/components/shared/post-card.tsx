@@ -74,8 +74,15 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const initial = authorName.slice(0, 1).toUpperCase();
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-border/80 hover:shadow-sm">
-      <header className="flex items-center gap-3">
+    <article className="overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
+      {reason && (
+        <div className="px-5 pt-3">
+          <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
+            <TrendingUp className="h-3 w-3" /> {reason}
+          </span>
+        </div>
+      )}
+      <header className="flex items-center gap-3 px-5 pt-3">
         <Link to="/u/$username" params={{ username: post.author_username || post.user_id }}>
           <Avatar className="h-10 w-10">
             {post.author_avatar && <AvatarImage src={post.author_avatar} />}
@@ -112,13 +119,15 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </DropdownMenu>
         )}
       </header>
-      <div className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.content}</div>
+      {post.content && (
+        <div className="px-5 py-3 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.content}</div>
+      )}
       {post.image_url && (
-        <div className="mt-3 overflow-hidden rounded-lg">
+        <div className="overflow-hidden">
           <img src={post.image_url} alt="" className="w-full" loading="lazy" />
         </div>
       )}
-      <footer className="mt-3 flex items-center gap-6 pt-3 text-[12.5px] text-muted-foreground">
+      <footer className="flex items-center gap-6 px-5 py-3 text-[12.5px] text-muted-foreground">
         <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
           <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
