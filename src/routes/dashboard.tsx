@@ -274,7 +274,7 @@ function Dashboard() {
           ) : (
             feedItems.map((item, idx) => {
               const inner = (() => {
-                if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} />;
+                if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} reason={item.reason} />;
                 if (item.type === "story") return (
                   <div className="space-y-0">
                     <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Story</span>
