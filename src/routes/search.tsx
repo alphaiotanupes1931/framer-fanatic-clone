@@ -94,15 +94,11 @@ function SearchPage() {
         </div>
 
         {!debounced ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center text-sm text-muted-foreground">
-            Start typing to search Planet Baltimore.
-          </div>
+          <EmptyState icon={SearchIcon} title="Start typing to search" description="Find people, events, orgs, and posts across Planet Baltimore." />
         ) : loading ? (
-          <div className="text-sm text-muted-foreground">Searching...</div>
+          <ListSkeleton count={4} />
         ) : totals.All === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center text-sm text-muted-foreground">
-            No results for "{debounced}".
-          </div>
+          <EmptyState icon={SearchIcon} title={`No results for "${debounced}"`} description="Try another spelling or a different filter." />
         ) : (
           <div className="space-y-8">
             {(tab === "All" || tab === "People") && people.length > 0 && (
