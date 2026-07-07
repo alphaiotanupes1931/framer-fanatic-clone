@@ -232,7 +232,7 @@ function Dashboard() {
         )}
 
         {/* Feed */}
-        <div className="space-y-[18px] pt-1">
+        <div className="space-y-[18px] rounded-xl bg-muted/50 p-4 pt-1 sm:p-5">
           {isLoading || filterLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
