@@ -27,7 +27,6 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
-import { Route as EventsRouteImport } from './routes/events'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CookiesRouteImport } from './routes/cookies'
@@ -40,6 +39,7 @@ import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
@@ -139,11 +139,6 @@ const GroupsRoute = GroupsRouteImport.update({
   path: '/groups',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EventsRoute = EventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
@@ -204,6 +199,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -225,14 +225,14 @@ const MarketplaceListingIdRoute = MarketplaceListingIdRouteImport.update({
   getParentRoute: () => MarketplaceRoute,
 } as any)
 const EventsNewRoute = EventsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => EventsRoute,
+  id: '/events/new',
+  path: '/events/new',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EventsEventIdRoute = EventsEventIdRouteImport.update({
-  id: '/$eventId',
-  path: '/$eventId',
-  getParentRoute: () => EventsRoute,
+  id: '/events/$eventId',
+  path: '/events/$eventId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
@@ -258,7 +258,6 @@ export interface FileRoutesByFullPath {
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
-  '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
@@ -284,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/events/': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -299,7 +299,6 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
-  '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
@@ -325,6 +324,7 @@ export interface FileRoutesByTo {
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/events': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -341,7 +341,6 @@ export interface FileRoutesById {
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
-  '/events': typeof EventsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
@@ -367,6 +366,7 @@ export interface FileRoutesById {
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/events/': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -384,7 +384,6 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dashboard'
     | '/discover'
-    | '/events'
     | '/groups'
     | '/leaderboard'
     | '/marketplace'
@@ -410,6 +409,7 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/events/'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -425,7 +425,6 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dashboard'
     | '/discover'
-    | '/events'
     | '/groups'
     | '/leaderboard'
     | '/marketplace'
@@ -451,6 +450,7 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/events'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -466,7 +466,6 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dashboard'
     | '/discover'
-    | '/events'
     | '/groups'
     | '/leaderboard'
     | '/marketplace'
@@ -492,6 +491,7 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/events/'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -508,7 +508,6 @@ export interface RootRouteChildren {
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
-  EventsRoute: typeof EventsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
@@ -527,8 +526,11 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
+  EventsEventIdRoute: typeof EventsEventIdRoute
+  EventsNewRoute: typeof EventsNewRoute
   OSlugRoute: typeof OSlugRoute
   UUsernameRoute: typeof UUsernameRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -660,13 +662,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/events': {
-      id: '/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof EventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/discover': {
       id: '/discover'
       path: '/discover'
@@ -751,6 +746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -781,17 +783,17 @@ declare module '@tanstack/react-router' {
     }
     '/events/new': {
       id: '/events/new'
-      path: '/new'
+      path: '/events/new'
       fullPath: '/events/new'
       preLoaderRoute: typeof EventsNewRouteImport
-      parentRoute: typeof EventsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/events/$eventId': {
       id: '/events/$eventId'
-      path: '/$eventId'
+      path: '/events/$eventId'
       fullPath: '/events/$eventId'
       preLoaderRoute: typeof EventsEventIdRouteImport
-      parentRoute: typeof EventsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/content': {
       id: '/admin/content'
@@ -819,19 +821,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
-
-interface EventsRouteChildren {
-  EventsEventIdRoute: typeof EventsEventIdRoute
-  EventsNewRoute: typeof EventsNewRoute
-}
-
-const EventsRouteChildren: EventsRouteChildren = {
-  EventsEventIdRoute: EventsEventIdRoute,
-  EventsNewRoute: EventsNewRoute,
-}
-
-const EventsRouteWithChildren =
-  EventsRoute._addFileChildren(EventsRouteChildren)
 
 interface MarketplaceRouteChildren {
   MarketplaceListingIdRoute: typeof MarketplaceListingIdRoute
@@ -869,7 +858,6 @@ const rootRouteChildren: RootRouteChildren = {
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
-  EventsRoute: EventsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
   MarketplaceRoute: MarketplaceRouteWithChildren,
@@ -888,8 +876,11 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
+  EventsEventIdRoute: EventsEventIdRoute,
+  EventsNewRoute: EventsNewRoute,
   OSlugRoute: OSlugRoute,
   UUsernameRoute: UUsernameRoute,
+  EventsIndexRoute: EventsIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

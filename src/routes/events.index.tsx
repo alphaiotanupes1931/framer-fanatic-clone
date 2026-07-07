@@ -18,7 +18,7 @@ type EventRow = {
   price_cents?: number | null;
 };
 
-export const Route = createFileRoute("/events")({
+export const Route = createFileRoute("/events/")({
   component: EventsPage,
   head: () => ({
     meta: [
