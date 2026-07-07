@@ -1,25 +1,99 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Mic } from "lucide-react";
+import { Mic, Plus, MapPin } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+type Pod = {
+  id: string;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  neighborhood: string | null;
+  bio: string | null;
+};
 
 function PodcastsPage() {
+  const [items, setItems] = useState<Pod[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, display_name, username, avatar_url, neighborhood, bio, category")
+        .eq("hidden_from_showcase", false)
+        .ilike("category", "%podcast%")
+        .order("created_at", { ascending: false })
+        .limit(48);
+      setItems((data ?? []) as Pod[]);
+      setLoading(false);
+    })();
+  }, []);
+
   return (
     <AppLayout>
       <div className="space-y-6">
         <HeroBanner
-          title="Podcasts"
-          subtitle="Voices, interviews, and conversations from Baltimore."
+          title="Planet Baltimore Podcasts"
+          subtitle="Real voices, real stories from Baltimore creators."
+          cta={
+            <Link
+              to="/profile"
+              className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+            >
+              <Plus className="h-4 w-4" /> Add your podcast
+            </Link>
+          }
         />
-        <div className="rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#d4580a]/10">
-            <Mic className="h-6 w-6" style={{ color: "#d4580a" }} />
-          </div>
-          <h3 className="text-base font-semibold text-foreground">Podcast directory coming soon</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            We're gathering Baltimore's best audio storytellers. Check back shortly.
-          </p>
+
+        <div className="text-sm text-neutral-500">
+          {loading ? "Loading…" : `${items.length} podcast${items.length === 1 ? "" : "s"} on Planet Baltimore`}
         </div>
+
+        {!loading && items.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#d4580a]/10">
+              <Mic className="h-6 w-6" style={{ color: "#d4580a" }} />
+            </div>
+            <div className="text-base font-semibold text-neutral-900">No podcasts yet</div>
+            <div className="mt-1 text-sm text-neutral-500">Be the first to add yours.</div>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {items.map((p) => {
+              const name = p.display_name || p.username || "Podcast";
+              return (
+                <Link
+                  key={p.id}
+                  to="/u/$username"
+                  params={{ username: p.username || p.id }}
+                  className="group flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-orange-300 hover:shadow-sm"
+                >
+                  <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100">
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} alt={name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-neutral-400">
+                        <Mic className="h-6 w-6" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[17px] font-bold text-neutral-900">{name}</div>
+                    {p.neighborhood && (
+                      <div className="mt-0.5 inline-flex items-center gap-1 text-sm text-neutral-500">
+                        <MapPin className="h-3.5 w-3.5" /> {p.neighborhood}
+                      </div>
+                    )}
+                    {p.bio && <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{p.bio}</p>}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     </AppLayout>
   );
@@ -28,7 +102,7 @@ function PodcastsPage() {
 export const Route = createFileRoute("/podcasts")({
   component: PodcastsPage,
   head: () => ({ meta: [
-    { title: "Podcasts - Planet Baltimore" },
-    { name: "description", content: "Baltimore's podcast community." },
+    { title: "Planet Baltimore Podcasts" },
+    { name: "description", content: "Real voices, real stories from Baltimore creators." },
   ] }),
 });

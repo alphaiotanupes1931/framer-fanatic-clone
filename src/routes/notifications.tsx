@@ -129,7 +129,7 @@ function NotificationsPage() {
               <Bell className="h-8 w-8" style={{ color: "#d4580a" }} />
             </div>
             <h3 className="mb-1 font-semibold text-foreground">No notifications yet</h3>
-            <p className="text-sm text-muted-foreground">When someone likes, comments, or follows you, you'll see it here.</p>
+            <p className="text-sm text-muted-foreground">When people interact with you, you'll see it here.</p>
           </div>
         ) : (
           <ul className="divide-y divide-border rounded-2xl border border-border bg-card">

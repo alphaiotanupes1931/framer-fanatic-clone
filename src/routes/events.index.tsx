@@ -75,7 +75,7 @@ function fmtDateLong(iso: string) {
   return `${day} · ${time}`;
 }
 
-const CATEGORIES = ["All", "Music", "Art", "Community", "Nightlife", "Food", "Wellness", "Education", "Sports", "Networking"] as const;
+const CATEGORIES = ["All", "Music", "Art", "Community", "Nightlife", "Food", "Wellness", "Education", "Sports", "Networking", "Festival"] as const;
 
 function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) => void; buying: boolean }) {
   const priced = (e.price_cents ?? 0) > 0;

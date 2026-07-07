@@ -100,14 +100,15 @@ export function tabsForCategory(category: string | null | undefined) {
 export const ARTS_ORG_SUBTYPES = [
   "Museum",
   "Gallery",
-  "Studio",
+  "Studio Space",
   "Collective",
   "Residency",
-  "Non-profit",
-  "Cultural Center",
-  "Performance Venue",
+  "Nonprofit",
+  "Cultural",
+  "Performance",
+  "Community",
+  "DIY / Alt",
   "Education",
-  "Public Art",
 ] as const;
 
 export const BUSINESS_SUBTYPES = [
