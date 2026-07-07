@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search as SearchIcon, MapPin, Calendar } from "lucide-react";
+import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
