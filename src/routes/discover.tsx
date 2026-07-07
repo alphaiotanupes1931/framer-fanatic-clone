@@ -27,14 +27,19 @@ function DiscoverPage() {
 
   useEffect(() => {
     (async () => {
-      const [ev, ar, gr, bu, ne] = await Promise.all([
-        supabase.from("events").select("id,title,description,image_url,starts_at,location").gte("starts_at", new Date().toISOString()).order("starts_at", { ascending: true }).limit(8),
+      const nowIso = new Date().toISOString();
+      const [evUp, evPast, ar, gr, bu, ne] = await Promise.all([
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(8),
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(8),
         supabase.rpc("public_creators", { lim: 12 }),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "group").limit(8),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(8),
         supabase.from("neighborhoods").select("id,name,region").order("name").limit(24),
       ]);
-      setEvents((ev.data ?? []) as EventRow[]);
+      const up = (evUp.data ?? []) as EventRow[];
+      const past = (evPast.data ?? []) as EventRow[];
+      // Show upcoming first; backfill with most recent so the section is never empty when events exist.
+      setEvents([...up, ...past].slice(0, 8));
       setArtists(((ar.data ?? []) as unknown) as Creator[]);
       setGroups(((gr.data ?? []) as unknown) as Org[]);
       setBusinesses(((bu.data ?? []) as unknown) as Org[]);
