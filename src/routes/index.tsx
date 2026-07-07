@@ -278,6 +278,9 @@ function StaggeredQuote({ text, className }: { text: string; className?: string 
 
 function QuoteSection() {
   const ref = useRef<HTMLDivElement>(null);
+  const { content } = useSiteContent();
+  const quoteText = siteText(content, "quote.text");
+  const quoteAuthor = siteText(content, "quote.author");
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -313,7 +316,7 @@ function QuoteSection() {
           {/* Quote */}
           <div className="text-ink">
             <StaggeredQuote
-              text="Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
+              text={quoteText}
               className="font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"
             />
             <motion.div
@@ -323,7 +326,7 @@ function QuoteSection() {
               transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60"
             >
-              Terrell Speaks
+              {quoteAuthor}
             </motion.div>
           </div>
         </div>
