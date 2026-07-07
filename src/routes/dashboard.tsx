@@ -208,10 +208,10 @@ function Dashboard() {
             <button
               key={filter}
               onClick={() => { setActiveFilter(filter); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
-              className={`flex h-[26px] items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-[11px] font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
                 activeFilter === filter
                   ? "bg-[#d4580a] text-white"
-                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
               }`}
             >
               {filter === "Discover" && <Compass className="h-4 w-4" />}
