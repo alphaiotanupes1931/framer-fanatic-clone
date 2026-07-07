@@ -199,7 +199,7 @@ function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-[640px] space-y-5 overflow-x-hidden sm:space-y-[22px]">
+      <div className="mx-auto max-w-3xl space-y-5 sm:space-y-[22px]">
         <HeroBanner title="Planet Baltimore" subtitle="Your city. Your community. Your feed." />
 
         {/* Filters */}
