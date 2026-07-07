@@ -36,14 +36,13 @@ export function OrgListPage({
   const [sub, setSub] = useState<string>("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState<"newest" | "oldest" | "name">("newest");
+  const [sort, setSort] = useState<"newest" | "followed">("newest");
   const [view, setView] = useState<"list" | "map">("list");
 
   const load = async () => {
     setLoading(true);
     let qb = supabase.from("organizations").select("*").eq("type", type);
-    if (sort === "name") qb = qb.order("name", { ascending: true });
-    else qb = qb.order("created_at", { ascending: sort === "oldest" });
+    qb = qb.order("created_at", { ascending: false });
     if (sub) qb = qb.eq("subtype", sub);
     const { data } = await qb;
     let list = (data ?? []) as Org[];
@@ -99,12 +98,11 @@ export function OrgListPage({
           {showSort && (
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value as "newest" | "oldest" | "name")}
+              onChange={(e) => setSort(e.target.value as "newest" | "followed")}
               className="rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none"
             >
               <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
-              <option value="name">Name</option>
+              <option value="followed">Most Followed</option>
             </select>
           )}
         </div>

@@ -42,7 +42,7 @@ function FindCreatorPage() {
   const [results, setResults] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>("All");
-  const [sort, setSort] = useState<"newest" | "az">("newest");
+  const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +60,8 @@ function FindCreatorPage() {
       }
       query = sort === "newest"
         ? query.order("created_at", { ascending: false })
+        : sort === "followed"
+        ? query.order("display_name", { ascending: true })
         : query.order("display_name", { ascending: true });
       const { data } = await query;
       if (cancelled) return;
@@ -131,13 +133,14 @@ function FindCreatorPage() {
                 className="h-12 rounded-full border-border bg-secondary/40 pl-11 text-sm"
               />
             </div>
-            <Select value={sort} onValueChange={(v) => setSort(v as "newest" | "az")}>
-              <SelectTrigger className="h-12 w-full rounded-full border-border bg-secondary/40 sm:w-40">
+            <Select value={sort} onValueChange={(v) => setSort(v as "newest" | "followed" | "active")}>
+              <SelectTrigger className="h-12 w-full rounded-full border-border bg-secondary/40 sm:w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="az">A - Z</SelectItem>
+                <SelectItem value="followed">Most Followed</SelectItem>
+                <SelectItem value="active">Most Active</SelectItem>
               </SelectContent>
             </Select>
           </div>

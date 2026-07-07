@@ -111,13 +111,13 @@ export const ARTS_ORG_SUBTYPES = [
 ] as const;
 
 export const BUSINESS_SUBTYPES = [
-  "Cafe / Restaurant",
-  "Bar",
+  "Restaurant",
   "Retail",
   "Service",
-  "Venue",
-  "Studio",
-  "Other",
+  "Entertainment",
+  "Health",
+  "Creative",
+  "Nonprofit",
 ] as const;
 
 export const GROUP_SUBTYPES = [
