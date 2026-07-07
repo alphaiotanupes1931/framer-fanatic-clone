@@ -170,7 +170,9 @@ function StoriesSignedIn() {
   const [filter, setFilter] = useState("All");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", excerpt: "", content: "", format: "blog" });
+  const [form, setForm] = useState({ title: "", excerpt: "", content: "", format: "blog", cover_url: "" });
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Story | null>(null);
 
@@ -224,10 +226,30 @@ function StoriesSignedIn() {
     const { error } = await supabase.from("stories").insert({
       user_id: me.id, title: form.title.trim(), excerpt: form.excerpt.trim() || null,
       content: form.content.trim(), format: form.format, read_minutes: read,
+      cover_url: form.cover_url || null,
     });
     if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", excerpt: "", content: "", format: "blog" });
+    setOpen(false); setForm({ title: "", excerpt: "", content: "", format: "blog", cover_url: "" });
     toast.success("Story published"); load();
+  };
+
+  const pickCover = async (file: File) => {
+    if (!me) return;
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+      const up = await supabase.storage.from("story-covers").upload(path, file, { upsert: false, contentType: file.type });
+      if (up.error) throw up.error;
+      const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+      setForm((f) => ({ ...f, cover_url: signed.signedUrl }));
+      toast.success("Cover image uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
