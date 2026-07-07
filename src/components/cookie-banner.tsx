@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 
 const KEY = "pb-cookie-consent";
 
 export function CookieBanner() {
   const [show, setShow] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     try {
       if (!localStorage.getItem(KEY)) setShow(true);
     } catch {}
   }, []);
+  if (pathname === "/dashboard") return null;
   if (!show) return null;
   const decide = (v: "accepted" | "declined") => {
     try { localStorage.setItem(KEY, v); } catch {}

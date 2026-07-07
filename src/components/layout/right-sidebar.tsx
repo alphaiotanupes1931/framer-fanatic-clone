@@ -9,17 +9,17 @@ import type { ReactNode, ComponentType } from "react";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
   return (
-    <div className="mb-7">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-1 rounded-full bg-[#d4580a]" />
-          <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">{title}</h3>
+    <div className="mb-6">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <Icon className="h-3.5 w-3.5 text-slate-800" />
+          <h3 className="text-[10px] font-extrabold uppercase tracking-normal text-slate-800">{title}</h3>
         </div>
         {seeAllLink && (
-          <Link to={seeAllLink} className="text-[11px] font-bold" style={{ color: "#d4580a" }}>See all</Link>
+          <Link to={seeAllLink} className="text-[9px] font-bold" style={{ color: "#d4580a" }}>See all</Link>
         )}
       </div>
-      <div className="space-y-1">{children}</div>
+      <div className="space-y-2.5">{children}</div>
     </div>
   );
 }
@@ -47,8 +47,8 @@ export function RightSidebar() {
   });
 
   return (
-    <aside className="fixed right-0 top-0 z-30 hidden h-screen w-[19%] min-w-[240px] overflow-y-auto border-l border-border bg-card xl:block">
-      <div className="space-y-5 p-4 pt-20 sm:p-5 sm:pt-24">
+    <aside className="fixed right-0 top-0 z-30 hidden h-screen w-[19%] min-w-[250px] overflow-y-auto border-l border-slate-200 bg-white xl:block">
+      <div className="space-y-4 px-5 pb-6 pt-[70px]">
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any, i: number) => (
@@ -56,14 +56,18 @@ export function RightSidebar() {
                 key={s.id}
                 to="/stories/$storyId"
                 params={{ storyId: s.id }}
-                className="group flex items-start gap-4 rounded-lg p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
+                className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100"
               >
-                <span className="w-6 flex-shrink-0 pt-0.5 text-xl font-black italic leading-none text-muted-foreground/30">
-                  {i + 1}
-                </span>
+                <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                  {s.cover_url ? (
+                    <img src={s.cover_url} alt="" className="h-full w-full object-cover" loading={i < 2 ? "eager" : "lazy"} />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs font-bold text-slate-500">{s.title?.charAt(0)}</div>
+                  )}
+                </div>
                 <div className="min-w-0 flex-1 space-y-0.5">
-                  <p className="truncate text-sm font-bold leading-tight text-foreground transition-colors group-hover:text-[#d4580a]">{s.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">{s.author_name}</p>
+                  <p className="truncate text-xs font-extrabold leading-tight text-slate-800 transition-colors group-hover:text-[#d4580a]">{s.title}</p>
+                  <p className="truncate text-[11px] leading-tight text-slate-500">by {s.author_name}</p>
                 </div>
               </Link>
             ))}
@@ -77,17 +81,17 @@ export function RightSidebar() {
                 key={a.id}
                 to="/u/$username"
                 params={{ username: a.username || a.id }}
-                className="group flex items-center gap-3 rounded-xl p-2 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary"
+                className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100"
               >
-                <div className="flex-shrink-0 rounded-2xl bg-gradient-to-br from-[#d4580a]/40 to-[#d4580a]/5 p-[2px] ring-1 ring-border/60">
-                  <Avatar className="h-11 w-11 rounded-2xl">
-                    <AvatarImage src={a.avatar_url} className="rounded-2xl object-cover" />
-                    <AvatarFallback className="rounded-2xl bg-card text-sm font-bold text-foreground">{a.display_name?.charAt(0)}</AvatarFallback>
+                <div className="flex-shrink-0">
+                  <Avatar className="h-9 w-9 rounded-lg">
+                    <AvatarImage src={a.avatar_url} className="rounded-lg object-cover" />
+                    <AvatarFallback className="rounded-lg bg-slate-100 text-xs font-bold text-slate-600">{a.display_name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{a.display_name || a.username}</p>
-                  <p className="truncate text-xs capitalize text-muted-foreground">{(a.category || a.role || "Artist").replace("_", " ")}</p>
+                  <p className="truncate text-xs font-extrabold text-slate-800 transition-colors group-hover:text-[#d4580a]">{a.display_name || a.username}</p>
+                  <p className="truncate text-[11px] capitalize text-slate-500">{(a.category || a.role || "Artist").replace("_", " ")}</p>
                 </div>
               </Link>
             ))}
@@ -97,17 +101,17 @@ export function RightSidebar() {
         {events.length > 0 && (
           <SuggestionSection title="Upcoming Events" icon={Calendar} seeAllLink="/events">
             {events.map((e: any) => (
-              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-lg p-1.5 transition-all duration-150 hover:bg-secondary/60 active:bg-secondary">
-                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-accent/10">
+              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100">
+                <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
                   {e.image_url ? (
-                    <EventImage src={e.image_url} alt={e.title} className="h-full w-full rounded-xl object-cover" />
+                    <EventImage src={e.image_url} alt={e.title} className="h-full w-full rounded-lg object-cover" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm font-bold text-accent-foreground">{e.title?.charAt(0)}</div>
+                    <div className="flex h-full w-full items-center justify-center text-xs font-bold text-slate-500">{e.title?.charAt(0)}</div>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{e.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="truncate text-xs font-extrabold text-slate-800 transition-colors group-hover:text-[#d4580a]">{e.title}</p>
+                  <p className="truncate text-[11px] text-slate-500">
                     {e.starts_at ? new Date(e.starts_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""}
                     {e.venue_name ? ` · ${e.venue_name}` : ""}
                   </p>
@@ -117,14 +121,14 @@ export function RightSidebar() {
           </SuggestionSection>
         )}
 
-        <div className="border-t border-border pt-4">
-          <Link to="/search" className="group flex items-center gap-2 rounded-md p-0.5 text-sm font-medium transition-all duration-150" style={{ color: "#d4580a" }}>
+        <div className="border-t border-slate-200 pt-4">
+          <Link to="/search" className="group flex items-center gap-2 rounded-md p-0.5 text-xs font-semibold transition-all duration-150" style={{ color: "#d4580a" }}>
             Explore more of Baltimore
             <ArrowRight className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
           </Link>
         </div>
 
-        <p className="text-[11px] text-muted-foreground/60">© 2026 Planet Baltimore</p>
+        <p className="text-[11px] text-slate-400">© 2026 Planet Baltimore</p>
       </div>
     </aside>
   );

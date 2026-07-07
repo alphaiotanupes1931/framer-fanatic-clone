@@ -57,28 +57,28 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
   }
 
   return (
-    <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group flex gap-4 rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0 sm:gap-5 sm:p-5">
-      <div className="min-w-0 flex-1">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <Avatar className="h-6 w-6">
+    <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group flex min-h-[94px] gap-3 rounded-xl border border-slate-200 bg-white p-3 transition-all duration-150 hover:border-slate-300 hover:shadow-sm active:translate-y-0">
+      <div className="min-w-0 flex-1 py-0.5">
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          <Avatar className="h-[18px] w-[18px]">
             <AvatarImage src={story.author_avatar ?? undefined} />
-            <AvatarFallback className="bg-accent/10 text-[9px] text-accent-foreground">
+            <AvatarFallback className="bg-slate-100 text-[8px] font-bold text-slate-500">
               {story.author_name?.charAt(0) ?? "?"}
             </AvatarFallback>
           </Avatar>
-          <span className="truncate text-[11px] font-medium text-foreground sm:text-xs">{story.author_name}</span>
-          {story.category && <Badge variant="secondary" className="text-[9px] capitalize sm:text-[10px]">{story.category}</Badge>}
+          <span className="max-w-[160px] truncate text-[10px] font-extrabold leading-none text-slate-800 sm:max-w-[220px]">{story.author_name}</span>
+          {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[8px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
         </div>
-        <h3 className="line-clamp-2 font-serif text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{story.title}</h3>
-        {cleanExcerpt && <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground sm:text-xs">{cleanExcerpt}</p>}
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground sm:text-xs">
+        <h3 className="line-clamp-1 font-serif text-[12px] font-extrabold leading-tight text-slate-950 transition-colors group-hover:text-[#d4580a]">{story.title}</h3>
+        {cleanExcerpt && <p className="mt-1 line-clamp-1 text-[11px] leading-snug text-slate-500">{cleanExcerpt}</p>}
+        <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[10px] leading-none text-slate-500">
           <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{story.read_minutes || 5} min</span>
           <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{story.likes_count || 0}</span>
           <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />{story.comments_count || 0}</span>
         </div>
       </div>
       {story.cover_url && (
-        <div className="aspect-square h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-24">
+        <div className="aspect-square h-[68px] w-[68px] flex-shrink-0 overflow-hidden rounded-lg sm:h-[72px] sm:w-[72px]">
           <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
         </div>
       )}

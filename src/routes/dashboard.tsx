@@ -7,7 +7,6 @@ import { PostCard } from "@/components/shared/post-card";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { StoryCard } from "@/components/shared/story-card";
 import { EventCard } from "@/components/shared/event-card";
-import { DiscoverCard } from "@/components/discovery/discover-card";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -200,19 +199,19 @@ function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="space-y-5 overflow-x-hidden sm:space-y-7">
+      <div className="mx-auto max-w-[640px] space-y-5 overflow-x-hidden sm:space-y-[22px]">
         <HeroBanner title="Planet Baltimore" subtitle="Your city. Your community. Your feed." />
 
         {/* Filters */}
-        <div className="scrollbar-hide -mx-3 flex flex-wrap gap-2 overflow-x-auto px-3 pb-1 sm:-mx-4 sm:px-4">
+        <div className="scrollbar-hide flex flex-wrap gap-2 overflow-x-auto pb-5 pt-0">
           {FILTERS.map((filter) => (
             <button
               key={filter}
               onClick={() => { setActiveFilter(filter); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
+              className={`flex h-[26px] items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-[11px] font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
                 activeFilter === filter
                   ? "bg-[#d4580a] text-white"
-                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >
               {filter === "Discover" && <Compass className="h-4 w-4" />}
@@ -221,37 +220,9 @@ function Dashboard() {
           ))}
         </div>
 
-        <div className="border-b border-border/60" />
+        <div className="border-b border-slate-200" />
 
-        {/* Neighborhood quick-filter */}
-        {currentUser && !userLoading && (
-          hoodPrimary ? (
-            <button
-              onClick={() => { setActiveFilter("Nearby"); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
-              className={`flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left text-sm transition-all ${
-                activeFilter === "Nearby"
-                  ? "bg-[#d4580a] text-white"
-                  : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
-              }`}
-            >
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>My Neighborhood: <span className="font-semibold text-foreground">{hoodPrimary}</span></span>
-              {activeFilter !== "Nearby" && <span className="ml-auto text-xs">See local feed →</span>}
-            </button>
-          ) : (
-            <Link
-              to="/profile"
-              className="flex w-full items-center gap-2 rounded-xl bg-secondary/60 px-4 py-3 text-sm text-muted-foreground transition-all hover:bg-secondary"
-            >
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>Add your neighborhood to see local content</span>
-              <span className="ml-auto text-xs">Set up →</span>
-            </Link>
-          )
-        )}
-
-        {/* Onboarding for zero-follow users */}
-        {!loadingFollows && follows.length === 0 && <OnboardingCard />}
+        <OnboardingCard />
 
         {activeFilter === "Discover" && (
           <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent/5 p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">
@@ -261,7 +232,7 @@ function Dashboard() {
         )}
 
         {/* Feed */}
-        <div className="space-y-4 sm:space-y-5">
+        <div className="space-y-[18px] pt-1">
           {isLoading || filterLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
@@ -305,26 +276,18 @@ function Dashboard() {
               const inner = (() => {
                 if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} />;
                 if (item.type === "story") return (
-                  <div className="space-y-1.5">
-                    <span className="inline-flex items-center rounded-full bg-[#d4580a]/10 px-2.5 py-1 text-[10px] font-semibold uppercase leading-none tracking-wider text-[#d4580a]">Story</span>
+                  <div className="space-y-0">
+                    <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Story</span>
                     <StoryCard story={item.data} />
                   </div>
                 );
                 return (
-                  <div className="space-y-1.5">
-                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase leading-none tracking-wider text-primary">Event</span>
+                  <div className="space-y-0">
+                    <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Event</span>
                     <EventCard event={item.data} />
                   </div>
                 );
               })();
-
-              if (item.isNew || item.reason) {
-                return (
-                  <DiscoverCard key={`${item.type}-${item.data.id}-${idx}`} isNew={item.isNew} reason={item.reason}>
-                    {inner}
-                  </DiscoverCard>
-                );
-              }
               return <div key={`${item.type}-${item.data.id}-${idx}`}>{inner}</div>;
             })
           )}
