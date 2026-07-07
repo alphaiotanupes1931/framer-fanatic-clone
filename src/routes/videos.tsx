@@ -76,6 +76,7 @@ function VideosSignedIn() {
   const [sort, setSort] = useState<"newest" | "popular">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
   const [form, setForm] = useState({ title: "", description: "", video_url: "", thumbnail_url: "" });
+  const [loaded, setLoaded] = useState(false);
 
   const load = async () => {
     const { data } = await supabase.from("videos").select("*").order("created_at", { ascending: false }).limit(50);
@@ -89,7 +90,6 @@ function VideosSignedIn() {
     setVids(list);
     setLoaded(true);
   };
-  const [loaded, setLoaded] = useState(false);
   useEffect(() => { load(); }, []);
 
   const filtered = vids.filter((v) => v.title.toLowerCase().includes(query.toLowerCase()));
