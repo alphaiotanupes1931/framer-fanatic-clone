@@ -62,7 +62,7 @@ function CalendarPage() {
         title="Calendar"
         subtitle="Events from local businesses, organizations and communities."
         cta={
-          <Link to="/events">
+          <Link to="/events/new">
             <Button variant="outline" className="gap-2 rounded-lg" style={{ borderColor: "#d4580a", color: "#d4580a" }}>
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Create Event</span>
