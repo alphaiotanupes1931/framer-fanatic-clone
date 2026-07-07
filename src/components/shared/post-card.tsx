@@ -33,6 +33,7 @@ export function PostCard({ post, currentUserId, onDelete }: {
 }) {
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes_count ?? 0);
+  const [saved, setSaved] = useState(false);
 
   const toggleLike = async () => {
     if (!currentUserId) { toast.error("Sign in to like"); return; }
@@ -54,6 +55,17 @@ export function PostCard({ post, currentUserId, onDelete }: {
       if (navigator.share) await navigator.share({ url, title: "Planet Baltimore" });
       else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
     } catch { /* cancelled */ }
+  };
+
+  const toggleSave = () => {
+    setSaved((s) => {
+      toast.success(s ? "Removed from saved" : "Saved");
+      return !s;
+    });
+  };
+
+  const openComments = () => {
+    toast("Comments coming soon");
   };
 
   const isMine = currentUserId && currentUserId === post.user_id;
@@ -109,14 +121,14 @@ export function PostCard({ post, currentUserId, onDelete }: {
         <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
           <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
-        <button className="flex items-center gap-1.5 transition hover:text-foreground">
+        <button onClick={openComments} className="flex items-center gap-1.5 transition hover:text-foreground">
           <MessageCircle className="h-4 w-4" /> {post.comments_count ?? 0}
         </button>
         <button onClick={share} className="flex items-center gap-1.5 transition hover:text-foreground">
           <Share2 className="h-4 w-4" />
         </button>
-        <button className="ml-auto flex items-center gap-1.5 transition hover:text-foreground" aria-label="Save">
-          <Bookmark className="h-4 w-4" />
+        <button onClick={toggleSave} className={`ml-auto flex items-center gap-1.5 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
+          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
         </button>
       </footer>
     </article>
