@@ -181,11 +181,11 @@ function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-5 flex gap-8 text-sm">
-            <div><div className="text-lg font-bold">{stats.posts}</div><div className="text-muted-foreground">Posts</div></div>
-            <div><div className="text-lg font-bold">{stats.followers}</div><div className="text-muted-foreground">Followers</div></div>
-            <div><div className="text-lg font-bold">{stats.following}</div><div className="text-muted-foreground">Following</div></div>
-            <div><div className="text-lg font-bold">0</div><div className="text-muted-foreground">Referrals</div></div>
+          <div className="mt-5 grid grid-cols-4 gap-2 text-center text-xs sm:flex sm:gap-8 sm:text-left sm:text-sm">
+            <div><div className="text-base font-bold sm:text-lg">{stats.posts}</div><div className="text-muted-foreground">Posts</div></div>
+            <div><div className="text-base font-bold sm:text-lg">{stats.followers}</div><div className="text-muted-foreground">Followers</div></div>
+            <div><div className="text-base font-bold sm:text-lg">{stats.following}</div><div className="text-muted-foreground">Following</div></div>
+            <div><div className="text-base font-bold sm:text-lg">0</div><div className="text-muted-foreground">Referrals</div></div>
           </div>
 
           {followerPreview.length > 0 && (

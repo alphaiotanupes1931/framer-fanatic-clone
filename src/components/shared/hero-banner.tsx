@@ -13,22 +13,22 @@ export function HeroBanner({
 }) {
   return (
     <div
-      className="relative min-h-[118px] overflow-hidden rounded-xl border-2 bg-[#fffdfb] px-8 py-7 sm:px-9 sm:py-8"
+      className="relative overflow-hidden rounded-xl border-2 bg-[#fffdfb] px-5 py-5 sm:min-h-[118px] sm:px-9 sm:py-8"
       style={{ borderColor: "#d4580a" }}
     >
-      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 max-w-2xl">
+      <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0 max-w-2xl sm:flex-1">
           <h1
-            className="mb-2 font-display text-[32px] font-extrabold leading-tight sm:text-[38px]"
+            className="mb-1.5 font-display text-[24px] font-extrabold leading-[1.15] sm:mb-2 sm:text-[38px]"
             style={{ color: "#d4580a" }}
           >
             {title}
           </h1>
           {subtitle && (
-            <p className="text-[15px] font-normal leading-relaxed text-neutral-500">{subtitle}</p>
+            <p className="text-[13px] font-normal leading-snug text-neutral-500 sm:text-[15px] sm:leading-relaxed">{subtitle}</p>
           )}
         </div>
-        {cta && <div className="flex-shrink-0">{cta}</div>}
+        {cta && <div className="flex-shrink-0 self-start">{cta}</div>}
       </div>
       <div className="pointer-events-none absolute inset-0 opacity-[0.055]">
         <div

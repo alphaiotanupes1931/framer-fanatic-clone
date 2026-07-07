@@ -209,7 +209,7 @@ function Hero() {
 
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10 text-paper">
-        <div className="font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
+        <div className="font-display font-medium text-[clamp(2rem,10vw,11rem)] leading-[0.95] md:leading-[0.88] tracking-[-0.03em] md:tracking-[-0.045em] break-words">
           <AnimatedHeadline lines={[line1, line2]} />
         </div>
 
