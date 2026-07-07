@@ -26,10 +26,11 @@ type Post = {
   is_founder?: boolean;
 };
 
-export function PostCard({ post, currentUserId, onDelete }: {
+export function PostCard({ post, currentUserId, onDelete, reason }: {
   post: Post;
   currentUserId?: string;
   onDelete?: (id: string) => void;
+  reason?: string;
 }) {
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes_count ?? 0);
