@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -38,9 +37,9 @@ type EventRow = {
 
 function NeighborhoodsPage() {
   const auth = useAuthState();
+  const navigate = useNavigate();
   const [list, setList] = useState<N[]>([]);
   const [selected, setSelected] = useState<N | null>(null);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [artists, setArtists] = useState<ArtistRow[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -112,7 +111,7 @@ function NeighborhoodsPage() {
           title="Neighborhoods"
           subtitle="Every upcoming event, pinned to where it's happening across Baltimore."
         />
-        <BaltimoreMap onSelectEvent={(e) => setSelectedEventId(e.id)} />
+        <BaltimoreMap onSelectEvent={(e) => navigate({ to: "/events/$eventId", params: { eventId: e.id } })} />
         <p className="text-xs text-muted-foreground">
           Tap a pin to see the event. Events without a mapped location won't appear here yet, edit the event to add coordinates.
         </p>
