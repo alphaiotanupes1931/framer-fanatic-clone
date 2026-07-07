@@ -72,6 +72,8 @@ function VideosSignedIn() {
   const [vids, setVids] = useState<Video[]>([]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [sort, setSort] = useState<"newest" | "popular">("newest");
+  const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
   const [form, setForm] = useState({ title: "", description: "", video_url: "", thumbnail_url: "" });
 
   const load = async () => {
@@ -115,12 +117,24 @@ function VideosSignedIn() {
             </Button>
           }
         />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search videos…"
               className="w-full rounded-full border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-orange-400 focus:outline-none" />
           </div>
+          <select value={sort} onChange={(e) => setSort(e.target.value as "newest" | "popular")}
+            className="rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none">
+            <option value="newest">Newest</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {VIDEO_CATEGORIES.map((c) => (
+            <button key={c} onClick={() => setCat(c)}
+              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition ${cat===c ? "bg-orange-600 text-white" : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"}`}>{c}</button>
+          ))}
         </div>
 
         {featured.length > 0 && (
