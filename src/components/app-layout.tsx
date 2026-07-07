@@ -69,7 +69,7 @@ function Shell({ children }: { children: ReactNode }) {
       >
         <TopMenuBar />
         <main className="w-full flex-1">
-          <div className="mx-auto w-full max-w-[1100px] px-4 py-4 pb-[calc(5rem+env(safe-area-inset-bottom))] text-[15px] sm:px-6 sm:py-6 lg:px-10 lg:py-10 lg:pb-10 lg:text-base">
+          <div className="mx-auto w-full max-w-[1100px] px-4 py-4 pb-[calc(5rem+env(safe-area-inset-bottom))] text-[15px] sm:px-6 sm:py-6 lg:px-10 lg:py-10 lg:pb-10 lg:text-[17px]">
             {children}
           </div>
         </main>
