@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2 } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, TrendingUp, LayoutDashboard, MessageCircle, Heart, Share2, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useServerFn } from "@tanstack/react-start";
@@ -67,6 +66,68 @@ function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: 
         </div>
       </div>
     </Link>
+  );
+}
+
+function fmtDateLong(iso: string) {
+  const d = new Date(iso);
+  const day = d.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const time = d.toLocaleString(undefined, { hour: "numeric", minute: "2-digit" });
+  return `${day} · ${time}`;
+}
+
+const CATEGORIES = ["All", "Music", "Art", "Community", "Nightlife", "Food", "Wellness", "Education", "Sports", "Networking"] as const;
+
+function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) => void; buying: boolean }) {
+  const priced = (e.price_cents ?? 0) > 0;
+  return (
+    <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+      <Link to="/events/$eventId" params={{ eventId: e.id }} className="relative block">
+        <div className="aspect-[16/9] w-full overflow-hidden bg-neutral-100">
+          {e.image_url ? (
+            <EventImage src={e.image_url} alt={e.title} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-neutral-400">
+              <Calendar className="h-12 w-12" />
+            </div>
+          )}
+        </div>
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5">
+          <div className="text-lg font-bold text-white">{e.title}</div>
+        </div>
+      </Link>
+      <div className="space-y-3 p-5">
+        <div className="flex items-center gap-2 text-sm text-neutral-600">
+          <Clock className="h-4 w-4 text-neutral-400" /> {fmtDateLong(e.starts_at)}
+        </div>
+        {e.location && (
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <MapPin className="h-4 w-4 text-neutral-400" /> {e.location}
+          </div>
+        )}
+        <div className="flex items-center justify-between pt-1">
+          <div className="text-sm font-bold text-neutral-900">
+            {priced ? `From $${((e.price_cents ?? 0) / 100).toFixed(2)}` : "Free"}
+          </div>
+          <button
+            onClick={() => onBuy(e.id)}
+            disabled={buying}
+            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-500 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-600 disabled:opacity-60"
+          >
+            <Ticket className="h-3.5 w-3.5" /> {priced ? "Get Tickets" : "RSVP"}
+          </button>
+        </div>
+        <div className="flex items-center justify-between border-t border-neutral-100 pt-3 text-sm text-neutral-500">
+          <button className="inline-flex items-center gap-1.5 hover:text-neutral-800">
+            <MessageCircle className="h-4 w-4" /> Hype this event
+          </button>
+          <div className="flex items-center gap-4">
+            <button className="hover:text-neutral-800"><Heart className="h-4 w-4" /></button>
+            <button className="inline-flex items-center gap-1 hover:text-neutral-800"><Share2 className="h-4 w-4" /> Share</button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -151,6 +212,20 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const [buying, setBuying] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("All");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return events.filter((e) => {
+      if (!q) return true;
+      return (
+        e.title.toLowerCase().includes(q) ||
+        (e.location ?? "").toLowerCase().includes(q) ||
+        (e.description ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [events, query]);
 
   const onPickImage = async (file: File) => {
     if (!me) return;
@@ -210,38 +285,91 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   return (
     <AppLayout
     >
-      <HeroBanner
-        title="Main Stage"
-        subtitle="Tickets for the best events in Baltimore."
-        cta={
-          isArtist ? (
-            <Link to="/events/new">
-              <Button
-                variant="outline"
-                className="gap-2 rounded-lg"
-                style={{ borderColor: "#d4580a", color: "#d4580a" }}
-              >
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Create Event</span>
-              </Button>
-            </Link>
-          ) : undefined
-        }
-      />
-      <div className="h-6" />
-      {dataLoading ? (
-        <div className="text-muted-foreground text-sm">Loading events…</div>
-      ) : events.length === 0 ? (
-        <div className="text-muted-foreground text-sm">No upcoming events. Be the first to post one!</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {events.map((e) => (
-            <div key={e.id} className={buying === e.id ? "opacity-60 pointer-events-none" : ""}>
-              <EventCard e={e} onBuy={buy} />
+      <div className="space-y-6">
+        <div
+          className="relative overflow-hidden rounded-2xl border-2 bg-[#fffdfb] px-8 py-8 sm:px-10 sm:py-10"
+          style={{ borderColor: "#d4580a" }}
+        >
+          <div className="pointer-events-none absolute inset-0 opacity-[0.055]">
+            <div className="absolute right-[-58px] top-[-84px] h-48 w-48 rounded-full" style={{ backgroundColor: "#d4580a" }} />
+            <div className="absolute bottom-[-74px] left-[-70px] h-36 w-36 rounded-full" style={{ backgroundColor: "#d4580a" }} />
+          </div>
+          <div className="relative z-10 max-w-3xl">
+            <h1 className="font-display text-[34px] font-extrabold leading-tight sm:text-[40px]" style={{ color: "#d4580a" }}>
+              Your Next Event
+            </h1>
+            <p className="mt-2 text-[15px] text-neutral-500">Tickets for the best events in Baltimore</p>
+            <div className="relative mt-6">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search events, venues..."
+                className="w-full rounded-full border border-neutral-200 bg-white py-3.5 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none"
+              />
             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-5 py-4 text-sm font-semibold text-neutral-700 hover:border-orange-300">
+            <TrendingUp className="h-4 w-4 text-neutral-500" /> Organizer Studio
+          </button>
+          <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-5 py-4 text-sm font-semibold text-neutral-700 hover:border-orange-300">
+            <LayoutDashboard className="h-4 w-4 text-neutral-500" /> Promoter Dashboard
+          </button>
+          {isArtist ? (
+            <Link
+              to="/events/new"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d4580a] px-5 py-4 text-sm font-semibold text-white shadow-sm hover:brightness-110"
+            >
+              <Plus className="h-4 w-4" /> Create Event
+            </Link>
+          ) : (
+            <button
+              onClick={() => setOpen(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d4580a] px-5 py-4 text-sm font-semibold text-white shadow-sm hover:brightness-110"
+            >
+              <Plus className="h-4 w-4" /> Create Event
+            </button>
+          )}
+        </div>
+
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCat(c)}
+              className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition ${
+                cat === c
+                  ? "bg-[#d4580a] text-white"
+                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+              }`}
+            >
+              {c}
+            </button>
           ))}
         </div>
-      )}
+
+        <div className="flex items-baseline gap-2 pt-2">
+          <h2 className="font-display text-2xl font-extrabold text-neutral-900">{cat === "All" ? "All Events" : cat}</h2>
+          <span className="text-sm text-neutral-500">({filtered.length})</span>
+        </div>
+
+        {dataLoading ? (
+          <div className="py-10 text-sm text-neutral-500">Loading events…</div>
+        ) : filtered.length === 0 ? (
+          <div className="py-10 text-sm text-neutral-500">No upcoming events. Be the first to post one!</div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {filtered.map((e) => (
+              <div key={e.id} className={buying === e.id ? "pointer-events-none opacity-60" : ""}>
+                <BigEventCard e={e} onBuy={buy} buying={buying === e.id} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {open && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
