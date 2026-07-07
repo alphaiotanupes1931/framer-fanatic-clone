@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { MapPin, Calendar, Ticket } from "lucide-react";
+import { MapPin, Calendar } from "lucide-react";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventImage } from "@/components/event-image";
@@ -40,6 +40,7 @@ function NeighborhoodsPage() {
   const auth = useAuthState();
   const [list, setList] = useState<N[]>([]);
   const [selected, setSelected] = useState<N | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [artists, setArtists] = useState<ArtistRow[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -109,21 +110,12 @@ function NeighborhoodsPage() {
       <div className="space-y-6">
         <HeroBanner
           title="Neighborhoods"
-          subtitle="Explore Baltimore's communities, click a pin to discover what's happening nearby."
+          subtitle="Every upcoming event, pinned to where it's happening across Baltimore."
         />
-        <BaltimoreMap onSelect={(n) => setSelected({ id: n.id, name: n.name, region: n.region })} />
-        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-          {[
-            ["North Baltimore","#f59e0b"],["South Baltimore","#ef4444"],
-            ["East Baltimore","#10b981"],["West Baltimore","#6366f1"],
-            ["Central Baltimore","#f97316"],
-          ].map(([label,c]) => (
-            <span key={label} className="inline-flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />
-              {label}
-            </span>
-          ))}
-        </div>
+        <BaltimoreMap onSelectEvent={(e) => setSelectedEventId(e.id)} />
+        <p className="text-xs text-muted-foreground">
+          Tap a pin to see the event. Events without a mapped location won't appear here yet, edit the event to add coordinates.
+        </p>
 
         <div>
           <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">All Neighborhoods</h2>
