@@ -87,7 +87,9 @@ export type Database = {
           id: string
           image_url: string | null
           is_published: boolean
+          latitude: number | null
           location: string | null
+          longitude: number | null
           neighborhood: string | null
           price_cents: number
           starts_at: string
@@ -106,7 +108,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           neighborhood?: string | null
           price_cents?: number
           starts_at: string
@@ -125,7 +129,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           neighborhood?: string | null
           price_cents?: number
           starts_at?: string
@@ -734,6 +740,27 @@ export type Database = {
           updated_at?: string
           username?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
