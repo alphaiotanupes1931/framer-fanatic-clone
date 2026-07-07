@@ -122,7 +122,7 @@ export function RightSidebar() {
         )}
 
         <div className="border-t border-slate-200 pt-4">
-          <Link to="/search" className="group flex items-center gap-2 rounded-md p-0.5 text-xs font-semibold transition-all duration-150" style={{ color: "#d4580a" }}>
+          <Link to="/discover" className="group flex items-center gap-2 rounded-md p-0.5 text-xs font-semibold transition-all duration-150" style={{ color: "#d4580a" }}>
             Explore more of Baltimore
             <ArrowRight className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
           </Link>
