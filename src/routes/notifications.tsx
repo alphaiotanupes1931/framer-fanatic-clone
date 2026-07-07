@@ -76,6 +76,20 @@ function NotificationsPage() {
 
   useEffect(() => { void load(); }, []);
 
+  // Realtime: refresh when a new notification arrives for this user
+  useEffect(() => {
+    if (!uid) return;
+    const channel = supabase
+      .channel(`notifications:${uid}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${uid}` },
+        () => { void load(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [uid]);
+
   const markAllRead = async () => {
     if (!uid) return;
     const { error } = await supabase.from("notifications").update({ is_read: true }).eq("user_id", uid).eq("is_read", false);

@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-type N = { id: string; name: string; region: string; latitude: number | null; longitude: number | null };
-
-const REGION_COLOR: Record<string, string> = {
-  "North Baltimore": "#f59e0b",
-  "South Baltimore": "#ef4444",
-  "East Baltimore": "#10b981",
-  "West Baltimore": "#6366f1",
-  "Central Baltimore": "#f97316",
+type EventPin = {
+  id: string;
+  title: string;
+  starts_at: string;
+  location: string | null;
+  image_url: string | null;
+  latitude: number;
+  longitude: number;
 };
 
-export function BaltimoreMap({ onSelect }: { onSelect?: (n: N) => void }) {
+export function BaltimoreMap({ onSelectEvent }: { onSelectEvent?: (e: EventPin) => void }) {
   const [mounted, setMounted] = useState(false);
-  const [neighborhoods, setNeighborhoods] = useState<N[]>([]);
+  const [events, setEvents] = useState<EventPin[]>([]);
   const [Lib, setLib] = useState<any>(null);
 
   useEffect(() => { setMounted(true); }, []);
@@ -30,10 +30,13 @@ export function BaltimoreMap({ onSelect }: { onSelect?: (n: N) => void }) {
     })();
     (async () => {
       const { data } = await supabase
-        .from("neighborhoods")
-        .select("id, name, region, latitude, longitude")
-        .order("name");
-      setNeighborhoods((data || []) as N[]);
+        .from("events")
+        .select("id, title, starts_at, location, image_url, latitude, longitude")
+        .gte("starts_at", new Date().toISOString())
+        .not("latitude", "is", null)
+        .not("longitude", "is", null)
+        .order("starts_at", { ascending: true });
+      setEvents(((data || []) as any[]).filter((e) => e.latitude != null && e.longitude != null) as EventPin[]);
     })();
   }, [mounted]);
 
@@ -44,7 +47,6 @@ export function BaltimoreMap({ onSelect }: { onSelect?: (n: N) => void }) {
   }
 
   const { MapContainer, TileLayer, CircleMarker, Tooltip, Popup } = Lib;
-  const points = neighborhoods.filter((n) => n.latitude != null && n.longitude != null);
 
   return (
     <div
@@ -61,31 +63,40 @@ export function BaltimoreMap({ onSelect }: { onSelect?: (n: N) => void }) {
           attribution='&copy; OpenStreetMap'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        {points.map((n) => (
+        {events.map((e) => (
           <CircleMarker
-            key={n.id}
-            center={[n.latitude!, n.longitude!]}
-            radius={9}
+            key={e.id}
+            center={[e.latitude, e.longitude]}
+            radius={10}
             pathOptions={{
-              color: REGION_COLOR[n.region] || "#f97316",
-              fillColor: REGION_COLOR[n.region] || "#f97316",
-              fillOpacity: 0.75,
+              color: "#d4580a",
+              fillColor: "#d4580a",
+              fillOpacity: 0.8,
               weight: 2,
             }}
-            eventHandlers={{ click: () => onSelect?.(n) }}
+            eventHandlers={{ click: () => onSelectEvent?.(e) }}
           >
             <Tooltip direction="top" offset={[0, -6]} opacity={1}>
-              <span className="text-xs font-semibold">{n.name}</span>
+              <span className="text-xs font-semibold">{e.title}</span>
             </Tooltip>
             <Popup>
-              <div className="space-y-1">
-                <div className="font-semibold">{n.name}</div>
-                <div className="text-xs text-neutral-500">{n.region}</div>
+              <div className="space-y-1 min-w-[180px]">
+                <div className="font-semibold">{e.title}</div>
+                <div className="text-xs text-neutral-600">
+                  {new Date(e.starts_at).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                </div>
+                {e.location && <div className="text-xs text-neutral-500">{e.location}</div>}
               </div>
             </Popup>
           </CircleMarker>
         ))}
+        {events.length === 0 && null}
       </MapContainer>
+      {events.length === 0 && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/60 text-sm text-neutral-500">
+          No upcoming events on the map yet. Create one from the Events page.
+        </div>
+      )}
     </div>
   );
 }

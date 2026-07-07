@@ -1,10 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -124,6 +124,25 @@ function AdminPage() {
         <Stat label="Total users" value={users.length} />
         <Stat label="Live now" value={liveCount} accent="bg-emerald-500" />
         <Stat label="Banned" value={bannedCount} accent="bg-rose-500" />
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-orange/40 bg-orange/5 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 font-semibold text-foreground">
+              <FileText className="h-4 w-4 text-orange" /> Landing page content
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Edit the hero headline, subtitle, CTA, and featured quote on the public homepage.
+            </p>
+          </div>
+          <Link
+            to="/admin/content"
+            className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-white hover:bg-orange/90"
+          >
+            <Pencil className="h-3.5 w-3.5" /> Edit content
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">

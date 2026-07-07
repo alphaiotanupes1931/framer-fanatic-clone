@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
+import { HeroBanner } from "@/components/shared/hero-banner";
 import {
   User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check, HelpCircle,
   ChevronDown, ExternalLink, CheckCircle2, AlertCircle,
@@ -73,6 +74,9 @@ function SettingsPage() {
 
   return (
     <AppLayout title="Settings" subtitle="Manage your account and preferences">
+      <div className="mb-6">
+        <HeroBanner title="Settings" subtitle="Manage your account, appearance, notifications, and payments." />
+      </div>
       <div className="grid gap-6 md:grid-cols-[280px_1fr]">
         <aside className="space-y-2">
           {SECTIONS.map((s) => (

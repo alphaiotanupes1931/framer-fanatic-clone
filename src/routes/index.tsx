@@ -10,6 +10,7 @@ import { assetUrl } from "@/lib/utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
+import { useSiteContent, siteText } from "@/hooks/use-site-content";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -189,6 +190,11 @@ function Nav() {
 
 
 function Hero() {
+  const { content } = useSiteContent();
+  const line1 = siteText(content, "hero.line1");
+  const line2 = siteText(content, "hero.line2");
+  const subtitle = siteText(content, "hero.subtitle");
+  const ctaLabel = siteText(content, "hero.cta");
   return (
     <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden">
       <HeroParallax />
@@ -204,7 +210,7 @@ function Hero() {
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10 text-paper">
         <div className="font-display font-medium text-[clamp(2.75rem,12vw,11rem)] leading-[0.9] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.045em]">
-          <AnimatedHeadline lines={["Baltimore is", "extraordinary"]} />
+          <AnimatedHeadline lines={[line1, line2]} />
         </div>
 
         <motion.div
@@ -214,7 +220,7 @@ function Hero() {
           className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
         >
           <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed">
-            We all deserve to experience more of it.
+            {subtitle}
           </p>
 
           <div className="hidden md:flex items-center gap-3">
@@ -223,7 +229,7 @@ function Hero() {
                 to="/auth"
                 className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-6 pr-2 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors"
               >
-                <span>Get Started</span>
+                <span>{ctaLabel}</span>
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper group-hover:bg-paper group-hover:text-ink transition-colors">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </span>
@@ -244,7 +250,7 @@ function Hero() {
             to="/auth"
             className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-5 pr-1.5 py-1.5 text-sm font-medium"
           >
-            <span>Get Started</span>
+            <span>{ctaLabel}</span>
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </span>
@@ -272,6 +278,9 @@ function StaggeredQuote({ text, className }: { text: string; className?: string 
 
 function QuoteSection() {
   const ref = useRef<HTMLDivElement>(null);
+  const { content } = useSiteContent();
+  const quoteText = siteText(content, "quote.text");
+  const quoteAuthor = siteText(content, "quote.author");
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -307,7 +316,7 @@ function QuoteSection() {
           {/* Quote */}
           <div className="text-ink">
             <StaggeredQuote
-              text="Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities."
+              text={quoteText}
               className="font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"
             />
             <motion.div
@@ -317,7 +326,7 @@ function QuoteSection() {
               transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60"
             >
-              Terrell Speaks
+              {quoteAuthor}
             </motion.div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
+import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, MessageSquare, Plus, Search, Send, Users, X } from "lucide-react";
 import { toast } from "sonner";
@@ -335,7 +336,10 @@ function MessagesPage() {
 
   return (
     <AppLayout title="" hero={false}>
-      <div className="grid h-[calc(100vh-8rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[340px_1fr]">
+      <div className="mb-6">
+        <HeroBanner title="Messages" subtitle="Direct conversations with people and organizations across Baltimore." />
+      </div>
+      <div className="grid h-[calc(100vh-12rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[340px_1fr]">
         {/* Conversation list */}
         <div
           className={`${showList ? "flex" : "hidden"} flex-col border-r border-border md:flex`}
