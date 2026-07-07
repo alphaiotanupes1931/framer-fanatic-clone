@@ -5,8 +5,9 @@ import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ORG_TYPE_LABEL, subtypesFor } from "@/lib/categories";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
-import { Plus, MapPin, Search, Building2 } from "lucide-react";
+import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
+import { BaltimoreMap } from "@/components/baltimore-map";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -36,6 +37,7 @@ export function OrgListPage({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<"newest" | "oldest" | "name">("newest");
+  const [view, setView] = useState<"list" | "map">("list");
 
   const load = async () => {
     setLoading(true);
@@ -65,9 +67,10 @@ export function OrgListPage({
               {showMap && (
                 <button
                   type="button"
+                  onClick={() => setView((v) => (v === "map" ? "list" : "map"))}
                   className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
                 >
-                  <MapPin className="h-4 w-4" /> Map
+                  {view === "map" ? <><List className="h-4 w-4" /> List</> : <><MapPin className="h-4 w-4" /> Map</>}
                 </button>
               )}
               {canCreate && (
@@ -134,7 +137,11 @@ export function OrgListPage({
           </div>
         )}
 
-        {loading ? (
+        {view === "map" ? (
+          <div className="overflow-hidden rounded-2xl border border-neutral-200">
+            <BaltimoreMap />
+          </div>
+        ) : loading ? (
           <div className="py-16 text-center text-neutral-500">Loading…</div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
