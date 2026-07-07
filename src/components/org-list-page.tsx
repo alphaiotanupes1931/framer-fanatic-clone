@@ -8,6 +8,7 @@ import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { BaltimoreMap } from "@/components/baltimore-map";
+import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -174,17 +175,18 @@ export function OrgListPage({
         )}
 
         {loading ? (
-          <div className="py-16 text-center text-neutral-500">Loading…</div>
+          <CardGridSkeleton count={6} aspect="aspect-[16/10]" />
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
-              <Building2 className="h-7 w-7 text-neutral-400" />
-            </div>
-            <div className="text-base font-semibold text-neutral-900">No {title.toLowerCase()} found</div>
-            <div className="mt-1 text-sm text-neutral-500">
-              Be the first to add a Baltimore {ORG_TYPE_LABEL[type].toLowerCase()}.
-            </div>
-          </div>
+          <EmptyState
+            icon={Building2}
+            title={`No ${title.toLowerCase()} found`}
+            description={`Be the first to add a Baltimore ${ORG_TYPE_LABEL[type].toLowerCase()}.`}
+            action={canCreate ? (
+              <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">
+                <Plus className="h-4 w-4" /> Create page
+              </button>
+            ) : undefined}
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((o) => (

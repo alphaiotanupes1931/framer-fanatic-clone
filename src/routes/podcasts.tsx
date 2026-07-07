@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Mic, Plus, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 
 type Pod = {
   id: string;
@@ -48,18 +49,20 @@ function PodcastsPage() {
           }
         />
 
-        <div className="text-sm text-neutral-500">
-          {loading ? "Loading…" : `${items.length} podcast${items.length === 1 ? "" : "s"} on Planet Baltimore`}
-        </div>
-
-        {!loading && items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#d4580a]/10">
-              <Mic className="h-6 w-6" style={{ color: "#d4580a" }} />
-            </div>
-            <div className="text-base font-semibold text-neutral-900">No podcasts yet</div>
-            <div className="mt-1 text-sm text-neutral-500">Be the first to add yours.</div>
+        {!loading && (
+          <div className="text-sm text-neutral-500">
+            {items.length} podcast{items.length === 1 ? "" : "s"} on Planet Baltimore
           </div>
+        )}
+
+        {loading ? (
+          <ListSkeleton count={4} />
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={Mic}
+            title="No podcasts yet"
+            description="Be the first to add yours."
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {items.map((p) => {

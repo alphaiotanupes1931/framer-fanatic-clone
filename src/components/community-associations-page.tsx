@@ -6,6 +6,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -80,15 +81,13 @@ export function CommunityAssociationsPage() {
         </div>
 
         {loading ? (
-          <div className="py-16 text-center text-neutral-500">Loading…</div>
+          <ListSkeleton count={4} />
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
-              <Users className="h-7 w-7 text-neutral-400" />
-            </div>
-            <div className="text-base font-semibold text-neutral-900">No community associations found</div>
-            <div className="mt-1 text-sm text-neutral-500">Be the first to add a Baltimore community association.</div>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="No community associations found"
+            description="Be the first to add a Baltimore community association."
+          />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {items.map((o) => (

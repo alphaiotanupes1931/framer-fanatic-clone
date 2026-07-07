@@ -6,6 +6,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
+import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -120,15 +121,13 @@ export function GroupsPage() {
         </div>
 
         {loading ? (
-          <div className="py-16 text-center text-neutral-500">Loading…</div>
+          <ListSkeleton count={4} />
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
-              <Users className="h-7 w-7 text-neutral-400" />
-            </div>
-            <div className="text-base font-semibold text-neutral-900">No communities found</div>
-            <div className="mt-1 text-sm text-neutral-500">Try a different filter, or start a new group.</div>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="No communities found"
+            description="Try a different filter, or start a new group."
+          />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {filtered.map((o) => (
