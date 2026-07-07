@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Bell, Heart, MessageCircle, UserPlus, Calendar, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
+import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 
 export const Route = createFileRoute("/notifications")({
   component: NotificationsPage,
