@@ -5,6 +5,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Tag, Search } from "lucide-react";
 import { toast } from "sonner";
+import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 
 type Listing = {
   id: string; seller_id: string; title: string; description: string | null;
@@ -74,13 +75,18 @@ function MarketplacePage() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-64 animate-pulse rounded-2xl bg-secondary" />)}
-          </div>
+          <CardGridSkeleton count={6} aspect="aspect-[4/3]" />
         ) : filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card py-20 text-center text-muted-foreground">
-            No listings yet. {me && <button onClick={() => setOpen(true)} className="font-semibold text-[#d4580a] hover:underline">Be the first to list something.</button>}
-          </div>
+          <EmptyState
+            icon={Tag}
+            title="No listings yet"
+            description="Nothing matches your search. Try a different category."
+            action={me ? (
+              <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110">
+                <Plus className="h-4 w-4" /> List an item
+              </button>
+            ) : undefined}
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((it) => (
