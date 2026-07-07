@@ -1,59 +1,46 @@
-## Goal
-Make Planet Baltimore an exact structural / visual replica of https://planetbaltimore.us across every page. All data continues to come from Base44 (no data-layer changes).
+# Big Batch Plan
 
-## Method
-Work page-by-page. For each page I will:
-1. Fetch the reference at that URL.
-2. Diff structure vs the current implementation.
-3. Rewrite only the layout / presentation of that route.
-4. Confirm visually before moving on.
+Given the scope, here's how I'll tackle everything in order. A few items depend on info from you — flagged below.
 
-No changes to data fetching, entities, or auth flows.
+## 1. Headers
+- Add the standard `HeroBanner` to **Settings** and **Messages** pages so they match the rest of the app.
 
-## Order of work (one page per turn — you'll see progress after each)
+## 2. Quick activations
+- **Search page**: wire the search input to query profiles, events, orgs, posts (already have `search_creators` RPC — extend for other tables).
+- **Notifications page**: it already reads from `notifications` table + realtime. I'll verify realtime subscription is live and unread badges update instantly.
 
-**1. Home (`/dashboard`)**
-- Keep orange hero banner (already correct).
-- Feed order: Stories dominate (matches reference), then Posts, then Events — not the current post-heavy weave.
-- Story item layout: `STORY` chip label above card, avatar + name + colored category tag (Poetry / Blog / Essay), title, one-line excerpt, `min · likes · comments`, right-side square thumbnail. Replace current `StoryCard`.
-- Welcome onboarding: 4-tile grid (Follow artists / Join community / Share something / Explore events) with dismiss X — replace current `OnboardingCard`.
-- Filter pills: `For You · Following · Nearby · Discover` (already present, restyle to match).
+## 3. Neighborhoods map rework
+- Remove colored region dots + legend.
+- Query all upcoming events with lat/lng, drop one pin per event.
+- Clicking a pin opens the event dialog (title, time, location, link to `/events/$eventId`).
+- Requires event rows to have `latitude`/`longitude`. Events table currently stores `location` text + `neighborhood`. I'll add nullable `latitude`/`longitude` columns via migration and geocode from `location` when a user creates an event (using a lightweight geocoder — Nominatim, free, no key).
 
-**2. Right sidebar**
-- Add `UPCOMING EVENTS` section under `ARTISTS TO FOLLOW` (currently missing).
-- Match spacing / header treatment (small icon + uppercase label + See all link).
+## 4. Content migration from planetbaltimore.us
+I'll use Firecrawl to scrape:
+- `planetbaltimore.us/baltimore-100` → seed Baltimore 100 page
+- `planetbaltimore.us/videos` → seed Videos page
+- `planetbaltimore.us/groups` (or equivalent) → seed Groups/Communities
 
-**3. Left sidebar**
-- Already close. Confirm order matches reference exactly: Home, Artists, Arts Orgs, Businesses, Calendar, Community Associations, Discover, Events, Groups/Communities, Messages, Neighborhoods, Notifications, Profile, Search, Stories, Videos, Baltimore 100, Settings.
-- Login button pinned to bottom above chevron.
+**Base44**: you mentioned Base44 keys — I see `BASE44_API_KEY` is set. If you want me to pull structured data from your Base44 app instead of scraping, tell me the Base44 app ID and I'll hit their API. Otherwise I'll go with Firecrawl on the live site.
 
-**4. Stories (`/stories`)**
-- Orange hero banner "Stories — Discover stories from Baltimore's writing community" + `Write A Story` button on the right.
-- `BROWSE BY FORMAT` dropdown (All Formats).
-- Tabs: Discover · Trending · Featured (orange underline for active).
-- Category pills: All / Poetry / Blog / Essay / Resource.
-- List layout matching reference (same as home story cards).
+Firecrawl requires the Firecrawl connector. If not linked, I'll ask you to link it before this step.
 
-**5. Artists (`/artists`)**
-- Hero banner + `Create Artist Page` button (already present, refine spacing).
-- Search input full-width left, `Newest` sort dropdown right (currently a pill, needs to be a select).
-- Category pills: All / Visual Art / Music / Video / Photography / Performance / Literary / Fashion / Podcaster.
-- Card: square image with rounded corners, name below, category, neighborhood.
+## 5. Admin dashboard: landing page text
+- New `/admin/content` section (visible only to admins via `has_role`).
+- New `site_content` table: `key text PRIMARY KEY`, `value jsonb`, `updated_at`. Public read (anon SELECT), admin-only write.
+- Landing page (`src/routes/index.tsx`) reads keys like `hero.title`, `hero.subtitle`, `about.body` from `site_content` with sensible defaults.
+- Admin page: simple form per key, save button.
 
-**6. Events (`/events`)**
-- Hero banner "Events — Find what's happening in Baltimore" + `Create Event` button.
-- Match card layout (image, date chip, title, venue, neighborhood).
+## Execution order
+1. Headers (Settings, Messages) — 1 edit each
+2. Site content table + admin page + landing page wiring
+3. Search activation
+4. Notifications realtime verification
+5. Neighborhoods map (migration + geocoding + map rewrite)
+6. Firecrawl scrape → seed Baltimore 100, Videos, Groups (needs connector link)
 
-**7. Remaining pages** (Arts Orgs, Businesses, Calendar, Community Associations, Discover, Groups, Neighborhoods, Videos, Baltimore 100)
-- Each gets the same hero-banner + filter-pills + card-grid pattern as above.
-- One turn per page so you can approve as we go.
+## What I need from you
+- **Confirm Firecrawl** as the scrape source, or give the Base44 app ID if you'd rather I pull from there.
+- **Landing page keys to make editable** — I'll default to hero title/subtitle/CTA + any about section. Tell me if there's more.
 
-## Out of scope for this plan
-- Data model changes (Base44 API stays as-is).
-- Detail pages (`/o/$slug`, `/u/$username`, `/stories/$storyId`, `/events/$eventId`) — I'll flag those for a follow-up after list pages are aligned.
-- Auth, admin, onboarding wizard, settings, notifications details.
-
-## Confirm before I start
-- OK to change the home feed so **Stories lead** instead of Posts? (Reference does this; you previously asked for posts to be visible — they'll still appear, just further down.)
-- OK to remove the current `OnboardingCard` in favor of the reference's 4-tile Welcome card?
-- Any page you want done first out of order?
+Reply "go" and I'll start with steps 1–5 immediately while you decide on the content source for step 6.
