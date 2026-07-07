@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Clock, Plus, X, Send } from "lucide-react";
+import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/stories")({
@@ -170,7 +170,9 @@ function StoriesSignedIn() {
   const [filter, setFilter] = useState("All");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", excerpt: "", content: "", format: "blog" });
+  const [form, setForm] = useState({ title: "", excerpt: "", content: "", format: "blog", cover_url: "" });
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Story | null>(null);
 
@@ -224,10 +226,30 @@ function StoriesSignedIn() {
     const { error } = await supabase.from("stories").insert({
       user_id: me.id, title: form.title.trim(), excerpt: form.excerpt.trim() || null,
       content: form.content.trim(), format: form.format, read_minutes: read,
+      cover_url: form.cover_url || null,
     });
     if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", excerpt: "", content: "", format: "blog" });
+    setOpen(false); setForm({ title: "", excerpt: "", content: "", format: "blog", cover_url: "" });
     toast.success("Story published"); load();
+  };
+
+  const pickCover = async (file: File) => {
+    if (!me) return;
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+      const up = await supabase.storage.from("story-covers").upload(path, file, { upsert: false, contentType: file.type });
+      if (up.error) throw up.error;
+      const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+      setForm((f) => ({ ...f, cover_url: signed.signedUrl }));
+      toast.success("Cover image uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -329,6 +351,37 @@ function StoriesSignedIn() {
               <select value={form.format} onChange={(e) => setForm({...form, format: e.target.value})} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">
                 {["blog","poetry","essay","resource"].map((f) => <option key={f}>{f}</option>)}
               </select>
+              <div className="rounded-lg border border-neutral-200 p-3">
+                <div className="flex items-center gap-3">
+                  {form.cover_url ? (
+                    <img src={form.cover_url} alt="" className="h-16 w-16 rounded-md object-cover border" />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-md bg-neutral-100 text-neutral-400"><ImagePlus className="h-5 w-5" /></div>
+                  )}
+                  <div className="flex-1">
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold hover:bg-neutral-50 disabled:opacity-60"
+                    >
+                      {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImagePlus className="h-3 w-3" />}
+                      {form.cover_url ? "Replace cover image" : "Upload cover image"}
+                    </button>
+                    {form.cover_url && (
+                      <button type="button" onClick={() => setForm({ ...form, cover_url: "" })} className="ml-2 text-xs text-neutral-500 hover:text-neutral-800">Remove</button>
+                    )}
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickCover(f); e.target.value = ""; }}
+                    />
+                    <p className="mt-1 text-[11px] text-neutral-500">Optional. Shown on the story card and detail page.</p>
+                  </div>
+                </div>
+              </div>
               <input value={form.excerpt} onChange={(e) => setForm({...form, excerpt: e.target.value})} placeholder="Excerpt (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <textarea value={form.content} onChange={(e) => setForm({...form, content: e.target.value})} placeholder="Your story…" rows={10} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <button onClick={submit} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">Publish</button>
