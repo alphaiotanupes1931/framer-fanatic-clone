@@ -21,6 +21,10 @@ type Story = {
   author?: { display_name: string | null; avatar_url: string | null };
 };
 
+const STORY_FORMATS = [
+  "All Formats","Novels","Short Stories","Poetry","Plays","Screenplays",
+  "Memoirs","Novellas","Flash Fiction","Spoken Word","Journals / Diaries",
+] as const;
 const FORMATS = ["All","poetry","blog","essay","resource"];
 const TABS = ["Discover","Trending","Featured"] as const;
 
