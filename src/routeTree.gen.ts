@@ -45,6 +45,7 @@ import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const VideosRoute = VideosRouteImport.update({
@@ -227,6 +228,11 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
   path: '/$eventId',
   getParentRoute: () => EventsRoute,
 } as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -236,7 +242,7 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
+  '/admin/content': typeof AdminContentRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
@@ -275,7 +282,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
+  '/admin/content': typeof AdminContentRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
@@ -315,7 +323,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -344,6 +352,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
+  '/admin/content': typeof AdminContentRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
@@ -385,6 +394,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/videos'
+    | '/admin/content'
     | '/events/$eventId'
     | '/marketplace/$listingId'
     | '/o/$slug'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/videos'
+    | '/admin/content'
     | '/events/$eventId'
     | '/marketplace/$listingId'
     | '/o/$slug'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/videos'
+    | '/admin/content'
     | '/events/$eventId'
     | '/marketplace/$listingId'
     | '/o/$slug'
@@ -474,7 +486,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ArtistsRoute: typeof ArtistsRoute
   ArtsOrgsRoute: typeof ArtsOrgsRoute
   AuthRoute: typeof AuthRoute
@@ -762,6 +774,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof EventsRoute
     }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -771,6 +790,16 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminContentRoute: typeof AdminContentRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminContentRoute: AdminContentRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface EventsRouteChildren {
   EventsEventIdRoute: typeof EventsEventIdRoute
@@ -809,7 +838,7 @@ const StoriesRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   ArtistsRoute: ArtistsRoute,
   ArtsOrgsRoute: ArtsOrgsRoute,
   AuthRoute: AuthRoute,
