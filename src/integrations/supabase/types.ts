@@ -432,12 +432,14 @@ export type Database = {
           email: string | null
           hours: Json | null
           id: string
+          mission: string | null
           name: string
           neighborhood: string | null
           owner_id: string
           phone: string | null
           slug: string
           subtype: string | null
+          tagline: string | null
           type: string
           updated_at: string
           website: string | null
@@ -451,12 +453,14 @@ export type Database = {
           email?: string | null
           hours?: Json | null
           id?: string
+          mission?: string | null
           name: string
           neighborhood?: string | null
           owner_id: string
           phone?: string | null
           slug: string
           subtype?: string | null
+          tagline?: string | null
           type: string
           updated_at?: string
           website?: string | null
@@ -470,12 +474,14 @@ export type Database = {
           email?: string | null
           hours?: Json | null
           id?: string
+          mission?: string | null
           name?: string
           neighborhood?: string | null
           owner_id?: string
           phone?: string | null
           slug?: string
           subtype?: string | null
+          tagline?: string | null
           type?: string
           updated_at?: string
           website?: string | null
