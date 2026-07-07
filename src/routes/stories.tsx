@@ -173,6 +173,7 @@ function StoriesSignedIn() {
   const [stories, setStories] = useState<Story[]>([]);
   const [filter, setFilter] = useState("All");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
+  const [storyFormat, setStoryFormat] = useState<(typeof STORY_FORMATS)[number]>("All Formats");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", excerpt: "", content: "", format: "blog", cover_url: "" });
   const [uploading, setUploading] = useState(false);
@@ -278,9 +279,9 @@ function StoriesSignedIn() {
         <div>
           <div className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Browse by format</div>
           <div className="flex flex-wrap gap-2">
-            {FORMATS.map((f) => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold capitalize transition ${filter===f ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}>{f}</button>
+            {STORY_FORMATS.map((f) => (
+              <button key={f} onClick={() => setStoryFormat(f)}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${storyFormat===f ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}>{f}</button>
             ))}
           </div>
         </div>
@@ -290,6 +291,15 @@ function StoriesSignedIn() {
             <button key={t} onClick={() => setTab(t)}
               className={`border-b-2 pb-2.5 text-sm font-semibold ${tab===t ? "border-orange-600 text-orange-600" : "border-transparent text-neutral-500 hover:text-neutral-800"}`}>{t}</button>
           ))}
+        </div>
+
+        <div>
+          <div className="flex flex-wrap gap-2">
+            {FORMATS.map((f) => (
+              <button key={f} onClick={() => setFilter(f)}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold capitalize transition ${filter===f ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}>{f}</button>
+            ))}
+          </div>
         </div>
 
         {stories.length === 0 && <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">No stories yet. Write the first one!</div>}
