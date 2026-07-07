@@ -19,13 +19,13 @@ export function HeroBanner({
       <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 max-w-2xl">
           <h1
-            className="mb-1 font-display text-[26px] font-extrabold leading-tight sm:text-[28px]"
+            className="mb-2 font-display text-[32px] font-extrabold leading-tight sm:text-[38px]"
             style={{ color: "#d4580a" }}
           >
             {title}
           </h1>
           {subtitle && (
-            <p className="text-xs font-medium leading-relaxed" style={{ color: "#d4580a" }}>{subtitle}</p>
+            <p className="text-[15px] font-normal leading-relaxed text-neutral-500">{subtitle}</p>
           )}
         </div>
         {cta && <div className="flex-shrink-0">{cta}</div>}
