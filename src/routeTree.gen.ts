@@ -58,6 +58,7 @@ import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
 import { Route as EventsNewRouteImport } from './routes/events.new'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
@@ -307,6 +308,11 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
   path: '/events/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/admin/content',
   path: '/admin/content',
@@ -361,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/ticketing': typeof TicketingRoute
   '/videos': typeof VideosRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/ticketing': typeof TicketingRoute
   '/videos': typeof VideosRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
@@ -468,6 +476,7 @@ export interface FileRoutesById {
   '/ticketing': typeof TicketingRoute
   '/videos': typeof VideosRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
@@ -523,6 +532,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/videos'
     | '/admin/content'
+    | '/admin/login'
     | '/events/$eventId'
     | '/events/new'
     | '/marketplace/$listingId'
@@ -576,6 +586,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/videos'
     | '/admin/content'
+    | '/admin/login'
     | '/events/$eventId'
     | '/events/new'
     | '/marketplace/$listingId'
@@ -629,6 +640,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/videos'
     | '/admin/content'
+    | '/admin/login'
     | '/events/$eventId'
     | '/events/new'
     | '/marketplace/$listingId'
@@ -683,6 +695,7 @@ export interface RootRouteChildren {
   TicketingRoute: typeof TicketingRoute
   VideosRoute: typeof VideosRoute
   AdminContentRoute: typeof AdminContentRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
   OSlugRoute: typeof OSlugRoute
@@ -1037,6 +1050,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/admin/content'
@@ -1120,6 +1140,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketingRoute: TicketingRoute,
   VideosRoute: VideosRoute,
   AdminContentRoute: AdminContentRoute,
+  AdminLoginRoute: AdminLoginRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
   OSlugRoute: OSlugRoute,
