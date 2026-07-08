@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar } from "lucide-react";
 
 const SUPABASE_HOST = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || "";
 
@@ -17,19 +16,16 @@ function extractEventImagePath(src: string): string | null {
 
 const cache = new Map<string, { url: string; exp: number }>();
 
-export function EventImage({ src, alt, className }: { src: string | null | undefined; alt: string; className?: string }) {
+export function useEventImageUrl(src: string | null | undefined): string | null {
   const [url, setUrl] = useState<string | null>(() => {
     if (!src) return null;
     const path = extractEventImagePath(src);
-    if (!path) return src; // external URL, use directly
+    if (!path) return src;
     const cached = cache.get(path);
     return cached && cached.exp > Date.now() ? cached.url : null;
   });
-  const [failed, setFailed] = useState(false);
-
   useEffect(() => {
-    if (!src) return;
-    setFailed(false);
+    if (!src) { setUrl(null); return; }
     const path = extractEventImagePath(src);
     if (!path) { setUrl(src); return; }
     const cached = cache.get(path);
@@ -41,18 +37,20 @@ export function EventImage({ src, alt, className }: { src: string | null | undef
       if (data?.signedUrl) {
         cache.set(path, { url: data.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
         setUrl(data.signedUrl);
+      } else {
+        setUrl(null);
       }
     })();
     return () => { cancel = true; };
   }, [src]);
+  return url;
+}
 
-  if (!url || failed) {
-    return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200 ${className ?? ""}`} aria-label={alt} role="img">
-        <Calendar className="h-8 w-8 text-[#d4580a]/40" />
-      </div>
-    );
-  }
+export function EventImage({ src, alt, className }: { src: string | null | undefined; alt: string; className?: string }) {
+  const url = useEventImageUrl(src);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setFailed(false); }, [url]);
+  if (!url || failed) return null;
   return <img src={url} alt={alt} className={className} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
 }
 
