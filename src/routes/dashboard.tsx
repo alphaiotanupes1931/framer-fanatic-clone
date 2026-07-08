@@ -199,7 +199,7 @@ function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="w-full space-y-5 sm:space-y-[22px]" style={{ zoom: 1.25 }}>
+      <div className="w-full space-y-5 sm:space-y-[22px]" style={{ zoom: 1.1 }}>
         <HeroBanner title="Planet Baltimore" subtitle="Your city. Your community. Your feed." />
 
         {/* Filters */}
