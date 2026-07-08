@@ -111,7 +111,10 @@ function NeighborhoodsPage() {
           title="Neighborhoods"
           subtitle="Every upcoming event, pinned to where it's happening across Baltimore."
         />
-        <BaltimoreMap onSelectEvent={(e) => navigate({ to: "/events/$eventId", params: { eventId: e.id } })} />
+        <BaltimoreMap
+          onSelectEvent={(e) => navigate({ to: "/events/$eventId", params: { eventId: e.id } })}
+          onSelectNeighborhood={(n) => setSelected({ id: n.id, name: n.name, region: n.region ?? "" })}
+        />
         <p className="text-xs text-muted-foreground">
           Tap a pin to see the event. Events without a mapped location won't appear here yet, edit the event to add coordinates.
         </p>
