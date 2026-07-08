@@ -12,7 +12,10 @@ function sessionConfig() {
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite: "lax" as const,
+      // The published site and the editor preview both embed the app inside
+      // a cross-site iframe. SameSite=Lax cookies are blocked in that
+      // context, so the session cookie would be set but never sent back.
+      sameSite: "none" as const,
       path: "/",
     },
   };
