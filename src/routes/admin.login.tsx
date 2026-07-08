@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
-import { isAdminUnlocked, unlockAdmin } from "@/lib/admin-gate";
+import { isAdminUnlocked, unlockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
 
 export const Route = createFileRoute("/admin/login")({
   component: AdminLoginPage,
@@ -20,13 +20,14 @@ function AdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isAdminUnlocked()) navigate({ to: "/admin" });
+    if (isAdminUnlocked()) { navigate({ to: "/admin" }); return; }
+    void refreshAdminUnlocked().then((ok) => { if (ok) navigate({ to: "/admin" }); });
   }, [navigate]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const ok = unlockAdmin(username, password);
+    const ok = await unlockAdmin(username, password);
     setSubmitting(false);
     if (!ok) { toast.error("Invalid username or password"); return; }
     toast.success("Welcome");
