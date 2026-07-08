@@ -204,6 +204,7 @@ export const becomeArtist = createServerFn({ method: "POST" })
       lng: typeof d.lng === "number" ? d.lng : null,
     };
   })
+  // (unchanged below)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: profile } = await supabase
