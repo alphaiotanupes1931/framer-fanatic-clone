@@ -5,6 +5,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Heart, MessageCircle, Clock, Share2, Trash2, Send } from "lucide-react";
 import { toast } from "sonner";
+import DOMPurify from "isomorphic-dompurify";
 
 export const Route = createFileRoute("/stories/$storyId")({
   component: StoryDetail,
@@ -167,9 +168,16 @@ function StoryDetail() {
           </div>
 
           {story.content && (
-            <div className="prose prose-neutral mt-8 max-w-none whitespace-pre-wrap text-[17px] leading-relaxed text-foreground/90">
-              {story.content}
-            </div>
+            /^\s*<[a-z]/i.test(story.content) ? (
+              <div
+                className="prose prose-neutral mt-8 max-w-none text-[17px] leading-relaxed text-foreground/90"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(story.content) }}
+              />
+            ) : (
+              <div className="prose prose-neutral mt-8 max-w-none whitespace-pre-wrap text-[17px] leading-relaxed text-foreground/90">
+                {story.content}
+              </div>
+            )
           )}
 
           <section className="mt-10">
