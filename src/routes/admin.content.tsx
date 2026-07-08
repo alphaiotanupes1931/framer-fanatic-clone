@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin-shell";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { isAdminUnlocked, refreshAdminUnlocked } from "@/lib/admin-gate";
+import { getAdminToken, refreshAdminUnlocked } from "@/lib/admin-gate";
 import { saveSiteContent } from "@/lib/admin-site.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,7 +77,7 @@ function AdminContentPage() {
     setSaving(true);
     const rows = dirtyKeys.map((k) => ({ key: k, value: values[k] ?? "" }));
     try {
-      await saveSiteContent({ data: { rows } });
+      await saveSiteContent({ data: { rows, adminToken: getAdminToken() } });
       setInitial({ ...values });
       toast.success(`Saved ${dirtyKeys.length} change${dirtyKeys.length === 1 ? "" : "s"}`);
     } catch (e) {

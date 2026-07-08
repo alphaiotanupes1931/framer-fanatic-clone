@@ -1,31 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { useSession } from "@tanstack/react-start/server";
-import { createHash, timingSafeEqual } from "node:crypto";
-
-type GateSession = { unlocked?: boolean };
-
-function sessionConfig() {
-  return {
-    password: process.env.ADMIN_SESSION_SECRET!,
-    name: "pb-admin-gate",
-    maxAge: 60 * 60 * 24 * 7,
-    cookie: {
-      httpOnly: true,
-      secure: true,
-      // The published site and the editor preview both embed the app inside
-      // a cross-site iframe. SameSite=Lax cookies are blocked in that
-      // context, so the session cookie would be set but never sent back.
-      sameSite: "none" as const,
-      path: "/",
-    },
-  };
-}
-
-function matches(input: string, expected: string): boolean {
-  const a = createHash("sha256").update(input, "utf8").digest();
-  const b = createHash("sha256").update(expected, "utf8").digest();
-  return timingSafeEqual(a, b);
-}
+import {
+  clearAdminUnlocked,
+  createAdminToken,
+  hasAdminAccess,
+  normalizeAdminPassword,
+  normalizeAdminUsername,
+  setAdminUnlocked,
+  timingSafeMatches,
+} from "./admin-session.server";
 
 export const unlockAdminSite = createServerFn({ method: "POST" })
   .inputValidator((data: { username: string; password: string }) => data)
@@ -35,30 +17,29 @@ export const unlockAdminSite = createServerFn({ method: "POST" })
     if (!expectedUser || !expectedPass) {
       throw new Error("Admin credentials are not configured");
     }
-    const userOk = matches(data.username.trim().toLowerCase(), expectedUser.trim().toLowerCase());
-    const passOk = matches(data.password.trim(), expectedPass.trim());
+    const userOk = timingSafeMatches(normalizeAdminUsername(data.username), normalizeAdminUsername(expectedUser));
+    const passOk = timingSafeMatches(
+      normalizeAdminPassword(data.password, expectedPass),
+      normalizeAdminPassword(expectedPass, expectedPass),
+    );
     if (!userOk || !passOk) return { ok: false as const };
-    const session = await useSession<GateSession>(sessionConfig());
-    await session.update({ unlocked: true });
-    return { ok: true as const };
+    await setAdminUnlocked();
+    return { ok: true as const, adminToken: createAdminToken() };
   });
 
 export const lockAdminSite = createServerFn({ method: "POST" }).handler(async () => {
-  const session = await useSession<GateSession>(sessionConfig());
-  await session.clear();
+  await clearAdminUnlocked();
   return { ok: true as const };
 });
 
-export const isAdminSiteUnlocked = createServerFn({ method: "GET" }).handler(async () => {
-  const session = await useSession<GateSession>(sessionConfig());
-  return { unlocked: !!session.data.unlocked };
-});
+export const isAdminSiteUnlocked = createServerFn({ method: "POST" })
+  .inputValidator((data?: { adminToken?: string | null }) => data ?? {})
+  .handler(async ({ data }) => ({ unlocked: await hasAdminAccess(data.adminToken) }));
 
 export const saveSiteContent = createServerFn({ method: "POST" })
-  .inputValidator((data: { rows: { key: string; value: string }[] }) => data)
+  .inputValidator((data: { rows: { key: string; value: string }[]; adminToken?: string | null }) => data)
   .handler(async ({ data }) => {
-    const session = await useSession<GateSession>(sessionConfig());
-    if (!session.data.unlocked) {
+    if (!(await hasAdminAccess(data.adminToken))) {
       throw new Error("Admin gate is locked");
     }
     const clean = data.rows

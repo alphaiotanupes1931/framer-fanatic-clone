@@ -6,6 +6,21 @@
 import { unlockAdminSite, lockAdminSite, isAdminSiteUnlocked } from "./admin-site.functions";
 
 const KEY = "pb_admin_gate";
+const TOKEN_KEY = "pb_admin_gate_token";
+
+function getStoredAdminToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try { return sessionStorage.getItem(TOKEN_KEY); } catch { return null; }
+}
+
+export function getAdminToken(): string | null {
+  return getStoredAdminToken();
+}
+
+function clearLocalAdminGate() {
+  try { sessionStorage.removeItem(KEY); } catch { /* ignore */ }
+  try { sessionStorage.removeItem(TOKEN_KEY); } catch { /* ignore */ }
+}
 
 export function isAdminUnlocked(): boolean {
   if (typeof window === "undefined") return false;
@@ -14,9 +29,12 @@ export function isAdminUnlocked(): boolean {
 
 export async function unlockAdmin(username: string, password: string): Promise<boolean> {
   try {
-    const { ok } = await unlockAdminSite({ data: { username, password } });
+    const { ok, adminToken } = await unlockAdminSite({ data: { username, password } });
     if (!ok) return false;
     try { sessionStorage.setItem(KEY, "1"); } catch { /* ignore */ }
+    if (adminToken) {
+      try { sessionStorage.setItem(TOKEN_KEY, adminToken); } catch { /* ignore */ }
+    }
     return true;
   } catch {
     return false;
@@ -24,17 +42,17 @@ export async function unlockAdmin(username: string, password: string): Promise<b
 }
 
 export async function lockAdmin(): Promise<void> {
-  try { sessionStorage.removeItem(KEY); } catch { /* ignore */ }
+  clearLocalAdminGate();
   try { await lockAdminSite(); } catch { /* ignore */ }
 }
 
 // Verify the server cookie is still valid and sync the UI flag.
 export async function refreshAdminUnlocked(): Promise<boolean> {
   try {
-    const { unlocked } = await isAdminSiteUnlocked();
+    const { unlocked } = await isAdminSiteUnlocked({ data: { adminToken: getStoredAdminToken() } });
     try {
       if (unlocked) sessionStorage.setItem(KEY, "1");
-      else sessionStorage.removeItem(KEY);
+      else clearLocalAdminGate();
     } catch { /* ignore */ }
     return unlocked;
   } catch {

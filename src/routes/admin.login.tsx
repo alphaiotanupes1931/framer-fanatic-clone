@@ -21,7 +21,6 @@ function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAdminUnlocked()) { navigate({ to: "/admin" }); return; }
     void refreshAdminUnlocked().then((ok) => { if (ok) navigate({ to: "/admin" }); });
   }, [navigate]);
 
@@ -58,11 +57,11 @@ function AdminLoginPage() {
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-6">
           <div className="space-y-1.5">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={username} onChange={(e) => setUsername(e.target.value)} required />
+            <Input id="username" name="username" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="next" value={username} onChange={(e) => setUsername(e.target.value)} required />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" autoComplete="current-password" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input id="password" name="password" type="password" autoComplete="current-password" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? "Signing in..." : "Sign in"}
