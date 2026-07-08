@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Calendar } from "lucide-react";
 
 const SUPABASE_HOST = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || "";
 
@@ -24,9 +25,11 @@ export function EventImage({ src, alt, className }: { src: string | null | undef
     const cached = cache.get(path);
     return cached && cached.exp > Date.now() ? cached.url : null;
   });
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!src) return;
+    setFailed(false);
     const path = extractEventImagePath(src);
     if (!path) { setUrl(src); return; }
     const cached = cache.get(path);
@@ -43,8 +46,14 @@ export function EventImage({ src, alt, className }: { src: string | null | undef
     return () => { cancel = true; };
   }, [src]);
 
-  if (!url) return null;
-  return <img src={url} alt={alt} className={className} loading="lazy" decoding="async" />;
+  if (!url || failed) {
+    return (
+      <div className={`flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200 ${className ?? ""}`} aria-label={alt} role="img">
+        <Calendar className="h-8 w-8 text-[#d4580a]/40" />
+      </div>
+    );
+  }
+  return <img src={url} alt={alt} className={className} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
 }
 
 export { SUPABASE_HOST };
