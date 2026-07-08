@@ -49,21 +49,17 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
 
   return (
     <Link to="/events/$eventId" params={{ eventId: event.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
-      <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-        {event.image_url ? (
+      {event.image_url && (
+        <div className="relative aspect-[16/9] overflow-hidden bg-muted">
           <EventImage src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#d4580a]/20 to-primary/10">
-            <Calendar className="h-12 w-12 text-[#d4580a]/40" />
-          </div>
-        )}
-        {event.is_free && (
-          <Badge className="absolute left-3 top-3 border-0 bg-green-500/90 text-xs text-white">Free</Badge>
-        )}
-        {event.category && (
-          <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">{event.category}</Badge>
-        )}
-      </div>
+          {event.is_free && (
+            <Badge className="absolute left-3 top-3 border-0 bg-green-500/90 text-xs text-white">Free</Badge>
+          )}
+          {event.category && (
+            <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">{event.category}</Badge>
+          )}
+        </div>
+      )}
       <div className="p-4 sm:p-5">
         <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
           <Clock className="h-3.5 w-3.5" />
