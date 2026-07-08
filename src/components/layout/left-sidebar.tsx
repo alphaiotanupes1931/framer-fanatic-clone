@@ -6,6 +6,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FileText, Sparkles, Palette as PaletteIcon, Building2 as BusinessIcon, Landmark as LandmarkIcon, Users as UsersIcon, Shield as ShieldIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -13,6 +18,16 @@ import { useSidebar } from "./sidebar-context";
 
 // Route-path map: repo path -> this app's existing TanStack route.
 type NavItem = { icon: typeof Home; label: string; to: string };
+
+const createItems: NavItem[] = [
+  { icon: FileText, label: "New Post", to: "/create-post" },
+  { icon: Sparkles, label: "New Story", to: "/create-story" },
+  { icon: PaletteIcon, label: "Artist Profile", to: "/create-artist" },
+  { icon: BusinessIcon, label: "Business", to: "/create-business" },
+  { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
+  { icon: UsersIcon, label: "Community", to: "/create-community" },
+  { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
+];
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Home", to: "/dashboard" },
@@ -61,22 +76,31 @@ export function LeftSidebar() {
 
         {/* Create button */}
         <div className={`px-3 pb-2 pt-3 ${collapsed ? "flex justify-center" : ""}`}>
-          <Link to="/dashboard">
-            {collapsed ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="icon" variant="outline" className="aspect-square rounded-full" style={{ borderColor: "#d4580a", color: "#d4580a" }}>
-                    <Plus className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">Create Post</TooltipContent>
-              </Tooltip>
-            ) : (
-              <Button variant="outline" className="w-full rounded-lg py-2.5 hover:bg-secondary/80" style={{ borderColor: "#d4580a", color: "#d4580a" }}>
-                Create Post
-              </Button>
-            )}
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              {collapsed ? (
+                <Button size="icon" variant="outline" className="aspect-square rounded-full" style={{ borderColor: "#d4580a", color: "#d4580a" }} aria-label="Create">
+                  <Plus className="h-5 w-5" />
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full rounded-lg py-2.5 hover:bg-secondary/80" style={{ borderColor: "#d4580a", color: "#d4580a" }}>
+                  <Plus className="mr-2 h-4 w-4" /> Create
+                </Button>
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="right" className="z-[1001] w-56">
+              <DropdownMenuLabel>Create</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {createItems.map(({ icon: Icon, label, to }) => (
+                <DropdownMenuItem key={to} asChild>
+                  <Link to={to} className="flex cursor-pointer items-center gap-2">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                    {label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Navigation */}
