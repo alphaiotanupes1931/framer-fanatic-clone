@@ -39,14 +39,22 @@ function SearchPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!debounced) { setPeople([]); setOrgs([]); setEvents([]); setPosts([]); return; }
       setLoading(true);
+      const hasQ = debounced.length > 0;
       const like = `%${debounced}%`;
       const [pplRes, orgRes, evRes, postRes] = await Promise.all([
-        supabase.rpc("search_creators", { q: debounced, lim: 24 }),
-        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").ilike("name", like).limit(24),
-        supabase.from("events").select("id,title,starts_at,venue_name,image_url").ilike("title", like).order("starts_at", { ascending: true }).limit(24),
-        supabase.from("posts").select("id,content,image_url,user_id,created_at").ilike("content", like).order("created_at", { ascending: false }).limit(24),
+        hasQ
+          ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
+          : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
+        hasQ
+          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").ilike("name", like).limit(24)
+          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").order("created_at", { ascending: false }).limit(24),
+        hasQ
+          ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").ilike("title", like).order("starts_at", { ascending: true }).limit(24)
+          : supabase.from("events").select("id,title,starts_at,venue_name,image_url").order("starts_at", { ascending: true }).limit(24),
+        hasQ
+          ? supabase.from("posts").select("id,content,image_url,user_id,created_at").ilike("content", like).order("created_at", { ascending: false }).limit(24)
+          : supabase.from("posts").select("id,content,image_url,user_id,created_at").order("created_at", { ascending: false }).limit(24),
       ]);
       if (cancelled) return;
       setPeople((pplRes.data ?? []) as Person[]);
@@ -94,12 +102,10 @@ function SearchPage() {
           ))}
         </div>
 
-        {!debounced ? (
-          <EmptyState icon={SearchIcon} title="Start typing to search" description="Find people, events, orgs, and posts across Planet Baltimore." />
-        ) : loading ? (
+        {loading ? (
           <ListSkeleton count={4} />
         ) : totals.All === 0 ? (
-          <EmptyState icon={SearchIcon} title={`No results for "${debounced}"`} description="Try another spelling or a different filter." />
+          <EmptyState icon={SearchIcon} title={debounced ? `No results for "${debounced}"` : "Nothing here yet"} description="Try another spelling or a different filter." />
         ) : (
           <div className="space-y-8">
             {(tab === "All" || tab === "People") && people.length > 0 && (
