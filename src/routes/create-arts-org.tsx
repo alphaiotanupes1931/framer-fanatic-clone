@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
+import { OrgForm } from "@/components/create/org-form";
 
 export const Route = createFileRoute("/create-arts-org")({
   component: CreateArtsOrgPage,
@@ -18,9 +19,7 @@ function CreateArtsOrgPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
         <HeroBanner title="Create Arts Organization" subtitle="Bring your arts org into the network." />
-        <div className="rounded-xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">
-          Arts org builder coming soon.
-        </div>
+        <OrgForm type="arts_org" kindLabel="Arts Organization" />
       </div>
     </AppLayout>
   );
