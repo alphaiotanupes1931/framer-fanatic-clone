@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Share2, Trash2, Edit3, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { createTicketCheckout } from "@/lib/stripe.functions";
+import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
 import { EventImage } from "@/components/event-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,11 @@ function EventDetail() {
   const [host, setHost] = useState<Host | null>(null);
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
+  const [rsvping, setRsvping] = useState(false);
+  const [rsvped, setRsvped] = useState(false);
   const [me, setMe] = useState<string | null>(null);
   const checkoutFn = useServerFn(createTicketCheckout);
+  const rsvpFn = useServerFn(rsvpFreeEvent);
 
   useEffect(() => {
     (async () => {
@@ -61,6 +64,21 @@ function EventDetail() {
       toast.error(e instanceof Error ? e.message : "Could not start checkout");
     } finally {
       setBuying(false);
+    }
+  };
+
+  const rsvp = async () => {
+    if (!evt) return;
+    if (!me) { toast.error("Sign in to RSVP"); return; }
+    setRsvping(true);
+    try {
+      const res = await rsvpFn({ data: { eventId: evt.id } });
+      setRsvped(true);
+      toast.success(res.alreadyRsvped ? "You're already on the list" : "You're going!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not RSVP");
+    } finally {
+      setRsvping(false);
     }
   };
 
