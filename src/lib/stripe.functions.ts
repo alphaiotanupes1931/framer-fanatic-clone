@@ -245,3 +245,43 @@ export const becomeArtist = createServerFn({ method: "POST" })
     if (error && !String(error.message).includes("duplicate")) throw error;
     return { ok: true };
   });
+
+/** RSVP to a free event. Creates a confirmed zero-cost ticket for the signed-in user. */
+export const rsvpFreeEvent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ eventId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: event, error: evErr } = await supabase
+      .from("events")
+      .select("id, user_id, price_cents, is_published")
+      .eq("id", data.eventId)
+      .maybeSingle();
+    if (evErr || !event) throw new Error("Event not found");
+    if (event.is_published === false) throw new Error("Event is not available");
+    if ((event.price_cents ?? 0) > 0) throw new Error("This event requires a paid ticket.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Idempotent: if the user already RSVPed, just return ok.
+    const { data: existing } = await supabaseAdmin
+      .from("tickets")
+      .select("id")
+      .eq("event_id", event.id)
+      .eq("buyer_id", userId)
+      .maybeSingle();
+    if (existing) return { ok: true, alreadyRsvped: true };
+
+    const { error } = await supabaseAdmin.from("tickets").insert({
+      event_id: event.id,
+      buyer_id: userId,
+      artist_id: event.user_id,
+      buyer_total_cents: 0,
+      artist_net_cents: 0,
+      platform_tax_cents: 0,
+      stripe_fee_cents: 0,
+      status: "confirmed",
+    });
+    if (error) throw error;
+    return { ok: true };
+  });
