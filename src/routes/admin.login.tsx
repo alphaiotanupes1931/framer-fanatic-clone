@@ -4,9 +4,9 @@ import { AdminShell } from "@/components/admin-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { isAdminUnlocked, unlockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
+import pbLogo from "@/assets/pb-logo.png";
 
 export const Route = createFileRoute("/admin/login")({
   component: AdminLoginPage,
@@ -38,9 +38,7 @@ function AdminLoginPage() {
     <AdminShell>
       <div className="mx-auto max-w-sm space-y-6 py-10">
         <div className="text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange/10">
-            <Lock className="h-5 w-5 text-orange" />
-          </div>
+          <img src={pbLogo} alt="Planet Baltimore" className="mx-auto mb-3 h-12 w-12 rounded-full object-contain" />
           <h1 className="text-2xl font-bold">Admin login</h1>
           <p className="mt-1 text-sm text-muted-foreground">Restricted area. Enter credentials to continue.</p>
         </div>

@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Shield, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { isAdminUnlocked, lockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
+import pbLogo from "@/assets/pb-logo.png";
 
 export function AdminShell({
   title,
@@ -22,9 +23,7 @@ export function AdminShell({
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex w-full max-w-[1120px] items-center justify-between px-4 py-3 sm:px-6">
           <Link to="/admin" className="flex items-center gap-2 font-semibold text-neutral-900">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange/10 text-orange">
-              <Shield className="h-3.5 w-3.5" />
-            </span>
+            <img src={pbLogo} alt="Planet Baltimore" className="h-7 w-7 rounded-full object-contain" />
             Planet Baltimore Admin
           </Link>
           {unlocked && (
