@@ -18,6 +18,7 @@ function AdminLoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdminUnlocked()) { navigate({ to: "/admin" }); return; }
@@ -26,12 +27,24 @@ function AdminLoginPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setSubmitting(true);
-    const ok = await unlockAdmin(username, password);
-    setSubmitting(false);
-    if (!ok) { toast.error("Invalid username or password"); return; }
-    toast.success("Welcome");
-    navigate({ to: "/admin" });
+    try {
+      const ok = await unlockAdmin(username, password);
+      setSubmitting(false);
+      if (!ok) {
+        setError("Invalid username or password");
+        toast.error("Invalid username or password");
+        return;
+      }
+      toast.success("Welcome");
+      navigate({ to: "/admin" });
+    } catch (err) {
+      setSubmitting(false);
+      const msg = err instanceof Error ? err.message : "Sign in failed";
+      setError(msg);
+      toast.error(msg);
+    }
   };
 
   return (
@@ -54,6 +67,9 @@ function AdminLoginPage() {
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? "Signing in..." : "Sign in"}
           </Button>
+          {error && (
+            <p className="text-center text-sm text-red-600" role="alert">{error}</p>
+          )}
         </form>
       </div>
     </AdminShell>
