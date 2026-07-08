@@ -48,22 +48,11 @@ function FindCreatorPage() {
     let cancelled = false;
     setLoading(true);
     const t = setTimeout(async () => {
-      let query = supabase
-        .from("profiles")
-        .select("id, display_name, username, avatar_url, role, neighborhood, bio, in_baltimore, category, created_at")
-        .eq("hidden_from_showcase", false)
-        .not("display_name", "is", null)
-        .limit(96);
-      if (q) {
-        const like = `%${q}%`;
-        query = query.or(`display_name.ilike.${like},username.ilike.${like},neighborhood.ilike.${like},bio.ilike.${like}`);
-      }
-      query = sort === "newest"
-        ? query.order("created_at", { ascending: false })
-        : sort === "followed"
-        ? query.order("display_name", { ascending: true })
-        : query.order("display_name", { ascending: true });
-      const { data } = await query;
+      const { data } = await supabase.rpc("public_artists", {
+        lim: 96,
+        search: q || null,
+        sort_by: sort,
+      });
       if (cancelled) return;
       setResults(((data as (Creator & { created_at: string })[]) ?? []) as Creator[]);
       setLoading(false);
