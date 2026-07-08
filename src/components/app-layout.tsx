@@ -59,13 +59,13 @@ export function AppLayout(props: {
 }
 
 function Shell({ children }: { children: ReactNode }) {
-  const { collapsed } = useSidebar();
+  const { collapsed, rightCollapsed } = useSidebar();
   return (
     <div className="min-h-screen bg-background" style={{ minHeight: "100dvh" }}>
       <LeftSidebar />
       <RightSidebar />
       <div
-        className={`flex min-h-[100dvh] flex-col transition-all duration-300 xl:mr-[380px] ${collapsed ? "lg:ml-[78px]" : "lg:ml-[240px]"}`}
+        className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${rightCollapsed ? "xl:mr-0" : "xl:mr-[380px]"} ${collapsed ? "lg:ml-[78px]" : "lg:ml-[240px]"}`}
       >
         <TopMenuBar />
         <main className="w-full flex-1">

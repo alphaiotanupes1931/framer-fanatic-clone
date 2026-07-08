@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { TrendingUp, Sparkles, ArrowRight, Calendar } from "lucide-react";
+import { TrendingUp, Sparkles, ArrowRight, Calendar, ChevronRight, ChevronLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { Story, Event } from "@/lib/entities";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
+import { useSidebar } from "@/components/layout/sidebar-context";
 import type { ReactNode, ComponentType } from "react";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
@@ -25,6 +26,7 @@ function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title:
 }
 
 export function RightSidebar() {
+  const { rightCollapsed, setRightCollapsed } = useSidebar();
   const { data: stories = [] } = useQuery({
     queryKey: ["sidebar-stories"],
     queryFn: () => Story.filter({ status: "published" }, "-created_at", 5),
@@ -47,7 +49,16 @@ export function RightSidebar() {
   });
 
   return (
-    <aside className="fixed right-0 top-0 z-30 hidden h-screen w-[380px] overflow-y-auto border-l border-slate-200 bg-white xl:block">
+    <>
+      <button
+        type="button"
+        onClick={() => setRightCollapsed(!rightCollapsed)}
+        aria-label={rightCollapsed ? "Show panel" : "Hide panel"}
+        className={`fixed top-1/2 z-40 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-slate-200 bg-white p-1.5 shadow-sm transition-all duration-300 hover:bg-slate-50 xl:flex ${rightCollapsed ? "right-0" : "right-[380px]"}`}
+      >
+        {rightCollapsed ? <ChevronLeft className="h-4 w-4 text-slate-600" /> : <ChevronRight className="h-4 w-4 text-slate-600" />}
+      </button>
+      <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[380px] overflow-y-auto border-l border-slate-200 bg-white transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
       <div className="space-y-4 px-5 pb-6 pt-[70px]">
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
@@ -130,6 +141,7 @@ export function RightSidebar() {
 
         <p className="text-[11px] text-slate-400">© 2026 Planet Baltimore</p>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
