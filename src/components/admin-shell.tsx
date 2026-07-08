@@ -25,8 +25,8 @@ export function AdminShell({
           </Link>
           {unlocked && (
             <button
-              onClick={() => {
-                lockAdmin();
+              onClick={async () => {
+                await lockAdmin();
                 window.location.href = "/admin/login";
               }}
               className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
