@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { isAdminUnlocked, lockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
 import pbLogo from "@/assets/pb-logo.png";
+import { Toaster } from "@/components/ui/sonner";
 
 export function AdminShell({
   title,
@@ -48,6 +49,7 @@ export function AdminShell({
         )}
         {children}
       </main>
+      <Toaster richColors position="top-center" />
     </div>
   );
 }
