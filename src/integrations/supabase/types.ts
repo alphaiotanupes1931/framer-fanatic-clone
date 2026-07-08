@@ -1061,6 +1061,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_artists: {
+        Args: { lim?: number; search?: string; sort_by?: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          category: string
+          created_at: string
+          display_name: string
+          id: string
+          in_baltimore: boolean
+          neighborhood: string
+          role: string
+          username: string
+        }[]
+      }
       public_creators: {
         Args: { lim?: number }
         Returns: {
