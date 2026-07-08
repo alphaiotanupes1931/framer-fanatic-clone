@@ -65,17 +65,22 @@ function FindCreatorPage() {
   const Card = ({ c }: { c: Creator }) => {
     const name = c.display_name ?? c.username ?? "Unnamed creator";
     const cat = (c.category || c.role || "Artist").replace(/_/g, " ");
+    const [imgError, setImgError] = useState(false);
     return (
       <div className="group h-full overflow-hidden rounded-2xl bg-secondary/40 transition-all duration-200 hover:shadow-lg">
         <div className="relative aspect-square w-full overflow-hidden bg-secondary">
-          {c.avatar_url ? (
+          {c.avatar_url && !imgError ? (
             <img
               src={c.avatar_url}
               alt={name}
+              loading="lazy"
+              decoding="async"
+              referrerPolicy="no-referrer"
+              onError={() => setImgError(true)}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-muted-foreground">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#d4580a]/20 to-[#d4580a]/5 text-4xl font-bold text-[#d4580a]">
               {name.slice(0, 1).toUpperCase()}
             </div>
           )}
