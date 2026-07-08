@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as TicketingRouteImport } from './routes/ticketing'
+import { Route as TicketSalesDashboardRouteImport } from './routes/ticket-sales-dashboard'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as StoriesRouteImport } from './routes/stories'
@@ -17,11 +19,14 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PromoterDashboardRouteImport } from './routes/promoter-dashboard'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PodcastsRouteImport } from './routes/podcasts'
+import { Route as OrganizerStudioRouteImport } from './routes/organizer-studio'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as NotificationSettingsRouteImport } from './routes/notification-settings'
 import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
@@ -29,6 +34,13 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CreateStoryRouteImport } from './routes/create-story'
+import { Route as CreatePostRouteImport } from './routes/create-post'
+import { Route as CreateCommunityAssociationRouteImport } from './routes/create-community-association'
+import { Route as CreateCommunityRouteImport } from './routes/create-community'
+import { Route as CreateBusinessRouteImport } from './routes/create-business'
+import { Route as CreateArtsOrgRouteImport } from './routes/create-arts-org'
+import { Route as CreateArtistRouteImport } from './routes/create-artist'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -52,6 +64,16 @@ import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/
 const VideosRoute = VideosRouteImport.update({
   id: '/videos',
   path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TicketingRoute = TicketingRouteImport.update({
+  id: '/ticketing',
+  path: '/ticketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TicketSalesDashboardRoute = TicketSalesDashboardRouteImport.update({
+  id: '/ticket-sales-dashboard',
+  path: '/ticket-sales-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -89,6 +111,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PromoterDashboardRoute = PromoterDashboardRouteImport.update({
+  id: '/promoter-dashboard',
+  path: '/promoter-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -104,6 +131,11 @@ const PodcastsRoute = PodcastsRouteImport.update({
   path: '/podcasts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrganizerStudioRoute = OrganizerStudioRouteImport.update({
+  id: '/organizer-studio',
+  path: '/organizer-studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -112,6 +144,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationSettingsRoute = NotificationSettingsRouteImport.update({
+  id: '/notification-settings',
+  path: '/notification-settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NeighborhoodsRoute = NeighborhoodsRouteImport.update({
@@ -147,6 +184,42 @@ const DiscoverRoute = DiscoverRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateStoryRoute = CreateStoryRouteImport.update({
+  id: '/create-story',
+  path: '/create-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatePostRoute = CreatePostRouteImport.update({
+  id: '/create-post',
+  path: '/create-post',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateCommunityAssociationRoute =
+  CreateCommunityAssociationRouteImport.update({
+    id: '/create-community-association',
+    path: '/create-community-association',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const CreateCommunityRoute = CreateCommunityRouteImport.update({
+  id: '/create-community',
+  path: '/create-community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateBusinessRoute = CreateBusinessRouteImport.update({
+  id: '/create-business',
+  path: '/create-business',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateArtsOrgRoute = CreateArtsOrgRouteImport.update({
+  id: '/create-arts-org',
+  path: '/create-arts-org',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateArtistRoute = CreateArtistRouteImport.update({
+  id: '/create-artist',
+  path: '/create-artist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -256,6 +329,13 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
+  '/create-artist': typeof CreateArtistRoute
+  '/create-arts-org': typeof CreateArtsOrgRoute
+  '/create-business': typeof CreateBusinessRoute
+  '/create-community': typeof CreateCommunityRoute
+  '/create-community-association': typeof CreateCommunityAssociationRoute
+  '/create-post': typeof CreatePostRoute
+  '/create-story': typeof CreateStoryRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -263,11 +343,14 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
+  '/notification-settings': typeof NotificationSettingsRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/organizer-studio': typeof OrganizerStudioRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/promoter-dashboard': typeof PromoterDashboardRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
@@ -275,6 +358,8 @@ export interface FileRoutesByFullPath {
   '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
+  '/ticketing': typeof TicketingRoute
   '/videos': typeof VideosRoute
   '/admin/content': typeof AdminContentRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -297,6 +382,13 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
+  '/create-artist': typeof CreateArtistRoute
+  '/create-arts-org': typeof CreateArtsOrgRoute
+  '/create-business': typeof CreateBusinessRoute
+  '/create-community': typeof CreateCommunityRoute
+  '/create-community-association': typeof CreateCommunityAssociationRoute
+  '/create-post': typeof CreatePostRoute
+  '/create-story': typeof CreateStoryRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -304,11 +396,14 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
+  '/notification-settings': typeof NotificationSettingsRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/organizer-studio': typeof OrganizerStudioRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/promoter-dashboard': typeof PromoterDashboardRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
@@ -316,6 +411,8 @@ export interface FileRoutesByTo {
   '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
+  '/ticketing': typeof TicketingRoute
   '/videos': typeof VideosRoute
   '/admin/content': typeof AdminContentRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -339,6 +436,13 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
+  '/create-artist': typeof CreateArtistRoute
+  '/create-arts-org': typeof CreateArtsOrgRoute
+  '/create-business': typeof CreateBusinessRoute
+  '/create-community': typeof CreateCommunityRoute
+  '/create-community-association': typeof CreateCommunityAssociationRoute
+  '/create-post': typeof CreatePostRoute
+  '/create-story': typeof CreateStoryRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -346,11 +450,14 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
   '/neighborhoods': typeof NeighborhoodsRoute
+  '/notification-settings': typeof NotificationSettingsRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/organizer-studio': typeof OrganizerStudioRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/promoter-dashboard': typeof PromoterDashboardRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
@@ -358,6 +465,8 @@ export interface FileRoutesById {
   '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
+  '/ticketing': typeof TicketingRoute
   '/videos': typeof VideosRoute
   '/admin/content': typeof AdminContentRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -382,6 +491,13 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
+    | '/create-artist'
+    | '/create-arts-org'
+    | '/create-business'
+    | '/create-community'
+    | '/create-community-association'
+    | '/create-post'
+    | '/create-story'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -389,11 +505,14 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/messages'
     | '/neighborhoods'
+    | '/notification-settings'
     | '/notifications'
     | '/onboarding'
+    | '/organizer-studio'
     | '/podcasts'
     | '/privacy'
     | '/profile'
+    | '/promoter-dashboard'
     | '/reset-password'
     | '/saved'
     | '/search'
@@ -401,6 +520,8 @@ export interface FileRouteTypes {
     | '/stories'
     | '/support'
     | '/terms'
+    | '/ticket-sales-dashboard'
+    | '/ticketing'
     | '/videos'
     | '/admin/content'
     | '/events/$eventId'
@@ -423,6 +544,13 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
+    | '/create-artist'
+    | '/create-arts-org'
+    | '/create-business'
+    | '/create-community'
+    | '/create-community-association'
+    | '/create-post'
+    | '/create-story'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -430,11 +558,14 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/messages'
     | '/neighborhoods'
+    | '/notification-settings'
     | '/notifications'
     | '/onboarding'
+    | '/organizer-studio'
     | '/podcasts'
     | '/privacy'
     | '/profile'
+    | '/promoter-dashboard'
     | '/reset-password'
     | '/saved'
     | '/search'
@@ -442,6 +573,8 @@ export interface FileRouteTypes {
     | '/stories'
     | '/support'
     | '/terms'
+    | '/ticket-sales-dashboard'
+    | '/ticketing'
     | '/videos'
     | '/admin/content'
     | '/events/$eventId'
@@ -464,6 +597,13 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
+    | '/create-artist'
+    | '/create-arts-org'
+    | '/create-business'
+    | '/create-community'
+    | '/create-community-association'
+    | '/create-post'
+    | '/create-story'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -471,11 +611,14 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/messages'
     | '/neighborhoods'
+    | '/notification-settings'
     | '/notifications'
     | '/onboarding'
+    | '/organizer-studio'
     | '/podcasts'
     | '/privacy'
     | '/profile'
+    | '/promoter-dashboard'
     | '/reset-password'
     | '/saved'
     | '/search'
@@ -483,6 +626,8 @@ export interface FileRouteTypes {
     | '/stories'
     | '/support'
     | '/terms'
+    | '/ticket-sales-dashboard'
+    | '/ticketing'
     | '/videos'
     | '/admin/content'
     | '/events/$eventId'
@@ -506,6 +651,13 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   CookiesRoute: typeof CookiesRoute
+  CreateArtistRoute: typeof CreateArtistRoute
+  CreateArtsOrgRoute: typeof CreateArtsOrgRoute
+  CreateBusinessRoute: typeof CreateBusinessRoute
+  CreateCommunityRoute: typeof CreateCommunityRoute
+  CreateCommunityAssociationRoute: typeof CreateCommunityAssociationRoute
+  CreatePostRoute: typeof CreatePostRoute
+  CreateStoryRoute: typeof CreateStoryRoute
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
   GroupsRoute: typeof GroupsRoute
@@ -513,11 +665,14 @@ export interface RootRouteChildren {
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
   MessagesRoute: typeof MessagesRoute
   NeighborhoodsRoute: typeof NeighborhoodsRoute
+  NotificationSettingsRoute: typeof NotificationSettingsRoute
   NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
+  OrganizerStudioRoute: typeof OrganizerStudioRoute
   PodcastsRoute: typeof PodcastsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  PromoterDashboardRoute: typeof PromoterDashboardRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SavedRoute: typeof SavedRoute
   SearchRoute: typeof SearchRoute
@@ -525,6 +680,8 @@ export interface RootRouteChildren {
   StoriesRoute: typeof StoriesRouteWithChildren
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
+  TicketingRoute: typeof TicketingRoute
   VideosRoute: typeof VideosRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
@@ -541,6 +698,20 @@ declare module '@tanstack/react-router' {
       path: '/videos'
       fullPath: '/videos'
       preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ticketing': {
+      id: '/ticketing'
+      path: '/ticketing'
+      fullPath: '/ticketing'
+      preLoaderRoute: typeof TicketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ticket-sales-dashboard': {
+      id: '/ticket-sales-dashboard'
+      path: '/ticket-sales-dashboard'
+      fullPath: '/ticket-sales-dashboard'
+      preLoaderRoute: typeof TicketSalesDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -592,6 +763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/promoter-dashboard': {
+      id: '/promoter-dashboard'
+      path: '/promoter-dashboard'
+      fullPath: '/promoter-dashboard'
+      preLoaderRoute: typeof PromoterDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -613,6 +791,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PodcastsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/organizer-studio': {
+      id: '/organizer-studio'
+      path: '/organizer-studio'
+      fullPath: '/organizer-studio'
+      preLoaderRoute: typeof OrganizerStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -625,6 +810,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notification-settings': {
+      id: '/notification-settings'
+      path: '/notification-settings'
+      fullPath: '/notification-settings'
+      preLoaderRoute: typeof NotificationSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/neighborhoods': {
@@ -674,6 +866,55 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-story': {
+      id: '/create-story'
+      path: '/create-story'
+      fullPath: '/create-story'
+      preLoaderRoute: typeof CreateStoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-post': {
+      id: '/create-post'
+      path: '/create-post'
+      fullPath: '/create-post'
+      preLoaderRoute: typeof CreatePostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-community-association': {
+      id: '/create-community-association'
+      path: '/create-community-association'
+      fullPath: '/create-community-association'
+      preLoaderRoute: typeof CreateCommunityAssociationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-community': {
+      id: '/create-community'
+      path: '/create-community'
+      fullPath: '/create-community'
+      preLoaderRoute: typeof CreateCommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-business': {
+      id: '/create-business'
+      path: '/create-business'
+      fullPath: '/create-business'
+      preLoaderRoute: typeof CreateBusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-arts-org': {
+      id: '/create-arts-org'
+      path: '/create-arts-org'
+      fullPath: '/create-arts-org'
+      preLoaderRoute: typeof CreateArtsOrgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-artist': {
+      id: '/create-artist'
+      path: '/create-artist'
+      fullPath: '/create-artist'
+      preLoaderRoute: typeof CreateArtistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -856,6 +1097,13 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   CookiesRoute: CookiesRoute,
+  CreateArtistRoute: CreateArtistRoute,
+  CreateArtsOrgRoute: CreateArtsOrgRoute,
+  CreateBusinessRoute: CreateBusinessRoute,
+  CreateCommunityRoute: CreateCommunityRoute,
+  CreateCommunityAssociationRoute: CreateCommunityAssociationRoute,
+  CreatePostRoute: CreatePostRoute,
+  CreateStoryRoute: CreateStoryRoute,
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
   GroupsRoute: GroupsRoute,
@@ -863,11 +1111,14 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceRoute: MarketplaceRouteWithChildren,
   MessagesRoute: MessagesRoute,
   NeighborhoodsRoute: NeighborhoodsRoute,
+  NotificationSettingsRoute: NotificationSettingsRoute,
   NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
+  OrganizerStudioRoute: OrganizerStudioRoute,
   PodcastsRoute: PodcastsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  PromoterDashboardRoute: PromoterDashboardRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SavedRoute: SavedRoute,
   SearchRoute: SearchRoute,
@@ -875,6 +1126,8 @@ const rootRouteChildren: RootRouteChildren = {
   StoriesRoute: StoriesRouteWithChildren,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  TicketSalesDashboardRoute: TicketSalesDashboardRoute,
+  TicketingRoute: TicketingRoute,
   VideosRoute: VideosRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
