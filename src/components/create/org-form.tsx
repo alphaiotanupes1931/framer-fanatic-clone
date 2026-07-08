@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
 function slugify(s: string) {
@@ -18,6 +18,8 @@ export type OrgType = "arts_org" | "business" | "community_assoc" | "group";
 export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -32,6 +34,24 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     mission: "",
   });
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const uploadAvatar = async (file: File) => {
+    if (!me) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${me.id}/org-${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      set("avatar_url", path);
+      toast.success("Logo uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const canSubmit = form.name.trim().length > 1;
 
@@ -99,8 +119,19 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         <Field label="Address">
           <Input value={form.address} onChange={(e) => set("address", e.target.value)} maxLength={200} />
         </Field>
-        <Field label="Avatar image URL">
-          <Input value={form.avatar_url} onChange={(e) => set("avatar_url", e.target.value)} placeholder="https://" maxLength={500} />
+        <Field label="Logo / avatar">
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }} />
+          {form.avatar_url ? (
+            <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
+              <span className="truncate">Logo attached</span>
+              <button type="button" onClick={() => set("avatar_url", "")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
+            </div>
+          ) : (
+            <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full">
+              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+              Upload logo
+            </Button>
+          )}
         </Field>
       </div>
       <div className="flex justify-end">
