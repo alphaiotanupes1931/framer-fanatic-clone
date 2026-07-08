@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { EventImage } from "@/components/event-image";
+import { EventImage, useEventImageUrl } from "@/components/event-image";
 
 type EventRow = {
   id: string;
@@ -21,6 +21,7 @@ type EventRow = {
 export function EventCard({ event, compact = false }: { event: EventRow; compact?: boolean }) {
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
+  const resolvedImage = useEventImageUrl(event.image_url);
 
   if (compact) {
     return (
@@ -49,7 +50,7 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
 
   return (
     <Link to="/events/$eventId" params={{ eventId: event.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
-      {event.image_url && (
+      {resolvedImage && (
         <div className="relative aspect-[16/9] overflow-hidden bg-muted">
           <EventImage src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
           {event.is_free && (
