@@ -50,7 +50,7 @@ function FindCreatorPage() {
     const t = setTimeout(async () => {
       const { data } = await supabase.rpc("public_artists", {
         lim: 96,
-        search: q || null,
+        search: q || undefined,
         sort_by: sort,
       });
       if (cancelled) return;
