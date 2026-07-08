@@ -280,7 +280,7 @@ export const rsvpFreeEvent = createServerFn({ method: "POST" })
       artist_net_cents: 0,
       platform_tax_cents: 0,
       stripe_fee_cents: 0,
-      status: "confirmed",
+      status: "paid",
     });
     if (error) throw error;
     return { ok: true };
