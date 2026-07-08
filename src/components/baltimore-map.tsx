@@ -11,9 +11,26 @@ type EventPin = {
   longitude: number;
 };
 
-export function BaltimoreMap({ onSelectEvent }: { onSelectEvent?: (e: EventPin) => void }) {
+type NeighborhoodPin = {
+  id: string;
+  name: string;
+  region: string | null;
+  latitude: number;
+  longitude: number;
+};
+
+export function BaltimoreMap({
+  onSelectEvent,
+  onSelectNeighborhood,
+  showNeighborhoods = true,
+}: {
+  onSelectEvent?: (e: EventPin) => void;
+  onSelectNeighborhood?: (n: NeighborhoodPin) => void;
+  showNeighborhoods?: boolean;
+}) {
   const [mounted, setMounted] = useState(false);
   const [events, setEvents] = useState<EventPin[]>([]);
+  const [neighborhoods, setNeighborhoods] = useState<NeighborhoodPin[]>([]);
   const [Lib, setLib] = useState<any>(null);
 
   useEffect(() => { setMounted(true); }, []);
@@ -38,7 +55,18 @@ export function BaltimoreMap({ onSelectEvent }: { onSelectEvent?: (e: EventPin) 
         .order("starts_at", { ascending: true });
       setEvents(((data || []) as any[]).filter((e) => e.latitude != null && e.longitude != null) as EventPin[]);
     })();
-  }, [mounted]);
+    if (showNeighborhoods) {
+      (async () => {
+        const { data } = await supabase
+          .from("neighborhoods")
+          .select("id, name, region, latitude, longitude")
+          .not("latitude", "is", null)
+          .not("longitude", "is", null)
+          .order("name");
+        setNeighborhoods(((data || []) as any[]).filter((n) => n.latitude != null && n.longitude != null) as NeighborhoodPin[]);
+      })();
+    }
+  }, [mounted, showNeighborhoods]);
 
   if (!mounted || !Lib) {
     return (
@@ -63,6 +91,30 @@ export function BaltimoreMap({ onSelectEvent }: { onSelectEvent?: (e: EventPin) 
           attribution='&copy; OpenStreetMap'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
+        {showNeighborhoods && neighborhoods.map((n) => (
+          <CircleMarker
+            key={`n-${n.id}`}
+            center={[n.latitude, n.longitude]}
+            radius={5}
+            pathOptions={{
+              color: "#1e3a5f",
+              fillColor: "#3b82f6",
+              fillOpacity: 0.7,
+              weight: 1.5,
+            }}
+            eventHandlers={{ click: () => onSelectNeighborhood?.(n) }}
+          >
+            <Tooltip direction="top" offset={[0, -4]} opacity={1}>
+              <span className="text-xs font-semibold">{n.name}</span>
+            </Tooltip>
+            <Popup>
+              <div className="space-y-1 min-w-[160px]">
+                <div className="font-semibold">{n.name}</div>
+                {n.region && <div className="text-xs text-neutral-500">{n.region}</div>}
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
         {events.map((e) => (
           <CircleMarker
             key={e.id}
