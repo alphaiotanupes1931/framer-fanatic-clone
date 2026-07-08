@@ -1,0 +1,1 @@
+DELETE FROM public.posts p USING public.posts q WHERE p.user_id = q.user_id AND p.content = q.content AND p.created_at = q.created_at AND p.id > q.id;
