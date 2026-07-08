@@ -67,24 +67,12 @@ function OrgProfile() {
         <div className="h-48 bg-gradient-to-br from-orange-300 to-orange-600"
           style={org.banner_url ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined} />
         <div className="px-6 pb-6">
-          <div className="-mt-12 flex items-end justify-between gap-3 flex-wrap">
-            <div className="flex items-end gap-4">
-              <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-secondary shrink-0">
-                {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
-              </div>
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-[#d4580a]">
-                  {ORG_TYPE_LABEL[org.type]}{org.subtype ? ` · ${org.subtype}` : ""}
-                </div>
-                <h1 className="text-2xl font-bold">{org.name}</h1>
-                {org.neighborhood && (
-                  <div className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" /> {org.neighborhood}
-                  </div>
-                )}
-              </div>
+          {/* Avatar floats over banner edge */}
+          <div className="-mt-12 flex justify-between items-start gap-3">
+            <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-secondary shrink-0 shadow-sm">
+              {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-14 flex-wrap justify-end">
               <button onClick={share} className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary">
                 <Share2 className="h-4 w-4" /> Share
               </button>
@@ -100,6 +88,19 @@ function OrgProfile() {
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Name + meta sit safely below the banner */}
+          <div className="mt-4 min-w-0">
+            <div className="text-xs font-semibold uppercase tracking-wider text-[#d4580a]">
+              {ORG_TYPE_LABEL[org.type]}{org.subtype ? ` · ${org.subtype}` : ""}
+            </div>
+            <h1 className="mt-1 text-2xl font-bold break-words">{org.name}</h1>
+            {org.neighborhood && (
+              <div className="mt-1.5 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" /> {org.neighborhood}
+              </div>
+            )}
           </div>
 
           {org.bio && <p className="mt-4 text-neutral-700">{org.bio}</p>}
