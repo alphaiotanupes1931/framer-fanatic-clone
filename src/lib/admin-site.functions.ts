@@ -36,7 +36,7 @@ export const unlockAdminSite = createServerFn({ method: "POST" })
       throw new Error("Admin credentials are not configured");
     }
     const userOk = matches(data.username.trim().toLowerCase(), expectedUser.trim().toLowerCase());
-    const passOk = matches(data.password, expectedPass);
+    const passOk = matches(data.password.trim(), expectedPass.trim());
     if (!userOk || !passOk) return { ok: false as const };
     const session = await useSession<GateSession>(sessionConfig());
     await session.update({ unlocked: true });
