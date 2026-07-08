@@ -293,29 +293,19 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
     <AppLayout
     >
       <div className="space-y-6">
-        <div
-          className="relative overflow-hidden rounded-2xl border-2 bg-[#fffdfb] px-8 py-8 sm:px-10 sm:py-10"
-          style={{ borderColor: "#d4580a" }}
-        >
-          <div className="pointer-events-none absolute inset-0 opacity-[0.055]">
-            <div className="absolute right-[-58px] top-[-84px] h-48 w-48 rounded-full" style={{ backgroundColor: "#d4580a" }} />
-            <div className="absolute bottom-[-74px] left-[-70px] h-36 w-36 rounded-full" style={{ backgroundColor: "#d4580a" }} />
-          </div>
-          <div className="relative z-10 max-w-3xl">
-            <h1 className="font-display text-[34px] font-extrabold leading-tight sm:text-[40px]" style={{ color: "#d4580a" }}>
-              Your Next Event
-            </h1>
-            <p className="mt-2 text-[15px] text-neutral-500">Tickets for the best events in Baltimore</p>
-            <div className="relative mt-6">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search events, venues..."
-                className="w-full rounded-full border border-neutral-200 bg-white py-3.5 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none"
-              />
-            </div>
-          </div>
+        <HeroBanner
+          title="Your Next Event"
+          subtitle="Tickets for the best events in Baltimore"
+        />
+
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search events, venues..."
+            className="w-full rounded-full border border-neutral-200 bg-white py-3.5 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none"
+          />
         </div>
 
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
