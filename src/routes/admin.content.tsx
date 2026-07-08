@@ -47,8 +47,9 @@ function AdminContentPage() {
 
   useEffect(() => {
     (async () => {
-      const flag = isAdminUnlocked();
-      const ok = flag ? true : await refreshAdminUnlocked();
+      // Always verify with the server so a stale local flag can't
+      // convince the UI it's unlocked when the cookie isn't set.
+      const ok = await refreshAdminUnlocked();
       setUnlocked(ok);
       setGateChecked(true);
       if (!ok) navigate({ to: "/admin/login" });
