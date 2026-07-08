@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { useUserRole } from "@/hooks/use-user-role";
+import { isAdminUnlocked } from "@/lib/admin-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,16 +27,20 @@ const FIELD_META: Record<string, { label: string; help: string; multiline?: bool
 };
 
 function AdminContentPage() {
-  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
+  const [unlocked, setUnlocked] = useState(false);
+  const [gateChecked, setGateChecked] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({ ...SITE_CONTENT_DEFAULTS });
   const [initial, setInitial] = useState<Record<string, string>>({ ...SITE_CONTENT_DEFAULTS });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!roleLoading && !isAdmin) navigate({ to: "/dashboard" });
-  }, [roleLoading, isAdmin, navigate]);
+    const ok = isAdminUnlocked();
+    setUnlocked(ok);
+    setGateChecked(true);
+    if (!ok) navigate({ to: "/admin/login" });
+  }, [navigate]);
 
   useEffect(() => {
     (async () => {
@@ -65,11 +69,11 @@ function AdminContentPage() {
     toast.success(`Saved ${dirtyKeys.length} change${dirtyKeys.length === 1 ? "" : "s"}`);
   };
 
-  if (roleLoading || !isAdmin) {
+  if (!gateChecked || !unlocked) {
     return (
       <AppLayout>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Checking permissions...
+          <Loader2 className="h-4 w-4 animate-spin" /> Redirecting to admin login...
         </div>
       </AppLayout>
     );
