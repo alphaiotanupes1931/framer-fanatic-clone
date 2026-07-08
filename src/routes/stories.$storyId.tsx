@@ -123,12 +123,7 @@ function StoryDetail() {
       </Link>
 
       <article className="overflow-hidden rounded-3xl border border-border bg-card">
-        {story.cover_url && (
-          <div className="aspect-[16/9] w-full overflow-hidden bg-secondary">
-            <img src={story.cover_url} alt={story.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
-          </div>
-        )}
-        <div className="px-5 py-6 md:px-8 md:py-8">
+        <div className="px-5 pt-6 md:px-8 md:pt-8">
           <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-full bg-[#d4580a]/10 px-2.5 py-1 font-semibold uppercase tracking-wider text-[#d4580a]">{story.format}</span>
             {story.read_minutes && (
@@ -138,7 +133,13 @@ function StoryDetail() {
 
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{story.title}</h1>
           {story.excerpt && <p className="mt-3 text-lg text-muted-foreground">{story.excerpt}</p>}
-
+        </div>
+        {story.cover_url && (
+          <div className="mt-6 aspect-[16/9] w-full overflow-hidden bg-secondary">
+            <img src={story.cover_url} alt={story.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+          </div>
+        )}
+        <div className="px-5 pb-6 md:px-8 md:pb-8">
           <div className="mt-6 flex items-center justify-between gap-3 border-y border-border py-4">
             {author ? (
               <Link to="/u/$username" params={{ username: author.username || author.id }} className="flex items-center gap-3">
