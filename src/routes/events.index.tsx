@@ -7,7 +7,7 @@ import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Trending
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useServerFn } from "@tanstack/react-start";
-import { createTicketCheckout } from "@/lib/stripe.functions";
+import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
 import { EventImage } from "@/components/event-image";
 
 type EventRow = {
@@ -206,6 +206,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const me = useCurrentProfile();
   const { isArtist } = useUserRole();
   const checkoutFn = useServerFn(createTicketCheckout);
+  const rsvpFn = useServerFn(rsvpFreeEvent);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
   const [buying, setBuying] = useState<string | null>(null);
@@ -247,8 +248,15 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const buy = async (eventId: string) => {
     setBuying(eventId);
     try {
-      const { url } = await checkoutFn({ data: { eventId, returnOrigin: window.location.origin } });
-      if (url) window.location.href = url;
+      const ev = events.find((e) => e.id === eventId);
+      const isFree = !ev || (ev.price_cents ?? 0) <= 0;
+      if (isFree) {
+        const res = await rsvpFn({ data: { eventId } });
+        toast.success(res.alreadyRsvped ? "You're already on the list" : "You're going!");
+      } else {
+        const { url } = await checkoutFn({ data: { eventId, returnOrigin: window.location.origin } });
+        if (url) window.location.href = url;
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start checkout");
     } finally {
