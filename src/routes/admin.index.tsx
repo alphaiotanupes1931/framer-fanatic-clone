@@ -111,7 +111,7 @@ function AdminPage() {
 
   if (!gateChecked || !unlocked) {
     return (
-      <AdminShell title="Admin" hero={false}>
+      <AdminShell title="Admin">
         <div className="flex items-center gap-2 text-sm text-neutral-500">
           <Loader2 className="h-4 w-4 animate-spin" /> Redirecting to admin login...
         </div>
