@@ -34,13 +34,10 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CreateStoryRouteImport } from './routes/create-story'
-import { Route as CreatePostRouteImport } from './routes/create-post'
 import { Route as CreateCommunityAssociationRouteImport } from './routes/create-community-association'
 import { Route as CreateCommunityRouteImport } from './routes/create-community'
 import { Route as CreateBusinessRouteImport } from './routes/create-business'
 import { Route as CreateArtsOrgRouteImport } from './routes/create-arts-org'
-import { Route as CreateArtistRouteImport } from './routes/create-artist'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -186,16 +183,6 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CreateStoryRoute = CreateStoryRouteImport.update({
-  id: '/create-story',
-  path: '/create-story',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CreatePostRoute = CreatePostRouteImport.update({
-  id: '/create-post',
-  path: '/create-post',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CreateCommunityAssociationRoute =
   CreateCommunityAssociationRouteImport.update({
     id: '/create-community-association',
@@ -215,11 +202,6 @@ const CreateBusinessRoute = CreateBusinessRouteImport.update({
 const CreateArtsOrgRoute = CreateArtsOrgRouteImport.update({
   id: '/create-arts-org',
   path: '/create-arts-org',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CreateArtistRoute = CreateArtistRouteImport.update({
-  id: '/create-artist',
-  path: '/create-artist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -329,13 +311,10 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
-  '/create-artist': typeof CreateArtistRoute
   '/create-arts-org': typeof CreateArtsOrgRoute
   '/create-business': typeof CreateBusinessRoute
   '/create-community': typeof CreateCommunityRoute
   '/create-community-association': typeof CreateCommunityAssociationRoute
-  '/create-post': typeof CreatePostRoute
-  '/create-story': typeof CreateStoryRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -382,13 +361,10 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
-  '/create-artist': typeof CreateArtistRoute
   '/create-arts-org': typeof CreateArtsOrgRoute
   '/create-business': typeof CreateBusinessRoute
   '/create-community': typeof CreateCommunityRoute
   '/create-community-association': typeof CreateCommunityAssociationRoute
-  '/create-post': typeof CreatePostRoute
-  '/create-story': typeof CreateStoryRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -436,13 +412,10 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
-  '/create-artist': typeof CreateArtistRoute
   '/create-arts-org': typeof CreateArtsOrgRoute
   '/create-business': typeof CreateBusinessRoute
   '/create-community': typeof CreateCommunityRoute
   '/create-community-association': typeof CreateCommunityAssociationRoute
-  '/create-post': typeof CreatePostRoute
-  '/create-story': typeof CreateStoryRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -491,13 +464,10 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
-    | '/create-artist'
     | '/create-arts-org'
     | '/create-business'
     | '/create-community'
     | '/create-community-association'
-    | '/create-post'
-    | '/create-story'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -544,13 +514,10 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
-    | '/create-artist'
     | '/create-arts-org'
     | '/create-business'
     | '/create-community'
     | '/create-community-association'
-    | '/create-post'
-    | '/create-story'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -597,13 +564,10 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/community-associations'
     | '/cookies'
-    | '/create-artist'
     | '/create-arts-org'
     | '/create-business'
     | '/create-community'
     | '/create-community-association'
-    | '/create-post'
-    | '/create-story'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -651,13 +615,10 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   CookiesRoute: typeof CookiesRoute
-  CreateArtistRoute: typeof CreateArtistRoute
   CreateArtsOrgRoute: typeof CreateArtsOrgRoute
   CreateBusinessRoute: typeof CreateBusinessRoute
   CreateCommunityRoute: typeof CreateCommunityRoute
   CreateCommunityAssociationRoute: typeof CreateCommunityAssociationRoute
-  CreatePostRoute: typeof CreatePostRoute
-  CreateStoryRoute: typeof CreateStoryRoute
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
   GroupsRoute: typeof GroupsRoute
@@ -868,20 +829,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/create-story': {
-      id: '/create-story'
-      path: '/create-story'
-      fullPath: '/create-story'
-      preLoaderRoute: typeof CreateStoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/create-post': {
-      id: '/create-post'
-      path: '/create-post'
-      fullPath: '/create-post'
-      preLoaderRoute: typeof CreatePostRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/create-community-association': {
       id: '/create-community-association'
       path: '/create-community-association'
@@ -908,13 +855,6 @@ declare module '@tanstack/react-router' {
       path: '/create-arts-org'
       fullPath: '/create-arts-org'
       preLoaderRoute: typeof CreateArtsOrgRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/create-artist': {
-      id: '/create-artist'
-      path: '/create-artist'
-      fullPath: '/create-artist'
-      preLoaderRoute: typeof CreateArtistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -1097,13 +1037,10 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   CookiesRoute: CookiesRoute,
-  CreateArtistRoute: CreateArtistRoute,
   CreateArtsOrgRoute: CreateArtsOrgRoute,
   CreateBusinessRoute: CreateBusinessRoute,
   CreateCommunityRoute: CreateCommunityRoute,
   CreateCommunityAssociationRoute: CreateCommunityAssociationRoute,
-  CreatePostRoute: CreatePostRoute,
-  CreateStoryRoute: CreateStoryRoute,
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
   GroupsRoute: GroupsRoute,
