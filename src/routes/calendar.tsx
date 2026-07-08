@@ -281,8 +281,8 @@ function CalendarPage() {
             ) : (
               <div className="overflow-hidden">
                 <div
-                  className="flex gap-4 transition-transform duration-300"
-                  style={{ transform: `translateX(calc(-${foryouIdx} * 100%))` }}
+                  className="flex gap-3 transition-transform duration-300"
+                  style={{ transform: `translateX(calc(-${foryouIdx} * (260px + 0.75rem)))` }}
                 >
                   {forYou.map((e) => (
                     <ForYouCard key={e.id} event={e} />
