@@ -126,7 +126,15 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
       )}
       {post.image_url && (
         <button type="button" onClick={() => setLightbox(true)} className="block w-full overflow-hidden focus:outline-none">
-          <img src={post.image_url} alt="" className="w-full cursor-zoom-in" loading="lazy" />
+          <img
+            src={post.image_url}
+            alt=""
+            className="w-full cursor-zoom-in"
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
         </button>
       )}
       <footer className="flex items-center gap-6 px-5 py-3 text-[12.5px] text-muted-foreground">
