@@ -48,10 +48,10 @@ import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtsOrgsRouteImport } from './routes/arts-orgs'
 import { Route as ArtistsRouteImport } from './routes/artists'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
@@ -257,11 +257,6 @@ const ArtistsRoute = ArtistsRouteImport.update({
   path: '/artists',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -275,6 +270,11 @@ const IndexRoute = IndexRouteImport.update({
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UUsernameRoute = UUsernameRouteImport.update({
@@ -308,9 +308,9 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminContentRoute = AdminContentRouteImport.update({
-  id: '/content',
-  path: '/content',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/content',
+  path: '/admin/content',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
@@ -321,7 +321,6 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -368,13 +367,13 @@ export interface FileRoutesByFullPath {
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -421,6 +420,7 @@ export interface FileRoutesByTo {
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/admin': typeof AdminIndexRoute
   '/events': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -428,7 +428,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -475,6 +474,7 @@ export interface FileRoutesById {
   '/o/$slug': typeof OSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -483,7 +483,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/admin'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -530,13 +529,13 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/admin/'
     | '/events/'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -583,13 +582,13 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/admin'
     | '/events'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/admin'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -636,6 +635,7 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/admin/'
     | '/events/'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
@@ -643,7 +643,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRouteWithChildren
   ArtistsRoute: typeof ArtistsRoute
   ArtsOrgsRoute: typeof ArtsOrgsRoute
   AuthRoute: typeof AuthRoute
@@ -683,10 +682,12 @@ export interface RootRouteChildren {
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
   TicketingRoute: typeof TicketingRoute
   VideosRoute: typeof VideosRoute
+  AdminContentRoute: typeof AdminContentRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
   OSlugRoute: typeof OSlugRoute
   UUsernameRoute: typeof UUsernameRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
@@ -966,13 +967,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -992,6 +986,13 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/events/'
       preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$username': {
@@ -1038,10 +1039,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/content': {
       id: '/admin/content'
-      path: '/content'
+      path: '/admin/content'
       fullPath: '/admin/content'
       preLoaderRoute: typeof AdminContentRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
@@ -1052,16 +1053,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface AdminRouteChildren {
-  AdminContentRoute: typeof AdminContentRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminContentRoute: AdminContentRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface MarketplaceRouteChildren {
   MarketplaceListingIdRoute: typeof MarketplaceListingIdRoute
@@ -1089,7 +1080,6 @@ const StoriesRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRouteWithChildren,
   ArtistsRoute: ArtistsRoute,
   ArtsOrgsRoute: ArtsOrgsRoute,
   AuthRoute: AuthRoute,
@@ -1129,10 +1119,12 @@ const rootRouteChildren: RootRouteChildren = {
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
   TicketingRoute: TicketingRoute,
   VideosRoute: VideosRoute,
+  AdminContentRoute: AdminContentRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
   OSlugRoute: OSlugRoute,
   UUsernameRoute: UUsernameRoute,
+  AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
