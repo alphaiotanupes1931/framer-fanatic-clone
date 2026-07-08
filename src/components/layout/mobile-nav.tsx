@@ -2,22 +2,32 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home, Search, Plus, Bell, User, Menu, MessageCircle, Compass, BookOpen,
   Users, Shield, Palette, Landmark, Building2, MapPin, Calendar, Ticket,
-  Video, Trophy, Settings,
+  Video, Trophy, Settings, PenSquare, Store,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 
-type Primary = { icon: typeof Home; label: string; to: string; isCreate?: boolean };
+type Primary = { icon: typeof Home; label: string; to: string };
 
 const primaryItems: Primary[] = [
   { icon: Home, label: "Home", to: "/dashboard" },
   { icon: Search, label: "Search", to: "/search" },
-  { icon: Plus, label: "Create", to: "/dashboard", isCreate: true },
-  { icon: Bell, label: "Alerts", to: "/dashboard" },
+  { icon: Bell, label: "Alerts", to: "/notifications" },
   { icon: User, label: "Profile", to: "/profile" },
 ];
+
+const createItems = [
+  { icon: Ticket, label: "Event", to: "/events/new" },
+  { icon: Users, label: "Community", to: "/groups" },
+  { icon: Palette, label: "Artist Page", to: "/artists" },
+  { icon: Landmark, label: "Arts Org", to: "/arts-orgs" },
+  { icon: Building2, label: "Business", to: "/businesses" },
+  { icon: Video, label: "Video", to: "/videos" },
+  { icon: Store, label: "Marketplace Listing", to: "/marketplace" },
+  { icon: PenSquare, label: "Post to Feed", to: "/dashboard" },
+] as const;
 
 const moreItems: Primary[] = [
   { icon: Compass, label: "Discover", to: "/search" },
@@ -50,36 +60,34 @@ export function MobileNav() {
       }}
     >
       <div className="flex items-center justify-around px-2 py-1.5">
-        {primaryItems.map((item) => {
-          const isActive = item.to === "/dashboard" ? currentPath === "/dashboard" : currentPath.startsWith(item.to);
-          const Icon = item.icon;
+        {primaryItems.slice(0, 2).map((item) => renderPrimary(item, currentPath, unreadNotifications))}
 
-          if (item.isCreate) {
-            return (
-              <Link key={item.label} to={item.to} className="flex min-h-[44px] min-w-[44px] items-center justify-center focus-visible:outline-none" aria-label="Create post">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform duration-150 active:scale-95" style={{ backgroundColor: "#d4580a" }}>
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-              </Link>
-            );
-          }
-
-          return (
-            <Link
-              key={item.label}
-              to={item.to}
-              className={`relative flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-lg px-2 py-1 transition-colors ${isActive ? "text-[#d4580a]" : "text-muted-foreground"}`}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label="Create"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center focus-visible:outline-none"
+          >
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform duration-150 active:scale-95"
+              style={{ backgroundColor: "#d4580a" }}
             >
-              <Icon className="h-5 w-5" />
-              <span className="mt-0.5 text-[10px] font-medium">{item.label}</span>
-              {item.label === "Alerts" && unreadNotifications > 0 && (
-                <span className="absolute right-1 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ backgroundColor: "#d4580a" }}>
-                  {unreadNotifications > 99 ? "99+" : unreadNotifications}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+              <Plus className="h-6 w-6 text-white" />
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" side="top" className="z-[1001] w-60">
+            {createItems.map(({ icon: Icon, label, to }) => (
+              <DropdownMenuItem key={label} asChild>
+                <Link to={to} className="flex cursor-pointer items-center gap-2">
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  {label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {primaryItems.slice(2).map((item) => renderPrimary(item, currentPath, unreadNotifications))}
+
         <DropdownMenu>
           <DropdownMenuTrigger className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-lg px-2 py-1 text-muted-foreground">
             <Menu className="h-5 w-5" />
@@ -100,4 +108,24 @@ export function MobileNav() {
       </div>
     </nav>
   );
+}
+
+function renderPrimary(item: Primary, currentPath: string, unreadNotifications: number) {
+          const isActive = item.to === "/dashboard" ? currentPath === "/dashboard" : currentPath.startsWith(item.to);
+          const Icon = item.icon;
+  return (
+            <Link
+              key={item.label}
+              to={item.to}
+              className={`relative flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-lg px-2 py-1 transition-colors ${isActive ? "text-[#d4580a]" : "text-muted-foreground"}`}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="mt-0.5 text-[10px] font-medium">{item.label}</span>
+              {item.label === "Alerts" && unreadNotifications > 0 && (
+                <span className="absolute right-1 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ backgroundColor: "#d4580a" }}>
+                  {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                </span>
+              )}
+            </Link>
+          );
 }
