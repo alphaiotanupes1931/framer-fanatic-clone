@@ -84,12 +84,9 @@ function OrgProfile() {
         </div>
 
         <div className="px-6 pb-6 sm:px-8">
-          {/* Avatar + right-side actions */}
-          <div className="-mt-12 flex items-end justify-between gap-4">
-            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-4 border-white bg-secondary shadow-md sm:h-28 sm:w-28">
-              {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
-            </div>
-            <div className="flex items-center gap-2 pb-1">
+          {/* Avatar floats over banner; actions sit on their own row */}
+          <div className="flex justify-end pt-4">
+            <div className="flex items-center gap-2">
               <button onClick={share} aria-label="Share" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]">
                 <Share2 className="h-4 w-4" />
               </button>
@@ -111,11 +108,16 @@ function OrgProfile() {
             </div>
           </div>
 
+          {/* Avatar overlapping banner */}
+          <div className="-mt-24 h-28 w-28 shrink-0 overflow-hidden rounded-2xl border-4 border-white bg-secondary shadow-md sm:h-32 sm:w-32">
+            {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+          </div>
+
           {/* Name + bio */}
-          <div className="mt-4">
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-[28px]">{org.name}</h1>
+          <div className="mt-5">
+            <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[28px]">{org.name}</h1>
             {org.bio && (
-              <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-600">{org.bio}</p>
+              <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-neutral-600">{org.bio}</p>
             )}
           </div>
 
