@@ -9,6 +9,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { X } from "lucide-react";
 
 type Post = {
   id: string;
@@ -35,6 +36,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes_count ?? 0);
   const [saved, setSaved] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
 
   const toggleLike = async () => {
     if (!currentUserId) { toast.error("Sign in to like"); return; }
@@ -123,9 +125,9 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         <div className="px-5 py-3 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.content}</div>
       )}
       {post.image_url && (
-        <div className="overflow-hidden">
-          <img src={post.image_url} alt="" className="w-full" loading="lazy" />
-        </div>
+        <button type="button" onClick={() => setLightbox(true)} className="block w-full overflow-hidden focus:outline-none">
+          <img src={post.image_url} alt="" className="w-full cursor-zoom-in" loading="lazy" />
+        </button>
       )}
       <footer className="flex items-center gap-6 px-5 py-3 text-[12.5px] text-muted-foreground">
         <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
@@ -141,6 +143,29 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
         </button>
       </footer>
+      {lightbox && post.image_url && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setLightbox(false)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={post.image_url}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[95vh] max-w-[95vw] object-contain"
+          />
+        </div>
+      )}
     </article>
   );
 }
