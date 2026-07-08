@@ -266,7 +266,7 @@ function CalendarPage() {
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setForyouIdx((i) => Math.min(Math.max(0, forYou.length - 2), i + 1))}
+                  onClick={() => setForyouIdx((i) => Math.min(Math.max(0, forYou.length - 1), i + 1))}
                   className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
                   aria-label="Next"
                 >
@@ -282,7 +282,7 @@ function CalendarPage() {
               <div className="overflow-hidden">
                 <div
                   className="flex gap-4 transition-transform duration-300"
-                  style={{ transform: `translateX(calc(-${foryouIdx} * (50% + 8px)))` }}
+                  style={{ transform: `translateX(calc(-${foryouIdx} * 100%))` }}
                 >
                   {forYou.map((e) => (
                     <ForYouCard key={e.id} event={e} />
