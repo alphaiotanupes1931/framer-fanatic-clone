@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteContent, siteText } from "@/hooks/use-site-content";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import aboutFounders from "@/assets/about-founders.png.asset.json";
@@ -87,6 +88,7 @@ function AboutNav() {
 }
 
 function Hero() {
+  const { content } = useSiteContent();
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-10 md:pt-28 pb-6 md:pb-16">
@@ -98,8 +100,8 @@ function Hero() {
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
             >
-              A platform for Baltimore's
-              <span className="block italic text-ink/55">artists and makers.</span>
+              {siteText(content, "about.hero.title")}
+              <span className="block italic text-ink/55">{siteText(content, "about.hero.italic")}</span>
             </motion.h1>
           </div>
 
@@ -122,30 +124,17 @@ function Hero() {
 }
 
 function Story() {
+  const { content } = useSiteContent();
   return (
     <section className="px-5 md:px-10 py-16 md:py-28">
       <div className="mx-auto grid max-w-[1100px] gap-12 md:grid-cols-[1fr_1.4fr] md:gap-20">
         <div>
-          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">Our Story</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">{siteText(content, "about.story.heading")}</h2>
         </div>
-        <div className="space-y-6 text-[16px] leading-[1.75] text-ink/80 md:text-[17.5px]">
-          <p>
-            Planet Baltimore was made so artists could finally have a platform of their own. A place
-            that isn't an algorithm chasing strangers in another city, but a corner of the internet
-            that actually belongs to the painters, rappers, photographers, chefs, DJs, poets, and
-            organizers shaping this city block by block.
-          </p>
-          <p>
-            Baltimore runs on creativity. From the murals in Station North to the
-            line cooks in Hampden, the harbor stages and the basement shows, the Sunday cookouts
-            and the Saturday markets, this city is made by people who make things. Planet
-            Baltimore exists so those people can find each other, hire each other, support each other,
-            and get paid without a middleman taking the cut.
-          </p>
-          <p>
-            One platform. One city. Every creator on it lives here, works here, and gets to keep
-            what they earn here.
-          </p>
+        <div className="space-y-6 text-[16px] leading-[1.75] text-ink/80 md:text-[17.5px] whitespace-pre-line">
+          <p>{siteText(content, "about.story.p1")}</p>
+          <p>{siteText(content, "about.story.p2")}</p>
+          <p>{siteText(content, "about.story.p3")}</p>
         </div>
       </div>
     </section>
@@ -153,18 +142,19 @@ function Story() {
 }
 
 function CTA() {
+  const { content } = useSiteContent();
   return (
     <section className="bg-ink text-paper px-5 md:px-10 py-20 md:py-28">
       <div className="mx-auto max-w-[1100px] text-center">
         <h2 className="font-display text-[clamp(2.25rem,7vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">
-          Join the platform built for Baltimore.
+          {siteText(content, "about.cta.heading")}
         </h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/auth" className="inline-flex rounded-full bg-paper text-ink px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-orange hover:text-paper transition-colors">
-            Get Started
+            {siteText(content, "about.cta.primary")}
           </Link>
           <Link to="/leaderboard" className="inline-flex rounded-full border border-paper/60 px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-paper hover:text-ink transition-colors">
-            Baltimore 100
+            {siteText(content, "about.cta.secondary")}
           </Link>
         </div>
       </div>
