@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin-shell";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { isAdminUnlocked } from "@/lib/admin-gate";
+import { isAdminUnlocked, refreshAdminUnlocked } from "@/lib/admin-gate";
+import { saveSiteContent } from "@/lib/admin-site.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,10 +37,13 @@ function AdminContentPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const ok = isAdminUnlocked();
-    setUnlocked(ok);
-    setGateChecked(true);
-    if (!ok) navigate({ to: "/admin/login" });
+    (async () => {
+      const flag = isAdminUnlocked();
+      const ok = flag ? true : await refreshAdminUnlocked();
+      setUnlocked(ok);
+      setGateChecked(true);
+      if (!ok) navigate({ to: "/admin/login" });
+    })();
   }, [navigate]);
 
   useEffect(() => {
@@ -61,12 +65,17 @@ function AdminContentPage() {
   const save = async () => {
     if (dirtyKeys.length === 0) return;
     setSaving(true);
-    const rows = dirtyKeys.map((k) => ({ key: k, value: values[k] }));
-    const { error } = await supabase.from("site_content").upsert(rows, { onConflict: "key" });
-    setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    setInitial({ ...values });
-    toast.success(`Saved ${dirtyKeys.length} change${dirtyKeys.length === 1 ? "" : "s"}`);
+    const rows = dirtyKeys.map((k) => ({ key: k, value: values[k] ?? "" }));
+    try {
+      await saveSiteContent({ data: { rows } });
+      setInitial({ ...values });
+      toast.success(`Saved ${dirtyKeys.length} change${dirtyKeys.length === 1 ? "" : "s"}`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Save failed";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!gateChecked || !unlocked) {
