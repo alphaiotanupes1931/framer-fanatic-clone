@@ -278,7 +278,7 @@ function Dashboard() {
                 if (item.type === "story") return (
                   <div className="space-y-0">
                     <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Story</span>
-                    <StoryCard story={item.data} />
+                    <StoryCard story={item.data} featured />
                   </div>
                 );
                 return (
