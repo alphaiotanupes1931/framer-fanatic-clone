@@ -372,9 +372,9 @@ function ForYouCard({ event }: { event: Ev }) {
     <Link
       to="/events/$eventId"
       params={{ eventId: event.id }}
-      className="group block w-full max-w-xl shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
+      className="group block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
     >
-      <div className="relative aspect-[16/9] max-h-[280px] w-full overflow-hidden bg-neutral-100">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         {event.image_url ? (
           <EventImage src={event.image_url} alt={event.title} className="h-full w-full object-cover transition group-hover:scale-105" />
         ) : null}
@@ -386,15 +386,15 @@ function ForYouCard({ event }: { event: Ev }) {
           9.5/10
         </div>
       </div>
-      <div className="p-4">
-        <div className="line-clamp-1 text-[15px] font-semibold text-neutral-900">{event.title}</div>
+      <div className="p-3">
+        <div className="line-clamp-1 text-sm font-semibold text-neutral-900">{event.title}</div>
         {d && (
           <div className="mt-0.5 text-xs font-medium text-[#d4580a]">
             {d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
           </div>
         )}
         {event.description && (
-          <p className="mt-2 line-clamp-2 text-[12.5px] leading-relaxed text-neutral-500">
+          <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">
             "{event.description}"
           </p>
         )}
