@@ -10,6 +10,18 @@ export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
   "quote.text":
     "Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities.",
   "quote.author": "Terrell Speaks",
+  "about.hero.title": "A platform for Baltimore's",
+  "about.hero.italic": "artists and makers.",
+  "about.story.heading": "Our Story",
+  "about.story.p1":
+    "Planet Baltimore was made so artists could finally have a platform of their own. A place that isn't an algorithm chasing strangers in another city, but a corner of the internet that actually belongs to the painters, rappers, photographers, chefs, DJs, poets, and organizers shaping this city block by block.",
+  "about.story.p2":
+    "Baltimore runs on creativity. From the murals in Station North to the line cooks in Hampden, the harbor stages and the basement shows, the Sunday cookouts and the Saturday markets, this city is made by people who make things. Planet Baltimore exists so those people can find each other, hire each other, support each other, and get paid without a middleman taking the cut.",
+  "about.story.p3":
+    "One platform. One city. Every creator on it lives here, works here, and gets to keep what they earn here.",
+  "about.cta.heading": "Join the platform built for Baltimore.",
+  "about.cta.primary": "Get Started",
+  "about.cta.secondary": "Baltimore 100",
 };
 
 export const SITE_CONTENT_KEYS = Object.keys(SITE_CONTENT_DEFAULTS);
