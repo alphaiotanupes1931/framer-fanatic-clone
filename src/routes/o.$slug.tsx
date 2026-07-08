@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ORG_TYPE_LABEL } from "@/lib/categories";
-import { Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2, ArrowLeft } from "lucide-react";
+import { Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2, ArrowLeft, ShieldCheck, BadgeCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/o/$slug")({
@@ -70,19 +70,30 @@ function OrgProfile() {
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
       <div className="overflow-hidden rounded-3xl border border-border bg-card">
-        <div className="h-48 bg-gradient-to-br from-orange-300 to-orange-600"
-          style={org.banner_url ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined} />
-        <div className="px-6 pb-6">
-          {/* Avatar floats over banner edge */}
-          <div className="-mt-12 flex justify-between items-start gap-3">
-            <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-secondary shrink-0 shadow-sm">
+        {/* Banner with floating badges */}
+        <div className="relative h-56 bg-gradient-to-br from-orange-300 to-orange-600"
+          style={org.banner_url ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+          <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-neutral-800 shadow-sm backdrop-blur">
+              <ShieldCheck className="h-3.5 w-3.5 text-neutral-700" /> Official {ORG_TYPE_LABEL[org.type]}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50/95 px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm backdrop-blur">
+              <BadgeCheck className="h-3.5 w-3.5" /> Verified
+            </span>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 sm:px-8">
+          {/* Avatar + right-side actions */}
+          <div className="-mt-12 flex items-end justify-between gap-4">
+            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-4 border-white bg-secondary shadow-md sm:h-28 sm:w-28">
               {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
             </div>
-            <div className="flex gap-2 pt-14 flex-wrap justify-end">
-              <button onClick={share} className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary">
-                <Share2 className="h-4 w-4" /> Share
+            <div className="flex items-center gap-2 pb-1">
+              <button onClick={share} aria-label="Share" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]">
+                <Share2 className="h-4 w-4" />
               </button>
-              {canManage && (
+              {canManage ? (
                 <button onClick={async () => {
                   if (!confirm("Delete this organization?")) return;
                   const { error } = await supabase.from("organizations").delete().eq("id", org.id);
@@ -92,39 +103,59 @@ function OrgProfile() {
                 }} className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100">
                   <Trash2 className="h-4 w-4" /> Delete
                 </button>
+              ) : (
+                <button className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]">
+                  Follow
+                </button>
               )}
             </div>
           </div>
 
-          {/* Name + meta sit safely below the banner */}
-          <div className="mt-4 min-w-0">
-            <div className="text-xs font-semibold uppercase tracking-wider text-[#d4580a]">
-              {ORG_TYPE_LABEL[org.type]}{org.subtype ? ` · ${org.subtype}` : ""}
-            </div>
-            <h1 className="mt-1 text-2xl font-bold break-words">{org.name}</h1>
-            {org.neighborhood && (
-              <div className="mt-1.5 inline-flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5" /> {org.neighborhood}
-              </div>
+          {/* Name + bio */}
+          <div className="mt-4">
+            <h1 className="text-2xl font-bold text-neutral-900 sm:text-[28px]">{org.name}</h1>
+            {org.bio && (
+              <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-600">{org.bio}</p>
             )}
           </div>
 
-          {org.bio && <p className="mt-4 text-neutral-700">{org.bio}</p>}
-
-          <div className="mt-4 flex flex-wrap gap-3 text-sm text-muted-foreground">
-            {org.website && <a href={org.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-[#d4580a]"><Globe className="h-3.5 w-3.5" /> Website</a>}
-            {org.phone && <a href={`tel:${org.phone}`} className="inline-flex items-center gap-1 hover:text-[#d4580a]"><Phone className="h-3.5 w-3.5" /> {org.phone}</a>}
-            {org.email && <a href={`mailto:${org.email}`} className="inline-flex items-center gap-1 hover:text-[#d4580a]"><Mail className="h-3.5 w-3.5" /> {org.email}</a>}
-            {org.address && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {org.address}</span>}
+          {/* Inline meta row */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-neutral-500">
+            {org.neighborhood && (
+              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.neighborhood}</span>
+            )}
+            {org.website && (
+              <a href={org.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Globe className="h-4 w-4" /> Website</a>
+            )}
+            {org.email && (
+              <a href={`mailto:${org.email}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Mail className="h-4 w-4" /> {org.email}</a>
+            )}
+            {org.phone && (
+              <a href={`tel:${org.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Phone className="h-4 w-4" /> {org.phone}</a>
+            )}
+            {org.address && (
+              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.address}</span>
+            )}
           </div>
 
-          <div className="mt-6 flex gap-1 overflow-x-auto border-b border-border">
-            {TABS.map((t) => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition ${tab === t ? "border-[#d4580a] text-[#d4580a]" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-                {t}
-              </button>
-            ))}
+          {/* Tabs: orange pill for active */}
+          <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto pb-1">
+            {TABS.map((t) => {
+              const active = tab === t;
+              return (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                    active
+                      ? "bg-[#d4580a] text-white shadow-sm"
+                      : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+                  }`}
+                >
+                  {t}
+                </button>
+              );
+            })}
           </div>
 
           <div className="py-6">
