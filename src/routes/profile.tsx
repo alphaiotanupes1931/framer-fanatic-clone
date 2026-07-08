@@ -68,7 +68,7 @@ function ProfilePage() {
       const { data: fs } = await supabase.from("follows").select("follower_id").eq("following_id", profile.id).limit(3);
       const ids = (fs || []).map((f: { follower_id: string }) => f.follower_id);
       if (!ids.length) { setFollowerPreview([]); return; }
-      const { data: ps } = await supabase.from("profiles").select("id, display_name, username").in("id", ids);
+      const { data: ps } = await (supabase as any).from("profiles_public").select("id, display_name, username").in("id", ids);
       setFollowerPreview((ps as Array<{ id: string; display_name: string | null; username: string | null }>) || []);
     })();
   }, [profile]);

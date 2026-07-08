@@ -326,8 +326,8 @@ function CommentsTab({ orgId, me, canManage }: { orgId: string; me: string | nul
     const list = (data ?? []) as Comment[];
     const ids = Array.from(new Set(list.map((c) => c.user_id)));
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids);
-      const by = new Map((profs ?? []).map((p: { id: string; display_name: string | null; avatar_url: string | null }) => [p.id, p]));
+      const { data: profs } = await (supabase as any).from("profiles_public").select("id, display_name, avatar_url").in("id", ids);
+      const by = new Map(((profs ?? []) as Array<{ id: string; display_name: string | null; avatar_url: string | null }>).map((p) => [p.id, p]));
       list.forEach((c) => { c.profiles = by.get(c.user_id) ?? null; });
     }
     setComments(list);
