@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Shield, LogOut } from "lucide-react";
-import { isAdminUnlocked, lockAdmin } from "@/lib/admin-gate";
+import { isAdminUnlocked, lockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
 
 export function AdminShell({
   title,
@@ -12,7 +12,11 @@ export function AdminShell({
   subtitle?: string;
   children: ReactNode;
 }) {
-  const unlocked = typeof window !== "undefined" && isAdminUnlocked();
+  const [unlocked, setUnlocked] = useState(false);
+  useEffect(() => {
+    setUnlocked(isAdminUnlocked());
+    void refreshAdminUnlocked().then(setUnlocked);
+  }, []);
   return (
     <div className="min-h-screen bg-neutral-50" style={{ minHeight: "100dvh" }}>
       <header className="border-b border-neutral-200 bg-white">

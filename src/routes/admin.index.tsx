@@ -50,10 +50,13 @@ function AdminPage() {
   const [editing, setEditing] = useState<AdminUser | null>(null);
 
   useEffect(() => {
-    const ok = isAdminUnlocked();
-    setUnlocked(ok);
-    setGateChecked(true);
-    if (!ok) navigate({ to: "/admin/login" });
+    (async () => {
+      const { refreshAdminUnlocked } = await import("@/lib/admin-gate");
+      const ok = await refreshAdminUnlocked();
+      setUnlocked(ok);
+      setGateChecked(true);
+      if (!ok) navigate({ to: "/admin/login" });
+    })();
   }, [navigate]);
 
   const load = async () => {
