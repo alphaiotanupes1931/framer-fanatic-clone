@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { isAdminUnlocked, unlockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
-import pbLogo from "@/assets/pb-logo.png";
+import pbLogo from "@/assets/pb-logo-dark.png";
 
 export const Route = createFileRoute("/admin/login")({
   component: AdminLoginPage,
@@ -51,7 +51,7 @@ function AdminLoginPage() {
     <AdminShell>
       <div className="mx-auto max-w-sm space-y-6 py-10">
         <div className="text-center">
-          <img src={pbLogo} alt="Planet Baltimore" className="mx-auto mb-3 h-12 w-12 rounded-full object-contain" />
+          <img src={pbLogo} alt="Planet Baltimore" className="mx-auto mb-3 h-12 w-12 rounded-full bg-neutral-900 object-contain p-2" />
           <h1 className="text-2xl font-bold">Admin login</h1>
           <p className="mt-1 text-sm text-muted-foreground">Restricted area. Enter credentials to continue.</p>
         </div>
