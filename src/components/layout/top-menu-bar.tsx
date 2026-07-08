@@ -28,7 +28,7 @@ const navItems: Item[] = [
 
 const utilItems: Item[] = [
   { icon: MessageCircle, label: "Messages", to: "/messages" },
-  { icon: Bell, label: "Notifications", to: "/dashboard" },
+  { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: User, label: "Profile", to: "/profile" },
 ];
 
@@ -53,7 +53,7 @@ export function TopMenuBar() {
           <Link to="/search" aria-label="Search" className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors active:bg-secondary ${currentPath === "/search" ? "text-[#d4580a]" : "text-muted-foreground"}`}>
             <Search className="h-5 w-5" />
           </Link>
-          <Link to="/dashboard" aria-label="Notifications" className="relative flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-muted-foreground transition-colors active:bg-secondary">
+          <Link to="/notifications" aria-label="Notifications" className={`relative flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors active:bg-secondary ${currentPath === "/notifications" ? "text-[#d4580a]" : "text-muted-foreground"}`}>
             <Bell className="h-5 w-5" />
             {unreadNotifications > 0 && (
               <span className="absolute right-1.5 top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ backgroundColor: "#d4580a" }}>
