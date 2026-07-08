@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ORG_TYPE_LABEL } from "@/lib/categories";
-import { Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2 } from "lucide-react";
+import { Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/o/$slug")({
@@ -63,6 +63,12 @@ function OrgProfile() {
 
   return (
     <AppLayout title="" hero={false}>
+      <button
+        onClick={() => (window.history.length > 1 ? window.history.back() : navigate({ to: "/dashboard" }))}
+        className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground hover:border-[#d4580a]"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back
+      </button>
       <div className="overflow-hidden rounded-3xl border border-border bg-card">
         <div className="h-48 bg-gradient-to-br from-orange-300 to-orange-600"
           style={org.banner_url ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined} />
