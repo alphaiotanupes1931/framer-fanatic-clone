@@ -372,9 +372,9 @@ function ForYouCard({ event }: { event: Ev }) {
     <Link
       to="/events/$eventId"
       params={{ eventId: event.id }}
-      className="group block w-full shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
+      className="group block w-full max-w-xl shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+      <div className="relative aspect-[16/9] max-h-[280px] w-full overflow-hidden bg-neutral-100">
         {event.image_url ? (
           <EventImage src={event.image_url} alt={event.title} className="h-full w-full object-cover transition group-hover:scale-105" />
         ) : null}
