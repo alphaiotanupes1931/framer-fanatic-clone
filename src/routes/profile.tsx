@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users } from "lucide-react";
+import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -22,8 +22,19 @@ export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
 });
 
-const TABS_ARTIST_BASE = ["Posts","Videos","Events","About","Saved","Organized","My Tickets","Stripe"] as const;
-const TABS_ATTENDEE_BASE = ["Videos","About","Saved","Attending","My Tickets"] as const;
+const TABS_ARTIST_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Stripe"] as const;
+const TABS_ATTENDEE_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
+const TAB_ICONS: Record<string, typeof LayoutGrid> = {
+  "Posts": LayoutGrid,
+  "Feed": Rss,
+  "My Writings": BookOpen,
+  "Saved": Bookmark,
+  "Attending": Calendar,
+  "Organized": CalendarCheck,
+  "My Tickets": Ticket,
+  "My Pages": Shield,
+  "My Dashboard": BarChart3,
+};
 type Tab = string;
 
 function ProfilePage() {
