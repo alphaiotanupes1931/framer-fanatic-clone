@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AppLayout } from "@/components/app-layout";
+import { AdminShell } from "@/components/admin-shell";
 import { isAdminUnlocked } from "@/lib/admin-gate";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText } from "lucide-react";
@@ -111,16 +111,16 @@ function AdminPage() {
 
   if (!gateChecked || !unlocked) {
     return (
-      <AppLayout title="Admin" hero={false}>
+      <AdminShell title="Admin" hero={false}>
         <div className="flex items-center gap-2 text-sm text-neutral-500">
           <Loader2 className="h-4 w-4 animate-spin" /> Redirecting to admin login...
         </div>
-      </AppLayout>
+      </AdminShell>
     );
   }
 
   return (
-    <AppLayout
+    <AdminShell
       title="Admin"
       subtitle="Manage users, monitor live activity, and moderate accounts."
     >
@@ -298,7 +298,7 @@ function AdminPage() {
       </div>
       <EditUserDialog user={editing} onClose={() => setEditing(null)} onSaved={onSaved} />
       <DangerZone onUserDeleted={(id: string) => setUsers((prev) => prev.filter((p) => p.id !== id))} />
-    </AppLayout>
+    </AdminShell>
   );
 }
 

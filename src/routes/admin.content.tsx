@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AppLayout } from "@/components/app-layout";
+import { AdminShell } from "@/components/admin-shell";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { isAdminUnlocked } from "@/lib/admin-gate";
 import { Button } from "@/components/ui/button";
@@ -71,16 +71,16 @@ function AdminContentPage() {
 
   if (!gateChecked || !unlocked) {
     return (
-      <AppLayout>
+      <AdminShell>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Redirecting to admin login...
         </div>
-      </AppLayout>
+      </AdminShell>
     );
   }
 
   return (
-    <AppLayout>
+    <AdminShell>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Link to="/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -142,6 +142,6 @@ function AdminContentPage() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </AdminShell>
   );
 }

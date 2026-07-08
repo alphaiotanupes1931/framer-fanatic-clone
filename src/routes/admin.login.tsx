@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AppLayout } from "@/components/app-layout";
+import { AdminShell } from "@/components/admin-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,7 @@ function AdminLoginPage() {
   };
 
   return (
-    <AppLayout>
+    <AdminShell>
       <div className="mx-auto max-w-sm space-y-6 py-10">
         <div className="text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange/10">
@@ -57,6 +57,6 @@ function AdminLoginPage() {
           </Button>
         </form>
       </div>
-    </AppLayout>
+    </AdminShell>
   );
 }
