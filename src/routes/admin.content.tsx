@@ -25,6 +25,15 @@ const FIELD_META: Record<string, { label: string; help: string; multiline?: bool
   "hero.cta": { label: "Hero CTA button label", help: "The button that links to /auth." },
   "quote.text": { label: "Featured quote", help: "The pull quote in the middle of the page.", multiline: true },
   "quote.author": { label: "Quote author", help: "Attribution under the quote." },
+  "about.hero.title": { label: "About: hero title", help: "First line of the About hero." },
+  "about.hero.italic": { label: "About: hero italic line", help: "Second, italic line of the About hero." },
+  "about.story.heading": { label: "About: story heading", help: "Section title above the story paragraphs." },
+  "about.story.p1": { label: "About: story paragraph 1", help: "First paragraph.", multiline: true },
+  "about.story.p2": { label: "About: story paragraph 2", help: "Second paragraph.", multiline: true },
+  "about.story.p3": { label: "About: story paragraph 3", help: "Third paragraph.", multiline: true },
+  "about.cta.heading": { label: "About: CTA heading", help: "Large call-to-action headline near the bottom." },
+  "about.cta.primary": { label: "About: primary button label", help: "Main call-to-action button." },
+  "about.cta.secondary": { label: "About: secondary button label", help: "Secondary link button." },
 };
 
 function AdminContentPage() {
