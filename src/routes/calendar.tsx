@@ -266,7 +266,7 @@ function CalendarPage() {
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setForyouIdx((i) => Math.min(Math.max(0, forYou.length - 2), i + 1))}
+                  onClick={() => setForyouIdx((i) => Math.min(Math.max(0, forYou.length - 1), i + 1))}
                   className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
                   aria-label="Next"
                 >
@@ -282,7 +282,7 @@ function CalendarPage() {
               <div className="overflow-hidden">
                 <div
                   className="flex gap-4 transition-transform duration-300"
-                  style={{ transform: `translateX(calc(-${foryouIdx} * (50% + 8px)))` }}
+                  style={{ transform: `translateX(calc(-${foryouIdx} * 100%))` }}
                 >
                   {forYou.map((e) => (
                     <ForYouCard key={e.id} event={e} />
@@ -372,7 +372,7 @@ function ForYouCard({ event }: { event: Ev }) {
     <Link
       to="/events/$eventId"
       params={{ eventId: event.id }}
-      className="group block w-[calc(50%-8px)] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
+      className="group block w-full shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
         {event.image_url ? (
