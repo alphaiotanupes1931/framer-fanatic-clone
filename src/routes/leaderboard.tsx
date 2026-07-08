@@ -23,7 +23,7 @@ function LeaderboardPage() {
   useEffect(() => {
     if (!auth.signedIn) return;
     (async () => {
-    const { data: profs } = await supabase.from("profiles").select("id, display_name, username, avatar_url").limit(100);
+    const { data: profs } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").limit(100);
     const list = profs || [];
     const results: Row[] = await Promise.all(list.map(async (p: any) => {
       const { count: posts } = await supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", p.id);

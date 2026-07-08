@@ -44,7 +44,7 @@ function EventDetail() {
       const { data } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
       if (data) {
         setEvt(data as EventRow);
-        const { data: h } = await supabase.from("profiles").select("id, display_name, username, avatar_url").eq("id", (data as EventRow).user_id).maybeSingle();
+        const { data: h } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").eq("id", (data as EventRow).user_id).maybeSingle();
         setHost((h as Host) || null);
       }
       setLoading(false);

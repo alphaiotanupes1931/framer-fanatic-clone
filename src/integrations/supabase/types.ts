@@ -988,7 +988,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          bio: string | null
+          category: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          in_baltimore: boolean | null
+          is_baltimore_verified: boolean | null
+          is_founder: boolean | null
+          last_seen_at: string | null
+          neighborhood: string | null
+          neighborhood_names: string[] | null
+          role: string | null
+          username: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          category?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          in_baltimore?: boolean | null
+          is_baltimore_verified?: boolean | null
+          is_founder?: boolean | null
+          last_seen_at?: string | null
+          neighborhood?: string | null
+          neighborhood_names?: string[] | null
+          role?: string | null
+          username?: string | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          category?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          in_baltimore?: boolean | null
+          is_baltimore_verified?: boolean | null
+          is_founder?: boolean | null
+          last_seen_at?: string | null
+          neighborhood?: string | null
+          neighborhood_names?: string[] | null
+          role?: string | null
+          username?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_delete_event: { Args: { _id: string }; Returns: undefined }

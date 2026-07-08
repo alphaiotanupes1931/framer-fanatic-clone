@@ -59,8 +59,8 @@ function NeighborhoodsPage() {
     setTab("artists");
     (async () => {
       const [{ data: a }, { data: e }] = await Promise.all([
-        supabase
-          .from("profiles")
+        (supabase as any)
+          .from("profiles_public")
           .select("id, display_name, username, avatar_url, bio, neighborhood")
           .eq("role", "artist")
           .ilike("neighborhood", selected.name),

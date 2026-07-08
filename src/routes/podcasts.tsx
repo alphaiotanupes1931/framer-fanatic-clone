@@ -21,10 +21,9 @@ function PodcastsPage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
+      const { data } = await (supabase as any)
+        .from("profiles_public")
         .select("id, display_name, username, avatar_url, neighborhood, bio, category")
-        .eq("hidden_from_showcase", false)
         .ilike("category", "%podcast%")
         .order("created_at", { ascending: false })
         .limit(48);

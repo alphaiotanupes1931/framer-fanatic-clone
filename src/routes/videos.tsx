@@ -83,7 +83,7 @@ function VideosSignedIn() {
     const list = (data || []) as Video[];
     const ids = Array.from(new Set(list.map((v) => v.user_id)));
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name, username").in("id", ids);
+      const { data: profs } = await (supabase as any).from("profiles_public").select("id, display_name, username").in("id", ids);
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((v) => { v.author = byId.get(v.user_id) as any; });
     }
