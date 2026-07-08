@@ -27,17 +27,21 @@ export function isAdminUnlocked(): boolean {
   try { return sessionStorage.getItem(KEY) === "1"; } catch { return false; }
 }
 
-export async function unlockAdmin(username: string, password: string): Promise<boolean> {
+export type AdminUnlockResult =
+  | { ok: true }
+  | { ok: false; reason: "invalid" | "not_configured" | "error" };
+
+export async function unlockAdmin(username: string, password: string): Promise<AdminUnlockResult> {
   try {
-    const { ok, adminToken } = await unlockAdminSite({ data: { username, password } });
-    if (!ok) return false;
+    const { ok, adminToken, reason } = await unlockAdminSite({ data: { username, password } });
+    if (!ok) return { ok: false, reason: reason ?? "invalid" };
     try { sessionStorage.setItem(KEY, "1"); } catch { /* ignore */ }
     if (adminToken) {
       try { sessionStorage.setItem(TOKEN_KEY, adminToken); } catch { /* ignore */ }
     }
-    return true;
+    return { ok: true };
   } catch {
-    return false;
+    return { ok: false, reason: "error" };
   }
 }
 

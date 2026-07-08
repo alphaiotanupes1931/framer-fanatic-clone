@@ -14,15 +14,16 @@ export const unlockAdminSite = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const expectedUser = process.env.ADMIN_SHARED_USERNAME;
     const expectedPass = process.env.ADMIN_SHARED_PASSWORD;
-    if (!expectedUser || !expectedPass) {
-      throw new Error("Admin credentials are not configured");
+    const sessionSecret = process.env.ADMIN_SESSION_SECRET;
+    if (!expectedUser || !expectedPass || !sessionSecret) {
+      return { ok: false as const, reason: "not_configured" as const };
     }
     const userOk = timingSafeMatches(normalizeAdminUsername(data.username), normalizeAdminUsername(expectedUser));
     const passOk = timingSafeMatches(
       normalizeAdminPassword(data.password, expectedPass),
       normalizeAdminPassword(expectedPass, expectedPass),
     );
-    if (!userOk || !passOk) return { ok: false as const };
+    if (!userOk || !passOk) return { ok: false as const, reason: "invalid" as const };
     await setAdminUnlocked();
     return { ok: true as const, adminToken: createAdminToken() };
   });

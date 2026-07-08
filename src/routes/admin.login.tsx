@@ -29,11 +29,14 @@ function AdminLoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const ok = await unlockAdmin(username, password);
+      const result = await unlockAdmin(username, password);
       setSubmitting(false);
-      if (!ok) {
-        setError("Invalid username or password");
-        toast.error("Invalid username or password");
+      if (!result.ok) {
+        const msg = result.reason === "not_configured"
+          ? "Admin login is not configured on this deployment"
+          : "Invalid username or password";
+        setError(msg);
+        toast.error(msg);
         return;
       }
       toast.success("Welcome");
