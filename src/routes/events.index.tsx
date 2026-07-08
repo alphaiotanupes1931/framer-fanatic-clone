@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
-import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, TrendingUp, LayoutDashboard, MessageCircle, Heart, Share2, Clock } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, MessageCircle, Heart, Share2, Clock } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -297,6 +297,24 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         <HeroBanner
           title="Your Next Event"
           subtitle="Tickets for the best events in Baltimore"
+          cta={
+            isArtist ? (
+              <Link
+                to="/events/new"
+                className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+              >
+                <Plus className="h-4 w-4" /> Create Event
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+              >
+                <Plus className="h-4 w-4" /> Create Event
+              </button>
+            )
+          }
         />
 
         <div className="relative">
@@ -305,36 +323,8 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search events, venues..."
-            className="w-full rounded-full border border-neutral-200 bg-white py-3.5 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none"
+            className="w-full rounded-2xl border border-neutral-200 bg-white py-3.5 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none"
           />
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <button className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-2 py-3 text-[12px] font-semibold text-neutral-700 hover:border-orange-300 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm">
-            <TrendingUp className="h-4 w-4 text-neutral-500" />
-            <span className="hidden sm:inline">Organizer Studio</span>
-            <span className="sm:hidden">Studio</span>
-          </button>
-          <button className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-2 py-3 text-[12px] font-semibold text-neutral-700 hover:border-orange-300 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm">
-            <LayoutDashboard className="h-4 w-4 text-neutral-500" />
-            <span className="hidden sm:inline">Promoter Dashboard</span>
-            <span className="sm:hidden">Promoter</span>
-          </button>
-          {isArtist ? (
-            <Link
-              to="/events/new"
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#d4580a] px-2 py-3 text-[12px] font-semibold text-white shadow-sm hover:brightness-110 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm"
-            >
-              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create Event</span><span className="sm:hidden">Create</span>
-            </Link>
-          ) : (
-            <button
-              onClick={() => setOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#d4580a] px-2 py-3 text-[12px] font-semibold text-white shadow-sm hover:brightness-110 sm:rounded-2xl sm:px-5 sm:py-4 sm:text-sm"
-            >
-              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create Event</span><span className="sm:hidden">Create</span>
-            </button>
-          )}
         </div>
 
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
