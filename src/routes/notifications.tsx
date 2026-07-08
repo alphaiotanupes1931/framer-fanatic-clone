@@ -67,7 +67,7 @@ function NotificationsPage() {
     const list = (data || []) as Notif[];
     const actorIds = Array.from(new Set(list.map((n) => n.actor_id).filter(Boolean))) as string[];
     if (actorIds.length) {
-      const { data: ps } = await supabase.from("profiles").select("id, display_name, username, avatar_url").in("id", actorIds);
+      const { data: ps } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").in("id", actorIds);
       const byId = new Map((ps || []).map((p) => [p.id, p]));
       list.forEach((n) => { if (n.actor_id) n.actor = byId.get(n.actor_id) as Notif["actor"] ?? null; });
     }
