@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
-import { useUserRole } from "@/hooks/use-user-role";
+import { isAdminUnlocked } from "@/lib/admin-gate";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
@@ -41,7 +41,8 @@ function isLive(ts: string | null) {
 
 function AdminPage() {
   const navigate = useNavigate();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const [unlocked, setUnlocked] = useState(false);
+  const [gateChecked, setGateChecked] = useState(false);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -49,8 +50,11 @@ function AdminPage() {
   const [editing, setEditing] = useState<AdminUser | null>(null);
 
   useEffect(() => {
-    if (!roleLoading && !isAdmin) navigate({ to: "/dashboard" });
-  }, [roleLoading, isAdmin, navigate]);
+    const ok = isAdminUnlocked();
+    setUnlocked(ok);
+    setGateChecked(true);
+    if (!ok) navigate({ to: "/admin/login" });
+  }, [navigate]);
 
   const load = async () => {
     setLoading(true);
@@ -61,8 +65,8 @@ function AdminPage() {
   };
 
   useEffect(() => {
-    if (isAdmin) void load();
-  }, [isAdmin]);
+    if (unlocked) void load();
+  }, [unlocked]);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -105,11 +109,11 @@ function AdminPage() {
     setUsers((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   };
 
-  if (roleLoading || !isAdmin) {
+  if (!gateChecked || !unlocked) {
     return (
       <AppLayout title="Admin" hero={false}>
         <div className="flex items-center gap-2 text-sm text-neutral-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Checking permissions...
+          <Loader2 className="h-4 w-4 animate-spin" /> Redirecting to admin login...
         </div>
       </AppLayout>
     );
