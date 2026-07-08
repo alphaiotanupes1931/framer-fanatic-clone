@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { isAdminUnlocked, unlockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
+import { unlockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
 import pbLogo from "@/assets/pb-logo-dark.png";
 
 export const Route = createFileRoute("/admin/login")({
