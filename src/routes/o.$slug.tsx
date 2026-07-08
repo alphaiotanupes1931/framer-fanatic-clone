@@ -84,9 +84,12 @@ function OrgProfile() {
         </div>
 
         <div className="px-6 pb-6 sm:px-8">
-          {/* Avatar floats over banner; actions sit on their own row */}
-          <div className="flex justify-end pt-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-4 pt-5 sm:flex-row sm:items-start sm:justify-between">
+            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-border bg-secondary shadow-sm sm:h-28 sm:w-28">
+              {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+            </div>
+
+            <div className="flex items-center gap-2 sm:pt-1">
               <button onClick={share} aria-label="Share" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]">
                 <Share2 className="h-4 w-4" />
               </button>
@@ -106,11 +109,6 @@ function OrgProfile() {
                 </button>
               )}
             </div>
-          </div>
-
-          {/* Avatar overlapping banner */}
-          <div className="-mt-24 h-28 w-28 shrink-0 overflow-hidden rounded-2xl border-4 border-white bg-secondary shadow-md sm:h-32 sm:w-32">
-            {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
           </div>
 
           {/* Name + bio */}
