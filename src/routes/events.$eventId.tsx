@@ -208,8 +208,8 @@ function EventDetail() {
               {buying ? "Loading…" : `Buy Ticket · $${((evt.price_cents ?? 0) / 100).toFixed(2)}`}
             </Button>
           ) : (
-            <Button onClick={share} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-              I'm going
+            <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+              {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "I'm going"}
             </Button>
           )}
           <Button onClick={share} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2">
