@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
-  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket,
+  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, Sparkles,
 } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,16 @@ const utilItems: Item[] = [
   { icon: User, label: "Profile", to: "/profile" },
 ];
 
+const createItems: Item[] = [
+  { icon: FileText, label: "New Post", to: "/create-post" },
+  { icon: Sparkles, label: "New Story", to: "/create-story" },
+  { icon: Palette, label: "Artist Profile", to: "/create-artist" },
+  { icon: Building2, label: "Business", to: "/create-business" },
+  { icon: Landmark, label: "Arts Organization", to: "/create-arts-org" },
+  { icon: Users, label: "Community", to: "/create-community" },
+  { icon: Shield, label: "Community Association", to: "/create-community-association" },
+];
+
 export function TopMenuBar() {
   const navigate = useNavigate();
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
@@ -50,6 +60,21 @@ export function TopMenuBar() {
         </Link>
 
         <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost" aria-label="Create" className="rounded-lg">
+                <Plus className="h-5 w-5" style={{ color: "#d4580a" }} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="z-[1001] w-56">
+              {createItems.map(({ icon: Icon, label, to }) => (
+                <DropdownMenuItem key={to} onSelect={() => navigate({ to })} className="flex cursor-pointer items-center gap-2">
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Link to="/search" aria-label="Search" className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors active:bg-secondary ${currentPath === "/search" ? "text-[#d4580a]" : "text-muted-foreground"}`}>
             <Search className="h-5 w-5" />
           </Link>
