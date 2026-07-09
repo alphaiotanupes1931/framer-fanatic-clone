@@ -47,12 +47,11 @@ export const saveSiteContent = createServerFn({ method: "POST" })
       .filter((r) => typeof r.key === "string" && r.key.length > 0 && r.key.length < 200)
       .map((r) => ({ key: r.key, value: String(r.value ?? "") }));
     if (clean.length === 0) return { ok: true as const, count: 0 };
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("site_content")
-      .upsert(clean, { onConflict: "key" });
+    const { createAdminSupabase } = await import("./admin-supabase.server");
+    const client = createAdminSupabase();
+    const { data: count, error } = await client.rpc("admin_upsert_site_content", { _rows: clean });
     if (error) throw new Error(error.message);
-    return { ok: true as const, count: clean.length };
+    return { ok: true as const, count: (count as number) ?? clean.length };
   });
 
 type AdminRpcArgs = Record<string, unknown> | undefined;
@@ -78,8 +77,9 @@ export const adminRpc = createServerFn({ method: "POST" })
     if (!ALLOWED_ADMIN_RPCS.has(data.name)) {
       throw new Error("Unknown admin RPC: " + data.name);
     }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin.rpc(data.name as never, (data.args ?? {}) as never);
+    const { createAdminSupabase } = await import("./admin-supabase.server");
+    const client = createAdminSupabase();
+    const { data: rows, error } = await client.rpc(data.name as never, (data.args ?? {}) as never);
     if (error) throw new Error(error.message);
     return { ok: true as const, data: rows ?? null };
   });
