@@ -1,13 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Home, Search, Plus, Bell, User, Menu, MessageCircle, Compass, BookOpen,
+  Home, Search, Plus, User, Menu, MessageCircle, Compass, BookOpen,
   Users, Shield, Palette, Landmark, Building2, MapPin, Calendar, Ticket,
   Video, Trophy, Settings, PenSquare, Store,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUnreadCounts } from "@/hooks/use-unread-counts";
 
 type Primary = { icon: typeof Home; label: string; to: string };
 
