@@ -54,3 +54,32 @@ export const saveSiteContent = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const, count: clean.length };
   });
+
+type AdminRpcArgs = Record<string, unknown> | undefined;
+
+const ALLOWED_ADMIN_RPCS = new Set([
+  "admin_list_users",
+  "admin_list_events",
+  "admin_list_organizations",
+  "admin_set_banned",
+  "admin_set_showcase_hidden",
+  "admin_update_profile",
+  "admin_delete_event",
+  "admin_delete_organization",
+  "admin_delete_profile",
+]);
+
+export const adminRpc = createServerFn({ method: "POST" })
+  .inputValidator((data: { name: string; args?: AdminRpcArgs; adminToken?: string | null }) => data)
+  .handler(async ({ data }) => {
+    if (!(await hasAdminAccess(data.adminToken))) {
+      throw new Error("Admin gate is locked");
+    }
+    if (!ALLOWED_ADMIN_RPCS.has(data.name)) {
+      throw new Error("Unknown admin RPC: " + data.name);
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin.rpc(data.name as never, (data.args ?? {}) as never);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, data: rows ?? null };
+  });

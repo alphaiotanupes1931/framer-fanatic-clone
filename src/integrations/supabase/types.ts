@@ -1117,6 +1117,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_caller: { Args: never; Returns: boolean }
       public_artists: {
         Args: { lim?: number; search?: string; sort_by?: string }
         Returns: {
