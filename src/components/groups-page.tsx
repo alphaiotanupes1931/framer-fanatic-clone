@@ -21,7 +21,7 @@ const CATEGORIES = ["All", "Neighborhood", "Arts", "Activism", "Wellness", "Educ
 
 export function GroupsPage() {
   const { isArtist, isAdmin } = useUserRole();
-  const canCreate = isArtist || isAdmin;
+  const canCreate = true;
   const [items, setItems] = useState<Org[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);

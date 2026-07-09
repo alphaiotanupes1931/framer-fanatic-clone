@@ -32,7 +32,7 @@ export function OrgListPage({
   showFeatured?: boolean;
 }) {
   const { isArtist, isAdmin } = useUserRole();
-  const canCreate = isArtist || isAdmin;
+  const canCreate = true;
   const subs = subtypesFor(type);
   const [items, setItems] = useState<Org[]>([]);
   const [q, setQ] = useState("");
