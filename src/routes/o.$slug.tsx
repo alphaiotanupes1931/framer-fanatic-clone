@@ -7,7 +7,6 @@ import { ORG_TYPE_LABEL } from "@/lib/categories";
 import { Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2, ArrowLeft, ShieldCheck, BadgeCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
-import { ORG_TYPE_LABEL } from "@/lib/categories";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
