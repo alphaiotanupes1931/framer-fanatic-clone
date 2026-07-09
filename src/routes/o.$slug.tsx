@@ -108,7 +108,8 @@ function OrgProfile() {
   const promptUpload = async (field: "avatar_url" | "banner_url") => {
     const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
     if (!url) return;
-    const { error } = await supabase.from("organizations").update({ [field]: url }).eq("id", org.id);
+    const patch = { [field]: url } as Partial<Org>;
+    const { error } = await supabase.from("organizations").update(patch).eq("id", org.id);
     if (error) return toast.error(error.message);
     setOrg({ ...org, [field]: url });
     toast.success("Updated");
