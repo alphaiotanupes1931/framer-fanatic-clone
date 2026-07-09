@@ -57,28 +57,28 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
   }
 
   return (
-    <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group flex min-h-[94px] gap-3 rounded-xl border border-slate-200 bg-white p-3 transition-all duration-150 hover:border-slate-300 hover:shadow-sm active:translate-y-0">
+    <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group flex min-h-[130px] gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-all duration-150 hover:border-slate-300 hover:shadow-sm active:translate-y-0">
       <div className="min-w-0 flex-1 py-0.5">
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-          <Avatar className="h-[18px] w-[18px]">
+        <div className="mb-2.5 flex flex-wrap items-center gap-2">
+          <Avatar className="h-6 w-6">
             <AvatarImage src={story.author_avatar ?? undefined} />
-            <AvatarFallback className="bg-slate-100 text-[8px] font-bold text-slate-500">
+            <AvatarFallback className="bg-slate-100 text-[10px] font-bold text-slate-500">
               {story.author_name?.charAt(0) ?? "?"}
             </AvatarFallback>
           </Avatar>
-          <span className="max-w-[160px] truncate text-[10px] font-extrabold leading-none text-slate-800 sm:max-w-[220px]">{story.author_name}</span>
-          {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[8px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
+          <span className="max-w-[200px] truncate text-xs font-extrabold leading-none text-slate-800 sm:max-w-[260px]">{story.author_name}</span>
+          {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
         </div>
-        <h3 className="line-clamp-1 font-serif text-[12px] font-extrabold leading-tight text-slate-950 transition-colors group-hover:text-[#d4580a]">{story.title}</h3>
-        {cleanExcerpt && <p className="mt-1 line-clamp-1 text-[11px] leading-snug text-slate-500">{cleanExcerpt}</p>}
-        <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[10px] leading-none text-slate-500">
-          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{story.read_minutes || 5} min</span>
-          <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{story.likes_count || 0}</span>
-          <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />{story.comments_count || 0}</span>
+        <h3 className="line-clamp-2 font-serif text-lg font-extrabold leading-snug text-slate-950 transition-colors group-hover:text-[#d4580a]">{story.title}</h3>
+        {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-slate-500">{cleanExcerpt}</p>}
+        <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs leading-none text-slate-500">
+          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{story.read_minutes || 5} min</span>
+          <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" />{story.likes_count || 0}</span>
+          <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{story.comments_count || 0}</span>
         </div>
       </div>
       {story.cover_url && (
-        <div className="aspect-square h-[68px] w-[68px] flex-shrink-0 overflow-hidden rounded-lg sm:h-[72px] sm:w-[72px]">
+        <div className="aspect-square h-[110px] w-[110px] flex-shrink-0 overflow-hidden rounded-lg sm:h-[130px] sm:w-[130px]">
           <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
         </div>
       )}
