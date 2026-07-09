@@ -61,28 +61,6 @@ export function GroupsPage() {
           subtitle="Find your people and build something together in Baltimore."
           cta={
             <div className="flex flex-wrap items-center gap-2">
-              <MessageAllButton
-                label="Message All"
-                audienceLabel="Groups"
-                defaultGroupName="Baltimore Groups"
-                loadCandidates={async () => {
-                  const { data } = await supabase
-                    .from("organizations")
-                    .select("owner_id, name, avatar_url, neighborhood")
-                    .eq("type", "group")
-                    .not("owner_id", "is", null);
-                  const rows = (data ?? []) as { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null }[];
-                  const seen = new Set<string>();
-                  return rows
-                    .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
-                    .map((r) => ({
-                      id: r.owner_id as string,
-                      display_name: r.name,
-                      avatar_url: r.avatar_url,
-                      subtitle: r.neighborhood || "Group",
-                    }));
-                }}
-              />
               {canCreate && (
                 <button
                   type="button"
