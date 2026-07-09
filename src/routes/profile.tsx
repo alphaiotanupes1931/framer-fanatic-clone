@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3 } from "lucide-react";
+import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -45,6 +46,7 @@ function ProfilePage() {
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
+  const [msgOpen, setMsgOpen] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
@@ -135,7 +137,7 @@ function ProfilePage() {
               <Link to="/stories" aria-label="My stories" className="rounded-full bg-[#d4580a]/10 p-2.5 text-[#d4580a] hover:bg-[#d4580a]/20"><BookOpen className="h-4 w-4" /></Link>
               <Link to="/events" aria-label="Create event" className="rounded-full bg-[#d4580a]/10 p-2.5 text-[#d4580a] hover:bg-[#d4580a]/20">+</Link>
               <Link to="/settings" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><Pencil className="h-4 w-4" /></Link>
-              <Link to="/messages" aria-label="Messages" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><MessageCircle className="h-4 w-4" /></Link>
+              <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><MessageCircle className="h-4 w-4" /></button>
               <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><UserPlus className="h-4 w-4" /></Link>
               <button
                 aria-label="Share profile"
@@ -254,6 +256,7 @@ function ProfilePage() {
           </div>
         </div>
       </div>
+      <MessageFollowersModal open={msgOpen} onClose={() => setMsgOpen(false)} />
     </AppLayout>
   );
 }
