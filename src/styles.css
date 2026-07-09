@@ -159,6 +159,13 @@
     text-size-adjust: 100%;
   }
 
+  /* Bump base font size on mobile so text stays readable on small screens. */
+  @media (max-width: 640px) {
+    html {
+      font-size: 17px;
+    }
+  }
+
   body {
     /* Prevent long words / URLs / hashes from forcing horizontal
        overflow at large text sizes or narrow viewports. */
