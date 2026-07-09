@@ -9,7 +9,6 @@ import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
-import { MessageAllButton } from "@/components/message-all-button";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -96,12 +95,6 @@ export function OrgListPage({
                   {view === "map" ? <><List className="h-4 w-4" /> List</> : <><MapPin className="h-4 w-4" /> Map</>}
                 </button>
               )}
-              <MessageAllButton
-                label="Message All"
-                audienceLabel={title}
-                defaultGroupName={`${title} group chat`}
-                loadCandidates={() => loadOrgOwners(type, title)}
-              />
               {canCreate && (
                 <button
                   type="button"
