@@ -90,11 +90,45 @@ function OrgProfile() {
               {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
             </div>
 
-            <div className="flex items-center gap-2 sm:pt-1">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:pt-1">
               <button onClick={share} aria-label="Share" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]">
                 <Share2 className="h-4 w-4" />
               </button>
-              {canManage ? (
+              <button
+                onClick={() => toast.success(`Following ${org.name}`)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]"
+              >
+                Follow
+              </button>
+              <MessageAllButton
+                label="Message All"
+                audienceLabel={ORG_TYPE_LABEL[org.type] || "Members"}
+                defaultGroupName={`${ORG_TYPE_LABEL[org.type] || "Community"} group chat`}
+                loadCandidates={async () => {
+                  const { data } = await supabase
+                    .from("organizations")
+                    .select("owner_id, name, avatar_url, neighborhood")
+                    .eq("type", org.type)
+                    .not("owner_id", "is", null);
+                  const rows = (data ?? []) as { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null }[];
+                  const seen = new Set<string>();
+                  return rows
+                    .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
+                    .map((r) => ({
+                      id: r.owner_id as string,
+                      display_name: r.name,
+                      avatar_url: r.avatar_url,
+                      subtitle: r.neighborhood || ORG_TYPE_LABEL[org.type],
+                    }));
+                }}
+              />
+              <button
+                onClick={() => toast.success(`Joined ${org.name}`)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800"
+              >
+                <Users className="h-4 w-4" /> Join
+              </button>
+              {canManage && (
                 <button onClick={async () => {
                   if (!confirm("Delete this organization?")) return;
                   const { error } = await supabase.from("organizations").delete().eq("id", org.id);
@@ -104,43 +138,6 @@ function OrgProfile() {
                 }} className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100">
                   <Trash2 className="h-4 w-4" /> Delete
                 </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => toast.success(`Following ${org.name}`)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]"
-                  >
-                    Follow
-                  </button>
-                  <MessageAllButton
-                    label="Message All"
-                    audienceLabel={ORG_TYPE_LABEL[org.type] || "Members"}
-                    defaultGroupName={`${ORG_TYPE_LABEL[org.type] || "Community"} group chat`}
-                    loadCandidates={async () => {
-                      const { data } = await supabase
-                        .from("organizations")
-                        .select("owner_id, name, avatar_url, neighborhood")
-                        .eq("type", org.type)
-                        .not("owner_id", "is", null);
-                      const rows = (data ?? []) as { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null }[];
-                      const seen = new Set<string>();
-                      return rows
-                        .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
-                        .map((r) => ({
-                          id: r.owner_id as string,
-                          display_name: r.name,
-                          avatar_url: r.avatar_url,
-                          subtitle: r.neighborhood || ORG_TYPE_LABEL[org.type],
-                        }));
-                    }}
-                  />
-                  <button
-                    onClick={() => toast.success(`Joined ${org.name}`)}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800"
-                  >
-                    <Users className="h-4 w-4" /> Join
-                  </button>
-                </>
               )}
             </div>
           </div>
