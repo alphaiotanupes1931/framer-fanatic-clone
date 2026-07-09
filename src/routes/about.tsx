@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteContent, siteText } from "@/hooks/use-site-content";
+import { SiteColorInjector } from "@/components/site-color-injector";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import aboutFounders from "@/assets/about-founders.png.asset.json";
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/about")({
 function AboutPage() {
   return (
     <div className="min-h-screen bg-paper text-ink font-sans">
+      <SiteColorInjector />
       <AboutNav />
       <Hero />
       <Story />

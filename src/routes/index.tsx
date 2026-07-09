@@ -11,6 +11,7 @@ import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import { useSiteContent, siteText } from "@/hooks/use-site-content";
+import { SiteColorInjector } from "@/components/site-color-injector";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <div className="min-h-screen bg-blue text-ink overflow-x-hidden font-sans">
+      <SiteColorInjector />
       <ScrollProgress />
       <Nav />
       <Hero />
