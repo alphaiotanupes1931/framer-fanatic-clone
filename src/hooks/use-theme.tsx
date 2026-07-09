@@ -29,7 +29,9 @@ function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (isTheme(stored)) return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  // Default to light on first load. Do NOT follow the OS `prefers-color-scheme`
+  // setting — users opt into dark/other themes explicitly via app settings.
+  return "light";
 }
 
 export function applyThemeClass(theme: Theme) {
