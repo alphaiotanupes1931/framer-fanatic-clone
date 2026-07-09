@@ -54,10 +54,16 @@ const COLOR_FIELDS: { key: string; label: string; help: string }[] = [
   { key: "colors.blueDeep", label: "Deep blue", help: "Darker blue behind the Communities section." },
   { key: "colors.ink", label: "Ink (dark)", help: "Near-black used for dark buttons, cards, and the footer." },
   { key: "colors.paper", label: "Paper (light)", help: "Off-white used for light text, quote section, and light buttons." },
+  { key: "colors.heroBg", label: "Hero background color", help: "Solid color for the hero section. Leave empty to show the photo/video background." },
+  { key: "colors.heroText", label: "Hero text color", help: "Color of the headline, subtitle, and CTAs in the hero." },
+  { key: "colors.textOnBlue", label: "Text color on blue sections", help: "Overrides text color on Features and CTA sections. Leave empty for default." },
+  { key: "colors.textOnBlueDeep", label: "Text color on deep blue section", help: "Overrides text color on the Communities section. Leave empty for default." },
+  { key: "colors.textOnPaper", label: "Text color on light sections", help: "Overrides text color on the quote / About story sections. Leave empty for default." },
 ];
 
 const COLOR_KEY_SET = new Set(COLOR_FIELDS.map((c) => c.key));
 const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+const OPTIONAL_COLOR_KEYS = new Set(["colors.heroBg", "colors.textOnBlue", "colors.textOnBlueDeep", "colors.textOnPaper"]);
 
 function normalizeHex(v: string): string {
   const t = v.trim();
@@ -175,7 +181,8 @@ function AdminContentPage() {
                   const current = values[c.key] ?? SITE_CONTENT_DEFAULTS[c.key] ?? "#000000";
                   const savedVal = initial[c.key] ?? SITE_CONTENT_DEFAULTS[c.key] ?? "";
                   const dirty = current !== savedVal;
-                  const valid = HEX_RE.test(current);
+                  const optional = OPTIONAL_COLOR_KEYS.has(c.key);
+                  const valid = (optional && current.trim() === "") || HEX_RE.test(current);
                   return (
                     <div key={c.key} className={`rounded-xl border p-4 ${dirty ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
                       <Label htmlFor={c.key} className="text-sm font-semibold">
@@ -186,7 +193,7 @@ function AdminContentPage() {
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
-                          value={valid ? current : "#000000"}
+                          value={HEX_RE.test(current) ? current : "#000000"}
                           onChange={(e) => setValues((v) => ({ ...v, [c.key]: e.target.value }))}
                           className="h-10 w-14 shrink-0 cursor-pointer rounded-md border border-border bg-transparent"
                           aria-label={`${c.label} color picker`}
@@ -194,25 +201,38 @@ function AdminContentPage() {
                         <Input
                           id={c.key}
                           value={current}
-                          onChange={(e) => setValues((v) => ({ ...v, [c.key]: normalizeHex(e.target.value) }))}
-                          placeholder="#000000"
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            setValues((v) => ({ ...v, [c.key]: raw.trim() === "" ? "" : normalizeHex(raw) }));
+                          }}
+                          placeholder={optional ? "empty = use default" : "#000000"}
                           className={valid ? "" : "border-destructive"}
                         />
+                        {optional && current.trim() !== "" && (
+                          <button
+                            type="button"
+                            onClick={() => setValues((v) => ({ ...v, [c.key]: "" }))}
+                            className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-50"
+                            title="Clear"
+                          >
+                            Clear
+                          </button>
+                        )}
                       </div>
                       <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                        <span>Currently saved: <code>{savedVal || "—"}</code></span>
+                        <span>Currently saved: <code>{savedVal || "(none)"}</code></span>
                         {current !== (SITE_CONTENT_DEFAULTS[c.key] ?? "") && (
                           <button
                             type="button"
                             onClick={() => setValues((v) => ({ ...v, [c.key]: SITE_CONTENT_DEFAULTS[c.key] ?? "" }))}
                             className="text-neutral-600 underline hover:text-neutral-900"
                           >
-                            Reset to default ({SITE_CONTENT_DEFAULTS[c.key]})
+                            Reset to default ({SITE_CONTENT_DEFAULTS[c.key] || "empty"})
                           </button>
                         )}
                       </div>
                       {!valid && (
-                        <p className="mt-2 text-[11px] text-destructive">Enter a valid hex like #1E3A5F</p>
+                        <p className="mt-2 text-[11px] text-destructive">Enter a valid hex like #1E3A5F{optional ? " (or leave empty)" : ""}</p>
                       )}
                     </div>
                   );

@@ -44,22 +44,29 @@ export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
   "colors.blueDeep": "#152C48",
   "colors.ink": "#1A1A1A",
   "colors.paper": "#FCFCFA",
+  // Hero-specific overrides. Leave heroBg empty to keep the photo/video background.
+  "colors.heroBg": "",
+  "colors.heroText": "#FCFCFA",
+  // Section text color overrides (leave empty to inherit from ink/paper tokens).
+  "colors.textOnBlue": "",
+  "colors.textOnBlueDeep": "",
+  "colors.textOnPaper": "",
 };
 
 export const SITE_CONTENT_KEYS = Object.keys(SITE_CONTENT_DEFAULTS);
 
 export function useSiteContent() {
-  const [content, setContent] = useState<Record<string, string>>(() => {
-    if (typeof window === "undefined") return SITE_CONTENT_DEFAULTS;
-    try {
-      const raw = window.localStorage.getItem(CACHE_KEY);
-      if (raw) return { ...SITE_CONTENT_DEFAULTS, ...JSON.parse(raw) };
-    } catch {}
-    return SITE_CONTENT_DEFAULTS;
-  });
+  // Always start from defaults so SSR and first client render match.
+  // Cached values are merged in a post-hydration effect.
+  const [content, setContent] = useState<Record<string, string>>(SITE_CONTENT_DEFAULTS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Hydrate from localStorage after mount to avoid SSR/CSR mismatch.
+    try {
+      const raw = window.localStorage.getItem(CACHE_KEY);
+      if (raw) setContent((prev) => ({ ...prev, ...JSON.parse(raw) }));
+    } catch {}
     let cancelled = false;
     (async () => {
       const { data } = await supabase.from("site_content").select("key, value");
