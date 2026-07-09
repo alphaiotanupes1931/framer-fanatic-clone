@@ -24,8 +24,7 @@ function AdminLoginPage() {
     void refreshAdminUnlocked().then((ok) => { if (ok) navigate({ to: "/admin" }); });
   }, [navigate]);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
     setError(null);
     setSubmitting(true);
     try {
@@ -49,6 +48,12 @@ function AdminLoginPage() {
     }
   };
 
+  const submitFromKeyboard = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter" || submitting) return;
+    e.preventDefault();
+    void submit();
+  };
+
   return (
     <AdminShell>
       <div className="mx-auto max-w-sm space-y-6 py-10">
@@ -57,22 +62,22 @@ function AdminLoginPage() {
           <h1 className="text-2xl font-bold">Admin login</h1>
           <p className="mt-1 text-sm text-muted-foreground">Restricted area. Enter credentials to continue.</p>
         </div>
-        <form onSubmit={submit} method="dialog" className="space-y-4 rounded-2xl border border-border bg-card p-6">
+        <div role="form" className="space-y-4 rounded-2xl border border-border bg-card p-6">
           <div className="space-y-1.5">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="next" value={username} onChange={(e) => setUsername(e.target.value)} required />
+            <Input id="username" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="next" value={username} onChange={(e) => setUsername(e.target.value)} onKeyDown={submitFromKeyboard} required />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" autoComplete="current-password" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input id="password" type="password" autoComplete="current-password" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={submitFromKeyboard} required />
           </div>
-          <Button type="submit" className="w-full" disabled={submitting}>
+          <Button type="button" className="w-full" disabled={submitting} onClick={() => void submit()}>
             {submitting ? "Signing in..." : "Sign in"}
           </Button>
           {error && (
             <p className="text-center text-sm text-red-600" role="alert">{error}</p>
           )}
-        </form>
+        </div>
       </div>
     </AdminShell>
   );
