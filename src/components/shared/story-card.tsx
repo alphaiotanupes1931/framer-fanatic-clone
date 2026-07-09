@@ -57,7 +57,7 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
   }
 
   return (
-    <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group flex min-h-[130px] gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-all duration-150 hover:border-slate-300 hover:shadow-sm active:translate-y-0">
+    <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group flex min-h-[130px] gap-3 rounded-xl border border-slate-200 bg-white p-3 transition-all duration-150 hover:border-slate-300 hover:shadow-sm active:translate-y-0 sm:gap-4 sm:p-4">
       <div className="min-w-0 flex-1 py-0.5">
         <div className="mb-2.5 flex flex-wrap items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -78,7 +78,7 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
         </div>
       </div>
       {story.cover_url && (
-        <div className="aspect-square h-[110px] w-[110px] flex-shrink-0 overflow-hidden rounded-lg sm:h-[130px] sm:w-[130px]">
+        <div className="aspect-square h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-lg sm:h-[130px] sm:w-[130px]">
           <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
         </div>
       )}

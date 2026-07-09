@@ -84,15 +84,15 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </span>
         </div>
       )}
-      <header className="flex items-center gap-3 px-6 pt-5">
-        <Link to="/u/$username" params={{ username: post.author_username || post.user_id }}>
-          <Avatar className="h-12 w-12">
+      <header className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+        <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="shrink-0">
+          <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
             {post.author_avatar && <AvatarImage src={post.author_avatar} />}
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-base font-semibold text-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground sm:text-base">
             <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="truncate hover:text-[#d4580a]">
               {authorName}
             </Link>
@@ -102,7 +102,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
               </span>
             )}
           </div>
-          <div className="text-[13px] text-muted-foreground">
+          <div className="text-[12px] text-muted-foreground sm:text-[13px]">
             {post.neighborhood_name || post.neighborhood || "Baltimore"} · {format(new Date(post.created_at), "MMM d")}
           </div>
         </div>
@@ -122,7 +122,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         )}
       </header>
       {post.content && (
-        <div className="px-6 py-4 whitespace-pre-wrap text-[17px] leading-relaxed text-foreground">{post.content}</div>
+        <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground sm:px-6 sm:py-4 sm:text-[17px]">{post.content}</div>
       )}
       {post.image_url && (
         <button type="button" onClick={() => setLightbox(true)} className="block w-full overflow-hidden focus:outline-none">
@@ -137,7 +137,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           />
         </button>
       )}
-      <footer className="flex items-center gap-7 px-6 py-4 text-sm text-muted-foreground">
+      <footer className="flex items-center gap-5 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-6 sm:py-4">
         <button onClick={toggleLike} className={`flex items-center gap-2 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
           <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
