@@ -135,6 +135,9 @@ function OrgProfile() {
               )}
             </div>
           </div>
+              )}
+            </div>
+          </div>
 
           {/* Name + bio */}
           <div className="mt-5">
