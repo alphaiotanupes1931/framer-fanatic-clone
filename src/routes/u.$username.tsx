@@ -157,41 +157,44 @@ function PublicProfilePage() {
       </Link>
       <div className="rounded-3xl border border-border bg-card overflow-hidden">
         <div
-          className="relative h-44 sm:h-56 bg-gradient-to-br from-muted to-accent"
+          className="relative h-40 sm:h-52 bg-gradient-to-br from-muted to-accent"
           style={profile.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         />
         <div className="px-5 md:px-8 pb-8">
-          <div className="-mt-12 sm:-mt-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div className="flex items-end gap-4">
-              <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-card shadow-md">
-                {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
-                <AvatarFallback className="bg-primary/10 text-primary text-xl">{initials}</AvatarFallback>
-              </Avatar>
-              <div className="pb-2 min-w-0">
-                <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
-                  {profile.display_name || profile.username}
-                </h1>
-                {profile.username && (
-                  <div className="text-sm text-muted-foreground">@{profile.username}</div>
+          <div className="-mt-14 sm:-mt-16 flex items-start gap-4 sm:gap-5">
+            <Avatar className="h-24 w-24 sm:h-28 sm:w-28 shrink-0 border-4 border-card shadow-md">
+              {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
+              <AvatarFallback className="bg-primary/10 text-primary text-xl">{initials}</AvatarFallback>
+            </Avatar>
+            {/* Spacer that keeps name/buttons below banner, aligned with avatar bottom */}
+            <div className="flex-1" />
+          </div>
+
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+            <div className="min-w-0">
+              <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
+                {profile.display_name || profile.username}
+              </h1>
+              {profile.username && (
+                <div className="text-sm text-muted-foreground">@{profile.username}</div>
+              )}
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                {profile.neighborhood && (
+                  <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {profile.neighborhood}</span>
                 )}
-                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {profile.neighborhood && (
-                    <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {profile.neighborhood}</span>
-                  )}
-                  {(() => {
-                    const label = formatCategory(profile.category, profile.role);
-                    return label ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5">{label}</span>
-                    ) : null;
-                  })()}
-                  {profile.role && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 capitalize">{profile.role}</span>
-                  )}
-                </div>
+                {(() => {
+                  const label = formatCategory(profile.category, profile.role);
+                  return label ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5">{label}</span>
+                  ) : null;
+                })()}
+                {profile.role && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 capitalize">{profile.role}</span>
+                )}
               </div>
             </div>
             {!isSelf && (
-              <div className="flex items-center gap-2 sm:pb-2">
+              <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
                 <button
                   onClick={toggleFollow}
                   disabled={working}
@@ -238,7 +241,7 @@ function PublicProfilePage() {
             {isSelf && (
               <Link
                 to="/profile"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent sm:pb-2"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent justify-self-end"
               >
                 Edit your profile
               </Link>
