@@ -17,7 +17,7 @@ type Org = {
 
 export function CommunityAssociationsPage() {
   const { isArtist, isAdmin } = useUserRole();
-  const canCreate = isArtist || isAdmin;
+  const canCreate = true;
   const [items, setItems] = useState<Org[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
