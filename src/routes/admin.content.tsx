@@ -49,6 +49,22 @@ const FIELD_META: Record<string, { label: string; help: string; multiline?: bool
   "about.cta.secondary": { label: "About: secondary button label", help: "Secondary link button." },
 };
 
+const COLOR_FIELDS: { key: string; label: string; help: string }[] = [
+  { key: "colors.blue", label: "Primary blue", help: "Main blue used on the hero background, Features and CTA sections." },
+  { key: "colors.blueDeep", label: "Deep blue", help: "Darker blue behind the Communities section." },
+  { key: "colors.ink", label: "Ink (dark)", help: "Near-black used for dark buttons, cards, and the footer." },
+  { key: "colors.paper", label: "Paper (light)", help: "Off-white used for light text, quote section, and light buttons." },
+];
+
+const COLOR_KEY_SET = new Set(COLOR_FIELDS.map((c) => c.key));
+const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+function normalizeHex(v: string): string {
+  const t = v.trim();
+  if (!t) return t;
+  return t.startsWith("#") ? t : `#${t}`;
+}
+
 function AdminContentPage() {
   const navigate = useNavigate();
   const [unlocked, setUnlocked] = useState(false);
@@ -136,7 +152,76 @@ function AdminContentPage() {
           </div>
         ) : (
           <div className="space-y-5">
+            {/* Colors */}
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-base font-semibold">Landing page colors</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Change the color palette used across the homepage and About page. Pick a color or paste a hex code.
+                  </p>
+                </div>
+                <a
+                  href="/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                >
+                  Open landing page ↗
+                </a>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {COLOR_FIELDS.map((c) => {
+                  const current = values[c.key] ?? SITE_CONTENT_DEFAULTS[c.key] ?? "#000000";
+                  const savedVal = initial[c.key] ?? SITE_CONTENT_DEFAULTS[c.key] ?? "";
+                  const dirty = current !== savedVal;
+                  const valid = HEX_RE.test(current);
+                  return (
+                    <div key={c.key} className={`rounded-xl border p-4 ${dirty ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
+                      <Label htmlFor={c.key} className="text-sm font-semibold">
+                        {c.label}
+                        {dirty && <span className="ml-2 text-xs text-orange">• unsaved</span>}
+                      </Label>
+                      <p className="mb-3 text-xs text-muted-foreground">{c.help}</p>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={valid ? current : "#000000"}
+                          onChange={(e) => setValues((v) => ({ ...v, [c.key]: e.target.value }))}
+                          className="h-10 w-14 shrink-0 cursor-pointer rounded-md border border-border bg-transparent"
+                          aria-label={`${c.label} color picker`}
+                        />
+                        <Input
+                          id={c.key}
+                          value={current}
+                          onChange={(e) => setValues((v) => ({ ...v, [c.key]: normalizeHex(e.target.value) }))}
+                          placeholder="#000000"
+                          className={valid ? "" : "border-destructive"}
+                        />
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                        <span>Currently saved: <code>{savedVal || "—"}</code></span>
+                        {current !== (SITE_CONTENT_DEFAULTS[c.key] ?? "") && (
+                          <button
+                            type="button"
+                            onClick={() => setValues((v) => ({ ...v, [c.key]: SITE_CONTENT_DEFAULTS[c.key] ?? "" }))}
+                            className="text-neutral-600 underline hover:text-neutral-900"
+                          >
+                            Reset to default ({SITE_CONTENT_DEFAULTS[c.key]})
+                          </button>
+                        )}
+                      </div>
+                      {!valid && (
+                        <p className="mt-2 text-[11px] text-destructive">Enter a valid hex like #1E3A5F</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {SITE_CONTENT_KEYS.map((key) => {
+              if (COLOR_KEY_SET.has(key)) return null;
               const meta = FIELD_META[key] ?? { label: key, help: "" };
               const dirty = values[key] !== initial[key];
               return (

@@ -39,6 +39,11 @@ export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
   "about.cta.heading": "Join the platform built for Baltimore.",
   "about.cta.primary": "Get Started",
   "about.cta.secondary": "Baltimore 100",
+  // Landing / About color tokens. Hex values. Applied live via CSS variables.
+  "colors.blue": "#1E3A5F",
+  "colors.blueDeep": "#152C48",
+  "colors.ink": "#1A1A1A",
+  "colors.paper": "#FCFCFA",
 };
 
 export const SITE_CONTENT_KEYS = Object.keys(SITE_CONTENT_DEFAULTS);
