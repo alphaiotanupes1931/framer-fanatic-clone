@@ -21,12 +21,16 @@ type Profile = {
 
 type Conv = {
   id: string;
-  user_a: string;
-  user_b: string;
+  user_a: string | null;
+  user_b: string | null;
   last_message_at: string;
   last_message_preview: string | null;
   last_read_at_a: string;
   last_read_at_b: string;
+  is_group?: boolean | null;
+  title?: string | null;
+  created_by?: string | null;
+  my_last_read?: string | null;
   other?: Profile;
   unread?: boolean;
 };
@@ -73,7 +77,15 @@ function MessagesPage() {
     (rows: Conv[], profilesById: Map<string, Profile>) => {
       if (!me) return rows;
       return rows.map((c) => {
-        const otherId = c.user_a === me.id ? c.user_b : c.user_a;
+        if (c.is_group) {
+          const myRead = c.my_last_read || c.last_message_at;
+          return {
+            ...c,
+            other: undefined,
+            unread: new Date(c.last_message_at).getTime() > new Date(myRead).getTime(),
+          };
+        }
+        const otherId = (c.user_a === me.id ? c.user_b : c.user_a) as string;
         const myRead = c.user_a === me.id ? c.last_read_at_a : c.last_read_at_b;
         return {
           ...c,
@@ -87,13 +99,34 @@ function MessagesPage() {
 
   const loadConvs = useCallback(async () => {
     if (!me) return;
-    const { data } = await supabase
+    const { data: direct } = await supabase
       .from("conversations")
       .select("*")
       .or(`user_a.eq.${me.id},user_b.eq.${me.id}`)
       .order("last_message_at", { ascending: false });
-    const list = (data || []) as Conv[];
-    const otherIds = list.map((c) => (c.user_a === me.id ? c.user_b : c.user_a));
+    const { data: memberships } = await supabase
+      .from("conversation_members")
+      .select("conversation_id, last_read_at")
+      .eq("user_id", me.id);
+    const groupIds = (memberships || []).map((m) => m.conversation_id);
+    const readByConv = new Map<string, string>((memberships || []).map((m) => [m.conversation_id, m.last_read_at]));
+    let groups: Conv[] = [];
+    if (groupIds.length) {
+      const { data: g } = await supabase
+        .from("conversations")
+        .select("*")
+        .in("id", groupIds)
+        .eq("is_group", true);
+      groups = ((g || []) as Conv[]).map((c) => ({ ...c, my_last_read: readByConv.get(c.id) || null }));
+    }
+    const seen = new Set<string>();
+    const merged = [...(direct as Conv[] || []), ...groups].filter((c) => (seen.has(c.id) ? false : (seen.add(c.id), true)));
+    merged.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+    const list = merged;
+    const otherIds = list
+      .filter((c) => !c.is_group)
+      .map((c) => (c.user_a === me.id ? c.user_b : c.user_a))
+      .filter((v): v is string => !!v);
     let byId = new Map<string, Profile>();
     if (otherIds.length) {
       const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: otherIds });
@@ -127,9 +160,17 @@ function MessagesPage() {
     async (c: Conv) => {
       if (!me) return;
       const now = new Date().toISOString();
-      const patch =
-        c.user_a === me.id ? { last_read_at_a: now } : { last_read_at_b: now };
-      await supabase.from("conversations").update(patch).eq("id", c.id);
+      if (c.is_group) {
+        await supabase
+          .from("conversation_members")
+          .update({ last_read_at: now })
+          .eq("conversation_id", c.id)
+          .eq("user_id", me.id);
+      } else {
+        const patch =
+          c.user_a === me.id ? { last_read_at_a: now } : { last_read_at_b: now };
+        await supabase.from("conversations").update(patch).eq("id", c.id);
+      }
       setConvs((prev) =>
         prev.map((row) => (row.id === c.id ? { ...row, unread: false } : row)),
       );
