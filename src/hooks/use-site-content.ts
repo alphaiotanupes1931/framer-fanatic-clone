@@ -10,6 +10,21 @@ export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
   "quote.text":
     "Planet Baltimore provides a space for artists to sustain ourselves by connecting us directly to our own communities.",
   "quote.author": "Terrell Speaks",
+  "creators.headline.line1": "Turning passions",
+  "creators.headline.line2": "into communities",
+  "creators.card1.title": "Build Your Community",
+  "creators.card1.body":
+    "Connect directly with Baltimore. No algorithms. No middlemen. Just you and the people who support what you do.",
+  "creators.card1.cta": "Start Building",
+  "creators.card2.title": "Everything in One Place",
+  "creators.card2.body":
+    "Artists, businesses, neighborhoods, events. Follow what moves you. Support what matters. All of Baltimore, together.",
+  "creators.card2.cta": "Explore",
+  "features.heading": "Meet today's Baltimore.",
+  "features.subtitle": "Three creators from the platform, refreshed every day.",
+  "cta.line1": "Start free.",
+  "cta.line2": "Get paid tomorrow.",
+  "cta.button": "Get Started",
   "about.hero.title": "A platform for Baltimore's",
   "about.hero.italic": "artists and makers.",
   "about.story.heading": "Our Story",
