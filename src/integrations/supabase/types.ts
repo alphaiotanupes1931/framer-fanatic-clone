@@ -1106,6 +1106,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_upsert_site_content: { Args: { _rows: Json }; Returns: number }
       generate_unique_username: {
         Args: { _base: string; _self: string }
         Returns: string
