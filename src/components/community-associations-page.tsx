@@ -7,7 +7,6 @@ import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
-import { MessageAllButton } from "@/components/message-all-button";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -60,28 +59,6 @@ export function CommunityAssociationsPage() {
           subtitle="Official community governance hubs for Baltimore neighborhoods."
           cta={
             <div className="flex flex-wrap items-center gap-2">
-              <MessageAllButton
-                label="Message All"
-                audienceLabel="Community Associations"
-                defaultGroupName="Baltimore Community Associations"
-                loadCandidates={async () => {
-                  const { data } = await supabase
-                    .from("organizations")
-                    .select("owner_id, name, avatar_url, neighborhood")
-                    .eq("type", "community_assoc")
-                    .not("owner_id", "is", null);
-                  const rows = (data ?? []) as { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null }[];
-                  const seen = new Set<string>();
-                  return rows
-                    .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
-                    .map((r) => ({
-                      id: r.owner_id as string,
-                      display_name: r.name,
-                      avatar_url: r.avatar_url,
-                      subtitle: r.neighborhood || "Community Association",
-                    }));
-                }}
-              />
               {canCreate && (
                 <button
                   type="button"
