@@ -197,16 +197,11 @@ function Hero() {
   const line2 = siteText(content, "hero.line2");
   const subtitle = siteText(content, "hero.subtitle");
   const ctaLabel = siteText(content, "hero.cta");
-  const heroBg = siteText(content, "colors.heroBg").trim();
   const heroText = siteText(content, "colors.heroText").trim() || "#FCFCFA";
-  const useSolid = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(heroBg);
   return (
-    <section
-      className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden"
-      style={useSolid ? { backgroundColor: heroBg } : undefined}
-    >
-      {!useSolid && <HeroParallax />}
-      {!useSolid && <div className="absolute inset-0 bg-ink/30" />}
+    <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden">
+      <HeroParallax />
+      <div className="absolute inset-0 bg-ink/30" />
       {/* Subtle grain */}
       <div
         aria-hidden
