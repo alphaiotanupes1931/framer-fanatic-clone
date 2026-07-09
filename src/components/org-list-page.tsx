@@ -16,26 +16,6 @@ type Org = {
   avatar_url: string | null; banner_url: string | null;
 };
 
-type OwnerRow = { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null };
-
-async function loadOrgOwners(type: string, audienceLabel: string) {
-  const { data } = await supabase
-    .from("organizations")
-    .select("owner_id, name, avatar_url, neighborhood")
-    .eq("type", type)
-    .not("owner_id", "is", null);
-  const rows = (data ?? []) as OwnerRow[];
-  const seen = new Set<string>();
-  return rows
-    .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
-    .map((r) => ({
-      id: r.owner_id as string,
-      display_name: r.name,
-      avatar_url: r.avatar_url,
-      subtitle: r.neighborhood || audienceLabel,
-    }));
-}
-
 export function OrgListPage({
   type,
   title,
