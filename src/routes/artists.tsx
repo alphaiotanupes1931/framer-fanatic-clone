@@ -7,6 +7,7 @@ import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageAllButton } from "@/components/message-all-button";
 
 type Creator = {
   id: string;
@@ -106,14 +107,31 @@ function FindCreatorPage() {
             title="Artists"
             subtitle="Discover Baltimore's creative voices, visual art, music, photography & more."
             cta={
-              <Link to="/profile">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-                >
-                  <Plus className="h-4 w-4" /> Create Artist Page
-                </button>
-              </Link>
+              <div className="flex flex-wrap items-center gap-2">
+                <MessageAllButton
+                  label="Message All"
+                  audienceLabel="Artists"
+                  defaultGroupName="Baltimore Artists"
+                  loadCandidates={async () => {
+                    const { data } = await supabase.rpc("public_artists", { lim: 200, search: undefined, sort_by: "newest" });
+                    return ((data as Creator[]) || []).map((c) => ({
+                      id: c.id,
+                      display_name: c.display_name,
+                      username: c.username,
+                      avatar_url: c.avatar_url,
+                      subtitle: c.neighborhood || c.category || null,
+                    }));
+                  }}
+                />
+                <Link to="/profile">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+                  >
+                    <Plus className="h-4 w-4" /> Create Artist Page
+                  </button>
+                </Link>
+              </div>
             }
           />
 
