@@ -40,6 +40,8 @@ function OrgProfile() {
   const [tab, setTab] = useState<Tab>("About");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
@@ -60,6 +62,18 @@ function OrgProfile() {
         .eq("user_id", me)
         .maybeSingle();
       setJoined(!!data);
+    })();
+  }, [org, me]);
+  useEffect(() => {
+    if (!org || !me) { setFollowing(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("organization_followers")
+        .select("user_id")
+        .eq("organization_id", org.id)
+        .eq("user_id", me)
+        .maybeSingle();
+      setFollowing(!!data);
     })();
   }, [org, me]);
 
@@ -89,6 +103,30 @@ function OrgProfile() {
       toast.error(e instanceof Error ? e.message : "Failed");
     } finally {
       setJoining(false);
+    }
+  };
+
+  const toggleFollow = async () => {
+    if (!me) { toast.error("Please sign in first"); return; }
+    setFollowBusy(true);
+    try {
+      if (following) {
+        const { error } = await supabase.from("organization_followers").delete()
+          .eq("organization_id", org.id).eq("user_id", me);
+        if (error) throw error;
+        setFollowing(false);
+        toast.success(`Unfollowed ${org.name}`);
+      } else {
+        const { error } = await supabase.from("organization_followers")
+          .insert({ organization_id: org.id, user_id: me });
+        if (error) throw error;
+        setFollowing(true);
+        toast.success(`Following ${org.name}`);
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setFollowBusy(false);
     }
   };
 
@@ -133,10 +171,11 @@ function OrgProfile() {
                 <Share2 className="h-4 w-4" />
               </button>
               <button
-                onClick={() => toast.success(`Following ${org.name}`)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]"
+                onClick={toggleFollow}
+                disabled={followBusy}
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 ${following ? "border border-border bg-white text-neutral-700 hover:border-[#d4580a]" : "border border-border bg-white text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"}`}
               >
-                Follow
+                {following ? "Following" : "Follow"}
               </button>
               <MessageAllButton
                 label="Message All"
