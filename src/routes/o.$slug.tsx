@@ -106,7 +106,10 @@ function OrgProfile() {
                 </button>
               ) : (
                 <>
-                  <button className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]">
+                  <button
+                    onClick={() => toast.success(`Following ${org.name}`)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]"
+                  >
                     Follow
                   </button>
                   <MessageAllButton
@@ -131,10 +134,13 @@ function OrgProfile() {
                         }));
                     }}
                   />
+                  <button
+                    onClick={() => toast.success(`Joined ${org.name}`)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800"
+                  >
+                    <Users className="h-4 w-4" /> Join
+                  </button>
                 </>
-              )}
-            </div>
-          </div>
               )}
             </div>
           </div>
