@@ -9,6 +9,7 @@ import { formatCategory } from "@/lib/format-category";
 import { PostCard } from "@/components/shared/post-card";
 import { StoryCard } from "@/components/shared/story-card";
 import { EventCard } from "@/components/shared/event-card";
+import { MessageAllButton } from "@/components/message-all-button";
 
 type PublicProfile = {
   id: string;
@@ -208,6 +209,30 @@ function PublicProfilePage() {
                 >
                   <MessageCircle className="w-4 h-4" /> Message
                 </button>
+                <MessageAllButton
+                  label="Message All"
+                  audienceLabel={`${profile.display_name || profile.username || "artist"}'s followers`}
+                  defaultGroupName={`${profile.display_name || profile.username || "Artist"} group chat`}
+                  loadCandidates={async () => {
+                    const { data: fol } = await supabase
+                      .from("follows")
+                      .select("follower_id")
+                      .eq("following_id", profile.id);
+                    const ids = Array.from(new Set(((fol ?? []) as { follower_id: string }[]).map((r) => r.follower_id)));
+                    ids.push(profile.id);
+                    const unique = Array.from(new Set(ids));
+                    if (unique.length === 0) return [];
+                    const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: unique });
+                    const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
+                    return rows.map((p) => ({
+                      id: p.id,
+                      display_name: p.display_name,
+                      username: p.username,
+                      avatar_url: p.avatar_url,
+                      subtitle: p.neighborhood || "Follower",
+                    }));
+                  }}
+                />
               </div>
             )}
             {isSelf && (
