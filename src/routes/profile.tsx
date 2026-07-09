@@ -256,6 +256,7 @@ function ProfilePage() {
           </div>
         </div>
       </div>
+      <MessageFollowersModal open={msgOpen} onClose={() => setMsgOpen(false)} />
     </AppLayout>
   );
 }
