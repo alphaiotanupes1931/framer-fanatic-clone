@@ -239,6 +239,7 @@ function MessagesPage() {
     if (!q) return convs;
     return convs.filter(
       (c) =>
+        (c.title || "").toLowerCase().includes(q) ||
         (c.other?.display_name || "").toLowerCase().includes(q) ||
         (c.other?.username || "").toLowerCase().includes(q) ||
         (c.last_message_preview || "").toLowerCase().includes(q),
