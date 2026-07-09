@@ -385,12 +385,11 @@ function HeroParallax() {
       <img
         src={heroBaltimore}
         alt="A vibrant event space filled with people connecting in Baltimore"
-        width={1920}
-        height={1080}
         loading="eager"
         fetchPriority="high"
         decoding="async"
         className="absolute inset-0 w-full h-full object-cover"
+        style={{ width: "100%", height: "100%" }}
       />
       {/* Video: desktop only */}
       {showVideo && (
