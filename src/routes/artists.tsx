@@ -108,21 +108,6 @@ function FindCreatorPage() {
             subtitle="Discover Baltimore's creative voices, visual art, music, photography & more."
             cta={
               <div className="flex flex-wrap items-center gap-2">
-                <MessageAllButton
-                  label="Message All"
-                  audienceLabel="Artists"
-                  defaultGroupName="Baltimore Artists"
-                  loadCandidates={async () => {
-                    const { data } = await supabase.rpc("public_artists", { lim: 200, search: undefined, sort_by: "newest" });
-                    return ((data as Creator[]) || []).map((c) => ({
-                      id: c.id,
-                      display_name: c.display_name,
-                      username: c.username,
-                      avatar_url: c.avatar_url,
-                      subtitle: c.neighborhood || c.category || null,
-                    }));
-                  }}
-                />
                 <Link to="/profile">
                   <button
                     type="button"
