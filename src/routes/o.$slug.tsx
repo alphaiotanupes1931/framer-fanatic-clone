@@ -140,31 +140,35 @@ function OrgProfile() {
               </button>
               <MessageAllButton
                 label="Message All"
-                audienceLabel={ORG_TYPE_LABEL[org.type] || "Members"}
-                defaultGroupName={`${ORG_TYPE_LABEL[org.type] || "Community"} group chat`}
+                audienceLabel={`${org.name} members`}
+                defaultGroupName={`${org.name} group chat`}
                 loadCandidates={async () => {
-                  const { data } = await supabase
-                    .from("organizations")
-                    .select("owner_id, name, avatar_url, neighborhood")
-                    .eq("type", org.type)
-                    .not("owner_id", "is", null);
-                  const rows = (data ?? []) as { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null }[];
-                  const seen = new Set<string>();
-                  return rows
-                    .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
-                    .map((r) => ({
-                      id: r.owner_id as string,
-                      display_name: r.name,
-                      avatar_url: r.avatar_url,
-                      subtitle: r.neighborhood || ORG_TYPE_LABEL[org.type],
-                    }));
+                  const { data: mem } = await supabase
+                    .from("organization_members")
+                    .select("user_id")
+                    .eq("organization_id", org.id);
+                  const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
+                  if (org.owner_id) ids.push(org.owner_id);
+                  const unique = Array.from(new Set(ids));
+                  if (unique.length === 0) return [];
+                  const { data: profs } = await supabase
+                    .rpc("public_profiles_by_ids", { _ids: unique });
+                  const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
+                  return rows.map((p) => ({
+                    id: p.id,
+                    display_name: p.display_name,
+                    username: p.username,
+                    avatar_url: p.avatar_url,
+                    subtitle: p.neighborhood || "Member",
+                  }));
                 }}
               />
               <button
-                onClick={() => toast.success(`Joined ${org.name}`)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800"
+                onClick={toggleJoin}
+                disabled={joining}
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 ${joined ? "border border-border bg-white text-neutral-700 hover:border-[#d4580a]" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
               >
-                <Users className="h-4 w-4" /> Join
+                <Users className="h-4 w-4" /> {joined ? "Joined" : "Join"}
               </button>
               {canManage && (
                 <button onClick={async () => {
