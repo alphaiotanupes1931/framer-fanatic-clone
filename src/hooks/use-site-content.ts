@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+const CACHE_KEY = "pb_site_content_v1";
+
 // Default fallback values so the site renders before/without any DB rows.
 export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
   "hero.line1": "Baltimore is",
@@ -42,7 +44,14 @@ export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
 export const SITE_CONTENT_KEYS = Object.keys(SITE_CONTENT_DEFAULTS);
 
 export function useSiteContent() {
-  const [content, setContent] = useState<Record<string, string>>(SITE_CONTENT_DEFAULTS);
+  const [content, setContent] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return SITE_CONTENT_DEFAULTS;
+    try {
+      const raw = window.localStorage.getItem(CACHE_KEY);
+      if (raw) return { ...SITE_CONTENT_DEFAULTS, ...JSON.parse(raw) };
+    } catch {}
+    return SITE_CONTENT_DEFAULTS;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,6 +66,7 @@ export function useSiteContent() {
       });
       setContent(merged);
       setLoading(false);
+      try { window.localStorage.setItem(CACHE_KEY, JSON.stringify(merged)); } catch {}
     })();
     return () => { cancelled = true; };
   }, []);
