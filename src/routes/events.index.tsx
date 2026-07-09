@@ -298,22 +298,12 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
           title="Your Next Event"
           subtitle="Tickets for the best events in Baltimore"
           cta={
-            isArtist ? (
-              <Link
-                to="/events/new"
-                className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-              >
-                <Plus className="h-4 w-4" /> Create Event
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-              >
-                <Plus className="h-4 w-4" /> Create Event
-              </button>
-            )
+            <Link
+              to="/events/new"
+              className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+            >
+              <Plus className="h-4 w-4" /> Create Event
+            </Link>
           }
         />
 
