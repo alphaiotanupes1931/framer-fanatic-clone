@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
-import { ORG_TYPE_LABEL } from "@/lib/categories";
-import { Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2, ArrowLeft, ShieldCheck, BadgeCheck, Users } from "lucide-react";
+import {
+  Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2,
+  ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
+} from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
 
@@ -28,8 +30,9 @@ type OrgPost = {
 
 type Comment = { id: string; user_id: string; body: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
 
-const TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
-type Tab = (typeof TABS)[number];
+const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
+const ASSOC_TABS = ["Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About"] as const;
+type Tab = string;
 
 function OrgProfile() {
   const { slug } = Route.useParams();
@@ -37,11 +40,14 @@ function OrgProfile() {
   const { isAdmin } = useUserRole();
   const [me, setMe] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
-  const [tab, setTab] = useState<Tab>("About");
+  const [tab, setTab] = useState<Tab>("Posts");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
   const [following, setFollowing] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
+  const [memberCount, setMemberCount] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [editAbout, setEditAbout] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
@@ -76,11 +82,45 @@ function OrgProfile() {
       setFollowing(!!data);
     })();
   }, [org, me]);
+  useEffect(() => {
+    if (!org) return;
+    (async () => {
+      const { count } = await supabase
+        .from("organization_members")
+        .select("user_id", { count: "exact", head: true })
+        .eq("organization_id", org.id);
+      setMemberCount(count ?? 0);
+    })();
+  }, [org, joined]);
+  useEffect(() => {
+    if (!org) return;
+    setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
+    setTab(org.type === "community_assoc" ? "Posts" : "About");
+  }, [org]);
 
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
 
   const isOwner = !!me && me === org.owner_id;
   const canManage = isOwner || isAdmin;
+  const isAssoc = org.type === "community_assoc";
+  const TABS: readonly string[] = isAssoc ? ASSOC_TABS : DEFAULT_TABS;
+
+  const promptUpload = async (field: "avatar_url" | "banner_url") => {
+    const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
+    if (!url) return;
+    const { error } = await supabase.from("organizations").update({ [field]: url }).eq("id", org.id);
+    if (error) return toast.error(error.message);
+    setOrg({ ...org, [field]: url });
+    toast.success("Updated");
+  };
+
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    if (next) localStorage.setItem(`pb_muted_org_${org.id}`, "1");
+    else localStorage.removeItem(`pb_muted_org_${org.id}`);
+    toast.success(next ? "Muted" : "Unmuted");
+  };
 
   const toggleJoin = async () => {
     if (!me) { toast.error("Please sign in first"); return; }
@@ -142,150 +182,213 @@ function OrgProfile() {
     <AppLayout title="" hero={false}>
       <button
         onClick={() => (window.history.length > 1 ? window.history.back() : navigate({ to: "/dashboard" }))}
-        className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground hover:border-[#d4580a]"
+        aria-label="Back"
+        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100"
       >
-        <ArrowLeft className="h-4 w-4" /> Back
+        <ArrowLeft className="h-5 w-5" />
       </button>
-      <div className="overflow-hidden rounded-3xl border border-border bg-card">
-        {/* Banner with floating badges */}
-        <div className="relative h-56 bg-gradient-to-br from-orange-300 to-orange-600"
-          style={org.banner_url ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
-          <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-neutral-800 shadow-sm backdrop-blur">
-              <ShieldCheck className="h-3.5 w-3.5 text-neutral-700" /> Official {ORG_TYPE_LABEL[org.type]}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50/95 px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm backdrop-blur">
-              <BadgeCheck className="h-3.5 w-3.5" /> Verified
-            </span>
+
+      {/* Banner */}
+      <div
+        className="relative h-44 overflow-hidden rounded-2xl sm:h-56"
+        style={
+          org.banner_url
+            ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+            : { backgroundColor: "#d40a0a" }
+        }
+      >
+        {canManage && (
+          <button
+            onClick={() => promptUpload("banner_url")}
+            className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-black/80"
+          >
+            <Camera className="h-3.5 w-3.5" /> Edit banner
+          </button>
+        )}
+      </div>
+
+      {/* Avatar + actions row */}
+      <div className="relative -mt-10 flex items-end justify-between gap-3 px-1 sm:px-2">
+        <div className="relative">
+          <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-neutral-200 shadow-sm sm:h-28 sm:w-28">
+            {org.avatar_url && (
+              <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+            )}
           </div>
+          {canManage && (
+            <button
+              onClick={() => promptUpload("avatar_url")}
+              aria-label="Edit avatar"
+              className="absolute bottom-1 right-1 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-white hover:bg-black/85"
+            >
+              <Camera className="h-3 w-3" />
+            </button>
+          )}
         </div>
 
-        <div className="px-6 pb-6 sm:px-8">
-          <div className="flex flex-col gap-4 pt-5 sm:flex-row sm:items-start sm:justify-between">
-            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-border bg-secondary shadow-sm sm:h-28 sm:w-28">
-              {org.avatar_url && <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
-            </div>
+        <div className="flex flex-wrap items-center justify-end gap-2 pb-2">
+          {canManage && (
+            <button
+              onClick={() => { setTab("About"); setEditAbout(true); }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+            >
+              <Pencil className="h-4 w-4" /> Edit Profile
+            </button>
+          )}
+          <MessageAllButton
+            label="Message All"
+            audienceLabel={`${org.name} members`}
+            defaultGroupName={`${org.name} group chat`}
+            loadCandidates={async () => {
+              const { data: mem } = await supabase
+                .from("organization_members")
+                .select("user_id")
+                .eq("organization_id", org.id);
+              const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
+              if (org.owner_id) ids.push(org.owner_id);
+              const unique = Array.from(new Set(ids));
+              if (unique.length === 0) return [];
+              const { data: profs } = await supabase
+                .rpc("public_profiles_by_ids", { _ids: unique });
+              const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
+              return rows.map((p) => ({
+                id: p.id,
+                display_name: p.display_name,
+                username: p.username,
+                avatar_url: p.avatar_url,
+                subtitle: p.neighborhood || "Member",
+              }));
+            }}
+          />
+          <button
+            onClick={share}
+            aria-label="Share"
+            className="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+          {!canManage && (
+            <button
+              onClick={toggleFollow}
+              disabled={followBusy}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${following ? "border border-neutral-200 bg-white text-neutral-700" : "border border-neutral-200 bg-white text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"}`}
+            >
+              {following ? "Following" : "Follow"}
+            </button>
+          )}
+          <button
+            onClick={toggleJoin}
+            disabled={joining}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
+          >
+            <Bell className="h-4 w-4" /> {joined ? "Joined" : "Join"}
+          </button>
+        </div>
+      </div>
 
-            <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:pt-1">
-              <button onClick={share} aria-label="Share" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-neutral-700 shadow-sm hover:border-[#d4580a] hover:text-[#d4580a]">
-                <Share2 className="h-4 w-4" />
-              </button>
+      {/* Name + tagline + description + meta */}
+      <div className="mt-4 px-1 sm:px-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">{org.name}</h1>
+          {isAssoc && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
+              <Star className="h-3 w-3" /> Grant Founding
+            </span>
+          )}
+        </div>
+        {org.subtype && (
+          <p className="mt-1 text-sm text-neutral-500">{org.subtype}</p>
+        )}
+        {org.bio && (
+          <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{org.bio}</p>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-neutral-500">
+          <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {memberCount} {memberCount === 1 ? "member" : "members"}</span>
+          {org.neighborhood && (
+            <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.neighborhood}</span>
+          )}
+          {org.website && (
+            <a href={org.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Globe className="h-4 w-4" /> Website</a>
+          )}
+          {org.email && (
+            <a href={`mailto:${org.email}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Mail className="h-4 w-4" /> {org.email}</a>
+          )}
+          {org.phone && (
+            <a href={`tel:${org.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Phone className="h-4 w-4" /> {org.phone}</a>
+          )}
+        </div>
+
+        {(canManage || me) && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {canManage && (
               <button
-                onClick={toggleFollow}
-                disabled={followBusy}
-                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 ${following ? "border border-border bg-white text-neutral-700 hover:border-[#d4580a]" : "border border-border bg-white text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"}`}
-              >
-                {following ? "Following" : "Follow"}
-              </button>
-              <MessageAllButton
-                label="Message All"
-                audienceLabel={`${org.name} members`}
-                defaultGroupName={`${org.name} group chat`}
-                loadCandidates={async () => {
-                  const { data: mem } = await supabase
-                    .from("organization_members")
-                    .select("user_id")
-                    .eq("organization_id", org.id);
-                  const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
-                  if (org.owner_id) ids.push(org.owner_id);
-                  const unique = Array.from(new Set(ids));
-                  if (unique.length === 0) return [];
-                  const { data: profs } = await supabase
-                    .rpc("public_profiles_by_ids", { _ids: unique });
-                  const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
-                  return rows.map((p) => ({
-                    id: p.id,
-                    display_name: p.display_name,
-                    username: p.username,
-                    avatar_url: p.avatar_url,
-                    subtitle: p.neighborhood || "Member",
-                  }));
-                }}
-              />
-              <button
-                onClick={toggleJoin}
-                disabled={joining}
-                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 ${joined ? "border border-border bg-white text-neutral-700 hover:border-[#d4580a]" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
-              >
-                <Users className="h-4 w-4" /> {joined ? "Joined" : "Join"}
-              </button>
-              {canManage && (
-                <button onClick={async () => {
-                  if (!confirm("Delete this organization?")) return;
+                onClick={async () => {
+                  if (!confirm("Delete this page?")) return;
                   const { error } = await supabase.from("organizations").delete().eq("id", org.id);
                   if (error) return toast.error(error.message);
                   toast.success("Deleted");
                   navigate({ to: "/dashboard" });
-                }} className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100">
-                  <Trash2 className="h-4 w-4" /> Delete
-                </button>
-              )}
-            </div>
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+              >
+                <Trash2 className="h-4 w-4" /> Delete Page
+              </button>
+            )}
+            {me && (
+              <button
+                onClick={toggleMute}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+              >
+                {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                {muted ? "Unmute Page" : "Mute Page"}
+              </button>
+            )}
           </div>
+        )}
 
-          {/* Name + bio */}
-          <div className="mt-5">
-            <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[28px]">{org.name}</h1>
-            {org.bio && (
-              <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-neutral-600">{org.bio}</p>
-            )}
-          </div>
+        {/* Tabs */}
+        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto rounded-full bg-neutral-100/70 p-1">
+          {TABS.map((t) => {
+            const active = tab === t;
+            return (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  active
+                    ? "bg-[#d4580a] text-white shadow-sm"
+                    : "text-neutral-500 hover:text-neutral-800"
+                }`}
+              >
+                {t}
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Inline meta row */}
-          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-neutral-500">
-            {org.neighborhood && (
-              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.neighborhood}</span>
-            )}
-            {org.website && (
-              <a href={org.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Globe className="h-4 w-4" /> Website</a>
-            )}
-            {org.email && (
-              <a href={`mailto:${org.email}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Mail className="h-4 w-4" /> {org.email}</a>
-            )}
-            {org.phone && (
-              <a href={`tel:${org.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Phone className="h-4 w-4" /> {org.phone}</a>
-            )}
-            {org.address && (
-              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.address}</span>
-            )}
-          </div>
-
-          {/* Tabs: orange pill for active */}
-          <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto pb-1">
-            {TABS.map((t) => {
-              const active = tab === t;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    active
-                      ? "bg-[#d4580a] text-white shadow-sm"
-                      : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-                  }`}
-                >
-                  {t}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="py-6">
-            {tab === "About" && <AboutTab org={org} canManage={canManage} onChange={setOrg} />}
-            {tab === "Events" && <EventsTab orgId={org.id} canManage={canManage} />}
-            {tab === "Opportunities" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
-            {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
-            {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
-            {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
-          </div>
+        <div className="py-8">
+          {tab === "About" && <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
+          {tab === "Events" && <EventsTab orgId={org.id} canManage={canManage} />}
+          {tab === "Opportunities" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
+          {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
+          {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
+          {tab === "Posts" && (
+            <div className="py-14 text-center text-sm text-neutral-500">No posts yet in this association.</div>
+          )}
+          {tab === "Members" && <MembersTab orgId={org.id} />}
+          {(tab === "Polls" || tab === "Voting" || tab === "Minutes" || tab === "Board" || tab === "By Laws" || tab === "Invite") && (
+            <div className="py-14 text-center text-sm text-neutral-500">{tab} coming soon.</div>
+          )}
+          {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
         </div>
       </div>
     </AppLayout>
   );
 }
 
-function AboutTab({ org, canManage, onChange }: { org: Org; canManage: boolean; onChange: (o: Org) => void }) {
-  const [edit, setEdit] = useState(false);
+function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org: Org; canManage: boolean; onChange: (o: Org) => void; initialEdit?: boolean; onEditClose?: () => void }) {
+  const [edit, setEdit] = useState(!!initialEdit);
+  useEffect(() => { if (initialEdit) setEdit(true); }, [initialEdit]);
   const [form, setForm] = useState({
     bio: org.bio ?? "", website: org.website ?? "", phone: org.phone ?? "",
     email: org.email ?? "", address: org.address ?? "", neighborhood: org.neighborhood ?? "",
@@ -307,6 +410,7 @@ function AboutTab({ org, canManage, onChange }: { org: Org; canManage: boolean; 
     if (error) return toast.error(error.message);
     onChange({ ...org, ...form, hours });
     setEdit(false);
+    onEditClose?.();
     toast.success("Saved");
   };
 
@@ -314,7 +418,7 @@ function AboutTab({ org, canManage, onChange }: { org: Org; canManage: boolean; 
     <div className="space-y-4">
       {canManage && (
         <div className="flex justify-end">
-          <button onClick={() => setEdit((v) => !v)} className="rounded-full bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary">
+          <button onClick={() => { setEdit((v) => { const n = !v; if (!n) onEditClose?.(); return n; }); }} className="rounded-full bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary">
             {edit ? "Cancel" : "Edit details"}
           </button>
         </div>
