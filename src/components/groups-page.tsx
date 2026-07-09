@@ -7,6 +7,7 @@ import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
+import { MessageAllButton } from "@/components/message-all-button";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -59,15 +60,39 @@ export function GroupsPage() {
           title="Groups / Communities"
           subtitle="Find your people and build something together in Baltimore."
           cta={
-            canCreate ? (
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-              >
-                <Plus className="h-4 w-4" /> Create Group/Community
-              </button>
-            ) : null
+            <div className="flex flex-wrap items-center gap-2">
+              <MessageAllButton
+                label="Message All"
+                audienceLabel="Groups"
+                defaultGroupName="Baltimore Groups"
+                loadCandidates={async () => {
+                  const { data } = await supabase
+                    .from("organizations")
+                    .select("owner_id, name, avatar_url, neighborhood")
+                    .eq("type", "group")
+                    .not("owner_id", "is", null);
+                  const rows = (data ?? []) as { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null }[];
+                  const seen = new Set<string>();
+                  return rows
+                    .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
+                    .map((r) => ({
+                      id: r.owner_id as string,
+                      display_name: r.name,
+                      avatar_url: r.avatar_url,
+                      subtitle: r.neighborhood || "Group",
+                    }));
+                }}
+              />
+              {canCreate && (
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+                >
+                  <Plus className="h-4 w-4" /> Create Group/Community
+                </button>
+              )}
+            </div>
           }
         />
 

@@ -9,12 +9,33 @@ import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
+import { MessageAllButton } from "@/components/message-all-button";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
   type: string; subtype: string | null; neighborhood: string | null;
   avatar_url: string | null; banner_url: string | null;
 };
+
+type OwnerRow = { owner_id: string | null; name: string | null; avatar_url: string | null; neighborhood: string | null };
+
+async function loadOrgOwners(type: string, audienceLabel: string) {
+  const { data } = await supabase
+    .from("organizations")
+    .select("owner_id, name, avatar_url, neighborhood")
+    .eq("type", type)
+    .not("owner_id", "is", null);
+  const rows = (data ?? []) as OwnerRow[];
+  const seen = new Set<string>();
+  return rows
+    .filter((r) => r.owner_id && !seen.has(r.owner_id) && (seen.add(r.owner_id), true))
+    .map((r) => ({
+      id: r.owner_id as string,
+      display_name: r.name,
+      avatar_url: r.avatar_url,
+      subtitle: r.neighborhood || audienceLabel,
+    }));
+}
 
 export function OrgListPage({
   type,
@@ -75,6 +96,12 @@ export function OrgListPage({
                   {view === "map" ? <><List className="h-4 w-4" /> List</> : <><MapPin className="h-4 w-4" /> Map</>}
                 </button>
               )}
+              <MessageAllButton
+                label="Message All"
+                audienceLabel={title}
+                defaultGroupName={`${title} group chat`}
+                loadCandidates={() => loadOrgOwners(type, title)}
+              />
               {canCreate && (
                 <button
                   type="button"

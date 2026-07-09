@@ -14,36 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversation_members: {
+        Row: {
+          conversation_id: string
+          joined_at: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          joined_at?: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          joined_at?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_members_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
+          is_group: boolean
           last_message_at: string
           last_message_preview: string | null
           last_read_at_a: string
           last_read_at_b: string
-          user_a: string
-          user_b: string
+          title: string | null
+          user_a: string | null
+          user_b: string | null
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
+          is_group?: boolean
           last_message_at?: string
           last_message_preview?: string | null
           last_read_at_a?: string
           last_read_at_b?: string
-          user_a: string
-          user_b: string
+          title?: string | null
+          user_a?: string | null
+          user_b?: string | null
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
+          is_group?: boolean
           last_message_at?: string
           last_message_preview?: string | null
           last_read_at_a?: string
           last_read_at_b?: string
-          user_a?: string
-          user_b?: string
+          title?: string | null
+          user_a?: string | null
+          user_b?: string | null
         }
         Relationships: []
       }
@@ -1119,6 +1157,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin_caller: { Args: never; Returns: boolean }
+      is_conversation_member: {
+        Args: { _conv: string; _uid: string }
+        Returns: boolean
+      }
       public_artists: {
         Args: { lim?: number; search?: string; sort_by?: string }
         Returns: {
