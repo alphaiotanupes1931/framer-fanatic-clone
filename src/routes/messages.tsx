@@ -414,15 +414,15 @@ function MessagesPage() {
                   }`}
                 >
                   <Avatar className="h-10 w-10">
-                    {c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                    {!c.is_group && c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
                     <AvatarFallback className="bg-primary/10 text-primary">
-                      {initials(c.other)}
+                      {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate text-sm font-semibold text-foreground">
-                        {c.other?.display_name || c.other?.username || "Unknown"}
+                        {c.is_group ? (c.title || "Group chat") : (c.other?.display_name || c.other?.username || "Unknown")}
                       </span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">
                         {formatWhen(c.last_message_at)}
@@ -491,18 +491,22 @@ function MessagesPage() {
                   <ArrowLeft className="h-5 w-5" />
                 </button>
                 <Avatar className="h-9 w-9">
-                  {active.other?.avatar_url && (
+                  {!active.is_group && active.other?.avatar_url && (
                     <AvatarImage src={active.other.avatar_url} alt="" />
                   )}
                   <AvatarFallback className="bg-primary/10 text-primary">
-                    {initials(active.other)}
+                    {active.is_group ? <Users className="h-5 w-5" /> : initials(active.other)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
                   <div className="truncate font-semibold text-foreground">
-                    {active.other?.display_name || active.other?.username}
+                    {active.is_group
+                      ? (active.title || "Group chat")
+                      : (active.other?.display_name || active.other?.username)}
                   </div>
-                  {active.other?.username && (
+                  {active.is_group ? (
+                    <div className="truncate text-xs text-muted-foreground">Group chat</div>
+                  ) : active.other?.username && (
                     <div className="truncate text-xs text-muted-foreground">
                       @{active.other.username}
                     </div>
