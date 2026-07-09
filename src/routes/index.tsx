@@ -503,6 +503,7 @@ function TiltCard({ index, img, title, body }: { index: number; img: string; tit
 }
 
 function CreatorsFans() {
+  const { content } = useSiteContent();
   return (
     <section
       id="creators"
@@ -513,7 +514,7 @@ function CreatorsFans() {
 
       <div className="relative mx-auto max-w-[1280px]">
         <ScrollHeadline
-          lines={["Turning passions", "into communities"]}
+          lines={[siteText(content, "creators.headline.line1"), siteText(content, "creators.headline.line2")]}
           className="font-display text-paper font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
         />
 
@@ -525,8 +526,8 @@ function CreatorsFans() {
           className="mt-14 md:mt-20 grid sm:grid-cols-2 gap-4 md:gap-5"
         >
           {[
-            { t: "Build Your Community", b: "Connect directly with Baltimore. No algorithms. No middlemen. Just you and the people who support what you do.", cta: "Start Building", primary: true },
-            { t: "Everything in One Place", b: "Artists, businesses, neighborhoods, events. Follow what moves you. Support what matters. All of Baltimore, together.", cta: "Explore", primary: false },
+            { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), primary: true },
+            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), primary: false },
           ].map((c) => (
             <div
               key={c.t}
