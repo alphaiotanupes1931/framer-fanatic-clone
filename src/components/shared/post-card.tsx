@@ -84,15 +84,15 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </span>
         </div>
       )}
-      <header className="flex items-center gap-3 px-5 pt-3">
+      <header className="flex items-center gap-3 px-6 pt-5">
         <Link to="/u/$username" params={{ username: post.author_username || post.user_id }}>
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-12 w-12">
             {post.author_avatar && <AvatarImage src={post.author_avatar} />}
-            <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">{initial}</AvatarFallback>
+            <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-base font-semibold text-foreground">
             <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="truncate hover:text-[#d4580a]">
               {authorName}
             </Link>
@@ -102,7 +102,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
               </span>
             )}
           </div>
-          <div className="text-[12px] text-muted-foreground">
+          <div className="text-[13px] text-muted-foreground">
             {post.neighborhood_name || post.neighborhood || "Baltimore"} · {format(new Date(post.created_at), "MMM d")}
           </div>
         </div>
@@ -122,7 +122,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         )}
       </header>
       {post.content && (
-        <div className="px-5 py-3 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.content}</div>
+        <div className="px-6 py-4 whitespace-pre-wrap text-[17px] leading-relaxed text-foreground">{post.content}</div>
       )}
       {post.image_url && (
         <button type="button" onClick={() => setLightbox(true)} className="block w-full overflow-hidden focus:outline-none">
@@ -137,18 +137,18 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           />
         </button>
       )}
-      <footer className="flex items-center gap-6 px-5 py-3 text-[12.5px] text-muted-foreground">
-        <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
-          <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
+      <footer className="flex items-center gap-7 px-6 py-4 text-sm text-muted-foreground">
+        <button onClick={toggleLike} className={`flex items-center gap-2 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
+          <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
-        <button onClick={openComments} className="flex items-center gap-1.5 transition hover:text-foreground">
-          <MessageCircle className="h-4 w-4" /> {post.comments_count ?? 0}
+        <button onClick={openComments} className="flex items-center gap-2 transition hover:text-foreground">
+          <MessageCircle className="h-5 w-5" /> {post.comments_count ?? 0}
         </button>
-        <button onClick={share} className="flex items-center gap-1.5 transition hover:text-foreground">
-          <Share2 className="h-4 w-4" />
+        <button onClick={share} className="flex items-center gap-2 transition hover:text-foreground">
+          <Share2 className="h-5 w-5" />
         </button>
-        <button onClick={toggleSave} className={`ml-auto flex items-center gap-1.5 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
-          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+        <button onClick={toggleSave} className={`ml-auto flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
+          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
         </button>
       </footer>
       {lightbox && post.image_url && (
