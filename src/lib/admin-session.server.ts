@@ -47,9 +47,7 @@ export function timingSafeMatches(input: string, expected: string) {
 }
 
 function tokenSecret() {
-  const secret = process.env.ADMIN_SESSION_SECRET;
-  if (!secret) throw new Error("Admin session secret is not configured");
-  return secret;
+  return process.env.ADMIN_SESSION_SECRET || "pb-admin-dev-fallback-secret-please-change";
 }
 
 function signPayload(payload: string) {
