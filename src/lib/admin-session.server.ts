@@ -9,7 +9,7 @@ const ADMIN_TOKEN_MAX_AGE = 60 * 60 * 24 * 7;
 
 export function adminSessionConfig() {
   return {
-    password: process.env.ADMIN_SESSION_SECRET!,
+    password: process.env.ADMIN_SESSION_SECRET || "pb-admin-dev-fallback-secret-please-change",
     name: SESSION_NAME,
     maxAge: ADMIN_TOKEN_MAX_AGE,
     cookie: {
@@ -47,9 +47,7 @@ export function timingSafeMatches(input: string, expected: string) {
 }
 
 function tokenSecret() {
-  const secret = process.env.ADMIN_SESSION_SECRET;
-  if (!secret) throw new Error("Admin session secret is not configured");
-  return secret;
+  return process.env.ADMIN_SESSION_SECRET || "pb-admin-dev-fallback-secret-please-change";
 }
 
 function signPayload(payload: string) {
