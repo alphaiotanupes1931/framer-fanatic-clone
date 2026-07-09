@@ -54,12 +54,12 @@ export function RightSidebar() {
         type="button"
         onClick={() => setRightCollapsed(!rightCollapsed)}
         aria-label={rightCollapsed ? "Show panel" : "Hide panel"}
-        className={`fixed top-1/2 z-40 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-slate-200 bg-white p-1.5 shadow-sm transition-all duration-300 hover:bg-slate-50 xl:flex ${rightCollapsed ? "right-0" : "right-[220px]"}`}
+        className={`fixed top-1/2 z-40 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-slate-200 bg-white p-1.5 shadow-sm transition-all duration-300 hover:bg-slate-50 xl:flex ${rightCollapsed ? "right-0" : "right-[280px]"}`}
       >
         {rightCollapsed ? <ChevronLeft className="h-4 w-4 text-slate-600" /> : <ChevronRight className="h-4 w-4 text-slate-600" />}
       </button>
-      <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[220px] overflow-y-auto border-l border-slate-200 bg-white transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
-      <div className="space-y-4 px-5 pb-6 pt-5">
+      <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[280px] overflow-y-auto border-l border-slate-200 bg-white transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
+      <div className="space-y-4 px-5 pb-6 pt-3">
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any, i: number) => (
