@@ -493,6 +493,38 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
   );
 }
 
+function MembersTab({ orgId }: { orgId: string }) {
+  const [rows, setRows] = useState<Array<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }>>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      const { data: mem } = await supabase.from("organization_members").select("user_id").eq("organization_id", orgId);
+      const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
+      if (ids.length === 0) { setRows([]); setLoading(false); return; }
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+      setRows((profs ?? []) as typeof rows);
+      setLoading(false);
+    })();
+  }, [orgId]);
+  if (loading) return <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>;
+  if (rows.length === 0) return <div className="py-14 text-center text-sm text-neutral-500">No members yet.</div>;
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {rows.map((p) => (
+        <div key={p.id} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3">
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-neutral-200">
+            {p.avatar_url && <img src={p.avatar_url} alt="" className="h-full w-full object-cover" />}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username || "Member"}</div>
+            {p.neighborhood && <div className="truncate text-xs text-neutral-500">{p.neighborhood}</div>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
