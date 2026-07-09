@@ -38,6 +38,8 @@ function OrgProfile() {
   const [me, setMe] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
   const [tab, setTab] = useState<Tab>("About");
+  const [joined, setJoined] = useState(false);
+  const [joining, setJoining] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
@@ -48,11 +50,47 @@ function OrgProfile() {
       setOrg(data as Org | null);
     })();
   }, [slug]);
+  useEffect(() => {
+    if (!org || !me) { setJoined(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("organization_members")
+        .select("user_id")
+        .eq("organization_id", org.id)
+        .eq("user_id", me)
+        .maybeSingle();
+      setJoined(!!data);
+    })();
+  }, [org, me]);
 
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
 
   const isOwner = !!me && me === org.owner_id;
   const canManage = isOwner || isAdmin;
+
+  const toggleJoin = async () => {
+    if (!me) { toast.error("Please sign in first"); return; }
+    setJoining(true);
+    try {
+      if (joined) {
+        const { error } = await supabase.from("organization_members").delete()
+          .eq("organization_id", org.id).eq("user_id", me);
+        if (error) throw error;
+        setJoined(false);
+        toast.success(`Left ${org.name}`);
+      } else {
+        const { error } = await supabase.from("organization_members")
+          .insert({ organization_id: org.id, user_id: me });
+        if (error) throw error;
+        setJoined(true);
+        toast.success(`Joined ${org.name}`);
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setJoining(false);
+    }
+  };
 
   const share = async () => {
     const url = `${window.location.origin}/o/${org.slug}`;
