@@ -65,7 +65,7 @@ function Shell({ children }: { children: ReactNode }) {
       <LeftSidebar />
       <RightSidebar />
       <div
-        className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${rightCollapsed ? "xl:mr-0" : "xl:mr-[220px]"} ${collapsed ? "lg:ml-[78px]" : "lg:ml-[240px]"}`}
+        className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${rightCollapsed ? "xl:mr-0" : "xl:mr-[280px]"} ${collapsed ? "lg:ml-[78px]" : "lg:ml-[250px]"}`}
       >
         <TopMenuBar />
         <main className="w-full flex-1">
