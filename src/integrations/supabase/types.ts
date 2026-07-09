@@ -413,6 +413,32 @@ export type Database = {
           },
         ]
       }
+      organization_followers: {
+        Row: {
+          created_at: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_followers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
