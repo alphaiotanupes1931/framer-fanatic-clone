@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin-shell";
-import { isAdminUnlocked } from "@/lib/admin-gate";
+import { isAdminUnlocked, getAdminToken } from "@/lib/admin-gate";
+import { adminRpc } from "@/lib/admin-site.functions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
@@ -61,9 +62,12 @@ function AdminPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("admin_list_users");
-    if (error) toast.error(error.message);
-    setUsers((data as AdminUser[]) ?? []);
+    try {
+      const res = await adminRpc({ data: { name: "admin_list_users", adminToken: getAdminToken() } });
+      setUsers((res.data as AdminUser[]) ?? []);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
     setLoading(false);
   };
 
@@ -86,24 +90,20 @@ function AdminPage() {
 
   const toggleBan = async (u: AdminUser) => {
     setBusy(u.id);
-    const { error } = await supabase.rpc("admin_set_banned", {
-      _user_id: u.id,
-      _banned: !u.banned,
-    });
+    try {
+      await adminRpc({ data: { name: "admin_set_banned", args: { _user_id: u.id, _banned: !u.banned }, adminToken: getAdminToken() } });
+    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
     setBusy(null);
-    if (error) return toast.error(error.message);
     toast.success(u.banned ? "Account unbanned" : "Account banned");
     setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, banned: !u.banned } : p)));
   };
 
   const toggleShowcase = async (u: AdminUser) => {
     setBusy(u.id);
-    const { error } = await supabase.rpc("admin_set_showcase_hidden", {
-      _user_id: u.id,
-      _hidden: !u.hidden_from_showcase,
-    });
+    try {
+      await adminRpc({ data: { name: "admin_set_showcase_hidden", args: { _user_id: u.id, _hidden: !u.hidden_from_showcase }, adminToken: getAdminToken() } });
+    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
     setBusy(null);
-    if (error) return toast.error(error.message);
     toast.success(u.hidden_from_showcase ? "Now visible in showcase" : "Hidden from showcase");
     setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, hidden_from_showcase: !u.hidden_from_showcase } : p)));
   };
@@ -368,16 +368,17 @@ function EditUserDialog({
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.rpc("admin_update_profile", {
-      _user_id: user.id,
-      _display_name: displayName || undefined,
-      _username: username || undefined,
-      _avatar_url: avatarUrl || undefined,
-      _bio: bio || undefined,
-      _neighborhood: neighborhood || undefined,
-    });
+    try {
+      await adminRpc({ data: { name: "admin_update_profile", args: {
+        _user_id: user.id,
+        _display_name: displayName || undefined,
+        _username: username || undefined,
+        _avatar_url: avatarUrl || undefined,
+        _bio: bio || undefined,
+        _neighborhood: neighborhood || undefined,
+      }, adminToken: getAdminToken() } });
+    } catch (e) { setSaving(false); return toast.error((e as Error).message); }
     setSaving(false);
-    if (error) return toast.error(error.message);
     onSaved(user.id, {
       display_name: displayName || null,
       username: username || null,
@@ -460,14 +461,19 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
   const [q, setQ] = useState("");
 
   const reload = async () => {
-    const [{ data: e }, { data: o }, { data: p }] = await Promise.all([
-      supabase.rpc("admin_list_events"),
-      supabase.rpc("admin_list_organizations"),
-      supabase.rpc("admin_list_users"),
-    ]);
-    setEvents((e as EventLite[]) ?? []);
-    setOrgs((o as OrgLite[]) ?? []);
-    setProfiles(((p as { id: string; display_name: string | null; email: string | null }[]) ?? []));
+    try {
+      const token = getAdminToken();
+      const [e, o, p] = await Promise.all([
+        adminRpc({ data: { name: "admin_list_events", adminToken: token } }),
+        adminRpc({ data: { name: "admin_list_organizations", adminToken: token } }),
+        adminRpc({ data: { name: "admin_list_users", adminToken: token } }),
+      ]);
+      setEvents((e.data as EventLite[]) ?? []);
+      setOrgs((o.data as OrgLite[]) ?? []);
+      setProfiles(((p.data as { id: string; display_name: string | null; email: string | null }[]) ?? []));
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
   };
   useEffect(() => { void reload(); }, []);
 
@@ -476,9 +482,10 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
     if (pw !== "admin123") { toast.error("Incorrect password"); return; }
     setBusy(pwOpen.id);
     const rpc = pwOpen.kind === "event" ? "admin_delete_event" : pwOpen.kind === "org" ? "admin_delete_organization" : "admin_delete_profile";
-    const { error } = await supabase.rpc(rpc, { _id: pwOpen.id });
+    try {
+      await adminRpc({ data: { name: rpc, args: { _id: pwOpen.id }, adminToken: getAdminToken() } });
+    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
     setBusy(null);
-    if (error) return toast.error(error.message);
     toast.success("Deleted " + pwOpen.label);
     if (pwOpen.kind === "event") setEvents((prev) => prev.filter((x) => x.id !== pwOpen.id));
     if (pwOpen.kind === "org") setOrgs((prev) => prev.filter((x) => x.id !== pwOpen.id));
