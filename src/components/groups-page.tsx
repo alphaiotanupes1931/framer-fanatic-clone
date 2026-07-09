@@ -7,7 +7,6 @@ import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
-import { MessageAllButton } from "@/components/message-all-button";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
