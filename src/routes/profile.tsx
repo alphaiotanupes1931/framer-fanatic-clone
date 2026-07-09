@@ -116,29 +116,29 @@ function ProfilePage() {
 
   return (
     <AppLayout title="" hero={false}>
-      <div className="rounded-3xl border border-border bg-card overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card overflow-hidden sm:rounded-3xl">
         <div
-          className="relative h-56 bg-gradient-to-br from-neutral-200 to-neutral-300"
+          className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
           style={profile?.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         >
-          <label className="absolute bottom-3 right-3 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-4 py-2 text-xs font-semibold text-white hover:bg-black/80">
+          <label className="absolute bottom-2 right-2 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-black/80 sm:bottom-3 sm:right-3 sm:px-4 sm:py-2 sm:text-xs">
             <Camera className="h-3.5 w-3.5" /> {profile?.banner_url ? "Change banner" : "Add banner"}
             <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadBanner(e.target.files[0])} />
           </label>
         </div>
 
-        <div className="relative px-6 pb-6">
-          <div className="-mt-12 flex items-end justify-between gap-4">
-            <Avatar className="h-24 w-24 ring-4 ring-background">
+        <div className="relative px-4 pb-6 sm:px-6">
+          <div className="-mt-10 flex flex-col gap-3 sm:-mt-12 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+            <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
               <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
             </Avatar>
-            <div className="flex items-center gap-2">
-              <Link to="/stories" aria-label="My stories" className="rounded-full bg-[#d4580a]/10 p-2.5 text-[#d4580a] hover:bg-[#d4580a]/20"><BookOpen className="h-4 w-4" /></Link>
-              <Link to="/events" aria-label="Create event" className="rounded-full bg-[#d4580a]/10 p-2.5 text-[#d4580a] hover:bg-[#d4580a]/20">+</Link>
-              <Link to="/settings" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><Pencil className="h-4 w-4" /></Link>
-              <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><MessageCircle className="h-4 w-4" /></button>
-              <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-secondary p-2.5 hover:bg-secondary"><UserPlus className="h-4 w-4" /></Link>
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <Link to="/stories" aria-label="My stories" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
+              <Link to="/events" aria-label="Create event" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5">+</Link>
+              <Link to="/settings" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
+              <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
+              <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></Link>
               <button
                 aria-label="Share profile"
                 onClick={async () => {
@@ -148,7 +148,7 @@ function ProfilePage() {
                     else { await navigator.clipboard.writeText(url); toast.success("Profile link copied"); }
                   } catch { /* user cancelled */ }
                 }}
-                className="rounded-full bg-secondary p-2.5 hover:bg-secondary"
+                className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"
               ><Share2 className="h-4 w-4" /></button>
             </div>
           </div>
