@@ -59,7 +59,7 @@ export function RightSidebar() {
         {rightCollapsed ? <ChevronLeft className="h-4 w-4 text-slate-600" /> : <ChevronRight className="h-4 w-4 text-slate-600" />}
       </button>
       <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[280px] overflow-y-auto border-l border-slate-200 bg-white transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
-      <div className="space-y-4 px-5 pb-6 pt-3">
+      <div className="space-y-4 px-5 pb-6 pt-6">
         {stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any, i: number) => (
