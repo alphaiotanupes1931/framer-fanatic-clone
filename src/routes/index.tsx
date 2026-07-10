@@ -688,25 +688,23 @@ function DailyCreators() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="group relative rounded-3xl bg-ink text-paper overflow-hidden block max-md:w-[82vw] max-md:shrink-0 max-md:snap-start"
+          className="group relative rounded-3xl bg-ink text-paper overflow-hidden block max-md:w-[82vw] max-md:shrink-0 max-md:snap-start aspect-[4/5] max-md:aspect-[3/4]"
         >
-          <div className="aspect-[4/5] max-md:aspect-[3/4] overflow-hidden bg-ink/60">
-            {c.avatar_url ? (
-              <motion.img
-                src={c.avatar_url}
-                alt={c.display_name ?? "Creator"}
-                loading="lazy"
-                className="w-full h-full object-cover"
-                whileHover={{ scale: 1.06 }}
-                transition={{ duration: 0.6 }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-paper/40 text-6xl max-md:text-4xl font-display">
-                {(c.display_name ?? "?").slice(0, 1).toUpperCase()}
-              </div>
-            )}
-          </div>
-          <div className="p-6 md:p-7 max-md:p-4">
+          {c.avatar_url ? (
+            <motion.img
+              src={c.avatar_url}
+              alt={c.display_name ?? "Creator"}
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+              whileHover={{ scale: 1.06 }}
+              transition={{ duration: 0.6 }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-paper/40 text-6xl max-md:text-4xl font-display bg-ink/60">
+              {(c.display_name ?? "?").slice(0, 1).toUpperCase()}
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/80 to-transparent p-6 md:p-7 max-md:p-4 pt-20 md:pt-24 max-md:pt-16">
             <h3 className="font-display text-2xl md:text-3xl max-md:text-xl font-medium tracking-tight">
               {c.display_name ?? c.username ?? "Baltimore creator"}
             </h3>
