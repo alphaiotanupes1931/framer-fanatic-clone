@@ -82,19 +82,24 @@ function CreatePostPage() {
   }, [excludeQuery, excluded]);
 
   const uploadTo = async (bucket: "post-media", file: File, kind: "image" | "video") => {
-    if (!me) return null;
-    const cap = kind === "image" ? 10 * 1024 * 1024 : 100 * 1024 * 1024;
+    if (!me) { toast.error("Please sign in"); return null; }
+    const cap = kind === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
     if (file.size > cap) { toast.error(`${kind === "image" ? "Image" : "Video"} must be under ${cap / 1024 / 1024}MB`); return null; }
     setUploading(true);
+    const tId = toast.loading(`Uploading ${kind}...`);
     try {
       const ext = (file.name.split(".").pop() || (kind === "image" ? "jpg" : "mp4")).toLowerCase();
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      toast.success(`${kind === "image" ? "Image" : "Video"} uploaded`);
-      return path;
+      // Bucket is private: create a long-lived signed URL so posts render everywhere.
+      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
+      toast.success(`${kind === "image" ? "Image" : "Video"} uploaded`, { id: tId });
+      return signed.signedUrl;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
+      console.error("upload failed", e);
+      toast.error(e instanceof Error ? e.message : "Upload failed", { id: tId });
       return null;
     } finally {
       setUploading(false);
