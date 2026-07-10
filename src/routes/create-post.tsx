@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, Loader2, Video as VideoIcon, Music as MusicIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/create-post")({
@@ -21,31 +21,81 @@ export const Route = createFileRoute("/create-post")({
   }),
 });
 
+type PostType = "text" | "photo" | "video" | "music";
+type Visibility = "public" | "followers" | "close_friends" | "only_me";
+
+const CATEGORIES = [
+  "General","Music","Art","Community","Event","Food","Nightlife","Wellness","Fashion","Sports","News","Question","Other",
+];
+
+const BG_COLORS = [
+  { name: "None",        bg: "",         fg: "#0F172A" },
+  { name: "Baltimore",   bg: "#d4580a",  fg: "#FFFFFF" },
+  { name: "Deep Blue",   bg: "#0F172A",  fg: "#FCFCFA" },
+  { name: "Sky",         bg: "#0EA5E9",  fg: "#FFFFFF" },
+  { name: "Rose",        bg: "#EC4899",  fg: "#FFFFFF" },
+  { name: "Forest",      bg: "#16A34A",  fg: "#FFFFFF" },
+  { name: "Sunset",      bg: "#F59E0B",  fg: "#0F172A" },
+  { name: "Violet",      bg: "#7C3AED",  fg: "#FFFFFF" },
+  { name: "Cream",       bg: "#FDF6E3",  fg: "#0F172A" },
+];
+
 function CreatePostPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+
+  const [postType, setPostType] = useState<PostType>("text");
   const [content, setContent] = useState("");
   const [imagePath, setImagePath] = useState("");
+  const [videoPath, setVideoPath] = useState("");
+  const [musicUrl, setMusicUrl] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [category, setCategory] = useState<string>("General");
+  const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
+  const [visibility, setVisibility] = useState<Visibility>("public");
+  const [excludeQuery, setExcludeQuery] = useState("");
+  const [excludeResults, setExcludeResults] = useState<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null }[]>([]);
+  const [excluded, setExcluded] = useState<{ id: string; display_name: string | null; username: string | null }[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const canSubmit = content.trim().length > 0 && content.trim().length <= 2000;
+  const contentValid = content.trim().length === 0 || content.trim().length <= 2000;
+  const hasMedia =
+    (postType === "photo" && !!imagePath) ||
+    (postType === "video" && !!videoPath) ||
+    (postType === "music" && musicUrl.trim().length > 0);
+  const canSubmit =
+    contentValid &&
+    (postType === "text" ? content.trim().length > 0 : hasMedia || content.trim().length > 0);
 
-  const upload = async (file: File) => {
-    if (!me) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+  // Debounced people search for the excluded list
+  useEffect(() => {
+    const q = excludeQuery.trim();
+    if (!q) { setExcludeResults([]); return; }
+    const t = setTimeout(async () => {
+      const { data } = await supabase.rpc("search_creators", { q, lim: 8 });
+      setExcludeResults((data ?? []).filter((r: { id: string }) => !excluded.some((e) => e.id === r.id)));
+    }, 220);
+    return () => clearTimeout(t);
+  }, [excludeQuery, excluded]);
+
+  const uploadTo = async (bucket: "post-media", file: File, kind: "image" | "video") => {
+    if (!me) return null;
+    const cap = kind === "image" ? 10 * 1024 * 1024 : 100 * 1024 * 1024;
+    if (file.size > cap) { toast.error(`${kind === "image" ? "Image" : "Video"} must be under ${cap / 1024 / 1024}MB`); return null; }
     setUploading(true);
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const ext = (file.name.split(".").pop() || (kind === "image" ? "jpg" : "mp4")).toLowerCase();
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("story-covers").upload(path, file, { upsert: false, contentType: file.type });
+      const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      setImagePath(path);
-      toast.success("Image uploaded");
+      toast.success(`${kind === "image" ? "Image" : "Video"} uploaded`);
+      return path;
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
+      return null;
     } finally {
       setUploading(false);
     }
@@ -53,13 +103,21 @@ function CreatePostPage() {
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
-    if (!canSubmit) { toast.error("Add some content (max 2000 chars)"); return; }
+    if (!canSubmit) { toast.error("Add some content"); return; }
     setSaving(true);
     try {
       const { error } = await supabase.from("posts").insert({
         user_id: me.id,
         content: content.trim(),
-        image_url: imagePath || null,
+        image_url: postType === "photo" ? (imagePath || null) : null,
+        video_url: postType === "video" ? (videoPath || null) : null,
+        music_url: postType === "music" ? (musicUrl.trim() || null) : null,
+        post_type: postType,
+        bg_color: postType === "text" && bg.bg ? bg.bg : null,
+        text_color: postType === "text" && bg.bg ? bg.fg : null,
+        category,
+        visibility,
+        excluded_user_ids: excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
       });
       if (error) throw error;
@@ -72,36 +130,200 @@ function CreatePostPage() {
     }
   };
 
+  const typeTabs: { id: PostType; label: string; Icon: typeof TypeIcon }[] = [
+    { id: "text",  label: "Text",  Icon: TypeIcon },
+    { id: "photo", label: "Photo", Icon: ImagePlus },
+    { id: "video", label: "Video", Icon: VideoIcon },
+    { id: "music", label: "Music", Icon: MusicIcon },
+  ];
+
+  const visibilityOpts: { id: Visibility; label: string; hint: string; Icon: typeof Globe }[] = [
+    { id: "public",         label: "Public",         hint: "Anyone can see",        Icon: Globe },
+    { id: "followers",      label: "Followers only", hint: "People who follow you", Icon: Users },
+    { id: "close_friends",  label: "Close friends",  hint: "Your close friends",    Icon: Star },
+    { id: "only_me",        label: "Only me",        hint: "Private",               Icon: Lock },
+  ];
+
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
         <HeroBanner title="Create Post" subtitle="Share what's happening in Baltimore." />
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">What's on your mind?<span className="text-orange"> *</span></Label>
-            <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={5} maxLength={2000} placeholder="Say something to the Baltimore feed" />
-            <p className="text-xs text-neutral-500">{content.length}/2000</p>
+          {/* Type tabs */}
+          <div className="flex flex-wrap gap-2">
+            {typeTabs.map(({ id, label, Icon }) => {
+              const active = postType === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setPostType(id)}
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                    active ? "border-[#d4580a] bg-[#d4580a] text-white" : "border-neutral-200 bg-white text-neutral-700 hover:border-orange-300"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" /> {label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Image</Label>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }} />
-            {imagePath ? (
-              <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-                <span className="truncate">Image attached</span>
-                <button type="button" onClick={() => setImagePath("")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
+          {/* Composer */}
+          {postType === "text" ? (
+            <div className="space-y-3">
+              <div
+                className="rounded-2xl p-6 min-h-[200px] flex items-center justify-center transition"
+                style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
+              >
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  rows={5}
+                  maxLength={2000}
+                  placeholder="Share your thoughts..."
+                  style={{ color: bg.fg }}
+                  className="w-full resize-none border-0 bg-transparent text-center text-xl font-medium placeholder:opacity-60 focus-visible:ring-0"
+                />
               </div>
-            ) : (
-              <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
-                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
-                Upload image
-              </Button>
-            )}
+              <div>
+                <Label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Background</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {BG_COLORS.map((c) => {
+                    const active = c.bg === bg.bg;
+                    return (
+                      <button
+                        key={c.name}
+                        type="button"
+                        onClick={() => setBg(c)}
+                        title={c.name}
+                        className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
+                        style={{ background: c.bg || "linear-gradient(135deg, #fff 50%, #eee 50%)" }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+              <p className="text-xs text-neutral-500 text-right">{content.length}/2000</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Caption (optional)</Label>
+              <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={3} maxLength={2000} placeholder="Add a caption..." />
+            </div>
+          )}
+
+          {postType === "photo" && (
+            <div className="space-y-1.5">
+              <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                const f = e.target.files?.[0]; if (!f) return;
+                const p = await uploadTo("post-media", f, "image"); if (p) setImagePath(p);
+              }} />
+              {imagePath ? (
+                <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
+                  <span className="truncate">Image attached</span>
+                  <button type="button" onClick={() => setImagePath("")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
+                </div>
+              ) : (
+                <Button type="button" variant="outline" onClick={() => imageRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
+                  {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />} Upload image
+                </Button>
+              )}
+            </div>
+          )}
+
+          {postType === "video" && (
+            <div className="space-y-1.5">
+              <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={async (e) => {
+                const f = e.target.files?.[0]; if (!f) return;
+                const p = await uploadTo("post-media", f, "video"); if (p) setVideoPath(p);
+              }} />
+              {videoPath ? (
+                <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
+                  <span className="truncate">Video attached</span>
+                  <button type="button" onClick={() => setVideoPath("")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
+                </div>
+              ) : (
+                <Button type="button" variant="outline" onClick={() => videoRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
+                  {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <VideoIcon className="mr-2 h-4 w-4" />} Upload video (max 100MB)
+                </Button>
+              )}
+            </div>
+          )}
+
+          {postType === "music" && (
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Music link</Label>
+              <Input value={musicUrl} onChange={(e) => setMusicUrl(e.target.value)} placeholder="Spotify, SoundCloud, YouTube, Apple Music..." />
+              <p className="text-xs text-neutral-500">Paste a public link to a song, mix, or playlist.</p>
+            </div>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Category</Label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Neighborhood</Label>
+              <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} maxLength={80} placeholder="e.g. Hampden" />
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Neighborhood</Label>
-            <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} maxLength={80} placeholder="e.g. Hampden" />
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Who can see this?</Label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {visibilityOpts.map(({ id, label, hint, Icon }) => {
+                const active = visibility === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setVisibility(id)}
+                    className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition ${
+                      active ? "border-[#d4580a] bg-orange-50" : "border-neutral-200 hover:border-orange-300"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 text-[#d4580a]" />
+                    <span className="text-sm font-semibold">{label}</span>
+                    <span className="text-[11px] text-neutral-500">{hint}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Exclude specific users */}
+          <div className="space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+            <Label className="text-sm font-medium">Hide from specific people (optional)</Label>
+            <Input value={excludeQuery} onChange={(e) => setExcludeQuery(e.target.value)} placeholder="Search people to exclude..." />
+            {excludeResults.length > 0 && (
+              <div className="rounded-md border border-neutral-200 bg-white">
+                {excludeResults.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => { setExcluded((x) => [...x, r]); setExcludeQuery(""); setExcludeResults([]); }}
+                    className="flex w-full items-center gap-2 border-b border-neutral-100 px-3 py-2 text-left text-sm last:border-b-0 hover:bg-neutral-50"
+                  >
+                    <span className="truncate">{r.display_name || r.username}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {excluded.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {excluded.map((e) => (
+                  <span key={e.id} className="inline-flex items-center gap-1 rounded-full bg-white border border-neutral-200 px-2.5 py-1 text-xs">
+                    {e.display_name || e.username}
+                    <button type="button" onClick={() => setExcluded((x) => x.filter((y) => y.id !== e.id))} className="text-neutral-400 hover:text-neutral-900">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end">
