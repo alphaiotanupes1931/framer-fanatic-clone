@@ -75,7 +75,7 @@ export const Post = {
     const { column, ascending } = parseOrder(order);
     const { data, error } = await supabase
       .from("posts")
-      .select("id, user_id, content, image_url, likes_count, comments_count, neighborhood, is_deleted, created_at")
+      .select("id, user_id, content, image_url, video_url, music_url, post_type, bg_color, text_color, likes_count, comments_count, neighborhood, is_deleted, created_at")
       .eq("is_deleted", false)
       .order(column, { ascending })
       .limit(limit);
