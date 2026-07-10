@@ -1320,6 +1320,15 @@ export type Database = {
           title: string
         }[]
       }
+      search_all_users: {
+        Args: { lim?: number; q?: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
       search_creators: {
         Args: { lim?: number; q?: string }
         Returns: {
