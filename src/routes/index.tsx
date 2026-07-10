@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import { assetUrl } from "@/lib/utils";
+import { stripHtml } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
@@ -838,27 +839,15 @@ function StoriesRotation() {
           <div className="text-ink">
             <a
               href={`/stories/${s.id}`}
-              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] hover:underline underline-offset-8 decoration-2"
+              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] hover:underline underline-offset-8 decoration-2 line-clamp-2 break-words"
             >
               {s.title || "Untitled story"}
             </a>
-            {s.excerpt && (() => {
-              const plain = s.excerpt
-                .replace(/<[^>]*>/g, " ")
-                .replace(/&nbsp;/g, " ")
-                .replace(/&amp;/g, "&")
-                .replace(/&lt;/g, "<")
-                .replace(/&gt;/g, ">")
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/\s+/g, " ")
-                .trim();
-              return plain ? (
-                <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4">
-                  {plain}
-                </p>
-              ) : null;
-            })()}
+            {s.excerpt && (
+              <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4 break-words">
+                {stripHtml(s.excerpt)}
+              </p>
+            )}
             <div className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60">
               {s.author_name ?? "Anonymous"}
             </div>
