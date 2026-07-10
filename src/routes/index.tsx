@@ -843,24 +843,11 @@ function StoriesRotation() {
             >
               {s.title || "Untitled story"}
             </a>
-            {s.excerpt && (() => {
-              const plain = s.excerpt
-                .replace(/&nbsp;/g, " ")
-                .replace(/&#160;/g, " ")
-                .replace(/&amp;/g, "&")
-                .replace(/&lt;/g, "<")
-                .replace(/&gt;/g, ">")
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/<[^>]*>/g, " ")
-                .replace(/\s+/g, " ")
-                .trim();
-              return plain ? (
-                <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4 break-words">
-                  {plain}
-                </p>
-              ) : null;
-            })()}
+            {s.excerpt && (
+              <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4 break-words">
+                {stripHtml(s.excerpt)}
+              </p>
+            )}
             <div className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60">
               {s.author_name ?? "Anonymous"}
             </div>

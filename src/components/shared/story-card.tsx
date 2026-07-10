@@ -18,19 +18,7 @@ type Story = {
 };
 
 export function StoryCard({ story, featured = false }: { story: Story; featured?: boolean }) {
-  const cleanExcerpt = story.excerpt
-    ? story.excerpt
-        .replace(/&nbsp;/g, " ")
-        .replace(/&#160;/g, " ")
-        .replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/<[^>]*>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-    : "";
+  const cleanExcerpt = stripHtml(story.excerpt);
   if (featured) {
     return (
       <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
