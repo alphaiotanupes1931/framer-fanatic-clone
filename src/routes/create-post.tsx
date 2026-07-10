@@ -75,7 +75,7 @@ function CreatePostPage() {
     const q = excludeQuery.trim();
     if (!q) { setExcludeResults([]); return; }
     const t = setTimeout(async () => {
-      const { data } = await supabase.rpc("search_creators", { q, lim: 8 });
+      const { data } = await supabase.rpc("search_all_users", { q, lim: 10 });
       setExcludeResults((data ?? []).filter((r: { id: string }) => !excluded.some((e) => e.id === r.id)));
     }, 220);
     return () => clearTimeout(t);
@@ -302,7 +302,7 @@ function CreatePostPage() {
           {/* Exclude specific users */}
           <div className="space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
             <Label className="text-sm font-medium">Hide from specific people (optional)</Label>
-            <Input value={excludeQuery} onChange={(e) => setExcludeQuery(e.target.value)} placeholder="Search people to exclude..." />
+            <Input value={excludeQuery} onChange={(e) => setExcludeQuery(e.target.value)} placeholder="Type a name or @username..." />
             {excludeResults.length > 0 && (
               <div className="rounded-md border border-neutral-200 bg-white">
                 {excludeResults.map((r) => (
@@ -312,7 +312,13 @@ function CreatePostPage() {
                     onClick={() => { setExcluded((x) => [...x, r]); setExcludeQuery(""); setExcludeResults([]); }}
                     className="flex w-full items-center gap-2 border-b border-neutral-100 px-3 py-2 text-left text-sm last:border-b-0 hover:bg-neutral-50"
                   >
-                    <span className="truncate">{r.display_name || r.username}</span>
+                    {r.avatar_url ? (
+                      <img src={r.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                    ) : (
+                      <span className="h-6 w-6 rounded-full bg-neutral-200" />
+                    )}
+                    <span className="truncate font-medium text-neutral-900">{r.display_name || r.username}</span>
+                    {r.username && <span className="truncate text-xs text-neutral-500">@{r.username}</span>}
                   </button>
                 ))}
               </div>
@@ -321,7 +327,7 @@ function CreatePostPage() {
               <div className="flex flex-wrap gap-2 pt-1">
                 {excluded.map((e) => (
                   <span key={e.id} className="inline-flex items-center gap-1 rounded-full bg-white border border-neutral-200 px-2.5 py-1 text-xs">
-                    {e.display_name || e.username}
+                    {e.display_name || e.username}{e.username ? ` (@${e.username})` : ""}
                     <button type="button" onClick={() => setExcluded((x) => x.filter((y) => y.id !== e.id))} className="text-neutral-400 hover:text-neutral-900">
                       <X className="h-3 w-3" />
                     </button>
