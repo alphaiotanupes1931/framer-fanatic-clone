@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Clock, Heart, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { stripHtml } from "@/lib/text-utils";
 
 type Story = {
   id: string;

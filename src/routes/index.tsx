@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import { assetUrl } from "@/lib/utils";
+import { stripHtml } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";

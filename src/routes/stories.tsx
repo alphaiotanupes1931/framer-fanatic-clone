@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { stripHtml } from "@/lib/text-utils";
 
 export const Route = createFileRoute("/stories")({
   component: StoriesPage,
