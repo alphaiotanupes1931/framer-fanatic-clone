@@ -838,7 +838,7 @@ function StoriesRotation() {
           <div className="text-ink">
             <a
               href={`/stories/${s.id}`}
-              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] hover:underline underline-offset-8 decoration-2"
+              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] hover:underline underline-offset-8 decoration-2 line-clamp-2 break-words"
             >
               {s.title || "Untitled story"}
             </a>

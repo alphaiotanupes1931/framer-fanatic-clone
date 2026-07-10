@@ -317,8 +317,8 @@ function StoriesSignedIn() {
                   <span className="rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange">{s.format}</span>
                 </div>
                 <Link to="/stories/$storyId" params={{ storyId: s.id }} className="group block">
-                  <h3 className="font-serif text-lg font-bold transition-colors group-hover:text-[#d4580a]">{s.title}</h3>
-                  {stripHtml(s.excerpt) && <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{stripHtml(s.excerpt)}</p>}
+                  <h3 className="font-serif text-lg font-bold transition-colors group-hover:text-[#d4580a] line-clamp-2 break-words">{s.title}</h3>
+                  {stripHtml(s.excerpt) && <p className="mt-1 line-clamp-3 text-sm text-muted-foreground break-words">{stripHtml(s.excerpt)}</p>}
                 </Link>
                 <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {s.read_minutes || 1} min</span>
