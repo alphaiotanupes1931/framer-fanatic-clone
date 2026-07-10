@@ -824,11 +824,11 @@ function StoriesRotation() {
           <div className="relative mx-auto lg:mx-0 w-full max-w-[260px] sm:max-w-[340px]">
             <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] bg-ink/5">
               {s.cover_url ? (
-                <img src={s.cover_url} alt={s.title ?? ""} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                <img src={s.cover_url} alt={s.title ?? ""} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
               ) : s.author_avatar ? (
-                <img src={s.author_avatar} alt={s.author_name ?? ""} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                <img src={s.author_avatar} alt={s.author_name ?? ""} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-ink/30 text-6xl font-display">
+                <div className="absolute inset-0 flex items-center justify-center text-ink/30 text-6xl font-display">
                   {(s.author_name ?? "B").slice(0, 1).toUpperCase()}
                 </div>
               )}
