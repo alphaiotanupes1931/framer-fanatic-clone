@@ -323,6 +323,12 @@ function CalendarPage() {
               <div className="rounded-2xl border border-dashed border-neutral-200 p-10 text-center text-sm text-neutral-400">
                 No upcoming events.
               </div>
+            ) : upcomingView === "grid" ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {upcoming.map((e) => (
+                  <UpcomingRow key={e.id} event={e} />
+                ))}
+              </div>
             ) : (
               <div className="space-y-3">
                 {upcoming.map((e) => (

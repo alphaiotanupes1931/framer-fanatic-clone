@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
@@ -57,6 +57,15 @@ export function LeftSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const { unreadMessages, unreadNotifications } = useUnreadCounts();
   const { user } = useCurrentUser();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try { await supabase.auth.signOut(); } catch (e) { console.error("signOut failed", e); }
+    try { localStorage.clear(); } catch {}
+    navigate({ to: "/auth", replace: true });
+    // Hard reload to fully clear any cached auth state
+    setTimeout(() => { if (typeof window !== "undefined") window.location.href = "/auth"; }, 50);
+  };
 
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
@@ -154,14 +163,14 @@ export function LeftSidebar() {
             collapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button onClick={() => supabase.auth.signOut()} className="flex w-full items-center justify-center rounded-lg py-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground">
+                  <button onClick={handleLogout} className="flex w-full items-center justify-center rounded-lg py-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground">
                     <LogOut className="h-5 w-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">Logout</TooltipContent>
               </Tooltip>
             ) : (
-              <button onClick={() => supabase.auth.signOut()} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all duration-150 hover:bg-muted hover:text-foreground active:scale-[0.98]">
+              <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all duration-150 hover:bg-muted hover:text-foreground active:scale-[0.98]">
                 <LogOut className="h-5 w-5 flex-shrink-0" />
                 <span className="truncate">Logout</span>
               </button>
