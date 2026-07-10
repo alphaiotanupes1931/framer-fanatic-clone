@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      close_friends: {
+        Row: {
+          created_at: string
+          friend_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversation_members: {
         Row: {
           conversation_id: string
@@ -667,37 +685,61 @@ export type Database = {
       }
       posts: {
         Row: {
+          bg_color: string | null
+          category: string | null
           comments_count: number
           content: string
           created_at: string
+          excluded_user_ids: string[]
           id: string
           image_url: string | null
           is_deleted: boolean
           likes_count: number
+          music_url: string | null
           neighborhood: string | null
+          post_type: string
+          text_color: string | null
           user_id: string
+          video_url: string | null
+          visibility: string
         }
         Insert: {
+          bg_color?: string | null
+          category?: string | null
           comments_count?: number
           content: string
           created_at?: string
+          excluded_user_ids?: string[]
           id?: string
           image_url?: string | null
           is_deleted?: boolean
           likes_count?: number
+          music_url?: string | null
           neighborhood?: string | null
+          post_type?: string
+          text_color?: string | null
           user_id: string
+          video_url?: string | null
+          visibility?: string
         }
         Update: {
+          bg_color?: string | null
+          category?: string | null
           comments_count?: number
           content?: string
           created_at?: string
+          excluded_user_ids?: string[]
           id?: string
           image_url?: string | null
           is_deleted?: boolean
           likes_count?: number
+          music_url?: string | null
           neighborhood?: string | null
+          post_type?: string
+          text_color?: string | null
           user_id?: string
+          video_url?: string | null
+          visibility?: string
         }
         Relationships: []
       }
@@ -1263,6 +1305,19 @@ export type Database = {
           is_founder: boolean
           neighborhood: string
           username: string
+        }[]
+      }
+      public_rotating_stories: {
+        Args: { lim?: number }
+        Returns: {
+          author_avatar: string
+          author_name: string
+          author_username: string
+          cover_url: string
+          created_at: string
+          excerpt: string
+          id: string
+          title: string
         }[]
       }
       search_creators: {
