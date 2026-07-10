@@ -27,7 +27,7 @@ function AuthPage() {
   const [showSignInPw, setShowSignInPw] = useState(false);
   const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
-  const [role, setRole] = useState<"artist" | "attendee">("attendee");
+  const [role, setRole] = useState<"artist" | "attendee" | "resident" | "visitor">("attendee");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
@@ -100,6 +100,10 @@ function AuthPage() {
       return toast.error("Please share your location to continue.");
     }
     const finalRole = role === "artist" && inBaltimore ? "artist" : "attendee";
+    const profileCategory =
+      role === "resident" ? "Resident" :
+      role === "visitor"  ? "Visitor"  :
+      null;
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -124,6 +128,14 @@ function AuthPage() {
     // If artist + verified Baltimore, immediately upgrade their role in user_roles.
     if (finalRole === "artist") {
       try { await becomeArtistFn(); } catch { /* harmless - they can also upgrade from profile */ }
+    }
+    // Tag Resident / Visitor selections on the profile so we can show them appropriately.
+    if (profileCategory) {
+      try {
+        const { data: sess } = await supabase.auth.getSession();
+        const uid = sess.session?.user.id;
+        if (uid) await supabase.from("profiles").update({ category: profileCategory }).eq("id", uid);
+      } catch { /* non-fatal */ }
     }
     // Flag this session as a fresh signup so the onboarding tour auto-runs once.
     try { localStorage.setItem("pb_new_signup", "1"); } catch { /* ignore */ }
@@ -260,6 +272,20 @@ function AuthPage() {
                       className={`rounded-md border px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${role === "artist" ? "border-primary bg-primary/10" : "border-input"}`}
                     >
                       Artist
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole("resident")}
+                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "resident" ? "border-primary bg-primary/10" : "border-input"}`}
+                    >
+                      Resident
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole("visitor")}
+                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "visitor" ? "border-primary bg-primary/10" : "border-input"}`}
+                    >
+                      Visitor
                     </button>
                   </div>
                 </div>
