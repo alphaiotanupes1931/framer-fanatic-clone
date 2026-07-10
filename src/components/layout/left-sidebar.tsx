@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
