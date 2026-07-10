@@ -35,7 +35,7 @@ function Index() {
       <Hero />
       <CreatorsFans />
       <Features />
-      <QuoteSection />
+      <StoriesRotation />
       
       <CTA />
       <Footer />
@@ -625,11 +625,13 @@ function DailyCreators() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.rpc("top_creators", { lim: 20 });
+      // Fetch a wide pool (broadened RPC fills with public profiles if not enough artists)
+      const { data } = await supabase.rpc("top_creators", { lim: 30 });
       if (cancelled) return;
-      const withAvatars = ((data ?? []) as DailyCreator[]).filter((c) => !!c.avatar_url && !c.is_founder);
-      // Deterministic daily rotation: pick 3 from the top 20 based on day-of-year.
-      const pool = withAvatars;
+      const withAvatars = ((data ?? []) as DailyCreator[]).filter((c) => !!c.avatar_url);
+      // Prefer non-founders but fall back to founders if needed so we always show 3.
+      const nonFounders = withAvatars.filter((c) => !c.is_founder);
+      const pool = nonFounders.length >= 3 ? nonFounders : withAvatars;
       if (pool.length <= 3) {
         setCreators(pool);
       } else {
