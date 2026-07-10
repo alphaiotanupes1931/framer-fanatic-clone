@@ -43,7 +43,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const [saved, setSaved] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
-  const [comments, setComments] = useState<{ id: string; content: string; user_id: string; created_at: string; author_name?: string }[]>([]);
+  const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string }[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
 
@@ -98,7 +98,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const loadComments = async () => {
     const { data } = await supabase
       .from("post_comments")
-      .select("id, content, user_id, created_at")
+      .select("id, body, user_id, created_at")
       .eq("post_id", post.id)
       .order("created_at", { ascending: true })
       .limit(100);
@@ -121,7 +121,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
     if (!currentUserId) { toast.error("Sign in to comment"); return; }
     const text = newComment.trim();
     if (!text) return;
-    const { error } = await supabase.from("post_comments").insert({ post_id: post.id, user_id: currentUserId, content: text });
+    const { error } = await supabase.from("post_comments").insert({ post_id: post.id, user_id: currentUserId, body: text });
     if (error) { toast.error(error.message); return; }
     setNewComment("");
     setCommentCount((n) => n + 1);
@@ -274,7 +274,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
               ) : comments.map((c) => (
                 <div key={c.id} className="text-sm">
                   <span className="font-semibold">{c.author_name}</span>{" "}
-                  <span className="text-neutral-700">{c.content}</span>
+                  <span className="text-neutral-700">{c.body}</span>
                 </div>
               ))}
             </div>
