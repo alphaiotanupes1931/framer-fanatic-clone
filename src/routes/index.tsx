@@ -721,6 +721,10 @@ function DailyCreators() {
 
 
 function NextRefreshCountdown() {
+  return <NextRefreshCountdownInner />;
+}
+
+function NextRefreshCountdownInner() {
   const [label, setLabel] = useState("");
   useEffect(() => {
     const tick = () => {
