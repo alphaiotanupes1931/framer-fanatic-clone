@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
-  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, Sparkles,
+  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, Sparkles, Plane,
 } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,8 @@ const createItems: Item[] = [
   { icon: FileText, label: "New Post", to: "/create-post" },
   { icon: Sparkles, label: "New Story", to: "/create-story" },
   { icon: Palette, label: "Artist Profile", to: "/create-artist" },
+  { icon: Home, label: "Resident Profile", to: "/create-resident" },
+  { icon: Plane, label: "Visitor Profile", to: "/create-visitor" },
   { icon: Building2, label: "Business", to: "/create-business" },
   { icon: Landmark, label: "Arts Organization", to: "/create-arts-org" },
   { icon: Users, label: "Community", to: "/create-community" },
