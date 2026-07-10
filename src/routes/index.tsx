@@ -721,10 +721,6 @@ function DailyCreators() {
 
 
 function NextRefreshCountdown() {
-  return <NextRefreshCountdownInner />;
-}
-
-function NextRefreshCountdownInner() {
   const [label, setLabel] = useState("");
   useEffect(() => {
     const tick = () => {
@@ -750,6 +746,118 @@ function NextRefreshCountdownInner() {
 }
 
 function CTA() {
+  return <CTAInner />;
+}
+
+type StoryRow = {
+  id: string;
+  title: string | null;
+  excerpt: string | null;
+  cover_url: string | null;
+  author_name: string | null;
+  author_username: string | null;
+  author_avatar: string | null;
+};
+
+function StoriesRotation() {
+  const [stories, setStories] = useState<StoryRow[]>([]);
+  const [idx, setIdx] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("public_rotating_stories", { lim: 15 });
+      if (cancelled) return;
+      const rows = (data ?? []) as StoryRow[];
+      // Deterministic daily rotation seeded by day-of-year, then auto-advance every 6s
+      if (rows.length > 0) {
+        const now = new Date();
+        const start = Date.UTC(now.getUTCFullYear(), 0, 0);
+        const dayOfYear = Math.floor((now.getTime() - start) / 86_400_000);
+        setIdx(dayOfYear % rows.length);
+      }
+      setStories(rows);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (stories.length < 2) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % stories.length), 6000);
+    return () => clearInterval(t);
+  }, [stories.length]);
+
+  if (loading || stories.length === 0) {
+    return (
+      <section className="relative w-full overflow-hidden bg-paper">
+        <div className="relative max-w-[1200px] mx-auto px-5 md:px-10 py-16 md:py-24" />
+      </section>
+    );
+  }
+
+  const s = stories[idx];
+  return (
+    <section className="relative w-full overflow-hidden bg-paper">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-ink/10" />
+      <div className="relative max-w-[1200px] mx-auto px-5 md:px-10 py-16 md:py-32 lg:py-40">
+        <div className="mb-8 md:mb-12 flex items-center justify-between">
+          <div className="text-[10px] md:text-xs uppercase tracking-widest text-ink/50">Stories from Baltimore</div>
+          <div className="flex items-center gap-1.5">
+            {stories.slice(0, Math.min(stories.length, 8)).map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Story ${i + 1}`}
+                onClick={() => setIdx(i)}
+                className={`h-1.5 rounded-full transition-all ${i === idx ? "w-6 bg-ink" : "w-1.5 bg-ink/25"}`}
+              />
+            ))}
+          </div>
+        </div>
+        <motion.div
+          key={s.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center"
+        >
+          <div className="relative mx-auto lg:mx-0 w-full max-w-[260px] sm:max-w-[340px]">
+            <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] bg-ink/5">
+              {s.cover_url ? (
+                <img src={s.cover_url} alt={s.title ?? ""} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              ) : s.author_avatar ? (
+                <img src={s.author_avatar} alt={s.author_name ?? ""} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-ink/30 text-6xl font-display">
+                  {(s.author_name ?? "B").slice(0, 1).toUpperCase()}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="text-ink">
+            <a
+              href={`/stories/${s.id}`}
+              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] hover:underline underline-offset-8 decoration-2"
+            >
+              {s.title || "Untitled story"}
+            </a>
+            {s.excerpt && (
+              <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4">
+                {s.excerpt}
+              </p>
+            )}
+            <div className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60">
+              — {s.author_name ?? "Anonymous"}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function CTAInner() {
   const { content } = useSiteContent();
   const line1 = siteText(content, "cta.line1");
   const line2 = siteText(content, "cta.line2");
