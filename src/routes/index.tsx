@@ -844,17 +844,18 @@ function StoriesRotation() {
             </a>
             {s.excerpt && (() => {
               const plain = s.excerpt
-                .replace(/<[^>]*>/g, " ")
                 .replace(/&nbsp;/g, " ")
+                .replace(/&#160;/g, " ")
                 .replace(/&amp;/g, "&")
                 .replace(/&lt;/g, "<")
                 .replace(/&gt;/g, ">")
                 .replace(/&quot;/g, '"')
                 .replace(/&#39;/g, "'")
+                .replace(/<[^>]*>/g, " ")
                 .replace(/\s+/g, " ")
                 .trim();
               return plain ? (
-                <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4">
+                <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4 break-words">
                   {plain}
                 </p>
               ) : null;
