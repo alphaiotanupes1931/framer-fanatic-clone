@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,6 +42,25 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const [likes, setLikes] = useState(post.likes_count ?? 0);
   const [saved, setSaved] = useState(false);
   const [lightbox, setLightbox] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comments, setComments] = useState<{ id: string; content: string; user_id: string; created_at: string; author_name?: string }[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    let cancelled = false;
+    (async () => {
+      const [likeRes, saveRes] = await Promise.all([
+        supabase.from("post_likes").select("post_id").eq("post_id", post.id).eq("user_id", currentUserId).maybeSingle(),
+        supabase.from("post_saves").select("post_id").eq("post_id", post.id).eq("user_id", currentUserId).maybeSingle(),
+      ]);
+      if (cancelled) return;
+      if (likeRes.data) setLiked(true);
+      if (saveRes.data) setSaved(true);
+    })();
+    return () => { cancelled = true; };
+  }, [currentUserId, post.id]);
 
   const toggleLike = async () => {
     if (!currentUserId) { toast.error("Sign in to like"); return; }
@@ -65,15 +84,48 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
     } catch { /* cancelled */ }
   };
 
-  const toggleSave = () => {
-    setSaved((s) => {
-      toast.success(s ? "Removed from saved" : "Saved");
-      return !s;
-    });
+  const toggleSave = async () => {
+    if (!currentUserId) { toast.error("Sign in to save"); return; }
+    const wasSaved = saved;
+    setSaved(!wasSaved);
+    const res = wasSaved
+      ? await supabase.from("post_saves").delete().eq("post_id", post.id).eq("user_id", currentUserId)
+      : await supabase.from("post_saves").insert({ post_id: post.id, user_id: currentUserId });
+    if (res.error) { setSaved(wasSaved); toast.error(res.error.message); }
+    else toast.success(wasSaved ? "Removed from saved" : "Saved");
   };
 
-  const openComments = () => {
-    toast("Comments coming soon");
+  const loadComments = async () => {
+    const { data } = await supabase
+      .from("post_comments")
+      .select("id, content, user_id, created_at")
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: true })
+      .limit(100);
+    const rows = data ?? [];
+    const ids = Array.from(new Set(rows.map((r) => r.user_id)));
+    let byId = new Map<string, { display_name: string | null; username: string | null }>();
+    if (ids.length) {
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+      byId = new Map((profs ?? []).map((p: { id: string; display_name: string | null; username: string | null }) => [p.id, p]));
+    }
+    setComments(rows.map((r) => ({ ...r, author_name: byId.get(r.user_id)?.display_name || byId.get(r.user_id)?.username || "Someone" })));
+  };
+
+  const openComments = async () => {
+    setCommentsOpen(true);
+    await loadComments();
+  };
+
+  const submitComment = async () => {
+    if (!currentUserId) { toast.error("Sign in to comment"); return; }
+    const text = newComment.trim();
+    if (!text) return;
+    const { error } = await supabase.from("post_comments").insert({ post_id: post.id, user_id: currentUserId, content: text });
+    if (error) { toast.error(error.message); return; }
+    setNewComment("");
+    setCommentCount((n) => n + 1);
+    await loadComments();
   };
 
   const isMine = currentUserId && currentUserId === post.user_id;
@@ -177,7 +229,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
         <button onClick={openComments} className="flex items-center gap-2 transition hover:text-foreground">
-          <MessageCircle className="h-5 w-5" /> {post.comments_count ?? 0}
+          <MessageCircle className="h-5 w-5" /> {commentCount}
         </button>
         <button onClick={share} className="flex items-center gap-2 transition hover:text-foreground">
           <Share2 className="h-5 w-5" />
@@ -207,6 +259,30 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
             onClick={(e) => e.stopPropagation()}
             className="max-h-[95vh] max-w-[95vw] object-contain"
           />
+        </div>
+      )}
+      {commentsOpen && (
+        <div role="dialog" aria-modal="true" onClick={() => setCommentsOpen(false)} className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl bg-white p-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
+              <h3 className="text-sm font-semibold">Comments</h3>
+              <button onClick={() => setCommentsOpen(false)} className="rounded p-1 text-neutral-500 hover:bg-neutral-100"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="max-h-[50vh] space-y-3 overflow-y-auto py-3">
+              {comments.length === 0 ? (
+                <p className="text-sm text-neutral-500">No comments yet. Be the first.</p>
+              ) : comments.map((c) => (
+                <div key={c.id} className="text-sm">
+                  <span className="font-semibold">{c.author_name}</span>{" "}
+                  <span className="text-neutral-700">{c.content}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 border-t border-neutral-100 pt-2">
+              <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") submitComment(); }} placeholder="Add a comment..." className="flex-1 rounded-full border border-neutral-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300" />
+              <Button size="sm" onClick={submitComment} disabled={!newComment.trim()}>Post</Button>
+            </div>
+          </div>
         </div>
       )}
     </article>
