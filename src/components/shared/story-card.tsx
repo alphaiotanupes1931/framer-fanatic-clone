@@ -18,7 +18,17 @@ type Story = {
 
 export function StoryCard({ story, featured = false }: { story: Story; featured?: boolean }) {
   const cleanExcerpt = story.excerpt
-    ? story.excerpt.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/\s+/g, " ").trim()
+    ? story.excerpt
+        .replace(/&nbsp;/g, " ")
+        .replace(/&#160;/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
     : "";
   if (featured) {
     return (
