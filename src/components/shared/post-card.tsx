@@ -16,6 +16,11 @@ type Post = {
   user_id: string;
   content: string;
   image_url: string | null;
+  video_url?: string | null;
+  music_url?: string | null;
+  post_type?: string | null;
+  bg_color?: string | null;
+  text_color?: string | null;
   likes_count: number | null;
   comments_count: number | null;
   neighborhood: string | null;
@@ -122,7 +127,16 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         )}
       </header>
       {post.content && (
-        <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground sm:px-6 sm:py-4 sm:text-[17px]">{post.content}</div>
+        (post.post_type === "text" && post.bg_color) ? (
+          <div
+            className="mx-4 my-3 rounded-2xl p-6 text-center text-lg font-medium whitespace-pre-wrap break-words sm:mx-6 sm:text-xl"
+            style={{ background: post.bg_color, color: post.text_color || "#fff" }}
+          >
+            {post.content}
+          </div>
+        ) : (
+          <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground sm:px-6 sm:py-4 sm:text-[17px]">{post.content}</div>
+        )
       )}
       {post.image_url && (
         <button type="button" onClick={() => setLightbox(true)} className="block w-full overflow-hidden focus:outline-none">
@@ -136,6 +150,27 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
         </button>
+      )}
+      {post.video_url && (
+        <video
+          src={post.video_url}
+          controls
+          playsInline
+          preload="metadata"
+          className="w-full max-h-[70vh] bg-black"
+        />
+      )}
+      {post.music_url && (
+        <div className="px-4 pb-3 sm:px-6">
+          <a
+            href={post.music_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm text-neutral-700 hover:border-orange-300"
+          >
+            🎵 Listen
+          </a>
+        </div>
       )}
       <footer className="flex items-center gap-5 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-6 sm:py-4">
         <button onClick={toggleLike} className={`flex items-center gap-2 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
