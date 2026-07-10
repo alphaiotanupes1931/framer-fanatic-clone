@@ -34,7 +34,9 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CreateVisitorRouteImport } from './routes/create-visitor'
 import { Route as CreateStoryRouteImport } from './routes/create-story'
+import { Route as CreateResidentRouteImport } from './routes/create-resident'
 import { Route as CreatePostRouteImport } from './routes/create-post'
 import { Route as CreateCommunityAssociationRouteImport } from './routes/create-community-association'
 import { Route as CreateCommunityRouteImport } from './routes/create-community'
@@ -187,9 +189,19 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateVisitorRoute = CreateVisitorRouteImport.update({
+  id: '/create-visitor',
+  path: '/create-visitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CreateStoryRoute = CreateStoryRouteImport.update({
   id: '/create-story',
   path: '/create-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateResidentRoute = CreateResidentRouteImport.update({
+  id: '/create-resident',
+  path: '/create-resident',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreatePostRoute = CreatePostRouteImport.update({
@@ -340,7 +352,9 @@ export interface FileRoutesByFullPath {
   '/create-community': typeof CreateCommunityRoute
   '/create-community-association': typeof CreateCommunityAssociationRoute
   '/create-post': typeof CreatePostRoute
+  '/create-resident': typeof CreateResidentRoute
   '/create-story': typeof CreateStoryRoute
+  '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -394,7 +408,9 @@ export interface FileRoutesByTo {
   '/create-community': typeof CreateCommunityRoute
   '/create-community-association': typeof CreateCommunityAssociationRoute
   '/create-post': typeof CreatePostRoute
+  '/create-resident': typeof CreateResidentRoute
   '/create-story': typeof CreateStoryRoute
+  '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -449,7 +465,9 @@ export interface FileRoutesById {
   '/create-community': typeof CreateCommunityRoute
   '/create-community-association': typeof CreateCommunityAssociationRoute
   '/create-post': typeof CreatePostRoute
+  '/create-resident': typeof CreateResidentRoute
   '/create-story': typeof CreateStoryRoute
+  '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/groups': typeof GroupsRoute
@@ -505,7 +523,9 @@ export interface FileRouteTypes {
     | '/create-community'
     | '/create-community-association'
     | '/create-post'
+    | '/create-resident'
     | '/create-story'
+    | '/create-visitor'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -559,7 +579,9 @@ export interface FileRouteTypes {
     | '/create-community'
     | '/create-community-association'
     | '/create-post'
+    | '/create-resident'
     | '/create-story'
+    | '/create-visitor'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -613,7 +635,9 @@ export interface FileRouteTypes {
     | '/create-community'
     | '/create-community-association'
     | '/create-post'
+    | '/create-resident'
     | '/create-story'
+    | '/create-visitor'
     | '/dashboard'
     | '/discover'
     | '/groups'
@@ -668,7 +692,9 @@ export interface RootRouteChildren {
   CreateCommunityRoute: typeof CreateCommunityRoute
   CreateCommunityAssociationRoute: typeof CreateCommunityAssociationRoute
   CreatePostRoute: typeof CreatePostRoute
+  CreateResidentRoute: typeof CreateResidentRoute
   CreateStoryRoute: typeof CreateStoryRoute
+  CreateVisitorRoute: typeof CreateVisitorRoute
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
   GroupsRoute: typeof GroupsRoute
@@ -882,11 +908,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/create-visitor': {
+      id: '/create-visitor'
+      path: '/create-visitor'
+      fullPath: '/create-visitor'
+      preLoaderRoute: typeof CreateVisitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/create-story': {
       id: '/create-story'
       path: '/create-story'
       fullPath: '/create-story'
       preLoaderRoute: typeof CreateStoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-resident': {
+      id: '/create-resident'
+      path: '/create-resident'
+      fullPath: '/create-resident'
+      preLoaderRoute: typeof CreateResidentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/create-post': {
@@ -1113,7 +1153,9 @@ const rootRouteChildren: RootRouteChildren = {
   CreateCommunityRoute: CreateCommunityRoute,
   CreateCommunityAssociationRoute: CreateCommunityAssociationRoute,
   CreatePostRoute: CreatePostRoute,
+  CreateResidentRoute: CreateResidentRoute,
   CreateStoryRoute: CreateStoryRoute,
+  CreateVisitorRoute: CreateVisitorRoute,
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
   GroupsRoute: GroupsRoute,
@@ -1152,13 +1194,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
