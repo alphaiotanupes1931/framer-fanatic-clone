@@ -36,8 +36,8 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
           )}
         </div>
         <div className="p-5">
-          <h2 className="line-clamp-2 font-serif text-xl font-bold text-foreground transition-colors group-hover:text-[#d4580a]">{story.title}</h2>
-          {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{cleanExcerpt}</p>}
+          <h2 className="line-clamp-2 font-serif text-xl font-bold text-foreground transition-colors group-hover:text-[#d4580a] break-words">{story.title}</h2>
+          {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground break-words">{cleanExcerpt}</p>}
           <div className="mt-4 flex items-center gap-3">
             <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
               <AvatarImage src={story.author_avatar ?? undefined} />
@@ -69,8 +69,8 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
           <span className="max-w-[200px] truncate text-xs font-extrabold leading-none text-slate-800 sm:max-w-[260px]">{story.author_name}</span>
           {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
         </div>
-        <h3 className="line-clamp-2 font-serif text-lg font-extrabold leading-snug text-slate-950 transition-colors group-hover:text-[#d4580a]">{story.title}</h3>
-        {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-slate-500">{cleanExcerpt}</p>}
+        <h3 className="line-clamp-2 font-serif text-lg font-extrabold leading-snug text-slate-950 transition-colors group-hover:text-[#d4580a] break-words">{story.title}</h3>
+        {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-slate-500 break-words">{cleanExcerpt}</p>}
         <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs leading-none text-slate-500">
           <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{story.read_minutes || 5} min</span>
           <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" />{story.likes_count || 0}</span>

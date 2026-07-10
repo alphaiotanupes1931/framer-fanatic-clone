@@ -131,8 +131,8 @@ function StoryDetail() {
             )}
           </div>
 
-          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{story.title}</h1>
-          {story.excerpt && <p className="mt-3 text-lg text-muted-foreground">{story.excerpt}</p>}
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl break-words">{story.title}</h1>
+          {story.excerpt && <p className="mt-3 text-lg text-muted-foreground break-words">{story.excerpt}</p>}
         </div>
         {story.cover_url && (
           <div className="mt-6 aspect-[16/9] w-full overflow-hidden bg-secondary">
