@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { timeAgo } from "@/lib/text-utils";
 import { X } from "lucide-react";
 
 type Post = {
@@ -160,7 +160,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
             )}
           </div>
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
-            {post.neighborhood_name || post.neighborhood || "Baltimore"} · {format(new Date(post.created_at), "MMM d")}
+            {post.neighborhood_name || post.neighborhood || "Baltimore"} · {timeAgo(post.created_at)}
           </div>
         </div>
         {isMine && onDelete && (
