@@ -72,7 +72,7 @@ function CreatePostPage() {
 
   // Debounced people search for the excluded list
   useEffect(() => {
-    const q = excludeQuery.trim();
+    const q = excludeQuery.trim().replace(/^@+/, "");
     if (!q) { setExcludeResults([]); return; }
     const t = setTimeout(async () => {
       const { data } = await supabase.rpc("search_all_users", { q, lim: 10 });
@@ -302,7 +302,29 @@ function CreatePostPage() {
           {/* Exclude specific users */}
           <div className="space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
             <Label className="text-sm font-medium">Hide from specific people (optional)</Label>
-            <Input value={excludeQuery} onChange={(e) => setExcludeQuery(e.target.value)} placeholder="Type a name or @username..." />
+            <Input
+              value={excludeQuery}
+              onChange={(e) => setExcludeQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.key === "Enter" || e.key === "Tab") && excludeResults.length > 0) {
+                  e.preventDefault();
+                  const top = excludeResults[0];
+                  setExcluded((x) => [...x, top]);
+                  setExcludeQuery("");
+                  setExcludeResults([]);
+                }
+              }}
+              placeholder="Type a name or @username..."
+              autoComplete="off"
+            />
+            {excludeQuery.trim() && excludeResults.length > 0 && (
+              <p className="text-xs text-neutral-500">
+                Press Enter or Tab to add <span className="font-medium text-neutral-800">
+                  {excludeResults[0].display_name || excludeResults[0].username}
+                  {excludeResults[0].username ? ` (@${excludeResults[0].username})` : ""}
+                </span>
+              </p>
+            )}
             {excludeResults.length > 0 && (
               <div className="rounded-md border border-neutral-200 bg-white">
                 {excludeResults.map((r) => (
