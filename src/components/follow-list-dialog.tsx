@@ -62,7 +62,7 @@ export function FollowListDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-xl p-0">
+      <DialogContent className="max-h-[80vh] w-[calc(100%_-_2rem)] max-w-md overflow-hidden rounded-xl p-0">
         <DialogHeader className="border-b border-border px-5 py-4 text-left">
           <DialogTitle>{mode === "followers" ? "Followers" : "Following"}</DialogTitle>
         </DialogHeader>
