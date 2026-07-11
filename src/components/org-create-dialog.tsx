@@ -20,6 +20,7 @@ export function OrgCreateDialog({
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
   const subs = subtypesFor(type);
   const [form, setForm] = useState({
@@ -57,6 +58,9 @@ export function OrgCreateDialog({
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) { toast.error("Sign in first"); return; }
+    // Instant local preview so the user sees the image immediately
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return localUrl; });
     setUploading(true);
     try {
       const ext = (file.name.split(".").pop() || "png").toLowerCase();
@@ -138,15 +142,27 @@ export function OrgCreateDialog({
             onClick={() => fileRef.current?.click()}
             className="mb-6 flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50/60 px-6 py-14 text-center transition hover:border-orange-300 hover:bg-orange-50/40"
           >
-            {form.avatar_url ? (
-              <img src={form.avatar_url} alt="Logo preview" className="h-24 w-24 rounded-2xl object-cover" />
+            {previewUrl || form.avatar_url ? (
+              <div className="relative">
+                <img
+                  src={previewUrl || form.avatar_url}
+                  alt="Logo preview"
+                  className="h-28 w-28 rounded-2xl object-cover"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                />
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/30">
+                    <Loader2 className="h-6 w-6 animate-spin text-white" />
+                  </div>
+                )}
+              </div>
             ) : uploading ? (
               <Loader2 className="h-10 w-10 animate-spin text-neutral-400" />
             ) : (
               <ImagePlus className="h-10 w-10 text-neutral-400" strokeWidth={1.5} />
             )}
             <div className="text-[15px] font-medium text-neutral-500">
-              {form.avatar_url ? "Change logo or photo" : "Add logo or photo"}
+              {previewUrl || form.avatar_url ? "Change logo or photo" : "Add logo or photo"}
             </div>
           </button>
           <input
