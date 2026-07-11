@@ -183,16 +183,16 @@ function NewEventPage() {
         </button>
 
         <div className="space-y-6">
-          <Field label="Event Title">
+          <Field label="Event Title" required>
             <input className={inputCls} placeholder="What's your event called?" value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={140} />
           </Field>
 
-          <Field label="Description">
+          <Field label="Description" optional>
             <textarea className={`${inputCls} min-h-[120px]`} placeholder="Tell people about your event..." value={form.description} onChange={(e) => set("description", e.target.value)} maxLength={5000} />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Start Date & Time">
+            <Field label="Start Date & Time" required>
               <div className="flex gap-2 mb-2">
                 <button type="button" onClick={() => setStartMode("set")}
                   className={`px-4 py-1.5 rounded-md text-sm font-medium ${startMode === "set" ? "bg-neutral-700 text-white" : "bg-neutral-100 text-neutral-600"}`}>Set Date</button>
@@ -204,34 +204,34 @@ function NewEventPage() {
               )}
             </Field>
 
-            <Field label="End Date & Time">
+            <Field label="End Date & Time" optional>
               <div className="h-[34px] mb-2" />
               <input type="datetime-local" className={inputCls} value={form.ends_at} onChange={(e) => set("ends_at", e.target.value)} />
             </Field>
           </div>
 
-          <Field label="Venue Name">
+          <Field label="Venue Name" optional>
             <input className={inputCls} placeholder="Where is it happening?" value={form.venue_name} onChange={(e) => set("venue_name", e.target.value)} maxLength={140} />
           </Field>
 
-          <Field label="Address">
+          <Field label="Address" optional>
             <input className={inputCls} placeholder="Full address" value={form.address} onChange={(e) => set("address", e.target.value)} maxLength={240} />
           </Field>
 
-          <Field label="Neighborhood">
+          <Field label="Neighborhood" optional>
             <select className={inputCls} value={form.neighborhood} onChange={(e) => set("neighborhood", e.target.value)}>
               <option value="">Select neighborhood...</option>
               {neighborhoods.map((n) => <option key={n.id} value={n.name}>{n.name}</option>)}
             </select>
           </Field>
 
-          <Field label="Category">
+          <Field label="Category" required>
             <select className={inputCls} value={form.category} onChange={(e) => set("category", e.target.value)}>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </Field>
 
-          <Field label="Ticketing Mode">
+          <Field label="Ticketing Mode" required>
             <select className={inputCls} value={form.ticketing} onChange={(e) => set("ticketing", e.target.value as "rsvp" | "paid")}>
               <option value="rsvp">RSVP Only</option>
               <option value="paid">Paid Tickets</option>
@@ -239,13 +239,13 @@ function NewEventPage() {
           </Field>
 
           {form.ticketing === "paid" && (
-            <Field label="Ticket Price (USD you net)">
+            <Field label="Ticket Price (USD you net)" required>
               <input type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" value={form.price} onChange={(e) => set("price", e.target.value)} />
               <p className="mt-1 text-[11px] text-neutral-500">Stripe fees and Baltimore's 10% admissions tax are added on top automatically.</p>
             </Field>
           )}
 
-          <Field label="Capacity">
+          <Field label="Capacity" optional>
             <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
           </Field>
         </div>
@@ -289,10 +289,14 @@ function NewEventPage() {
 
 const inputCls = "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, required, optional }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean }) {
   return (
     <div>
-      <label className="block text-sm font-semibold mb-2">{label}</label>
+      <label className="block text-sm font-semibold mb-2">
+        {label}
+        {required && <span className="ml-1 text-[#d4580a]">*</span>}
+        {optional && <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span>}
+      </label>
       {children}
     </div>
   );
