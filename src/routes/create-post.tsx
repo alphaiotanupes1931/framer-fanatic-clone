@@ -72,7 +72,7 @@ function CreatePostPage() {
 
   // Debounced people search for the excluded list
   useEffect(() => {
-    const q = excludeQuery.trim();
+    const q = excludeQuery.trim().replace(/^@+/, "");
     if (!q) { setExcludeResults([]); return; }
     const t = setTimeout(async () => {
       const { data } = await supabase.rpc("search_all_users", { q, lim: 10 });
