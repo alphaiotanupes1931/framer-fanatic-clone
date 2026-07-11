@@ -137,7 +137,9 @@ function CalendarPage() {
     [filtered],
   );
   const forYou = useMemo(
-    () => filtered.filter((e) => e.starts_at && e.image_url).slice(0, 8),
+    () => filtered
+      .filter((e) => e.starts_at && e.image_url && new Date(e.starts_at) >= now)
+      .slice(0, 8),
     [filtered],
   );
   const eventDays = useMemo(
@@ -320,8 +322,12 @@ function CalendarPage() {
               </div>
             </div>
             {upcoming.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-neutral-200 p-10 text-center text-sm text-neutral-400">
-                No upcoming events.
+              <div className="rounded-2xl border border-dashed border-neutral-200 p-10 text-center text-sm text-neutral-500">
+                No upcoming events scheduled yet.{" "}
+                <Link to="/events/new" className="font-semibold text-[#d4580a] hover:underline">
+                  Create one
+                </Link>
+                .
               </div>
             ) : upcomingView === "grid" ? (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
