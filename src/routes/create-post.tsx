@@ -224,9 +224,19 @@ function CreatePostPage() {
                 const p = await uploadTo("post-media", f, "image"); if (p) setImagePath(p);
               }} />
               {imagePath ? (
-                <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-                  <span className="truncate">Image attached</span>
-                  <button type="button" onClick={() => setImagePath("")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
+                <div className="relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
+                  <img src={imagePath} alt="Preview" className="max-h-[420px] w-full object-contain bg-black/5" />
+                  <div className="flex items-center justify-between px-3 py-2 text-xs text-neutral-600">
+                    <span className="truncate">Preview — this is how your image will appear.</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button type="button" onClick={() => imageRef.current?.click()} className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs font-medium hover:bg-neutral-100" disabled={uploading}>
+                        Replace
+                      </button>
+                      <button type="button" onClick={() => setImagePath("")} className="rounded-md p-1 text-neutral-500 hover:text-neutral-900" aria-label="Remove image">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <Button type="button" variant="outline" onClick={() => imageRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
@@ -243,9 +253,19 @@ function CreatePostPage() {
                 const p = await uploadTo("post-media", f, "video"); if (p) setVideoPath(p);
               }} />
               {videoPath ? (
-                <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-                  <span className="truncate">Video attached</span>
-                  <button type="button" onClick={() => setVideoPath("")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
+                <div className="relative overflow-hidden rounded-lg border border-neutral-200 bg-black">
+                  <video src={videoPath} controls className="max-h-[420px] w-full bg-black" />
+                  <div className="flex items-center justify-between bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
+                    <span className="truncate">Preview — this is how your video will appear.</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button type="button" onClick={() => videoRef.current?.click()} className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs font-medium hover:bg-neutral-100" disabled={uploading}>
+                        Replace
+                      </button>
+                      <button type="button" onClick={() => setVideoPath("")} className="rounded-md p-1 text-neutral-500 hover:text-neutral-900" aria-label="Remove video">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <Button type="button" variant="outline" onClick={() => videoRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
