@@ -133,13 +133,30 @@ function CalendarPage() {
   }, [events, neighborhood]);
 
   const upcoming = useMemo(
-    () => filtered.filter((e) => e.starts_at && new Date(e.starts_at) >= now).slice(0, 12),
+    () => {
+      const future = filtered
+        .filter((e) => e.starts_at && new Date(e.starts_at) >= now)
+        .sort((a, b) => new Date(a.starts_at!).getTime() - new Date(b.starts_at!).getTime());
+      if (future.length > 0) return future.slice(0, 12);
+      // Fallback: show most recent events so the calendar is never empty
+      return filtered
+        .filter((e) => e.starts_at)
+        .sort((a, b) => new Date(b.starts_at!).getTime() - new Date(a.starts_at!).getTime())
+        .slice(0, 12);
+    },
     [filtered],
   );
   const forYou = useMemo(
-    () => filtered
-      .filter((e) => e.starts_at && e.image_url && new Date(e.starts_at) >= now)
-      .slice(0, 8),
+    () => {
+      const future = filtered
+        .filter((e) => e.starts_at && e.image_url && new Date(e.starts_at) >= now)
+        .sort((a, b) => new Date(a.starts_at!).getTime() - new Date(b.starts_at!).getTime());
+      if (future.length > 0) return future.slice(0, 8);
+      return filtered
+        .filter((e) => e.starts_at && e.image_url)
+        .sort((a, b) => new Date(b.starts_at!).getTime() - new Date(a.starts_at!).getTime())
+        .slice(0, 8);
+    },
     [filtered],
   );
   const eventDays = useMemo(
