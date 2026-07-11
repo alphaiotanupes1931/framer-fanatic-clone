@@ -6,7 +6,7 @@
 
 @layer base {
   html, body { overflow-x: hidden; }
-  img, video { max-width: 100%; height: auto; }
+  :where(img, video) { max-width: 100%; height: auto; }
 }
 
 /*
