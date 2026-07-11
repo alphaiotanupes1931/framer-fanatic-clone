@@ -33,19 +33,19 @@ export function FollowListDialog({
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const idColumn = mode === "followers" ? "follower_id" : "following_id";
-      const matchColumn = mode === "followers" ? "following_id" : "follower_id";
-      const { data: rows, error } = await supabase
-        .from("follows")
-        .select(idColumn)
-        .eq(matchColumn, profileId);
+      const result = mode === "followers"
+        ? await supabase.from("follows").select("follower_id").eq("following_id", profileId)
+        : await supabase.from("follows").select("following_id").eq("follower_id", profileId);
+      const { data: rows, error } = result;
       if (cancelled) return;
       if (error) {
         setPeople([]);
         setLoading(false);
         return;
       }
-      const ids = Array.from(new Set((rows ?? []).map((row) => String(row[idColumn]))));
+      const ids = Array.from(new Set((rows ?? []).map((row) => (
+        "follower_id" in row ? row.follower_id : row.following_id
+      ))));
       if (!ids.length) {
         setPeople([]);
         setLoading(false);
