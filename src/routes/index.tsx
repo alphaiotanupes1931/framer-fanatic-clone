@@ -848,7 +848,7 @@ function StoriesRotation() {
             </div>
             {s.excerpt && (
               <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl break-words">
-                {truncateText(s.excerpt, 120)}
+                {`${truncateText(s.excerpt, 120).replace(/\.{3}$/, "")}...`}
               </p>
             )}
             <div className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60">
