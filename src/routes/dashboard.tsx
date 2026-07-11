@@ -238,7 +238,7 @@ function Dashboard() {
         )}
 
         {/* Feed */}
-        <div className="pt-1 grid gap-[18px] grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
+        <div className="pt-1 flex flex-col gap-[18px] max-w-2xl mx-auto w-full">
           {isLoading || filterLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
