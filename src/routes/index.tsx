@@ -847,8 +847,8 @@ function StoriesRotation() {
               {s.title || "Untitled story"}
             </div>
             {s.excerpt && (
-              <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4 break-words">
-                {stripHtml(s.excerpt)}
+              <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-3 break-words">
+                {truncateText(s.excerpt, 180)}
               </p>
             )}
             <div className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60">
