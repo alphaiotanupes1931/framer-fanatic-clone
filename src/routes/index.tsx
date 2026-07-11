@@ -688,14 +688,14 @@ function DailyCreators() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="group relative rounded-3xl bg-ink text-paper overflow-hidden block max-md:w-[82vw] max-md:shrink-0 max-md:snap-start aspect-[4/5] max-md:aspect-[3/4]"
+          className="group relative rounded-3xl bg-ink text-paper overflow-hidden block max-md:w-[82vw] max-md:shrink-0 max-md:snap-start aspect-square"
         >
           {c.avatar_url ? (
             <motion.img
               src={c.avatar_url}
               alt={c.display_name ?? "Creator"}
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-center"
               whileHover={{ scale: 1.06 }}
               transition={{ duration: 0.6 }}
             />
