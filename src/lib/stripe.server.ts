@@ -6,7 +6,11 @@ export function getStripe(): Stripe {
   if (_stripe) return _stripe;
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
-  _stripe = new Stripe(key);
+  // Cloudflare Workers runtime: force fetch-based HTTP client so the SDK
+  // does not try to use Node's http/https module (which is stubbed).
+  _stripe = new Stripe(key, {
+    httpClient: Stripe.createFetchHttpClient(),
+  });
   return _stripe;
 }
 
