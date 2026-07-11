@@ -97,6 +97,8 @@ function Dashboard() {
     queryKey: ["follows", currentUser?.id],
     queryFn: () => Follow.listMine(currentUser!.id),
     enabled: !!currentUser?.id,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const handleDeletePost = async (postId: string) => {
@@ -238,7 +240,7 @@ function Dashboard() {
         )}
 
         {/* Feed */}
-        <div className="pt-1 flex flex-col gap-[18px] max-w-2xl mx-auto w-full">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-[18px] pt-1">
           {isLoading || filterLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
