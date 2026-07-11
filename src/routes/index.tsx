@@ -829,7 +829,7 @@ function StoriesRotation() {
                   alt={s.title ?? ""}
                   loading="lazy"
                   decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  className="absolute inset-0 w-full h-full object-contain object-center"
                 />
               ) : s.author_avatar ? (
                 <img src={s.author_avatar} alt={s.author_name ?? ""} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
