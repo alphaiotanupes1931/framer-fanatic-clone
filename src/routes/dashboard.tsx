@@ -170,10 +170,17 @@ function Dashboard() {
     }
 
     if (activeFilter === "Nearby") {
-      const hood = currentUser?.neighborhood_names?.[0] || currentUser?.neighborhood;
-      if (!hood) return [];
-      const np = filteredPosts.filter((p) => p.neighborhood === hood);
-      const ne = (events as any[]).filter((e) => e.neighborhood === hood);
+      const hoods = [
+        ...(currentUser?.neighborhood_names ?? []),
+        currentUser?.neighborhood,
+      ]
+        .filter(Boolean)
+        .map((h) => String(h).trim().toLowerCase());
+      if (hoods.length === 0) return [];
+      const match = (h: string | null | undefined) =>
+        !!h && hoods.includes(String(h).trim().toLowerCase());
+      const np = filteredPosts.filter((p) => match(p.neighborhood));
+      const ne = (events as any[]).filter((e) => match(e.neighborhood));
       return [
         ...np.map((p) => ({ type: "post" as const, date: p.created_at, data: p })),
         ...ne.map((e) => ({ type: "event" as const, date: e.created_at, data: e })),
@@ -192,8 +199,7 @@ function Dashboard() {
 
   const isEmpty = !isLoading && feedItems.length === 0;
   const rawHood = currentUser?.neighborhood_names?.[0] || currentUser?.neighborhood;
-  // "Baltimore" is the city, not a neighborhood — treat as unset so the user is prompted to pick one.
-  const hoodPrimary = rawHood && rawHood.trim().toLowerCase() !== "baltimore" ? rawHood : null;
+  const hoodPrimary = rawHood && rawHood.trim().length > 0 ? rawHood : null;
 
   if (!checked) return null;
 
