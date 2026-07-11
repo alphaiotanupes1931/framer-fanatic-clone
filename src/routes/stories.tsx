@@ -349,17 +349,24 @@ function StoriesSignedIn() {
                   {me && me.id === s.user_id && (
                     <button
                       onClick={() => removeStory(s)}
-                      className="ml-auto inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                      className="inline-flex items-center gap-1 text-muted-foreground hover:text-red-600 transition"
                       aria-label="Delete story"
                     >
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
               </div>
               {s.cover_url && (
                 <Link to="/stories/$storyId" params={{ storyId: s.id }} className="shrink-0">
-                  <img src={s.cover_url} alt="" className="h-24 w-32 rounded-lg object-cover" loading="lazy" decoding="async" />
+                  <img
+                    src={s.cover_url}
+                    alt=""
+                    className="h-24 w-32 rounded-lg object-cover bg-muted"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = "none"; }}
+                  />
                 </Link>
               )}
             </article>
