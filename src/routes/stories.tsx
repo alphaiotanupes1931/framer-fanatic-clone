@@ -6,7 +6,7 @@ import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-prev
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
 
@@ -178,6 +178,20 @@ function StoriesSignedIn() {
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Story | null>(null);
 
+  const removeStory = async (s: Story) => {
+    if (!me || s.user_id !== me.id) return;
+    if (!confirm("Delete this story? This can't be undone.")) return;
+    const prev = stories;
+    setStories((cur) => cur.filter((x) => x.id !== s.id));
+    const { error } = await supabase.from("stories").delete().eq("id", s.id);
+    if (error) {
+      toast.error(error.message);
+      setStories(prev);
+    } else {
+      toast.success("Story deleted");
+    }
+  };
+
   const load = async () => {
     let q = supabase.from("stories").select("*").order("created_at", { ascending: false }).limit(50);
     if (filter !== "All") q = q.eq("format", filter);
@@ -332,6 +346,15 @@ function StoriesSignedIn() {
                   >
                     <MessageCircle className="h-3.5 w-3.5" /> {s.comments_count}
                   </button>
+                  {me && me.id === s.user_id && (
+                    <button
+                      onClick={() => removeStory(s)}
+                      className="ml-auto inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                      aria-label="Delete story"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </button>
+                  )}
                 </div>
               </div>
               {s.cover_url && (
