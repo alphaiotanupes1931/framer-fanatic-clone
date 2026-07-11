@@ -232,11 +232,11 @@ function Dashboard() {
         )}
 
         {/* Feed */}
-        <div className="space-y-[18px] pt-1">
+        <div className="pt-1 grid gap-[18px] grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
           {isLoading || filterLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
-            <div className="py-12 text-center sm:py-16">
+            <div className="py-12 text-center sm:py-16 col-span-full">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#d4580a]/10 sm:mb-6 sm:h-20 sm:w-20">
                 {activeFilter === "Following" ? <Users className="h-7 w-7 text-[#d4580a] sm:h-9 sm:w-9" /> : activeFilter === "Nearby" ? <MapPin className="h-7 w-7 text-[#d4580a] sm:h-9 sm:w-9" /> : <span className="text-3xl sm:text-4xl">🏙️</span>}
               </div>
