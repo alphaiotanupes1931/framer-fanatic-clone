@@ -13,12 +13,12 @@ const STEPS: Step[] = [
     placement: "center",
     title: "Welcome to Planet Baltimore",
     content:
-      "A 60-second tour of everything you can do here - discover artists, attend events, and connect with your neighborhood.",
+      "A 60-second tour of everything you can do here: discover artists, attend events, and connect with your neighborhood.",
   },
   {
     target: '[data-tour="nav-home"]',
     title: "Home Feed",
-    content: "Your dashboard - posts, updates, and what's happening across the city right now.",
+    content: "Your dashboard: posts, updates, and what's happening across the city right now.",
   },
   {
     target: '[data-tour="nav-search"]',
@@ -29,7 +29,7 @@ const STEPS: Step[] = [
     target: '[data-tour="nav-events"]',
     title: "Events & Tickets",
     content:
-      "Browse upcoming events. Buy tickets in one tap - artists can create paid events here.",
+      "Browse upcoming events. Buy tickets in one tap. Artists can create paid events here.",
   },
   {
     target: '[data-tour="nav-calendar"]',
