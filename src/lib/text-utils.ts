@@ -22,3 +22,23 @@ export function truncateText(s: string | null | undefined, maxLen: number): stri
   const trimmed = text.slice(0, maxLen).replace(/\s+\S*$/, "");
   return trimmed.trim() + "...";
 }
+
+export function timeAgo(input: string | number | Date | null | undefined): string {
+  if (!input) return "";
+  const d = input instanceof Date ? input : new Date(input);
+  if (isNaN(d.getTime())) return "";
+  const diff = Math.max(0, (Date.now() - d.getTime()) / 1000);
+  if (diff < 45) return "just now";
+  if (diff < 90) return "1m ago";
+  const m = Math.round(diff / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const days = Math.round(h / 24);
+  if (days < 7) return `${days}d ago`;
+  const now = new Date();
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return d.toLocaleDateString(undefined, sameYear
+    ? { month: "short", day: "numeric" }
+    : { month: "short", day: "numeric", year: "numeric" });
+}
