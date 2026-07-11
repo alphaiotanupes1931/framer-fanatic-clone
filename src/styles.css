@@ -4,8 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
-html, body { overflow-x: hidden; }
-img, video { max-width: 100%; height: auto; }
+@layer base {
+  html, body { overflow-x: hidden; }
+  img, video { max-width: 100%; height: auto; }
+}
 
 /*
  * Design system definition.
