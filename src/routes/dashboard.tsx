@@ -230,7 +230,7 @@ function Dashboard() {
 
         <div className="border-b border-slate-200" />
 
-        <OnboardingCard />
+        {activeFilter === "For You" && <OnboardingCard />}
 
         {activeFilter === "Discover" && (
           <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent/5 p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">
