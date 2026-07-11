@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import { assetUrl } from "@/lib/utils";
-import { stripHtml } from "@/lib/text-utils";
+import { stripHtml, truncateText } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
@@ -847,8 +847,8 @@ function StoriesRotation() {
               {s.title || "Untitled story"}
             </div>
             {s.excerpt && (
-              <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4 break-words">
-                {stripHtml(s.excerpt)}
+              <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-3 break-words">
+                {truncateText(s.excerpt, 180)}
               </p>
             )}
             <div className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60">
