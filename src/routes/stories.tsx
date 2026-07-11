@@ -10,6 +10,24 @@ import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2, Trash2 
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
 
+function StoryCover({ storyId, url }: { storyId: string; url: string | null }) {
+  const [error, setError] = useState(false);
+  if (!url || error) return null;
+  return (
+    <Link to="/stories/$storyId" params={{ storyId }} className="shrink-0">
+      <img
+        src={url}
+        alt=""
+        className="h-24 w-32 rounded-lg object-cover bg-muted"
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onError={() => setError(true)}
+      />
+    </Link>
+  );
+}
+
 export const Route = createFileRoute("/stories")({
   component: StoriesPage,
   head: () => ({ meta: [{ title: "Stories - Planet Baltimore" }] }),
