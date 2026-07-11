@@ -137,7 +137,9 @@ function CalendarPage() {
     [filtered],
   );
   const forYou = useMemo(
-    () => filtered.filter((e) => e.starts_at && e.image_url).slice(0, 8),
+    () => filtered
+      .filter((e) => e.starts_at && e.image_url && new Date(e.starts_at) >= now)
+      .slice(0, 8),
     [filtered],
   );
   const eventDays = useMemo(
