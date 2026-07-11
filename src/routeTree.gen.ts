@@ -56,6 +56,7 @@ import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
+import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
 import { Route as EventsNewRouteImport } from './routes/events.new'
@@ -300,6 +301,11 @@ const StoriesStoryIdRoute = StoriesStoryIdRouteImport.update({
   path: '/$storyId',
   getParentRoute: () => StoriesRoute,
 } as any)
+const PostsPostIdRoute = PostsPostIdRouteImport.update({
+  id: '/posts/$postId',
+  path: '/posts/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OSlugRoute = OSlugRouteImport.update({
   id: '/o/$slug',
   path: '/o/$slug',
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
   '/admin/': typeof AdminIndexRoute
@@ -442,6 +449,7 @@ export interface FileRoutesByTo {
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
   '/admin': typeof AdminIndexRoute
@@ -499,6 +507,7 @@ export interface FileRoutesById {
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
+  '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
   '/admin/': typeof AdminIndexRoute
@@ -557,6 +566,7 @@ export interface FileRouteTypes {
     | '/events/new'
     | '/marketplace/$listingId'
     | '/o/$slug'
+    | '/posts/$postId'
     | '/stories/$storyId'
     | '/u/$username'
     | '/admin/'
@@ -613,6 +623,7 @@ export interface FileRouteTypes {
     | '/events/new'
     | '/marketplace/$listingId'
     | '/o/$slug'
+    | '/posts/$postId'
     | '/stories/$storyId'
     | '/u/$username'
     | '/admin'
@@ -669,6 +680,7 @@ export interface FileRouteTypes {
     | '/events/new'
     | '/marketplace/$listingId'
     | '/o/$slug'
+    | '/posts/$postId'
     | '/stories/$storyId'
     | '/u/$username'
     | '/admin/'
@@ -725,6 +737,7 @@ export interface RootRouteChildren {
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
   OSlugRoute: typeof OSlugRoute
+  PostsPostIdRoute: typeof PostsPostIdRoute
   UUsernameRoute: typeof UUsernameRoute
   AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
@@ -1062,6 +1075,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoriesStoryIdRouteImport
       parentRoute: typeof StoriesRoute
     }
+    '/posts/$postId': {
+      id: '/posts/$postId'
+      path: '/posts/$postId'
+      fullPath: '/posts/$postId'
+      preLoaderRoute: typeof PostsPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/o/$slug': {
       id: '/o/$slug'
       path: '/o/$slug'
@@ -1186,6 +1206,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
   OSlugRoute: OSlugRoute,
+  PostsPostIdRoute: PostsPostIdRoute,
   UUsernameRoute: UUsernameRoute,
   AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,

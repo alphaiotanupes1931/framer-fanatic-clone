@@ -180,28 +180,40 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
       </header>
       {post.content && (
         (post.post_type === "text" && post.bg_color) ? (
-          <div
-            className="mx-4 my-3 rounded-2xl p-6 text-center text-lg font-medium whitespace-pre-wrap break-words sm:mx-6 sm:text-xl"
+          <Link
+            to="/posts/$postId"
+            params={{ postId: post.id }}
+            className="mx-4 my-3 block rounded-2xl p-6 text-center text-lg font-medium whitespace-pre-wrap break-words sm:mx-6 sm:text-xl"
             style={{ background: post.bg_color, color: post.text_color || "#fff" }}
           >
             {post.content}
-          </div>
+          </Link>
         ) : (
-          <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground sm:px-6 sm:py-4 sm:text-[17px]">{post.content}</div>
+          <Link
+            to="/posts/$postId"
+            params={{ postId: post.id }}
+            className="block px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-4 sm:text-[17px]"
+          >
+            {post.content}
+          </Link>
         )
       )}
       {post.image_url && (
-        <button type="button" onClick={() => setLightbox(true)} className="block w-full overflow-hidden focus:outline-none">
+        <Link
+          to="/posts/$postId"
+          params={{ postId: post.id }}
+          className="block w-full overflow-hidden focus:outline-none"
+        >
           <img
             src={post.image_url}
             alt=""
-            className="w-full cursor-zoom-in"
+            className="w-full cursor-pointer"
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
-        </button>
+        </Link>
       )}
       {post.video_url && (
         <video
