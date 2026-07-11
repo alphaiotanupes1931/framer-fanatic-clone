@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Clock, Heart, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { stripHtml } from "@/lib/text-utils";
+import { stripHtml, timeAgo } from "@/lib/text-utils";
 
 type Story = {
   id: string;
@@ -15,6 +15,7 @@ type Story = {
   author_name?: string;
   author_avatar?: string | null;
   category?: string | null;
+  created_at?: string | null;
 };
 
 export function StoryCard({ story, featured = false }: { story: Story; featured?: boolean }) {
@@ -47,7 +48,8 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
             <div className="flex min-w-0 items-center gap-2 text-[10px] text-muted-foreground sm:text-xs">
               <span className="truncate font-medium text-foreground">{story.author_name}</span>
               <span>·</span>
-              <span>{story.read_minutes || 5} min</span>
+              {story.created_at && <><span>{timeAgo(story.created_at)}</span><span>·</span></>}
+              <span>{story.read_minutes || 5} min read</span>
             </div>
           </div>
         </div>
@@ -71,7 +73,8 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
         <h3 className="line-clamp-2 font-serif text-lg font-extrabold leading-snug text-slate-950 transition-colors group-hover:text-[#d4580a] break-words">{story.title}</h3>
         {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-slate-500 break-words">{cleanExcerpt}</p>}
         <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs leading-none text-slate-500">
-          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{story.read_minutes || 5} min</span>
+          {story.created_at && <span>{timeAgo(story.created_at)}</span>}
+          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{story.read_minutes || 5} min read</span>
           <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" />{story.likes_count || 0}</span>
           <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{story.comments_count || 0}</span>
         </div>
