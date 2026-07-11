@@ -842,12 +842,11 @@ function StoriesRotation() {
             </div>
           </div>
           <div className="text-ink">
-            <a
-              href={`/stories/${s.id}`}
-              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] hover:underline underline-offset-8 decoration-2 line-clamp-2 break-words"
+            <div
+              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] line-clamp-2 break-words"
             >
               {s.title || "Untitled story"}
-            </a>
+            </div>
             {s.excerpt && (
               <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl line-clamp-4 break-words">
                 {stripHtml(s.excerpt)}
