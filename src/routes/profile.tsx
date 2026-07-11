@@ -17,6 +17,7 @@ import {
 } from "@/lib/stripe.functions";
 import { tabsForCategory } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
+import { FollowListDialog } from "@/components/follow-list-dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -47,6 +48,7 @@ function ProfilePage() {
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
   const [msgOpen, setMsgOpen] = useState(false);
+  const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
@@ -196,10 +198,19 @@ function ProfilePage() {
 
           <div className="mt-5 grid grid-cols-4 gap-2 text-center text-xs sm:flex sm:gap-8 sm:text-left sm:text-sm">
             <div><div className="text-base font-bold sm:text-lg">{stats.posts}</div><div className="text-muted-foreground">Posts</div></div>
-            <div><div className="text-base font-bold sm:text-lg">{stats.followers}</div><div className="text-muted-foreground">Followers</div></div>
-            <div><div className="text-base font-bold sm:text-lg">{stats.following}</div><div className="text-muted-foreground">Following</div></div>
+            <button type="button" onClick={() => setFollowList("followers")} className="hover:text-[#d4580a]"><div className="text-base font-bold sm:text-lg">{stats.followers}</div><div className="text-muted-foreground">Followers</div></button>
+            <button type="button" onClick={() => setFollowList("following")} className="hover:text-[#d4580a]"><div className="text-base font-bold sm:text-lg">{stats.following}</div><div className="text-muted-foreground">Following</div></button>
             <div><div className="text-base font-bold sm:text-lg">0</div><div className="text-muted-foreground">Referrals</div></div>
           </div>
+
+          {profile && followList && (
+            <FollowListDialog
+              open
+              onOpenChange={(open) => { if (!open) setFollowList(null); }}
+              profileId={profile.id}
+              mode={followList}
+            />
+          )}
 
           {followerPreview.length > 0 && (
             <div className="mt-3 pb-3 border-b border-border">

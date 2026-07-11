@@ -88,7 +88,7 @@ function DiscoverPage() {
         {show("Events") && fEvents.length > 0 && (
           <section>
             <SectionHead icon={TrendingUp} title="Trending Events" to="/events" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="mx-auto flex max-w-2xl flex-col gap-4">
               {fEvents.slice(0, 4).map((e) => <EventCard key={e.id} event={{ ...e, venue_name: e.location }} />)}
             </div>
           </section>
@@ -97,7 +97,7 @@ function DiscoverPage() {
         {show("Artists") && fArtists.length > 0 && (
           <section>
             <SectionHead icon={Sparkles} title="Artists to Follow" to="/artists" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+             <div className="mx-auto flex max-w-2xl flex-col gap-3">
               {fArtists.slice(0, 6).map((a) => (
                 <Link key={a.id} to="/u/$username" params={{ username: a.username || a.id }}
                   className="bg-card border border-border rounded-xl p-4 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
@@ -116,7 +116,7 @@ function DiscoverPage() {
         {show("Communities") && fGroups.length > 0 && (
           <section>
             <SectionHead icon={Users} title="Communities" to="/groups" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+             <div className="mx-auto flex max-w-2xl flex-col gap-3">
               {fGroups.slice(0, 6).map((g) => <OrgRow key={g.id} o={g} />)}
             </div>
           </section>
@@ -125,7 +125,7 @@ function DiscoverPage() {
         {show("Businesses") && fBiz.length > 0 && (
           <section>
             <SectionHead icon={Building2} title="Businesses" to="/businesses" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+             <div className="mx-auto flex max-w-2xl flex-col gap-3">
               {fBiz.slice(0, 6).map((b) => (
                 <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }}
                   className="bg-card border border-border rounded-xl p-4 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
@@ -144,7 +144,7 @@ function DiscoverPage() {
         {show("Stories") && fStories.length > 0 && (
           <section>
             <SectionHead icon={BookOpen} title="Trending Stories" to="/stories" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="mx-auto flex max-w-2xl flex-col gap-4">
               {fStories.slice(0, 4).map((s) => <StoryCard key={s.id} story={s as never} />)}
             </div>
           </section>
@@ -153,7 +153,7 @@ function DiscoverPage() {
         {show("Neighborhoods") && fNbh.length > 0 && (
           <section>
             <SectionHead icon={MapPin} title="Neighborhoods" to="/neighborhoods" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+             <div className="mx-auto flex max-w-2xl flex-col gap-3">
               {fNbh.slice(0, 12).map((n) => (
                 <Link key={n.id} to="/neighborhoods"
                   className="bg-card border border-border rounded-xl p-3 hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +11,7 @@ import { PostCard } from "@/components/shared/post-card";
 import { StoryCard } from "@/components/shared/story-card";
 import { EventCard } from "@/components/shared/event-card";
 import { MessageAllButton } from "@/components/message-all-button";
+import { FollowListDialog } from "@/components/follow-list-dialog";
 
 type PublicProfile = {
   id: string;
@@ -33,6 +35,7 @@ function PublicProfilePage() {
   const { username } = Route.useParams();
   const me = useCurrentProfile();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
@@ -43,6 +46,7 @@ function PublicProfilePage() {
   const [stories, setStories] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
+  const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,14 +103,17 @@ function PublicProfilePage() {
     setWorking(true);
     try {
       if (isFollowing) {
-        await supabase.from("follows").delete().eq("follower_id", me.id).eq("following_id", profile.id);
+        const { error } = await supabase.from("follows").delete().eq("follower_id", me.id).eq("following_id", profile.id);
+        if (error) throw error;
         setIsFollowing(false);
         setStats((s) => ({ ...s, followers: Math.max(0, s.followers - 1) }));
       } else {
-        await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id });
+        const { error } = await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id });
+        if (error) throw error;
         setIsFollowing(true);
         setStats((s) => ({ ...s, followers: s.followers + 1 }));
       }
+      await queryClient.invalidateQueries({ queryKey: ["follows", me.id] });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not update follow");
     } finally {
@@ -250,9 +257,18 @@ function PublicProfilePage() {
 
           <div className="mt-6 flex flex-wrap gap-6 text-sm">
             <div><span className="font-semibold text-foreground">{stats.posts}</span> <span className="text-muted-foreground">posts</span></div>
-            <div><span className="font-semibold text-foreground">{stats.followers}</span> <span className="text-muted-foreground">followers</span></div>
-            <div><span className="font-semibold text-foreground">{stats.following}</span> <span className="text-muted-foreground">following</span></div>
+            <button type="button" onClick={() => setFollowList("followers")} className="hover:text-orange"><span className="font-semibold text-foreground">{stats.followers}</span> <span className="text-muted-foreground">followers</span></button>
+            <button type="button" onClick={() => setFollowList("following")} className="hover:text-orange"><span className="font-semibold text-foreground">{stats.following}</span> <span className="text-muted-foreground">following</span></button>
           </div>
+
+          {followList && (
+            <FollowListDialog
+              open
+              onOpenChange={(open) => { if (!open) setFollowList(null); }}
+              profileId={profile.id}
+              mode={followList}
+            />
+          )}
 
           {profile.bio && (
             <p className="mt-6 max-w-2xl whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
