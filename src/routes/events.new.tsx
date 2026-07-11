@@ -160,7 +160,11 @@ function NewEventPage() {
           </button>
         </div>
 
-        {/* Flyer */}
+        <p className="text-xs text-neutral-500 mb-4">
+          Fields marked with <span className="text-[#d4580a]">*</span> are required. Everything else is optional.
+        </p>
+
+        {/* Flyer (optional) */}
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
@@ -171,7 +175,7 @@ function NewEventPage() {
           ) : uploading ? (
             <><Loader2 className="w-6 h-6 animate-spin mb-2" /><span className="text-sm">Uploading…</span></>
           ) : (
-            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Add event flyer</span></>
+            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Add event flyer</span><span className="text-xs text-neutral-400 mt-0.5">Optional</span></>
           )}
           <input
             ref={fileRef}
