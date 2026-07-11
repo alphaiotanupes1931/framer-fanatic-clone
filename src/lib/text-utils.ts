@@ -14,3 +14,11 @@ export function stripHtml(s: string | null | undefined): string {
     .replace(/\s+/g, " ")
     .trim();
 }
+
+export function truncateText(s: string | null | undefined, maxLen: number): string {
+  const text = stripHtml(s);
+  if (!text) return "";
+  if (text.length <= maxLen) return text;
+  const trimmed = text.slice(0, maxLen).replace(/\s+\S*$/, "");
+  return trimmed.trim() + "...";
+}
