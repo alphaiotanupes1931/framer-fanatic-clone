@@ -5,7 +5,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
-import { Play, Search, Star, Plus, X } from "lucide-react";
+import { Play, Search, Star, Plus, X, Upload } from "lucide-react";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
@@ -77,6 +77,8 @@ function VideosSignedIn() {
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
   const [form, setForm] = useState({ title: "", description: "", video_url: "", thumbnail_url: "" });
   const [loaded, setLoaded] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
 
   const load = async () => {
     const { data } = await supabase.from("videos").select("*").order("created_at", { ascending: false }).limit(50);
@@ -92,6 +94,30 @@ function VideosSignedIn() {
   };
   useEffect(() => { load(); }, []);
 
+  const handleFileUpload = async (file: File) => {
+    if (!me) { toast.error("Please sign in"); return; }
+    if (!file.type.startsWith("video/")) { toast.error("Please choose a video file"); return; }
+    const cap = 100 * 1024 * 1024;
+    if (file.size > cap) { toast.error("Video must be under 100MB"); return; }
+    setLocalPreview(URL.createObjectURL(file));
+    setUploading(true);
+    const tId = toast.loading("Uploading video...");
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
+      setForm((f) => ({ ...f, video_url: signed.signedUrl }));
+      toast.success("Video uploaded", { id: tId });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed", { id: tId });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const filtered = vids.filter((v) => v.title.toLowerCase().includes(query.toLowerCase()));
   const featured = filtered.filter((v) => v.featured);
   const rest = filtered.filter((v) => !v.featured);
@@ -104,6 +130,7 @@ function VideosSignedIn() {
     });
     if (error) { toast.error(error.message); return; }
     setOpen(false); setForm({ title: "", description: "", video_url: "", thumbnail_url: "" });
+    setLocalPreview(null);
     toast.success("Video added"); load();
   };
 
@@ -181,10 +208,22 @@ function VideosSignedIn() {
             </div>
             <div className="space-y-3">
               <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              <label className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-6 text-sm text-neutral-600 hover:border-orange-400 hover:bg-orange-50 ${uploading ? "opacity-60 pointer-events-none" : "cursor-pointer"}`}>
+                <Upload className="h-5 w-5 text-orange-600" />
+                <span className="font-semibold">{uploading ? "Uploading..." : "Upload video file"}</span>
+                <span className="text-xs text-neutral-500">MP4, MOV, WebM up to 100MB</span>
+                <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
+              </label>
+              {localPreview && (
+                <video src={localPreview} controls className="w-full rounded-lg border border-neutral-200 max-h-56 bg-black" />
+              )}
+              <div className="relative flex items-center gap-2 text-[11px] uppercase tracking-wider text-neutral-400">
+                <span className="h-px flex-1 bg-neutral-200" /> or paste a URL <span className="h-px flex-1 bg-neutral-200" />
+              </div>
               <input value={form.video_url} onChange={(e) => setForm({...form, video_url: e.target.value})} placeholder="Video URL (YouTube, Vimeo, mp4)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <input value={form.thumbnail_url} onChange={(e) => setForm({...form, thumbnail_url: e.target.value})} placeholder="Thumbnail URL (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-              <button onClick={submit} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">Add</button>
+              <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim()} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
             </div>
           </div>
         </div>
