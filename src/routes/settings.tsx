@@ -303,7 +303,7 @@ function NotificationsSection() {
       { k: "push_tickets", label: "Ticket sales", sub: "Show a notification when someone buys a ticket to your event." },
     ]},
     { title: "Digest", items: [
-      { k: "digest_weekly", label: "Weekly Baltimore digest", sub: "A summary of the week in Baltimore - top Artists, events, and stories." },
+      { k: "digest_weekly", label: "Weekly Baltimore digest", sub: "A summary of the week in Baltimore: top artists, events, and stories." },
     ]},
   ];
 

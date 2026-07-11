@@ -82,7 +82,7 @@ function NeighborhoodsPage() {
   if (auth.loading) return null;
   if (!auth.signedIn) {
     return (
-      <PublicShell title="Neighborhoods" subtitle="Every corner of Baltimore - from Hampden to Highlandtown." signedIn={false}>
+      <PublicShell title="Neighborhoods" subtitle="Every corner of Baltimore, from Hampden to Highlandtown." signedIn={false}>
         <PreviewGrid
           items={list}
           unlockedCount={3}
