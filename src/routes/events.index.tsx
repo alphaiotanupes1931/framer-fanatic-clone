@@ -156,7 +156,7 @@ function EventsPage() {
         {dataLoading ? (
           <div className="text-paper/60 text-sm">Loading events…</div>
         ) : events.length === 0 ? (
-          <div className="text-paper/60 text-sm">No upcoming events yet - sign up to be the first to post one.</div>
+          <div className="text-paper/60 text-sm">No upcoming events yet. Sign up to be the first to post one.</div>
         ) : (
           <>
             {next && (
