@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -34,6 +35,7 @@ function PublicProfilePage() {
   const { username } = Route.useParams();
   const me = useCurrentProfile();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
@@ -111,6 +113,7 @@ function PublicProfilePage() {
         setIsFollowing(true);
         setStats((s) => ({ ...s, followers: s.followers + 1 }));
       }
+      await queryClient.invalidateQueries({ queryKey: ["follows", me.id] });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not update follow");
     } finally {
