@@ -34,18 +34,21 @@ export type Database = {
       }
       conversation_members: {
         Row: {
+          cleared_at: string | null
           conversation_id: string
           joined_at: string
           last_read_at: string
           user_id: string
         }
         Insert: {
+          cleared_at?: string | null
           conversation_id: string
           joined_at?: string
           last_read_at?: string
           user_id: string
         }
         Update: {
+          cleared_at?: string | null
           conversation_id?: string
           joined_at?: string
           last_read_at?: string
@@ -63,6 +66,8 @@ export type Database = {
       }
       conversations: {
         Row: {
+          cleared_at_a: string | null
+          cleared_at_b: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -76,6 +81,8 @@ export type Database = {
           user_b: string | null
         }
         Insert: {
+          cleared_at_a?: string | null
+          cleared_at_b?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -89,6 +96,8 @@ export type Database = {
           user_b?: string | null
         }
         Update: {
+          cleared_at_a?: string | null
+          cleared_at_b?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -273,6 +282,7 @@ export type Database = {
           content: string
           conversation_id: string
           created_at: string
+          deleted_for: string[]
           id: string
           sender_id: string
         }
@@ -280,6 +290,7 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
+          deleted_for?: string[]
           id?: string
           sender_id: string
         }
@@ -287,6 +298,7 @@ export type Database = {
           content?: string
           conversation_id?: string
           created_at?: string
+          deleted_for?: string[]
           id?: string
           sender_id?: string
         }

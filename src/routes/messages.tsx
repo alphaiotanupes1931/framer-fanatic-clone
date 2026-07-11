@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MessageSquare, Plus, Search, Send, Users, X } from "lucide-react";
+import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/messages")({
@@ -31,6 +31,9 @@ type Conv = {
   title?: string | null;
   created_by?: string | null;
   my_last_read?: string | null;
+  cleared_at_a?: string | null;
+  cleared_at_b?: string | null;
+  my_cleared_at?: string | null;
   other?: Profile;
   unread?: boolean;
 };
@@ -41,6 +44,7 @@ type Msg = {
   sender_id: string;
   content: string;
   created_at: string;
+  deleted_for?: string[] | null;
 };
 
 function initials(p?: Profile | null) {
@@ -119,10 +123,23 @@ function MessagesPage() {
         .eq("is_group", true);
       groups = ((g || []) as Conv[]).map((c) => ({ ...c, my_last_read: readByConv.get(c.id) || null }));
     }
+    const clearedByConv = new Map<string, string | null>((memberships || []).map((m: { conversation_id: string; cleared_at?: string | null }) => [m.conversation_id, m.cleared_at ?? null]));
     const seen = new Set<string>();
     const merged = [...(direct as Conv[] || []), ...groups].filter((c) => (seen.has(c.id) ? false : (seen.add(c.id), true)));
-    merged.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
-    const list = merged;
+    // Attach my_cleared_at for each conversation
+    const withCleared = merged.map((c) => {
+      const myCleared = c.is_group
+        ? clearedByConv.get(c.id) || null
+        : (c.user_a === me.id ? c.cleared_at_a : c.cleared_at_b) || null;
+      return { ...c, my_cleared_at: myCleared };
+    });
+    // Hide chats the user cleared and no new activity since
+    const visible = withCleared.filter((c) => {
+      if (!c.my_cleared_at) return true;
+      return new Date(c.last_message_at).getTime() > new Date(c.my_cleared_at).getTime();
+    });
+    visible.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+    const list = visible;
     const otherIds = list
       .filter((c) => !c.is_group)
       .map((c) => (c.user_a === me.id ? c.user_b : c.user_a))
@@ -153,8 +170,52 @@ function MessagesPage() {
       .select("*")
       .eq("conversation_id", c.id)
       .order("created_at");
-    setMsgs((data || []) as Msg[]);
+    const meId = (await supabase.auth.getUser()).data.user?.id;
+    const cleared = c.my_cleared_at ? new Date(c.my_cleared_at).getTime() : 0;
+    const filtered = ((data || []) as Msg[]).filter((m) => {
+      if (Array.isArray(m.deleted_for) && meId && m.deleted_for.includes(meId)) return false;
+      if (cleared && new Date(m.created_at).getTime() <= cleared) return false;
+      return true;
+    });
+    setMsgs(filtered);
   }, []);
+
+  const deleteChat = useCallback(
+    async (c: Conv) => {
+      if (!me) return;
+      if (!confirm("Delete this chat for you? It won't be removed for the other person.")) return;
+      const now = new Date().toISOString();
+      if (c.is_group) {
+        await supabase
+          .from("conversation_members")
+          .update({ cleared_at: now })
+          .eq("conversation_id", c.id)
+          .eq("user_id", me.id);
+      } else {
+        const patch = c.user_a === me.id ? { cleared_at_a: now } : { cleared_at_b: now };
+        await supabase.from("conversations").update(patch).eq("id", c.id);
+      }
+      setConvs((prev) => prev.filter((row) => row.id !== c.id));
+      if (active?.id === c.id) setActive(null);
+      toast.success("Chat deleted for you");
+    },
+    [me, active],
+  );
+
+  const deleteMessage = useCallback(
+    async (m: Msg) => {
+      if (!me) return;
+      if (!confirm("Delete this message for you? It won't be removed for others.")) return;
+      const next = Array.from(new Set([...(m.deleted_for || []), me.id]));
+      const { error } = await supabase
+        .from("messages")
+        .update({ deleted_for: next })
+        .eq("id", m.id);
+      if (error) { toast.error(error.message); return; }
+      setMsgs((prev) => prev.filter((x) => x.id !== m.id));
+    },
+    [me],
+  );
 
   const markRead = useCallback(
     async (c: Conv) => {
@@ -406,12 +467,15 @@ function MessagesPage() {
               </div>
             ) : (
               filteredConvs.map((c) => (
-                <button
+                <div
                   key={c.id}
-                  onClick={() => setActive(c)}
-                  className={`flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left transition hover:bg-muted ${
+                  className={`group relative flex w-full items-center border-b border-border transition hover:bg-muted ${
                     active?.id === c.id ? "bg-muted" : ""
                   }`}
+                >
+                <button
+                  onClick={() => setActive(c)}
+                  className="flex flex-1 items-center gap-3 px-4 py-3 text-left"
                 >
                   <Avatar className="h-10 w-10">
                     {!c.is_group && c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
@@ -442,6 +506,15 @@ function MessagesPage() {
                     </div>
                   </div>
                 </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); void deleteChat(c); }}
+                    className="mr-2 rounded-full p-2 text-muted-foreground opacity-0 transition hover:bg-background hover:text-destructive group-hover:opacity-100"
+                    aria-label="Delete chat"
+                    title="Delete chat for me"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               ))
             )}
           </div>
@@ -521,7 +594,7 @@ function MessagesPage() {
                   return (
                     <div
                       key={m.id}
-                      className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
+                      className={`group/msg flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
                     >
                       {!mine && (
                         <div className="w-7 shrink-0">
@@ -536,6 +609,16 @@ function MessagesPage() {
                             </Avatar>
                           )}
                         </div>
+                      )}
+                      {mine && (
+                        <button
+                          onClick={() => void deleteMessage(m)}
+                          className="mb-2 rounded-full p-1.5 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-destructive group-hover/msg:opacity-100"
+                          aria-label="Delete message"
+                          title="Delete for me"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       )}
                       <div
                         className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${
@@ -553,6 +636,16 @@ function MessagesPage() {
                           {formatWhen(m.created_at)}
                         </div>
                       </div>
+                      {!mine && (
+                        <button
+                          onClick={() => void deleteMessage(m)}
+                          className="mb-2 rounded-full p-1.5 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-destructive group-hover/msg:opacity-100"
+                          aria-label="Delete message"
+                          title="Delete for me"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
