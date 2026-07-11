@@ -357,18 +357,7 @@ function StoriesSignedIn() {
                   )}
                 </div>
               </div>
-              {s.cover_url && (
-                <Link to="/stories/$storyId" params={{ storyId: s.id }} className="shrink-0">
-                  <img
-                    src={s.cover_url}
-                    alt=""
-                    className="h-24 w-32 rounded-lg object-cover bg-muted"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = "none"; }}
-                  />
-                </Link>
-              )}
+              <StoryCover storyId={s.id} url={s.cover_url} />
             </article>
           ))}
         </div>
