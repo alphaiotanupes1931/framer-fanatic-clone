@@ -44,7 +44,9 @@ function CreateStoryPage() {
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("story-covers").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      set("cover_url", path);
+      const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
+      set("cover_url", signed.signedUrl);
       toast.success("Cover uploaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -121,10 +123,27 @@ function CreateStoryPage() {
                 className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) onPickCover(f); }}
               />
-              <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full">
-                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
-                {form.cover_url ? "Replace cover" : "Upload cover"}
-              </Button>
+              {form.cover_url ? (
+                <div className="overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
+                  <img src={form.cover_url} alt="Cover preview" className="max-h-64 w-full object-cover" />
+                  <div className="flex items-center justify-between px-3 py-2 text-xs text-neutral-600">
+                    <span className="truncate">Preview</span>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs font-medium hover:bg-neutral-100">
+                        Replace
+                      </button>
+                      <button type="button" onClick={() => set("cover_url", "")} className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full">
+                  {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+                  Upload cover
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex justify-end">
