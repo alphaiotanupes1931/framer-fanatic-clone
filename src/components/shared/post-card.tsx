@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp } from "lucide-react";
+import { Flag } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { X } from "lucide-react";
+import { ReportDialog } from "@/components/report-dialog";
 
 type Post = {
   id: string;
@@ -46,6 +48,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string }[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
+  const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -163,20 +166,25 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
             {post.neighborhood_name || post.neighborhood || "Baltimore"} · {timeAgo(post.created_at)}
           </div>
         </div>
-        {isMine && onDelete && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {isMine && onDelete && (
               <DropdownMenuItem className="text-destructive" onSelect={() => onDelete(post.id)}>
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+            )}
+            {!isMine && (
+              <DropdownMenuItem onSelect={() => setReportOpen(true)}>
+                <Flag className="mr-2 h-4 w-4" /> Report
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
       {post.content && (
         (post.post_type === "text" && post.bg_color) ? (
@@ -297,6 +305,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </div>
         </div>
       )}
+      <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
     </article>
   );
 }
