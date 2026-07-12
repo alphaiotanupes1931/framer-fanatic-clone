@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,6 +49,7 @@ function ProfilePage() {
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
   const [msgOpen, setMsgOpen] = useState(false);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
