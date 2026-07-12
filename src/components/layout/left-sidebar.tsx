@@ -2,7 +2,7 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
-  BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic, ShoppingBag,
+  BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic, ShoppingBag, Flag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +14,7 @@ import { FileText, Sparkles, Palette as PaletteIcon, Building2 as BusinessIcon, 
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useUserRole } from "@/hooks/use-user-role";
 import { useSidebar } from "./sidebar-context";
 
 // Route-path map: repo path -> this app's existing TanStack route.
@@ -57,6 +58,7 @@ export function LeftSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const { unreadMessages, unreadNotifications } = useUnreadCounts();
   const { user } = useCurrentUser();
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -68,6 +70,10 @@ export function LeftSidebar() {
   };
 
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
+
+  const visibleNavItems = isAdmin
+    ? [...navItems, { icon: Flag, label: "Content Reports", to: "/admin/reports" } as NavItem]
+    : navItems;
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -116,7 +122,7 @@ export function LeftSidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2 sm:px-3">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const active = isActive(item.to);
             const Icon = item.icon;
             const badge = item.label === "Notifications" ? unreadNotifications : item.label === "Messages" ? unreadMessages : 0;
