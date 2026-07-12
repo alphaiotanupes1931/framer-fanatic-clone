@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,6 +49,7 @@ function ProfilePage() {
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
   const [msgOpen, setMsgOpen] = useState(false);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
@@ -123,10 +124,24 @@ function ProfilePage() {
           className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
           style={profile?.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         >
-          <label className="absolute bottom-2 right-2 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-black/80 sm:bottom-3 sm:right-3 sm:px-4 sm:py-2 sm:text-xs">
+          <button
+            type="button"
+            onClick={() => bannerInputRef.current?.click()}
+            className="absolute bottom-2 right-2 z-10 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-black/80 sm:bottom-3 sm:right-3 sm:px-4 sm:py-2 sm:text-xs"
+          >
             <Camera className="h-3.5 w-3.5" /> {profile?.banner_url ? "Change banner" : "Add banner"}
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadBanner(e.target.files[0])} />
-          </label>
+          </button>
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void uploadBanner(f);
+              e.target.value = "";
+            }}
+          />
         </div>
 
         <div className="relative px-4 pb-6 sm:px-6">
