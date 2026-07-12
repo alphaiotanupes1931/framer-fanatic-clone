@@ -72,7 +72,7 @@ export function LeftSidebar() {
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
   const visibleNavItems = isAdmin
-    ? [...navItems, { icon: Flag, label: "Content Reports", to: "/admin/reports" } as NavItem]
+    ? [...navItems, { icon: Flag, label: "Content Reports", to: "/reports" } as NavItem]
     : navItems;
 
   return (
