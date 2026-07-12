@@ -821,7 +821,7 @@ function StoriesRotation() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center"
         >
-          <div className="relative mx-auto lg:mx-0 w-full max-w-[340px] sm:max-w-[400px]">
+          <Link to="/stories/$storyId" params={{ storyId: s.id }} className="relative mx-auto lg:mx-0 w-full max-w-[340px] sm:max-w-[400px] group">
             <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] bg-ink/5">
               {s.cover_url ? (
                 <img
@@ -829,7 +829,7 @@ function StoriesRotation() {
                   alt={s.title ?? ""}
                   loading="lazy"
                   decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
                 />
               ) : s.author_avatar ? (
                 <img src={s.author_avatar} alt={s.author_name ?? ""} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
@@ -839,13 +839,15 @@ function StoriesRotation() {
                 </div>
               )}
             </div>
-          </div>
+          </Link>
           <div className="text-ink">
-            <div
-              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] line-clamp-2 break-words"
+            <Link
+              to="/stories/$storyId"
+              params={{ storyId: s.id }}
+              className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] line-clamp-2 break-words hover:underline"
             >
               {s.title || "Untitled story"}
-            </div>
+            </Link>
             {s.excerpt && (
               <p className="mt-5 md:mt-7 text-ink/70 text-base md:text-lg leading-relaxed max-w-2xl break-words">
                 {`${truncateText(s.excerpt, 120).replace(/\.{3}$/, "")}...`}
