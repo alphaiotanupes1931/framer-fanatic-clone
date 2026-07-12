@@ -135,8 +135,8 @@ function StoryDetail() {
           {story.excerpt && <p className="mt-3 text-lg text-muted-foreground break-words">{story.excerpt}</p>}
         </div>
         {story.cover_url && (
-          <div className="mt-6 aspect-[16/9] w-full overflow-hidden bg-secondary">
-            <img src={story.cover_url} alt={story.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+          <div className="mt-6 w-full overflow-hidden bg-black">
+            <img src={story.cover_url} alt={story.title} className="mx-auto block max-h-[85vh] w-full object-contain" loading="lazy" decoding="async" />
           </div>
         )}
         <div className="px-5 pb-6 md:px-8 md:pb-8">
