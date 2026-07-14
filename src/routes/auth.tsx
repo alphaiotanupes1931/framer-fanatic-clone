@@ -27,7 +27,7 @@ function AuthPage() {
   const [showSignInPw, setShowSignInPw] = useState(false);
   const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
-  const [role, setRole] = useState<"artist" | "attendee" | "resident" | "visitor">("attendee");
+  const [role, setRole] = useState<"artist" | "resident" | "visitor">("resident");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -66,7 +66,7 @@ function AuthPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalRole = role === "artist" ? "artist" : "attendee";
+    const finalRole = role;
     const profileCategory =
       role === "resident" ? "Resident" :
       role === "visitor"  ? "Visitor"  :
@@ -88,7 +88,9 @@ function AuthPage() {
     toast.success(
       finalRole === "artist"
         ? "Account created. Welcome, Artist!"
-        : "Account created as an Attendee.",
+        : finalRole === "visitor"
+          ? "Account created as a Visitor."
+          : "Account created as a Resident.",
     );
     if (finalRole === "artist") {
       try { await becomeArtistFn(); } catch { /* harmless - they can also upgrade from profile */ }
