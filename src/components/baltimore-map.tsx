@@ -169,7 +169,7 @@ export function BaltimoreMap({
                 {g.list.length > 1 ? `${g.list.length} events here` : g.list[0].title}
               </span>
             </Tooltip>
-            <Popup maxWidth={280} minWidth={240}>
+            <Popup maxWidth={300} minWidth={280} className="event-map-popup">
               <EventPopup list={g.list} onSelectEvent={onSelectEvent} />
             </Popup>
           </CircleMarker>
@@ -198,83 +198,94 @@ function EventPopup({
   const prev = () => setIdx((i) => (i - 1 + list.length) % list.length);
   const next = () => setIdx((i) => (i + 1) % list.length);
   return (
-    <div className="w-[240px]">
-      {e.image_url && (
-        <div className="relative -mx-3 -mt-3 mb-2 h-28 overflow-hidden rounded-t-md bg-neutral-100">
+    <div className="event-map-popup-inner w-[260px] overflow-hidden">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-orange-100 to-orange-50">
+        {e.image_url ? (
           <img src={e.image_url} alt={e.title} className="h-full w-full object-cover" />
-          {multi && (
-            <div className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white">
-              {idx + 1} / {list.length}
-            </div>
-          )}
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <Calendar className="h-10 w-10 text-orange-400/70" />
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/60 to-transparent" />
+        {multi && (
+          <div className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+            {idx + 1} / {list.length}
+          </div>
+        )}
+        <div className="absolute bottom-2 left-2 right-2">
+          <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-white/90">
+            <Calendar className="h-3 w-3" />
+            {new Date(e.starts_at).toLocaleString(undefined, {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            })}
+            <span className="text-white/70">·</span>
+            {new Date(e.starts_at).toLocaleString(undefined, {
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+          </div>
         </div>
-      )}
-      <div className="space-y-1.5">
-        {!e.image_url && multi && (
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
-            {idx + 1} of {list.length} events
+      </div>
+      <div className="space-y-2 p-3">
+        <Link
+          to="/e/$id"
+          params={{ id: e.id }}
+          onClick={() => onSelectEvent?.(e)}
+          className="block text-[15px] font-semibold leading-snug text-neutral-900 hover:text-[#d4580a] line-clamp-2"
+        >
+          {e.title}
+        </Link>
+        {e.location && (
+          <div className="flex items-start gap-1.5 text-xs text-neutral-500">
+            <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+            <span className="line-clamp-1">{e.location}</span>
           </div>
         )}
         <Link
           to="/e/$id"
           params={{ id: e.id }}
           onClick={() => onSelectEvent?.(e)}
-          className="block text-sm font-semibold leading-snug text-neutral-900 hover:underline"
+          className="mt-1 flex w-full items-center justify-center rounded-lg bg-[#d4580a] px-3 py-2 text-xs font-semibold text-white hover:bg-[#b8490a] transition"
         >
-          {e.title}
+          View event
         </Link>
-        <div className="flex items-start gap-1.5 text-xs text-neutral-600">
-          <Calendar className="mt-0.5 h-3 w-3 shrink-0" />
-          <span>
-            {new Date(e.starts_at).toLocaleString(undefined, {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-            })}
-          </span>
-        </div>
-        {e.location && (
-          <div className="flex items-start gap-1.5 text-xs text-neutral-500">
-            <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-            <span className="line-clamp-2">{e.location}</span>
+        {multi && (
+          <div className="flex items-center justify-between border-t border-neutral-100 pt-2">
+            <button
+              type="button"
+              onClick={prev}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+              aria-label="Previous event"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="flex gap-1">
+              {list.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setIdx(i)}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === idx ? "w-4 bg-[#d4580a]" : "w-1.5 bg-neutral-300"
+                  }`}
+                  aria-label={`Go to event ${i + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={next}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+              aria-label="Next event"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         )}
       </div>
-      {multi && (
-        <div className="mt-2 flex items-center justify-between border-t border-neutral-200 pt-2">
-          <button
-            type="button"
-            onClick={prev}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-            aria-label="Previous event"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <div className="flex gap-1">
-            {list.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setIdx(i)}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === idx ? "w-4 bg-[#d4580a]" : "w-1.5 bg-neutral-300"
-                }`}
-                aria-label={`Go to event ${i + 1}`}
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={next}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-            aria-label="Next event"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
