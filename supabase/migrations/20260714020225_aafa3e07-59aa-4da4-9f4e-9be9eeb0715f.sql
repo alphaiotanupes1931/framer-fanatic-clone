@@ -1,0 +1,1 @@
+UPDATE public.organizations SET subtype='Restaurant' WHERE type='business' AND subtype='Cafe / Restaurant';
