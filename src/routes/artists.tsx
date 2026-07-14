@@ -66,7 +66,8 @@ function FindCreatorPage() {
 
   const Card = ({ c }: { c: Creator }) => {
     const name = c.display_name ?? c.username ?? "Unnamed creator";
-    const cat = (c.category || c.role || "Artist").replace(/_/g, " ");
+    const rawCat = (c.category || c.role || "Artist").replace(/_/g, " ");
+    const cat = /^attendee$/i.test(rawCat) ? "Resident" : rawCat;
     const [imgError, setImgError] = useState(false);
     return (
       <div className="group h-full overflow-hidden rounded-2xl bg-secondary/40 transition-all duration-200 hover:shadow-lg">
