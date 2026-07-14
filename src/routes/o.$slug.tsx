@@ -36,8 +36,7 @@ type Comment = { id: string; user_id: string; body: string; created_at: string; 
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
-  "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
-  "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments", "About",
+  "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const RESTAURANT_TABS = [
   "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
@@ -62,7 +61,7 @@ function OrgProfile() {
   const { isAdmin } = useUserRole();
   const [me, setMe] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
-  const [tab, setTab] = useState<Tab>("Posts");
+  const [tab, setTab] = useState<Tab>("Feed");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
   const [following, setFollowing] = useState(false);
@@ -123,7 +122,7 @@ function OrgProfile() {
   useEffect(() => {
     if (!org) return;
     setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
-    setTab("Posts");
+    setTab("Feed");
   }, [org]);
 
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
