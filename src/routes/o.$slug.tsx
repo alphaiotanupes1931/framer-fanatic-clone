@@ -404,11 +404,10 @@ function OrgProfile() {
           {tab === "Opportunities" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
           {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
-          {tab === "Posts" && (
-            <div className="py-14 text-center text-sm text-neutral-500">No posts yet in this association.</div>
-          )}
+          {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
-          {(["Announcements","Calendar","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
+          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} coming soon.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
