@@ -140,38 +140,47 @@ export function GroupsPage() {
             description="Try a different filter, or start a new group."
           />
         ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((o) => (
               <Link
                 key={o.id}
                 to="/o/$slug"
                 params={{ slug: o.slug }}
-                className="group flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-orange-300 hover:shadow-sm"
+                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
               >
                 <div
-                  className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100"
+                  className="relative h-32 w-full bg-gradient-to-br from-neutral-200 to-neutral-100"
                   style={
-                    o.avatar_url || o.banner_url
-                      ? {
-                          backgroundImage: `url(${o.avatar_url ?? o.banner_url})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }
+                    o.banner_url
+                      ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
                       : undefined
                   }
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
+                >
+                  <div
+                    className="absolute -bottom-6 left-4 h-16 w-16 overflow-hidden rounded-xl bg-neutral-100 ring-4 ring-white"
+                    style={
+                      o.avatar_url
+                        ? { backgroundImage: `url(${o.avatar_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : undefined
+                    }
+                  />
+                </div>
+                <div className="px-4 pb-4 pt-8">
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <div className="truncate text-[17px] font-bold text-neutral-900">{o.name}</div>
-                    <ShieldCheck className="h-4 w-4 text-neutral-400" />
+                    <ShieldCheck className="h-4 w-4 shrink-0 text-orange-500" />
                   </div>
                   {o.subtype && (
-                    <div className="mt-0.5 text-sm text-neutral-500">{prettyLabel(o.subtype)}</div>
+                    <div className="mt-1.5">
+                      <span className="inline-flex items-center rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-semibold text-orange-700">
+                        {prettyLabel(o.subtype)}
+                      </span>
+                    </div>
                   )}
                   {o.bio && (
-                    <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{o.bio}</p>
+                    <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{o.bio}</p>
                   )}
-                  <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-neutral-500">
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
                     {typeof o.member_count === "number" && (
                       <span className="inline-flex items-center gap-1">
                         <Users className="h-3.5 w-3.5" /> {o.member_count} members
@@ -179,7 +188,7 @@ export function GroupsPage() {
                     )}
                     {o.neighborhood && (
                       <span className="inline-flex items-center gap-1">
-                        · <MapPin className="h-3.5 w-3.5" /> {o.neighborhood}
+                        <MapPin className="h-3.5 w-3.5" /> {o.neighborhood}
                       </span>
                     )}
                   </div>
