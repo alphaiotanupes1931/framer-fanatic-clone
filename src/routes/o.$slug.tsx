@@ -36,8 +36,7 @@ type Comment = { id: string; user_id: string; body: string; created_at: string; 
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
-  "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
-  "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments", "About",
+  "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const RESTAURANT_TABS = [
   "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
