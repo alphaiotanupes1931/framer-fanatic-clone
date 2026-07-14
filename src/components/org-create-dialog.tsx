@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Loader2 } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
 import { slugify, subtypesFor, ORG_TYPE_LABEL } from "@/lib/categories";
+import { itemHintsFor } from "@/components/org/price-items-section";
 
 type Neighborhood = { id: string; name: string };
 
@@ -23,6 +24,8 @@ export function OrgCreateDialog({
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
   const subs = subtypesFor(type);
+  type DraftItem = { name: string; price: string; section: string; description: string };
+  const [priceItems, setPriceItems] = useState<DraftItem[]>([]);
   const [form, setForm] = useState({
     name: "",
     tagline: "",
@@ -106,6 +109,29 @@ export function OrgCreateDialog({
         hours: form.hours.trim() ? { text: form.hours.trim() } : null,
       }).select("slug").single();
       if (error) throw error;
+      // Insert any pricing items the user pre-filled during setup
+      const cleanItems = priceItems
+        .map((it) => ({ ...it, name: it.name.trim() }))
+        .filter((it) => it.name.length > 0);
+      if (cleanItems.length && data) {
+        const { data: orgRow } = await supabase.from("organizations").select("id").eq("slug", data.slug).maybeSingle();
+        if (orgRow?.id) {
+          const rows = cleanItems.map((it, i) => {
+            const raw = it.price.trim();
+            const m = raw.match(/^\$?\s*(\d+(?:\.\d{1,2})?)\s*$/);
+            return {
+              organization_id: orgRow.id,
+              name: it.name,
+              description: it.description.trim() || null,
+              price_cents: m ? Math.round(parseFloat(m[1]) * 100) : null,
+              price_label: m ? null : (raw || null),
+              section: it.section.trim() || null,
+              sort_order: i,
+            };
+          });
+          await supabase.from("organization_price_items").insert(rows);
+        }
+      }
       toast.success(`${ORG_TYPE_LABEL[type]} created`);
       onClose();
       navigate({ to: "/o/$slug", params: { slug: data!.slug } });
@@ -115,6 +141,8 @@ export function OrgCreateDialog({
   };
 
   const inputCls = "w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none";
+  const hints = itemHintsFor(form.subtype);
+  const showPricing = type === "business" && form.subtype;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
@@ -242,6 +270,57 @@ export function OrgCreateDialog({
               placeholder="Hours (e.g. Tue-Sun, 10am-5pm)"
               className={inputCls}
             />
+            {showPricing && (
+              <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 p-4">
+                <div className="mb-1 text-[15px] font-semibold text-neutral-900">Pricing</div>
+                <div className="mb-3 text-xs text-neutral-500">
+                  Add a few {hints.itemLabel.toLowerCase()}s and prices so customers know what to expect. You can add more later.
+                </div>
+                <div className="space-y-2">
+                  {priceItems.map((it, idx) => (
+                    <div key={idx} className="rounded-xl border border-neutral-200 bg-white p-3">
+                      <div className="grid gap-2 sm:grid-cols-[1fr,120px]">
+                        <input
+                          value={it.name}
+                          onChange={(e) => setPriceItems((xs) => xs.map((x, i) => i === idx ? { ...x, name: e.target.value } : x))}
+                          placeholder={`${hints.itemLabel} — ${hints.exampleName}`}
+                          className="w-full rounded-md border border-neutral-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
+                        />
+                        <input
+                          value={it.price}
+                          onChange={(e) => setPriceItems((xs) => xs.map((x, i) => i === idx ? { ...x, price: e.target.value } : x))}
+                          placeholder="Price"
+                          className="w-full rounded-md border border-neutral-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
+                        />
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          value={it.section}
+                          onChange={(e) => setPriceItems((xs) => xs.map((x, i) => i === idx ? { ...x, section: e.target.value } : x))}
+                          placeholder={`Section (optional) — ${hints.exampleSection}`}
+                          className="w-full rounded-md border border-neutral-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPriceItems((xs) => xs.filter((_, i) => i !== idx))}
+                          className="rounded-md p-2 text-neutral-500 hover:bg-red-50 hover:text-red-600"
+                          aria-label="Remove"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPriceItems((xs) => [...xs, { name: "", price: "", section: "", description: "" }])}
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-neutral-700 hover:border-orange-300 hover:text-[#d4580a]"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add {hints.itemLabel.toLowerCase()}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

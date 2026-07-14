@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
+import { PriceItemsSection } from "@/components/org/price-items-section";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
@@ -430,8 +431,7 @@ function OrgProfile() {
                 <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">No specials posted today.</div>
               </section>
               <section>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><List className="h-5 w-5 text-[#d4580a]" /> Menu</h3>
-                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">Menu coming soon.</div>
+                <PriceItemsSection orgId={org.id} subtype={org.subtype} canManage={canManage} title="Menu" />
               </section>
               <section>
                 <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Megaphone className="h-5 w-5 text-[#d4580a]" /> Posts & Updates</h3>
@@ -443,8 +443,7 @@ function OrgProfile() {
           {tab === "Services" && (
             <div className="space-y-10">
               <section>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Briefcase className="h-5 w-5 text-[#d4580a]" /> Services & Pricing</h3>
-                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">No services listed yet.</div>
+                <PriceItemsSection orgId={org.id} subtype={org.subtype} canManage={canManage} title="Services & Pricing" />
               </section>
               <section>
                 <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Megaphone className="h-5 w-5 text-[#d4580a]" /> Posts & Updates</h3>
