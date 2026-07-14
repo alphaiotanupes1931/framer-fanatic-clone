@@ -79,6 +79,7 @@ function OrgProfile() {
       setOrg(data as Org | null);
       const sub = ((data as Org | null)?.subtype ?? "").toLowerCase();
       if (sub === "restaurant") setTab("Menu");
+      else if (sub === "service") setTab("Services");
     })();
   }, [slug]);
   useEffect(() => {
