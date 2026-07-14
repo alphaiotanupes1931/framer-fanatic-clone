@@ -77,9 +77,11 @@ function OrgProfile() {
     (async () => {
       const { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
       setOrg(data as Org | null);
-      const sub = ((data as Org | null)?.subtype ?? "").toLowerCase();
-      if (sub === "restaurant") setTab("Menu");
-      else if (sub === "service") setTab("Services");
+      const o = data as Org | null;
+      const sub = (o?.subtype ?? "").toLowerCase();
+      const isBiz = o?.type !== "community_assoc";
+      if (isBiz && sub === "restaurant") setTab("Menu");
+      else if (isBiz) setTab("Services");
     })();
   }, [slug]);
   useEffect(() => {
@@ -127,8 +129,9 @@ function OrgProfile() {
   const isOwner = !!me && me === org.owner_id;
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
-  const isRestaurant = (org.subtype ?? "").toLowerCase() === "restaurant";
-  const isService = (org.subtype ?? "").toLowerCase() === "service";
+  const isBusiness = !isAssoc;
+  const isRestaurant = isBusiness && (org.subtype ?? "").toLowerCase() === "restaurant";
+  const isService = isBusiness && !isRestaurant;
   const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : isService ? SERVICE_TABS : ASSOC_TABS;
 
   const promptUpload = async (field: "avatar_url" | "banner_url") => {
