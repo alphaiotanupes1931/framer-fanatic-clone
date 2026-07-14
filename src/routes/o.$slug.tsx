@@ -435,6 +435,18 @@ function OrgProfile() {
             </div>
           )}
           {tab === "Feed" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Services" && (
+            <div className="space-y-10">
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Briefcase className="h-5 w-5 text-[#d4580a]" /> Services & Pricing</h3>
+                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">No services listed yet.</div>
+              </section>
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Megaphone className="h-5 w-5 text-[#d4580a]" /> Posts & Updates</h3>
+                <OrgPostList orgId={org.id} kind={null} canManage={canManage} />
+              </section>
+            </div>
+          )}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
           {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
