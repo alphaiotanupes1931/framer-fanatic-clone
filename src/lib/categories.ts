@@ -1,5 +1,6 @@
 export const CREATOR_CATEGORIES = [
-  "Attendee",
+  "Resident",
+  "Visitor",
   "Musician",
   "Podcaster",
   "Visual Artist",
