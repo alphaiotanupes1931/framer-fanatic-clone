@@ -39,6 +39,9 @@ const ASSOC_TABS = [
   "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
   "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments",
 ] as const;
+const COMMUNITY_ASSOC_TABS = [
+  "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About",
+] as const;
 const RESTAURANT_TABS = [
   "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
@@ -136,7 +139,13 @@ function OrgProfile() {
   const subLower = (org.subtype ?? "").toLowerCase();
   const isRestaurant = isBusiness && /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(subLower);
   const isService = isBusiness && !isRestaurant;
-  const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : isService ? SERVICE_TABS : ASSOC_TABS;
+  const TABS: readonly string[] = isRestaurant
+    ? RESTAURANT_TABS
+    : isService
+    ? SERVICE_TABS
+    : isAssoc
+    ? COMMUNITY_ASSOC_TABS
+    : ASSOC_TABS;
 
   const promptUpload = async (field: "avatar_url" | "banner_url") => {
     const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
