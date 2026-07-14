@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Loader2, MapPin } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2 } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 
 export const Route = createFileRoute("/events/new")({
@@ -23,8 +23,6 @@ function NewEventPage() {
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
-  const [outsideOpen, setOutsideOpen] = useState(false);
-  const [checkingLocation, setCheckingLocation] = useState(false);
 
   const [form, setForm] = useState({
     image_url: "",
@@ -69,44 +67,9 @@ function NewEventPage() {
 
   const canSubmit = form.title.trim().length > 0 && (startMode === "now" || form.starts_at.length > 0);
 
-  // Haversine distance in miles between two lat/lng points.
-  const milesBetween = (lat1: number, lng1: number, lat2: number, lng2: number) => {
-    const toRad = (v: number) => (v * Math.PI) / 180;
-    const R = 3958.8;
-    const dLat = toRad(lat2 - lat1);
-    const dLng = toRad(lng2 - lng1);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-    return R * 2 * Math.asin(Math.sqrt(a));
-  };
-
-  const getCurrentLocation = () =>
-    new Promise<{ lat: number; lng: number } | null>((resolve) => {
-      if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => resolve(null),
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
-      );
-    });
-
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!canSubmit) { toast.error("Title and start date are required"); return; }
-
-    // Location gate: Baltimore metro (15 miles from downtown).
-    setCheckingLocation(true);
-    try {
-      const BALT = { lat: 39.2904, lng: -76.6122 };
-      const loc = await getCurrentLocation();
-      if (!loc || milesBetween(loc.lat, loc.lng, BALT.lat, BALT.lng) > 15) {
-        setOutsideOpen(true);
-        return;
-      }
-    } finally {
-      setCheckingLocation(false);
-    }
 
     setSaving(true);
     try {
