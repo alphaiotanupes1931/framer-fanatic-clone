@@ -466,12 +466,6 @@ function PublicProfilePage() {
             ) : (
               <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}</div>
             )
-          ) : tab === "studio" ? (
-            stories.length === 0 ? (
-              <EmptyTab icon={Flame} label="No studio updates yet." />
-            ) : (
-              <div className="space-y-4">{stories.map((s) => <StoryCard key={s.id} story={s} />)}</div>
-            )
           ) : tab === "events" ? (
             events.length === 0 ? (
               <EmptyTab icon={Calendar} label="No events yet." />
@@ -493,15 +487,9 @@ function PublicProfilePage() {
                 </div>
               );
             })()
-          ) : tab === "cvbio" ? (
+          ) : tab === "about" ? (
             <div className="max-w-3xl whitespace-pre-wrap text-[15px] leading-relaxed text-neutral-700">
-              {profile.bio || <EmptyTab icon={FileText} label="No CV or bio yet." />}
-            </div>
-          ) : tab === "contact" ? (
-            <div className="space-y-2 text-sm text-neutral-700">
-              {profile.website ? (
-                <div className="inline-flex items-center gap-2"><Globe className="h-4 w-4" /> <a className="hover:text-[#d4580a]" href={profile.website} target="_blank" rel="noreferrer">{profile.website.replace(/^https?:\/\//, "")}</a></div>
-              ) : <EmptyTab icon={Mail} label="No contact details shared." />}
+              {profile.bio || <EmptyTab icon={FileText} label="No bio yet." />}
             </div>
           ) : tab === "invite" ? (
             <div className="max-w-md space-y-3">
