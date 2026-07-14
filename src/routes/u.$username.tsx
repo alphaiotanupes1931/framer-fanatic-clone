@@ -7,6 +7,8 @@ import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Flame, Layers,
   Image as ImageIcon, Calendar, MessagesSquare, Mail, FileText, UserPlus2, ChevronDown,
+  List, Megaphone, Users, MessageCircle as MessageCircleIcon, BarChart3,
+  Folder, Briefcase, Trophy, MessageSquare, Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -30,15 +32,21 @@ type PublicProfile = {
 };
 
 const ARTIST_TABS = [
-  { key: "posts", label: "Posts", Icon: Grid3x3 },
-  { key: "studio", label: "Studio", Icon: Flame },
-  { key: "series", label: "Series", Icon: Layers },
-  { key: "gallery", label: "Gallery", Icon: ImageIcon },
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "announcements", label: "Announcements", Icon: Megaphone },
   { key: "events", label: "Events", Icon: Calendar },
-  { key: "talk", label: "Talk", Icon: MessagesSquare },
-  { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cvbio", label: "CV/Bio", Icon: FileText },
+  { key: "calendar", label: "Calendar", Icon: Calendar },
+  { key: "members", label: "Members", Icon: Users },
+  { key: "threads", label: "Threads", Icon: MessageCircleIcon },
+  { key: "polls", label: "Polls", Icon: BarChart3 },
+  { key: "gallery", label: "Gallery", Icon: ImageIcon },
+  { key: "resources", label: "Resources", Icon: Folder },
+  { key: "jobs", label: "Jobs", Icon: Briefcase },
+  { key: "leaderboard", label: "Leaderboard", Icon: Trophy },
+  { key: "rules", label: "Rules", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
+  { key: "comments", label: "Comments", Icon: MessageSquare },
+  { key: "about", label: "About", Icon: FileText },
 ] as const;
 type TabKey = typeof ARTIST_TABS[number]["key"];
 
