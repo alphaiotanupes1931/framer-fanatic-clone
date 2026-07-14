@@ -8,6 +8,7 @@ import {
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
@@ -404,11 +405,10 @@ function OrgProfile() {
           {tab === "Opportunities" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
           {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
-          {tab === "Posts" && (
-            <div className="py-14 text-center text-sm text-neutral-500">No posts yet in this association.</div>
-          )}
+          {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
-          {(["Announcements","Calendar","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
+          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} coming soon.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
@@ -524,6 +524,102 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
   );
 }
 
+function CalendarTab({ orgId: _orgId }: { orgId: string }) {
+  const [cursor, setCursor] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+  const [events, setEvents] = useState<Array<{ id: string; title: string; starts_at: string }>>([]);
+
+  useEffect(() => {
+    (async () => {
+      const from = new Date(cursor.getFullYear(), cursor.getMonth(), 1).toISOString();
+      const to = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1).toISOString();
+      const { data } = await supabase
+        .from("events")
+        .select("id,title,starts_at")
+        .gte("starts_at", from)
+        .lt("starts_at", to)
+        .order("starts_at", { ascending: true });
+      setEvents((data ?? []) as typeof events);
+    })();
+  }, [cursor]);
+
+  const monthLabel = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
+  const firstDow = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay();
+  const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+  const prevMonthDays = new Date(cursor.getFullYear(), cursor.getMonth(), 0).getDate();
+  const cells: Array<{ day: number; inMonth: boolean; date: Date }> = [];
+  for (let i = firstDow - 1; i >= 0; i--) {
+    cells.push({ day: prevMonthDays - i, inMonth: false, date: new Date(cursor.getFullYear(), cursor.getMonth() - 1, prevMonthDays - i) });
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d, inMonth: true, date: new Date(cursor.getFullYear(), cursor.getMonth(), d) });
+  }
+  while (cells.length % 7 !== 0) {
+    const d = cells.length - firstDow - daysInMonth + 1;
+    cells.push({ day: d, inMonth: false, date: new Date(cursor.getFullYear(), cursor.getMonth() + 1, d) });
+  }
+  const today = new Date();
+  const isToday = (d: Date) => d.toDateString() === today.toDateString();
+  const eventsByDay = new Map<string, typeof events>();
+  for (const e of events) {
+    const key = new Date(e.starts_at).toDateString();
+    const arr = eventsByDay.get(key) ?? [];
+    arr.push(e);
+    eventsByDay.set(key, arr);
+  }
+  const dowLabels = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const upcoming = events.filter((e) => new Date(e.starts_at) >= today).slice(0, 8);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} className="rounded-full p-2 hover:bg-neutral-100"><ChevronLeft className="h-5 w-5" /></button>
+        <div className="text-lg font-semibold">{monthLabel}</div>
+        <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))} className="rounded-full p-2 hover:bg-neutral-100"><ChevronRight className="h-5 w-5" /></button>
+      </div>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+        <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-600">
+          {dowLabels.map((d) => (<div key={d} className="px-3 py-2">{d}</div>))}
+        </div>
+        <div className="grid grid-cols-7">
+          {cells.map((c, i) => {
+            const dayEvents = eventsByDay.get(c.date.toDateString()) ?? [];
+            return (
+              <div key={i} className={`min-h-[80px] border-b border-r border-neutral-100 p-2 text-sm ${c.inMonth ? "text-neutral-900" : "bg-neutral-50 text-neutral-400"}`}>
+                <div className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${isToday(c.date) ? "border border-neutral-900" : ""}`}>{c.day}</div>
+                <div className="mt-1 space-y-0.5">
+                  {dayEvents.slice(0, 2).map((e) => (
+                    <div key={e.id} className="truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-[10px] font-medium text-[#d4580a]">{e.title}</div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div>
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-neutral-900">
+          <CalendarIcon className="h-4 w-4" /> Upcoming Events
+        </div>
+        {upcoming.length === 0 ? (
+          <div className="py-8 text-center text-sm text-neutral-500">No upcoming events.</div>
+        ) : (
+          <div className="space-y-2">
+            {upcoming.map((e) => (
+              <div key={e.id} className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white p-3 text-sm">
+                <div className="font-medium text-neutral-900">{e.title}</div>
+                <div className="text-xs text-neutral-500">{new Date(e.starts_at).toLocaleString()}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MembersTab({ orgId }: { orgId: string }) {
   const [rows, setRows] = useState<Array<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }>>([]);
   const [loading, setLoading] = useState(true);
@@ -556,13 +652,15 @@ function MembersTab({ orgId }: { orgId: string }) {
   );
 }
 
-function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"; canManage: boolean }) {
+function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
 
   const load = async () => {
-    const { data } = await supabase.from("organization_posts").select("*").eq("org_id", orgId).eq("kind", kind).order("created_at", { ascending: false });
+    let q = supabase.from("organization_posts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
+    if (kind) q = q.eq("kind", kind);
+    const { data } = await q;
     setItems((data ?? []) as OrgPost[]);
   };
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId, kind]);
@@ -573,7 +671,7 @@ function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportu
     const uid = sess.session?.user.id;
     if (!uid) return;
     const { error } = await supabase.from("organization_posts").insert({
-      org_id: orgId, author_id: uid, kind, title: form.title.trim(),
+      org_id: orgId, author_id: uid, kind: kind ?? "update", title: form.title.trim(),
       body: form.body.trim() || null, link_url: form.link_url.trim() || null, media_url: form.media_url.trim() || null,
     });
     if (error) return toast.error(error.message);
@@ -592,7 +690,7 @@ function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportu
       {canManage && (
         <div className="flex justify-end">
           <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-            <Plus className="h-4 w-4" /> New {kind}
+            <Plus className="h-4 w-4" /> New {kind ?? "post"}
           </button>
         </div>
       )}
@@ -606,7 +704,7 @@ function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportu
         </div>
       )}
       {items.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">No {kind} entries yet.</div>
+        <div className="py-12 text-center text-muted-foreground">No {kind ?? "post"} entries yet.</div>
       ) : (
         <div className="space-y-3">
           {items.map((p) => (
