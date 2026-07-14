@@ -25,7 +25,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 const TABS_ARTIST_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Stripe"] as const;
-const TABS_ATTENDEE_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
+const TABS_RESIDENT_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
   "Feed": Rss,
@@ -41,9 +41,9 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { isArtist, isAttendee, isAdmin, loading: roleLoading } = useUserRole();
+  const { isArtist, isResident, isAdmin, loading: roleLoading } = useUserRole();
   const categoryTabs = tabsForCategory((profile as { category?: string | null } | null)?.category);
-  const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_ATTENDEE_BASE;
+  const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
@@ -117,7 +117,7 @@ function ProfilePage() {
 
   const initials = (profile?.display_name || profile?.email || "U").slice(0, 2).toUpperCase();
   const currentTag = ((profile as { category?: string | null } | null)?.category as string | null) ||
-    (isArtist ? "Artist" : isAttendee ? "Resident" : ((profile?.role || "resident").replace(/\b\w/g, (c) => c.toUpperCase())));
+    (isArtist ? "Artist" : isResident ? "Resident" : ((profile?.role || "resident").replace(/\b\w/g, (c) => c.toUpperCase())));
 
   const selectTag = async (tag: string) => {
     if (!profile) return;
@@ -312,7 +312,7 @@ function ProfilePage() {
               ) : null
             ) : (
               <div className="py-12 text-center text-muted-foreground">
-                {!roleLoading && isAttendee ? (
+                {!roleLoading && isResident ? (
                   <BecomeArtistCTA />
                 ) : (
                   <>No {tab.toLowerCase()} yet. Share something with the community!</>
