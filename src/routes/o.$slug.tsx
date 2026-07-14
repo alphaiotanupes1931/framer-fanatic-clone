@@ -38,6 +38,9 @@ const ASSOC_TABS = [
   "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
   "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments", "About",
 ] as const;
+const RESTAURANT_TABS = [
+  "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
   Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
@@ -45,6 +48,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Invite: UserPlus, Comments: MessageSquare, About: FileText,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
+  Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star,
 };
 type Tab = string;
 
@@ -70,6 +74,8 @@ function OrgProfile() {
     (async () => {
       const { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
       setOrg(data as Org | null);
+      const sub = ((data as Org | null)?.subtype ?? "").toLowerCase();
+      if (sub === "restaurant") setTab("Menu");
     })();
   }, [slug]);
   useEffect(() => {
@@ -117,7 +123,8 @@ function OrgProfile() {
   const isOwner = !!me && me === org.owner_id;
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
-  const TABS: readonly string[] = ASSOC_TABS;
+  const isRestaurant = (org.subtype ?? "").toLowerCase() === "restaurant";
+  const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : ASSOC_TABS;
 
   const promptUpload = async (field: "avatar_url" | "banner_url") => {
     const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
@@ -406,9 +413,26 @@ function OrgProfile() {
           {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Menu" && (
+            <div className="space-y-10">
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Star className="h-5 w-5 text-[#d4580a]" /> Today's Specials</h3>
+                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">No specials posted today.</div>
+              </section>
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><List className="h-5 w-5 text-[#d4580a]" /> Menu</h3>
+                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">Menu coming soon.</div>
+              </section>
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Megaphone className="h-5 w-5 text-[#d4580a]" /> Posts & Updates</h3>
+                <OrgPostList orgId={org.id} kind={null} canManage={canManage} />
+              </section>
+            </div>
+          )}
+          {tab === "Feed" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
-          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
+          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
