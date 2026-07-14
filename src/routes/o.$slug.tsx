@@ -61,7 +61,7 @@ function OrgProfile() {
   const { isAdmin } = useUserRole();
   const [me, setMe] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
-  const [tab, setTab] = useState<Tab>("Posts");
+  const [tab, setTab] = useState<Tab>("Feed");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
   const [following, setFollowing] = useState(false);
@@ -122,7 +122,7 @@ function OrgProfile() {
   useEffect(() => {
     if (!org) return;
     setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
-    setTab("Posts");
+    setTab(isRestaurant ? "Menu" : isService ? "Services" : "Feed");
   }, [org]);
 
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
