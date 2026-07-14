@@ -229,15 +229,22 @@ export const becomeArtist = createServerFn({ method: "POST" })
     }
 
     // Persist verified location for future checks.
-    if (data.lat != null && data.lng != null) {
-      await supabase
-        .from("profiles")
-        .update({ latitude: data.lat, longitude: data.lng, in_baltimore: true } as never)
-        .eq("id", userId);
-    }
-
-    // Service-role insert to bypass user_roles RLS for self-upgrade.
+    // Service-role writes bypass the profile guard trigger and user_roles RLS.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const profileUpdate: Record<string, unknown> = {
+      in_baltimore: true,
+      is_baltimore_verified: true,
+      role: "resident",
+    };
+    if (data.lat != null && data.lng != null) {
+      profileUpdate.latitude = data.lat;
+      profileUpdate.longitude = data.lng;
+    }
+    await supabaseAdmin
+      .from("profiles")
+      .update(profileUpdate as never)
+      .eq("id", userId);
+
     const { error } = await supabaseAdmin
       .from("user_roles")
       .insert({ user_id: userId, role: "artist" });
