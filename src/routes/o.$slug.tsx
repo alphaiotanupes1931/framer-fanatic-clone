@@ -41,6 +41,9 @@ const ASSOC_TABS = [
 const RESTAURANT_TABS = [
   "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
+const SERVICE_TABS = [
+  "Services", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
   Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
@@ -48,7 +51,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Invite: UserPlus, Comments: MessageSquare, About: FileText,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
-  Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star,
+  Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
 };
 type Tab = string;
 
