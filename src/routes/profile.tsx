@@ -117,7 +117,7 @@ function ProfilePage() {
 
   const initials = (profile?.display_name || profile?.email || "U").slice(0, 2).toUpperCase();
   const currentTag = ((profile as { category?: string | null } | null)?.category as string | null) ||
-    (isArtist ? "Artist" : isAttendee ? "Attendee" : ((profile?.role || "attendee").replace(/\b\w/g, (c) => c.toUpperCase())));
+    (isArtist ? "Artist" : isAttendee ? "Resident" : ((profile?.role || "resident").replace(/\b\w/g, (c) => c.toUpperCase())));
 
   const selectTag = async (tag: string) => {
     if (!profile) return;
@@ -323,7 +323,7 @@ function BecomeArtistCTA() {
     <div className="mx-auto max-w-md space-y-3 rounded-2xl border border-border bg-neutral-50 p-6 text-left">
       <h3 className="text-base font-semibold text-foreground">Want to host events or post?</h3>
       <p className="text-sm text-muted-foreground">
-        Attendees can view content and buy tickets. To create events, post, or sell tickets, upgrade to an Artist account.
+        Residents and Visitors can view content and buy tickets. To create events, post, or sell tickets, upgrade to an Artist account.
       </p>
       <button
         disabled={loading}
