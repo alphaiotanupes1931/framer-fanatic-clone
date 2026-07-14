@@ -201,13 +201,6 @@ function AuthPage() {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() => setRole("attendee")}
-                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "attendee" ? "border-primary bg-primary/10" : "border-input"}`}
-                    >
-                      Attendee
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setRole("artist")}
                       className={`rounded-md border px-3 py-2 text-sm transition ${role === "artist" ? "border-primary bg-primary/10" : "border-input"}`}
                     >
@@ -223,7 +216,7 @@ function AuthPage() {
                     <button
                       type="button"
                       onClick={() => setRole("visitor")}
-                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "visitor" ? "border-primary bg-primary/10" : "border-input"}`}
+                      className={`col-span-2 rounded-md border px-3 py-2 text-sm transition ${role === "visitor" ? "border-primary bg-primary/10" : "border-input"}`}
                     >
                       Visitor
                     </button>
