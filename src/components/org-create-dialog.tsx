@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Loader2 } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
 import { slugify, subtypesFor, ORG_TYPE_LABEL } from "@/lib/categories";
 import { itemHintsFor } from "@/components/org/price-items-section";
-import { Plus, Trash2 } from "lucide-react";
 
 type Neighborhood = { id: string; name: string };
 
