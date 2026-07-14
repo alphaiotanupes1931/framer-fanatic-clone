@@ -10,6 +10,16 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 
+function prettyLabel(v: string) {
+  return v
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w))
+    .join(" ");
+}
+
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
   type: string; subtype: string | null; neighborhood: string | null;
@@ -138,7 +148,7 @@ export function OrgListPage({
                     : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
                 }`}
               >
-                {s}
+                {prettyLabel(s)}
               </button>
             ))}
           </div>
@@ -165,7 +175,7 @@ export function OrgListPage({
                   </div>
                   <div className="px-4 pb-4 pt-8">
                     <div className="truncate text-base font-bold text-neutral-900">{o.name}</div>
-                    {o.subtype && <div className="mt-1 text-sm text-neutral-600">{o.subtype}</div>}
+                    {o.subtype && <div className="mt-1 text-sm text-neutral-600">{prettyLabel(o.subtype)}</div>}
                     {o.bio && <p className="mt-2 line-clamp-3 text-sm text-neutral-600">{o.bio}</p>}
                     {o.neighborhood && (
                       <div className="mt-3 inline-flex items-center gap-1 text-sm text-neutral-500">
@@ -209,7 +219,7 @@ export function OrgListPage({
                     <div className="truncate text-base font-bold text-neutral-900">{o.name}</div>
                     <span className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-neutral-300" aria-hidden />
                   </div>
-                  {o.subtype && <div className="mt-1 text-sm text-neutral-600">{o.subtype}</div>}
+                  {o.subtype && <div className="mt-1 text-sm text-neutral-600">{prettyLabel(o.subtype)}</div>}
                   {o.neighborhood && (
                     <div className="mt-3 inline-flex items-center gap-1 text-sm text-neutral-500">
                       <MapPin className="h-3.5 w-3.5" /> {o.neighborhood}
