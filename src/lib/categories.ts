@@ -23,6 +23,25 @@ export const CREATOR_CATEGORIES = [
 
 export type CreatorCategory = (typeof CREATOR_CATEGORIES)[number];
 
+// Tags a user can pick to describe themselves on their profile.
+// Kept in sync with the "Create Artist Page" options, plus DJ.
+export const PROFILE_TAGS = [
+  "Attendee",
+  "Visual Art",
+  "Music",
+  "DJ",
+  "Video",
+  "Photography",
+  "Performance",
+  "Literary",
+  "Mixed Media",
+  "Fashion",
+  "Podcaster",
+  "Other",
+] as const;
+
+export type ProfileTag = (typeof PROFILE_TAGS)[number];
+
 // Maps a category -> the extra tabs shown on a public profile.
 // Each tab maps to a "kind" stored in profile_sections.kind.
 const TABS: Record<string, { label: string; kind: string }[]> = {
