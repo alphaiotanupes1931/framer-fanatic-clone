@@ -5,18 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
-  Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Flame, Layers,
-  Image as ImageIcon, Calendar, MessagesSquare, Mail, FileText, UserPlus2, ChevronDown,
-  List, Megaphone, Users, MessageCircle as MessageCircleIcon, BarChart3,
-  Folder, Briefcase, Trophy, MessageSquare, Bell,
+  Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Layers,
+  Image as ImageIcon, Calendar, FileText, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
 import { PostCard } from "@/components/shared/post-card";
-import { StoryCard } from "@/components/shared/story-card";
 import { EventCard } from "@/components/shared/event-card";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
+import { tabsForArtist, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
+import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
 
 type PublicProfile = {
   id: string;
@@ -30,25 +29,6 @@ type PublicProfile = {
   category: string | null;
   website: string | null;
 };
-
-const ARTIST_TABS = [
-  { key: "posts", label: "Posts", Icon: List },
-  { key: "announcements", label: "Announcements", Icon: Megaphone },
-  { key: "events", label: "Events", Icon: Calendar },
-  { key: "calendar", label: "Calendar", Icon: Calendar },
-  { key: "members", label: "Members", Icon: Users },
-  { key: "threads", label: "Threads", Icon: MessageCircleIcon },
-  { key: "polls", label: "Polls", Icon: BarChart3 },
-  { key: "gallery", label: "Gallery", Icon: ImageIcon },
-  { key: "resources", label: "Resources", Icon: Folder },
-  { key: "jobs", label: "Jobs", Icon: Briefcase },
-  { key: "leaderboard", label: "Leaderboard", Icon: Trophy },
-  { key: "rules", label: "Rules", Icon: FileText },
-  { key: "invite", label: "Invite", Icon: UserPlus2 },
-  { key: "comments", label: "Comments", Icon: MessageSquare },
-  { key: "about", label: "About", Icon: FileText },
-] as const;
-type TabKey = typeof ARTIST_TABS[number]["key"];
 
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfilePage,
@@ -67,7 +47,6 @@ function PublicProfilePage() {
   const [working, setWorking] = useState(false);
   const [tab, setTab] = useState<TabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
-  const [stories, setStories] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
