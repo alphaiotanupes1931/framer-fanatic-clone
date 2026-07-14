@@ -60,7 +60,9 @@ function FindCreatorPage() {
     return () => { cancelled = true; clearTimeout(t); };
   }, [q, sort]);
 
-  const filtered = results.filter((c) => matchesCategory(c, category));
+  const filtered = results
+    .filter((c) => matchesCategory(c, category))
+    .sort((a, b) => Number(!!b.avatar_url) - Number(!!a.avatar_url));
 
   const Card = ({ c }: { c: Creator }) => {
     const name = c.display_name ?? c.username ?? "Unnamed creator";
