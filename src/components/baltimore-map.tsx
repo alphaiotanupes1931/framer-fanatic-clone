@@ -9,6 +9,7 @@ type EventPin = {
   starts_at: string;
   location: string | null;
   image_url: string | null;
+  description: string | null;
   latitude: number;
   longitude: number;
 };
@@ -51,7 +52,7 @@ export function BaltimoreMap({
       const [{ data: evData }, { data: nData }] = await Promise.all([
         supabase
           .from("events")
-          .select("id, title, starts_at, location, image_url, latitude, longitude, neighborhood")
+          .select("id, title, starts_at, location, image_url, description, latitude, longitude, neighborhood")
           .gte("starts_at", new Date().toISOString())
           .order("starts_at", { ascending: true }),
         supabase
@@ -72,7 +73,7 @@ export function BaltimoreMap({
           if (hit) { lat = hit.lat; lng = hit.lng; }
         }
         if (lat != null && lng != null) {
-          resolved.push({ id: e.id, title: e.title, starts_at: e.starts_at, location: e.location, image_url: e.image_url, latitude: lat, longitude: lng });
+          resolved.push({ id: e.id, title: e.title, starts_at: e.starts_at, location: e.location, image_url: e.image_url, description: e.description ?? null, latitude: lat, longitude: lng });
         }
       }
       setEvents(resolved);
@@ -169,7 +170,7 @@ export function BaltimoreMap({
                 {g.list.length > 1 ? `${g.list.length} events here` : g.list[0].title}
               </span>
             </Tooltip>
-            <Popup maxWidth={300} minWidth={280} className="event-map-popup">
+            <Popup maxWidth={320} minWidth={300} className="event-map-popup">
               <EventPopup list={g.list} onSelectEvent={onSelectEvent} />
             </Popup>
           </CircleMarker>
@@ -198,7 +199,7 @@ function EventPopup({
   const prev = () => setIdx((i) => (i - 1 + list.length) % list.length);
   const next = () => setIdx((i) => (i + 1) % list.length);
   return (
-    <div className="event-map-popup-inner w-[260px] overflow-hidden">
+    <div className="event-map-popup-inner w-[280px] overflow-hidden">
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-orange-100 to-orange-50">
         {e.image_url ? (
           <img src={e.image_url} alt={e.title} className="h-full w-full object-cover" />
@@ -207,50 +208,48 @@ function EventPopup({
             <Calendar className="h-10 w-10 text-orange-400/70" />
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/60 to-transparent" />
         {multi && (
           <div className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
             {idx + 1} / {list.length}
           </div>
         )}
-        <div className="absolute bottom-2 left-2 right-2">
-          <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-white/90">
-            <Calendar className="h-3 w-3" />
+      </div>
+      <div className="space-y-2.5 p-3.5">
+        <div className="text-[15px] font-bold leading-snug text-neutral-900 line-clamp-2">
+          {e.title}
+        </div>
+        <div className="flex items-center gap-1.5 text-[12.5px] text-neutral-700">
+          <Calendar className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+          <span>
             {new Date(e.starts_at).toLocaleString(undefined, {
-              weekday: "short",
               month: "short",
               day: "numeric",
             })}
-            <span className="text-white/70">·</span>
+            {", "}
             {new Date(e.starts_at).toLocaleString(undefined, {
               hour: "numeric",
               minute: "2-digit",
             })}
-          </div>
+          </span>
         </div>
-      </div>
-      <div className="space-y-2 p-3">
-        <Link
-          to="/e/$id"
-          params={{ id: e.id }}
-          onClick={() => onSelectEvent?.(e)}
-          className="block text-[15px] font-semibold leading-snug text-neutral-900 hover:text-[#d4580a] line-clamp-2"
-        >
-          {e.title}
-        </Link>
         {e.location && (
-          <div className="flex items-start gap-1.5 text-xs text-neutral-500">
-            <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+          <div className="flex items-start gap-1.5 text-[12.5px] text-neutral-700">
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d4580a]" />
             <span className="line-clamp-1">{e.location}</span>
           </div>
+        )}
+        {e.description && (
+          <p className="text-[12.5px] leading-relaxed text-neutral-600 line-clamp-3">
+            {e.description}
+          </p>
         )}
         <Link
           to="/e/$id"
           params={{ id: e.id }}
           onClick={() => onSelectEvent?.(e)}
-          className="mt-1 flex w-full items-center justify-center rounded-lg bg-[#d4580a] px-3 py-2 text-xs font-semibold text-white hover:bg-[#b8490a] transition"
+          className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#d4580a] hover:text-[#b8490a] transition"
         >
-          View event
+          View event <span aria-hidden>→</span>
         </Link>
         {multi && (
           <div className="flex items-center justify-between border-t border-neutral-100 pt-2">
