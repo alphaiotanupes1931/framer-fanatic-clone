@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type UserRole = "attendee" | "artist" | "admin";
+export type UserRole = "attendee" | "resident" | "visitor" | "artist" | "admin";
 
 export function useUserRole() {
   const [roles, setRoles] = useState<UserRole[]>([]);
@@ -31,7 +31,13 @@ export function useUserRole() {
     roles,
     loading,
     isArtist: roles.includes("artist"),
-    isAttendee: roles.includes("attendee") && !roles.includes("artist"),
+    isResident: roles.includes("resident") && !roles.includes("artist"),
+    isVisitor: roles.includes("visitor") && !roles.includes("artist"),
+    // Back-compat: treat legacy 'attendee' as resident, expose isAttendee for any
+    // remaining callers.
+    isAttendee:
+      (roles.includes("resident") || roles.includes("attendee")) &&
+      !roles.includes("artist"),
     isAdmin: roles.includes("admin"),
   };
 }
