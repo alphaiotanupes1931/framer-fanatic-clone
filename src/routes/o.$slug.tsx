@@ -74,6 +74,8 @@ function OrgProfile() {
     (async () => {
       const { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
       setOrg(data as Org | null);
+      const sub = ((data as Org | null)?.subtype ?? "").toLowerCase();
+      if (sub === "restaurant") setTab("Menu");
     })();
   }, [slug]);
   useEffect(() => {
