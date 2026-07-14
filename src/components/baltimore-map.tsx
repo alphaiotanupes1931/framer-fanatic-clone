@@ -46,14 +46,34 @@ export function BaltimoreMap({
       setLib({ ...rl, L: leaflet.default ?? leaflet });
     })();
     (async () => {
-      const { data } = await supabase
-        .from("events")
-        .select("id, title, starts_at, location, image_url, latitude, longitude")
-        .gte("starts_at", new Date().toISOString())
-        .not("latitude", "is", null)
-        .not("longitude", "is", null)
-        .order("starts_at", { ascending: true });
-      setEvents(((data || []) as any[]).filter((e) => e.latitude != null && e.longitude != null) as EventPin[]);
+      const [{ data: evData }, { data: nData }] = await Promise.all([
+        supabase
+          .from("events")
+          .select("id, title, starts_at, location, image_url, latitude, longitude, neighborhood")
+          .gte("starts_at", new Date().toISOString())
+          .order("starts_at", { ascending: true }),
+        supabase
+          .from("neighborhoods")
+          .select("name, latitude, longitude")
+          .not("latitude", "is", null)
+          .not("longitude", "is", null),
+      ]);
+      const nMap = new Map<string, { lat: number; lng: number }>();
+      for (const n of (nData || []) as any[]) {
+        if (n?.name) nMap.set(String(n.name).toLowerCase(), { lat: n.latitude, lng: n.longitude });
+      }
+      const resolved: EventPin[] = [];
+      for (const e of (evData || []) as any[]) {
+        let lat = e.latitude, lng = e.longitude;
+        if ((lat == null || lng == null) && e.neighborhood) {
+          const hit = nMap.get(String(e.neighborhood).toLowerCase());
+          if (hit) { lat = hit.lat; lng = hit.lng; }
+        }
+        if (lat != null && lng != null) {
+          resolved.push({ id: e.id, title: e.title, starts_at: e.starts_at, location: e.location, image_url: e.image_url, latitude: lat, longitude: lng });
+        }
+      }
+      setEvents(resolved);
     })();
     if (showNeighborhoods) {
       (async () => {
