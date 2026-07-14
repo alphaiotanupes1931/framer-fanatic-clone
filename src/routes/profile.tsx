@@ -41,7 +41,7 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { isArtist, isAttendee, loading: roleLoading } = useUserRole();
+  const { isArtist, isAttendee, isAdmin, loading: roleLoading } = useUserRole();
   const categoryTabs = tabsForCategory((profile as { category?: string | null } | null)?.category);
   const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_ATTENDEE_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
@@ -182,7 +182,18 @@ function ProfilePage() {
           </div>
 
           <div className="mt-4">
-            <div className="flex items-center gap-2 text-xl font-bold text-foreground">{profile?.display_name || profile?.username}</div>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              {profile?.display_name || profile?.username}
+              {isAdmin && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                  style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a", borderColor: "rgba(212,88,10,0.3)" }}
+                  title="You are an admin"
+                >
+                  <Shield className="h-3 w-3" /> Admin
+                </span>
+              )}
+            </div>
             {profile?.website && (
               <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer" className="mt-1 flex items-center gap-1 text-sm hover:underline" style={{ color: "#d4580a" }}>
                 <LinkIcon className="h-3.5 w-3.5" />{profile.website.replace(/https?:\/\//, "")}
