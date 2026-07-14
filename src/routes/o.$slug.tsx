@@ -252,9 +252,9 @@ function OrgProfile() {
         </div>
       </div>
 
-      {/* Avatar overlapping banner */}
-      <div className="relative px-1 sm:px-2">
-        <div className="relative -mt-8 inline-block">
+      {/* Avatar overlapping banner + inline action buttons */}
+      <div className="relative flex items-end justify-between gap-3 px-1 sm:px-2">
+        <div className="relative -mt-8 inline-block shrink-0">
           <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
             {org.avatar_url && (
               <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
@@ -269,6 +269,61 @@ function OrgProfile() {
               <Camera className="h-3 w-3" />
             </button>
           )}
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2 pb-1">
+          {canManage && (
+            <button
+              onClick={() => { setTab("About"); setEditAbout(true); }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+            >
+              <Pencil className="h-4 w-4" /> Edit Profile
+            </button>
+          )}
+          <MessageAllButton
+            label="Message All"
+            audienceLabel={`${org.name} members`}
+            defaultGroupName={`${org.name} group chat`}
+            loadCandidates={async () => {
+              const { data: mem } = await supabase
+                .from("organization_members")
+                .select("user_id")
+                .eq("organization_id", org.id);
+              const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
+              if (org.owner_id) ids.push(org.owner_id);
+              const unique = Array.from(new Set(ids));
+              if (unique.length === 0) return [];
+              const { data: profs } = await supabase
+                .rpc("public_profiles_by_ids", { _ids: unique });
+              const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
+              return rows.map((p) => ({
+                id: p.id,
+                display_name: p.display_name,
+                username: p.username,
+                avatar_url: p.avatar_url,
+                subtitle: p.neighborhood || "Member",
+              }));
+            }}
+          />
+          <button
+            onClick={share}
+            aria-label="Share"
+            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white p-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => toast.info("Follow coming soon")}
+            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+          >
+            <Bell className="h-4 w-4" /> Follow
+          </button>
+          <button
+            onClick={toggleJoin}
+            disabled={joining}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
+          >
+            <Users className="h-4 w-4" /> {joined ? "Joined" : "Join"}
+          </button>
         </div>
       </div>
 
@@ -325,54 +380,8 @@ function OrgProfile() {
           )}
         </div>
 
-        {/* Action row: Edit / Message All / Join / Delete / Mute */}
+        {/* Secondary admin actions */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {canManage && (
-            <button
-              onClick={() => { setTab("About"); setEditAbout(true); }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-            >
-              <Pencil className="h-4 w-4" /> Edit Profile
-            </button>
-          )}
-          <MessageAllButton
-            label="Message All"
-            audienceLabel={`${org.name} members`}
-            defaultGroupName={`${org.name} group chat`}
-            loadCandidates={async () => {
-              const { data: mem } = await supabase
-                .from("organization_members")
-                .select("user_id")
-                .eq("organization_id", org.id);
-              const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
-              if (org.owner_id) ids.push(org.owner_id);
-              const unique = Array.from(new Set(ids));
-              if (unique.length === 0) return [];
-              const { data: profs } = await supabase
-                .rpc("public_profiles_by_ids", { _ids: unique });
-              const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
-              return rows.map((p) => ({
-                id: p.id,
-                display_name: p.display_name,
-                username: p.username,
-                avatar_url: p.avatar_url,
-                subtitle: p.neighborhood || "Member",
-              }));
-            }}
-          />
-          <button
-            onClick={share}
-            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-          >
-            <Share2 className="h-4 w-4" /> Share
-          </button>
-          <button
-            onClick={toggleJoin}
-            disabled={joining}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
-          >
-            <Bell className="h-4 w-4" /> {joined ? "Joined" : "Join"}
-          </button>
           {canManage && (
             <button
               onClick={async () => {
