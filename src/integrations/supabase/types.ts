@@ -694,6 +694,51 @@ export type Database = {
         }
         Relationships: []
       }
+      podcast_episodes: {
+        Row: {
+          audio_url: string | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          episode_number: number | null
+          id: string
+          published_at: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          episode_number?: number | null
+          id?: string
+          published_at?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          episode_number?: number | null
+          id?: string
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           body: string
