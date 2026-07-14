@@ -45,7 +45,7 @@ function PublicProfilePage() {
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
   const [working, setWorking] = useState(false);
-  const [tab, setTab] = useState<TabKey>("posts");
+  const [tab, setTab] = useState<ArtistTabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
@@ -115,8 +115,8 @@ function PublicProfilePage() {
           author_avatar: publicProfile.avatar_url,
           author_username: publicProfile.username,
         };
+        void storiesRes;
         setPosts((postsRes.data || []).map((p) => ({ ...p, ...authorMeta })));
-        setStories((storiesRes.data || []).map((s) => ({ ...s, ...authorMeta })));
         setEvents(eventsRes.data || []);
         setContentLoading(false);
       }
@@ -223,7 +223,8 @@ function PublicProfilePage() {
     );
   }
 
-  const categoryLabel = formatCategory(profile.category, profile.role);
+  const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
+  const tabs = tabsForArtist(profile.category, profile.role);
 
   return (
     <AppLayout title="" hero={false}>
@@ -420,7 +421,7 @@ function PublicProfilePage() {
 
         {/* Tabs */}
         <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
-          {ARTIST_TABS.map(({ key, label, Icon }) => {
+          {tabs.map(({ key, label, Icon }) => {
             const active = tab === key;
             return (
               <button
@@ -451,6 +452,8 @@ function PublicProfilePage() {
             ) : (
               <div className="space-y-4">{events.map((e) => <EventCard key={e.id} event={e} />)}</div>
             )
+          ) : tab === "episodes" ? (
+            <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
           ) : tab === "gallery" ? (
             (() => {
               const media = posts.filter((p) => p.media_url).slice(0, 60);
@@ -466,7 +469,7 @@ function PublicProfilePage() {
                 </div>
               );
             })()
-          ) : tab === "about" ? (
+          ) : tab === "cv" ? (
             <div className="max-w-3xl whitespace-pre-wrap text-[15px] leading-relaxed text-neutral-700">
               {profile.bio || <EmptyTab icon={FileText} label="No bio yet." />}
             </div>
