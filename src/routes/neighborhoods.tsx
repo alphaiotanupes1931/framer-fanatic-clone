@@ -35,6 +35,18 @@ type EventRow = {
   price_cents: number | null;
 };
 
+type OrgRow = {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  subtype: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+};
+
+type TabKey = "events" | "businesses" | "groups" | "artists" | "arts_orgs" | "associations";
+
 function NeighborhoodsPage() {
   const auth = useAuthState();
   const navigate = useNavigate();
@@ -42,8 +54,9 @@ function NeighborhoodsPage() {
   const [selected, setSelected] = useState<N | null>(null);
   const [artists, setArtists] = useState<ArtistRow[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
+  const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"artists" | "events">("artists");
+  const [tab, setTab] = useState<TabKey>("events");
 
   useEffect(() => { (async () => {
     const { data } = await supabase.from("neighborhoods").select("id, name, region").order("name");
@@ -56,9 +69,10 @@ function NeighborhoodsPage() {
     setLoading(true);
     setArtists([]);
     setEvents([]);
-    setTab("artists");
+    setOrgs([]);
+    setTab("events");
     (async () => {
-      const [{ data: a }, { data: e }] = await Promise.all([
+      const [{ data: a }, { data: e }, { data: o }] = await Promise.all([
         (supabase as any)
           .from("profiles_public")
           .select("id, display_name, username, avatar_url, bio, neighborhood")
@@ -70,10 +84,16 @@ function NeighborhoodsPage() {
           .ilike("neighborhood", selected.name)
           .gte("starts_at", new Date().toISOString())
           .order("starts_at", { ascending: true }),
+        supabase
+          .from("organizations")
+          .select("id, name, slug, type, subtype, avatar_url, bio")
+          .ilike("neighborhood", selected.name)
+          .order("name"),
       ]);
       if (cancelled) return;
       setArtists((a || []) as ArtistRow[]);
       setEvents((e || []) as EventRow[]);
+      setOrgs((o || []) as OrgRow[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
