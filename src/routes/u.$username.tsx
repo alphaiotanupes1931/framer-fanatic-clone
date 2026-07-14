@@ -3,8 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft } from "lucide-react";
+import {
+  MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
+  Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Flame, Layers,
+  Image as ImageIcon, Calendar, MessagesSquare, Mail, FileText, UserPlus2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
 import { PostCard } from "@/components/shared/post-card";
@@ -26,6 +29,19 @@ type PublicProfile = {
   website: string | null;
 };
 
+const ARTIST_TABS = [
+  { key: "posts", label: "Posts", Icon: Grid3x3 },
+  { key: "studio", label: "Studio", Icon: Flame },
+  { key: "series", label: "Series", Icon: Layers },
+  { key: "gallery", label: "Gallery", Icon: ImageIcon },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessagesSquare },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cvbio", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+] as const;
+type TabKey = typeof ARTIST_TABS[number]["key"];
+
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfilePage,
   head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
@@ -41,12 +57,14 @@ function PublicProfilePage() {
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
   const [working, setWorking] = useState(false);
-  const [tab, setTab] = useState<"posts" | "stories" | "events">("posts");
+  const [tab, setTab] = useState<TabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
   const [stories, setStories] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +76,7 @@ function PublicProfilePage() {
       if (cancelled) return;
       setProfile(publicProfile || null);
       if (publicProfile) {
+        setMuted(window.localStorage.getItem(`pb_mute_user_${publicProfile.id}`) === "1");
         const [{ count: followers }, { count: following }, { count: posts }] = await Promise.all([
           supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
           supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
@@ -72,6 +91,8 @@ function PublicProfilePage() {
             .eq("following_id", publicProfile.id)
             .maybeSingle();
           setIsFollowing(!!f);
+          const { data: adminCheck } = await supabase.rpc("has_role", { _user_id: me.id, _role: "admin" });
+          setIsAdmin(!!adminCheck);
         }
         // Load their content
         setContentLoading(true);
@@ -97,6 +118,45 @@ function PublicProfilePage() {
   }, [username, me]);
 
   const isSelf = useMemo(() => me && profile && me.id === profile.id, [me, profile]);
+  const canManage = !!isSelf || isAdmin;
+  const hashtags = useMemo(() => {
+    if (!profile) return [] as string[];
+    const fromBio = Array.from(new Set((profile.bio || "").match(/#[A-Za-z0-9_]+/g) || []));
+    if (fromBio.length) return fromBio;
+    const cat = formatCategory(profile.category, profile.role);
+    const parts: string[] = [];
+    if (cat) parts.push(`#${cat.toLowerCase().replace(/\s+/g, "")}`);
+    if (profile.neighborhood) parts.push(`#${profile.neighborhood.toLowerCase().replace(/\s+/g, "")}`);
+    if (profile.role) parts.push(`#${profile.role.toLowerCase()}`);
+    return parts;
+  }, [profile]);
+
+  const share = async () => {
+    if (!profile) return;
+    const url = `${window.location.origin}/u/${profile.username}`;
+    try {
+      if (navigator.share) await navigator.share({ title: profile.display_name || profile.username || "", url });
+      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
+    } catch { /* cancelled */ }
+  };
+
+  const toggleMute = () => {
+    if (!profile) return;
+    const next = !muted;
+    setMuted(next);
+    if (next) window.localStorage.setItem(`pb_mute_user_${profile.id}`, "1");
+    else window.localStorage.removeItem(`pb_mute_user_${profile.id}`);
+    toast.success(next ? "Page muted" : "Page unmuted");
+  };
+
+  const deletePage = async () => {
+    if (!profile) return;
+    if (!confirm("Delete this artist page? This removes their profile.")) return;
+    const { error } = await supabase.rpc("admin_delete_profile", { _id: profile.id });
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    navigate({ to: "/artists" });
+  };
 
   const toggleFollow = async () => {
     if (!me || !profile) { navigate({ to: "/auth" }); return; }
@@ -155,193 +215,268 @@ function PublicProfilePage() {
     );
   }
 
-  const initials = (profile.display_name || profile.username || "U").slice(0, 2).toUpperCase();
+  const categoryLabel = formatCategory(profile.category, profile.role);
 
   return (
     <AppLayout title="" hero={false}>
-      <Link to="/artists" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4" /> Back
-      </Link>
-      <div className="rounded-3xl border border-border bg-card overflow-hidden">
-        <div
-          className="relative h-40 sm:h-52 bg-gradient-to-br from-muted to-accent"
-          style={profile.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-        />
-        <div className="px-5 md:px-8 pb-8">
-          <div className="-mt-14 sm:-mt-16 flex items-start gap-4 sm:gap-5">
-            <Avatar className="h-24 w-24 sm:h-28 sm:w-28 shrink-0 border-4 border-card shadow-md">
-              {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
-              <AvatarFallback className="bg-primary/10 text-primary text-xl">{initials}</AvatarFallback>
-            </Avatar>
-            {/* Spacer that keeps name/buttons below banner, aligned with avatar bottom */}
-            <div className="flex-1" />
-          </div>
+      <button
+        onClick={() => (window.history.length > 1 ? window.history.back() : navigate({ to: "/artists" }))}
+        aria-label="Back"
+        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100"
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </button>
 
-          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
-            <div className="min-w-0">
-              <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
-                {profile.display_name || profile.username}
-              </h1>
-              {profile.username && (
-                <div className="text-sm text-muted-foreground">@{profile.username}</div>
-              )}
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                {profile.neighborhood && (
-                  <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {profile.neighborhood}</span>
-                )}
-                {(() => {
-                  const label = formatCategory(profile.category, profile.role);
-                  return label ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5">{label}</span>
-                  ) : null;
-                })()}
-                {profile.role && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 capitalize">{profile.role}</span>
-                )}
-              </div>
-            </div>
-            {!isSelf && (
-              <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
-                <button
-                  onClick={toggleFollow}
-                  disabled={working}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    isFollowing
-                      ? "border border-border bg-card text-foreground hover:bg-accent"
-                      : "bg-orange text-white hover:brightness-110"
-                  }`}
-                >
-                  {isFollowing ? <><UserCheck className="w-4 h-4" /> Following</> : <><UserPlus className="w-4 h-4" /> Follow</>}
-                </button>
-                <button
-                  onClick={startMessage}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent"
-                >
-                  <MessageCircle className="w-4 h-4" /> Message
-                </button>
-                <MessageAllButton
-                  label="Message All"
-                  audienceLabel={`${profile.display_name || profile.username || "artist"}'s followers`}
-                  defaultGroupName={`${profile.display_name || profile.username || "Artist"} group chat`}
-                  loadCandidates={async () => {
-                    const { data: fol } = await supabase
-                      .from("follows")
-                      .select("follower_id")
-                      .eq("following_id", profile.id);
-                    const ids = Array.from(new Set(((fol ?? []) as { follower_id: string }[]).map((r) => r.follower_id)));
-                    ids.push(profile.id);
-                    const unique = Array.from(new Set(ids));
-                    if (unique.length === 0) return [];
-                    const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: unique });
-                    const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
-                    return rows.map((p) => ({
-                      id: p.id,
-                      display_name: p.display_name,
-                      username: p.username,
-                      avatar_url: p.avatar_url,
-                      subtitle: p.neighborhood || "Follower",
-                    }));
-                  }}
-                />
-              </div>
-            )}
-            {isSelf && (
-              <Link
-                to="/profile"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent justify-self-end"
-              >
-                Edit your profile
-              </Link>
-            )}
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-6 text-sm">
-            <div><span className="font-semibold text-foreground">{stats.posts}</span> <span className="text-muted-foreground">posts</span></div>
-            <button type="button" onClick={() => setFollowList("followers")} className="hover:text-orange"><span className="font-semibold text-foreground">{stats.followers}</span> <span className="text-muted-foreground">followers</span></button>
-            <button type="button" onClick={() => setFollowList("following")} className="hover:text-orange"><span className="font-semibold text-foreground">{stats.following}</span> <span className="text-muted-foreground">following</span></button>
-          </div>
-
-          {followList && (
-            <FollowListDialog
-              open
-              onOpenChange={(open) => { if (!open) setFollowList(null); }}
-              profileId={profile.id}
-              mode={followList}
-            />
-          )}
-
-          {profile.bio && (
-            <p className="mt-6 max-w-2xl whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
-              {profile.bio}
-            </p>
-          )}
-
-          {profile.website && (
-            <a
-              href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-orange hover:underline"
+      {/* Banner with floating actions + category chip */}
+      <div
+        className="relative h-44 overflow-hidden rounded-2xl sm:h-60"
+        style={
+          profile.banner_url
+            ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+            : { backgroundColor: "#e7e5e0" }
+        }
+      >
+        {categoryLabel && (
+          <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+            {categoryLabel}
+          </span>
+        )}
+        <div className="absolute right-3 top-3 flex items-center gap-2">
+          <button
+            onClick={share}
+            aria-label="Share"
+            className="grid h-9 w-9 place-items-center rounded-full bg-white/95 text-neutral-700 shadow-sm backdrop-blur hover:text-[#d4580a]"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+          {!isSelf && (
+            <button
+              onClick={toggleFollow}
+              disabled={working}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 ${
+                isFollowing ? "bg-white/95 text-neutral-700" : "bg-white/95 text-neutral-800 hover:text-[#d4580a]"
+              }`}
             >
-              <Globe className="w-4 h-4" /> {profile.website.replace(/^https?:\/\//, "")}
-            </a>
+              {isFollowing ? <><UserCheck className="h-4 w-4" /> Following</> : <><UserPlus className="h-4 w-4" /> Follow</>}
+            </button>
           )}
         </div>
       </div>
 
-      {/* Content tabs */}
-      <div className="mt-6">
-        <div className="mb-4 flex gap-6 border-b border-border">
-          {(["posts", "stories", "events"] as const).map((t) => {
-            const count = t === "posts" ? posts.length : t === "stories" ? stories.length : events.length;
+      {/* Avatar overlapping banner */}
+      <div className="relative px-1 sm:px-2">
+        <div className="relative -mt-8 inline-block">
+          <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+            {profile.avatar_url && (
+              <img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Name + meta */}
+      <div className="mt-3 px-1 sm:px-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">
+            {profile.display_name || profile.username}
+          </h1>
+          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
+            <Star className="h-3 w-3" /> Grant Founding
+          </span>
+        </div>
+        {profile.bio && (
+          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{profile.bio}</p>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
+          <button type="button" onClick={() => setFollowList("followers")} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]">
+            <UserPlus className="h-4 w-4" /> {stats.followers} followers
+          </button>
+          {profile.neighborhood && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {profile.neighborhood}</span>
+            </>
+          )}
+          {profile.website && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <a
+                href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"
+              >
+                <Globe className="h-4 w-4" /> Website
+              </a>
+            </>
+          )}
+        </div>
+
+        {hashtags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {hashtags.map((h) => (
+              <span key={h} className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">{h}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Action row */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {isSelf && (
+            <Link
+              to="/profile"
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+            >
+              Edit Profile
+            </Link>
+          )}
+          {!isSelf && (
+            <button
+              onClick={startMessage}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+            >
+              <MessageCircle className="h-4 w-4" /> Message
+            </button>
+          )}
+          {!isSelf && (
+            <MessageAllButton
+              label="Message All"
+              audienceLabel={`${profile.display_name || profile.username || "artist"}'s followers`}
+              defaultGroupName={`${profile.display_name || profile.username || "Artist"} group chat`}
+              loadCandidates={async () => {
+                const { data: fol } = await supabase
+                  .from("follows")
+                  .select("follower_id")
+                  .eq("following_id", profile.id);
+                const ids = Array.from(new Set(((fol ?? []) as { follower_id: string }[]).map((r) => r.follower_id)));
+                ids.push(profile.id);
+                const unique = Array.from(new Set(ids));
+                if (unique.length === 0) return [];
+                const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: unique });
+                const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
+                return rows.map((p) => ({
+                  id: p.id,
+                  display_name: p.display_name,
+                  username: p.username,
+                  avatar_url: p.avatar_url,
+                  subtitle: p.neighborhood || "Follower",
+                }));
+              }}
+            />
+          )}
+          {canManage && (
+            <button
+              onClick={deletePage}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+            >
+              <Trash2 className="h-4 w-4" /> Delete Page {isAdmin && !isSelf && <span className="text-[10px] opacity-60">(Admin)</span>}
+            </button>
+          )}
+          {me && !isSelf && (
+            <button
+              onClick={toggleMute}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+            >
+              {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {muted ? "Unmute Page" : "Mute Page"}
+            </button>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
+          {ARTIST_TABS.map(({ key, label, Icon }) => {
+            const active = tab === key;
             return (
               <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`-mb-px border-b-2 pb-2.5 text-sm font-semibold capitalize transition ${
-                  tab === t ? "border-[#d4580a] text-[#d4580a]" : "border-transparent text-muted-foreground hover:text-foreground"
+                key={key}
+                onClick={() => setTab(key)}
+                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition ${
+                  active ? "bg-[#d4580a] text-white shadow-sm" : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
                 }`}
               >
-                {t} {count > 0 && <span className="ml-1 text-xs">({count})</span>}
+                <Icon className="h-4 w-4" /> {label}
               </button>
             );
           })}
         </div>
 
-        {contentLoading ? (
-          <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
-        ) : tab === "posts" ? (
-          posts.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-sm text-muted-foreground">
-              {profile.display_name || profile.username} hasn't posted yet.
+        <div className="py-6">
+          {contentLoading && tab === "posts" ? (
+            <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
+          ) : tab === "posts" ? (
+            posts.length === 0 ? (
+              <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
+            ) : (
+              <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}</div>
+            )
+          ) : tab === "studio" ? (
+            stories.length === 0 ? (
+              <EmptyTab icon={Flame} label="No studio updates yet." />
+            ) : (
+              <div className="space-y-4">{stories.map((s) => <StoryCard key={s.id} story={s} />)}</div>
+            )
+          ) : tab === "events" ? (
+            events.length === 0 ? (
+              <EmptyTab icon={Calendar} label="No events yet." />
+            ) : (
+              <div className="space-y-4">{events.map((e) => <EventCard key={e.id} event={e} />)}</div>
+            )
+          ) : tab === "gallery" ? (
+            (() => {
+              const media = posts.filter((p) => p.media_url).slice(0, 60);
+              return media.length === 0 ? (
+                <EmptyTab icon={ImageIcon} label="No gallery images yet." />
+              ) : (
+                <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5">
+                  {media.map((p) => (
+                    <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="aspect-square overflow-hidden rounded-md bg-neutral-100">
+                      <img src={p.media_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    </Link>
+                  ))}
+                </div>
+              );
+            })()
+          ) : tab === "cvbio" ? (
+            <div className="max-w-3xl whitespace-pre-wrap text-[15px] leading-relaxed text-neutral-700">
+              {profile.bio || <EmptyTab icon={FileText} label="No CV or bio yet." />}
+            </div>
+          ) : tab === "contact" ? (
+            <div className="space-y-2 text-sm text-neutral-700">
+              {profile.website ? (
+                <div className="inline-flex items-center gap-2"><Globe className="h-4 w-4" /> <a className="hover:text-[#d4580a]" href={profile.website} target="_blank" rel="noreferrer">{profile.website.replace(/^https?:\/\//, "")}</a></div>
+              ) : <EmptyTab icon={Mail} label="No contact details shared." />}
+            </div>
+          ) : tab === "invite" ? (
+            <div className="max-w-md space-y-3">
+              <p className="text-sm text-neutral-600">Share this artist's page with someone.</p>
+              <button onClick={share} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110">
+                <Share2 className="h-4 w-4" /> Copy invite link
+              </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}
-            </div>
-          )
-        ) : tab === "stories" ? (
-          stories.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-sm text-muted-foreground">
-              No stories yet.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {stories.map((s) => <StoryCard key={s.id} story={s} />)}
-            </div>
-          )
-        ) : (
-          events.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-sm text-muted-foreground">
-              No events yet.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {events.map((e) => <EventCard key={e.id} event={e} />)}
-            </div>
-          )
-        )}
+            <EmptyTab icon={Layers} label="Nothing here yet." />
+          )}
+        </div>
       </div>
+
+      {followList && (
+        <FollowListDialog
+          open
+          onOpenChange={(open) => { if (!open) setFollowList(null); }}
+          profileId={profile.id}
+          mode={followList}
+        />
+      )}
     </AppLayout>
+  );
+}
+
+function EmptyTab({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-sm text-neutral-500">
+      <Icon className="h-6 w-6 text-neutral-400" />
+      <div>{label}</div>
+    </div>
   );
 }
