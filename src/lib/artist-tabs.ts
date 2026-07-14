@@ -1,0 +1,106 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  List, Disc3, Music2, Mic, Ticket, FileText, BookOpen, Calendar, MessageCircle,
+  UserPlus2, Layers, Image as ImageIcon, Flame, Headphones, Mail, Shirt,
+  ShoppingBag, Sparkles, Users, Film, Camera, Radio,
+} from "lucide-react";
+
+export type ArtistTabKey =
+  | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
+  | "episodes" | "guests" | "listen" | "contact"
+  | "studio" | "series" | "gallery"
+  | "fashion_line" | "lookbook" | "drops" | "collabs";
+
+export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
+
+const MUSIC: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "album", label: "Album", Icon: Disc3 },
+  { key: "singles", label: "Singles", Icon: Music2 },
+  { key: "shows", label: "Shows", Icon: Ticket },
+  { key: "epk", label: "EPK", Icon: FileText },
+  { key: "book", label: "Book", Icon: BookOpen },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const PODCAST: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "episodes", label: "Episodes", Icon: Mic },
+  { key: "guests", label: "Guests", Icon: Users },
+  { key: "listen", label: "Listen On", Icon: Headphones },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const STUDIO: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "studio", label: "Studio", Icon: Flame },
+  { key: "series", label: "Series", Icon: Layers },
+  { key: "gallery", label: "Gallery", Icon: ImageIcon },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const FASHION: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "fashion_line", label: "Fashion Line", Icon: Layers },
+  { key: "lookbook", label: "Lookbook", Icon: Shirt },
+  { key: "drops", label: "Drops", Icon: Sparkles },
+  { key: "collabs", label: "Collabs", Icon: Users },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const DEFAULT_TABS: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "gallery", label: "Gallery", Icon: ImageIcon },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+// Marker icons reserved for future domain-specific rendering.
+void ShoppingBag; void Film; void Camera; void Radio;
+
+function norm(s?: string | null) {
+  return (s ?? "").toLowerCase().trim();
+}
+
+export function tabsForArtist(category?: string | null, role?: string | null): ArtistTab[] {
+  const c = norm(category);
+  const r = norm(role);
+  const hay = `${c} ${r}`;
+  if (/podcast/.test(hay)) return PODCAST;
+  if (/music|musician|dj|producer/.test(hay)) return MUSIC;
+  if (/fashion/.test(hay)) return FASHION;
+  if (/mixed media|performance|photograph|videograph|film|visual art|literary|poet|writer|dancer|muralist/.test(hay))
+    return STUDIO;
+  return DEFAULT_TABS;
+}
+
+export function bannerLabelForArtist(category?: string | null, role?: string | null): string | null {
+  const hay = `${norm(category)} ${norm(role)}`;
+  if (/podcast/.test(hay)) return "Podcaster";
+  if (/music|musician/.test(hay)) return "Music";
+  if (/dj/.test(hay)) return "DJ";
+  if (/producer/.test(hay)) return "Producer";
+  if (/fashion/.test(hay)) return "Fashion";
+  if (/mixed media/.test(hay)) return "Mixed Media";
+  if (/performance|dancer/.test(hay)) return "Performance";
+  if (/photograph/.test(hay)) return "Photography";
+  if (/videograph|film/.test(hay)) return "Video";
+  if (/visual art|muralist/.test(hay)) return "Visual Art";
+  if (/literary|poet|writer/.test(hay)) return "Literary";
+  return null;
+}
