@@ -53,6 +53,12 @@ export function OrgListPage({
       const needle = q.toLowerCase();
       list = list.filter((o) => o.name.toLowerCase().includes(needle) || (o.bio ?? "").toLowerCase().includes(needle) || (o.neighborhood ?? "").toLowerCase().includes(needle));
     }
+    // Prioritize orgs that have a picture (avatar or banner) so they surface first
+    list.sort((a, b) => {
+      const ap = (a.avatar_url ? 2 : 0) + (a.banner_url ? 1 : 0);
+      const bp = (b.avatar_url ? 2 : 0) + (b.banner_url ? 1 : 0);
+      return bp - ap;
+    });
     setItems(list); setLoading(false);
   };
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sub, sort]);
