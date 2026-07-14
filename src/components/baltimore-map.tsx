@@ -53,8 +53,7 @@ export function BaltimoreMap({
         supabase
           .from("events")
           .select("id, title, starts_at, location, image_url, description, latitude, longitude, neighborhood")
-          .gte("starts_at", new Date().toISOString())
-          .order("starts_at", { ascending: true }),
+          .order("starts_at", { ascending: false }),
         supabase
           .from("neighborhoods")
           .select("name, latitude, longitude")
