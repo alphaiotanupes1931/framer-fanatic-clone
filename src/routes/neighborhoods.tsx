@@ -160,8 +160,8 @@ function NeighborhoodsPage() {
       </div>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
+        <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl p-0 sm:w-full">
+          <DialogHeader className="px-4 pt-4 sm:px-6 sm:pt-6">
             <DialogTitle className="flex items-center gap-2 text-lg">
               <MapPin className="h-4 w-4 text-orange" />
               {selected?.name}
@@ -188,12 +188,12 @@ function NeighborhoodsPage() {
               tab === "associations" ? associations : [];
             return (
               <>
-                <div className="mt-2 flex gap-1 overflow-x-auto border-b border-border">
+                <div className="mt-2 flex gap-1 overflow-x-auto border-b border-border px-4 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {tabs.map((t) => (
                     <button
                       key={t.key}
                       onClick={() => setTab(t.key)}
-                      className={`whitespace-nowrap px-3 py-2 text-sm font-medium transition ${
+                      className={`whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-medium transition ${
                         tab === t.key
                           ? "text-orange border-b-2 border-orange -mb-[1px]"
                           : "text-muted-foreground hover:text-foreground"
@@ -203,7 +203,7 @@ function NeighborhoodsPage() {
                     </button>
                   ))}
                 </div>
-                <div className="mt-2 max-h-[60vh] overflow-y-auto">
+                <div className="max-h-[60vh] overflow-y-auto px-4 pb-4 sm:px-6 sm:pb-6">
                   {loading ? (
                     <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
                   ) : tab === "events" ? (
