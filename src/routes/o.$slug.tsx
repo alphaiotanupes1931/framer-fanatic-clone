@@ -555,13 +555,15 @@ function MembersTab({ orgId }: { orgId: string }) {
   );
 }
 
-function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"; canManage: boolean }) {
+function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
 
   const load = async () => {
-    const { data } = await supabase.from("organization_posts").select("*").eq("org_id", orgId).eq("kind", kind).order("created_at", { ascending: false });
+    let q = supabase.from("organization_posts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
+    if (kind) q = q.eq("kind", kind);
+    const { data } = await q;
     setItems((data ?? []) as OrgPost[]);
   };
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId, kind]);
@@ -572,7 +574,7 @@ function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportu
     const uid = sess.session?.user.id;
     if (!uid) return;
     const { error } = await supabase.from("organization_posts").insert({
-      org_id: orgId, author_id: uid, kind, title: form.title.trim(),
+      org_id: orgId, author_id: uid, kind: kind ?? "update", title: form.title.trim(),
       body: form.body.trim() || null, link_url: form.link_url.trim() || null, media_url: form.media_url.trim() || null,
     });
     if (error) return toast.error(error.message);
@@ -591,7 +593,7 @@ function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportu
       {canManage && (
         <div className="flex justify-end">
           <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-            <Plus className="h-4 w-4" /> New {kind}
+            <Plus className="h-4 w-4" /> New {kind ?? "post"}
           </button>
         </div>
       )}
@@ -605,7 +607,7 @@ function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportu
         </div>
       )}
       {items.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">No {kind} entries yet.</div>
+        <div className="py-12 text-center text-muted-foreground">No {kind ?? "post"} entries yet.</div>
       ) : (
         <div className="space-y-3">
           {items.map((p) => (
