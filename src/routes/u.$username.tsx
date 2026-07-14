@@ -6,7 +6,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Flame, Layers,
-  Image as ImageIcon, Calendar, MessagesSquare, Mail, FileText, UserPlus2,
+  Image as ImageIcon, Calendar, MessagesSquare, Mail, FileText, UserPlus2, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -65,6 +65,27 @@ function PublicProfilePage() {
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
+  const [showHoodPicker, setShowHoodPicker] = useState(false);
+
+  const isOwner = !!me && !!profile && me.id === profile.id;
+
+  useEffect(() => {
+    if (!isOwner) return;
+    (async () => {
+      const { data } = await supabase.from("neighborhoods").select("id, name").order("name").limit(200);
+      if (data) setNeighborhoods(data as Array<{ id: string; name: string }>);
+    })();
+  }, [isOwner]);
+
+  const updateNeighborhood = async (name: string) => {
+    if (!profile) return;
+    const { error } = await supabase.from("profiles").update({ neighborhood: name }).eq("id", profile.id);
+    if (error) { toast.error(error.message); return; }
+    setProfile({ ...profile, neighborhood: name });
+    setShowHoodPicker(false);
+    toast.success("Neighborhood updated");
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -291,10 +312,37 @@ function PublicProfilePage() {
           <button type="button" onClick={() => setFollowList("followers")} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]">
             <UserPlus className="h-4 w-4" /> {stats.followers} followers
           </button>
-          {profile.neighborhood && (
+          {(profile.neighborhood || isOwner) && (
             <>
               <span className="text-neutral-300">·</span>
-              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {profile.neighborhood}</span>
+              {isOwner ? (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowHoodPicker((v) => !v)}
+                    className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {profile.neighborhood || "Add neighborhood"}
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                  {showHoodPicker && (
+                    <div className="absolute top-7 left-0 z-30 max-h-64 w-56 overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-xl">
+                      {neighborhoods.map((n) => (
+                        <button
+                          key={n.id}
+                          onClick={() => updateNeighborhood(n.name)}
+                          className={`w-full px-3 py-2 text-left text-sm hover:bg-neutral-100 ${profile.neighborhood === n.name ? "font-semibold text-[#d4580a]" : "text-neutral-700"}`}
+                        >
+                          {n.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {profile.neighborhood}</span>
+              )}
             </>
           )}
           {profile.website && (
