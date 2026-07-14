@@ -413,9 +413,26 @@ function OrgProfile() {
           {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Menu" && (
+            <div className="space-y-10">
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Star className="h-5 w-5 text-[#d4580a]" /> Today's Specials</h3>
+                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">No specials posted today.</div>
+              </section>
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><List className="h-5 w-5 text-[#d4580a]" /> Menu</h3>
+                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">Menu coming soon.</div>
+              </section>
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Megaphone className="h-5 w-5 text-[#d4580a]" /> Posts & Updates</h3>
+                <OrgPostList orgId={org.id} kind={null} canManage={canManage} />
+              </section>
+            </div>
+          )}
+          {tab === "Feed" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
-          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
+          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
