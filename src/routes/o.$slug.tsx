@@ -41,6 +41,9 @@ const ASSOC_TABS = [
 const RESTAURANT_TABS = [
   "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
+const SERVICE_TABS = [
+  "Services", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
   Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
@@ -48,7 +51,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Invite: UserPlus, Comments: MessageSquare, About: FileText,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
-  Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star,
+  Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
 };
 type Tab = string;
 
@@ -76,6 +79,7 @@ function OrgProfile() {
       setOrg(data as Org | null);
       const sub = ((data as Org | null)?.subtype ?? "").toLowerCase();
       if (sub === "restaurant") setTab("Menu");
+      else if (sub === "service") setTab("Services");
     })();
   }, [slug]);
   useEffect(() => {
@@ -124,7 +128,8 @@ function OrgProfile() {
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
   const isRestaurant = (org.subtype ?? "").toLowerCase() === "restaurant";
-  const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : ASSOC_TABS;
+  const isService = (org.subtype ?? "").toLowerCase() === "service";
+  const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : isService ? SERVICE_TABS : ASSOC_TABS;
 
   const promptUpload = async (field: "avatar_url" | "banner_url") => {
     const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
@@ -430,6 +435,18 @@ function OrgProfile() {
             </div>
           )}
           {tab === "Feed" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Services" && (
+            <div className="space-y-10">
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Briefcase className="h-5 w-5 text-[#d4580a]" /> Services & Pricing</h3>
+                <div className="rounded-xl border border-neutral-200 bg-neutral-50 py-10 text-center text-sm text-neutral-500">No services listed yet.</div>
+              </section>
+              <section>
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Megaphone className="h-5 w-5 text-[#d4580a]" /> Posts & Updates</h3>
+                <OrgPostList orgId={org.id} kind={null} canManage={canManage} />
+              </section>
+            </div>
+          )}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
           {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
