@@ -68,8 +68,6 @@ function OrgProfile() {
   const [tab, setTab] = useState<Tab>("Feed");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
-  const [following, setFollowing] = useState(false);
-  const [followBusy, setFollowBusy] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
   const [muted, setMuted] = useState(false);
   const [editAbout, setEditAbout] = useState(false);
@@ -99,18 +97,6 @@ function OrgProfile() {
         .eq("user_id", me)
         .maybeSingle();
       setJoined(!!data);
-    })();
-  }, [org, me]);
-  useEffect(() => {
-    if (!org || !me) { setFollowing(false); return; }
-    (async () => {
-      const { data } = await supabase
-        .from("organization_followers")
-        .select("user_id")
-        .eq("organization_id", org.id)
-        .eq("user_id", me)
-        .maybeSingle();
-      setFollowing(!!data);
     })();
   }, [org, me]);
   useEffect(() => {
@@ -310,12 +296,6 @@ function OrgProfile() {
             className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white p-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
           >
             <Share2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => toast.info("Follow coming soon")}
-            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-          >
-            <Bell className="h-4 w-4" /> Follow
           </button>
           <button
             onClick={toggleJoin}
