@@ -213,6 +213,7 @@ function StoriesSignedIn() {
   const load = async () => {
     let q = supabase.from("stories").select("*").order("created_at", { ascending: false }).limit(50);
     if (filter !== "All") q = q.eq("format", filter);
+    if (storyFormat !== "All Formats") q = q.ilike("format", storyFormat);
     if (tab === "Featured") q = q.eq("featured", true);
     if (tab === "Trending") q = q.order("likes_count", { ascending: false });
     const { data } = await q;
@@ -233,7 +234,7 @@ function StoriesSignedIn() {
     }
   };
 
-  useEffect(() => { load(); }, [filter, tab, me?.id]);
+  useEffect(() => { load(); }, [filter, tab, storyFormat, me?.id]);
 
   const toggleLike = async (s: Story) => {
     if (!me) { toast.error("Sign in to like"); return; }
@@ -408,7 +409,9 @@ function StoriesSignedIn() {
             <div className="space-y-3">
               <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <select value={form.format} onChange={(e) => setForm({...form, format: e.target.value})} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">
-                {["blog","poetry","essay","resource"].map((f) => <option key={f}>{f}</option>)}
+                {STORY_FORMATS.filter((f) => f !== "All Formats").map((f) => (
+                  <option key={f} value={f}>{f}</option>
+                ))}
               </select>
               <div className="rounded-lg border border-neutral-200 p-3">
                 <div className="flex items-center gap-3">
