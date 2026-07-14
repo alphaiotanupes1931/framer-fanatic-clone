@@ -6,6 +6,8 @@ import { useUserRole } from "@/hooks/use-user-role";
 import {
   Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2,
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
+  Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
+  Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
@@ -31,7 +33,18 @@ type OrgPost = {
 type Comment = { id: string; user_id: string; body: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
-const ASSOC_TABS = ["Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About"] as const;
+const ASSOC_TABS = [
+  "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
+  "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments", "About",
+] as const;
+const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
+  Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
+  Resources: Folder, Jobs: Briefcase, Leaderboard: Trophy, Rules: FileText,
+  Invite: UserPlus, Comments: MessageSquare, About: FileText,
+  Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
+  Minutes: FileText, Board: Users, "By Laws": FileText,
+};
 type Tab = string;
 
 function OrgProfile() {
@@ -189,29 +202,49 @@ function OrgProfile() {
         <ArrowLeft className="h-5 w-5" />
       </button>
 
-      {/* Banner */}
+      {/* Banner with floating actions */}
       <div
-        className="relative h-44 overflow-hidden rounded-2xl sm:h-56"
+        className="relative h-44 overflow-hidden rounded-2xl sm:h-60"
         style={
           org.banner_url
             ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
             : { backgroundColor: "#d40a0a" }
         }
       >
-        {canManage && (
+        <div className="absolute right-3 top-3 flex items-center gap-2">
           <button
-            onClick={() => promptUpload("banner_url")}
-            className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-black/80"
+            onClick={share}
+            aria-label="Share"
+            className="grid h-9 w-9 place-items-center rounded-full bg-white/95 text-neutral-700 shadow-sm backdrop-blur hover:text-[#d4580a]"
           >
-            <Camera className="h-3.5 w-3.5" /> Edit banner
+            <Share2 className="h-4 w-4" />
           </button>
-        )}
+          {!canManage && (
+            <button
+              onClick={toggleFollow}
+              disabled={followBusy}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 ${
+                following ? "bg-white/95 text-neutral-700" : "bg-white/95 text-neutral-800 hover:text-[#d4580a]"
+              }`}
+            >
+              {following ? "Following" : "Follow"}
+            </button>
+          )}
+          {canManage && (
+            <button
+              onClick={() => promptUpload("banner_url")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-black/80"
+            >
+              <Camera className="h-3.5 w-3.5" /> Edit banner
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Avatar + actions row */}
-      <div className="relative -mt-10 flex items-end justify-between gap-3 px-1 sm:px-2">
-        <div className="relative">
-          <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-neutral-200 shadow-sm sm:h-28 sm:w-28">
+      {/* Avatar overlapping banner */}
+      <div className="relative px-1 sm:px-2">
+        <div className="relative -mt-8 inline-block">
+          <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
             {org.avatar_url && (
               <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
@@ -226,12 +259,62 @@ function OrgProfile() {
             </button>
           )}
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 pb-2">
+      {/* Name + tagline + description + meta */}
+      <div className="mt-3 px-1 sm:px-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">{org.name}</h1>
+          {isAssoc && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
+              <Star className="h-3 w-3" /> Grant Founding
+            </span>
+          )}
+        </div>
+        {org.subtype && (
+          <div className="mt-2">
+            <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+              {org.subtype}
+            </span>
+          </div>
+        )}
+        {org.bio && (
+          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{org.bio}</p>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
+          <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {memberCount} {memberCount === 1 ? "member" : "members"}</span>
+          {org.website && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <a href={org.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Globe className="h-4 w-4" /> Website</a>
+            </>
+          )}
+          {org.neighborhood && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.neighborhood}</span>
+            </>
+          )}
+          {org.email && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <a href={`mailto:${org.email}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Mail className="h-4 w-4" /> {org.email}</a>
+            </>
+          )}
+          {org.phone && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <a href={`tel:${org.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Phone className="h-4 w-4" /> {org.phone}</a>
+            </>
+          )}
+        </div>
+
+        {/* Action row: Edit / Message All / Join / Delete / Mute */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           {canManage && (
             <button
               onClick={() => { setTab("About"); setEditAbout(true); }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
             >
               <Pencil className="h-4 w-4" /> Edit Profile
             </button>
@@ -262,105 +345,53 @@ function OrgProfile() {
             }}
           />
           <button
-            onClick={share}
-            aria-label="Share"
-            className="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
-          {!canManage && (
-            <button
-              onClick={toggleFollow}
-              disabled={followBusy}
-              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${following ? "border border-neutral-200 bg-white text-neutral-700" : "border border-neutral-200 bg-white text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"}`}
-            >
-              {following ? "Following" : "Follow"}
-            </button>
-          )}
-          <button
             onClick={toggleJoin}
             disabled={joining}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
           >
             <Bell className="h-4 w-4" /> {joined ? "Joined" : "Join"}
           </button>
-        </div>
-      </div>
-
-      {/* Name + tagline + description + meta */}
-      <div className="mt-4 px-1 sm:px-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">{org.name}</h1>
-          {isAssoc && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
-              <Star className="h-3 w-3" /> Grant Founding
-            </span>
+          {canManage && (
+            <button
+              onClick={async () => {
+                if (!confirm("Delete this page?")) return;
+                const { error } = await supabase.from("organizations").delete().eq("id", org.id);
+                if (error) return toast.error(error.message);
+                toast.success("Deleted");
+                navigate({ to: "/dashboard" });
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+            >
+              <Trash2 className="h-4 w-4" /> Delete Page {canManage && <span className="text-[10px] opacity-60">(Admin)</span>}
+            </button>
+          )}
+          {me && (
+            <button
+              onClick={toggleMute}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+            >
+              {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {muted ? "Unmute Page" : "Mute Page"}
+            </button>
           )}
         </div>
-        {org.subtype && (
-          <p className="mt-1 text-sm text-neutral-500">{org.subtype}</p>
-        )}
-        {org.bio && (
-          <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{org.bio}</p>
-        )}
-        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-neutral-500">
-          <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {memberCount} {memberCount === 1 ? "member" : "members"}</span>
-          {org.neighborhood && (
-            <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.neighborhood}</span>
-          )}
-          {org.website && (
-            <a href={org.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Globe className="h-4 w-4" /> Website</a>
-          )}
-          {org.email && (
-            <a href={`mailto:${org.email}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Mail className="h-4 w-4" /> {org.email}</a>
-          )}
-          {org.phone && (
-            <a href={`tel:${org.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Phone className="h-4 w-4" /> {org.phone}</a>
-          )}
-        </div>
-
-        {(canManage || me) && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {canManage && (
-              <button
-                onClick={async () => {
-                  if (!confirm("Delete this page?")) return;
-                  const { error } = await supabase.from("organizations").delete().eq("id", org.id);
-                  if (error) return toast.error(error.message);
-                  toast.success("Deleted");
-                  navigate({ to: "/dashboard" });
-                }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-              >
-                <Trash2 className="h-4 w-4" /> Delete Page
-              </button>
-            )}
-            {me && (
-              <button
-                onClick={toggleMute}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-              >
-                {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-                {muted ? "Unmute Page" : "Mute Page"}
-              </button>
-            )}
-          </div>
-        )}
 
         {/* Tabs */}
-        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto rounded-full bg-neutral-100/70 p-1">
+        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
           {TABS.map((t) => {
             const active = tab === t;
+            const Icon = TAB_ICONS[t];
             return (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition ${
                   active
                     ? "bg-[#d4580a] text-white shadow-sm"
-                    : "text-neutral-500 hover:text-neutral-800"
+                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
                 }`}
               >
+                {Icon && <Icon className="h-4 w-4" />}
                 {t}
               </button>
             );
@@ -377,7 +408,7 @@ function OrgProfile() {
             <div className="py-14 text-center text-sm text-neutral-500">No posts yet in this association.</div>
           )}
           {tab === "Members" && <MembersTab orgId={org.id} />}
-          {(tab === "Polls" || tab === "Voting" || tab === "Minutes" || tab === "Board" || tab === "By Laws" || tab === "Invite") && (
+          {(["Announcements","Calendar","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} coming soon.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
