@@ -307,11 +307,22 @@ function StoriesSignedIn() {
 
         <div>
           <div className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Browse by format</div>
-          <div className="flex flex-wrap gap-2">
-            {STORY_FORMATS.map((f) => (
-              <button key={f} onClick={() => setStoryFormat(f)}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${storyFormat===f ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}>{f}</button>
-            ))}
+          <div className="relative max-w-md">
+            <select
+              value={storyFormat}
+              onChange={(e) => setStoryFormat(e.target.value as (typeof STORY_FORMATS)[number])}
+              className="w-full appearance-none rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-800 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+            >
+              {STORY_FORMATS.map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
+            <svg
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+              viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+            >
+              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.24 4.38a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+            </svg>
           </div>
         </div>
 
