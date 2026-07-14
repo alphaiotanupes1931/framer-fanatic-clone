@@ -170,7 +170,7 @@ export function BaltimoreMap({
                 {g.list.length > 1 ? `${g.list.length} events here` : g.list[0].title}
               </span>
             </Tooltip>
-            <Popup maxWidth={300} minWidth={280} className="event-map-popup">
+            <Popup maxWidth={320} minWidth={300} className="event-map-popup">
               <EventPopup list={g.list} onSelectEvent={onSelectEvent} />
             </Popup>
           </CircleMarker>
