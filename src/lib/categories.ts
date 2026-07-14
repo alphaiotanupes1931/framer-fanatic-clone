@@ -27,7 +27,8 @@ export type CreatorCategory = (typeof CREATOR_CATEGORIES)[number];
 // Tags a user can pick to describe themselves on their profile.
 // Kept in sync with the "Create Artist Page" options, plus DJ.
 export const PROFILE_TAGS = [
-  "Attendee",
+  "Resident",
+  "Visitor",
   "Visual Art",
   "Music",
   "DJ",
