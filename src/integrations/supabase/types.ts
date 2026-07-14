@@ -1458,7 +1458,7 @@ export type Database = {
       touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "attendee" | "artist" | "admin"
+      app_role: "attendee" | "artist" | "admin" | "resident" | "visitor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1586,7 +1586,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["attendee", "artist", "admin"],
+      app_role: ["attendee", "artist", "admin", "resident", "visitor"],
     },
   },
 } as const

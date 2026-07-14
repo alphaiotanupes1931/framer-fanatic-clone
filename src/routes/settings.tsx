@@ -33,7 +33,7 @@ const SECTIONS = [
 
 const FAQS = [
   { q: "How do I get started on Planet Baltimore?", a: "Sign up, complete your profile in Settings, pick your neighborhood, and follow the onboarding tour. You can replay the tour any time from this Help page." },
-  { q: "What is the difference between an Artist and an Attendee?", a: "Artists can post, create events, sell tickets, and appear on the Baltimore 100. Attendees can browse, follow, and buy tickets. You can request an artist upgrade from your Profile." },
+  { q: "What is the difference between an Artist, a Resident, and a Visitor?", a: "Artists can post, create events, sell tickets, and appear on the Baltimore 100. Residents and Visitors can browse, follow, and buy tickets. You can request an artist upgrade from your Profile." },
   { q: "How do I post or create an event?", a: "Go to the Dashboard and use the composer at the top to post. To create an event, open the Events tab and tap Create Event. Only artists can post and host events." },
   { q: "How do I sell tickets?", a: "Open Settings, go to Stripe Payments, and connect your Stripe account. Once connected, you can set a ticket price on any event. Stripe fees and Baltimore city tax are added automatically." },
   { q: "Why can I not see certain neighborhoods or artists?", a: "Planet Baltimore is Baltimore only. Make sure your neighborhood is set in Settings to Account. Use the Neighborhoods tab to explore artists and events by area." },

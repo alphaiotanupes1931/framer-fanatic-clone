@@ -73,7 +73,7 @@ const STEPS: Step[] = [
     placement: "center",
     title: "You're all set",
     content:
-      "Attendees can browse and buy tickets. To post, host events, or sell tickets, become an Artist from your Profile (Baltimore residents only).",
+      "Residents and Visitors can browse and buy tickets. To post, host events, or sell tickets, become an Artist from your Profile.",
   },
 ];
 
