@@ -137,14 +137,14 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div className="space-y-3">
-            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-muted">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 sm:px-5 sm:py-4">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-muted sm:h-12 sm:w-12">
+                <MapPin className="h-4 w-4 text-muted-foreground sm:h-5 sm:w-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-base font-bold text-foreground">{selected.name}</div>
+                <div className="truncate text-[17px] font-bold leading-tight text-foreground sm:text-lg">{selected.name}</div>
                 {selected.region && (
-                  <span className="mt-1 inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                  <span className="mt-1.5 inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
                     {selected.region}
                   </span>
                 )}
@@ -177,7 +177,7 @@ function NeighborhoodsPage() {
                 tab === "associations" ? associations : [];
               return (
                 <div className="rounded-2xl border border-border bg-card">
-                  <div className="flex gap-1 overflow-x-auto border-b border-border px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex gap-1 overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {tabs.map((t) => {
                       const active = tab === t.key;
                       const Icon = t.Icon;
@@ -185,32 +185,31 @@ function NeighborhoodsPage() {
                         <button
                           key={t.key}
                           onClick={() => setTab(t.key)}
-                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-t-lg px-3 py-2.5 text-xs font-medium transition sm:text-sm ${
+                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-[13px] font-medium transition sm:text-sm ${
                             active
                               ? "bg-orange/10 text-orange"
-                              : "text-muted-foreground hover:text-foreground"
+                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                           }`}
                         >
                           <Icon className="h-3.5 w-3.5" />
                           <span>{t.label}</span>
-                          <span className={`rounded-full px-1.5 text-[10px] ${active ? "bg-orange/20 text-orange" : "bg-secondary text-muted-foreground"}`}>{t.count}</span>
                         </button>
                       );
                     })}
                   </div>
-                  <div className="p-3 sm:p-4">
+                  <div className="border-t border-border p-2 sm:p-3">
                     {loading ? (
                       <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
                     ) : tab === "events" ? (
                       events.length === 0 ? (
                         <EmptyRow label={`No upcoming events in ${selected.name} yet.`} />
                       ) : (
-                        <ul className="divide-y divide-border">
+                        <ul className="space-y-1">
                           {events.map((ev) => (
                             <li key={ev.id}>
-                              <Link to="/events/$eventId" params={{ eventId: ev.id }} className="flex items-start gap-3 py-3 transition hover:bg-accent/50">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                                  {ev.image_url ? <EventImage src={ev.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" /> : <Calendar className="h-4 w-4 text-muted-foreground" />}
+                              <Link to="/events/$eventId" params={{ eventId: ev.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+                                  {ev.image_url ? <EventImage src={ev.image_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <Calendar className="h-5 w-5 text-muted-foreground" />}
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="truncate text-sm font-semibold text-foreground">{ev.title}</div>
@@ -231,16 +230,16 @@ function NeighborhoodsPage() {
                       artists.length === 0 ? (
                         <EmptyRow label={`No artists listed in ${selected.name} yet.`} />
                       ) : (
-                        <ul className="divide-y divide-border">
+                        <ul className="space-y-1">
                           {artists.map((a) => (
                             <li key={a.id}>
-                              <Link to="/u/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 py-3 transition hover:bg-accent/50">
-                                <Avatar className="h-10 w-10">
+                              <Link to="/u/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                                <Avatar className="h-12 w-12 rounded-lg">
                                   {a.avatar_url && <AvatarImage src={a.avatar_url} />}
-                                  <AvatarFallback className="bg-muted text-[11px] text-foreground">{(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}</AvatarFallback>
+                                  <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0 flex-1">
-                                  <div className="truncate text-sm font-semibold text-foreground">{a.display_name || a.username || "Unnamed Artist"}</div>
+                                  <div className="truncate text-[15px] font-semibold text-foreground">{a.display_name || a.username || "Unnamed Artist"}</div>
                                   {a.bio && <div className="truncate text-xs text-muted-foreground">{a.bio}</div>}
                                 </div>
                               </Link>
@@ -251,16 +250,16 @@ function NeighborhoodsPage() {
                     ) : activeOrgs.length === 0 ? (
                       <EmptyRow label={`Nothing in ${selected.name} yet.`} />
                     ) : (
-                      <ul className="divide-y divide-border">
+                      <ul className="space-y-1">
                         {activeOrgs.map((o) => (
                           <li key={o.id}>
-                            <Link to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 py-3 transition hover:bg-accent/50">
-                              <Avatar className="h-10 w-10 rounded-lg">
+                            <Link to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                              <Avatar className="h-12 w-12 rounded-lg">
                                 {o.avatar_url && <AvatarImage src={o.avatar_url} className="rounded-lg object-cover" />}
-                                <AvatarFallback className="rounded-lg bg-muted text-[11px] text-foreground">{o.name.slice(0, 1).toUpperCase()}</AvatarFallback>
+                                <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{o.name.slice(0, 1).toUpperCase()}</AvatarFallback>
                               </Avatar>
                               <div className="min-w-0 flex-1">
-                                <div className="truncate text-sm font-semibold text-foreground">{o.name}</div>
+                                <div className="truncate text-[15px] font-semibold text-foreground">{o.name}</div>
                                 {o.bio && <div className="truncate text-xs text-muted-foreground">{o.bio}</div>}
                               </div>
                             </Link>
