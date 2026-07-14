@@ -194,61 +194,19 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     return { url: session.url };
   });
 
-/** Upgrade the signed-in user from attendee to artist (Baltimore-verified only). */
+/** Upgrade the signed-in user to artist. Open to anyone; no location check. */
 export const becomeArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => {
-    const d = (data ?? {}) as { lat?: number; lng?: number };
-    return {
-      lat: typeof d.lat === "number" ? d.lat : null,
-      lng: typeof d.lng === "number" ? d.lng : null,
-    };
-  })
-  .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("in_baltimore, latitude, longitude, is_baltimore_verified, geo_lat, geo_lng")
-      .eq("id", userId)
-      .maybeSingle();
-
-    // Treat any user with a captured Baltimore-area lat/lng as verified.
-    // Prefer fresh client-supplied coords (re-checks location at click time).
-    const lat = data.lat
-      ?? (profile as { latitude?: number | null; geo_lat?: number | null } | null)?.latitude
-      ?? (profile as { geo_lat?: number | null } | null)?.geo_lat
-      ?? null;
-    const lng = data.lng
-      ?? (profile as { longitude?: number | null; geo_lng?: number | null } | null)?.longitude
-      ?? (profile as { geo_lng?: number | null } | null)?.geo_lng
-      ?? null;
-    const inBox = lat != null && lng != null && lat >= 39.2 && lat <= 39.38 && lng >= -76.72 && lng <= -76.52;
-
-    if (!inBox) {
-      throw new Error("Artist accounts are limited to Baltimore-area residents. Please enable location access from within Baltimore to upgrade.");
-    }
-
-    // Persist verified location for future checks.
-    // Service-role writes bypass the profile guard trigger and user_roles RLS.
+  .handler(async ({ context }) => {
+    const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const profileUpdate: Record<string, unknown> = {
-      in_baltimore: true,
-      is_baltimore_verified: true,
-      role: "resident",
-    };
-    if (data.lat != null && data.lng != null) {
-      profileUpdate.latitude = data.lat;
-      profileUpdate.longitude = data.lng;
-    }
     await supabaseAdmin
       .from("profiles")
-      .update(profileUpdate as never)
+      .update({ role: "resident" } as never)
       .eq("id", userId);
-
     const { error } = await supabaseAdmin
       .from("user_roles")
       .insert({ user_id: userId, role: "artist" });
-    // Ignore unique-violation (already an artist)
     if (error && !String(error.message).includes("duplicate")) throw error;
     return { ok: true };
   });

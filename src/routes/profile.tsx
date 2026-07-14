@@ -323,45 +323,17 @@ function BecomeArtistCTA() {
     <div className="mx-auto max-w-md space-y-3 rounded-2xl border border-border bg-neutral-50 p-6 text-left">
       <h3 className="text-base font-semibold text-foreground">Want to host events or post?</h3>
       <p className="text-sm text-muted-foreground">
-        Attendees can view content and buy tickets. To create events, post, or sell tickets, upgrade to an
-        Artist account. Artist accounts are limited to verified Baltimore-area residents.
+        Attendees can view content and buy tickets. To create events, post, or sell tickets, upgrade to an Artist account.
       </p>
       <button
         disabled={loading}
         onClick={async () => {
           setLoading(true);
           try {
-            toast.loading("Checking your location...", { id: "become-artist" });
-            const coords = await new Promise<{ lat: number; lng: number } | null>((resolve) => {
-              if (!("geolocation" in navigator)) return resolve(null);
-              let done = false;
-              const finish = (v: { lat: number; lng: number } | null) => {
-                if (done) return;
-                done = true;
-                resolve(v);
-              };
-              // Hard timeout in case the browser silently drops the prompt (iframes, permissions)
-              setTimeout(() => finish(null), 10000);
-              try {
-                navigator.geolocation.getCurrentPosition(
-                  (pos) => finish({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-                  () => finish(null),
-                  { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 },
-                );
-              } catch {
-                finish(null);
-              }
-            });
-            toast.dismiss("become-artist");
-            if (!coords) {
-              toast.error("Couldn't read your location. Enable location access in your browser and try again.");
-              return;
-            }
-            await become({ data: { lat: coords.lat, lng: coords.lng } });
-            toast.success("You're now a Baltimore Resident Artist, reloading...");
+            await become();
+            toast.success("You're now an Artist, reloading...");
             setTimeout(() => location.reload(), 700);
           } catch (e) {
-            toast.dismiss("become-artist");
             toast.error(e instanceof Error ? e.message : "Failed to upgrade");
           } finally {
             setLoading(false);
