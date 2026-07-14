@@ -409,7 +409,7 @@ function OrgProfile() {
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
           {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws"]).includes(tab) && (
-            <div className="py-14 text-center text-sm text-neutral-500">{tab} coming soon.</div>
+            <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
         </div>
