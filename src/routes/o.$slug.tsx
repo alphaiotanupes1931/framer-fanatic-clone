@@ -80,7 +80,8 @@ function OrgProfile() {
       const o = data as Org | null;
       const sub = (o?.subtype ?? "").toLowerCase();
       const isBiz = o?.type !== "community_assoc";
-      if (isBiz && sub === "restaurant") setTab("Menu");
+      const foodLike = ["restaurant", "cafe", "coffee", "bakery", "bar"].includes(sub);
+      if (isBiz && foodLike) setTab("Menu");
       else if (isBiz) setTab("Services");
     })();
   }, [slug]);
@@ -130,7 +131,8 @@ function OrgProfile() {
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
   const isBusiness = !isAssoc;
-  const isRestaurant = isBusiness && (org.subtype ?? "").toLowerCase() === "restaurant";
+  const subLower = (org.subtype ?? "").toLowerCase();
+  const isRestaurant = isBusiness && ["restaurant", "cafe", "coffee", "bakery", "bar"].includes(subLower);
   const isService = isBusiness && !isRestaurant;
   const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : isService ? SERVICE_TABS : ASSOC_TABS;
 
