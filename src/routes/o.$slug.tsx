@@ -127,7 +127,8 @@ function OrgProfile() {
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
   const isRestaurant = (org.subtype ?? "").toLowerCase() === "restaurant";
-  const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : ASSOC_TABS;
+  const isService = (org.subtype ?? "").toLowerCase() === "service";
+  const TABS: readonly string[] = isRestaurant ? RESTAURANT_TABS : isService ? SERVICE_TABS : ASSOC_TABS;
 
   const promptUpload = async (field: "avatar_url" | "banner_url") => {
     const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
