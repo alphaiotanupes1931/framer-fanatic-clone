@@ -9,6 +9,32 @@
   :where(img, video) { max-width: 100%; height: auto; }
 }
 
+/* Leaflet event popup: remove default padding so cover image reaches edges */
+.leaflet-popup.event-map-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -8px rgba(0,0,0,0.25);
+}
+.leaflet-popup.event-map-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+.leaflet-popup.event-map-popup .leaflet-popup-close-button {
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  border-radius: 9999px;
+  line-height: 22px;
+  text-align: center;
+  padding: 0;
+  font-size: 16px;
+  z-index: 10;
+}
+
 /*
  * Design system definition.
  *
