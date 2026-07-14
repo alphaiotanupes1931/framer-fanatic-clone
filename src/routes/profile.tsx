@@ -15,7 +15,7 @@ import {
   refreshConnectStatus,
   becomeArtist,
 } from "@/lib/stripe.functions";
-import { tabsForCategory } from "@/lib/categories";
+import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 
@@ -52,6 +52,7 @@ function ProfilePage() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
+  const [showTagPicker, setShowTagPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
 
   useEffect(() => {
@@ -115,7 +116,17 @@ function ProfilePage() {
   };
 
   const initials = (profile?.display_name || profile?.email || "U").slice(0, 2).toUpperCase();
-  const roleLabel = isArtist ? "Artist" : isAttendee ? "Attendee" : ((profile?.role || "attendee").replace(/\b\w/g, (c) => c.toUpperCase()));
+  const currentTag = ((profile as { category?: string | null } | null)?.category as string | null) ||
+    (isArtist ? "Artist" : isAttendee ? "Attendee" : ((profile?.role || "attendee").replace(/\b\w/g, (c) => c.toUpperCase())));
+
+  const selectTag = async (tag: string) => {
+    if (!profile) return;
+    const { error } = await supabase.from("profiles").update({ category: tag }).eq("id", profile.id);
+    if (error) { toast.error(error.message); return; }
+    setShowTagPicker(false);
+    toast.success("Tag updated");
+    location.reload();
+  };
 
   return (
     <AppLayout title="" hero={false}>
@@ -199,15 +210,33 @@ function ProfilePage() {
             </div>
             {profile?.bio && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{profile.bio}</p>}
             <div className="mt-2">
-              {isArtist ? (
-                <Badge className="gap-1.5 border text-xs font-medium" style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a", borderColor: "rgba(212,88,10,0.2)" }}>
-                  <Mic2 className="w-3 h-3" /> Artist
-                </Badge>
-              ) : (
-                <Badge className="gap-1.5 bg-secondary text-secondary-foreground border border-border text-xs font-medium">
-                  <Users className="w-3 h-3" /> {roleLabel}
-                </Badge>
-              )}
+              <div className="relative inline-block">
+                <button
+                  type="button"
+                  onClick={() => setShowTagPicker((v) => !v)}
+                  className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition hover:opacity-90"
+                  style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a", borderColor: "rgba(212,88,10,0.2)" }}
+                  aria-label="Change tag"
+                >
+                  {isArtist ? <Mic2 className="h-3 w-3" /> : <Users className="h-3 w-3" />}
+                  {currentTag}
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                {showTagPicker && (
+                  <div className="absolute top-8 left-0 z-30 w-48 max-h-72 overflow-y-auto rounded-xl border border-border bg-card shadow-xl">
+                    {PROFILE_TAGS.map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => selectTag(t)}
+                        className={`w-full px-3 py-2 text-left text-sm hover:bg-secondary ${currentTag === t ? "font-semibold" : "text-foreground"}`}
+                        style={currentTag === t ? { color: "#d4580a" } : undefined}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
