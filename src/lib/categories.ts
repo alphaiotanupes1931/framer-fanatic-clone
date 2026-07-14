@@ -135,6 +135,7 @@ export const ARTS_ORG_SUBTYPES = [
 export const BUSINESS_SUBTYPES = [
   "Cafe",
   "Restaurant",
+  "Bar",
   "Venue",
   "Retail",
   "Service",
