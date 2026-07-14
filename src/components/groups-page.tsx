@@ -8,6 +8,15 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 
+function prettyLabel(v: string) {
+  return v
+    .replace(/[_-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
   type: string; subtype: string | null; neighborhood: string | null;
@@ -157,7 +166,7 @@ export function GroupsPage() {
                     <ShieldCheck className="h-4 w-4 text-neutral-400" />
                   </div>
                   {o.subtype && (
-                    <div className="mt-0.5 text-sm text-neutral-500">{o.subtype}</div>
+                    <div className="mt-0.5 text-sm text-neutral-500">{prettyLabel(o.subtype)}</div>
                   )}
                   {o.bio && (
                     <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{o.bio}</p>
