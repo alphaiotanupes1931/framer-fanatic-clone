@@ -6,7 +6,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Flame, Layers,
-  Image as ImageIcon, Calendar, MessagesSquare, Mail, FileText, UserPlus2,
+  Image as ImageIcon, Calendar, MessagesSquare, Mail, FileText, UserPlus2, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -65,6 +65,27 @@ function PublicProfilePage() {
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
+  const [showHoodPicker, setShowHoodPicker] = useState(false);
+
+  const isOwner = !!me && !!profile && me.id === profile.id;
+
+  useEffect(() => {
+    if (!isOwner) return;
+    (async () => {
+      const { data } = await supabase.from("neighborhoods").select("id, name").order("name").limit(200);
+      if (data) setNeighborhoods(data as Array<{ id: string; name: string }>);
+    })();
+  }, [isOwner]);
+
+  const updateNeighborhood = async (name: string) => {
+    if (!profile) return;
+    const { error } = await supabase.from("profiles").update({ neighborhood: name }).eq("id", profile.id);
+    if (error) { toast.error(error.message); return; }
+    setProfile({ ...profile, neighborhood: name });
+    setShowHoodPicker(false);
+    toast.success("Neighborhood updated");
+  };
 
   useEffect(() => {
     let cancelled = false;
