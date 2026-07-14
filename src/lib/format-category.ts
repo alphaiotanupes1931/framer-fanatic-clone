@@ -8,11 +8,11 @@ const ALLOWED = new Set([
 /**
  * Normalizes a stored profile category into a display label.
  * Legacy values like "resident" or "business_owner" collapse to "Artist".
- * Returns null for residents/attendees so callers can hide the badge entirely.
+ * Returns null for residents so callers can hide the badge entirely.
  */
 export function formatCategory(category?: string | null, role?: string | null): string | null {
   const c = (category ?? "").trim().toLowerCase();
-  if (!c || c === "attendee" || c === "resident") {
+  if (!c || c === "resident") {
     return role === "artist" ? "Artist" : null;
   }
   if (!ALLOWED.has(c)) return "Artist";

@@ -606,7 +606,7 @@ type DailyCreator = {
 function formatCreatorLabel(category?: string | null) {
   if (!category) return "Artist";
   const c = category.trim().toLowerCase();
-  if (!c || c === "attendee" || c === "resident" || c === "visitor") return "Artist";
+  if (!c || c === "resident" || c === "visitor") return "Artist";
   // Only show recognized creator categories; everything else (legacy
   // imports like "resident", "business_owner") collapses to "Artist".
   const allowed = new Set([
