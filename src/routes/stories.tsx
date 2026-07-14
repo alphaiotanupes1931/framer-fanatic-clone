@@ -213,6 +213,7 @@ function StoriesSignedIn() {
   const load = async () => {
     let q = supabase.from("stories").select("*").order("created_at", { ascending: false }).limit(50);
     if (filter !== "All") q = q.eq("format", filter);
+    if (storyFormat !== "All Formats") q = q.ilike("format", storyFormat);
     if (tab === "Featured") q = q.eq("featured", true);
     if (tab === "Trending") q = q.order("likes_count", { ascending: false });
     const { data } = await q;
@@ -233,7 +234,7 @@ function StoriesSignedIn() {
     }
   };
 
-  useEffect(() => { load(); }, [filter, tab, me?.id]);
+  useEffect(() => { load(); }, [filter, tab, storyFormat, me?.id]);
 
   const toggleLike = async (s: Story) => {
     if (!me) { toast.error("Sign in to like"); return; }
