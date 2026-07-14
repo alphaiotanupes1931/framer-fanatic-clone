@@ -28,36 +28,6 @@ function AuthPage() {
   const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"artist" | "attendee" | "resident" | "visitor">("attendee");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [locating, setLocating] = useState(false);
-  const [locError, setLocError] = useState<string | null>(null);
-
-  const inBaltimore =
-    !!coords &&
-    coords.lat >= 39.2 &&
-    coords.lat <= 39.38 &&
-    coords.lng >= -76.72 &&
-    coords.lng <= -76.52;
-
-  const detectLocation = () => {
-    setLocError(null);
-    if (!("geolocation" in navigator)) {
-      setLocError("Geolocation is not supported by your browser.");
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocating(false);
-      },
-      (err) => {
-        setLocError(err.message || "Unable to retrieve your location.");
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -96,10 +66,7 @@ function AuthPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!coords) {
-      return toast.error("Please share your location to continue.");
-    }
-    const finalRole = role === "artist" && inBaltimore ? "artist" : "attendee";
+    const finalRole = role === "artist" ? "artist" : "attendee";
     const profileCategory =
       role === "resident" ? "Resident" :
       role === "visitor"  ? "Visitor"  :
@@ -113,8 +80,6 @@ function AuthPage() {
         data: {
           display_name: displayName || email.split("@")[0],
           role: finalRole,
-          latitude: coords.lat,
-          longitude: coords.lng,
         },
       },
     });
@@ -125,7 +90,6 @@ function AuthPage() {
         ? "Account created. Welcome, Artist!"
         : "Account created as an Attendee.",
     );
-    // If artist + verified Baltimore, immediately upgrade their role in user_roles.
     if (finalRole === "artist") {
       try { await becomeArtistFn(); } catch { /* harmless - they can also upgrade from profile */ }
     }
@@ -231,30 +195,6 @@ function AuthPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Your location</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={detectLocation}
-                    disabled={locating}
-                  >
-                    {locating
-                      ? "Detecting…"
-                      : coords
-                        ? `Location set (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})`
-                        : "Share my location"}
-                  </Button>
-                  {locError && <p className="text-sm text-destructive">{locError}</p>}
-                  {coords && (
-                    <p className="text-xs text-muted-foreground">
-                      {inBaltimore
-                        ? "✓ You're in the Baltimore area. You can sign up as an Artist or an Attendee."
-                        : "You're outside Baltimore. Artist sign-up is restricted to Baltimore-area residents. You can still join as an Attendee."}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
                   <Label>I'm signing up as</Label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -266,10 +206,8 @@ function AuthPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => inBaltimore && setRole("artist")}
-                      disabled={!inBaltimore}
-                      title={!inBaltimore ? "Artist sign-up requires a Baltimore location." : ""}
-                      className={`rounded-md border px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${role === "artist" ? "border-primary bg-primary/10" : "border-input"}`}
+                      onClick={() => setRole("artist")}
+                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "artist" ? "border-primary bg-primary/10" : "border-input"}`}
                     >
                       Artist
                     </button>
