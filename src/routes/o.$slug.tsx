@@ -175,30 +175,6 @@ function OrgProfile() {
     }
   };
 
-  const toggleFollow = async () => {
-    if (!me) { toast.error("Please sign in first"); return; }
-    setFollowBusy(true);
-    try {
-      if (following) {
-        const { error } = await supabase.from("organization_followers").delete()
-          .eq("organization_id", org.id).eq("user_id", me);
-        if (error) throw error;
-        setFollowing(false);
-        toast.success(`Unfollowed ${org.name}`);
-      } else {
-        const { error } = await supabase.from("organization_followers")
-          .insert({ organization_id: org.id, user_id: me });
-        if (error) throw error;
-        setFollowing(true);
-        toast.success(`Following ${org.name}`);
-      }
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed");
-    } finally {
-      setFollowBusy(false);
-    }
-  };
-
   const share = async () => {
     const url = `${window.location.origin}/o/${org.slug}`;
     try {
