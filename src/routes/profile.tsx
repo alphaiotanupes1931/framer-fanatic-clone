@@ -50,6 +50,7 @@ function ProfilePage() {
   const [msgOpen, setMsgOpen] = useState(false);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [showTagPicker, setShowTagPicker] = useState(false);
@@ -104,13 +105,14 @@ function ProfilePage() {
 
   const uploadBanner = async (file: File) => {
     if (!profile) return;
+    setUploadingBanner(true);
     const path = `${profile.id}/banner-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (error) { toast.error(error.message); return; }
+    if (error) { setUploadingBanner(false); toast.error(error.message); return; }
     const { data, error: signErr } = await supabase.storage
       .from("avatars")
       .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-    if (signErr || !data) { toast.error(signErr?.message || "Could not sign URL"); return; }
+    if (signErr || !data) { setUploadingBanner(false); toast.error(signErr?.message || "Could not sign URL"); return; }
     await supabase.from("profiles").update({ banner_url: data.signedUrl }).eq("id", profile.id);
     toast.success("Banner updated"); location.reload();
   };
@@ -135,12 +137,21 @@ function ProfilePage() {
           className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
           style={profile?.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         >
+          {uploadingBanner && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-neutral-800 shadow">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#d4580a] border-t-transparent" />
+                Uploading banner...
+              </div>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => bannerInputRef.current?.click()}
-            className="absolute bottom-2 right-2 z-10 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-black/80 sm:bottom-3 sm:right-3 sm:px-4 sm:py-2 sm:text-xs"
+            disabled={uploadingBanner}
+            className="absolute bottom-2 right-2 z-10 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-black/80 disabled:opacity-60 sm:bottom-3 sm:right-3 sm:px-4 sm:py-2 sm:text-xs"
           >
-            <Camera className="h-3.5 w-3.5" /> {profile?.banner_url ? "Change banner" : "Add banner"}
+            <Camera className="h-3.5 w-3.5" /> {uploadingBanner ? "Uploading..." : profile?.banner_url ? "Change banner" : "Add banner"}
           </button>
           <input
             ref={bannerInputRef}

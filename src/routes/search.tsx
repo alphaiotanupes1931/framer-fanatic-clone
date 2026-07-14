@@ -112,16 +112,16 @@ function SearchPage() {
               <Section title="People">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {people.slice(0, tab === "All" ? 6 : 24).map((p) => (
-                    <Link key={p.id} to="/u/$username" params={{ username: p.username || p.id }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
-                      <Avatar className="h-11 w-11">
+                    <Link key={p.id} to="/u/$username" params={{ username: p.username || p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                      <Avatar className="h-11 w-11 shrink-0">
                         {p.avatar_url && <AvatarImage src={p.avatar_url} />}
                         <AvatarFallback>{(p.display_name || p.username || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{p.display_name || p.username}</div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                           {p.username && <span className="truncate">@{p.username}</span>}
-                          {p.neighborhood && <span className="inline-flex items-center gap-0.5"><MapPin className="h-3 w-3" /> {p.neighborhood}</span>}
+                          {p.neighborhood && <span className="inline-flex items-center gap-0.5 whitespace-nowrap"><MapPin className="h-3 w-3" /> {p.neighborhood}</span>}
                         </div>
                       </div>
                     </Link>
@@ -140,7 +140,7 @@ function SearchPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{o.name}</div>
-                        <div className="text-xs capitalize text-muted-foreground">{o.type}{o.neighborhood ? ` · ${o.neighborhood}` : ""}</div>
+                        <div className="text-xs text-muted-foreground">{o.type.replace(/[_-]+/g, " ").split(" ").filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(" ")}{o.neighborhood ? ` · ${o.neighborhood}` : ""}</div>
                       </div>
                     </Link>
                   ))}
