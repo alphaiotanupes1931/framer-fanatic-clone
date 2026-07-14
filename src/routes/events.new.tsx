@@ -220,36 +220,6 @@ function NewEventPage() {
         <div className="h-12" />
       </div>
 
-      {outsideOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={() => setOutsideOpen(false)}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center gap-2 text-[#d4580a]">
-              <MapPin className="h-5 w-5" />
-              <h2 className="text-lg font-bold text-foreground">Baltimore Artists Only</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Planet Baltimore is a hyper-local platform for Baltimore City and the greater Baltimore metro area (within 15 miles). Your location appears to be outside this area.
-            </p>
-            <p className="mt-3 text-sm text-muted-foreground">
-              If you believe this is an error, please make sure location permissions are enabled for this site, or contact us for help.
-            </p>
-            <div className="mt-5 flex justify-end">
-              <button
-                onClick={() => setOutsideOpen(false)}
-                className="rounded-full bg-[#d4580a] px-5 py-2 text-sm font-semibold text-white hover:brightness-110"
-              >
-                Got it
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </AppLayout>
   );
 }
