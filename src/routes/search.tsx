@@ -140,7 +140,7 @@ function SearchPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{o.name}</div>
-                        <div className="text-xs capitalize text-muted-foreground">{o.type}{o.neighborhood ? ` · ${o.neighborhood}` : ""}</div>
+                        <div className="text-xs text-muted-foreground">{o.type.replace(/[_-]+/g, " ").split(" ").filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(" ")}{o.neighborhood ? ` · ${o.neighborhood}` : ""}</div>
                       </div>
                     </Link>
                   ))}
