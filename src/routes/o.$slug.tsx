@@ -108,7 +108,7 @@ function OrgProfile() {
   useEffect(() => {
     if (!org) return;
     setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
-    setTab(org.type === "community_assoc" ? "Posts" : "About");
+    setTab("Posts");
   }, [org]);
 
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
@@ -116,7 +116,7 @@ function OrgProfile() {
   const isOwner = !!me && me === org.owner_id;
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
-  const TABS: readonly string[] = isAssoc ? ASSOC_TABS : DEFAULT_TABS;
+  const TABS: readonly string[] = ASSOC_TABS;
 
   const promptUpload = async (field: "avatar_url" | "banner_url") => {
     const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
