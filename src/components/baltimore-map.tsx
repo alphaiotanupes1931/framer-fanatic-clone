@@ -163,15 +163,14 @@ export function BaltimoreMap({
               fillOpacity: 0.85,
               weight: 2,
             }}
-            eventHandlers={{ click: () => onSelectEvent?.(g.list[0]) }}
           >
             <Tooltip direction="top" offset={[0, -6]} opacity={1}>
               <span className="text-xs font-semibold">
                 {g.list.length > 1 ? `${g.list.length} events here` : g.list[0].title}
               </span>
             </Tooltip>
-            <Popup maxWidth={320} minWidth={300} className="event-map-popup">
-              <EventPopup list={g.list} onSelectEvent={onSelectEvent} />
+            <Popup maxWidth={320} minWidth={280} className="event-map-popup" autoPan autoPanPadding={[16, 16]}>
+              <EventPopup list={g.list} />
             </Popup>
           </CircleMarker>
         ))}
@@ -188,10 +187,8 @@ export function BaltimoreMap({
 
 function EventPopup({
   list,
-  onSelectEvent,
 }: {
   list: EventPin[];
-  onSelectEvent?: (e: EventPin) => void;
 }) {
   const [idx, setIdx] = useState(0);
   const e = list[idx];
@@ -244,9 +241,8 @@ function EventPopup({
           </p>
         )}
         <Link
-          to="/e/$id"
-          params={{ id: e.id }}
-          onClick={() => onSelectEvent?.(e)}
+          to="/events/$eventId"
+          params={{ eventId: e.id }}
           className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#d4580a] hover:text-[#b8490a] transition"
         >
           View event <span aria-hidden>→</span>
