@@ -292,8 +292,13 @@ function OrgProfile() {
         </div>
         {org.subtype && (
           <div className="mt-2">
-            <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-neutral-600">
-              {org.subtype}
+            <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
+              {org.subtype
+                .replace(/[_-]+/g, " ")
+                .split(" ")
+                .filter(Boolean)
+                .map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
+                .join(" ")}
             </span>
           </div>
         )}
