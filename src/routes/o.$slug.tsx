@@ -6,6 +6,8 @@ import { useUserRole } from "@/hooks/use-user-role";
 import {
   Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2,
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
+  Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
+  Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
@@ -31,7 +33,18 @@ type OrgPost = {
 type Comment = { id: string; user_id: string; body: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
-const ASSOC_TABS = ["Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About"] as const;
+const ASSOC_TABS = [
+  "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
+  "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments", "About",
+] as const;
+const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
+  Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
+  Resources: Folder, Jobs: Briefcase, Leaderboard: Trophy, Rules: FileText,
+  Invite: UserPlus, Comments: MessageSquare, About: FileText,
+  Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
+  Minutes: FileText, Board: Users, "By Laws": FileText,
+};
 type Tab = string;
 
 function OrgProfile() {
