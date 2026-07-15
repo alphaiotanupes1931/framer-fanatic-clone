@@ -501,12 +501,27 @@ function MessagesPage() {
                   onClick={() => setActive(c)}
                   className="flex flex-1 items-center gap-3 px-4 py-3 text-left"
                 >
-                  <Avatar className="h-10 w-10">
-                    {!c.is_group && c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
-                    </AvatarFallback>
-                  </Avatar>
+                  {!c.is_group && c.other?.username ? (
+                    <Link
+                      to="/u/$username"
+                      params={{ username: c.other.username }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Avatar className="h-10 w-10">
+                        {c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {initials(c.other)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <Avatar className="h-10 w-10">
+                      {!c.is_group && c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate text-sm font-semibold text-foreground">
