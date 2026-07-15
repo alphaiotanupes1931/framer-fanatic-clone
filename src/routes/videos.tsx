@@ -232,9 +232,26 @@ function VideosSignedIn() {
 }
 
 function VideoCard({ v }: { v: Video }) {
+  const url = v.video_url || "";
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  const ytThumb = yt ? `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg` : null;
+  const poster = v.thumbnail_url || ytThumb;
+  const isDirect = !yt && !vimeo && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
   return (
     <a href={v.video_url} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-      <div className="relative aspect-video bg-gradient-to-br from-orange-300 to-orange-600" style={v.thumbnail_url ? { backgroundImage: `url(${v.thumbnail_url})`, backgroundSize: "cover" } : undefined}>
+      <div className="relative aspect-video bg-neutral-900 overflow-hidden">
+        {poster ? (
+          <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+        ) : isDirect || url.startsWith("blob:") || url.startsWith("http") ? (
+          <video
+            src={`${url}${url.includes("#") ? "" : "#t=0.5"}`}
+            preload="metadata"
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : null}
         {v.featured && <div className="absolute left-3 top-3 rounded-md bg-yellow-400 px-2 py-1 text-[10px] font-bold text-yellow-900">★ Featured</div>}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-full bg-white/30 p-4 backdrop-blur group-hover:bg-white/50"><Play className="h-6 w-6 fill-white text-white" /></div>
