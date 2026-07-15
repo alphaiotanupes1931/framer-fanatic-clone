@@ -18,6 +18,7 @@ import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
+import { tabsForArtist } from "@/lib/artist-tabs";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -49,9 +50,16 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { isArtist, isResident, isAdmin } = useUserRole();
-  const categoryTabs = isArtist ? [] : tabsForCategory((profile as { category?: string | null } | null)?.category);
-  const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_RESIDENT_BASE;
+  const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
+  const category = (profile as { category?: string | null } | null)?.category ?? null;
+  const role = (profile as { role?: string | null } | null)?.role ?? null;
+  const artistTabLabels = tabsForArtist(category, role).map((t) => t.label);
+  // Treat as artist if role says so OR the profile's category maps to an artist tab set
+  // that differs from the generic default (Posts/Gallery/Events/CV/Bio/Invite).
+  const isArtist = roleIsArtist || artistTabLabels.some((l) => ["Studio","Series","Album","Singles","EPK","Episodes","Fashion Line","Lookbook","Drops"].includes(l));
+  const categoryTabs = isArtist ? [] : tabsForCategory(category);
+  const artistExtras = ["Saved","My Tickets","My Dashboard","Stripe"];
+  const baseTabs = isArtist ? [...artistTabLabels, ...artistExtras] : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
