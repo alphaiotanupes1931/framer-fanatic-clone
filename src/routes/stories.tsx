@@ -284,7 +284,11 @@ function StoriesSignedIn() {
     const from = stories.length;
     const { data } = await buildQuery(from, from + PAGE - 1);
     const list = await hydrateAuthors((data || []) as Story[]);
-    setStories((cur) => [...cur, ...list]);
+    setStories((cur) => {
+      const seen = new Set(cur.map((x) => x.id));
+      const dedup = list.filter((x) => !seen.has(x.id));
+      return [...cur, ...dedup];
+    });
     setHasMore(list.length === PAGE);
     setLoadingMore(false);
   };
