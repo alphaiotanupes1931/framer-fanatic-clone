@@ -238,7 +238,8 @@ function VideosSignedIn() {
   );
 }
 
-function VideoCard({ v }: { v: Video }) {
+function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
+  const { isAdmin } = useUserRole();
   const url = v.video_url || "";
   const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
@@ -260,6 +261,21 @@ function VideoCard({ v }: { v: Video }) {
           />
         ) : null}
         {v.featured && <div className="absolute left-3 top-3 rounded-md bg-yellow-400 px-2 py-1 text-[10px] font-bold text-yellow-900">★ Featured</div>}
+        {isAdmin && (
+          <button
+            onClick={async (e) => {
+              e.preventDefault(); e.stopPropagation();
+              const { error } = await supabase.from("videos").update({ featured: !v.featured } as any).eq("id", v.id);
+              if (error) { toast.error(error.message); return; }
+              toast.success(v.featured ? "Removed from featured" : "Marked as featured");
+              onChanged?.();
+            }}
+            className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${v.featured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}
+          >
+            <Star className={`h-3.5 w-3.5 ${v.featured ? "" : "fill-yellow-900"}`} />
+            {v.featured ? "Unfeature" : "Feature"}
+          </button>
+        )}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-full bg-white/30 p-4 backdrop-blur group-hover:bg-white/50"><Play className="h-6 w-6 fill-white text-white" /></div>
         </div>
