@@ -615,14 +615,27 @@ function MessagesPage() {
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
-                <Avatar className="h-9 w-9">
-                  {!active.is_group && active.other?.avatar_url && (
-                    <AvatarImage src={active.other.avatar_url} alt="" />
-                  )}
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    {active.is_group ? <Users className="h-5 w-5" /> : initials(active.other)}
-                  </AvatarFallback>
-                </Avatar>
+                {!active.is_group && active.other?.username ? (
+                  <Link to="/u/$username" params={{ username: active.other.username }}>
+                    <Avatar className="h-9 w-9">
+                      {active.other?.avatar_url && (
+                        <AvatarImage src={active.other.avatar_url} alt="" />
+                      )}
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {initials(active.other)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+                ) : (
+                  <Avatar className="h-9 w-9">
+                    {!active.is_group && active.other?.avatar_url && (
+                      <AvatarImage src={active.other.avatar_url} alt="" />
+                    )}
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {active.is_group ? <Users className="h-5 w-5" /> : initials(active.other)}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
                 <div className="min-w-0">
                   <div className="truncate font-semibold text-foreground">
                     {active.is_group
