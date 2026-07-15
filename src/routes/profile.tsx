@@ -85,9 +85,9 @@ function ProfilePage() {
         .order("created_at", { ascending: false })
         .limit(50);
       const author = {
-        author_display_name: profile.display_name,
+        author_name: profile.display_name || profile.username || "You",
         author_username: profile.username,
-        author_avatar_url: profile.avatar_url,
+        author_avatar: profile.avatar_url,
       };
       setMyPosts((data || []).map((p: any) => ({ ...p, ...author })));
     })();
