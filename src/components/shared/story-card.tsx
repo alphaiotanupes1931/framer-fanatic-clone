@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Clock, Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
+import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import { stripHtml, timeAgo } from "@/lib/text-utils";
 
 type Story = {
   id: string;
+  user_id?: string;
   title: string;
   excerpt?: string | null;
   cover_url?: string | null;
@@ -22,12 +23,14 @@ type Story = {
   created_at?: string | null;
 };
 
-export function StoryCard({ story, featured = false, currentUserId }: { story: Story; featured?: boolean; currentUserId?: string }) {
+export function StoryCard({ story, featured = false, currentUserId, onDeleted }: { story: Story; featured?: boolean; currentUserId?: string; onDeleted?: (id: string) => void }) {
   const cleanExcerpt = stripHtml(story.excerpt);
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(story.likes_count || 0);
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const isOwner = !!currentUserId && !!story.user_id && currentUserId === story.user_id;
   const storyUrl = typeof window !== "undefined" ? `${window.location.origin}/stories/${story.id}` : `/stories/${story.id}`;
 
   useEffect(() => {
@@ -56,6 +59,16 @@ export function StoryCard({ story, featured = false, currentUserId }: { story: S
     if (res.error) { setLiked(was); setLikes((n) => n + (was ? 1 : -1)); toast.error(res.error.message); }
   };
   const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!isOwner || deleting) return;
+    if (!confirm("Delete this story? This can't be undone.")) return;
+    setDeleting(true);
+    const { error } = await supabase.from("stories").delete().eq("id", story.id);
+    if (error) { setDeleting(false); toast.error(error.message); return; }
+    toast.success("Story deleted");
+    onDeleted?.(story.id);
+  };
   const toggleSave = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
     if (!currentUserId) { toast.error("Sign in to save"); return; }
@@ -179,6 +192,11 @@ export function StoryCard({ story, featured = false, currentUserId }: { story: S
         <button onClick={toggleSave} className={`flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
         </button>
+        {isOwner && (
+          <button onClick={handleDelete} disabled={deleting} className="flex items-center gap-2 text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label="Delete">
+            <Trash2 className="h-5 w-5" />
+          </button>
+        )}
       </footer>
       <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={storyUrl} title={story.title} />
     </article>
