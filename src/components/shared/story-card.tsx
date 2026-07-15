@@ -184,8 +184,8 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
         <span className="flex items-center gap-2 text-muted-foreground/80">
           <Clock className="h-5 w-5" />{story.read_minutes || 5}m
         </span>
-        <button onClick={openShare} className="ml-auto flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app">
-          <Share2 className="h-5 w-5" />
+        <button onClick={openShare} className="ml-auto flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
+          <Send className="h-5 w-5" />
         </button>
         <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-5 w-5" />
