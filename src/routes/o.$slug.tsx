@@ -675,7 +675,49 @@ function MembersTab({ orgId }: { orgId: string }) {
 }
 
 function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+  const [items, setItems] = useState<OrgPost[]>([]);
 
+function SupportTab({ org }: { org: Org }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <div className="mb-2 flex items-center gap-2 text-lg font-bold text-neutral-900">
+          <Heart className="h-5 w-5 text-[#d4580a]" /> Support {org.name}
+        </div>
+        <p className="text-sm text-neutral-600">
+          Your contribution helps sustain programming, artists, and community impact.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {org.website && (
+            <a href={org.website} target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
+              <Globe className="h-4 w-4" /> Donate / Website
+            </a>
+          )}
+          {org.email && (
+            <a href={`mailto:${org.email}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">
+              <Mail className="h-4 w-4" /> Contact
+            </a>
+          )}
+        </div>
+      </div>
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <div className="mb-2 flex items-center gap-2 text-lg font-bold text-neutral-900">
+          <Users className="h-5 w-5 text-[#d4580a]" /> Other ways to help
+        </div>
+        <ul className="space-y-2 text-sm text-neutral-700">
+          <li>· Volunteer at upcoming events</li>
+          <li>· Share their work with your network</li>
+          <li>· Attend and bring a friend</li>
+          <li>· Sponsor a program or exhibition</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function _OrgPostListStart({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
