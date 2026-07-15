@@ -23,34 +23,29 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
   if (featured) {
     return (
       <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
-        <div className="relative aspect-[2/1] overflow-hidden bg-muted">
+        <div className="flex items-center gap-2 px-4 pt-3">
+          <Avatar className="h-7 w-7">
+            <AvatarImage src={story.author_avatar ?? undefined} />
+            <AvatarFallback className="bg-slate-100 text-[10px] font-bold text-slate-500">
+              {story.author_name?.charAt(0) ?? "?"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="truncate text-xs font-extrabold text-slate-800">{story.author_name}</span>
+          {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
+          {story.created_at && <span className="ml-auto text-[11px] text-slate-500">{timeAgo(story.created_at)}</span>}
+        </div>
+        <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
           {story.cover_url ? (
             <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/10 to-accent/10" />
           )}
-          {story.category && (
-            <Badge variant="secondary" className="absolute left-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">
-              {story.category}
-            </Badge>
-          )}
         </div>
         <div className="p-5">
           <h2 className="line-clamp-2 font-serif text-xl font-bold text-foreground transition-colors group-hover:text-[#d4580a] break-words">{story.title}</h2>
           {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground break-words">{cleanExcerpt}</p>}
-          <div className="mt-4 flex items-center gap-3">
-            <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
-              <AvatarImage src={story.author_avatar ?? undefined} />
-              <AvatarFallback className="bg-accent/10 text-[10px] text-accent-foreground sm:text-xs">
-                {story.author_name?.charAt(0) ?? "?"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex min-w-0 items-center gap-2 text-[10px] text-muted-foreground sm:text-xs">
-              <span className="truncate font-medium text-foreground">{story.author_name}</span>
-              <span>·</span>
-              {story.created_at && <><span>{timeAgo(story.created_at)}</span><span>·</span></>}
-              <span>{story.read_minutes || 5} min read</span>
-            </div>
+          <div className="mt-3 text-[11px] text-slate-500">
+            {story.read_minutes || 5} min read
           </div>
         </div>
       </Link>

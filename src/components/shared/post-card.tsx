@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { X } from "lucide-react";
 import { ReportDialog } from "@/components/report-dialog";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 
 type Post = {
   id: string;
@@ -49,6 +50,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const [newComment, setNewComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
   const [reportOpen, setReportOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -79,13 +81,8 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
     }
   };
 
-  const share = async () => {
-    const url = `${window.location.origin}/dashboard#post-${post.id}`;
-    try {
-      if (navigator.share) await navigator.share({ url, title: "Planet Baltimore" });
-      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
-    } catch { /* cancelled */ }
-  };
+  const share = () => setShareOpen(true);
+  const postUrl = typeof window !== "undefined" ? `${window.location.origin}/posts/${post.id}` : `/posts/${post.id}`;
 
   const toggleSave = async () => {
     if (!currentUserId) { toast.error("Sign in to save"); return; }
@@ -186,6 +183,32 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
+      {post.image_url && (
+        <Link
+          to="/posts/$postId"
+          params={{ postId: post.id }}
+          className="mt-3 block w-full overflow-hidden focus:outline-none"
+        >
+          <img
+            src={post.image_url}
+            alt=""
+            className="w-full cursor-pointer"
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+        </Link>
+      )}
+      {post.video_url && (
+        <video
+          src={post.video_url}
+          controls
+          playsInline
+          preload="metadata"
+          className="mt-3 w-full max-h-[70vh] bg-black"
+        />
+      )}
       {post.content && (
         (post.post_type === "text" && post.bg_color) ? (
           <Link
@@ -205,32 +228,6 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
             {post.content}
           </Link>
         )
-      )}
-      {post.image_url && (
-        <Link
-          to="/posts/$postId"
-          params={{ postId: post.id }}
-          className="block w-full overflow-hidden focus:outline-none"
-        >
-          <img
-            src={post.image_url}
-            alt=""
-            className="w-full cursor-pointer"
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-          />
-        </Link>
-      )}
-      {post.video_url && (
-        <video
-          src={post.video_url}
-          controls
-          playsInline
-          preload="metadata"
-          className="w-full max-h-[70vh] bg-black"
-        />
       )}
       {post.music_url && (
         <div className="px-4 pb-3 sm:px-6">
@@ -306,6 +303,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         </div>
       )}
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
+      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={postUrl} title={post.content?.slice(0, 120) || "A post on Planet Baltimore"} />
     </article>
   );
 }
