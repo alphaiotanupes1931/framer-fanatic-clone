@@ -55,6 +55,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as VideosIdRouteImport } from './routes/videos.$id'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
@@ -297,6 +298,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VideosIdRoute = VideosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => VideosRoute,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -392,7 +398,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
-  '/videos': typeof VideosRoute
+  '/videos': typeof VideosRouteWithChildren
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -402,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -450,7 +457,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
-  '/videos': typeof VideosRoute
+  '/videos': typeof VideosRouteWithChildren
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/videos/$id': typeof VideosIdRoute
   '/admin': typeof AdminIndexRoute
   '/events': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -509,7 +517,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
-  '/videos': typeof VideosRoute
+  '/videos': typeof VideosRouteWithChildren
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -519,6 +527,7 @@ export interface FileRoutesById {
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -579,6 +588,7 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/videos/$id'
     | '/admin/'
     | '/events/'
     | '/api/public/stripe-webhook'
@@ -637,6 +647,7 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/videos/$id'
     | '/admin'
     | '/events'
     | '/api/public/stripe-webhook'
@@ -695,6 +706,7 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/stories/$storyId'
     | '/u/$username'
+    | '/videos/$id'
     | '/admin/'
     | '/events/'
     | '/api/public/stripe-webhook'
@@ -744,7 +756,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
   TicketingRoute: typeof TicketingRoute
-  VideosRoute: typeof VideosRoute
+  VideosRoute: typeof VideosRouteWithChildren
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
@@ -1081,6 +1093,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/videos/$id': {
+      id: '/videos/$id'
+      path: '/$id'
+      fullPath: '/videos/$id'
+      preLoaderRoute: typeof VideosIdRouteImport
+      parentRoute: typeof VideosRoute
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -1177,6 +1196,17 @@ const StoriesRouteChildren: StoriesRouteChildren = {
 const StoriesRouteWithChildren =
   StoriesRoute._addFileChildren(StoriesRouteChildren)
 
+interface VideosRouteChildren {
+  VideosIdRoute: typeof VideosIdRoute
+}
+
+const VideosRouteChildren: VideosRouteChildren = {
+  VideosIdRoute: VideosIdRoute,
+}
+
+const VideosRouteWithChildren =
+  VideosRoute._addFileChildren(VideosRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1221,7 +1251,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
   TicketingRoute: TicketingRoute,
-  VideosRoute: VideosRoute,
+  VideosRoute: VideosRouteWithChildren,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
   EventsEventIdRoute: EventsEventIdRoute,
