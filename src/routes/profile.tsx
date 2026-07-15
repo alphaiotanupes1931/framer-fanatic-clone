@@ -361,15 +361,21 @@ function ProfilePage() {
               <MyTicketsTab />
             ) : (isArtist && ["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
               profile ? (
-                <ProfileSectionTab
-                  userId={profile.id}
-                  kind={tab === "CV/Bio" ? "cv" : tab.toLowerCase()}
-                  label={tab}
-                  canEdit={true}
-                />
+                tab === "Gallery" ? (
+                  <ArtistGalleryTab userId={profile.id} canEdit />
+                ) : tab === "CV/Bio" ? (
+                  <ArtistCVTab userId={profile.id} profile={profile} canEdit />
+                ) : (
+                  <ProfileSectionTab
+                    userId={profile.id}
+                    kind={tab.toLowerCase()}
+                    label={tab}
+                    canEdit={true}
+                  />
+                )
               ) : null
             ) : (isArtist && tab === "Contact") ? (
-              <ArtistContactTab profile={profile} />
+              <ArtistBookCollaborateTab profile={profile} />
             ) : (isArtist && tab === "Invite") ? (
               <ArtistInviteTab profile={profile} />
             ) : (isArtist && tab === "Events") ? (
