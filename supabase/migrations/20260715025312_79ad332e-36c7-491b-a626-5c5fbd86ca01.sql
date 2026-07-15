@@ -1,0 +1,1 @@
+CREATE POLICY "admins delete any story" ON public.stories FOR DELETE USING (public.has_role(auth.uid(), 'admin'));

@@ -24,7 +24,7 @@ type Story = {
   created_at?: string | null;
 };
 
-export function StoryCard({ story, featured = false, currentUserId, onDeleted }: { story: Story; featured?: boolean; currentUserId?: string; onDeleted?: (id: string) => void }) {
+export function StoryCard({ story, featured = false, currentUserId, isAdmin = false, onDeleted }: { story: Story; featured?: boolean; currentUserId?: string; isAdmin?: boolean; onDeleted?: (id: string) => void }) {
   const cleanExcerpt = stripHtml(story.excerpt);
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(story.likes_count || 0);
@@ -32,6 +32,7 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
   const [shareOpen, setShareOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const isOwner = !!currentUserId && !!story.user_id && currentUserId === story.user_id;
+  const canDelete = isOwner || isAdmin;
   const storyUrl = typeof window !== "undefined" ? `${window.location.origin}/stories/${story.id}` : `/stories/${story.id}`;
 
   useEffect(() => {
@@ -63,8 +64,9 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
   const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(storyUrl, story.title, cleanExcerpt || undefined); };
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
-    if (!isOwner || deleting) return;
-    if (!confirm("Delete this story? This can't be undone.")) return;
+    if (!canDelete || deleting) return;
+    const msg = isOwner ? "Delete this story? This can't be undone." : "Delete this story as admin? This can't be undone.";
+    if (!confirm(msg)) return;
     setDeleting(true);
     const { error } = await supabase.from("stories").delete().eq("id", story.id);
     if (error) { setDeleting(false); toast.error(error.message); return; }
@@ -194,8 +196,8 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
           {saved ? "Saved" : "Save"}
         </button>
-        {isOwner && (
-          <button onClick={handleDelete} disabled={deleting} className="flex items-center gap-2 text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label="Delete">
+        {canDelete && (
+          <button onClick={handleDelete} disabled={deleting} className="flex items-center gap-2 text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
             <Trash2 className="h-5 w-5" />
           </button>
         )}

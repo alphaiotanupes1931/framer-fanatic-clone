@@ -5,6 +5,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { StoryCard } from "@/components/shared/story-card";
+import { useUserRole } from "@/hooks/use-user-role";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Clock, Plus, X, Send, Loader2, Trash2, Share2, Bookmark, MoreHorizontal, Search } from "lucide-react";
@@ -195,6 +196,7 @@ function AnonStories() {
 
 function StoriesSignedIn() {
   const me = useCurrentProfile();
+  const { isAdmin } = useUserRole();
   const [stories, setStories] = useState<Story[]>([]);
   const [filter, setFilter] = useState("All");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
@@ -435,6 +437,7 @@ function StoriesSignedIn() {
                 <StoryCard
                   key={s.id}
                   currentUserId={me?.id}
+                  isAdmin={isAdmin}
                   onDeleted={(id) => setStories((prev) => prev.filter((x) => x.id !== id))}
                   story={{
                     id: s.id,
