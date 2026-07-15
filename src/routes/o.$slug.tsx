@@ -8,7 +8,7 @@ import {
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Heart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
@@ -48,6 +48,9 @@ const RESTAURANT_TABS = [
 const SERVICE_TABS = [
   "Services", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
+const ARTS_ORG_TABS = [
+  "Posts", "Events", "Artists", "Support", "Opportunities", "Press", "Updates", "Invite", "About", "Comments",
+] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
   Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
@@ -56,6 +59,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
+  Artists: Users, Support: Heart,
 };
 type Tab = string;
 
@@ -121,11 +125,14 @@ function OrgProfile() {
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
   const isGroup = org.type === "group";
-  const isBusiness = !isAssoc && !isGroup;
+  const isArtsOrg = org.type === "arts_org";
+  const isBusiness = !isAssoc && !isGroup && !isArtsOrg;
   const subLower = (org.subtype ?? "").toLowerCase();
   const isRestaurant = isBusiness && /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(subLower);
   const isService = isBusiness && !isRestaurant;
-  const TABS: readonly string[] = isRestaurant
+  const TABS: readonly string[] = isArtsOrg
+    ? ARTS_ORG_TABS
+    : isRestaurant
     ? RESTAURANT_TABS
     : isService
     ? SERVICE_TABS
@@ -392,6 +399,8 @@ function OrgProfile() {
           {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Artists" && <MembersTab orgId={org.id} />}
+          {tab === "Support" && <SupportTab org={org} />}
           {tab === "Menu" && (
             <div className="space-y-10">
               <section>
