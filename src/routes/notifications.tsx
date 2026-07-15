@@ -136,7 +136,7 @@ function NotificationsPage() {
               const Icon = iconFor(n.type);
               const name = n.actor?.display_name || n.actor?.username || "Someone";
               const actorLink = n.actor?.username ? `/u/${n.actor.username}` : undefined;
-              const AvatarWrap = actorLink ? ({ children }: { children: React.ReactNode }) => (
+              const AvatarWrap = actorLink ? ({ children }: { children: ReactNode }) => (
                 <Link
                   to={actorLink}
                   onClick={(e) => e.stopPropagation()}
@@ -144,7 +144,7 @@ function NotificationsPage() {
                 >
                   {children}
                 </Link>
-              ) : ({ children }: { children: React.ReactNode }) => <div className="relative flex-shrink-0">{children}</div>;
+              ) : ({ children }: { children: ReactNode }) => <div className="relative flex-shrink-0">{children}</div>;
               return (
                 <li key={n.id}>
                   <button
