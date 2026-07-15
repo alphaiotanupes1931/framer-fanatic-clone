@@ -227,10 +227,6 @@ function VideosSignedIn() {
               {localPreview && (
                 <video src={localPreview} controls className="w-full rounded-lg border border-neutral-200 max-h-56 bg-black" />
               )}
-              <div className="relative flex items-center gap-2 text-[11px] uppercase tracking-wider text-neutral-400">
-                <span className="h-px flex-1 bg-neutral-200" /> or paste a URL <span className="h-px flex-1 bg-neutral-200" />
-              </div>
-              <input value={form.video_url} onChange={(e) => setForm({...form, video_url: e.target.value})} placeholder="Video URL (YouTube, Vimeo, mp4)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim() || !form.category} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
             </div>

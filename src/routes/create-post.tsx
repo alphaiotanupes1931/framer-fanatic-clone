@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, Video as VideoIcon, Music as MusicIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
+import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/create-post")({
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/create-post")({
   }),
 });
 
-type PostType = "text" | "photo" | "video" | "music";
+type PostType = "text" | "photo" | "video";
 type Visibility = "public" | "followers" | "close_friends" | "only_me";
 
 const CATEGORIES = [
@@ -50,7 +50,6 @@ function CreatePostPage() {
   const [content, setContent] = useState("");
   const [imagePath, setImagePath] = useState("");
   const [videoPath, setVideoPath] = useState("");
-  const [musicUrl, setMusicUrl] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [category, setCategory] = useState<string>("General");
   const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
@@ -64,8 +63,7 @@ function CreatePostPage() {
   const contentValid = content.trim().length === 0 || content.trim().length <= 2000;
   const hasMedia =
     (postType === "photo" && !!imagePath) ||
-    (postType === "video" && !!videoPath) ||
-    (postType === "music" && musicUrl.trim().length > 0);
+    (postType === "video" && !!videoPath);
   const canSubmit =
     contentValid &&
     (postType === "text" ? content.trim().length > 0 : hasMedia || content.trim().length > 0);
@@ -116,7 +114,7 @@ function CreatePostPage() {
         content: content.trim(),
         image_url: postType === "photo" ? (imagePath || null) : null,
         video_url: postType === "video" ? (videoPath || null) : null,
-        music_url: postType === "music" ? (musicUrl.trim() || null) : null,
+        music_url: null,
         post_type: postType,
         bg_color: postType === "text" && bg.bg ? bg.bg : null,
         text_color: postType === "text" && bg.bg ? bg.fg : null,
@@ -139,7 +137,6 @@ function CreatePostPage() {
     { id: "text",  label: "Text",  Icon: TypeIcon },
     { id: "photo", label: "Photo", Icon: ImagePlus },
     { id: "video", label: "Video", Icon: VideoIcon },
-    { id: "music", label: "Music", Icon: MusicIcon },
   ];
 
   const visibilityOpts: { id: Visibility; label: string; hint: string; Icon: typeof Globe }[] = [
@@ -272,14 +269,6 @@ function CreatePostPage() {
                   {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <VideoIcon className="mr-2 h-4 w-4" />} Upload video (max 100MB)
                 </Button>
               )}
-            </div>
-          )}
-
-          {postType === "music" && (
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Music link</Label>
-              <Input value={musicUrl} onChange={(e) => setMusicUrl(e.target.value)} placeholder="Spotify, SoundCloud, YouTube, Apple Music..." />
-              <p className="text-xs text-neutral-500">Paste a public link to a song, mix, or playlist.</p>
             </div>
           )}
 
