@@ -65,7 +65,7 @@ function VideoDetail() {
       ) : !video ? (
         <div className="text-sm text-neutral-500">Video not found.</div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-8">
           <div className="min-w-0">
             <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
             <h1 className="mt-4 text-xl font-bold sm:text-2xl">{video.title}</h1>
@@ -94,13 +94,13 @@ function VideoDetail() {
               </div>
             )}
           </div>
-          <aside className="min-w-0">
-            <h2 className="mb-3 text-sm font-bold text-neutral-800">Up next</h2>
-            <div className="space-y-3">
+          <section className="min-w-0">
+            <h2 className="mb-4 text-lg font-bold text-neutral-900">Up next</h2>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {related.map((r) => <RelatedCard key={r.id} v={r} />)}
               {related.length === 0 && <div className="text-sm text-neutral-500">No more videos yet.</div>}
             </div>
-          </aside>
+          </section>
         </div>
       )}
     </AppLayout>
