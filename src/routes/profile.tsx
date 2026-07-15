@@ -985,7 +985,6 @@ function ArtistEventsTab({ userId }: { userId: string }) {
 }
 
 function MyTicketsTab() {
-function MyTicketsTab() {
   type TicketRow = {
     id: string; status: string; buyer_total_cents: number; event_id: string;
     events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null;
