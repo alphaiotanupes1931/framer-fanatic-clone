@@ -38,7 +38,7 @@ type Story = {
   id: string; user_id: string; title: string; excerpt: string | null;
   cover_url: string | null; format: string; read_minutes: number | null;
   likes_count: number; comments_count: number; created_at: string;
-  author?: { display_name: string | null; avatar_url: string | null };
+  author?: { display_name: string | null; avatar_url: string | null; username: string | null; neighborhood: string | null; is_founder: boolean };
 };
 
 const STORY_FORMATS = [
