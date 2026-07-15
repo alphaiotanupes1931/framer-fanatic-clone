@@ -398,11 +398,46 @@ function ProfilePage() {
                     No posts yet. Share something with the community!
                   </div>
                 ) : (
-                  <div className={isArtist ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "space-y-4"}>
-                    {myPosts.map((p) => (
-                      <PostCard key={p.id} post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
-                    ))}
-                  </div>
+                  isArtist ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {myPosts.map((p) => (
+                        <Link
+                          key={p.id}
+                          to="/posts/$postId"
+                          params={{ postId: p.id }}
+                          className="group block"
+                        >
+                          {p.image_url ? (
+                            <div className="overflow-hidden rounded-lg bg-neutral-100">
+                              <img
+                                src={p.image_url}
+                                alt={p.content || "Artwork"}
+                                className="h-auto w-full object-cover transition group-hover:opacity-95"
+                              />
+                            </div>
+                          ) : (
+                            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 text-[15px] whitespace-pre-wrap text-foreground">
+                              {p.content}
+                            </div>
+                          )}
+                          {p.image_url && p.content && (
+                            <div className="mt-3 text-[15px] font-medium text-foreground line-clamp-2">
+                              {p.content}
+                            </div>
+                          )}
+                          {p.tag && (
+                            <div className="mt-1 text-xs text-muted-foreground">#{p.tag}</div>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {myPosts.map((p) => (
+                        <PostCard key={p.id} post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
+                      ))}
+                    </div>
+                  )
                 )
               ) : (
                 <div className="py-12 text-center text-muted-foreground">
