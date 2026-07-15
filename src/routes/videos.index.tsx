@@ -11,7 +11,7 @@ import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/videos")({
+export const Route = createFileRoute("/videos/")({
   component: VideosPage,
   head: () => ({ meta: [{ title: "Videos - Planet Baltimore" }] }),
 });
