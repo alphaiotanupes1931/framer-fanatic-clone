@@ -13,7 +13,6 @@ import { Route as TicketingRouteImport } from './routes/ticketing'
 import { Route as TicketSalesDashboardRouteImport } from './routes/ticket-sales-dashboard'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
-import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SavedRouteImport } from './routes/saved'
@@ -53,6 +52,7 @@ import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VideosIndexRouteImport } from './routes/videos.index'
+import { Route as StoriesIndexRouteImport } from './routes/stories.index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VideosIdRouteImport } from './routes/videos.$id'
@@ -85,11 +85,6 @@ const TermsRoute = TermsRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StoriesRoute = StoriesRouteImport.update({
-  id: '/stories',
-  path: '/stories',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -288,6 +283,11 @@ const VideosIndexRoute = VideosIndexRouteImport.update({
   path: '/videos/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoriesIndexRoute = StoriesIndexRouteImport.update({
+  id: '/stories/',
+  path: '/stories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -309,9 +309,9 @@ const UUsernameRoute = UUsernameRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoriesStoryIdRoute = StoriesStoryIdRouteImport.update({
-  id: '/$storyId',
-  path: '/$storyId',
-  getParentRoute: () => StoriesRoute,
+  id: '/stories/$storyId',
+  path: '/stories/$storyId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/posts/$postId',
@@ -393,7 +393,6 @@ export interface FileRoutesByFullPath {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
-  '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
@@ -410,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -452,7 +452,6 @@ export interface FileRoutesByTo {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
-  '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
@@ -469,6 +468,7 @@ export interface FileRoutesByTo {
   '/videos/$id': typeof VideosIdRoute
   '/admin': typeof AdminIndexRoute
   '/events': typeof EventsIndexRoute
+  '/stories': typeof StoriesIndexRoute
   '/videos': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -512,7 +512,6 @@ export interface FileRoutesById {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
-  '/stories': typeof StoriesRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
@@ -529,6 +528,7 @@ export interface FileRoutesById {
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
@@ -573,7 +573,6 @@ export interface FileRouteTypes {
     | '/saved'
     | '/search'
     | '/settings'
-    | '/stories'
     | '/support'
     | '/terms'
     | '/ticket-sales-dashboard'
@@ -590,6 +589,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin/'
     | '/events/'
+    | '/stories/'
     | '/videos/'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -632,7 +632,6 @@ export interface FileRouteTypes {
     | '/saved'
     | '/search'
     | '/settings'
-    | '/stories'
     | '/support'
     | '/terms'
     | '/ticket-sales-dashboard'
@@ -649,6 +648,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin'
     | '/events'
+    | '/stories'
     | '/videos'
     | '/api/public/stripe-webhook'
   id:
@@ -691,7 +691,6 @@ export interface FileRouteTypes {
     | '/saved'
     | '/search'
     | '/settings'
-    | '/stories'
     | '/support'
     | '/terms'
     | '/ticket-sales-dashboard'
@@ -708,6 +707,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin/'
     | '/events/'
+    | '/stories/'
     | '/videos/'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
@@ -751,7 +751,6 @@ export interface RootRouteChildren {
   SavedRoute: typeof SavedRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
-  StoriesRoute: typeof StoriesRouteWithChildren
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
@@ -762,10 +761,12 @@ export interface RootRouteChildren {
   EventsNewRoute: typeof EventsNewRoute
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
+  StoriesStoryIdRoute: typeof StoriesStoryIdRoute
   UUsernameRoute: typeof UUsernameRoute
   VideosIdRoute: typeof VideosIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
+  StoriesIndexRoute: typeof StoriesIndexRoute
   VideosIndexRoute: typeof VideosIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
@@ -798,13 +799,6 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/stories': {
-      id: '/stories'
-      path: '/stories'
-      fullPath: '/stories'
-      preLoaderRoute: typeof StoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -1080,6 +1074,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stories/': {
+      id: '/stories/'
+      path: '/stories'
+      fullPath: '/stories/'
+      preLoaderRoute: typeof StoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/': {
       id: '/events/'
       path: '/events'
@@ -1110,10 +1111,10 @@ declare module '@tanstack/react-router' {
     }
     '/stories/$storyId': {
       id: '/stories/$storyId'
-      path: '/$storyId'
+      path: '/stories/$storyId'
       fullPath: '/stories/$storyId'
       preLoaderRoute: typeof StoriesStoryIdRouteImport
-      parentRoute: typeof StoriesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/posts/$postId': {
       id: '/posts/$postId'
@@ -1186,17 +1187,6 @@ const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
   MarketplaceRouteChildren,
 )
 
-interface StoriesRouteChildren {
-  StoriesStoryIdRoute: typeof StoriesStoryIdRoute
-}
-
-const StoriesRouteChildren: StoriesRouteChildren = {
-  StoriesStoryIdRoute: StoriesStoryIdRoute,
-}
-
-const StoriesRouteWithChildren =
-  StoriesRoute._addFileChildren(StoriesRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1236,7 +1226,6 @@ const rootRouteChildren: RootRouteChildren = {
   SavedRoute: SavedRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
-  StoriesRoute: StoriesRouteWithChildren,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
@@ -1247,10 +1236,12 @@ const rootRouteChildren: RootRouteChildren = {
   EventsNewRoute: EventsNewRoute,
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
+  StoriesStoryIdRoute: StoriesStoryIdRoute,
   UUsernameRoute: UUsernameRoute,
   VideosIdRoute: VideosIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
+  StoriesIndexRoute: StoriesIndexRoute,
   VideosIndexRoute: VideosIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
