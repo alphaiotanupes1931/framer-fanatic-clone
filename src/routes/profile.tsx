@@ -939,6 +939,7 @@ function ArtistEventsTab({ userId }: { userId: string }) {
         .from("events")
         .select("id, title, description, starts_at, location, image_url")
         .eq("user_id", userId)
+        .is("organization_id", null)
         .order("starts_at", { ascending: false })
         .limit(50);
       setEvents((data ?? []) as never);

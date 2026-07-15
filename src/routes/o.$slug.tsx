@@ -575,11 +575,31 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
 }
 
 function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; canManage: boolean }) {
+  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
+  const [events, setEvents] = useState<OrgEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("id,title,starts_at,venue_name,image_url")
+        .eq("organization_id", _orgId)
+        .order("starts_at", { ascending: false })
+        .limit(50);
+      setEvents((data ?? []) as OrgEvent[]);
+      setLoading(false);
+    })();
+  }, [_orgId]);
+
+  const now = Date.now();
+  const upcoming = events.filter((e) => new Date(e.starts_at).getTime() >= now).sort((a, b) => +new Date(a.starts_at) - +new Date(b.starts_at));
+  const past = events.filter((e) => new Date(e.starts_at).getTime() < now);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <a
-          href="/events/new"
+          href={`/events/new?org=${encodeURIComponent(_orgId)}`}
           className="inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-[#d4580a] hover:text-[#d4580a]"
         >
           <Plus className="h-4 w-4" /> Create Event
@@ -592,7 +612,51 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
           <ExternalLink className="h-3.5 w-3.5 opacity-60" />
         </a>
       </div>
+
+      {loading ? (
+        <div className="py-8 text-center text-sm text-neutral-500">Loading events…</div>
+      ) : events.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-neutral-200 bg-card py-12 text-center text-sm text-neutral-500">
+          No events yet. Click Create Event above to add the first one.
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {upcoming.length > 0 && (
+            <section>
+              <h3 className="mb-3 text-sm font-semibold text-neutral-900">Upcoming</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {upcoming.map((e) => <OrgEventCard key={e.id} e={e} />)}
+              </div>
+            </section>
+          )}
+          {past.length > 0 && (
+            <section>
+              <h3 className="mb-3 text-sm font-semibold text-neutral-500">Past</h3>
+              <div className="grid gap-4 sm:grid-cols-2 opacity-70">
+                {past.map((e) => <OrgEventCard key={e.id} e={e} />)}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </div>
+  );
+}
+
+function OrgEventCard({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null } }) {
+  return (
+    <a href={`/events/${e.id}`} className="block overflow-hidden rounded-2xl border border-neutral-200 bg-card transition hover:shadow-md">
+      {e.image_url && <img src={e.image_url} alt={e.title} className="h-40 w-full object-cover" />}
+      <div className="space-y-1 p-4">
+        <div className="text-xs font-medium text-[#d4580a]">
+          {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+          {" · "}
+          {new Date(e.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+        </div>
+        <div className="font-semibold text-neutral-900 line-clamp-2">{e.title}</div>
+        {e.venue_name && <div className="text-xs text-neutral-500">{e.venue_name}</div>}
+      </div>
+    </a>
   );
 }
 

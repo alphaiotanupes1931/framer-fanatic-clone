@@ -9,6 +9,7 @@ import { EventImage } from "@/components/event-image";
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
   head: () => ({ meta: [{ title: "Create Event - Planet Baltimore" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ org: typeof s.org === "string" ? s.org : undefined }),
 });
 
 type Neighborhood = { id: string; name: string };
@@ -18,6 +19,8 @@ const CATEGORIES = ["community", "music", "art", "food", "wellness", "family", "
 function NewEventPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
+  const { org: orgId } = Route.useSearch();
+  const [orgName, setOrgName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -45,6 +48,14 @@ function NewEventPage() {
       setNeighborhoods((data ?? []) as Neighborhood[]);
     })();
   }, []);
+
+  useEffect(() => {
+    if (!orgId) { setOrgName(null); return; }
+    (async () => {
+      const { data } = await supabase.from("organizations").select("name").eq("id", orgId).maybeSingle();
+      setOrgName((data as { name: string } | null)?.name ?? null);
+    })();
+  }, [orgId]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -80,6 +91,7 @@ function NewEventPage() {
 
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
+        organization_id: orgId ?? null,
         title: form.title.trim(),
         description: form.description.trim() || null,
         image_url: form.image_url || null,
@@ -114,6 +126,9 @@ function NewEventPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-xl font-bold">Create Event</h1>
+          {orgName && (
+            <span className="ml-2 hidden sm:inline text-xs font-medium text-neutral-500">for {orgName}</span>
+          )}
           <button
             onClick={submit}
             disabled={!canSubmit || saving}
