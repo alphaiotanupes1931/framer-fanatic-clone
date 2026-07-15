@@ -410,6 +410,84 @@ function ProfilePage() {
   );
 }
 
+function ArtistContactTab({ profile }: { profile: any }) {
+  if (!profile) return null;
+  const rows: Array<{ label: string; value: string | null; href?: string }> = [
+    { label: "Email", value: profile.email ?? null, href: profile.email ? `mailto:${profile.email}` : undefined },
+    { label: "Website", value: profile.website ?? null, href: profile.website ?? undefined },
+    { label: "Location", value: profile.neighborhood ?? profile.location ?? null },
+    { label: "Instagram", value: profile.instagram ?? null, href: profile.instagram ? `https://instagram.com/${String(profile.instagram).replace(/^@/, "")}` : undefined },
+  ];
+  const visible = rows.filter((r) => r.value);
+  if (visible.length === 0) return <div className="py-12 text-center text-muted-foreground">No contact info yet. Add it from Edit Profile.</div>;
+  return (
+    <div className="rounded-xl border border-border divide-y divide-border">
+      {visible.map((r) => (
+        <div key={r.label} className="flex items-center justify-between p-4">
+          <div className="text-sm font-semibold text-muted-foreground">{r.label}</div>
+          {r.href ? (
+            <a href={r.href} target="_blank" rel="noreferrer" className="text-sm font-semibold text-[#d4580a] hover:underline break-all">{r.value}</a>
+          ) : (
+            <div className="text-sm font-semibold break-all">{r.value}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ArtistInviteTab({ profile }: { profile: any }) {
+  const url = typeof window !== "undefined" && profile?.username
+    ? `${window.location.origin}/u/${profile.username}`
+    : "";
+  return (
+    <div className="rounded-xl border border-border p-6 space-y-4">
+      <div>
+        <div className="text-lg font-semibold">Invite people to your page</div>
+        <div className="text-sm text-muted-foreground">Share your public profile link.</div>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input readOnly value={url} className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <button
+          onClick={() => { if (url) { navigator.clipboard.writeText(url); toast.success("Link copied"); } }}
+          className="rounded-lg bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Copy link</button>
+      </div>
+    </div>
+  );
+}
+
+function ArtistEventsTab({ userId }: { userId: string }) {
+  const [events, setEvents] = useState<Array<{ id: string; title: string; starts_at: string; location: string | null; image_url: string | null }>>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("id, title, starts_at, location, image_url")
+        .eq("organizer_id", userId)
+        .order("starts_at", { ascending: false })
+        .limit(50);
+      setEvents((data ?? []) as never);
+      setLoading(false);
+    })();
+  }, [userId]);
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading events…</div>;
+  if (events.length === 0) return <div className="py-12 text-center text-muted-foreground">No events yet.</div>;
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {events.map((e) => (
+        <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-xl border border-border overflow-hidden hover:shadow-md transition">
+          {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-40 object-cover" />}
+          <div className="p-3">
+            <div className="font-semibold truncate">{e.title}</div>
+            <div className="text-xs text-muted-foreground">{new Date(e.starts_at).toLocaleString()}{e.location ? ` · ${e.location}` : ""}</div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function MyTicketsTab() {
   const [tickets, setTickets] = useState<Array<{
     id: string; status: string; buyer_total_cents: number; event_id: string;
