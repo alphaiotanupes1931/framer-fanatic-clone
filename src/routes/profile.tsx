@@ -13,7 +13,6 @@ import {
   ensureConnectAccount,
   createConnectOnboardingLink,
   refreshConnectStatus,
-  becomeArtist,
 } from "@/lib/stripe.functions";
 import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
@@ -41,7 +40,7 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { isArtist, isResident, isAdmin, loading: roleLoading } = useUserRole();
+  const { isArtist, isResident, isAdmin } = useUserRole();
   const categoryTabs = tabsForCategory((profile as { category?: string | null } | null)?.category);
   const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
@@ -173,8 +172,8 @@ function ProfilePage() {
               <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <Link to="/stories" aria-label="My stories" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
-              <Link to="/events" aria-label="Create event" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5">+</Link>
+              <Link to="/create-story" aria-label="Write a story" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
+              <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
               <Link to="/settings" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></Link>
@@ -323,11 +322,7 @@ function ProfilePage() {
               ) : null
             ) : (
               <div className="py-12 text-center text-muted-foreground">
-                {!roleLoading && isResident ? (
-                  <BecomeArtistCTA />
-                ) : (
-                  <>No {tab.toLowerCase()} yet. Share something with the community!</>
-                )}
+                No {tab.toLowerCase()} yet. Share something with the community!
               </div>
             )}
           </div>
@@ -335,37 +330,6 @@ function ProfilePage() {
       </div>
       <MessageFollowersModal open={msgOpen} onClose={() => setMsgOpen(false)} />
     </AppLayout>
-  );
-}
-
-function BecomeArtistCTA() {
-  const become = useServerFn(becomeArtist);
-  const [loading, setLoading] = useState(false);
-  return (
-    <div className="mx-auto max-w-md space-y-3 rounded-2xl border border-border bg-neutral-50 p-6 text-left">
-      <h3 className="text-base font-semibold text-foreground">Want to host events or post?</h3>
-      <p className="text-sm text-muted-foreground">
-        Residents and Visitors can view content and buy tickets. To create events, post, or sell tickets, upgrade to an Artist account.
-      </p>
-      <button
-        disabled={loading}
-        onClick={async () => {
-          setLoading(true);
-          try {
-            await become();
-            toast.success("You're now an Artist, reloading...");
-            setTimeout(() => location.reload(), 700);
-          } catch (e) {
-            toast.error(e instanceof Error ? e.message : "Failed to upgrade");
-          } finally {
-            setLoading(false);
-          }
-        }}
-        className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
-      >
-        {loading ? "Upgrading…" : "Become an Artist"}
-      </button>
-    </div>
   );
 }
 
