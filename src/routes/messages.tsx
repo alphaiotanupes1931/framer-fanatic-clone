@@ -501,12 +501,27 @@ function MessagesPage() {
                   onClick={() => setActive(c)}
                   className="flex flex-1 items-center gap-3 px-4 py-3 text-left"
                 >
-                  <Avatar className="h-10 w-10">
-                    {!c.is_group && c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
-                    </AvatarFallback>
-                  </Avatar>
+                  {!c.is_group && c.other?.username ? (
+                    <Link
+                      to="/u/$username"
+                      params={{ username: c.other.username }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Avatar className="h-10 w-10">
+                        {c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {initials(c.other)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <Avatar className="h-10 w-10">
+                      {!c.is_group && c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate text-sm font-semibold text-foreground">
@@ -600,14 +615,27 @@ function MessagesPage() {
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
-                <Avatar className="h-9 w-9">
-                  {!active.is_group && active.other?.avatar_url && (
-                    <AvatarImage src={active.other.avatar_url} alt="" />
-                  )}
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    {active.is_group ? <Users className="h-5 w-5" /> : initials(active.other)}
-                  </AvatarFallback>
-                </Avatar>
+                {!active.is_group && active.other?.username ? (
+                  <Link to="/u/$username" params={{ username: active.other.username }}>
+                    <Avatar className="h-9 w-9">
+                      {active.other?.avatar_url && (
+                        <AvatarImage src={active.other.avatar_url} alt="" />
+                      )}
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {initials(active.other)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+                ) : (
+                  <Avatar className="h-9 w-9">
+                    {!active.is_group && active.other?.avatar_url && (
+                      <AvatarImage src={active.other.avatar_url} alt="" />
+                    )}
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {active.is_group ? <Users className="h-5 w-5" /> : initials(active.other)}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
                 <div className="min-w-0">
                   <div className="truncate font-semibold text-foreground">
                     {active.is_group
@@ -635,7 +663,18 @@ function MessagesPage() {
                     >
                       {!mine && (
                         <div className="w-7 shrink-0">
-                          {showAvatar && (
+                          {showAvatar && !active.is_group && active.other?.username ? (
+                            <Link to="/u/$username" params={{ username: active.other.username }}>
+                              <Avatar className="h-7 w-7">
+                                {active.other?.avatar_url && (
+                                  <AvatarImage src={active.other.avatar_url} alt="" />
+                                )}
+                                <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
+                                  {initials(active.other)}
+                                </AvatarFallback>
+                              </Avatar>
+                            </Link>
+                          ) : showAvatar && (
                             <Avatar className="h-7 w-7">
                               {active.other?.avatar_url && (
                                 <AvatarImage src={active.other.avatar_url} alt="" />
