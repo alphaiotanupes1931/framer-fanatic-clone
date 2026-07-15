@@ -173,8 +173,8 @@ function ProfilePage() {
               <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <Link to="/stories" aria-label="My stories" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
-              <Link to="/events" aria-label="Create event" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5">+</Link>
+              <Link to="/create-story" aria-label="Write a story" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
+              <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
               <Link to="/settings" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <Link to="/artists" aria-label="Find people to follow" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></Link>
@@ -323,11 +323,7 @@ function ProfilePage() {
               ) : null
             ) : (
               <div className="py-12 text-center text-muted-foreground">
-                {!roleLoading && isResident ? (
-                  <BecomeArtistCTA />
-                ) : (
-                  <>No {tab.toLowerCase()} yet. Share something with the community!</>
-                )}
+                No {tab.toLowerCase()} yet. Share something with the community!
               </div>
             )}
           </div>
