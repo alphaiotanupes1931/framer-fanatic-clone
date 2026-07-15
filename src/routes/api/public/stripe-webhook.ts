@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         try {
           if (event.type === "checkout.session.completed") {
             const session = event.data.object as import("stripe").Stripe.Checkout.Session;
-            await supabaseAdmin
+            const { data: updated } = await supabaseAdmin
               .from("tickets")
               .update({
                 status: "paid",
@@ -33,7 +33,34 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                     ? session.payment_intent
                     : session.payment_intent?.id ?? null,
               })
-              .eq("stripe_checkout_session_id", session.id);
+              .eq("stripe_checkout_session_id", session.id)
+              .select("id, buyer_id, artist_id, event_id");
+            for (const row of updated ?? []) {
+              // Notify buyer
+              if (row.buyer_id) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: row.buyer_id,
+                  actor_id: null,
+                  type: "ticket_purchased",
+                  target_type: "ticket",
+                  target_id: row.id,
+                  message: "Your ticket is confirmed. Tap to view your digital ticket.",
+                  metadata: { event_id: row.event_id, ticket_id: row.id },
+                });
+              }
+              // Notify organizer
+              if (row.artist_id && row.artist_id !== row.buyer_id) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: row.artist_id,
+                  actor_id: row.buyer_id ?? null,
+                  type: "ticket_sold",
+                  target_type: "event",
+                  target_id: row.event_id,
+                  message: "You sold a ticket.",
+                  metadata: { event_id: row.event_id, ticket_id: row.id },
+                });
+              }
+            }
           } else if (event.type === "checkout.session.expired") {
             const session = event.data.object as import("stripe").Stripe.Checkout.Session;
             await supabaseAdmin
