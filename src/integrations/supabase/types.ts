@@ -900,6 +900,7 @@ export type Database = {
           music_url: string | null
           neighborhood: string | null
           post_type: string
+          tag: string | null
           text_color: string | null
           user_id: string
           video_url: string | null
@@ -919,6 +920,7 @@ export type Database = {
           music_url?: string | null
           neighborhood?: string | null
           post_type?: string
+          tag?: string | null
           text_color?: string | null
           user_id: string
           video_url?: string | null
@@ -938,6 +940,7 @@ export type Database = {
           music_url?: string | null
           neighborhood?: string | null
           post_type?: string
+          tag?: string | null
           text_color?: string | null
           user_id?: string
           video_url?: string | null
@@ -954,6 +957,7 @@ export type Database = {
           link_url: string | null
           media_url: string | null
           order_index: number
+          parent_id: string | null
           subtitle: string | null
           title: string | null
           updated_at: string
@@ -968,6 +972,7 @@ export type Database = {
           link_url?: string | null
           media_url?: string | null
           order_index?: number
+          parent_id?: string | null
           subtitle?: string | null
           title?: string | null
           updated_at?: string
@@ -982,13 +987,22 @@ export type Database = {
           link_url?: string | null
           media_url?: string | null
           order_index?: number
+          parent_id?: string | null
           subtitle?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
           year?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profile_sections_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profile_sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

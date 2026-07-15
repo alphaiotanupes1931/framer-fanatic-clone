@@ -28,6 +28,10 @@ const CATEGORIES = [
   "General","Music","Art","Community","Event","Food","Nightlife","Wellness","Fashion","Sports","News","Question","Other",
 ];
 
+const POST_TAGS = [
+  "Process","Announcement","Studio","Behind the Scenes","Work in Progress","New Release","Show","Collaboration","Sale","Tutorial",
+];
+
 const BG_COLORS = [
   { name: "None",        bg: "",         fg: "#0F172A" },
   { name: "Baltimore",   bg: "#d4580a",  fg: "#FFFFFF" },
@@ -52,6 +56,7 @@ function CreatePostPage() {
   const [videoPath, setVideoPath] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [category, setCategory] = useState<string>("General");
+  const [tag, setTag] = useState<string>("");
   const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
   const [visibility, setVisibility] = useState<Visibility>("public");
   const [excludeQuery, setExcludeQuery] = useState("");
@@ -119,6 +124,7 @@ function CreatePostPage() {
         bg_color: postType === "text" && bg.bg ? bg.bg : null,
         text_color: postType === "text" && bg.bg ? bg.fg : null,
         category,
+        tag: tag || null,
         visibility,
         excluded_user_ids: excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
@@ -282,6 +288,22 @@ function CreatePostPage() {
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">Neighborhood</Label>
               <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} maxLength={80} placeholder="e.g. Hampden" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Tag (optional)</Label>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => setTag("")}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${tag === "" ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
+                None
+              </button>
+              {POST_TAGS.map((t) => (
+                <button key={t} type="button" onClick={() => setTag(t)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium ${tag === t ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
+                  {t}
+                </button>
+              ))}
             </div>
           </div>
 
