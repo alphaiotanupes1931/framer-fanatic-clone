@@ -347,7 +347,7 @@ function StoriesSignedIn() {
 
         {stories.length === 0 && <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">No stories yet. Write the first one!</div>}
 
-        <div className="space-y-5 pt-1">
+        <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2">
           {stories.map((s) => (
             <StoryCard
               key={s.id}
