@@ -3,6 +3,7 @@ import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
   BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic, ShoppingBag, Flag,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -41,6 +42,7 @@ const navItems: NavItem[] = [
   { icon: Shield, label: "Community Associations", to: "/community-associations" },
   { icon: Compass, label: "Discover", to: "/discover" },
   { icon: Ticket, label: "Events", to: "/events" },
+  { icon: LayoutDashboard, label: "Organizer Studio", to: "/organizer-studio" },
   { icon: Users, label: "Groups/Communities", to: "/groups" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
