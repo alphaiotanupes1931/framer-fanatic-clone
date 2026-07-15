@@ -7,7 +7,7 @@ import { Send } from "lucide-react";
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="py-12 text-center text-muted-foreground">No posts yet.</div>;
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-3 gap-3">
       {posts.map((p) => {
         const img = p.image_url || p.media_url;
         return (
