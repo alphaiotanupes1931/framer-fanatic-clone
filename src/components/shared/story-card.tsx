@@ -1,7 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Clock, Heart, MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Clock, Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { stripHtml, timeAgo } from "@/lib/text-utils";
 
 type Story = {
@@ -18,8 +22,42 @@ type Story = {
   created_at?: string | null;
 };
 
-export function StoryCard({ story, featured = false }: { story: Story; featured?: boolean }) {
+export function StoryCard({ story, featured = false, currentUserId }: { story: Story; featured?: boolean; currentUserId?: string }) {
   const cleanExcerpt = stripHtml(story.excerpt);
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(story.likes_count || 0);
+  const [saved, setSaved] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const storyUrl = typeof window !== "undefined" ? `${window.location.origin}/stories/${story.id}` : `/stories/${story.id}`;
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("story_likes")
+        .select("story_id")
+        .eq("story_id", story.id)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+      if (!cancelled && data) setLiked(true);
+    })();
+    return () => { cancelled = true; };
+  }, [currentUserId, story.id]);
+
+  const toggleLike = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!currentUserId) { toast.error("Sign in to like"); return; }
+    const was = liked;
+    setLiked(!was); setLikes((n) => n + (was ? -1 : 1));
+    const res = was
+      ? await supabase.from("story_likes").delete().eq("story_id", story.id).eq("user_id", currentUserId)
+      : await supabase.from("story_likes").insert({ story_id: story.id, user_id: currentUserId });
+    if (res.error) { setLiked(was); setLikes((n) => n + (was ? 1 : -1)); toast.error(res.error.message); }
+  };
+  const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
+  const toggleSave = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setSaved((s) => !s); };
+
   if (featured) {
     return (
       <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
@@ -53,12 +91,12 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
   }
 
   return (
-    <Link
-      to="/stories/$storyId"
-      params={{ storyId: story.id }}
-      className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-200 hover:shadow-md"
-    >
-      <header className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+    <article className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
+      <Link
+        to="/stories/$storyId"
+        params={{ storyId: story.id }}
+        className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5"
+      >
         <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
           <AvatarImage src={story.author_avatar ?? undefined} />
           <AvatarFallback className="bg-muted text-sm text-muted-foreground">
@@ -78,8 +116,12 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
             {story.created_at ? timeAgo(story.created_at) : ""}
           </div>
         </div>
-      </header>
-      <div className="mt-3 aspect-[16/9] w-full overflow-hidden bg-muted">
+      </Link>
+      <Link
+        to="/stories/$storyId"
+        params={{ storyId: story.id }}
+        className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-muted"
+      >
         {story.cover_url ? (
           <img
             src={story.cover_url}
@@ -91,8 +133,12 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-primary/10 to-accent/10" />
         )}
-      </div>
-      <div className="flex flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4">
+      </Link>
+      <Link
+        to="/stories/$storyId"
+        params={{ storyId: story.id }}
+        className="flex flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4"
+      >
         <h3 className="line-clamp-2 font-serif text-[17px] font-bold leading-snug text-foreground transition-colors group-hover:text-[#d4580a] break-words sm:text-lg">
           {story.title}
         </h3>
@@ -101,12 +147,30 @@ export function StoryCard({ story, featured = false }: { story: Story; featured?
             {cleanExcerpt}
           </p>
         )}
-      </div>
+      </Link>
       <footer className="flex items-center gap-5 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-6 sm:py-4">
-        <span className="flex items-center gap-2"><Clock className="h-5 w-5" />{story.read_minutes || 5}m</span>
-        <span className="flex items-center gap-2"><Heart className="h-5 w-5" />{story.likes_count || 0}</span>
-        <span className="flex items-center gap-2"><MessageCircle className="h-5 w-5" />{story.comments_count || 0}</span>
+        <button onClick={toggleLike} className={`flex items-center gap-2 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Like">
+          <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
+        </button>
+        <Link
+          to="/stories/$storyId"
+          params={{ storyId: story.id }}
+          hash="comments"
+          className="flex items-center gap-2 transition hover:text-foreground"
+        >
+          <MessageCircle className="h-5 w-5" /> {story.comments_count || 0}
+        </Link>
+        <span className="flex items-center gap-2 text-muted-foreground/80">
+          <Clock className="h-5 w-5" />{story.read_minutes || 5}m
+        </span>
+        <button onClick={openShare} className="ml-auto flex items-center gap-2 transition hover:text-foreground" aria-label="Share">
+          <Share2 className="h-5 w-5" />
+        </button>
+        <button onClick={toggleSave} className={`flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
+          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
+        </button>
       </footer>
-    </Link>
+      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={storyUrl} title={story.title} />
+    </article>
   );
 }
