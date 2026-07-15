@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -10,7 +10,7 @@ import { EventCard } from "@/components/shared/event-card";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Users, Sparkles, Compass, MapPin } from "lucide-react";
+import { Users, Sparkles, Compass, MapPin, Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Post, Story, Event, Follow } from "@/lib/entities";
 
@@ -65,6 +65,10 @@ function Dashboard() {
   const [activeFilter, setActiveFilter] = useState<Filter>("For You");
   const [filterLoading, setFilterLoading] = useState(false);
   const [checked, setChecked] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(12);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => { setVisibleCount(12); }, [activeFilter]);
 
   // Auth guard
   useEffect(() => {
@@ -200,6 +204,21 @@ function Dashboard() {
   }, [activeFilter, posts, stories, events, follows, currentUser]);
 
   const isEmpty = !isLoading && feedItems.length === 0;
+  const visibleItems = feedItems.slice(0, visibleCount);
+  const hasMore = visibleCount < feedItems.length;
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        setVisibleCount((n) => Math.min(n + 12, feedItems.length));
+      }
+    }, { rootMargin: "800px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, feedItems.length]);
+
   const rawHood = currentUser?.neighborhood_names?.[0] || currentUser?.neighborhood;
   const hoodPrimary = rawHood && rawHood.trim().length > 0 ? rawHood : null;
 
@@ -280,13 +299,14 @@ function Dashboard() {
               )}
             </div>
           ) : (
-            feedItems.map((item, idx) => {
+            <>
+            {visibleItems.map((item, idx) => {
               const inner = (() => {
                 if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} reason={item.reason} />;
                 if (item.type === "story") return (
                   <div className="space-y-0">
                     <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Story</span>
-                    <StoryCard story={item.data} />
+                    <StoryCard story={item.data} currentUserId={currentUser?.id} />
                   </div>
                 );
                 return (
@@ -297,7 +317,15 @@ function Dashboard() {
                 );
               })();
               return <div key={`${item.type}-${item.data.id}-${idx}`}>{inner}</div>;
-            })
+            })}
+            <div ref={sentinelRef} className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+              {hasMore ? (
+                <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Loading more…</span>
+              ) : (
+                <span>You're all caught up.</span>
+              )}
+            </div>
+            </>
           )}
         </div>
       </div>
