@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ElementType } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -45,6 +45,38 @@ function relTime(iso: string) {
   const d = Math.floor(h / 24);
   if (d < 7) return `${d}d`;
   return new Date(iso).toLocaleDateString();
+}
+
+function ActorAvatarLink({
+  username,
+  avatarUrl,
+  fallback,
+  typeIcon,
+}: {
+  username: string;
+  avatarUrl: string | null | undefined;
+  fallback: string;
+  typeIcon: ElementType;
+}) {
+  const Icon = typeIcon;
+  return (
+    <Link
+      to="/u/$username"
+      params={{ username }}
+      onClick={(e) => e.stopPropagation()}
+      className="relative flex-shrink-0 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#d4580a]"
+    >
+      <Avatar className="h-10 w-10">
+        <AvatarImage src={avatarUrl ?? undefined} />
+        <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>
+          {fallback.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card" style={{ backgroundColor: "#d4580a" }}>
+        <Icon className="h-3 w-3 text-white" />
+      </span>
+    </Link>
+  );
 }
 
 function NotificationsPage() {
@@ -141,17 +173,26 @@ function NotificationsPage() {
                     onClick={() => onClick(n)}
                     className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/60 ${!n.is_read ? "bg-[#d4580a]/5" : ""}`}
                   >
-                    <div className="relative flex-shrink-0">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={n.actor?.avatar_url ?? undefined} />
-                        <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>
-                          {name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card" style={{ backgroundColor: "#d4580a" }}>
-                        <Icon className="h-3 w-3 text-white" />
-                      </span>
-                    </div>
+                    {n.actor?.username ? (
+                      <ActorAvatarLink
+                        username={n.actor.username}
+                        avatarUrl={n.actor.avatar_url}
+                        fallback={name}
+                        typeIcon={Icon}
+                      />
+                    ) : (
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={n.actor?.avatar_url ?? undefined} />
+                          <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>
+                            {name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card" style={{ backgroundColor: "#d4580a" }}>
+                          <Icon className="h-3 w-3 text-white" />
+                        </span>
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-foreground">
                         <span className="font-semibold">{name}</span>{" "}
