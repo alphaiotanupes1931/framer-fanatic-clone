@@ -435,8 +435,10 @@ function StoriesSignedIn() {
                 <StoryCard
                   key={s.id}
                   currentUserId={me?.id}
+                  onDeleted={(id) => setStories((prev) => prev.filter((x) => x.id !== id))}
                   story={{
                     id: s.id,
+                    user_id: s.user_id,
                     title: s.title,
                     excerpt: s.excerpt,
                     cover_url: s.cover_url,
