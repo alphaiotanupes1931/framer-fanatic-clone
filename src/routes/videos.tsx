@@ -120,7 +120,10 @@ function VideosSignedIn() {
     }
   };
 
-  const filtered = vids.filter((v) => v.title.toLowerCase().includes(query.toLowerCase()));
+  const filtered = vids.filter((v) =>
+    v.title.toLowerCase().includes(query.toLowerCase()) &&
+    (cat === "All" || (v.category || "") === cat)
+  );
   const featured = filtered.filter((v) => v.featured);
   const rest = filtered.filter((v) => !v.featured);
 
