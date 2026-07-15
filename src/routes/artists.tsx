@@ -2,11 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUserRole } from "@/hooks/use-user-role";
+import { toast } from "sonner";
 
 type Creator = {
   id: string;
@@ -38,11 +40,21 @@ function matchesCategory(c: Creator, cat: Category) {
 
 function FindCreatorPage() {
   const { loading: authLoading, signedIn } = useAuthState();
+  const { isAdmin } = useUserRole();
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>("All");
   const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
+
+  async function handleAdminDelete(c: Creator) {
+    const name = c.display_name || c.username || "this profile";
+    if (!window.confirm(`Delete ${name}? This permanently removes their account.`)) return;
+    const { error } = await supabase.rpc("admin_delete_profile", { _id: c.id });
+    if (error) { toast.error(error.message); return; }
+    setResults((prev) => prev.filter((x) => x.id !== c.id));
+    toast.success("Profile deleted");
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -169,14 +181,25 @@ function FindCreatorPage() {
           ) : (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((c) => (
-                <Link
-                  key={c.id}
-                  to="/u/$username"
-                  params={{ username: c.username || c.id }}
-                  className="text-left"
-                >
-                  <Card c={c} />
-                </Link>
+                <div key={c.id} className="relative">
+                  <Link
+                    to="/u/$username"
+                    params={{ username: c.username || c.id }}
+                    className="block text-left"
+                  >
+                    <Card c={c} />
+                  </Link>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAdminDelete(c); }}
+                      className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-red-700"
+                      aria-label="Admin delete profile"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           )}
