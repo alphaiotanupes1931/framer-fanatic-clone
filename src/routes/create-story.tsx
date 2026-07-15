@@ -1,10 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { HeroBanner } from "@/components/shared/hero-banner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, ArrowLeft, Save, Eye } from "lucide-react";
