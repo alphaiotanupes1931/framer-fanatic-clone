@@ -22,6 +22,7 @@ import { Route as PromoterDashboardRouteImport } from './routes/promoter-dashboa
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PodcastsRouteImport } from './routes/podcasts'
+import { Route as OrganizerStudioRouteImport } from './routes/organizer-studio'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NotificationSettingsRouteImport } from './routes/notification-settings'
@@ -129,6 +130,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PodcastsRoute = PodcastsRouteImport.update({
   id: '/podcasts',
   path: '/podcasts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizerStudioRoute = OrganizerStudioRouteImport.update({
+  id: '/organizer-studio',
+  path: '/organizer-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -377,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/notification-settings': typeof NotificationSettingsRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/organizer-studio': typeof OrganizerStudioRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -435,6 +442,7 @@ export interface FileRoutesByTo {
   '/notification-settings': typeof NotificationSettingsRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/organizer-studio': typeof OrganizerStudioRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -494,6 +502,7 @@ export interface FileRoutesById {
   '/notification-settings': typeof NotificationSettingsRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/organizer-studio': typeof OrganizerStudioRoute
   '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -554,6 +563,7 @@ export interface FileRouteTypes {
     | '/notification-settings'
     | '/notifications'
     | '/onboarding'
+    | '/organizer-studio'
     | '/podcasts'
     | '/privacy'
     | '/profile'
@@ -612,6 +622,7 @@ export interface FileRouteTypes {
     | '/notification-settings'
     | '/notifications'
     | '/onboarding'
+    | '/organizer-studio'
     | '/podcasts'
     | '/privacy'
     | '/profile'
@@ -670,6 +681,7 @@ export interface FileRouteTypes {
     | '/notification-settings'
     | '/notifications'
     | '/onboarding'
+    | '/organizer-studio'
     | '/podcasts'
     | '/privacy'
     | '/profile'
@@ -729,6 +741,7 @@ export interface RootRouteChildren {
   NotificationSettingsRoute: typeof NotificationSettingsRoute
   NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
+  OrganizerStudioRoute: typeof OrganizerStudioRoute
   PodcastsRoute: typeof PodcastsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
@@ -849,6 +862,13 @@ declare module '@tanstack/react-router' {
       path: '/podcasts'
       fullPath: '/podcasts'
       preLoaderRoute: typeof PodcastsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizer-studio': {
+      id: '/organizer-studio'
+      path: '/organizer-studio'
+      fullPath: '/organizer-studio'
+      preLoaderRoute: typeof OrganizerStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -1196,6 +1216,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationSettingsRoute: NotificationSettingsRoute,
   NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
+  OrganizerStudioRoute: OrganizerStudioRoute,
   PodcastsRoute: PodcastsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
