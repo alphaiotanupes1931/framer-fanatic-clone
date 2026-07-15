@@ -587,6 +587,7 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
         .from("events")
         .select("id,title,starts_at,venue_name,image_url")
         .eq("organization_id", _orgId)
+        .eq("is_exhibition", false)
         .order("starts_at", { ascending: false })
         .limit(50);
       setEvents((data ?? []) as OrgEvent[]);
