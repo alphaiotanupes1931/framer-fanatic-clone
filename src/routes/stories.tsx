@@ -7,7 +7,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { StoryCard } from "@/components/shared/story-card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2, Trash2, Share2, Bookmark, MoreHorizontal, Search } from "lucide-react";
+import { Heart, MessageCircle, Clock, Plus, X, Send, Loader2, Trash2, Share2, Bookmark, MoreHorizontal, Search } from "lucide-react";
 
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
@@ -199,10 +199,6 @@ function StoriesSignedIn() {
   const [filter, setFilter] = useState("All");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
   const [storyFormat, setStoryFormat] = useState<(typeof STORY_FORMATS)[number]>("All Formats");
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", excerpt: "", content: "", format: "blog", cover_url: "" });
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
@@ -325,38 +321,6 @@ function StoriesSignedIn() {
     }
   };
 
-  const submit = async () => {
-    if (!me || !form.title.trim()) return;
-    const read = Math.max(1, Math.round(form.content.split(/\s+/).length / 200));
-    const { error } = await supabase.from("stories").insert({
-      user_id: me.id, title: form.title.trim(), excerpt: form.excerpt.trim() || null,
-      content: form.content.trim(), format: form.format, read_minutes: read,
-      cover_url: form.cover_url || null,
-    });
-    if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", excerpt: "", content: "", format: "blog", cover_url: "" });
-    toast.success("Story published"); load();
-  };
-
-  const pickCover = async (file: File) => {
-    if (!me) return;
-    setUploading(true);
-    try {
-      const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage.from("story-covers").upload(path, file, { upsert: false, contentType: file.type });
-      if (up.error) throw up.error;
-      const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
-      setForm((f) => ({ ...f, cover_url: signed.signedUrl }));
-      toast.success("Cover image uploaded");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -364,15 +328,14 @@ function StoriesSignedIn() {
           title="Stories"
           subtitle="Discover stories from Baltimore's writing community."
           cta={
-            <Button
-              onClick={() => setOpen(true)}
-              variant="outline"
-              className="gap-2 rounded-lg"
+            <Link
+              to="/create-story"
+              className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold"
               style={{ borderColor: "#d4580a", color: "#d4580a" }}
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Write A Story</span>
-            </Button>
+            </Link>
           }
         />
 
@@ -460,9 +423,9 @@ function StoriesSignedIn() {
             <div className="text-base font-semibold text-neutral-800">No stories to show</div>
             <p className="max-w-sm text-sm text-neutral-500">Try a different format or filter, or share the first story in this category.</p>
             {me && (
-              <Button onClick={() => setOpen(true)} className="mt-1 rounded-lg" style={{ background: "#d4580a" }}>
+              <Link to="/create-story" className="mt-1 inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-white" style={{ background: "#d4580a" }}>
                 <Plus className="mr-2 h-4 w-4" /> Write A Story
-              </Button>
+              </Link>
             )}
           </div>
         ) : (
@@ -505,59 +468,6 @@ function StoriesSignedIn() {
         <CommentsDialog story={commentsFor} onClose={() => setCommentsFor(null)} onCountChange={(n: number) => {
           setStories((prev) => prev.map((x) => x.id === commentsFor.id ? { ...x, comments_count: n } : x));
         }} />
-      )}
-
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold">Write A Story</h2>
-              <button onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
-            </div>
-            <div className="space-y-3">
-              <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-              <select value={form.format} onChange={(e) => setForm({...form, format: e.target.value})} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">
-                {STORY_FORMATS.filter((f) => f !== "All Formats").map((f) => (
-                  <option key={f} value={f}>{f}</option>
-                ))}
-              </select>
-              <div className="rounded-lg border border-neutral-200 p-3">
-                <div className="flex items-center gap-3">
-                  {form.cover_url ? (
-                    <img src={form.cover_url} alt="" className="h-16 w-16 rounded-md object-cover border" />
-                  ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-md bg-neutral-100 text-neutral-400"><ImagePlus className="h-5 w-5" /></div>
-                  )}
-                  <div className="flex-1">
-                    <button
-                      type="button"
-                      onClick={() => fileRef.current?.click()}
-                      disabled={uploading}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold hover:bg-neutral-50 disabled:opacity-60"
-                    >
-                      {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImagePlus className="h-3 w-3" />}
-                      {form.cover_url ? "Replace cover image" : "Upload cover image"}
-                    </button>
-                    {form.cover_url && (
-                      <button type="button" onClick={() => setForm({ ...form, cover_url: "" })} className="ml-2 text-xs text-neutral-500 hover:text-neutral-800">Remove</button>
-                    )}
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickCover(f); e.target.value = ""; }}
-                    />
-                    <p className="mt-1 text-[11px] text-neutral-500">Optional. Shown on the story card and detail page.</p>
-                  </div>
-                </div>
-              </div>
-              <input value={form.excerpt} onChange={(e) => setForm({...form, excerpt: e.target.value})} placeholder="Excerpt (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-              <textarea value={form.content} onChange={(e) => setForm({...form, content: e.target.value})} placeholder="Your story…" rows={10} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-              <button onClick={submit} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700">Publish</button>
-            </div>
-          </div>
-        </div>
       )}
     </AppLayout>
   );
