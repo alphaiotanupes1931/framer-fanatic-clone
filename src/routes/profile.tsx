@@ -360,9 +360,23 @@ function ProfilePage() {
                 />
               ) : null
             ) : (
-              <div className="py-12 text-center text-muted-foreground">
-                No {tab.toLowerCase()} yet. Share something with the community!
-              </div>
+              (tab === "Posts" || tab === "Feed") ? (
+                myPosts.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">
+                    No posts yet. Share something with the community!
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {myPosts.map((p) => (
+                      <PostCard key={p.id} post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="py-12 text-center text-muted-foreground">
+                  No {tab.toLowerCase()} yet. Share something with the community!
+                </div>
+              )
             )}
           </div>
         </div>
