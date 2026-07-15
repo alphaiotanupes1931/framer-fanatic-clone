@@ -334,8 +334,13 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         </div>
 
         <div className="flex items-baseline gap-2 pt-2">
-          <h2 className="font-display text-2xl font-extrabold text-neutral-900">{cat === "All" ? "All Events" : cat}</h2>
-          <span className="text-sm text-neutral-500">({filtered.length})</span>
+          {/* moved into sticky header below */}
+        </div>
+        <div className="sticky top-0 z-20 -mx-4 border-b border-neutral-200 bg-white/90 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/70 sm:mx-0 sm:rounded-xl sm:border sm:px-4">
+          <div className="flex items-baseline gap-2">
+            <h2 className="font-display text-xl font-extrabold text-neutral-900 sm:text-2xl">{cat === "All" ? "All Events" : cat}</h2>
+            <span className="text-sm text-neutral-500">({filtered.length})</span>
+          </div>
         </div>
 
         {dataLoading ? (

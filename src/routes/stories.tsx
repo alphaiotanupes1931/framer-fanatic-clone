@@ -348,9 +348,7 @@ function StoriesSignedIn() {
         <div className="space-y-4">
           {stories.map((s) => (
             <article key={s.id} className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
-              <StoryCover storyId={s.id} url={s.cover_url} />
-              <div className="min-w-0 p-4">
-                <div className="mb-2 flex items-center gap-2">
+              <div className="flex items-center gap-2 px-4 pt-4 pb-3">
                   <Avatar className="h-7 w-7">
                     {s.author?.avatar_url && <img src={s.author.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                     <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(s.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
@@ -358,6 +356,8 @@ function StoriesSignedIn() {
                   <span className="text-sm font-medium">{s.author?.display_name || "Anonymous"}</span>
                   <span className="rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange">{s.format}</span>
                 </div>
+              <StoryCover storyId={s.id} url={s.cover_url} />
+              <div className="min-w-0 p-4">
                 <Link to="/stories/$storyId" params={{ storyId: s.id }} className="group block">
                   <h3 className="font-serif text-base font-bold transition-colors group-hover:text-[#d4580a] line-clamp-2 break-words">{s.title}</h3>
                   {stripHtml(s.excerpt) && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground break-words">{stripHtml(s.excerpt)}</p>}
