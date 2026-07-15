@@ -219,10 +219,9 @@ function EmptyState({ icon: Icon, title, hint, cta, to }: { icon: typeof Bookmar
 }
 
 function StoryTile({ story, onUnsave }: { story: SavedStory; onUnsave: () => void }) {
-  const href = story.slug ? `/story/${story.slug}` : `/story/${story.id}`;
   return (
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md">
-      <Link to={href as any} className="block">
+      <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         {story.cover_url ? (
           <img src={story.cover_url} alt="" loading="lazy" className="h-40 w-full object-cover" />
         ) : (
@@ -250,7 +249,7 @@ function EventTile({ event, onUnsave }: { event: SavedEvent; onUnsave: () => voi
   const when = event.starts_at ? new Date(event.starts_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : null;
   return (
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md">
-      <Link to={`/events/${event.id}` as any} className="block">
+      <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
         {event.image_url ? (
           <img src={event.image_url} alt="" loading="lazy" className="h-40 w-full object-cover" />
         ) : (
