@@ -675,8 +675,6 @@ function MembersTab({ orgId }: { orgId: string }) {
 }
 
 function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
-  const [items, setItems] = useState<OrgPost[]>([]);
-
 function SupportTab({ org }: { org: Org }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -717,7 +715,7 @@ function SupportTab({ org }: { org: Org }) {
   );
 }
 
-function _OrgPostListStart({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
