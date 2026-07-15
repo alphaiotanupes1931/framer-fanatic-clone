@@ -741,8 +741,11 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
     if (!form.title.trim() && !form.body.trim() && !form.media_url.trim()) {
       toast.error("Add a title or content"); return;
     }
+    const { data: sess } = await supabase.auth.getUser();
+    const uid = sess.user?.id;
+    if (!uid) { toast.error("Sign in required"); return; }
     const payload = {
-      org_id: org.id, kind: "press" as const,
+      org_id: org.id, kind: "press" as const, author_id: uid,
       title: form.title || "Untitled",
       body: form.body || null,
       link_url: form.link_url || null,
