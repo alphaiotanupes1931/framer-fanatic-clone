@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send } from "lucide-react";
 import { Flag } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/text-utils";
 import { X } from "lucide-react";
 import { ReportDialog } from "@/components/report-dialog";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 
 type Post = {
   id: string;
@@ -83,6 +84,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
 
   const share = () => setShareOpen(true);
   const postUrl = typeof window !== "undefined" ? `${window.location.origin}/posts/${post.id}` : `/posts/${post.id}`;
+  const sendExternal = () => void externalShare(postUrl, post.content?.slice(0, 80) || "A post on Planet Baltimore");
 
   const toggleSave = async () => {
     if (!currentUserId) { toast.error("Sign in to save"); return; }
@@ -248,8 +250,11 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         <button onClick={openComments} className="flex items-center gap-2 transition hover:text-foreground">
           <MessageCircle className="h-5 w-5" /> {commentCount}
         </button>
-        <button onClick={share} className="flex items-center gap-2 transition hover:text-foreground">
+        <button onClick={share} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app">
           <Share2 className="h-5 w-5" />
+        </button>
+        <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+          <Send className="h-5 w-5" />
         </button>
         <button onClick={toggleSave} className={`ml-auto flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
@@ -303,7 +308,21 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         </div>
       )}
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
-      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={postUrl} title={post.content?.slice(0, 120) || "A post on Planet Baltimore"} />
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={postUrl}
+        title={post.content?.slice(0, 120) || "A post on Planet Baltimore"}
+        preview={{
+          type: "post",
+          id: post.id,
+          url: postUrl,
+          title: post.content?.slice(0, 120) || null,
+          excerpt: null,
+          image: post.image_url || null,
+          author: post.author_name || null,
+        }}
+      />
     </article>
   );
 }

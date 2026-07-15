@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2 } from "lucide-react";
+import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { stripHtml, timeAgo } from "@/lib/text-utils";
+import { externalShare } from "@/lib/share-preview";
 
 type Story = {
   id: string;
@@ -59,6 +60,7 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
     if (res.error) { setLiked(was); setLikes((n) => n + (was ? 1 : -1)); toast.error(res.error.message); }
   };
   const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
+  const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(storyUrl, story.title, cleanExcerpt || undefined); };
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
     if (!isOwner || deleting) return;
@@ -186,8 +188,11 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
         <span className="flex items-center gap-2 text-muted-foreground/80">
           <Clock className="h-5 w-5" />{story.read_minutes || 5}m
         </span>
-        <button onClick={openShare} className="ml-auto flex items-center gap-2 transition hover:text-foreground" aria-label="Share">
+        <button onClick={openShare} className="ml-auto flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app">
           <Share2 className="h-5 w-5" />
+        </button>
+        <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+          <Send className="h-5 w-5" />
         </button>
         <button onClick={toggleSave} className={`flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
@@ -198,7 +203,21 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
           </button>
         )}
       </footer>
-      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={storyUrl} title={story.title} />
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={storyUrl}
+        title={story.title}
+        preview={{
+          type: "story",
+          id: story.id,
+          url: storyUrl,
+          title: story.title,
+          excerpt: cleanExcerpt || null,
+          image: story.cover_url || null,
+          author: story.author_name || null,
+        }}
+      />
     </article>
   );
 }
