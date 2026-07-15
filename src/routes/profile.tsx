@@ -104,15 +104,23 @@ function ProfilePage() {
 
   const uploadBanner = async (file: File) => {
     if (!profile) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image is too large (max 10MB)");
+      return;
+    }
     setUploadingBanner(true);
-    const path = `${profile.id}/banner-${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `${profile.id}/banner-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg", cacheControl: "3600" });
     if (error) { setUploadingBanner(false); toast.error(error.message); return; }
     const { data, error: signErr } = await supabase.storage
       .from("avatars")
       .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
     if (signErr || !data) { setUploadingBanner(false); toast.error(signErr?.message || "Could not sign URL"); return; }
-    await supabase.from("profiles").update({ banner_url: data.signedUrl }).eq("id", profile.id);
+    const { error: updErr } = await supabase.from("profiles").update({ banner_url: data.signedUrl }).eq("id", profile.id);
+    if (updErr) { setUploadingBanner(false); toast.error(updErr.message); return; }
     toast.success("Banner updated"); location.reload();
   };
 
