@@ -34,6 +34,8 @@ type Post = {
   author_username?: string | null;
   neighborhood_name?: string | null;
   is_founder?: boolean;
+  tag?: string | null;
+  category?: string | null;
 };
 
 export function PostCard({ post, currentUserId, onDelete, reason }: {
