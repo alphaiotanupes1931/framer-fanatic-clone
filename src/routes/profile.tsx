@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail } from "lucide-react";
+import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
 });
 
-const TABS_ARTIST_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Stripe"] as const;
+const TABS_ARTIST_BASE = ["Posts","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Dashboard","Stripe"] as const;
 const TABS_RESIDENT_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
@@ -36,13 +36,21 @@ const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "My Tickets": Ticket,
   "My Pages": Shield,
   "My Dashboard": BarChart3,
+  "Studio": Palette,
+  "Series": Layers,
+  "Gallery": ImageIcon,
+  "Events": Calendar,
+  "Talk": MessageSquare,
+  "Contact": Mail,
+  "CV/Bio": FileText,
+  "Invite": Send,
 };
 type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
   const { isArtist, isResident, isAdmin } = useUserRole();
-  const categoryTabs = tabsForCategory((profile as { category?: string | null } | null)?.category);
+  const categoryTabs = isArtist ? [] : tabsForCategory((profile as { category?: string | null } | null)?.category);
   const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
