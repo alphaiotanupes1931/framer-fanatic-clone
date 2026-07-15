@@ -28,6 +28,10 @@ const CATEGORIES = [
   "General","Music","Art","Community","Event","Food","Nightlife","Wellness","Fashion","Sports","News","Question","Other",
 ];
 
+const POST_TAGS = [
+  "Process","Announcement","Studio","Behind the Scenes","Work in Progress","New Release","Show","Collaboration","Sale","Tutorial",
+];
+
 const BG_COLORS = [
   { name: "None",        bg: "",         fg: "#0F172A" },
   { name: "Baltimore",   bg: "#d4580a",  fg: "#FFFFFF" },
@@ -52,6 +56,7 @@ function CreatePostPage() {
   const [videoPath, setVideoPath] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [category, setCategory] = useState<string>("General");
+  const [tag, setTag] = useState<string>("");
   const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
   const [visibility, setVisibility] = useState<Visibility>("public");
   const [excludeQuery, setExcludeQuery] = useState("");
@@ -119,6 +124,7 @@ function CreatePostPage() {
         bg_color: postType === "text" && bg.bg ? bg.bg : null,
         text_color: postType === "text" && bg.bg ? bg.fg : null,
         category,
+        tag: tag || null,
         visibility,
         excluded_user_ids: excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
