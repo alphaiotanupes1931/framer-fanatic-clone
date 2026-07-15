@@ -1004,6 +1004,30 @@ export type Database = {
           },
         ]
       }
+      profile_wall_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

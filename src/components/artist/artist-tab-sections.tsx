@@ -451,17 +451,112 @@ export function ArtistStudioTab({ posts }: { posts: any[] }) {
   return <ArtistPostsGrid posts={studio} />;
 }
 
-export function ArtistTalkTab({ posts }: { posts: any[] }) {
-  const talks = posts.filter((p) => (p.tag || "").toLowerCase() === "announcement" || (p.tag || "").toLowerCase() === "talk");
-  if (talks.length === 0) return <div className="py-12 text-center text-muted-foreground">No announcements yet.</div>;
+export function ArtistTalkTab({ profile }: { profile: { id: string; display_name?: string | null; username?: string | null } }) {
+  const [me, setMe] = useState<{ id: string } | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("profile_wall_comments")
+      .select("id, content, created_at, author_id")
+      .eq("profile_id", profile.id)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    const rows = (data ?? []) as any[];
+    const ids = Array.from(new Set(rows.map((r) => r.author_id)));
+    let authors: Record<string, any> = {};
+    if (ids.length) {
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+      for (const p of (profs ?? []) as any[]) authors[p.id] = p;
+    }
+    setComments(rows.map((r) => ({ ...r, author: authors[r.author_id] })));
+    setLoading(false);
+  };
+  useEffect(() => {
+    void load();
+    supabase.auth.getUser().then(({ data }) => setMe(data.user ? { id: data.user.id } : null));
+  }, [profile.id]);
+
+  const post = async () => {
+    if (!me) { toast.error("Sign in to comment"); return; }
+    const body = text.trim();
+    if (!body) return;
+    const { error } = await supabase.from("profile_wall_comments").insert({ profile_id: profile.id, author_id: me.id, content: body });
+    if (error) { toast.error(error.message); return; }
+    setText(""); void load();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Delete this comment?")) return;
+    const { error } = await supabase.from("profile_wall_comments").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setComments((c) => c.filter((x) => x.id !== id));
+  };
+
+  const name = profile.display_name || profile.username || "this page";
   return (
-    <div className="space-y-4">
-      {talks.map((p) => (
-        <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="block rounded-2xl border border-border p-4 hover:shadow-sm transition">
-          {p.tag && <div className="text-xs uppercase tracking-wider text-[#d4580a] font-semibold mb-1">{p.tag}</div>}
-          <div className="text-[15px] text-neutral-800">{p.content}</div>
-        </Link>
-      ))}
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-border p-5 bg-muted/30">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a]">💬</div>
+          <div>
+            <div className="font-semibold text-[15px]">Community Discussion</div>
+            <div className="text-sm text-muted-foreground">Ask questions, share thoughts, or start a conversation with {name} and their followers.</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div className="text-lg font-semibold flex items-center gap-2">💬 Comments</div>
+        <div className="flex gap-2 items-start">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={me ? "Add a comment..." : "Sign in to comment"}
+            disabled={!me}
+            rows={2}
+            className="flex-1 rounded-2xl border border-border bg-background px-4 py-2.5 text-sm resize-none"
+          />
+          <button onClick={post} disabled={!me || !text.trim()} className="rounded-full bg-[#d4580a] p-2.5 text-white disabled:opacity-40 shrink-0" aria-label="Post comment">
+            ➤
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : comments.length === 0 ? (
+          <div className="py-10 text-center text-sm text-muted-foreground">No comments yet. Be the first!</div>
+        ) : (
+          <div className="space-y-3 pt-2">
+            {comments.map((c) => (
+              <div key={c.id} className="flex gap-3 rounded-xl border border-border p-3">
+                {c.author?.avatar_url ? (
+                  <img src={c.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+                ) : (
+                  <div className="h-9 w-9 rounded-full bg-muted" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-semibold truncate">
+                      {c.author?.username ? (
+                        <Link to="/u/$username" params={{ username: c.author.username }} className="hover:underline">
+                          {c.author.display_name || c.author.username}
+                        </Link>
+                      ) : (c.author?.display_name || "Someone")}
+                    </div>
+                    <div className="text-xs text-muted-foreground shrink-0">{new Date(c.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <div className="text-sm text-neutral-800 whitespace-pre-wrap mt-0.5">{c.content}</div>
+                  {me && (me.id === c.author_id || me.id === profile.id) && (
+                    <button onClick={() => remove(c.id)} className="text-xs text-red-600 hover:underline mt-1">Delete</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
