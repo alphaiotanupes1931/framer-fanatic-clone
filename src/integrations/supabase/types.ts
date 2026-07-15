@@ -181,6 +181,32 @@ export type Database = {
         }
         Relationships: []
       }
+      event_saves: {
+        Row: {
+          created_at: string
+          event_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_saves_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           address: string | null
@@ -1153,6 +1179,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "story_likes_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_saves: {
+        Row: {
+          created_at: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_saves_story_id_fkey"
             columns: ["story_id"]
             isOneToOne: false
             referencedRelation: "stories"
