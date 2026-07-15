@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home, Search, Plus, User, Menu, MessageCircle, Compass, BookOpen,
   Users, Shield, Palette, Landmark, Building2, MapPin, Calendar, Ticket,
-  Video, Trophy, Settings, PenSquare, Store,
+  Video, Trophy, Settings, PenSquare, Store, Bookmark,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -33,6 +33,7 @@ const moreItems: Primary[] = [
   { icon: Ticket, label: "Events", to: "/events" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
+  { icon: Bookmark, label: "Saved", to: "/saved" },
   { icon: Users, label: "Communities", to: "/groups" },
   { icon: Shield, label: "Associations", to: "/community-associations" },
   { icon: Palette, label: "Artists", to: "/artists" },
