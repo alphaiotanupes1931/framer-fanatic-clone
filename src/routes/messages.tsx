@@ -529,6 +529,11 @@ function MessagesPage() {
                             const label = shared.preview.type === "story" ? "story" : shared.preview.type === "event" ? "event" : "post";
                             return `Shared a ${label}${shared.preview.title ? `: ${shared.preview.title}` : ""}`;
                           }
+                          if (raw.startsWith("::share::")) {
+                            const m = raw.match(/"type"\s*:\s*"(post|story|event)"/);
+                            const t = m?.[1] || "post";
+                            return `Shared a ${t}`;
+                          }
                           return raw || "Say hello";
                         })()}
                       </span>
