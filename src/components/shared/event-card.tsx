@@ -127,8 +127,9 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
         <button type="button" onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Send className="h-5 w-5" />
         </button>
-        <button type="button" onClick={toggleSave} className={`ml-auto flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
-          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
+        <button type="button" onClick={toggleSave} className={`ml-auto flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
+          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+          {saved ? "Saved" : "Save"}
         </button>
       </div>
       <ShareToUsersDialog
