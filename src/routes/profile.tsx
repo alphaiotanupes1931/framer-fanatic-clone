@@ -59,8 +59,9 @@ function ProfilePage() {
   // that differs from the generic default (Posts/Gallery/Events/CV/Bio/Invite).
   const isArtist = roleIsArtist || artistTabLabels.some((l) => ["Studio","Series","Album","Singles","EPK","Episodes","Fashion Line","Lookbook","Drops"].includes(l));
   const categoryTabs = isArtist ? [] : tabsForCategory(category);
-  const artistExtras = ["Saved","My Tickets","My Dashboard","Stripe"];
-  const baseTabs = isArtist ? [...artistTabLabels, ...artistExtras] : TABS_RESIDENT_BASE;
+  const baseTabs = isArtist
+    ? [...TABS_RESIDENT_BASE, "Stripe"]
+    : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
