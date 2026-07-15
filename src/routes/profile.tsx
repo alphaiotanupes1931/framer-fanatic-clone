@@ -365,6 +365,8 @@ function ProfilePage() {
                   <ArtistGalleryTab userId={profile.id} canEdit />
                 ) : tab === "CV/Bio" ? (
                   <ArtistCVTab userId={profile.id} profile={profile} canEdit />
+                ) : tab === "Series" ? (
+                  <ArtistSeriesTab userId={profile.id} canEdit />
                 ) : (
                   <ProfileSectionTab
                     userId={profile.id}
