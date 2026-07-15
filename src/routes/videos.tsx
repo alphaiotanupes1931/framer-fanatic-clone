@@ -75,7 +75,7 @@ function VideosSignedIn() {
   const [open, setOpen] = useState(false);
   const [sort, setSort] = useState<"newest" | "popular">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
-  const [form, setForm] = useState({ title: "", description: "", video_url: "", thumbnail_url: "" });
+  const [form, setForm] = useState({ title: "", description: "", video_url: "" });
   const [loaded, setLoaded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -126,10 +126,10 @@ function VideosSignedIn() {
     if (!me || !form.title.trim() || !form.video_url.trim()) return;
     const { error } = await supabase.from("videos").insert({
       user_id: me.id, title: form.title.trim(), description: form.description.trim() || null,
-      video_url: form.video_url.trim(), thumbnail_url: form.thumbnail_url.trim() || null,
+      video_url: form.video_url.trim(), thumbnail_url: null,
     });
     if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", description: "", video_url: "", thumbnail_url: "" });
+    setOpen(false); setForm({ title: "", description: "", video_url: "" });
     setLocalPreview(null);
     toast.success("Video added"); load();
   };
@@ -221,7 +221,6 @@ function VideosSignedIn() {
                 <span className="h-px flex-1 bg-neutral-200" /> or paste a URL <span className="h-px flex-1 bg-neutral-200" />
               </div>
               <input value={form.video_url} onChange={(e) => setForm({...form, video_url: e.target.value})} placeholder="Video URL (YouTube, Vimeo, mp4)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-              <input value={form.thumbnail_url} onChange={(e) => setForm({...form, thumbnail_url: e.target.value})} placeholder="Thumbnail URL (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim()} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
             </div>
@@ -233,9 +232,26 @@ function VideosSignedIn() {
 }
 
 function VideoCard({ v }: { v: Video }) {
+  const url = v.video_url || "";
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  const ytThumb = yt ? `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg` : null;
+  const poster = v.thumbnail_url || ytThumb;
+  const isDirect = !yt && !vimeo && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
   return (
     <a href={v.video_url} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-      <div className="relative aspect-video bg-gradient-to-br from-orange-300 to-orange-600" style={v.thumbnail_url ? { backgroundImage: `url(${v.thumbnail_url})`, backgroundSize: "cover" } : undefined}>
+      <div className="relative aspect-video bg-neutral-900 overflow-hidden">
+        {poster ? (
+          <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+        ) : isDirect || url.startsWith("blob:") || url.startsWith("http") ? (
+          <video
+            src={`${url}${url.includes("#") ? "" : "#t=0.5"}`}
+            preload="metadata"
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : null}
         {v.featured && <div className="absolute left-3 top-3 rounded-md bg-yellow-400 px-2 py-1 text-[10px] font-bold text-yellow-900">★ Featured</div>}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-full bg-white/30 p-4 backdrop-blur group-hover:bg-white/50"><Play className="h-6 w-6 fill-white text-white" /></div>
