@@ -522,7 +522,15 @@ function MessagesPage() {
                           c.unread ? "font-semibold text-foreground" : "text-muted-foreground"
                         }`}
                       >
-                        {c.last_message_preview || "Say hello"}
+                        {(() => {
+                          const raw = c.last_message_preview || "";
+                          const shared = parseSharePreview(raw);
+                          if (shared) {
+                            const label = shared.preview.type === "story" ? "story" : shared.preview.type === "event" ? "event" : "post";
+                            return `Shared a ${label}${shared.preview.title ? `: ${shared.preview.title}` : ""}`;
+                          }
+                          return raw || "Say hello";
+                        })()}
                       </span>
                       {c.unread && (
                         <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
