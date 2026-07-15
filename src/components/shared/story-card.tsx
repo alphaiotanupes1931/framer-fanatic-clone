@@ -34,13 +34,13 @@ export function StoryCard({ story, featured = false, currentUserId }: { story: S
     if (!currentUserId) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("story_likes")
-        .select("story_id")
-        .eq("story_id", story.id)
-        .eq("user_id", currentUserId)
-        .maybeSingle();
-      if (!cancelled && data) setLiked(true);
+      const [likeRes, saveRes] = await Promise.all([
+        supabase.from("story_likes").select("story_id").eq("story_id", story.id).eq("user_id", currentUserId).maybeSingle(),
+        supabase.from("story_saves").select("story_id").eq("story_id", story.id).eq("user_id", currentUserId).maybeSingle(),
+      ]);
+      if (cancelled) return;
+      if (likeRes.data) setLiked(true);
+      if (saveRes.data) setSaved(true);
     })();
     return () => { cancelled = true; };
   }, [currentUserId, story.id]);
@@ -56,7 +56,17 @@ export function StoryCard({ story, featured = false, currentUserId }: { story: S
     if (res.error) { setLiked(was); setLikes((n) => n + (was ? 1 : -1)); toast.error(res.error.message); }
   };
   const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
-  const toggleSave = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setSaved((s) => !s); };
+  const toggleSave = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!currentUserId) { toast.error("Sign in to save"); return; }
+    const was = saved;
+    setSaved(!was);
+    const res = was
+      ? await supabase.from("story_saves").delete().eq("story_id", story.id).eq("user_id", currentUserId)
+      : await supabase.from("story_saves").insert({ story_id: story.id, user_id: currentUserId });
+    if (res.error) { setSaved(was); toast.error(res.error.message); }
+    else toast.success(was ? "Removed from saved" : "Saved");
+  };
 
   if (featured) {
     return (
