@@ -249,6 +249,7 @@ export type Database = {
           ends_at: string | null
           id: string
           image_url: string | null
+          is_exhibition: boolean
           is_published: boolean
           latitude: number | null
           location: string | null
@@ -271,6 +272,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          is_exhibition?: boolean
           is_published?: boolean
           latitude?: number | null
           location?: string | null
@@ -293,6 +295,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          is_exhibition?: boolean
           is_published?: boolean
           latitude?: number | null
           location?: string | null

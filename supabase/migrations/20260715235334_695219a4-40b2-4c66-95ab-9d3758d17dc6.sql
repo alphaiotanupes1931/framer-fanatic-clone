@@ -1,0 +1,2 @@
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS is_exhibition boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS events_org_exhibition_idx ON public.events (organization_id, is_exhibition, starts_at DESC);
