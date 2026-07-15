@@ -292,6 +292,22 @@ function CreatePostPage() {
           </div>
 
           <div className="space-y-2">
+            <Label className="text-sm font-medium">Tag (optional)</Label>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => setTag("")}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${tag === "" ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
+                None
+              </button>
+              {POST_TAGS.map((t) => (
+                <button key={t} type="button" onClick={() => setTag(t)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium ${tag === t ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label className="text-sm font-medium">Who can see this?</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {visibilityOpts.map(({ id, label, hint, Icon }) => {
