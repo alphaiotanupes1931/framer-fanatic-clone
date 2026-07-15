@@ -49,7 +49,7 @@ const SERVICE_TABS = [
   "Services", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const ARTS_ORG_TABS = [
-  "Posts", "Events", "Artists", "Support", "Opportunities", "Press", "Updates", "Invite", "About", "Comments",
+  "Posts", "Events", "Artists", "Exhibition", "Support", "Opportunities", "Press", "Updates", "Invite", "About", "Comments",
 ] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
@@ -59,7 +59,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
-  Artists: Users, Support: Heart,
+  Artists: Users, Support: Heart, Exhibition: ImageIcon,
 };
 type Tab = string;
 
