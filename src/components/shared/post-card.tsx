@@ -238,6 +238,13 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </Link>
         )
       )}
+      {post.tag && (
+        <div className="px-4 pb-2 sm:px-6">
+          <span className="inline-flex items-center rounded-full bg-[#d4580a]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#d4580a]">
+            #{post.tag}
+          </span>
+        </div>
+      )}
       {post.music_url && (
         <div className="px-4 pb-3 sm:px-6">
           <a
