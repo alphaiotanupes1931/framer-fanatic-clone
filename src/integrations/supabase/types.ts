@@ -254,6 +254,7 @@ export type Database = {
           location: string | null
           longitude: number | null
           neighborhood: string | null
+          organization_id: string | null
           price_cents: number
           starts_at: string
           status: string
@@ -275,6 +276,7 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           neighborhood?: string | null
+          organization_id?: string | null
           price_cents?: number
           starts_at: string
           status?: string
@@ -296,6 +298,7 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           neighborhood?: string | null
+          organization_id?: string | null
           price_cents?: number
           starts_at?: string
           status?: string
@@ -304,7 +307,15 @@ export type Database = {
           user_id?: string
           venue_name?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       follows: {
         Row: {
