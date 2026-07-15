@@ -105,8 +105,16 @@ function Dashboard() {
   });
 
   const handleDeletePost = async (postId: string) => {
-    await Post.delete(postId);
-    qc.invalidateQueries({ queryKey: ["home-posts"] });
+    // Optimistic: remove from cache immediately so it disappears from the feed.
+    const prev = qc.getQueryData<any[]>(["home-posts"]);
+    qc.setQueryData<any[]>(["home-posts"], (old = []) => old.filter((p: any) => p.id !== postId));
+    try {
+      await Post.delete(postId);
+      qc.invalidateQueries({ queryKey: ["home-posts"] });
+    } catch (e) {
+      qc.setQueryData(["home-posts"], prev);
+      throw e;
+    }
   };
 
   const isLoading = loadingPosts || loadingStories || loadingEvents || (activeFilter === "Following" && loadingFollows);
