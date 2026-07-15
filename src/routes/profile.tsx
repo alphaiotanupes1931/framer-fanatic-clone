@@ -464,7 +464,7 @@ function ArtistEventsTab({ userId }: { userId: string }) {
       const { data } = await supabase
         .from("events")
         .select("id, title, starts_at, location, image_url")
-        .eq("organizer_id", userId)
+        .eq("user_id", userId)
         .order("starts_at", { ascending: false })
         .limit(50);
       setEvents((data ?? []) as never);
