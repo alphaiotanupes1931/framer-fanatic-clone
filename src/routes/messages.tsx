@@ -663,7 +663,18 @@ function MessagesPage() {
                     >
                       {!mine && (
                         <div className="w-7 shrink-0">
-                          {showAvatar && (
+                          {showAvatar && !active.is_group && active.other?.username ? (
+                            <Link to="/u/$username" params={{ username: active.other.username }}>
+                              <Avatar className="h-7 w-7">
+                                {active.other?.avatar_url && (
+                                  <AvatarImage src={active.other.avatar_url} alt="" />
+                                )}
+                                <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
+                                  {initials(active.other)}
+                                </AvatarFallback>
+                              </Avatar>
+                            </Link>
+                          ) : showAvatar && (
                             <Avatar className="h-7 w-7">
                               {active.other?.avatar_url && (
                                 <AvatarImage src={active.other.avatar_url} alt="" />
