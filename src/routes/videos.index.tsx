@@ -7,6 +7,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
 import { Play, Search, Star, Plus, X, Upload } from "lucide-react";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
+import { useUserRole } from "@/hooks/use-user-role";
 
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
@@ -177,7 +178,7 @@ function VideosSignedIn() {
           <section>
             <h2 className="mb-3 flex items-center gap-2 text-sm font-bold"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> Featured Videos</h2>
             <div className="grid gap-5 sm:grid-cols-2">
-              {featured.map((v) => <VideoCard key={v.id} v={v} />)}
+              {featured.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
             </div>
           </section>
         )}
@@ -199,7 +200,7 @@ function VideosSignedIn() {
             />
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {rest.map((v) => <VideoCard key={v.id} v={v} />)}
+              {rest.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
             </div>
           )}
         </section>
