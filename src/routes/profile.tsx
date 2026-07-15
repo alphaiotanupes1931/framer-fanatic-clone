@@ -17,6 +17,7 @@ import {
 import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
+import { PostCard } from "@/components/shared/post-card";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -46,6 +47,7 @@ function ProfilePage() {
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
+  const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +73,29 @@ function ProfilePage() {
       setStats({ posts: posts || 0, followers: followers || 0, following: following || 0 });
     })();
   }, [profile]);
+
+  useEffect(() => {
+    if (!profile) return;
+    (async () => {
+      const { data } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("user_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      const author = {
+        author_display_name: profile.display_name,
+        author_username: profile.username,
+        author_avatar_url: profile.avatar_url,
+      };
+      setMyPosts((data || []).map((p: any) => ({ ...p, ...author })));
+    })();
+  }, [profile]);
+
+  const handleDeleteMyPost = (id: string) => {
+    setMyPosts((prev) => prev.filter((p) => p.id !== id));
+    setStats((s) => ({ ...s, posts: Math.max(0, s.posts - 1) }));
+  };
 
   useEffect(() => {
     (async () => {
@@ -335,9 +360,23 @@ function ProfilePage() {
                 />
               ) : null
             ) : (
-              <div className="py-12 text-center text-muted-foreground">
-                No {tab.toLowerCase()} yet. Share something with the community!
-              </div>
+              (tab === "Posts" || tab === "Feed") ? (
+                myPosts.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">
+                    No posts yet. Share something with the community!
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {myPosts.map((p) => (
+                      <PostCard key={p.id} post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="py-12 text-center text-muted-foreground">
+                  No {tab.toLowerCase()} yet. Share something with the community!
+                </div>
+              )
             )}
           </div>
         </div>
