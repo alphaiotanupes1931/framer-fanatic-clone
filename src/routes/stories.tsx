@@ -8,7 +8,7 @@ import { StoryCard } from "@/components/shared/story-card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2, Trash2, Share2, Bookmark, MoreHorizontal } from "lucide-react";
-import { format } from "date-fns";
+
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
 
