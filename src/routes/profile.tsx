@@ -375,6 +375,8 @@ function ProfilePage() {
                   <ArtistCVTab userId={profile.id} profile={profile} canEdit />
                 ) : tab === "Series" ? (
                   <ArtistSeriesTab userId={profile.id} canEdit />
+                ) : tab === "Talk" ? (
+                  <ArtistTalkTab profile={profile} />
                 ) : (
                   <ProfileSectionTab
                     userId={profile.id}
