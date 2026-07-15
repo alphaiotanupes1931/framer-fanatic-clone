@@ -678,6 +678,142 @@ function MembersTab({ orgId }: { orgId: string }) {
 }
 
 function SupportTab({ org }: { org: Org }) {
+  return <SupportTabImpl org={org} />;
+}
+
+function ArtsOrgAboutTab({ org, canManage, onChange }: { org: Org; canManage: boolean; onChange: (o: Org) => void }) {
+  const parsed = parseArtsBio(org.bio ?? "");
+  const [edit, setEdit] = useState(false);
+  const [form, setForm] = useState({
+    mission: parsed.mission,
+    description: parsed.description,
+    programming: parsed.programming.join(", "),
+    address: org.address ?? "",
+    email: org.email ?? "",
+    neighborhood: org.neighborhood ?? "",
+  });
+
+  const save = async () => {
+    const tags = form.programming.split(",").map((t) => t.trim()).filter(Boolean);
+    const bio = composeArtsBio(form.mission, form.description, tags);
+    const { error } = await supabase.from("organizations").update({
+      bio: bio || null,
+      address: form.address || null,
+      email: form.email || null,
+      neighborhood: form.neighborhood || null,
+    }).eq("id", org.id);
+    if (error) return toast.error(error.message);
+    onChange({ ...org, bio, address: form.address || null, email: form.email || null, neighborhood: form.neighborhood || null });
+    setEdit(false);
+    toast.success("Saved");
+  };
+
+  if (edit) {
+    return (
+      <div className="space-y-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm">
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Mission</div>
+          <textarea value={form.mission} onChange={(e) => setForm({ ...form, mission: e.target.value })} rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2" />
+        </div>
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Description</div>
+          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2" />
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Address / area" className="rounded-lg border border-neutral-200 px-3 py-2" />
+          <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Contact email" className="rounded-lg border border-neutral-200 px-3 py-2" />
+        </div>
+        <input value={form.programming} onChange={(e) => setForm({ ...form, programming: e.target.value })} placeholder="Programming tags (comma separated)" className="w-full rounded-lg border border-neutral-200 px-3 py-2" />
+        <div className="flex justify-end gap-2">
+          <button onClick={() => setEdit(false)} className="rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-semibold text-neutral-700">Cancel</button>
+          <button onClick={save} className="rounded-full bg-[#d4580a] px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-700">Save</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {canManage && (
+        <div className="flex justify-end">
+          <button onClick={() => setEdit(true)} className="rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">
+            Edit About
+          </button>
+        </div>
+      )}
+
+      <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
+        <div className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Mission</div>
+        <p className="text-sm leading-relaxed text-neutral-800">
+          {parsed.mission || "No mission statement yet."}
+        </p>
+      </div>
+
+      {parsed.description && (
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">{parsed.description}</p>
+        </div>
+      )}
+
+      <div className="space-y-2 px-1 text-sm text-neutral-700">
+        {(org.address || org.neighborhood) && (
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-neutral-500" />
+            <span>{[org.address, org.neighborhood].filter(Boolean).join(" — ")}</span>
+          </div>
+        )}
+        {org.email && (
+          <a href={`mailto:${org.email}`} className="flex items-center gap-2 hover:text-[#d4580a]">
+            <Mail className="h-4 w-4 text-neutral-500" />
+            <span>{org.email}</span>
+          </a>
+        )}
+      </div>
+
+      {parsed.programming.length > 0 && (
+        <div>
+          <div className="mb-2 px-1 text-xs font-bold uppercase tracking-wider text-neutral-500">Programming</div>
+          <div className="flex flex-wrap gap-2">
+            {parsed.programming.map((p) => (
+              <span key={p} className="inline-flex items-center rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-800">
+                {p}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function parseArtsBio(bio: string): { mission: string; description: string; programming: string[] } {
+  let mission = "";
+  let programming: string[] = [];
+  let rest = bio;
+  const missionMatch = rest.match(/(?:^|\n)MISSION:\s*([\s\S]*?)(?=\n[A-Z]+:|$)/);
+  if (missionMatch) { mission = missionMatch[1].trim(); rest = rest.replace(missionMatch[0], "").trim(); }
+  const progMatch = rest.match(/(?:^|\n)PROGRAMMING:\s*([\s\S]*?)(?=\n[A-Z]+:|$)/);
+  if (progMatch) {
+    programming = progMatch[1].split(",").map((t) => t.trim()).filter(Boolean);
+    rest = rest.replace(progMatch[0], "").trim();
+  }
+  if (!mission) {
+    const parts = rest.split(/\n\n+/);
+    mission = parts[0]?.trim() ?? "";
+    rest = parts.slice(1).join("\n\n").trim();
+  }
+  return { mission, description: rest, programming };
+}
+
+function composeArtsBio(mission: string, description: string, programming: string[]): string {
+  const parts: string[] = [];
+  if (mission.trim()) parts.push(`MISSION: ${mission.trim()}`);
+  if (description.trim()) parts.push(description.trim());
+  if (programming.length) parts.push(`PROGRAMMING: ${programming.join(", ")}`);
+  return parts.join("\n\n");
+}
+
+function SupportTabImpl({ org }: { org: Org }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-2xl border border-neutral-200 bg-white p-5">
