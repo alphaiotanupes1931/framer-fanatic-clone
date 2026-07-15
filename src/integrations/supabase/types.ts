@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      artist_inquiries: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+          intent: string
+          message: string
+          sender_email: string
+          sender_id: string | null
+          sender_name: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+          intent: string
+          message: string
+          sender_email: string
+          sender_id?: string | null
+          sender_name: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+          intent?: string
+          message?: string
+          sender_email?: string
+          sender_id?: string | null
+          sender_name?: string
+        }
+        Relationships: []
+      }
       close_friends: {
         Row: {
           created_at: string
@@ -921,9 +954,11 @@ export type Database = {
           link_url: string | null
           media_url: string | null
           order_index: number
+          subtitle: string | null
           title: string | null
           updated_at: string
           user_id: string
+          year: string | null
         }
         Insert: {
           body?: string | null
@@ -933,9 +968,11 @@ export type Database = {
           link_url?: string | null
           media_url?: string | null
           order_index?: number
+          subtitle?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
+          year?: string | null
         }
         Update: {
           body?: string | null
@@ -945,9 +982,11 @@ export type Database = {
           link_url?: string | null
           media_url?: string | null
           order_index?: number
+          subtitle?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
+          year?: string | null
         }
         Relationships: []
       }

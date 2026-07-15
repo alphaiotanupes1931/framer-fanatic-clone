@@ -361,15 +361,21 @@ function ProfilePage() {
               <MyTicketsTab />
             ) : (isArtist && ["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
               profile ? (
-                <ProfileSectionTab
-                  userId={profile.id}
-                  kind={tab === "CV/Bio" ? "cv" : tab.toLowerCase()}
-                  label={tab}
-                  canEdit={true}
-                />
+                tab === "Gallery" ? (
+                  <ArtistGalleryTab userId={profile.id} canEdit />
+                ) : tab === "CV/Bio" ? (
+                  <ArtistCVTab userId={profile.id} profile={profile} canEdit />
+                ) : (
+                  <ProfileSectionTab
+                    userId={profile.id}
+                    kind={tab.toLowerCase()}
+                    label={tab}
+                    canEdit={true}
+                  />
+                )
               ) : null
             ) : (isArtist && tab === "Contact") ? (
-              <ArtistContactTab profile={profile} />
+              <ArtistBookCollaborateTab profile={profile} />
             ) : (isArtist && tab === "Invite") ? (
               <ArtistInviteTab profile={profile} />
             ) : (isArtist && tab === "Events") ? (
@@ -410,28 +416,290 @@ function ProfilePage() {
   );
 }
 
-function ArtistContactTab({ profile }: { profile: any }) {
-  if (!profile) return null;
-  const rows: Array<{ label: string; value: string | null; href?: string }> = [
-    { label: "Email", value: profile.email ?? null, href: profile.email ? `mailto:${profile.email}` : undefined },
-    { label: "Website", value: profile.website ?? null, href: profile.website ?? undefined },
-    { label: "Location", value: profile.neighborhood ?? profile.location ?? null },
-    { label: "Instagram", value: profile.instagram ?? null, href: profile.instagram ? `https://instagram.com/${String(profile.instagram).replace(/^@/, "")}` : undefined },
+function ArtistBookCollaborateTab({ profile }: { profile: any }) {
+  const [intent, setIntent] = useState<string>("Collaborate");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const intents = [
+    { key: "Collaborate", icon: "💬" },
+    { key: "Commission", icon: "🏛️" },
+    { key: "Book / Perform", icon: "🎵" },
+    { key: "Photography", icon: "📷" },
+    { key: "Other", icon: "💭" },
   ];
-  const visible = rows.filter((r) => r.value);
-  if (visible.length === 0) return <div className="py-12 text-center text-muted-foreground">No contact info yet. Add it from Edit Profile.</div>;
+  const displayName = profile?.display_name || profile?.username || "this artist";
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile?.id) return;
+    if (!name.trim() || !email.trim() || !message.trim()) { toast.error("Fill in your name, email, and message."); return; }
+    setSending(true);
+    const { data: sess } = await supabase.auth.getSession();
+    const { error } = await supabase.from("artist_inquiries").insert({
+      artist_id: profile.id,
+      sender_id: sess.session?.user.id ?? null,
+      intent,
+      sender_name: name.trim(),
+      sender_email: email.trim(),
+      message: message.trim(),
+    });
+    setSending(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Message sent");
+    setName(""); setEmail(""); setMessage("");
+  };
   return (
-    <div className="rounded-xl border border-border divide-y divide-border">
-      {visible.map((r) => (
-        <div key={r.label} className="flex items-center justify-between p-4">
-          <div className="text-sm font-semibold text-muted-foreground">{r.label}</div>
-          {r.href ? (
-            <a href={r.href} target="_blank" rel="noreferrer" className="text-sm font-semibold text-[#d4580a] hover:underline break-all">{r.value}</a>
-          ) : (
-            <div className="text-sm font-semibold break-all">{r.value}</div>
+    <div className="rounded-2xl border border-border p-6 space-y-6">
+      <div>
+        <div className="text-xl font-bold">Book or Collaborate</div>
+        <div className="text-sm text-muted-foreground mt-1">
+          Reach out to {displayName} for commissions, collaborations, bookings, or any project inquiry.
+        </div>
+      </div>
+      <div>
+        <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-2">I WANT TO...</div>
+        <div className="flex flex-wrap gap-2">
+          {intents.map((i) => (
+            <button key={i.key} type="button" onClick={() => setIntent(i.key)}
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+                intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-muted"
+              }`}>
+              <span>{i.icon}</span> {i.key}
+            </button>
+          ))}
+        </div>
+      </div>
+      <form onSubmit={submit} className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-semibold">Your name <span className="text-[#d4580a]">*</span></label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Smith"
+              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="text-sm font-semibold">Your email <span className="text-[#d4580a]">*</span></label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@example.com"
+              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          </div>
+        </div>
+        <div>
+          <label className="text-sm font-semibold">Message <span className="text-[#d4580a]">*</span></label>
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={5}
+            placeholder={`Tell ${displayName} about your project, timeline, budget, or any details that would help them respond...`}
+            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        </div>
+        <button type="submit" disabled={sending}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50">
+          <Send className="h-4 w-4" /> {sending ? "Sending..." : "Send Message"}
+        </button>
+        <p className="text-center text-xs text-muted-foreground">Your message goes directly to {displayName}. No spam, ever.</p>
+      </form>
+    </div>
+  );
+}
+
+function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit: boolean }) {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ title: "", media_url: "" });
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase.from("profile_sections").select("*")
+      .eq("user_id", userId).eq("kind", "gallery")
+      .order("created_at", { ascending: false });
+    setItems(data ?? []);
+    setLoading(false);
+  };
+  useEffect(() => { void load(); }, [userId]);
+  const add = async () => {
+    if (!form.media_url.trim()) { toast.error("Add an image URL"); return; }
+    const { error } = await supabase.from("profile_sections").insert({
+      user_id: userId, kind: "gallery", title: form.title.trim() || null, media_url: form.media_url.trim(), order_index: items.length,
+    });
+    if (error) { toast.error(error.message); return; }
+    setOpen(false); setForm({ title: "", media_url: "" }); void load();
+  };
+  const remove = async (id: string) => {
+    await supabase.from("profile_sections").delete().eq("id", id);
+    void load();
+  };
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
+  return (
+    <div className="space-y-4">
+      {canEdit && (
+        <div className="flex justify-end">
+          <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">
+            + Add artwork
+          </button>
+        </div>
+      )}
+      {open && (
+        <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
+          <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="Title (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <input value={form.media_url} onChange={(e) => setForm({ ...form, media_url: e.target.value })}
+            placeholder="Image URL" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setOpen(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
+            <button onClick={add} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Save</button>
+          </div>
+        </div>
+      )}
+      {items.length === 0 ? (
+        <div className="py-12 text-center text-muted-foreground">No artwork yet.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {items.map((it) => (
+            <div key={it.id} className="group relative overflow-hidden rounded-lg bg-muted">
+              {it.media_url && <img src={it.media_url} alt={it.title ?? ""} className="w-full h-auto object-cover" loading="lazy" />}
+              {it.title && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                  <div className="text-sm font-semibold text-white">{it.title}</div>
+                </div>
+              )}
+              {canEdit && (
+                <button onClick={() => remove(it.id)} className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 opacity-0 group-hover:opacity-100">
+                  <span className="text-red-600 text-xs font-bold">✕</span>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Education", icon: "🎓" },
+  { kind: "cv_solo", label: "Solo Exhibitions", icon: "🌐" },
+  { kind: "cv_group", label: "Group Exhibitions", icon: "🌐" },
+  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
+  { kind: "cv_residencies", label: "Residencies", icon: "📖" },
+  { kind: "cv_publications", label: "Publications", icon: "📚" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+];
+
+function ArtistCVTab({ userId, profile, canEdit }: { userId: string; profile: any; canEdit: boolean }) {
+  const [statement, setStatement] = useState<string>(profile?.bio || "");
+  const [editStatement, setEditStatement] = useState(false);
+  const [items, setItems] = useState<any[]>([]);
+  const load = async () => {
+    const { data } = await supabase.from("profile_sections").select("*").eq("user_id", userId)
+      .in("kind", CV_SECTIONS.map((s) => s.kind))
+      .order("year", { ascending: false, nullsFirst: false });
+    setItems(data ?? []);
+  };
+  useEffect(() => { void load(); }, [userId]);
+  useEffect(() => { setStatement(profile?.bio || ""); }, [profile?.bio]);
+  const saveStatement = async () => {
+    const { error } = await supabase.from("profiles").update({ bio: statement }).eq("id", userId);
+    if (error) { toast.error(error.message); return; }
+    setEditStatement(false); toast.success("Statement saved");
+  };
+  return (
+    <div className="space-y-4">
+      <div className="text-2xl font-bold">Curriculum Vitae</div>
+      <div className="rounded-2xl border border-border p-5">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-semibold tracking-wider text-muted-foreground">ARTIST STATEMENT</div>
+          {canEdit && !editStatement && (
+            <button onClick={() => setEditStatement(true)} className="text-xs font-semibold text-[#d4580a]">Edit</button>
           )}
         </div>
+        {editStatement ? (
+          <div className="space-y-2">
+            <textarea value={statement} onChange={(e) => setStatement(e.target.value)} rows={6}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => { setStatement(profile?.bio || ""); setEditStatement(false); }} className="rounded-full px-4 py-2 text-sm">Cancel</button>
+              <button onClick={saveStatement} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Save</button>
+            </div>
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap text-sm leading-relaxed">
+            {statement || <span className="text-muted-foreground">No artist statement yet.</span>}
+          </p>
+        )}
+      </div>
+      {CV_SECTIONS.map((s) => (
+        <CVSection key={s.kind} section={s} userId={userId} items={items.filter((i) => i.kind === s.kind)} canEdit={canEdit} onChange={load} />
       ))}
+    </div>
+  );
+}
+
+function CVSection({ section, userId, items, canEdit, onChange }: {
+  section: { kind: string; label: string; icon: string };
+  userId: string; items: any[]; canEdit: boolean; onChange: () => void;
+}) {
+  const [expanded, setExpanded] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ year: "", title: "", subtitle: "" });
+  const add = async () => {
+    if (!form.title.trim()) { toast.error("Title required"); return; }
+    const { error } = await supabase.from("profile_sections").insert({
+      user_id: userId, kind: section.kind,
+      year: form.year.trim() || null, title: form.title.trim(), subtitle: form.subtitle.trim() || null,
+    });
+    if (error) { toast.error(error.message); return; }
+    setForm({ year: "", title: "", subtitle: "" }); setAdding(false); onChange();
+  };
+  const remove = async (id: string) => {
+    await supabase.from("profile_sections").delete().eq("id", id);
+    onChange();
+  };
+  return (
+    <div className="rounded-2xl border border-border">
+      <button onClick={() => setExpanded((v) => !v)} className="w-full flex items-center justify-between p-4">
+        <div className="flex items-center gap-2">
+          <span>{section.icon}</span>
+          <span className="font-semibold">{section.label}</span>
+          <span className="text-sm text-muted-foreground">({items.length})</span>
+        </div>
+        <span className="text-muted-foreground">{expanded ? "▲" : "▼"}</span>
+      </button>
+      {expanded && (
+        <div className="border-t border-border p-4 space-y-3">
+          {items.length === 0 && !adding && (
+            <div className="text-sm text-muted-foreground text-center py-4">No entries yet.</div>
+          )}
+          {items.map((it) => (
+            <div key={it.id} className="grid grid-cols-[70px_1fr_auto] gap-3 items-start">
+              <div className="text-sm font-semibold text-muted-foreground">{it.year || ""}</div>
+              <div>
+                <div className="font-semibold">{it.title}</div>
+                {it.subtitle && <div className="text-sm text-muted-foreground">{it.subtitle}</div>}
+              </div>
+              {canEdit && (
+                <button onClick={() => remove(it.id)} className="text-xs text-red-600 hover:underline">Remove</button>
+              )}
+            </div>
+          ))}
+          {canEdit && (
+            adding ? (
+              <div className="rounded-lg bg-muted/30 p-3 space-y-2">
+                <div className="grid grid-cols-[100px_1fr] gap-2">
+                  <input value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder="Year"
+                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+                  <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title"
+                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+                </div>
+                <input value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} placeholder="Venue / Location (optional)"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => setAdding(false)} className="rounded-full px-3 py-1.5 text-sm">Cancel</button>
+                  <button onClick={add} className="rounded-full bg-[#d4580a] px-3 py-1.5 text-sm font-semibold text-white">Add</button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setAdding(true)} className="text-sm font-semibold text-[#d4580a]">+ Add entry</button>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -457,13 +725,13 @@ function ArtistInviteTab({ profile }: { profile: any }) {
 }
 
 function ArtistEventsTab({ userId }: { userId: string }) {
-  const [events, setEvents] = useState<Array<{ id: string; title: string; starts_at: string; location: string | null; image_url: string | null }>>([]);
+  const [events, setEvents] = useState<Array<{ id: string; title: string; description: string | null; starts_at: string; location: string | null; image_url: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id, title, starts_at, location, image_url")
+        .select("id, title, description, starts_at, location, image_url")
         .eq("user_id", userId)
         .order("starts_at", { ascending: false })
         .limit(50);
@@ -473,17 +741,38 @@ function ArtistEventsTab({ userId }: { userId: string }) {
   }, [userId]);
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading events…</div>;
   if (events.length === 0) return <div className="py-12 text-center text-muted-foreground">No events yet.</div>;
+  const now = Date.now();
+  const upcoming = events.filter((e) => new Date(e.starts_at).getTime() >= now).sort((a, b) => +new Date(a.starts_at) - +new Date(b.starts_at));
+  const past = events.filter((e) => new Date(e.starts_at).getTime() < now);
+  const renderCard = (e: typeof events[number]) => (
+    <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
+      {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-56 object-cover" />}
+      <div className="p-4 space-y-2">
+        <div className="text-xs text-muted-foreground">
+          {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+          {" · "}
+          {new Date(e.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+        </div>
+        <div className="font-bold text-lg">{e.title}</div>
+        {e.description && <p className="text-sm text-muted-foreground line-clamp-2">{e.description}</p>}
+        {e.location && <div className="text-xs text-muted-foreground">📍 {e.location}</div>}
+      </div>
+    </Link>
+  );
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {events.map((e) => (
-        <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-xl border border-border overflow-hidden hover:shadow-md transition">
-          {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-40 object-cover" />}
-          <div className="p-3">
-            <div className="font-semibold truncate">{e.title}</div>
-            <div className="text-xs text-muted-foreground">{new Date(e.starts_at).toLocaleString()}{e.location ? ` · ${e.location}` : ""}</div>
-          </div>
-        </Link>
-      ))}
+    <div className="space-y-8">
+      {upcoming.length > 0 && (
+        <div>
+          <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">UPCOMING</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{upcoming.map(renderCard)}</div>
+        </div>
+      )}
+      {past.length > 0 && (
+        <div>
+          <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">PAST</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{past.map(renderCard)}</div>
+        </div>
+      )}
     </div>
   );
 }
