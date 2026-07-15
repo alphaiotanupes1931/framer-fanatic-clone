@@ -82,7 +82,7 @@ function Dashboard() {
   const { data: posts = [], isLoading: loadingPosts } = useQuery({
     queryKey: ["home-posts"],
     queryFn: () => Post.list("-created_at", 50),
-    staleTime: 0,
+    staleTime: 60_000,
   });
 
   const { data: stories = [], isLoading: loadingStories } = useQuery({
@@ -101,8 +101,7 @@ function Dashboard() {
     queryKey: ["follows", currentUser?.id],
     queryFn: () => Follow.listMine(currentUser!.id),
     enabled: !!currentUser?.id,
-    staleTime: 0,
-    refetchOnMount: "always",
+    staleTime: 300_000,
   });
 
   const handleDeletePost = async (postId: string) => {

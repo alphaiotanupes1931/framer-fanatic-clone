@@ -136,7 +136,7 @@ function SearchPage() {
                   {orgs.slice(0, tab === "All" ? 6 : 24).map((o) => (
                     <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
-                        {o.avatar_url && <img src={o.avatar_url} alt="" className="h-full w-full object-cover" />}
+                        {o.avatar_url && <img src={o.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{o.name}</div>
@@ -173,7 +173,7 @@ function SearchPage() {
                   {posts.slice(0, tab === "All" ? 4 : 24).map((p) => (
                     <div key={p.id} className="rounded-xl border border-border bg-card p-4">
                       {p.content && <p className="text-sm text-foreground line-clamp-3">{p.content}</p>}
-                      {p.image_url && <img src={p.image_url} alt="" className="mt-2 max-h-48 rounded-lg object-cover" />}
+                      {p.image_url && <img src={p.image_url} alt="" loading="lazy" decoding="async" className="mt-2 max-h-48 rounded-lg object-cover" />}
                       <div className="mt-2 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
                     </div>
                   ))}
