@@ -437,7 +437,7 @@ function OrgProfile() {
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
           {tab === "Artists" && <MembersTab orgId={org.id} />}
-          {tab === "Support" && <SupportTab org={org} />}
+          {tab === "Support" && <SupportTab org={org} canManage={canManage} />}
           {tab === "Menu" && (
             <div className="space-y-10">
               <section>
@@ -711,8 +711,8 @@ function MembersTab({ orgId }: { orgId: string }) {
   );
 }
 
-function SupportTab({ org }: { org: Org }) {
-  return <SupportTabImpl org={org} />;
+function SupportTab({ org, canManage }: { org: Org; canManage: boolean }) {
+  return <SupportTabImpl org={org} canManage={canManage} />;
 }
 
 function ArtsOrgAboutTab({ org, canManage, onChange }: { org: Org; canManage: boolean; onChange: (o: Org) => void }) {
