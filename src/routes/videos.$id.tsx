@@ -127,8 +127,8 @@ function RelatedCard({ v }: { v: Video }) {
   const info = parseEmbed(v.video_url || "");
   const poster = v.thumbnail_url || info.poster;
   return (
-    <Link to="/videos/$id" params={{ id: v.id }} className="group flex gap-3">
-      <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-900">
+    <Link to="/videos/$id" params={{ id: v.id }} className="group block">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900">
         {poster ? (
           <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : info.kind === "file" ? (
@@ -137,7 +137,7 @@ function RelatedCard({ v }: { v: Video }) {
           <div className="absolute inset-0 flex items-center justify-center text-white/60"><Play className="h-6 w-6" /></div>
         )}
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="mt-2 min-w-0">
         <div className="line-clamp-2 text-sm font-semibold text-neutral-900 group-hover:text-orange-600">{v.title}</div>
         <div className="mt-1 truncate text-xs text-neutral-500">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
         <div className="text-xs text-neutral-400">{new Date(v.created_at).toLocaleDateString()}</div>
