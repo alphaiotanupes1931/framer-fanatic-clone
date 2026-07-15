@@ -167,33 +167,32 @@ function NotificationsPage() {
             {items.map((n) => {
               const Icon = iconFor(n.type);
               const name = n.actor?.display_name || n.actor?.username || "Someone";
-              const actorLink = n.actor?.username ? `/u/${n.actor.username}` : undefined;
-              const AvatarWrap = actorLink ? ({ children }: { children: ReactNode }) => (
-                <Link
-                  to={actorLink}
-                  onClick={(e) => e.stopPropagation()}
-                  className="relative flex-shrink-0 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#d4580a]"
-                >
-                  {children}
-                </Link>
-              ) : ({ children }: { children: ReactNode }) => <div className="relative flex-shrink-0">{children}</div>;
               return (
                 <li key={n.id}>
                   <button
                     onClick={() => onClick(n)}
                     className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/60 ${!n.is_read ? "bg-[#d4580a]/5" : ""}`}
                   >
-                    <AvatarWrap>
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={n.actor?.avatar_url ?? undefined} />
-                        <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>
-                          {name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card" style={{ backgroundColor: "#d4580a" }}>
-                        <Icon className="h-3 w-3 text-white" />
-                      </span>
-                    </AvatarWrap>
+                    {n.actor?.username ? (
+                      <ActorAvatarLink
+                        username={n.actor.username}
+                        avatarUrl={n.actor.avatar_url}
+                        fallback={name}
+                        typeIcon={Icon}
+                      />
+                    ) : (
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={n.actor?.avatar_url ?? undefined} />
+                          <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>
+                            {name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card" style={{ backgroundColor: "#d4580a" }}>
+                          <Icon className="h-3 w-3 text-white" />
+                        </span>
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-foreground">
                         <span className="font-semibold">{name}</span>{" "}
