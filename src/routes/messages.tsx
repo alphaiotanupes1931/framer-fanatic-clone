@@ -654,7 +654,6 @@ function MessagesPage() {
                     </div>
                   )}
                 </div>
-              </div>
                 <button
                   type="button"
                   onClick={() => setMsgSearchOpen((v) => !v)}
