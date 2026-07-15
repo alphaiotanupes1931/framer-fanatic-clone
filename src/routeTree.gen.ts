@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VideosRouteImport } from './routes/videos'
 import { Route as TicketingRouteImport } from './routes/ticketing'
 import { Route as TicketSalesDashboardRouteImport } from './routes/ticket-sales-dashboard'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -53,6 +52,7 @@ import { Route as ArtsOrgsRouteImport } from './routes/arts-orgs'
 import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VideosIndexRouteImport } from './routes/videos.index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VideosIdRouteImport } from './routes/videos.$id'
@@ -67,11 +67,6 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
-const VideosRoute = VideosRouteImport.update({
-  id: '/videos',
-  path: '/videos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TicketingRoute = TicketingRouteImport.update({
   id: '/ticketing',
   path: '/ticketing',
@@ -288,6 +283,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VideosIndexRoute = VideosIndexRouteImport.update({
+  id: '/videos/',
+  path: '/videos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -299,9 +299,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const VideosIdRoute = VideosIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => VideosRoute,
+  id: '/videos/$id',
+  path: '/videos/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
@@ -398,7 +398,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
-  '/videos': typeof VideosRouteWithChildren
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -411,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -457,7 +457,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
-  '/videos': typeof VideosRouteWithChildren
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -470,6 +469,7 @@ export interface FileRoutesByTo {
   '/videos/$id': typeof VideosIdRoute
   '/admin': typeof AdminIndexRoute
   '/events': typeof EventsIndexRoute
+  '/videos': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -517,7 +517,6 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
-  '/videos': typeof VideosRouteWithChildren
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -530,6 +529,7 @@ export interface FileRoutesById {
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -578,7 +578,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
-    | '/videos'
     | '/admin/content'
     | '/admin/login'
     | '/events/$eventId'
@@ -591,6 +590,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin/'
     | '/events/'
+    | '/videos/'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -637,7 +637,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
-    | '/videos'
     | '/admin/content'
     | '/admin/login'
     | '/events/$eventId'
@@ -650,6 +649,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin'
     | '/events'
+    | '/videos'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
@@ -696,7 +696,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
-    | '/videos'
     | '/admin/content'
     | '/admin/login'
     | '/events/$eventId'
@@ -709,6 +708,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin/'
     | '/events/'
+    | '/videos/'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -756,7 +756,6 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
   TicketingRoute: typeof TicketingRoute
-  VideosRoute: typeof VideosRouteWithChildren
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
@@ -764,20 +763,15 @@ export interface RootRouteChildren {
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   UUsernameRoute: typeof UUsernameRoute
+  VideosIdRoute: typeof VideosIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
+  VideosIndexRoute: typeof VideosIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/videos': {
-      id: '/videos'
-      path: '/videos'
-      fullPath: '/videos'
-      preLoaderRoute: typeof VideosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/ticketing': {
       id: '/ticketing'
       path: '/ticketing'
@@ -1079,6 +1073,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/videos/': {
+      id: '/videos/'
+      path: '/videos'
+      fullPath: '/videos/'
+      preLoaderRoute: typeof VideosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/': {
       id: '/events/'
       path: '/events'
@@ -1095,10 +1096,10 @@ declare module '@tanstack/react-router' {
     }
     '/videos/$id': {
       id: '/videos/$id'
-      path: '/$id'
+      path: '/videos/$id'
       fullPath: '/videos/$id'
       preLoaderRoute: typeof VideosIdRouteImport
-      parentRoute: typeof VideosRoute
+      parentRoute: typeof rootRouteImport
     }
     '/u/$username': {
       id: '/u/$username'
@@ -1196,17 +1197,6 @@ const StoriesRouteChildren: StoriesRouteChildren = {
 const StoriesRouteWithChildren =
   StoriesRoute._addFileChildren(StoriesRouteChildren)
 
-interface VideosRouteChildren {
-  VideosIdRoute: typeof VideosIdRoute
-}
-
-const VideosRouteChildren: VideosRouteChildren = {
-  VideosIdRoute: VideosIdRoute,
-}
-
-const VideosRouteWithChildren =
-  VideosRoute._addFileChildren(VideosRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1251,7 +1241,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
   TicketingRoute: TicketingRoute,
-  VideosRoute: VideosRouteWithChildren,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
   EventsEventIdRoute: EventsEventIdRoute,
@@ -1259,8 +1248,10 @@ const rootRouteChildren: RootRouteChildren = {
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   UUsernameRoute: UUsernameRoute,
+  VideosIdRoute: VideosIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
+  VideosIndexRoute: VideosIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
