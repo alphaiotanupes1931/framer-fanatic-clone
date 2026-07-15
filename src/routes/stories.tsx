@@ -48,6 +48,14 @@ const STORY_FORMATS = [
 ] as const;
 const FORMATS = ["All","poetry","blog","essay","resource"];
 const TABS = ["Discover","Trending","Featured"] as const;
+const SORTS = [
+  { key: "newest", label: "Newest" },
+  { key: "oldest", label: "Oldest" },
+  { key: "most_liked", label: "Most liked" },
+  { key: "most_commented", label: "Most commented" },
+  { key: "quickest_read", label: "Quickest read" },
+] as const;
+type SortKey = (typeof SORTS)[number]["key"];
 
 
 type Comment = {
@@ -200,6 +208,7 @@ function StoriesSignedIn() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [sort, setSort] = useState<SortKey>("newest");
   const PAGE = 12;
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -219,8 +228,17 @@ function StoriesSignedIn() {
 
   const buildQuery = (from: number, to: number) => {
     let q = supabase.from("stories").select("*").range(from, to);
-    if (tab === "Trending") q = q.order("likes_count", { ascending: false });
-    else q = q.order("created_at", { ascending: false });
+    if (tab === "Trending") {
+      q = q.order("likes_count", { ascending: false });
+    } else {
+      switch (sort) {
+        case "oldest": q = q.order("created_at", { ascending: true }); break;
+        case "most_liked": q = q.order("likes_count", { ascending: false }); break;
+        case "most_commented": q = q.order("comments_count", { ascending: false }); break;
+        case "quickest_read": q = q.order("read_minutes", { ascending: true, nullsFirst: false }); break;
+        default: q = q.order("created_at", { ascending: false });
+      }
+    }
     if (filter !== "All") q = q.eq("format", filter);
     if (storyFormat !== "All Formats") q = q.ilike("format", storyFormat);
     if (tab === "Featured") q = q.eq("featured", true);
@@ -264,7 +282,7 @@ function StoriesSignedIn() {
     setLoadingMore(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter, tab, storyFormat, me?.id]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter, tab, storyFormat, sort, me?.id]);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -375,13 +393,24 @@ function StoriesSignedIn() {
           ))}
         </div>
 
-        <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-2">
             {FORMATS.map((f) => (
               <button key={f} onClick={() => setFilter(f)}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold capitalize transition ${filter===f ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}>{f}</button>
             ))}
           </div>
+          <label className="flex items-center gap-2 text-xs font-semibold text-neutral-500">
+            <span className="uppercase tracking-wider">Sort</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              disabled={tab === "Trending"}
+              className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 disabled:opacity-50"
+            >
+              {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+            </select>
+          </label>
         </div>
 
         {loading ? (
@@ -422,6 +451,7 @@ function StoriesSignedIn() {
               {stories.map((s) => (
                 <StoryCard
                   key={s.id}
+                  currentUserId={me?.id}
                   story={{
                     id: s.id,
                     title: s.title,
