@@ -173,7 +173,12 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {isMine && onDelete && (
-              <DropdownMenuItem className="text-destructive" onSelect={() => onDelete(post.id)}>
+              <DropdownMenuItem
+                className="text-destructive"
+                onSelect={() => {
+                  if (window.confirm("Delete this post? This can't be undone.")) onDelete(post.id);
+                }}
+              >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </DropdownMenuItem>
             )}
