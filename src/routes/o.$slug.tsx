@@ -675,6 +675,7 @@ function MembersTab({ orgId }: { orgId: string }) {
 }
 
 function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
