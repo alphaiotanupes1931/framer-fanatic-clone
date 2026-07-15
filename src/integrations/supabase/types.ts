@@ -1291,6 +1291,7 @@ export type Database = {
       }
       videos: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           featured: boolean
@@ -1301,6 +1302,7 @@ export type Database = {
           video_url: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           featured?: boolean
@@ -1311,6 +1313,7 @@ export type Database = {
           video_url: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           featured?: boolean
