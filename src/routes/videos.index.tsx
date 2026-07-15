@@ -7,6 +7,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
 import { Play, Search, Star, Plus, X, Upload } from "lucide-react";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
+import { useUserRole } from "@/hooks/use-user-role";
 
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
@@ -177,7 +178,7 @@ function VideosSignedIn() {
           <section>
             <h2 className="mb-3 flex items-center gap-2 text-sm font-bold"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> Featured Videos</h2>
             <div className="grid gap-5 sm:grid-cols-2">
-              {featured.map((v) => <VideoCard key={v.id} v={v} />)}
+              {featured.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
             </div>
           </section>
         )}
@@ -199,7 +200,7 @@ function VideosSignedIn() {
             />
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {rest.map((v) => <VideoCard key={v.id} v={v} />)}
+              {rest.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
             </div>
           )}
         </section>
@@ -237,7 +238,8 @@ function VideosSignedIn() {
   );
 }
 
-function VideoCard({ v }: { v: Video }) {
+function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
+  const { isAdmin } = useUserRole();
   const url = v.video_url || "";
   const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
@@ -259,6 +261,21 @@ function VideoCard({ v }: { v: Video }) {
           />
         ) : null}
         {v.featured && <div className="absolute left-3 top-3 rounded-md bg-yellow-400 px-2 py-1 text-[10px] font-bold text-yellow-900">★ Featured</div>}
+        {isAdmin && (
+          <button
+            onClick={async (e) => {
+              e.preventDefault(); e.stopPropagation();
+              const { error } = await supabase.from("videos").update({ featured: !v.featured } as any).eq("id", v.id);
+              if (error) { toast.error(error.message); return; }
+              toast.success(v.featured ? "Removed from featured" : "Marked as featured");
+              onChanged?.();
+            }}
+            className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${v.featured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}
+          >
+            <Star className={`h-3.5 w-3.5 ${v.featured ? "" : "fill-yellow-900"}`} />
+            {v.featured ? "Unfeature" : "Feature"}
+          </button>
+        )}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-full bg-white/30 p-4 backdrop-blur group-hover:bg-white/50"><Play className="h-6 w-6 fill-white text-white" /></div>
         </div>
