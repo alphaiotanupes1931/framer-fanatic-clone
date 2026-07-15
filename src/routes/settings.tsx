@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import {
-  User, Shield, Moon, Bell, Lock, CreditCard, LogOut, Check, HelpCircle,
+  User, Shield, Moon, Sun, Bell, Lock, CreditCard, LogOut, Check, HelpCircle,
   ChevronDown, ExternalLink, CheckCircle2, AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -220,6 +220,7 @@ const THEME_META: Record<Theme, { label: string; desc: string; swatch: string; b
 
 function AppearanceSection() {
   const { theme, setTheme } = useTheme();
+  const isDark = ["dark", "midnight", "forest", "ocean", "mono"].includes(theme);
   return (
     <div className="space-y-6">
       <div>
@@ -228,6 +229,35 @@ function AppearanceSection() {
           Pick how Planet Baltimore looks on this device. Themes affect the whole app except the public landing page. Current theme: <span className="font-medium text-foreground capitalize">{THEME_META[theme]?.label || theme}</span>.
         </p>
       </div>
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-foreground">Mode</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setTheme("light")}
+            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${!isDark ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}
+          >
+            <Sun className="h-5 w-5 text-orange" />
+            <div>
+              <div className="text-sm font-semibold text-foreground">Light Mode</div>
+              <div className="text-xs text-muted-foreground">Bright surfaces</div>
+            </div>
+            {!isDark && <Check className="ml-auto h-4 w-4 text-orange" />}
+          </button>
+          <button
+            onClick={() => setTheme("dark")}
+            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${isDark ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}
+          >
+            <Moon className="h-5 w-5 text-orange" />
+            <div>
+              <div className="text-sm font-semibold text-foreground">Dark Mode</div>
+              <div className="text-xs text-muted-foreground">Low-light friendly</div>
+            </div>
+            {isDark && <Check className="ml-auto h-4 w-4 text-orange" />}
+          </button>
+        </div>
+      </div>
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-foreground">Themes</h3>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {THEMES.map((id) => {
           const meta = THEME_META[id];
@@ -256,6 +286,7 @@ function AppearanceSection() {
             </button>
           );
         })}
+      </div>
       </div>
     </div>
   );
