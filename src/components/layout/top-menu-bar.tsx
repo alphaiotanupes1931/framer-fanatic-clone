@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
-  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, Sparkles, Plane,
+  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, Sparkles, Plane, Bookmark,
 } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ const navItems: Item[] = [
 const utilItems: Item[] = [
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: Bell, label: "Notifications", to: "/notifications" },
+  { icon: Bookmark, label: "Saved", to: "/saved" },
   { icon: User, label: "Profile", to: "/profile" },
 ];
 
