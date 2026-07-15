@@ -2,7 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
-import { Play, ChevronLeft } from "lucide-react";
+import { Play, X } from "lucide-react";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -54,56 +54,63 @@ function VideoDetail() {
   }, [id]);
 
   return (
-    <AppLayout>
-      <div className="mb-4">
-        <Link to="/videos" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900">
-          <ChevronLeft className="h-4 w-4" /> Back to Videos
-        </Link>
-      </div>
-      {loading ? (
-        <div className="text-sm text-neutral-500">Loading…</div>
-      ) : !video ? (
-        <div className="text-sm text-neutral-500">Video not found.</div>
-      ) : (
-        <div className="space-y-8">
-          <div className="min-w-0">
-            <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
-            <h1 className="mt-4 text-xl font-bold sm:text-2xl">{video.title}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-neutral-600">
-              {video.author?.username ? (
-                <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold text-neutral-800 hover:text-orange-600">
-                  {video.author.avatar_url ? (
-                    <img src={video.author.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-neutral-200" />
-                  )}
-                  {video.author.display_name || video.author.username}
-                </Link>
-              ) : (
-                <span className="font-semibold">{video.author?.display_name || "Anonymous"}</span>
-              )}
-              <span>·</span>
-              <span>{new Date(video.created_at).toLocaleDateString()}</span>
-              {video.category && (
-                <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700">{video.category}</span>
-              )}
-            </div>
-            {video.description && (
-              <div className="mt-4 rounded-xl bg-neutral-50 p-4 text-sm leading-relaxed text-neutral-700 whitespace-pre-wrap">
-                {video.description}
-              </div>
-            )}
+    <div className="fixed inset-0 z-50 bg-neutral-950 text-neutral-100 overflow-y-auto">
+      <div className="mx-auto flex max-w-[1400px] flex-col px-4 py-4 sm:px-6">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-semibold">Planet Baltimore</span>
+            {!loading && video && <><span className="text-neutral-500">·</span><span className="text-neutral-400">{related.length + 1} videos</span></>}
           </div>
-          <section className="min-w-0">
-            <h2 className="mb-4 text-lg font-bold text-neutral-900">Up next</h2>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {related.map((r) => <RelatedCard key={r.id} v={r} />)}
-              {related.length === 0 && <div className="text-sm text-neutral-500">No more videos yet.</div>}
-            </div>
-          </section>
+          <Link to="/videos" className="rounded-full p-2 text-neutral-300 hover:bg-neutral-800 hover:text-white" aria-label="Close">
+            <X className="h-5 w-5" />
+          </Link>
         </div>
-      )}
-    </AppLayout>
+        {loading ? (
+          <div className="text-sm text-neutral-400">Loading…</div>
+        ) : !video ? (
+          <div className="text-sm text-neutral-400">Video not found.</div>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="min-w-0">
+              <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
+              <h1 className="mt-4 text-xl font-bold sm:text-2xl">{video.title}</h1>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-300">
+                {video.author?.username ? (
+                  <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-400">
+                    {video.author.avatar_url ? (
+                      <img src={video.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+                    ) : (
+                      <div className="h-9 w-9 rounded-full bg-neutral-700" />
+                    )}
+                    <span>
+                      <div>{video.author.display_name || video.author.username}</div>
+                      <div className="text-xs font-normal text-neutral-400">{new Date(video.created_at).toLocaleDateString()}</div>
+                    </span>
+                  </Link>
+                ) : (
+                  <span className="font-semibold">{video.author?.display_name || "Anonymous"}</span>
+                )}
+                {video.category && (
+                  <span className="ml-auto rounded-full bg-neutral-800 px-3 py-1 text-xs font-semibold text-neutral-200">{video.category}</span>
+                )}
+              </div>
+              {video.description && (
+                <div className="mt-4 rounded-xl bg-neutral-900 p-4 text-sm leading-relaxed text-neutral-200 whitespace-pre-wrap">
+                  {video.description}
+                </div>
+              )}
+            </div>
+            <aside className="min-w-0">
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-400">Up next</h2>
+              <div className="space-y-3">
+                {related.map((r) => <RelatedCard key={r.id} v={r} />)}
+                {related.length === 0 && <div className="text-sm text-neutral-500">No more videos yet.</div>}
+              </div>
+            </aside>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -127,8 +134,8 @@ function RelatedCard({ v }: { v: Video }) {
   const info = parseEmbed(v.video_url || "");
   const poster = v.thumbnail_url || info.poster;
   return (
-    <Link to="/videos/$id" params={{ id: v.id }} className="group block">
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900">
+    <Link to="/videos/$id" params={{ id: v.id }} className="group flex gap-3">
+      <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-800">
         {poster ? (
           <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : info.kind === "file" ? (
@@ -137,10 +144,9 @@ function RelatedCard({ v }: { v: Video }) {
           <div className="absolute inset-0 flex items-center justify-center text-white/60"><Play className="h-6 w-6" /></div>
         )}
       </div>
-      <div className="mt-2 min-w-0">
-        <div className="line-clamp-2 text-sm font-semibold text-neutral-900 group-hover:text-orange-600">{v.title}</div>
-        <div className="mt-1 truncate text-xs text-neutral-500">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
-        <div className="text-xs text-neutral-400">{new Date(v.created_at).toLocaleDateString()}</div>
+      <div className="min-w-0 flex-1">
+        <div className="line-clamp-2 text-sm font-semibold text-neutral-100 group-hover:text-orange-400">{v.title}</div>
+        <div className="mt-1 truncate text-xs text-neutral-400">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
       </div>
     </Link>
   );
