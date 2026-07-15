@@ -437,7 +437,7 @@ function OrgProfile() {
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
           {tab === "Artists" && <MembersTab orgId={org.id} />}
-          {tab === "Support" && <SupportTab org={org} />}
+          {tab === "Support" && <SupportTab org={org} canManage={canManage} />}
           {tab === "Menu" && (
             <div className="space-y-10">
               <section>
@@ -711,8 +711,8 @@ function MembersTab({ orgId }: { orgId: string }) {
   );
 }
 
-function SupportTab({ org }: { org: Org }) {
-  return <SupportTabImpl org={org} />;
+function SupportTab({ org, canManage }: { org: Org; canManage: boolean }) {
+  return <SupportTabImpl org={org} canManage={canManage} />;
 }
 
 function ArtsOrgAboutTab({ org, canManage, onChange }: { org: Org; canManage: boolean; onChange: (o: Org) => void }) {
@@ -847,22 +847,92 @@ function composeArtsBio(mission: string, description: string, programming: strin
   return parts.join("\n\n");
 }
 
-function SupportTabImpl({ org }: { org: Org }) {
+type SupportTier = {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  price_cents: number | null;
+  interval: string;
+  image_url: string | null;
+  join_url: string | null;
+  sort_order: number;
+};
+
+function fmtTierPrice(cents: number | null, interval: string) {
+  if (cents == null) return "Any amount";
+  const amt = `$${(cents / 100).toFixed(2).replace(/\.00$/, "")}`;
+  if (interval === "yearly") return `${amt}/yr`;
+  if (interval === "monthly") return `${amt}/mo`;
+  return amt;
+}
+
+function SupportTabImpl({ org, canManage }: { org: Org; canManage: boolean }) {
+  const [tiers, setTiers] = useState<SupportTier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<SupportTier | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [donateInterval, setDonateInterval] = useState<"one_time" | "yearly">("one_time");
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("organization_support_tiers")
+      .select("*")
+      .eq("organization_id", org.id)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    setTiers((data ?? []) as SupportTier[]);
+    setLoading(false);
+  };
+  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [org.id]);
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this tier?")) return;
+    const { error } = await supabase.from("organization_support_tiers").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    setTiers((xs) => xs.filter((x) => x.id !== id));
+  };
+
+  const donateHref = org.website
+    ? org.website
+    : org.email
+      ? `mailto:${org.email}?subject=${encodeURIComponent(`Donation to ${org.name}`)}`
+      : null;
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-        <div className="mb-2 flex items-center gap-2 text-lg font-bold text-neutral-900">
+    <div className="space-y-5">
+      {/* Donate hero */}
+      <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-orange-50 to-white p-5">
+        <div className="flex items-center gap-2 text-lg font-bold text-neutral-900">
           <Heart className="h-5 w-5 text-[#d4580a]" /> Support {org.name}
         </div>
-        <p className="text-sm text-neutral-600">
+        <p className="mt-1 text-sm text-neutral-600">
           Your contribution helps sustain programming, artists, and community impact.
         </p>
+        <div className="mt-4 inline-flex rounded-full bg-neutral-100 p-1 text-xs font-semibold">
+          <button
+            onClick={() => setDonateInterval("one_time")}
+            className={`rounded-full px-3 py-1.5 ${donateInterval === "one_time" ? "bg-white text-neutral-900 shadow" : "text-neutral-500"}`}
+          >One-time</button>
+          <button
+            onClick={() => setDonateInterval("yearly")}
+            className={`rounded-full px-3 py-1.5 ${donateInterval === "yearly" ? "bg-white text-neutral-900 shadow" : "text-neutral-500"}`}
+          >Yearly</button>
+        </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {org.website && (
-            <a href={org.website} target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-              <Globe className="h-4 w-4" /> Donate / Website
+          {donateHref ? (
+            <a
+              href={donateHref}
+              target={donateHref.startsWith("http") ? "_blank" : undefined}
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-5 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+            >
+              <Heart className="h-4 w-4" />
+              Donate {donateInterval === "yearly" ? "yearly" : "one-time"}
             </a>
+          ) : (
+            <div className="text-xs text-neutral-500">Donation link not set yet.</div>
           )}
           {org.email && (
             <a href={`mailto:${org.email}`}
@@ -872,16 +942,181 @@ function SupportTabImpl({ org }: { org: Org }) {
           )}
         </div>
       </div>
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-        <div className="mb-2 flex items-center gap-2 text-lg font-bold text-neutral-900">
-          <Users className="h-5 w-5 text-[#d4580a]" /> Other ways to help
+
+      {/* Tiers */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-bold text-neutral-900">Membership & Sponsorship Tiers</h3>
+        {canManage && !adding && (
+          <button
+            onClick={() => setAdding(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add tier
+          </button>
+        )}
+      </div>
+
+      {adding && (
+        <TierForm
+          orgId={org.id}
+          onCancel={() => setAdding(false)}
+          onSaved={(t) => { setTiers((xs) => [...xs, t]); setAdding(false); }}
+        />
+      )}
+
+      {loading ? (
+        <div className="rounded-2xl border border-dashed border-neutral-200 py-10 text-center text-sm text-neutral-500">Loading…</div>
+      ) : tiers.length === 0 && !adding ? (
+        <div className="rounded-2xl border border-dashed border-neutral-200 py-10 text-center text-sm text-neutral-500">
+          {canManage ? "No tiers yet. Add your first one above." : "No tiers listed yet."}
         </div>
-        <ul className="space-y-2 text-sm text-neutral-700">
-          <li>· Volunteer at upcoming events</li>
-          <li>· Share their work with your network</li>
-          <li>· Attend and bring a friend</li>
-          <li>· Sponsor a program or exhibition</li>
-        </ul>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {tiers.map((t) => editing?.id === t.id ? (
+            <TierForm
+              key={t.id}
+              orgId={org.id}
+              initial={t}
+              onCancel={() => setEditing(null)}
+              onSaved={(saved) => { setTiers((xs) => xs.map((x) => x.id === saved.id ? saved : x)); setEditing(null); }}
+            />
+          ) : (
+            <div key={t.id} className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+              {t.image_url && (
+                <img src={t.image_url} alt={t.name} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+              )}
+              <div className="flex flex-1 flex-col p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="text-base font-bold text-neutral-900">{t.name}</div>
+                  <div className="whitespace-nowrap text-sm font-bold text-[#d4580a]">{fmtTierPrice(t.price_cents, t.interval)}</div>
+                </div>
+                {t.description && (
+                  <p className="mt-1.5 whitespace-pre-wrap text-sm text-neutral-600">{t.description}</p>
+                )}
+                <div className="mt-3 flex items-center gap-2">
+                  <a
+                    href={t.join_url || donateHref || "#"}
+                    target={(t.join_url || donateHref || "").startsWith("http") ? "_blank" : undefined}
+                    rel="noreferrer"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#d4580a] px-3 py-2 text-xs font-semibold text-white hover:bg-orange-700"
+                  >
+                    <Heart className="h-3.5 w-3.5" />
+                    {t.interval === "yearly" ? "Join yearly" : t.interval === "monthly" ? "Join monthly" : "Donate"}
+                  </a>
+                  {canManage && (
+                    <>
+                      <button onClick={() => setEditing(t)} className="rounded-full p-2 text-neutral-500 hover:bg-neutral-100"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => remove(t.id)} className="rounded-full p-2 text-neutral-500 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TierForm({ orgId, initial, onCancel, onSaved }: {
+  orgId: string;
+  initial?: SupportTier;
+  onCancel: () => void;
+  onSaved: (t: SupportTier) => void;
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [priceStr, setPriceStr] = useState(initial?.price_cents != null ? String(initial.price_cents / 100) : "");
+  const [interval, setInterval] = useState<string>(initial?.interval ?? "one_time");
+  const [joinUrl, setJoinUrl] = useState(initial?.join_url ?? "");
+  const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const upload = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
+    setUploading(true);
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `support-tiers/${orgId}/${Date.now()}-${safe}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { setUploading(false); toast.error(upErr.message); return; }
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    setImageUrl(data.publicUrl);
+    setUploading(false);
+  };
+
+  const save = async () => {
+    if (!name.trim()) { toast.error("Name is required"); return; }
+    setSaving(true);
+    const priceCents = priceStr.trim() ? Math.round(parseFloat(priceStr) * 100) : null;
+    const payload = {
+      organization_id: orgId,
+      name: name.trim(),
+      description: description.trim() || null,
+      price_cents: Number.isFinite(priceCents as number) ? priceCents : null,
+      interval,
+      join_url: joinUrl.trim() || null,
+      image_url: imageUrl || null,
+    };
+    if (initial) {
+      const { data, error } = await supabase.from("organization_support_tiers").update(payload).eq("id", initial.id).select("*").single();
+      setSaving(false);
+      if (error) return toast.error(error.message);
+      onSaved(data as SupportTier);
+    } else {
+      const { data, error } = await supabase.from("organization_support_tiers").insert(payload).select("*").single();
+      setSaving(false);
+      if (error) return toast.error(error.message);
+      onSaved(data as SupportTier);
+    }
+  };
+
+  const input = "w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none";
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+      {/* Image uploader */}
+      <div>
+        {imageUrl ? (
+          <div className="relative overflow-hidden rounded-xl border border-neutral-200">
+            <img src={imageUrl} alt="" className="aspect-[16/9] w-full object-cover" />
+            <button onClick={() => setImageUrl("")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-red-600 shadow"><Trash2 className="h-3.5 w-3.5" /></button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="flex aspect-[16/9] w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-white text-sm text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
+          >
+            <Camera className="h-4 w-4" /> {uploading ? "Uploading…" : "Upload tier image"}
+          </button>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); }} />
+      </div>
+
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tier name (e.g. Gold Sponsor)" className={input} />
+      <div className="grid gap-2 sm:grid-cols-[1fr_140px]">
+        <input value={priceStr} onChange={(e) => setPriceStr(e.target.value)} placeholder="Price in USD (leave blank for any amount)" className={input} />
+        <select value={interval} onChange={(e) => setInterval(e.target.value)} className={input}>
+          <option value="one_time">One-time</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        rows={4}
+        placeholder="Describe the perks. What does the supporter get?"
+        className={input}
+      />
+      <input value={joinUrl} onChange={(e) => setJoinUrl(e.target.value)} placeholder="Join / Donate URL (optional)" className={input} />
+      <div className="flex justify-end gap-2">
+        <button onClick={onCancel} className="rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700">Cancel</button>
+        <button onClick={save} disabled={saving} className="rounded-full bg-[#d4580a] px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">{saving ? "Saving…" : "Save"}</button>
       </div>
     </div>
   );

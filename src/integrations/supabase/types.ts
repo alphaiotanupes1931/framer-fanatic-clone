@@ -687,6 +687,56 @@ export type Database = {
           },
         ]
       }
+      organization_support_tiers: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          interval: string
+          join_url: string | null
+          name: string
+          organization_id: string
+          price_cents: number | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          interval?: string
+          join_url?: string | null
+          name: string
+          organization_id: string
+          price_cents?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          interval?: string
+          join_url?: string | null
+          name?: string
+          organization_id?: string
+          price_cents?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_support_tiers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
