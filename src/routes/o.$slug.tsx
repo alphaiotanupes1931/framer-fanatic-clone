@@ -393,7 +393,10 @@ function OrgProfile() {
         </div>
 
         <div className="py-8">
-          {tab === "About" && <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
+          {tab === "About" && (isArtsOrg
+            ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
+            : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />
+          )}
           {tab === "Events" && <EventsTab orgId={org.id} canManage={canManage} />}
           {tab === "Opportunities" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
           {tab === "Press" && <PressTab org={org} canManage={canManage} />}
