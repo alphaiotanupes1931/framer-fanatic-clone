@@ -985,11 +985,14 @@ function ArtistEventsTab({ userId }: { userId: string }) {
 }
 
 function MyTicketsTab() {
-  const [tickets, setTickets] = useState<Array<{
+function MyTicketsTab() {
+  type TicketRow = {
     id: string; status: string; buyer_total_cents: number; event_id: string;
-    events: { title: string; starts_at: string; location: string | null } | null;
-  }>>([]);
+    events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null;
+  };
+  const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<"upcoming" | "past">("upcoming");
   useEffect(() => {
     (async () => {
       const { data: sess } = await supabase.auth.getSession();
@@ -997,33 +1000,74 @@ function MyTicketsTab() {
       if (!uid) { setLoading(false); return; }
       const { data } = await supabase
         .from("tickets")
-        .select("id, status, buyer_total_cents, event_id, events(title, starts_at, location)")
+        .select("id, status, buyer_total_cents, event_id, events(title, starts_at, location, venue_name)")
         .eq("buyer_id", uid)
+        .eq("status", "paid")
         .order("created_at", { ascending: false });
-      setTickets((data ?? []) as never);
+      setTickets((data ?? []) as TicketRow[]);
       setLoading(false);
     })();
   }, []);
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading tickets…</div>;
-  if (tickets.length === 0) return <div className="py-12 text-center text-muted-foreground">No tickets yet.</div>;
+  if (tickets.length === 0) return <div className="py-12 text-center text-muted-foreground">You haven't bought any tickets yet.</div>;
+  const now = Date.now();
+  const shown = tickets.filter((t) => {
+    const at = t.events ? new Date(t.events.starts_at).getTime() : 0;
+    return view === "upcoming" ? at >= now : at < now;
+  });
   return (
-    <div className="space-y-3">
-      {tickets.map((t) => (
-        <div key={t.id} className="flex items-center justify-between rounded-xl border border-border p-4">
+    <div className="space-y-4">
+      <div className="inline-flex rounded-full bg-neutral-100 p-1 text-sm">
+        <button onClick={() => setView("upcoming")} className={`rounded-full px-4 py-1.5 font-semibold ${view === "upcoming" ? "bg-white shadow" : "text-neutral-500"}`}>Upcoming</button>
+        <button onClick={() => setView("past")} className={`rounded-full px-4 py-1.5 font-semibold ${view === "past" ? "bg-white shadow" : "text-neutral-500"}`}>Past</button>
+      </div>
+      {shown.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-neutral-200 py-10 text-center text-sm text-neutral-500">No {view} tickets</div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {shown.map((t) => <TicketStub key={t.id} t={t} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TicketStub({ t }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null } }) {
+  const when = t.events ? new Date(t.events.starts_at) : null;
+  return (
+    <Link
+      to="/tickets/$ticketId"
+      params={{ ticketId: t.id }}
+      className="group relative flex overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-lg transition hover:scale-[1.01] hover:shadow-xl"
+    >
+      <div className="flex-1 p-5">
+        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300">Planet Baltimore Ticket</div>
+        <div className="mt-2 line-clamp-2 text-lg font-bold leading-tight">{t.events?.title ?? "Event"}</div>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
           <div>
-            <div className="font-semibold">{t.events?.title ?? "Event"}</div>
-            <div className="text-xs text-muted-foreground">
-              {t.events?.starts_at ? new Date(t.events.starts_at).toLocaleString() : ""}
-              {t.events?.location ? ` · ${t.events.location}` : ""}
-            </div>
+            <div className="text-white/40">Date</div>
+            <div className="font-semibold">{when?.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div>
           </div>
-          <div className="text-right">
-            <div className="font-semibold">${(t.buyer_total_cents/100).toFixed(2)}</div>
-            <div className={`text-[11px] uppercase tracking-wider ${t.status === "paid" ? "text-emerald-600" : "text-neutral-400"}`}>{t.status}</div>
+          <div>
+            <div className="text-white/40">Time</div>
+            <div className="font-semibold">{when?.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</div>
+          </div>
+          <div className="col-span-2">
+            <div className="text-white/40">Venue</div>
+            <div className="truncate font-semibold">{t.events?.venue_name ?? t.events?.location ?? "TBA"}</div>
           </div>
         </div>
-      ))}
-    </div>
+        <div className="mt-3 text-[10px] font-mono uppercase text-white/50">#{t.id.slice(0, 8)}</div>
+      </div>
+      {/* Perforation */}
+      <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900 px-4 py-5">
+        <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
+        <div className="rounded-lg bg-white p-1.5">
+          <img alt="QR" src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&margin=0&data=${encodeURIComponent(t.id)}`} className="h-[70px] w-[70px]" />
+        </div>
+        <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-white/60">Admit One</div>
+      </div>
+    </Link>
   );
 }
 
