@@ -99,6 +99,8 @@ function MessagesPage() {
   const [broadcasting, setBroadcasting] = useState(false);
   const [broadcastOpen, setBroadcastOpen] = useState(false);
   const [broadcastText, setBroadcastText] = useState("");
+  const [msgSearch, setMsgSearch] = useState("");
+  const [msgSearchOpen, setMsgSearchOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const decorate = useCallback(
@@ -271,6 +273,8 @@ function MessagesPage() {
     if (active) {
       loadMsgs(active);
       markRead(active);
+      setMsgSearch("");
+      setMsgSearchOpen(false);
     }
   }, [active, loadMsgs, markRead]);
 
@@ -651,10 +655,34 @@ function MessagesPage() {
                   )}
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setMsgSearchOpen((v) => !v)}
+                className="ml-auto rounded-full p-2 text-muted-foreground hover:bg-muted"
+                aria-label="Search in conversation"
+                title="Search in conversation"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+              </div>
+              {msgSearchOpen && (
+                <div className="border-b border-border px-4 py-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      value={msgSearch}
+                      onChange={(e) => setMsgSearch(e.target.value)}
+                      autoFocus
+                      placeholder="Search messages"
+                      className="w-full rounded-full border border-border bg-muted py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
               <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-4 sm:p-5">
-                {msgs.map((m, i) => {
+                {(msgSearch.trim() ? msgs.filter((m) => m.content.toLowerCase().includes(msgSearch.trim().toLowerCase())) : msgs).map((m, i, arr) => {
                   const mine = m.sender_id === me?.id;
-                  const prev = msgs[i - 1];
+                  const prev = arr[i - 1];
                   const showAvatar = !mine && (!prev || prev.sender_id !== m.sender_id);
                   return (
                     <div
