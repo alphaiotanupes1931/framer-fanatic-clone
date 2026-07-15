@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
+import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Heart, MessageCircle, Clock, Share2, Trash2, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ type Comment = { id: string; user_id: string; body: string; created_at: string; 
 function StoryDetail() {
   const { storyId } = Route.useParams();
   const me = useCurrentProfile();
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   const [story, setStory] = useState<Story | null>(null);
   const [author, setAuthor] = useState<Author | null>(null);
@@ -97,7 +99,7 @@ function StoryDetail() {
   };
 
   const remove = async () => {
-    if (!story || !me || story.user_id !== me.id) return;
+    if (!story || !me || (story.user_id !== me.id && !isAdmin)) return;
     if (!confirm("Delete this story?")) return;
     const { error } = await supabase.from("stories").delete().eq("id", story.id);
     if (error) return toast.error(error.message);
@@ -115,6 +117,8 @@ function StoryDetail() {
 
   const initials = (author?.display_name || author?.username || "U").slice(0, 2).toUpperCase();
   const isOwner = me && me.id === story.user_id;
+  const canDelete = isOwner || isAdmin;
+  const excerptText = story.excerpt ? story.excerpt.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() : "";
 
   const dateLabel = new Date(story.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
@@ -133,13 +137,13 @@ function StoryDetail() {
 
         <div className="mt-6 flex items-start justify-between gap-3">
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl break-words">{story.title}</h1>
-          {isOwner && (
+          {canDelete && (
             <button onClick={remove} aria-label="Delete story" className="shrink-0 rounded-full border border-border bg-card p-2 text-red-600 hover:bg-red-50">
               <Trash2 className="h-4 w-4" />
             </button>
           )}
         </div>
-        {story.excerpt && <p className="mt-2 text-lg text-muted-foreground break-words">{story.excerpt}</p>}
+        {excerptText && <p className="mt-2 text-lg text-muted-foreground break-words">{excerptText}</p>}
 
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           {story.read_minutes && (
