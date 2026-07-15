@@ -725,13 +725,13 @@ function ArtistInviteTab({ profile }: { profile: any }) {
 }
 
 function ArtistEventsTab({ userId }: { userId: string }) {
-  const [events, setEvents] = useState<Array<{ id: string; title: string; starts_at: string; location: string | null; image_url: string | null }>>([]);
+  const [events, setEvents] = useState<Array<{ id: string; title: string; description: string | null; starts_at: string; location: string | null; image_url: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id, title, starts_at, location, image_url")
+        .select("id, title, description, starts_at, location, image_url")
         .eq("user_id", userId)
         .order("starts_at", { ascending: false })
         .limit(50);
@@ -741,17 +741,38 @@ function ArtistEventsTab({ userId }: { userId: string }) {
   }, [userId]);
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading events…</div>;
   if (events.length === 0) return <div className="py-12 text-center text-muted-foreground">No events yet.</div>;
+  const now = Date.now();
+  const upcoming = events.filter((e) => new Date(e.starts_at).getTime() >= now).sort((a, b) => +new Date(a.starts_at) - +new Date(b.starts_at));
+  const past = events.filter((e) => new Date(e.starts_at).getTime() < now);
+  const renderCard = (e: typeof events[number]) => (
+    <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
+      {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-56 object-cover" />}
+      <div className="p-4 space-y-2">
+        <div className="text-xs text-muted-foreground">
+          {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+          {" · "}
+          {new Date(e.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+        </div>
+        <div className="font-bold text-lg">{e.title}</div>
+        {e.description && <p className="text-sm text-muted-foreground line-clamp-2">{e.description}</p>}
+        {e.location && <div className="text-xs text-muted-foreground">📍 {e.location}</div>}
+      </div>
+    </Link>
+  );
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {events.map((e) => (
-        <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-xl border border-border overflow-hidden hover:shadow-md transition">
-          {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-40 object-cover" />}
-          <div className="p-3">
-            <div className="font-semibold truncate">{e.title}</div>
-            <div className="text-xs text-muted-foreground">{new Date(e.starts_at).toLocaleString()}{e.location ? ` · ${e.location}` : ""}</div>
-          </div>
-        </Link>
-      ))}
+    <div className="space-y-8">
+      {upcoming.length > 0 && (
+        <div>
+          <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">UPCOMING</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{upcoming.map(renderCard)}</div>
+        </div>
+      )}
+      {past.length > 0 && (
+        <div>
+          <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">PAST</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{past.map(renderCard)}</div>
+        </div>
+      )}
     </div>
   );
 }
