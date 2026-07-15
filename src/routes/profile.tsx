@@ -40,7 +40,7 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { isArtist, isResident, isAdmin, loading: roleLoading } = useUserRole();
+  const { isArtist, isResident, isAdmin } = useUserRole();
   const categoryTabs = tabsForCategory((profile as { category?: string | null } | null)?.category);
   const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
