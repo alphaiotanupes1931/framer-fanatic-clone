@@ -56,7 +56,7 @@ function ActorAvatarLink({
   username: string;
   avatarUrl: string | null | undefined;
   fallback: string;
-  typeIcon: React.ElementType;
+  typeIcon: ElementType;
 }) {
   const Icon = typeIcon;
   return (
