@@ -6,6 +6,30 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
+import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
+
+function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: boolean }) {
+  const label = preview.type === "story" ? "Story" : preview.type === "event" ? "Event" : "Post";
+  const inner = (
+    <div className={`overflow-hidden rounded-xl border ${mine ? "border-white/25 bg-white/10" : "border-border bg-background"}`}>
+      {preview.image && (
+        <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
+          <img src={preview.image} alt="" className="h-full w-full object-cover" loading="lazy" />
+        </div>
+      )}
+      <div className="p-3">
+        <div className={`text-[10px] font-bold uppercase tracking-wide ${mine ? "text-white/70" : "text-[#d4580a]"}`}>{label}</div>
+        {preview.title && <div className={`mt-0.5 line-clamp-2 text-sm font-semibold ${mine ? "text-white" : "text-foreground"}`}>{preview.title}</div>}
+        {preview.excerpt && <div className={`mt-1 line-clamp-2 text-xs ${mine ? "text-white/80" : "text-muted-foreground"}`}>{preview.excerpt}</div>}
+        {preview.author && <div className={`mt-1.5 text-[11px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>by {preview.author}</div>}
+      </div>
+    </div>
+  );
+  if (preview.type === "story") return <Link to="/stories/$storyId" params={{ storyId: preview.id }}>{inner}</Link>;
+  if (preview.type === "event") return <Link to="/events/$eventId" params={{ eventId: preview.id }}>{inner}</Link>;
+  return <Link to="/posts/$postId" params={{ postId: preview.id }}>{inner}</Link>;
+}
 
 export const Route = createFileRoute("/messages")({
   component: MessagesPage,
