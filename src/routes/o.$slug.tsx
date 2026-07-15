@@ -481,7 +481,7 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
   const [edit, setEdit] = useState(!!initialEdit);
   useEffect(() => { if (initialEdit) setEdit(true); }, [initialEdit]);
   const [form, setForm] = useState({
-    bio: org.bio ?? "", website: org.website ?? "", phone: org.phone ?? "",
+    name: org.name ?? "", bio: org.bio ?? "", website: org.website ?? "", phone: org.phone ?? "",
     email: org.email ?? "", address: org.address ?? "", neighborhood: org.neighborhood ?? "",
   });
   const days = ["mon","tue","wed","thu","fri","sat","sun"] as const;
@@ -493,13 +493,14 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
   });
 
   const save = async () => {
+    if (!form.name.trim()) return toast.error("Name is required");
     const { error } = await supabase.from("organizations").update({
-      bio: form.bio || null, website: form.website || null, phone: form.phone || null,
+      name: form.name.trim(), bio: form.bio || null, website: form.website || null, phone: form.phone || null,
       email: form.email || null, address: form.address || null, neighborhood: form.neighborhood || null,
       hours,
     }).eq("id", org.id);
     if (error) return toast.error(error.message);
-    onChange({ ...org, ...form, hours });
+    onChange({ ...org, ...form, name: form.name.trim(), hours });
     setEdit(false);
     onEditClose?.();
     toast.success("Saved");
@@ -516,6 +517,7 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
       )}
       {edit ? (
         <div className="space-y-3 rounded-2xl border border-border bg-neutral-50 p-4 text-sm">
+          <input value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="Name" className="w-full rounded-lg border border-border px-3 py-2 font-semibold" />
           <textarea value={form.bio} onChange={(e) => setForm({...form, bio: e.target.value})} placeholder="About" rows={4} className="w-full rounded-lg border border-border px-3 py-2" />
           <div className="grid grid-cols-2 gap-2">
             <input value={form.website} onChange={(e) => setForm({...form, website: e.target.value})} placeholder="Website" className="rounded-lg border border-border px-3 py-2" />
