@@ -16,6 +16,17 @@ import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { tabsForArtist, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
 import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
+import {
+  ArtistPostsGrid,
+  ArtistGalleryTab,
+  ArtistSeriesTab,
+  ArtistBookCollaborateTab,
+  ArtistCVTab,
+  ArtistInviteTab,
+  ArtistEventsGrouped,
+  ArtistStudioTab,
+  ArtistTalkTab,
+} from "@/components/artist/artist-tab-sections";
 
 type PublicProfile = {
   id: string;
@@ -136,7 +147,7 @@ function PublicProfilePage() {
     if (cat) parts.push(`#${cat.toLowerCase().replace(/\s+/g, "")}`);
     if (profile.neighborhood) parts.push(`#${profile.neighborhood.toLowerCase().replace(/\s+/g, "")}`);
     if (profile.role) parts.push(`#${profile.role.toLowerCase()}`);
-    return parts;
+    return Array.from(new Set(parts));
   }, [profile]);
 
   const share = async () => {
@@ -225,6 +236,8 @@ function PublicProfilePage() {
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
   const tabs = tabsForArtist(profile.category, profile.role);
+  const isArtistView = tabs.some((t) => ["studio","series","gallery","cv","talk","contact"].includes(t.key as string));
+  const canEdit = !!isSelf;
 
   return (
     <AppLayout title="" hero={false}>
@@ -441,45 +454,45 @@ function PublicProfilePage() {
           {contentLoading && tab === "posts" ? (
             <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
           ) : tab === "posts" ? (
-            posts.length === 0 ? (
-              <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
+            isArtistView ? (
+              posts.length === 0 ? (
+                <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
+              ) : (
+                <ArtistPostsGrid posts={posts} />
+              )
             ) : (
-              <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}</div>
+              posts.length === 0 ? (
+                <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
+              ) : (
+                <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}</div>
+              )
             )
+          ) : tab === "studio" ? (
+            <ArtistStudioTab posts={posts} />
+          ) : tab === "series" ? (
+            <ArtistSeriesTab userId={profile.id} canEdit={canEdit} />
+          ) : tab === "talk" ? (
+            <ArtistTalkTab posts={posts} />
+          ) : tab === "contact" ? (
+            <ArtistBookCollaborateTab profile={profile} />
+          ) : tab === "cv" ? (
+            <ArtistCVTab userId={profile.id} profile={profile} canEdit={canEdit} />
+          ) : tab === "invite" ? (
+            <ArtistInviteTab profile={profile} />
           ) : tab === "events" ? (
-            events.length === 0 ? (
-              <EmptyTab icon={Calendar} label="No events yet." />
+            isArtistView ? (
+              <ArtistEventsGrouped events={events as never} />
             ) : (
-              <div className="space-y-4">{events.map((e) => <EventCard key={e.id} event={e} />)}</div>
+              events.length === 0 ? (
+                <EmptyTab icon={Calendar} label="No events yet." />
+              ) : (
+                <div className="space-y-4">{events.map((e) => <EventCard key={e.id} event={e} />)}</div>
+              )
             )
           ) : tab === "episodes" ? (
             <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
           ) : tab === "gallery" ? (
-            (() => {
-              const media = posts.filter((p) => p.media_url).slice(0, 60);
-              return media.length === 0 ? (
-                <EmptyTab icon={ImageIcon} label="No gallery images yet." />
-              ) : (
-                <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5">
-                  {media.map((p) => (
-                    <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="aspect-square overflow-hidden rounded-md bg-neutral-100">
-                      <img src={p.media_url} alt="" className="h-full w-full object-cover" loading="lazy" />
-                    </Link>
-                  ))}
-                </div>
-              );
-            })()
-          ) : tab === "cv" ? (
-            <div className="max-w-3xl whitespace-pre-wrap text-[15px] leading-relaxed text-neutral-700">
-              {profile.bio || <EmptyTab icon={FileText} label="No bio yet." />}
-            </div>
-          ) : tab === "invite" ? (
-            <div className="max-w-md space-y-3">
-              <p className="text-sm text-neutral-600">Share this artist's page with someone.</p>
-              <button onClick={share} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110">
-                <Share2 className="h-4 w-4" /> Copy invite link
-              </button>
-            </div>
+            <ArtistGalleryTab userId={profile.id} canEdit={canEdit} />
           ) : (
             <EmptyTab icon={Layers} label="Nothing here yet." />
           )}
