@@ -31,7 +31,7 @@ function StoryCover({ storyId, url }: { storyId: string; url: string | null }) {
   );
 }
 
-export const Route = createFileRoute("/stories")({
+export const Route = createFileRoute("/stories/")({
   component: StoriesPage,
   head: () => ({ meta: [{ title: "Stories - Planet Baltimore" }] }),
 });
