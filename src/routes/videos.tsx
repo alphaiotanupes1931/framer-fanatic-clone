@@ -19,6 +19,7 @@ export const Route = createFileRoute("/videos")({
 type Video = {
   id: string; user_id: string; title: string; description: string | null;
   video_url: string; thumbnail_url: string | null; featured: boolean; created_at: string;
+  category?: string | null;
   author?: { display_name: string | null; username: string | null };
 };
 
@@ -75,7 +76,8 @@ function VideosSignedIn() {
   const [open, setOpen] = useState(false);
   const [sort, setSort] = useState<"newest" | "popular">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
-  const [form, setForm] = useState({ title: "", description: "", video_url: "" });
+  const UPLOAD_CATEGORIES = VIDEO_CATEGORIES.filter((c) => c !== "All");
+  const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "" });
   const [loaded, setLoaded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -118,18 +120,22 @@ function VideosSignedIn() {
     }
   };
 
-  const filtered = vids.filter((v) => v.title.toLowerCase().includes(query.toLowerCase()));
+  const filtered = vids.filter((v) =>
+    v.title.toLowerCase().includes(query.toLowerCase()) &&
+    (cat === "All" || (v.category || "") === cat)
+  );
   const featured = filtered.filter((v) => v.featured);
   const rest = filtered.filter((v) => !v.featured);
 
   const submit = async () => {
     if (!me || !form.title.trim() || !form.video_url.trim()) return;
+    if (!form.category) { toast.error("Please select a category"); return; }
     const { error } = await supabase.from("videos").insert({
       user_id: me.id, title: form.title.trim(), description: form.description.trim() || null,
-      video_url: form.video_url.trim(), thumbnail_url: null,
-    });
+      video_url: form.video_url.trim(), thumbnail_url: null, category: form.category,
+    } as any);
     if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", description: "", video_url: "" });
+    setOpen(false); setForm({ title: "", description: "", video_url: "", category: "" });
     setLocalPreview(null);
     toast.success("Video added"); load();
   };
@@ -208,6 +214,10 @@ function VideosSignedIn() {
             </div>
             <div className="space-y-3">
               <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              <select value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm">
+                <option value="">Select a category…</option>
+                {UPLOAD_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
               <label className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-6 text-sm text-neutral-600 hover:border-orange-400 hover:bg-orange-50 ${uploading ? "opacity-60 pointer-events-none" : "cursor-pointer"}`}>
                 <Upload className="h-5 w-5 text-orange-600" />
                 <span className="font-semibold">{uploading ? "Uploading..." : "Upload video file"}</span>
@@ -222,7 +232,7 @@ function VideosSignedIn() {
               </div>
               <input value={form.video_url} onChange={(e) => setForm({...form, video_url: e.target.value})} placeholder="Video URL (YouTube, Vimeo, mp4)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-              <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim()} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
+              <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim() || !form.category} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
             </div>
           </div>
         </div>
