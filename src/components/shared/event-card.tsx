@@ -1,9 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock, Share2, Bookmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useEventImageUrl } from "@/components/event-image";
 import { useEffect, useState } from "react";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useCurrentProfile } from "@/components/app-layout";
+import { toast } from "sonner";
 
 type EventRow = {
   id: string;
@@ -26,6 +30,34 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
   const [imgFailed, setImgFailed] = useState(false);
   useEffect(() => { setImgFailed(false); }, [resolvedImage]);
   const showImage = !!resolvedImage && !imgFailed;
+  const me = useCurrentProfile();
+  const [saved, setSaved] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const eventUrl = typeof window !== "undefined" ? `${window.location.origin}/events/${event.id}` : `/events/${event.id}`;
+
+  useEffect(() => {
+    if (compact || !me?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("event_saves").select("event_id").eq("event_id", event.id).eq("user_id", me.id).maybeSingle();
+      if (!cancelled && data) setSaved(true);
+    })();
+    return () => { cancelled = true; };
+  }, [me?.id, event.id, compact]);
+
+  const toggleSave = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!me?.id) { toast.error("Sign in to save"); return; }
+    const was = saved;
+    setSaved(!was);
+    const res = was
+      ? await supabase.from("event_saves").delete().eq("event_id", event.id).eq("user_id", me.id)
+      : await supabase.from("event_saves").insert({ event_id: event.id, user_id: me.id });
+    if (res.error) { setSaved(was); toast.error(res.error.message); }
+    else toast.success(was ? "Removed from saved" : "Saved");
+  };
+
+  const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
 
   if (compact) {
     return (
@@ -53,8 +85,9 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
   }
 
   return (
-    <Link to="/events/$eventId" params={{ eventId: event.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
-      {showImage && (
+    <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
+      <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
+        {showImage && (
         <div className="relative aspect-[16/9] overflow-hidden bg-muted">
           <img
             src={resolvedImage}
@@ -71,8 +104,8 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
             <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">{event.category}</Badge>
           )}
         </div>
-      )}
-      <div className="p-4 sm:p-5">
+        )}
+        <div className="p-4 sm:p-5">
         <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
           <Clock className="h-3.5 w-3.5" />
           <span className="truncate">{eventDate ? format(eventDate, "EEE, MMM d · h:mm a") : "Date TBD"}</span>
@@ -83,7 +116,17 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
           <MapPin className="h-3 w-3" />
           <span className="truncate">{event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore"}</span>
         </div>
+        </div>
+      </Link>
+      <div className="flex items-center gap-5 border-t border-border/50 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-5">
+        <button type="button" onClick={openShare} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share">
+          <Share2 className="h-5 w-5" />
+        </button>
+        <button type="button" onClick={toggleSave} className={`ml-auto flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
+          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
+        </button>
       </div>
-    </Link>
+      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={eventUrl} title={event.title} />
+    </article>
   );
 }
