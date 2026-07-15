@@ -655,15 +655,15 @@ function MessagesPage() {
                   )}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setMsgSearchOpen((v) => !v)}
-                className="ml-auto rounded-full p-2 text-muted-foreground hover:bg-muted"
-                aria-label="Search in conversation"
-                title="Search in conversation"
-              >
-                <Search className="h-4 w-4" />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setMsgSearchOpen((v) => !v)}
+                  className="ml-auto rounded-full p-2 text-muted-foreground hover:bg-muted"
+                  aria-label="Search in conversation"
+                  title="Search in conversation"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
               </div>
               {msgSearchOpen && (
                 <div className="border-b border-border px-4 py-2">
