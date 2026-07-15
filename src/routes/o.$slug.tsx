@@ -674,7 +674,6 @@ function MembersTab({ orgId }: { orgId: string }) {
   );
 }
 
-function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
 function SupportTab({ org }: { org: Org }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
