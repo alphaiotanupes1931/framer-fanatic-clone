@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
+import { StoryCard } from "@/components/shared/story-card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2, Trash2, Share2, Bookmark, MoreHorizontal } from "lucide-react";
