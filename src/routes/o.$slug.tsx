@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -140,14 +140,31 @@ function OrgProfile() {
     ? COMMUNITY_ASSOC_TABS
     : ASSOC_TABS;
 
-  const promptUpload = async (field: "avatar_url" | "banner_url") => {
-    const url = window.prompt(`Paste an image URL for the ${field === "avatar_url" ? "avatar" : "banner"}`);
-    if (!url) return;
-    const patch = { [field]: url } as Partial<Org>;
-    const { error } = await supabase.from("organizations").update(patch).eq("id", org.id);
-    if (error) return toast.error(error.message);
-    setOrg({ ...org, [field]: url });
-    toast.success("Updated");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
+
+  const handleFileUpload = async (field: "avatar_url" | "banner_url", file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+    setUploading(field);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `orgs/${org.id}/${field}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = data.publicUrl;
+      const patch = { [field]: url } as Partial<Org>;
+      const { error } = await supabase.from("organizations").update(patch).eq("id", org.id);
+      if (error) throw error;
+      setOrg({ ...org, [field]: url });
+      toast.success("Updated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(null);
+    }
   };
 
   const toggleMute = () => {
@@ -200,6 +217,22 @@ function OrgProfile() {
         <ArrowLeft className="h-5 w-5" />
       </button>
 
+      {/* Hidden file inputs for uploads */}
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload("avatar_url", f); e.target.value = ""; }}
+      />
+      <input
+        ref={bannerInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload("banner_url", f); e.target.value = ""; }}
+      />
+
       {/* Banner with floating actions */}
       <div
         className="relative h-44 overflow-hidden rounded-2xl sm:h-60"
@@ -212,10 +245,11 @@ function OrgProfile() {
         <div className="absolute right-3 top-3 flex items-center gap-2">
           {canManage && (
             <button
-              onClick={() => promptUpload("banner_url")}
+              onClick={() => bannerInputRef.current?.click()}
+              disabled={uploading === "banner_url"}
               className="inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-black/80"
             >
-              <Camera className="h-3.5 w-3.5" /> Edit banner
+              <Camera className="h-3.5 w-3.5" /> {uploading === "banner_url" ? "Uploading…" : "Edit banner"}
             </button>
           )}
         </div>
@@ -231,7 +265,8 @@ function OrgProfile() {
           </div>
           {canManage && (
             <button
-              onClick={() => promptUpload("avatar_url")}
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploading === "avatar_url"}
               aria-label="Edit avatar"
               className="absolute bottom-1 right-1 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-white hover:bg-black/85"
             >
