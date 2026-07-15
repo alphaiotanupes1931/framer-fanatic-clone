@@ -84,8 +84,10 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   if (/podcast/.test(hay)) return PODCAST;
   if (/music|musician|dj|producer/.test(hay)) return MUSIC;
   if (/fashion/.test(hay)) return FASHION;
-  if (/mixed media|performance|photograph|videograph|film|visual art|literary|poet|writer|dancer|muralist/.test(hay))
+  if (/mixed media|performance|photograph|videograph|film|visual art|literary|poet|writer|dancer|muralist|artist|painter|sculpt|illustrat|designer|creative/.test(hay))
     return STUDIO;
+  // Any artist role falls back to the full studio tab set.
+  if (/artist/.test(hay)) return STUDIO;
   return DEFAULT_TABS;
 }
 
