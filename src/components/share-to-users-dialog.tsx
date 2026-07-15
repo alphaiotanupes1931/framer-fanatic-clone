@@ -166,7 +166,10 @@ export function ShareToUsersDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-          <div className="text-lg font-bold text-neutral-900">Share</div>
+          <div>
+            <div className="text-lg font-bold text-neutral-900">Share with followers</div>
+            <div className="mt-0.5 text-xs text-neutral-500">You can only send this to people you follow (or who follow you).</div>
+          </div>
           <button type="button" onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
@@ -193,7 +196,7 @@ export function ShareToUsersDialog({
 
           <div className="rounded-lg border border-neutral-200">
             <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
-              <Users className="h-3.5 w-3.5" /> People ({selectedIds.length} selected)
+              <Users className="h-3.5 w-3.5" /> Followers ({selectedIds.length} selected)
             </div>
             <div className="max-h-64 overflow-y-auto">
               {loading ? (
