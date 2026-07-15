@@ -8,11 +8,13 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="py-12 text-center text-muted-foreground">No posts yet.</div>;
   return (
     <div className="grid grid-cols-2 gap-3">
-      {posts.map((p) => (
+      {posts.map((p) => {
+        const img = p.image_url || p.media_url;
+        return (
         <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="group block">
-          {p.media_url ? (
+          {img ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
-              <img src={p.media_url} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+              <img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
             </div>
           ) : (
             <div className="aspect-square rounded-xl bg-neutral-100 p-4 text-sm text-neutral-700 flex items-center justify-center text-center">
@@ -24,7 +26,8 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
             {p.tag && <div className="mt-0.5 text-xs uppercase tracking-wider text-neutral-500">{p.tag}</div>}
           </div>
         </Link>
-      ))}
+        );
+      })}
     </div>
   );
 }
