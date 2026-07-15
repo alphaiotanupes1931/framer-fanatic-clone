@@ -396,7 +396,7 @@ function OrgProfile() {
           {tab === "About" && <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
           {tab === "Events" && <EventsTab orgId={org.id} canManage={canManage} />}
           {tab === "Opportunities" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
-          {tab === "Press" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
+          {tab === "Press" && <PressTab org={org} canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
           {tab === "Artists" && <MembersTab orgId={org.id} />}
