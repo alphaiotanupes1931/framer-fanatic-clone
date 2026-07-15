@@ -197,6 +197,11 @@ function StoriesSignedIn() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Story | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE = 12;
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const removeStory = async (s: Story) => {
     if (!me || s.user_id !== me.id) return;
@@ -212,21 +217,32 @@ function StoriesSignedIn() {
     }
   };
 
-  const load = async () => {
-    let q = supabase.from("stories").select("*").order("created_at", { ascending: false }).limit(50);
+  const buildQuery = (from: number, to: number) => {
+    let q = supabase.from("stories").select("*").range(from, to);
+    if (tab === "Trending") q = q.order("likes_count", { ascending: false });
+    else q = q.order("created_at", { ascending: false });
     if (filter !== "All") q = q.eq("format", filter);
     if (storyFormat !== "All Formats") q = q.ilike("format", storyFormat);
     if (tab === "Featured") q = q.eq("featured", true);
-    if (tab === "Trending") q = q.order("likes_count", { ascending: false });
-    const { data } = await q;
-    const list = (data || []) as Story[];
+    return q;
+  };
+
+  const hydrateAuthors = async (list: Story[]) => {
     const ids = Array.from(new Set(list.map((s) => s.user_id)));
-    if (ids.length) {
-      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-      const byId = new Map((profs || []).map((p: any) => [p.id, p]));
-      list.forEach((s) => { s.author = byId.get(s.user_id) as any; });
-    }
+    if (!ids.length) return list;
+    const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+    const byId = new Map((profs || []).map((p: any) => [p.id, p]));
+    list.forEach((s) => { s.author = byId.get(s.user_id) as any; });
+    return list;
+  };
+
+  const load = async () => {
+    setLoading(true);
+    setHasMore(true);
+    const { data } = await buildQuery(0, PAGE - 1);
+    const list = await hydrateAuthors((data || []) as Story[]);
     setStories(list);
+    setHasMore(list.length === PAGE);
     if (me && list.length) {
       const { data: likes } = await supabase
         .from("story_likes").select("story_id")
@@ -234,9 +250,32 @@ function StoriesSignedIn() {
         .in("story_id", list.map((s) => s.id));
       setLikedIds(new Set((likes || []).map((l: any) => l.story_id)));
     }
+    setLoading(false);
   };
 
-  useEffect(() => { load(); }, [filter, tab, storyFormat, me?.id]);
+  const loadMore = async () => {
+    if (loadingMore || loading || !hasMore) return;
+    setLoadingMore(true);
+    const from = stories.length;
+    const { data } = await buildQuery(from, from + PAGE - 1);
+    const list = await hydrateAuthors((data || []) as Story[]);
+    setStories((cur) => [...cur, ...list]);
+    setHasMore(list.length === PAGE);
+    setLoadingMore(false);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter, tab, storyFormat, me?.id]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) loadMore();
+    }, { rootMargin: "600px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+    // eslint-disable-next-line
+  }, [stories.length, hasMore, loadingMore, loading]);
 
   const toggleLike = async (s: Story) => {
     if (!me) { toast.error("Sign in to like"); return; }
@@ -345,28 +384,71 @@ function StoriesSignedIn() {
           </div>
         </div>
 
-        {stories.length === 0 && <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">No stories yet. Write the first one!</div>}
-
-        <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2">
-          {stories.map((s) => (
-            <StoryCard
-              key={s.id}
-              story={{
-                id: s.id,
-                title: s.title,
-                excerpt: s.excerpt,
-                cover_url: s.cover_url,
-                likes_count: s.likes_count,
-                comments_count: s.comments_count,
-                read_minutes: s.read_minutes,
-                author_name: s.author?.display_name || undefined,
-                author_avatar: s.author?.avatar_url || undefined,
-                category: s.format,
-                created_at: s.created_at,
-              }}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="overflow-hidden rounded-xl bg-card shadow-sm">
+                <div className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+                  <div className="h-11 w-11 shrink-0 animate-pulse rounded-full bg-muted sm:h-12 sm:w-12" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+                    <div className="h-2 w-1/4 animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+                <div className="mt-3 aspect-[16/9] w-full animate-pulse bg-muted" />
+                <div className="space-y-2 px-4 py-3 sm:px-6 sm:py-4">
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-full animate-pulse rounded bg-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : stories.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-neutral-300 bg-white p-12 text-center">
+            <div className="grid h-14 w-14 place-items-center rounded-full bg-orange-50 text-orange-600">
+              <Plus className="h-6 w-6" />
+            </div>
+            <div className="text-base font-semibold text-neutral-800">No stories to show</div>
+            <p className="max-w-sm text-sm text-neutral-500">Try a different format or filter, or share the first story in this category.</p>
+            {me && (
+              <Button onClick={() => setOpen(true)} className="mt-1 rounded-lg" style={{ background: "#d4580a" }}>
+                <Plus className="mr-2 h-4 w-4" /> Write A Story
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2 xl:grid-cols-3">
+              {stories.map((s) => (
+                <StoryCard
+                  key={s.id}
+                  story={{
+                    id: s.id,
+                    title: s.title,
+                    excerpt: s.excerpt,
+                    cover_url: s.cover_url,
+                    likes_count: s.likes_count,
+                    comments_count: s.comments_count,
+                    read_minutes: s.read_minutes,
+                    author_name: s.author?.display_name || undefined,
+                    author_avatar: s.author?.avatar_url || undefined,
+                    category: s.format,
+                    created_at: s.created_at,
+                  }}
+                />
+              ))}
+            </div>
+            <div ref={sentinelRef} className="flex items-center justify-center py-6 text-sm text-neutral-500">
+              {loadingMore ? (
+                <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Loading more…</span>
+              ) : hasMore ? (
+                <span className="opacity-0">.</span>
+              ) : (
+                <span>You're all caught up.</span>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {commentsFor && (
