@@ -575,10 +575,23 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
 }
 
 function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; canManage: boolean }) {
-  // Events are owned by users right now, not orgs. Show a placeholder linking to the events page.
   return (
-    <div className="rounded-2xl border border-dashed border-neutral-300 bg-card p-10 text-center text-muted-foreground">
-      Event hosting per organization is coming soon. For now, owners can post events from the main Events page.
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <a
+          href="/events/new"
+          className="inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-[#d4580a] hover:text-[#d4580a]"
+        >
+          <Plus className="h-4 w-4" /> Create Event
+        </a>
+        <a
+          href="/organizer-studio"
+          className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+        >
+          <CalendarIcon className="h-4 w-4" /> Manage Tickets in Studio
+          <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+        </a>
+      </div>
     </div>
   );
 }
