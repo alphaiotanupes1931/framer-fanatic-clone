@@ -136,27 +136,35 @@ function NeighborhoodsPage() {
         />
 
         {selected && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 sm:px-5 sm:py-4">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-muted sm:h-12 sm:w-12">
-                <MapPin className="h-4 w-4 text-muted-foreground sm:h-5 sm:w-5" />
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+            onClick={() => setSelected(null)}
+          >
+            <div
+              className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-background text-foreground shadow-xl sm:rounded-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-5 sm:py-4">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-muted sm:h-12 sm:w-12">
+                  <MapPin className="h-4 w-4 text-muted-foreground sm:h-5 sm:w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[17px] font-bold leading-tight text-foreground sm:text-lg">{selected.name}</div>
+                  {selected.region && (
+                    <span className="mt-1.5 inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                      {selected.region}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => setSelected(null)}
+                  aria-label="Close"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-[17px] font-bold leading-tight text-foreground sm:text-lg">{selected.name}</div>
-                {selected.region && (
-                  <span className="mt-1.5 inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
-                    {selected.region}
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => setSelected(null)}
-                aria-label="Close"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+              <div className="flex-1 overflow-y-auto">
             {(() => {
               const businesses = orgs.filter((o) => o.type === "business");
               const groups = orgs.filter((o) => o.type === "group");
@@ -176,7 +184,7 @@ function NeighborhoodsPage() {
                 tab === "arts_orgs" ? artsOrgs :
                 tab === "associations" ? associations : [];
               return (
-                <div className="rounded-2xl border border-border bg-card">
+                <div className="bg-card">
                   <div className="flex gap-1 overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {tabs.map((t) => {
                       const active = tab === t.key;
@@ -271,6 +279,8 @@ function NeighborhoodsPage() {
                 </div>
               );
             })()}
+              </div>
+            </div>
           </div>
         )}
 
