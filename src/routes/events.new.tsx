@@ -126,6 +126,9 @@ function NewEventPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-xl font-bold">Create Event</h1>
+          {orgName && (
+            <span className="ml-2 hidden sm:inline text-xs font-medium text-neutral-500">for {orgName}</span>
+          )}
           <button
             onClick={submit}
             disabled={!canSubmit || saving}
