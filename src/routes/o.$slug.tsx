@@ -796,25 +796,32 @@ function ArtsOrgAboutTab({ org, canManage, onChange }: { org: Org; canManage: bo
   const parsed = parseArtsBio(org.bio ?? "");
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({
+    name: org.name ?? "",
     mission: parsed.mission,
     description: parsed.description,
     programming: parsed.programming.join(", "),
     address: org.address ?? "",
     email: org.email ?? "",
+    phone: org.phone ?? "",
+    website: org.website ?? "",
     neighborhood: org.neighborhood ?? "",
   });
 
   const save = async () => {
+    if (!form.name.trim()) return toast.error("Name is required");
     const tags = form.programming.split(",").map((t) => t.trim()).filter(Boolean);
     const bio = composeArtsBio(form.mission, form.description, tags);
     const { error } = await supabase.from("organizations").update({
+      name: form.name.trim(),
       bio: bio || null,
       address: form.address || null,
       email: form.email || null,
+      phone: form.phone || null,
+      website: form.website || null,
       neighborhood: form.neighborhood || null,
     }).eq("id", org.id);
     if (error) return toast.error(error.message);
-    onChange({ ...org, bio, address: form.address || null, email: form.email || null, neighborhood: form.neighborhood || null });
+    onChange({ ...org, name: form.name.trim(), bio, address: form.address || null, email: form.email || null, phone: form.phone || null, website: form.website || null, neighborhood: form.neighborhood || null });
     setEdit(false);
     toast.success("Saved");
   };
@@ -822,6 +829,10 @@ function ArtsOrgAboutTab({ org, canManage, onChange }: { org: Org; canManage: bo
   if (edit) {
     return (
       <div className="space-y-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm">
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Name</div>
+          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2" />
+        </div>
         <div>
           <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Mission</div>
           <textarea value={form.mission} onChange={(e) => setForm({ ...form, mission: e.target.value })} rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2" />
@@ -831,8 +842,11 @@ function ArtsOrgAboutTab({ org, canManage, onChange }: { org: Org; canManage: bo
           <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2" />
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Address / area" className="rounded-lg border border-neutral-200 px-3 py-2" />
+          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Address" className="rounded-lg border border-neutral-200 px-3 py-2" />
+          <input value={form.neighborhood} onChange={(e) => setForm({ ...form, neighborhood: e.target.value })} placeholder="Neighborhood" className="rounded-lg border border-neutral-200 px-3 py-2" />
           <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Contact email" className="rounded-lg border border-neutral-200 px-3 py-2" />
+          <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone" className="rounded-lg border border-neutral-200 px-3 py-2" />
+          <input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="Website (https://...)" className="rounded-lg border border-neutral-200 px-3 py-2 sm:col-span-2" />
         </div>
         <input value={form.programming} onChange={(e) => setForm({ ...form, programming: e.target.value })} placeholder="Programming tags (comma separated)" className="w-full rounded-lg border border-neutral-200 px-3 py-2" />
         <div className="flex justify-end gap-2">
