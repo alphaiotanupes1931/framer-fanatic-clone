@@ -3,6 +3,7 @@ import { Send, Users, X, Search, Link as LinkIcon, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
+import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
 
 type Person = {
   id: string;
@@ -20,11 +21,13 @@ export function ShareToUsersDialog({
   onClose,
   url,
   title,
+  preview,
 }: {
   open: boolean;
   onClose: () => void;
   url: string;
   title?: string;
+  preview?: SharePreview;
 }) {
   const me = useCurrentProfile();
   const [people, setPeople] = useState<Person[]>([]);
@@ -101,7 +104,9 @@ export function ShareToUsersDialog({
     }
     setSending(true);
     try {
-      const body = `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
+      const body = preview
+        ? encodeSharePreview({ ...preview, url }, note)
+        : `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
       for (const uid of selectedIds) {
         const { data: mine } = await supabase
