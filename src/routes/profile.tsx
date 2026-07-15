@@ -334,37 +334,6 @@ function ProfilePage() {
   );
 }
 
-function BecomeArtistCTA() {
-  const become = useServerFn(becomeArtist);
-  const [loading, setLoading] = useState(false);
-  return (
-    <div className="mx-auto max-w-md space-y-3 rounded-2xl border border-border bg-neutral-50 p-6 text-left">
-      <h3 className="text-base font-semibold text-foreground">Want to host events or post?</h3>
-      <p className="text-sm text-muted-foreground">
-        Residents and Visitors can view content and buy tickets. To create events, post, or sell tickets, upgrade to an Artist account.
-      </p>
-      <button
-        disabled={loading}
-        onClick={async () => {
-          setLoading(true);
-          try {
-            await become();
-            toast.success("You're now an Artist, reloading...");
-            setTimeout(() => location.reload(), 700);
-          } catch (e) {
-            toast.error(e instanceof Error ? e.message : "Failed to upgrade");
-          } finally {
-            setLoading(false);
-          }
-        }}
-        className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
-      >
-        {loading ? "Upgrading…" : "Become an Artist"}
-      </button>
-    </div>
-  );
-}
-
 function MyTicketsTab() {
   const [tickets, setTickets] = useState<Array<{
     id: string; status: string; buyer_total_cents: number; event_id: string;
