@@ -13,7 +13,6 @@ import {
   ensureConnectAccount,
   createConnectOnboardingLink,
   refreshConnectStatus,
-  becomeArtist,
 } from "@/lib/stripe.functions";
 import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
