@@ -43,7 +43,14 @@ export function GroupsPage() {
     if (sort === "members") qb = qb.order("member_count", { ascending: false, nullsFirst: false });
     else qb = qb.order("created_at", { ascending: false });
     const { data } = await qb;
-    setItems((data ?? []) as Org[]);
+    const rows = (data ?? []) as Org[];
+    // Prioritize items that have images (avatar or banner) so cards with visuals show first.
+    rows.sort((a, b) => {
+      const aHas = a.avatar_url || a.banner_url ? 1 : 0;
+      const bHas = b.avatar_url || b.banner_url ? 1 : 0;
+      return bHas - aHas;
+    });
+    setItems(rows);
     setLoading(false);
   };
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sort]);
