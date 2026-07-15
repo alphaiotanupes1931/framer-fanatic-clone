@@ -116,70 +116,78 @@ function StoryDetail() {
   const initials = (author?.display_name || author?.username || "U").slice(0, 2).toUpperCase();
   const isOwner = me && me.id === story.user_id;
 
+  const dateLabel = new Date(story.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+
   return (
     <AppLayout title="" hero={false}>
       <Link to="/stories" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4" /> Back to stories
+        <ArrowLeft className="h-4 w-4" /> Back
       </Link>
 
-      <article className="overflow-hidden rounded-3xl border border-border bg-card">
-        <div className="px-5 pt-6 md:px-8 md:pt-8">
-          <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-[#d4580a]/10 px-2.5 py-1 font-semibold uppercase tracking-wider text-[#d4580a]">{story.format}</span>
-            {story.read_minutes && (
-              <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> {story.read_minutes} min read</span>
-            )}
-          </div>
-
-          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl break-words">{story.title}</h1>
-          {story.excerpt && <p className="mt-3 text-lg text-muted-foreground break-words">{story.excerpt}</p>}
-        </div>
+      <article className="mx-auto max-w-3xl">
         {story.cover_url && (
-          <div className="mt-6 w-full overflow-hidden bg-black">
-            <img src={story.cover_url} alt={story.title} className="mx-auto block max-h-[85vh] w-full object-contain" loading="lazy" decoding="async" />
+          <div className="overflow-hidden rounded-2xl bg-muted">
+            <img src={story.cover_url} alt={story.title} className="block w-full object-cover" loading="lazy" decoding="async" />
           </div>
         )}
-        <div className="px-5 pb-6 md:px-8 md:pb-8">
-          <div className="mt-6 flex items-center justify-between gap-3 border-y border-border py-4">
-            {author ? (
-              <Link to="/u/$username" params={{ username: author.username || author.id }} className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  {author.avatar_url && <AvatarImage src={author.avatar_url} alt="" />}
-                  <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-semibold text-foreground">{author.display_name || author.username}</div>
-                  <div className="text-xs text-muted-foreground">{new Date(story.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}</div>
-                </div>
-              </Link>
-            ) : <div />}
-            <div className="flex items-center gap-2">
-              <button onClick={toggleLike} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition ${liked ? "bg-[#d4580a] text-white" : "border border-border bg-card text-foreground hover:bg-accent"}`}>
-                <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {story.likes_count}
-              </button>
-              <button onClick={share} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
-                <Share2 className="h-4 w-4" />
-              </button>
-              {isOwner && (
-                <button onClick={remove} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </div>
 
+        <div className="mt-6 flex items-start justify-between gap-3">
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl break-words">{story.title}</h1>
+          {isOwner && (
+            <button onClick={remove} aria-label="Delete story" className="shrink-0 rounded-full border border-border bg-card p-2 text-red-600 hover:bg-red-50">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        {story.excerpt && <p className="mt-2 text-lg text-muted-foreground break-words">{story.excerpt}</p>}
+
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+          {story.read_minutes && (
+            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {story.read_minutes} min read</span>
+          )}
+          <span className="text-muted-foreground/50">·</span>
+          <span>{dateLabel}</span>
+        </div>
+
+        {author && (
+          <Link to="/u/$username" params={{ username: author.username || author.id }} className="mt-5 flex items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-3">
+            <Avatar className="h-11 w-11">
+              {author.avatar_url && <AvatarImage src={author.avatar_url} alt="" />}
+              <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-semibold text-foreground">{author.display_name || author.username}</div>
+              <div className="text-xs text-muted-foreground">Published {dateLabel}</div>
+            </div>
+          </Link>
+        )}
+
+        <div className="mt-6">
+          <span className="inline-block rounded-lg bg-secondary px-3 py-1 text-xs font-semibold text-foreground">{story.format}</span>
+        </div>
+
+        <div>
           {story.content && (
             /^\s*<[a-z]/i.test(story.content) ? (
               <div
-                className="prose prose-neutral mt-8 max-w-none text-[17px] leading-relaxed text-foreground/90"
+                className="prose prose-neutral mt-6 max-w-none text-[17px] leading-relaxed text-foreground/90"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(story.content) }}
               />
             ) : (
-              <div className="prose prose-neutral mt-8 max-w-none whitespace-pre-wrap text-[17px] leading-relaxed text-foreground/90">
+              <div className="prose prose-neutral mt-6 max-w-none whitespace-pre-wrap text-[17px] leading-relaxed text-foreground/90">
                 {story.content}
               </div>
             )
           )}
+
+          <div className="mt-8 flex items-center justify-between border-t border-border pt-4">
+            <button onClick={toggleLike} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition ${liked ? "bg-[#d4580a] text-white" : "text-foreground hover:bg-accent"}`}>
+              <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {story.likes_count}
+            </button>
+            <button onClick={share} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
+              <Share2 className="h-4 w-4" /> Share
+            </button>
+          </div>
 
           <section className="mt-10">
             <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
