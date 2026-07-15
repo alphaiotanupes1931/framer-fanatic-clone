@@ -1447,6 +1447,15 @@ export type Database = {
         Args: { _base: string; _self: string }
         Returns: string
       }
+      get_actors_minimal: {
+        Args: { _ids: string[] }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
