@@ -36,6 +36,7 @@ import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CreateVisitorRouteImport } from './routes/create-visitor'
+import { Route as CreateStoryRouteImport } from './routes/create-story'
 import { Route as CreateResidentRouteImport } from './routes/create-resident'
 import { Route as CreatePostRouteImport } from './routes/create-post'
 import { Route as CreateCommunityAssociationRouteImport } from './routes/create-community-association'
@@ -200,6 +201,11 @@ const CreateVisitorRoute = CreateVisitorRouteImport.update({
   path: '/create-visitor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateStoryRoute = CreateStoryRouteImport.update({
+  id: '/create-story',
+  path: '/create-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CreateResidentRoute = CreateResidentRouteImport.update({
   id: '/create-resident',
   path: '/create-resident',
@@ -359,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/create-community-association': typeof CreateCommunityAssociationRoute
   '/create-post': typeof CreatePostRoute
   '/create-resident': typeof CreateResidentRoute
+  '/create-story': typeof CreateStoryRoute
   '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
@@ -416,6 +423,7 @@ export interface FileRoutesByTo {
   '/create-community-association': typeof CreateCommunityAssociationRoute
   '/create-post': typeof CreatePostRoute
   '/create-resident': typeof CreateResidentRoute
+  '/create-story': typeof CreateStoryRoute
   '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
@@ -474,6 +482,7 @@ export interface FileRoutesById {
   '/create-community-association': typeof CreateCommunityAssociationRoute
   '/create-post': typeof CreatePostRoute
   '/create-resident': typeof CreateResidentRoute
+  '/create-story': typeof CreateStoryRoute
   '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
@@ -533,6 +542,7 @@ export interface FileRouteTypes {
     | '/create-community-association'
     | '/create-post'
     | '/create-resident'
+    | '/create-story'
     | '/create-visitor'
     | '/dashboard'
     | '/discover'
@@ -590,6 +600,7 @@ export interface FileRouteTypes {
     | '/create-community-association'
     | '/create-post'
     | '/create-resident'
+    | '/create-story'
     | '/create-visitor'
     | '/dashboard'
     | '/discover'
@@ -647,6 +658,7 @@ export interface FileRouteTypes {
     | '/create-community-association'
     | '/create-post'
     | '/create-resident'
+    | '/create-story'
     | '/create-visitor'
     | '/dashboard'
     | '/discover'
@@ -705,6 +717,7 @@ export interface RootRouteChildren {
   CreateCommunityAssociationRoute: typeof CreateCommunityAssociationRoute
   CreatePostRoute: typeof CreatePostRoute
   CreateResidentRoute: typeof CreateResidentRoute
+  CreateStoryRoute: typeof CreateStoryRoute
   CreateVisitorRoute: typeof CreateVisitorRoute
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
@@ -933,6 +946,13 @@ declare module '@tanstack/react-router' {
       path: '/create-visitor'
       fullPath: '/create-visitor'
       preLoaderRoute: typeof CreateVisitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-story': {
+      id: '/create-story'
+      path: '/create-story'
+      fullPath: '/create-story'
+      preLoaderRoute: typeof CreateStoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/create-resident': {
@@ -1174,6 +1194,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateCommunityAssociationRoute: CreateCommunityAssociationRoute,
   CreatePostRoute: CreatePostRoute,
   CreateResidentRoute: CreateResidentRoute,
+  CreateStoryRoute: CreateStoryRoute,
   CreateVisitorRoute: CreateVisitorRoute,
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
