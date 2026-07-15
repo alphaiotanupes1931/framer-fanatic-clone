@@ -346,51 +346,115 @@ function StoriesSignedIn() {
 
         {stories.length === 0 && <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">No stories yet. Write the first one!</div>}
 
-        <div className="space-y-4">
-          {stories.map((s) => (
-            <article key={s.id} className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
-              <div className="flex items-center gap-2 px-4 pt-4 pb-3">
-                  <Avatar className="h-7 w-7">
+        <div className="space-y-5">
+          {stories.map((s) => {
+            const excerptText = stripHtml(s.excerpt);
+            const hasLongExcerpt = excerptText.length > 140;
+            return (
+              <article key={s.id} className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
+                <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+                  <Avatar className="h-10 w-10 shrink-0">
                     {s.author?.avatar_url && <img src={s.author.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
-                    <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(s.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
+                    <AvatarFallback className="bg-orange-100 text-sm text-orange-700">{(s.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium">{s.author?.display_name || "Anonymous"}</span>
-                  <span className="rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange">{s.format}</span>
-                </div>
-              <StoryCover storyId={s.id} url={s.cover_url} />
-              <div className="min-w-0 p-4">
-                <Link to="/stories/$storyId" params={{ storyId: s.id }} className="group block">
-                  <h3 className="font-serif text-base font-bold transition-colors group-hover:text-[#d4580a] line-clamp-2 break-words">{s.title}</h3>
-                  {stripHtml(s.excerpt) && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground break-words">{stripHtml(s.excerpt)}</p>}
-                </Link>
-                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {s.read_minutes || 1} min</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-semibold text-foreground">{s.author?.display_name || "Anonymous"}</span>
+                      <span className="shrink-0 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange">{s.format}</span>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                      <span>{s.author?.neighborhood || "Baltimore"}</span>
+                      <span>·</span>
+                      <span>{format(new Date(s.created_at), "MMM d")}</span>
+                    </div>
+                  </div>
                   <button
-                    onClick={() => toggleLike(s)}
-                    className={`inline-flex items-center gap-1 transition ${likedIds.has(s.id) ? "text-red-500" : "hover:text-neutral-800"}`}
-                    aria-label={likedIds.has(s.id) ? "Unlike" : "Like"}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                    aria-label="Story options"
+                    onClick={() => toast("Story options coming soon")}
                   >
-                    <Heart className={`h-3.5 w-3.5 ${likedIds.has(s.id) ? "fill-current" : ""}`} /> {s.likes_count}
+                    <MoreHorizontal className="h-4 w-4" />
                   </button>
-                  <button
-                    onClick={() => setCommentsFor(s)}
-                    className="inline-flex items-center gap-1 hover:text-neutral-800"
-                  >
-                    <MessageCircle className="h-3.5 w-3.5" /> {s.comments_count}
-                  </button>
-                  {me && me.id === s.user_id && (
-                    <button
-                      onClick={() => removeStory(s)}
-                      className="inline-flex items-center gap-1 text-muted-foreground hover:text-red-600 transition"
-                      aria-label="Delete story"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  )}
                 </div>
-              </div>
-            </article>
-          ))}
+
+                {s.cover_url && (
+                  <Link to="/stories/$storyId" params={{ storyId: s.id }} className="block">
+                    <img
+                      src={s.cover_url}
+                      alt=""
+                      className="w-full aspect-[4/3] object-cover bg-muted"
+                      loading="lazy"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
+                    />
+                  </Link>
+                )}
+
+                <div className="px-4 py-3">
+                  <Link to="/stories/$storyId" params={{ storyId: s.id }} className="group block">
+                    <h3 className="text-base font-bold leading-snug transition-colors group-hover:text-[#d4580a] line-clamp-2 break-words">{s.title}</h3>
+                    {excerptText && (
+                      <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-muted-foreground break-words">
+                        {excerptText}
+                        {hasLongExcerpt && (
+                          <span className="ml-1 font-semibold text-foreground">more</span>
+                        )}
+                      </p>
+                    )}
+                  </Link>
+
+                  <div className="mt-4 flex items-center justify-between text-muted-foreground">
+                    <div className="flex items-center gap-5">
+                      <button
+                        onClick={() => toggleLike(s)}
+                        className={`inline-flex items-center gap-1.5 text-sm transition ${likedIds.has(s.id) ? "text-red-500" : "hover:text-foreground"}`}
+                        aria-label={likedIds.has(s.id) ? "Unlike" : "Like"}
+                      >
+                        <Heart className={`h-4 w-4 ${likedIds.has(s.id) ? "fill-current" : ""}`} />
+                        <span>{s.likes_count}</span>
+                      </button>
+                      <button
+                        onClick={() => setCommentsFor(s)}
+                        className="inline-flex items-center gap-1.5 text-sm hover:text-foreground"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        <span>{s.comments_count}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/stories/${s.id}`;
+                          if (navigator.share) navigator.share({ title: s.title, url }).catch(() => {});
+                          else { navigator.clipboard.writeText(url); toast("Story link copied"); }
+                        }}
+                        className="inline-flex items-center gap-1.5 text-sm hover:text-foreground"
+                        aria-label="Share story"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toast("Saved to bookmarks")}
+                        className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                        aria-label="Bookmark story"
+                      >
+                        <Bookmark className="h-4 w-4" />
+                      </button>
+                      {me && me.id === s.user_id && (
+                        <button
+                          onClick={() => removeStory(s)}
+                          className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-red-50 hover:text-red-600"
+                          aria-label="Delete story"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
 
