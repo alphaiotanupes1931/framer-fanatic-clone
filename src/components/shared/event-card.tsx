@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Share2, Bookmark } from "lucide-react";
+import { Calendar, MapPin, Clock, Share2, Bookmark, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useEventImageUrl } from "@/components/event-image";
@@ -8,6 +8,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
+import { externalShare } from "@/lib/share-preview";
 
 type EventRow = {
   id: string;
@@ -58,6 +59,7 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
   };
 
   const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
+  const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(eventUrl, event.title, event.description || undefined); };
 
   if (compact) {
     return (
@@ -119,14 +121,31 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
         </div>
       </Link>
       <div className="flex items-center gap-5 border-t border-border/50 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-5">
-        <button type="button" onClick={openShare} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share">
+        <button type="button" onClick={openShare} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app">
           <Share2 className="h-5 w-5" />
+        </button>
+        <button type="button" onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+          <Send className="h-5 w-5" />
         </button>
         <button type="button" onClick={toggleSave} className={`ml-auto flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Save">
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
         </button>
       </div>
-      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={eventUrl} title={event.title} />
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={eventUrl}
+        title={event.title}
+        preview={{
+          type: "event",
+          id: event.id,
+          url: eventUrl,
+          title: event.title,
+          excerpt: event.description || null,
+          image: resolvedImage || null,
+          author: event.venue_name || event.neighborhood_name || event.neighborhood || null,
+        }}
+      />
     </article>
   );
 }
