@@ -359,6 +359,21 @@ function ProfilePage() {
               <StripeTab />
             ) : tab === "My Tickets" ? (
               <MyTicketsTab />
+            ) : (isArtist && ["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
+              profile ? (
+                <ProfileSectionTab
+                  userId={profile.id}
+                  kind={tab === "CV/Bio" ? "cv" : tab.toLowerCase()}
+                  label={tab}
+                  canEdit={true}
+                />
+              ) : null
+            ) : (isArtist && tab === "Contact") ? (
+              <ArtistContactTab profile={profile} />
+            ) : (isArtist && tab === "Invite") ? (
+              <ArtistInviteTab profile={profile} />
+            ) : (isArtist && tab === "Events") ? (
+              profile ? <ArtistEventsTab userId={profile.id} /> : null
             ) : categoryTabs.find((t) => t.label === tab) ? (
               profile ? (
                 <ProfileSectionTab
@@ -375,7 +390,7 @@ function ProfilePage() {
                     No posts yet. Share something with the community!
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className={isArtist ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "space-y-4"}>
                     {myPosts.map((p) => (
                       <PostCard key={p.id} post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
                     ))}
