@@ -97,13 +97,11 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
           {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
           {story.created_at && <span className="ml-auto text-[11px] text-slate-500">{timeAgo(story.created_at)}</span>}
         </div>
-        <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
-          {story.cover_url ? (
+        {story.cover_url && (
+          <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
             <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-primary/10 to-accent/10" />
-          )}
-        </div>
+          </div>
+        )}
         <div className="p-5">
           <h2 className="line-clamp-2 font-serif text-xl font-bold text-foreground transition-colors group-hover:text-[#d4580a] break-words">{story.title}</h2>
           {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground break-words">{cleanExcerpt}</p>}
@@ -142,12 +140,12 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
           </div>
         </div>
       </Link>
-      <Link
-        to="/stories/$storyId"
-        params={{ storyId: story.id }}
-        className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-muted"
-      >
-        {story.cover_url ? (
+      {story.cover_url && (
+        <Link
+          to="/stories/$storyId"
+          params={{ storyId: story.id }}
+          className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-muted"
+        >
           <img
             src={story.cover_url}
             alt=""
@@ -155,10 +153,8 @@ export function StoryCard({ story, featured = false, currentUserId, onDeleted }:
             loading="lazy"
             decoding="async"
           />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-primary/10 to-accent/10" />
-        )}
-      </Link>
+        </Link>
+      )}
       <Link
         to="/stories/$storyId"
         params={{ storyId: story.id }}
