@@ -374,6 +374,15 @@ function StoriesSignedIn() {
 
         <div>
           <div className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Browse by format</div>
+          <div className="relative mb-3">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search stories by title or excerpt…"
+              className="w-full rounded-xl border border-neutral-200 bg-white py-3 pl-10 pr-4 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+            />
+          </div>
           <div className="relative max-w-md">
             <select
               value={storyFormat}
