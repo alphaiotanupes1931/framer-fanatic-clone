@@ -141,7 +141,7 @@ function NeighborhoodsPage() {
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-background text-foreground shadow-xl sm:rounded-2xl"
+              className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-t-2xl bg-background text-foreground shadow-xl sm:rounded-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-5 sm:py-4">
