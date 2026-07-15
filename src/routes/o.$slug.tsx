@@ -75,6 +75,9 @@ function OrgProfile() {
   const [memberCount, setMemberCount] = useState(0);
   const [muted, setMuted] = useState(false);
   const [editAbout, setEditAbout] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
@@ -139,10 +142,6 @@ function OrgProfile() {
     : isAssoc
     ? COMMUNITY_ASSOC_TABS
     : ASSOC_TABS;
-
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
 
   const handleFileUpload = async (field: "avatar_url" | "banner_url", file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
