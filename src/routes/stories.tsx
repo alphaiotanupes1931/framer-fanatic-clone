@@ -7,7 +7,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { StoryCard } from "@/components/shared/story-card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2, Trash2, Share2, Bookmark, MoreHorizontal } from "lucide-react";
+import { Heart, MessageCircle, Clock, Plus, X, Send, ImagePlus, Loader2, Trash2, Share2, Bookmark, MoreHorizontal, Search } from "lucide-react";
 
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
@@ -209,6 +209,12 @@ function StoriesSignedIn() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [sort, setSort] = useState<SortKey>("newest");
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setSearch(searchInput.trim()), 250);
+    return () => clearTimeout(id);
+  }, [searchInput]);
   const PAGE = 12;
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -242,6 +248,7 @@ function StoriesSignedIn() {
     if (filter !== "All") q = q.eq("format", filter);
     if (storyFormat !== "All Formats") q = q.ilike("format", storyFormat);
     if (tab === "Featured") q = q.eq("featured", true);
+    if (search) q = q.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
     return q;
   };
 
@@ -282,7 +289,7 @@ function StoriesSignedIn() {
     setLoadingMore(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter, tab, storyFormat, sort, me?.id]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter, tab, storyFormat, sort, search, me?.id]);
 
   useEffect(() => {
     const el = sentinelRef.current;
