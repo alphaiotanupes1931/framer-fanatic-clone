@@ -715,6 +715,177 @@ function SupportTab({ org }: { org: Org }) {
 }
 
 function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+  return <OrgPostListImpl orgId={orgId} kind={kind} canManage={canManage} />;
+}
+
+function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
+  const [items, setItems] = useState<OrgPost[]>([]);
+  const [releases, setReleases] = useState<OrgPost[]>([]);
+  const [addOpen, setAddOpen] = useState<null | "image" | "release">(null);
+  const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("organization_posts")
+      .select("*")
+      .eq("org_id", org.id)
+      .eq("kind", "press")
+      .order("created_at", { ascending: false });
+    const rows = (data ?? []) as OrgPost[];
+    setItems(rows.filter((r) => !!r.media_url));
+    setReleases(rows.filter((r) => !r.media_url));
+  };
+  useEffect(() => { load(); }, [org.id]);
+
+  const submit = async () => {
+    if (!form.title.trim() && !form.body.trim() && !form.media_url.trim()) {
+      toast.error("Add a title or content"); return;
+    }
+    const payload = {
+      org_id: org.id, kind: "press" as const,
+      title: form.title || "Untitled",
+      body: form.body || null,
+      link_url: form.link_url || null,
+      media_url: addOpen === "image" ? (form.media_url || null) : null,
+    };
+    const { error } = await supabase.from("organization_posts").insert(payload);
+    if (error) return toast.error(error.message);
+    setAddOpen(null);
+    setForm({ title: "", body: "", link_url: "", media_url: "" });
+    load();
+    toast.success("Added");
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this item?")) return;
+    const { error } = await supabase.from("organization_posts").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    load();
+  };
+
+  const Section = ({ title, children, onAdd }: { title: string; children: React.ReactNode; onAdd?: () => void }) => (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="text-base font-bold text-neutral-900">{title}</div>
+        {canManage && onAdd && (
+          <button onClick={onAdd} className="inline-flex items-center gap-1 rounded-full bg-[#d4580a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700">
+            <Plus className="h-3.5 w-3.5" /> Add
+          </button>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <Section title="Press Contact">
+        {org.email || org.phone ? (
+          <div className="space-y-1.5 text-sm text-neutral-700">
+            {org.email && (
+              <a href={`mailto:${org.email}`} className="inline-flex items-center gap-2 hover:text-[#d4580a]">
+                <Mail className="h-4 w-4" /> {org.email}
+              </a>
+            )}
+            {org.phone && (
+              <div className="inline-flex items-center gap-2"><Phone className="h-4 w-4" /> {org.phone}</div>
+            )}
+          </div>
+        ) : (
+          <div className="text-sm text-neutral-500">No press contact info added yet.</div>
+        )}
+      </Section>
+
+      <Section title="Logo">
+        {org.avatar_url ? (
+          <div className="flex items-center gap-4">
+            <img src={org.avatar_url} alt={`${org.name} logo`} className="h-24 w-24 rounded-xl border border-neutral-200 object-cover" />
+            <a href={org.avatar_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">
+              <ExternalLink className="h-3.5 w-3.5" /> Download
+            </a>
+          </div>
+        ) : (
+          <div className="text-sm text-neutral-500">No logo uploaded yet.</div>
+        )}
+      </Section>
+
+      <Section title="Press Images" onAdd={() => setAddOpen("image")}>
+        {items.length === 0 ? (
+          <div className="text-sm text-neutral-500">No press images yet.</div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {items.map((it) => (
+              <div key={it.id} className="group relative overflow-hidden rounded-xl border border-neutral-200">
+                <img src={it.media_url!} alt={it.title} className="aspect-square w-full object-cover" loading="lazy" />
+                <div className="p-2 text-xs font-medium text-neutral-700">{it.title}</div>
+                {canManage && (
+                  <button onClick={() => remove(it.id)} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-[#d4580a] shadow opacity-0 group-hover:opacity-100">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      <Section title="Press Releases" onAdd={() => setAddOpen("release")}>
+        {releases.length === 0 ? (
+          <div className="text-sm text-neutral-500">No press releases yet.</div>
+        ) : (
+          <ul className="divide-y divide-neutral-100">
+            {releases.map((r) => (
+              <li key={r.id} className="flex items-start justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <div className="font-semibold text-neutral-900">{r.title}</div>
+                  {r.body && <div className="mt-0.5 text-sm text-neutral-600 line-clamp-2">{r.body}</div>}
+                  <div className="mt-1 flex items-center gap-3 text-xs text-neutral-500">
+                    <span>{new Date(r.created_at).toLocaleDateString()}</span>
+                    {r.link_url && (
+                      <a href={r.link_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[#d4580a] hover:underline">
+                        <ExternalLink className="h-3 w-3" /> Read
+                      </a>
+                    )}
+                  </div>
+                </div>
+                {canManage && (
+                  <button onClick={() => remove(r.id)} className="text-[#d4580a] hover:opacity-80">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {addOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setAddOpen(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <div className="mb-3 text-lg font-bold text-neutral-900">
+              Add {addOpen === "image" ? "Press Image" : "Press Release"}
+            </div>
+            <div className="space-y-2">
+              <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              {addOpen === "image" ? (
+                <input value={form.media_url} onChange={(e) => setForm({ ...form, media_url: e.target.value })} placeholder="Image URL" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              ) : (
+                <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Summary" rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              )}
+              <input value={form.link_url} onChange={(e) => setForm({ ...form, link_url: e.target.value })} placeholder="Link URL (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setAddOpen(null)} className="rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-semibold text-neutral-700">Cancel</button>
+              <button onClick={submit} className="rounded-full bg-[#d4580a] px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-700">Add</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
