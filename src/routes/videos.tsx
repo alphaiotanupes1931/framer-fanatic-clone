@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -249,7 +249,7 @@ function VideoCard({ v }: { v: Video }) {
   const poster = v.thumbnail_url || ytThumb;
   const isDirect = !yt && !vimeo && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
   return (
-    <a href={v.video_url} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+    <Link to="/videos/$id" params={{ id: v.id }} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white block">
       <div className="relative aspect-video bg-neutral-900 overflow-hidden">
         {poster ? (
           <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
@@ -272,6 +272,6 @@ function VideoCard({ v }: { v: Video }) {
         <div className="text-xs text-neutral-500">{new Date(v.created_at).toLocaleDateString()}</div>
         <p className="mt-2 line-clamp-2 text-sm text-neutral-700">{v.title}</p>
       </div>
-    </a>
+    </Link>
   );
 }
