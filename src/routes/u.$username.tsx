@@ -472,7 +472,7 @@ function PublicProfilePage() {
           ) : tab === "series" ? (
             <ArtistSeriesTab userId={profile.id} canEdit={canEdit} />
           ) : tab === "talk" ? (
-            <ArtistTalkTab posts={posts} />
+            <ArtistTalkTab profile={profile} />
           ) : tab === "contact" ? (
             <ArtistBookCollaborateTab profile={profile} />
           ) : tab === "cv" ? (
