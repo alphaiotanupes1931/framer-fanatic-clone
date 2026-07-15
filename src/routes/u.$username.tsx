@@ -118,7 +118,7 @@ function PublicProfilePage() {
         const [postsRes, storiesRes, eventsRes] = await Promise.all([
           supabase.from("posts").select("*").eq("user_id", publicProfile.id).order("created_at", { ascending: false }).limit(30),
           supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("created_at", { ascending: false }).limit(30),
-          supabase.from("events").select("*").eq("user_id", publicProfile.id).order("starts_at", { ascending: false }).limit(30),
+          supabase.from("events").select("*").eq("user_id", publicProfile.id).is("organization_id", null).order("starts_at", { ascending: false }).limit(30),
         ]);
         if (cancelled) return;
         const authorMeta = {
