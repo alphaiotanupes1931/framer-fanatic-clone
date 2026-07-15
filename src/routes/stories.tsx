@@ -360,7 +360,11 @@ function StoriesSignedIn() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-sm font-semibold text-foreground">{s.author?.display_name || "Anonymous"}</span>
-                      <span className="shrink-0 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange">{s.format}</span>
+                      {s.author?.is_founder ? (
+                        <span className="shrink-0 rounded-full border border-orange-300 bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-700">Founding Member</span>
+                      ) : (
+                        <span className="shrink-0 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-orange">{s.format}</span>
+                      )}
                     </div>
                     <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                       <span>{s.author?.neighborhood || "Baltimore"}</span>
