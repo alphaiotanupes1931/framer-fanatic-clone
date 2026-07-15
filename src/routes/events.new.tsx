@@ -9,7 +9,10 @@ import { EventImage } from "@/components/event-image";
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
   head: () => ({ meta: [{ title: "Create Event - Planet Baltimore" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({ org: typeof s.org === "string" ? s.org : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    org: typeof s.org === "string" ? s.org : undefined,
+    kind: s.kind === "exhibition" ? "exhibition" as const : undefined,
+  }),
 });
 
 type Neighborhood = { id: string; name: string };
@@ -19,7 +22,8 @@ const CATEGORIES = ["community", "music", "art", "food", "wellness", "family", "
 function NewEventPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
-  const { org: orgId } = Route.useSearch();
+  const { org: orgId, kind } = Route.useSearch();
+  const isExhibition = kind === "exhibition";
   const [orgName, setOrgName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -92,6 +96,7 @@ function NewEventPage() {
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
         organization_id: orgId ?? null,
+        is_exhibition: isExhibition,
         title: form.title.trim(),
         description: form.description.trim() || null,
         image_url: form.image_url || null,
@@ -125,7 +130,7 @@ function NewEventPage() {
           <button onClick={() => navigate({ to: "/calendar" })} className="p-2 -ml-2 rounded-full hover:bg-secondary" aria-label="Back">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-bold">Create Event</h1>
+          <h1 className="text-xl font-bold">{isExhibition ? "Create Exhibition" : "Create Event"}</h1>
           {orgName && (
             <span className="ml-2 hidden sm:inline text-xs font-medium text-neutral-500">for {orgName}</span>
           )}
@@ -134,7 +139,7 @@ function NewEventPage() {
             disabled={!canSubmit || saving}
             className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
           >
-            {saving ? "Creating…" : "Create"}
+            {saving ? "Creating…" : isExhibition ? "Create Exhibition" : "Create"}
           </button>
         </div>
 
