@@ -10,6 +10,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
 import { EventImage } from "@/components/event-image";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -80,6 +81,8 @@ const CATEGORIES = ["All", "Music", "Art", "Community", "Nightlife", "Food", "We
 
 function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) => void; buying: boolean }) {
   const priced = (e.price_cents ?? 0) > 0;
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/events/${e.id}` : `/events/${e.id}`;
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
       <Link to="/events/$eventId" params={{ eventId: e.id }} className="relative block">
@@ -123,10 +126,11 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
           </button>
           <div className="flex items-center gap-4">
             <button className="hover:text-neutral-800"><Heart className="h-4 w-4" /></button>
-            <button className="inline-flex items-center gap-1 hover:text-neutral-800"><Share2 className="h-4 w-4" /> Share</button>
+            <button type="button" onClick={() => setShareOpen(true)} className="inline-flex items-center gap-1 hover:text-neutral-800"><Share2 className="h-4 w-4" /> Share</button>
           </div>
         </div>
       </div>
+      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={shareUrl} title={e.title} />
     </div>
   );
 }

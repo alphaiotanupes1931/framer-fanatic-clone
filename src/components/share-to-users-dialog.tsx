@@ -121,7 +121,13 @@ export function ShareToUsersDialog({
         if (!convId) {
           const { data: conv, error } = await supabase
             .from("conversations")
-            .insert({ is_group: false, created_by: me.id, last_message_preview: (title || url).slice(0, 140) })
+            .insert({
+              is_group: false,
+              created_by: me.id,
+              user_a: me.id,
+              user_b: uid,
+              last_message_preview: (title || url).slice(0, 140),
+            })
             .select("id")
             .single();
           if (error || !conv) throw error || new Error("Could not create conversation");
