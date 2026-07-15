@@ -1058,8 +1058,11 @@ export type Database = {
           likes_count: number
           read_minutes: number | null
           status: string
+          tags: string[]
           title: string
+          updated_at: string
           user_id: string
+          visibility: string
         }
         Insert: {
           comments_count?: number
@@ -1073,8 +1076,11 @@ export type Database = {
           likes_count?: number
           read_minutes?: number | null
           status?: string
+          tags?: string[]
           title: string
+          updated_at?: string
           user_id: string
+          visibility?: string
         }
         Update: {
           comments_count?: number
@@ -1088,8 +1094,11 @@ export type Database = {
           likes_count?: number
           read_minutes?: number | null
           status?: string
+          tags?: string[]
           title?: string
+          updated_at?: string
           user_id?: string
+          visibility?: string
         }
         Relationships: []
       }
