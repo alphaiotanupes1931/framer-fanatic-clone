@@ -574,6 +574,163 @@ function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit: boolea
   );
 }
 
+function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean }) {
+  const [series, setSeries] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [addingSeries, setAddingSeries] = useState(false);
+  const [seriesForm, setSeriesForm] = useState({ title: "", body: "", media_url: "" });
+  const [itemForm, setItemForm] = useState({ title: "", media_url: "", body: "" });
+  const [addingItem, setAddingItem] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("profile_sections").select("*")
+      .eq("user_id", userId).eq("kind", "series")
+      .order("created_at", { ascending: false });
+    const all = data ?? [];
+    setSeries(all.filter((r: any) => !r.parent_id));
+    setItems(all.filter((r: any) => r.parent_id));
+  };
+  useEffect(() => { void load(); }, [userId]);
+
+  const addSeries = async () => {
+    if (!seriesForm.title.trim()) { toast.error("Series title required"); return; }
+    const { error } = await supabase.from("profile_sections").insert({
+      user_id: userId, kind: "series",
+      title: seriesForm.title.trim(),
+      body: seriesForm.body.trim() || null,
+      media_url: seriesForm.media_url.trim() || null,
+    });
+    if (error) { toast.error(error.message); return; }
+    setSeriesForm({ title: "", body: "", media_url: "" });
+    setAddingSeries(false);
+    void load();
+  };
+  const addItem = async (parentId: string) => {
+    if (!itemForm.media_url.trim() && !itemForm.title.trim()) { toast.error("Add an image or title"); return; }
+    const { error } = await supabase.from("profile_sections").insert({
+      user_id: userId, kind: "series", parent_id: parentId,
+      title: itemForm.title.trim() || null,
+      media_url: itemForm.media_url.trim() || null,
+      body: itemForm.body.trim() || null,
+    });
+    if (error) { toast.error(error.message); return; }
+    setItemForm({ title: "", media_url: "", body: "" });
+    setAddingItem(false);
+    void load();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Delete this?")) return;
+    await supabase.from("profile_sections").delete().eq("id", id);
+    void load();
+  };
+
+  if (openId) {
+    const s = series.find((r) => r.id === openId);
+    const kids = items.filter((r) => r.parent_id === openId);
+    if (!s) { setOpenId(null); return null; }
+    return (
+      <div className="space-y-4">
+        <button onClick={() => setOpenId(null)} className="text-sm font-semibold text-[#d4580a]">← Back to Series</button>
+        <div className="rounded-2xl border border-border overflow-hidden">
+          {s.media_url && <img src={s.media_url} alt={s.title} className="w-full h-56 object-cover" />}
+          <div className="p-5">
+            <div className="text-2xl font-bold">{s.title}</div>
+            {s.body && <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>}
+          </div>
+        </div>
+        {canEdit && (
+          addingItem ? (
+            <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
+              <input value={itemForm.title} onChange={(e) => setItemForm({ ...itemForm, title: e.target.value })}
+                placeholder="Piece title" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              <input value={itemForm.media_url} onChange={(e) => setItemForm({ ...itemForm, media_url: e.target.value })}
+                placeholder="Image URL" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              <textarea value={itemForm.body} onChange={(e) => setItemForm({ ...itemForm, body: e.target.value })}
+                placeholder="Description (optional)" rows={2}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setAddingItem(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
+                <button onClick={() => addItem(s.id)} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Add to series</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setAddingItem(true)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">
+              + Add piece to series
+            </button>
+          )
+        )}
+        {kids.length === 0 ? (
+          <div className="py-12 text-center text-muted-foreground">No pieces in this series yet.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {kids.map((k) => (
+              <div key={k.id} className="group relative overflow-hidden rounded-2xl border border-border">
+                {k.media_url && <img src={k.media_url} alt={k.title ?? ""} className="w-full h-64 object-cover" />}
+                <div className="p-3">
+                  {k.title && <div className="font-semibold">{k.title}</div>}
+                  {k.body && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{k.body}</p>}
+                </div>
+                {canEdit && (
+                  <button onClick={() => remove(k.id)} className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 opacity-0 group-hover:opacity-100">
+                    <span className="text-red-600 text-xs font-bold">✕</span>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {canEdit && (
+        <div className="flex justify-end">
+          <button onClick={() => setAddingSeries((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">
+            + New series
+          </button>
+        </div>
+      )}
+      {addingSeries && (
+        <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
+          <input value={seriesForm.title} onChange={(e) => setSeriesForm({ ...seriesForm, title: e.target.value })}
+            placeholder="Series title (e.g. The Maroons: Rebellion)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <textarea value={seriesForm.body} onChange={(e) => setSeriesForm({ ...seriesForm, body: e.target.value })}
+            placeholder="Series description" rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <input value={seriesForm.media_url} onChange={(e) => setSeriesForm({ ...seriesForm, media_url: e.target.value })}
+            placeholder="Cover image URL (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setAddingSeries(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
+            <button onClick={addSeries} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Create series</button>
+          </div>
+        </div>
+      )}
+      {series.length === 0 ? (
+        <div className="py-12 text-center text-muted-foreground">No series yet. Create one to group related pieces.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {series.map((s) => {
+            const count = items.filter((i) => i.parent_id === s.id).length;
+            return (
+              <button key={s.id} onClick={() => setOpenId(s.id)}
+                className="text-left rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
+                {s.media_url && <img src={s.media_url} alt={s.title} className="w-full h-48 object-cover" />}
+                <div className="p-4">
+                  <div className="font-bold">{s.title}</div>
+                  {s.body && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{s.body}</p>}
+                  <div className="mt-2 text-xs text-muted-foreground">{count} {count === 1 ? "piece" : "pieces"}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
   { kind: "cv_education", label: "Education", icon: "🎓" },
   { kind: "cv_solo", label: "Solo Exhibitions", icon: "🌐" },
