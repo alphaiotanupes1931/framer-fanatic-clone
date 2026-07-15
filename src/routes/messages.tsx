@@ -644,22 +644,28 @@ function MessagesPage() {
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       )}
-                      <div
-                        className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${
-                          mine
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-foreground"
-                        }`}
-                      >
-                        <div className="whitespace-pre-wrap break-words">{m.content}</div>
-                        <div
-                          className={`mt-0.5 text-[10px] ${
-                            mine ? "text-primary-foreground/70" : "text-muted-foreground"
-                          }`}
-                        >
-                          {formatWhen(m.created_at)}
-                        </div>
-                      </div>
+                      {(() => {
+                        const shared = parseSharePreview(m.content);
+                        return (
+                          <div
+                            className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${
+                              mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                            }`}
+                          >
+                            {shared ? (
+                              <div className="space-y-2">
+                                <SharePreviewCard preview={shared.preview} mine={mine} />
+                                {shared.note && <div className="whitespace-pre-wrap break-words">{shared.note}</div>}
+                              </div>
+                            ) : (
+                              <div className="whitespace-pre-wrap break-words">{m.content}</div>
+                            )}
+                            <div className={`mt-0.5 text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                              {formatWhen(m.created_at)}
+                            </div>
+                          </div>
+                        );
+                      })()}
                       {!mine && (
                         <button
                           onClick={() => void deleteMessage(m)}
