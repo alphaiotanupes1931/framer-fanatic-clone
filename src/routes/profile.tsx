@@ -90,6 +90,8 @@ function ProfilePage() {
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [showTagPicker, setShowTagPicker] = useState(false);
