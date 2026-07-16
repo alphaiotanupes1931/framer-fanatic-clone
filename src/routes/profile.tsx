@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send } from "lucide-react";
+import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -113,13 +113,40 @@ function ProfilePage() {
         author_username: profile.username,
         author_avatar: profile.avatar_url,
       };
-      setMyPosts((data || []).map((p: any) => ({ ...p, ...author })));
+      const rows = (data || []).map((p: any) => ({ ...p, ...author }));
+      rows.sort((a: any, b: any) => {
+        const ap = a.is_pinned ? 1 : 0;
+        const bp = b.is_pinned ? 1 : 0;
+        if (ap !== bp) return bp - ap;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      setMyPosts(rows);
     })();
   }, [profile]);
 
   const handleDeleteMyPost = (id: string) => {
     setMyPosts((prev) => prev.filter((p) => p.id !== id));
     setStats((s) => ({ ...s, posts: Math.max(0, s.posts - 1) }));
+  };
+
+  const handleTogglePin = async (id: string, next: boolean) => {
+    setMyPosts((prev) => {
+      const updated = prev.map((p) => (p.id === id ? { ...p, is_pinned: next } : p));
+      updated.sort((a: any, b: any) => {
+        const ap = a.is_pinned ? 1 : 0;
+        const bp = b.is_pinned ? 1 : 0;
+        if (ap !== bp) return bp - ap;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      return updated;
+    });
+    const { error } = await supabase.from("posts").update({ is_pinned: next }).eq("id", id);
+    if (error) {
+      toast.error("Could not update pin");
+      setMyPosts((prev) => prev.map((p) => (p.id === id ? { ...p, is_pinned: !next } : p)));
+    } else {
+      toast.success(next ? "Pinned to top" : "Unpinned");
+    }
   };
 
   useEffect(() => {
