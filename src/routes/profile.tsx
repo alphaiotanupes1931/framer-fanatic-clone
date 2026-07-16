@@ -460,12 +460,6 @@ function ProfilePage() {
                           {p.is_pinned && (
                             <div className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow">Pinned</div>
                           )}
-                          {p.is_pinned && (
-                            <div className="absolute left-2 bottom-2 z-10 flex gap-1">
-                              <button type="button" onClick={(e) => { e.preventDefault(); handleReorderPin(p.id, -1); }} className="rounded-full bg-white/90 p-1 shadow hover:bg-white" title="Move up"><ArrowUp className="h-3.5 w-3.5" /></button>
-                              <button type="button" onClick={(e) => { e.preventDefault(); handleReorderPin(p.id, 1); }} className="rounded-full bg-white/90 p-1 shadow hover:bg-white" title="Move down"><ArrowDown className="h-3.5 w-3.5" /></button>
-                            </div>
-                          )}
                           <Link
                             to="/posts/$postId"
                             params={{ postId: p.id }}
@@ -507,12 +501,6 @@ function ProfilePage() {
                           )}
                           <PostCard post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
                           <div className="absolute right-3 top-3 z-10 flex gap-1">
-                            {p.is_pinned && (
-                              <>
-                                <button type="button" onClick={() => handleReorderPin(p.id, -1)} className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white" title="Move up"><ArrowUp className="h-4 w-4" /></button>
-                                <button type="button" onClick={() => handleReorderPin(p.id, 1)} className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white" title="Move down"><ArrowDown className="h-4 w-4" /></button>
-                              </>
-                            )}
                             <button
                             type="button"
                             onClick={() => handleTogglePin(p.id, !p.is_pinned)}
