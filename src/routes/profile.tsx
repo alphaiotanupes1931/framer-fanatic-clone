@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, ArrowUp, ArrowDown } from "lucide-react";
+import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -162,24 +162,6 @@ function ProfilePage() {
     }
   };
 
-  const handleReorderPin = async (id: string, direction: -1 | 1) => {
-    const pinned = myPosts.filter((p) => p.is_pinned).sort((a, b) => (a.pin_order ?? 0) - (b.pin_order ?? 0));
-    const idx = pinned.findIndex((p) => p.id === id);
-    const swapIdx = idx + direction;
-    if (idx < 0 || swapIdx < 0 || swapIdx >= pinned.length) return;
-    const a = pinned[idx];
-    const b = pinned[swapIdx];
-    const aOrder = a.pin_order ?? idx;
-    const bOrder = b.pin_order ?? swapIdx;
-    setMyPosts((prev) => sortPosts(prev.map((p) => {
-      if (p.id === a.id) return { ...p, pin_order: bOrder };
-      if (p.id === b.id) return { ...p, pin_order: aOrder };
-      return p;
-    })));
-    await supabase.from("posts").update({ pin_order: bOrder } as any).eq("id", a.id);
-    await supabase.from("posts").update({ pin_order: aOrder } as any).eq("id", b.id);
-  };
-
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("neighborhoods").select("id, name").order("name").limit(200);
@@ -293,7 +275,6 @@ function ProfilePage() {
               <Link to="/edit-profile" aria-label="Edit profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <button type="button" onClick={() => setInviteOpen(true)} aria-label="Invite friends" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
-              <button type="button" onClick={() => setShareExternalOpen(true)} aria-label="Share profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Share2 className="h-4 w-4" /></button>
             </div>
           </div>
 
@@ -479,12 +460,6 @@ function ProfilePage() {
                           {p.is_pinned && (
                             <div className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow">Pinned</div>
                           )}
-                          {p.is_pinned && (
-                            <div className="absolute left-2 bottom-2 z-10 flex gap-1">
-                              <button type="button" onClick={(e) => { e.preventDefault(); handleReorderPin(p.id, -1); }} className="rounded-full bg-white/90 p-1 shadow hover:bg-white" title="Move up"><ArrowUp className="h-3.5 w-3.5" /></button>
-                              <button type="button" onClick={(e) => { e.preventDefault(); handleReorderPin(p.id, 1); }} className="rounded-full bg-white/90 p-1 shadow hover:bg-white" title="Move down"><ArrowDown className="h-3.5 w-3.5" /></button>
-                            </div>
-                          )}
                           <Link
                             to="/posts/$postId"
                             params={{ postId: p.id }}
@@ -526,12 +501,6 @@ function ProfilePage() {
                           )}
                           <PostCard post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
                           <div className="absolute right-3 top-3 z-10 flex gap-1">
-                            {p.is_pinned && (
-                              <>
-                                <button type="button" onClick={() => handleReorderPin(p.id, -1)} className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white" title="Move up"><ArrowUp className="h-4 w-4" /></button>
-                                <button type="button" onClick={() => handleReorderPin(p.id, 1)} className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white" title="Move down"><ArrowDown className="h-4 w-4" /></button>
-                              </>
-                            )}
                             <button
                             type="button"
                             onClick={() => handleTogglePin(p.id, !p.is_pinned)}

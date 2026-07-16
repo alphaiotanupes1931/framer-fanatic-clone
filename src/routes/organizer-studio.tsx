@@ -307,7 +307,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       {tab === "payouts" && (
         <div className="grid gap-3 sm:grid-cols-3">
           <Stat label="Gross" value={fmt(revenue)} />
-          <Stat label="Fees & tax" value={fmt(revenue - net)} />
+          <Stat label="Fees" value={fmt(revenue - net)} />
           <Stat label="Your net payout" value={fmt(net)} />
         </div>
       )}
