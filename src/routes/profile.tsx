@@ -23,6 +23,7 @@ import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { ExternalShareDialog } from "@/components/external-share-dialog";
+import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
