@@ -175,11 +175,11 @@ function ProfilePage() {
   useEffect(() => {
     if (!profile) return;
     (async () => {
-      const { data: fs } = await supabase.from("follows").select("follower_id").eq("following_id", profile.id).limit(3);
+      const { data: fs } = await supabase.from("follows").select("follower_id").eq("following_id", profile.id).limit(5);
       const ids = (fs || []).map((f: { follower_id: string }) => f.follower_id);
       if (!ids.length) { setFollowerPreview([]); return; }
-      const { data: ps } = await (supabase as any).from("profiles_public").select("id, display_name, username").in("id", ids);
-      setFollowerPreview((ps as Array<{ id: string; display_name: string | null; username: string | null }>) || []);
+      const { data: ps } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").in("id", ids);
+      setFollowerPreview((ps as Array<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null }>) || []);
     })();
   }, [profile]);
 
@@ -385,21 +385,39 @@ function ProfilePage() {
             />
           )}
 
-          {followerPreview.length > 0 && (
-            <div className="mt-3 pb-3 border-b border-border">
-              <p className="text-xs text-muted-foreground">
-                <span>Followed by </span>
-                {followerPreview.map((u, i) => (
-                  <span key={u.id}>
-                    <Link to="/u/$username" params={{ username: u.username || u.id }} className="font-semibold text-foreground hover:text-[#d4580a] transition-colors">
-                      {(u.display_name || u.username || "user").split(" ")[0]}
+          <div className="mt-3 pb-3 border-b border-border">
+            {followerPreview.length > 0 ? (
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {followerPreview.slice(0, 4).map((u) => (
+                    <Link key={u.id} to="/u/$username" params={{ username: u.username || u.id }}>
+                      <img
+                        src={(u as any).avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.display_name || u.username || "u")}`}
+                        alt=""
+                        className="h-6 w-6 rounded-full border-2 border-background object-cover"
+                      />
                     </Link>
-                    {i < followerPreview.length - 1 && <span>, </span>}
-                  </span>
-                ))}
-              </p>
-            </div>
-          )}
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  <span>Followed by </span>
+                  {followerPreview.slice(0, 2).map((u, i) => (
+                    <span key={u.id}>
+                      <Link to="/u/$username" params={{ username: u.username || u.id }} className="font-semibold text-foreground hover:text-[#d4580a] transition-colors">
+                        {(u.display_name || u.username || "user").split(" ")[0]}
+                      </Link>
+                      {i < Math.min(followerPreview.length, 2) - 1 && <span>, </span>}
+                    </span>
+                  ))}
+                  {stats.followers > 2 && (
+                    <span> and <span className="font-semibold text-foreground">{stats.followers - 2} others</span></span>
+                  )}
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Not followed by anyone you know yet.</p>
+            )}
+          </div>
 
           <div className="mt-6 flex gap-1 overflow-x-auto border-b border-border">
             {TABS.map((t) => {
