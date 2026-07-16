@@ -248,7 +248,7 @@ export function ReferralNetworkDialog({
                   <Button
                     onClick={handleCopy}
                     variant="outline"
-                    className="gap-1.5 border-[#d4580a] text-[#d4580a] hover:bg-[#d4580a]/10"
+                    className="gap-1.5 border-primary text-primary hover:bg-primary/10"
                   >
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     {copied ? "Copied" : "Copy"}
