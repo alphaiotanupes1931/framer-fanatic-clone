@@ -114,13 +114,7 @@ function ProfilePage() {
         author_avatar: profile.avatar_url,
       };
       const rows = (data || []).map((p: any) => ({ ...p, ...author }));
-      rows.sort((a: any, b: any) => {
-        const ap = a.is_pinned ? 1 : 0;
-        const bp = b.is_pinned ? 1 : 0;
-        if (ap !== bp) return bp - ap;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-      setMyPosts(rows);
+      setMyPosts(sortPosts(rows));
     })();
   }, [profile]);
 
@@ -130,23 +124,48 @@ function ProfilePage() {
   };
 
   const handleTogglePin = async (id: string, next: boolean) => {
-    setMyPosts((prev) => {
-      const updated = prev.map((p) => (p.id === id ? { ...p, is_pinned: next } : p));
-      updated.sort((a: any, b: any) => {
-        const ap = a.is_pinned ? 1 : 0;
-        const bp = b.is_pinned ? 1 : 0;
-        if (ap !== bp) return bp - ap;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-      return updated;
-    });
-    const { error } = await supabase.from("posts").update({ is_pinned: next }).eq("id", id);
-    if (error) {
-      toast.error("Could not update pin");
-      setMyPosts((prev) => prev.map((p) => (p.id === id ? { ...p, is_pinned: !next } : p)));
+    if (next) {
+      const pinnedCount = myPosts.filter((p) => p.is_pinned).length;
+      if (pinnedCount >= 3) {
+        toast.error("You can only pin up to 3 posts. Unpin one first.");
+        return;
+      }
+      const nextOrder = pinnedCount;
+      setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: true, pin_order: nextOrder } : p))));
+      const { error } = await supabase.from("posts").update({ is_pinned: true, pin_order: nextOrder } as any).eq("id", id);
+      if (error) {
+        toast.error("Could not update pin");
+        setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: false, pin_order: null } : p))));
+      } else {
+        toast.success("Pinned to top");
+      }
     } else {
-      toast.success(next ? "Pinned to top" : "Unpinned");
+      setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: false, pin_order: null } : p))));
+      const { error } = await supabase.from("posts").update({ is_pinned: false, pin_order: null } as any).eq("id", id);
+      if (error) {
+        toast.error("Could not update pin");
+      } else {
+        toast.success("Unpinned");
+      }
     }
+  };
+
+  const handleReorderPin = async (id: string, direction: -1 | 1) => {
+    const pinned = myPosts.filter((p) => p.is_pinned).sort((a, b) => (a.pin_order ?? 0) - (b.pin_order ?? 0));
+    const idx = pinned.findIndex((p) => p.id === id);
+    const swapIdx = idx + direction;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= pinned.length) return;
+    const a = pinned[idx];
+    const b = pinned[swapIdx];
+    const aOrder = a.pin_order ?? idx;
+    const bOrder = b.pin_order ?? swapIdx;
+    setMyPosts((prev) => sortPosts(prev.map((p) => {
+      if (p.id === a.id) return { ...p, pin_order: bOrder };
+      if (p.id === b.id) return { ...p, pin_order: aOrder };
+      return p;
+    })));
+    await supabase.from("posts").update({ pin_order: bOrder } as any).eq("id", a.id);
+    await supabase.from("posts").update({ pin_order: aOrder } as any).eq("id", b.id);
   };
 
   useEffect(() => {
