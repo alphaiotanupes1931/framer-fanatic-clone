@@ -184,12 +184,12 @@ export function ReferralNetworkDialog({
               {TIERS.map((tier) => (
                 <div
                   key={tier.level}
-                  className="relative rounded-xl border border-border bg-card p-4 text-center transition hover:border-[#d4580a]/30 hover:shadow-sm"
+                  className="relative rounded-xl border border-border bg-card p-4 text-center transition hover:border-primary/30 hover:shadow-sm"
                 >
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#d4580a] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
                     Tier {tier.level}
                   </div>
-                  <div className="mb-1 mt-2 text-2xl font-bold text-[#d4580a]">
+                  <div className="mb-1 mt-2 text-2xl font-bold text-primary">
                     +{tier.points}
                   </div>
                   <div className="text-xs font-semibold text-foreground">
