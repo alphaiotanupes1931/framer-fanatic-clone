@@ -63,7 +63,7 @@ function ProfilePage() {
   const isArtist = roleIsArtist || artistTabLabels.some((l) => ["Studio","Series","Album","Singles","EPK","Episodes","Fashion Line","Lookbook","Drops"].includes(l));
   const categoryTabs = isArtist ? [] : tabsForCategory(category);
   const baseTabs = isArtist
-    ? [...TABS_RESIDENT_BASE, "Stripe"]
+    ? [...TABS_RESIDENT_BASE, "Events", "Stripe"]
     : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
