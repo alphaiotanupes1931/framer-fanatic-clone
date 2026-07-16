@@ -232,8 +232,7 @@ function ProfilePage() {
               <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
               <Link to="/settings" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
-              <button type="button" onClick={() => setShareInAppOpen(true)} aria-label="Share profile in app" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Send className="h-4 w-4" /></button>
-              <button type="button" onClick={() => setShareExternalOpen(true)} aria-label="Share profile externally" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Share2 className="h-4 w-4" /></button>
+              <button type="button" onClick={() => setShareExternalOpen(true)} aria-label="Share profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Share2 className="h-4 w-4" /></button>
             </div>
           </div>
 
