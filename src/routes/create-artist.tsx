@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/create-artist")({
@@ -27,6 +27,8 @@ function CreateArtistPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     display_name: "",
     category: "Music",
@@ -36,6 +38,26 @@ function CreateArtistPage() {
     avatar_url: "",
   });
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const uploadAvatar = async (file: File) => {
+    if (!me) { toast.error("Please sign in"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${me.id}/avatar-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || "image/jpeg", cacheControl: "3600" });
+      if (error) throw error;
+      const { data, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      if (signErr || !data) throw signErr || new Error("Could not sign URL");
+      setForm((f) => ({ ...f, avatar_url: data.signedUrl }));
+      toast.success("Photo uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   useEffect(() => {
     if (me) {
@@ -104,14 +126,34 @@ function CreateArtistPage() {
             <Label className="text-sm font-medium">Bio</Label>
             <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={1000} />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Website</Label>
-              <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Avatar image URL</Label>
-              <Input value={form.avatar_url} onChange={(e) => set("avatar_url", e.target.value)} placeholder="https://" maxLength={500} />
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">Website</Label>
+            <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">Profile photo</Label>
+            <div className="flex items-center gap-4">
+              <div className="relative h-20 w-20 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
+                {form.avatar_url ? (
+                  <img src={form.avatar_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-neutral-400"><Camera className="h-6 w-6" /></div>
+                )}
+              </div>
+              <div>
+                <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                  {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {form.avatar_url ? "Change photo" : "Upload photo"}
+                </Button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAvatar(f); e.target.value = ""; }}
+                />
+                <p className="mt-1 text-xs text-neutral-500">PNG or JPG, up to 10MB.</p>
+              </div>
             </div>
           </div>
           <div className="flex justify-end">
