@@ -167,50 +167,47 @@ export function ReferralNetworkDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="w-[95vw] max-w-xl max-h-[85vh] overflow-hidden p-0 gap-0">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md sm:max-w-lg max-h-[85vh] overflow-hidden p-0 gap-0">
         <div className="flex max-h-[85vh] flex-col">
-          <div className="relative bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground">
+          <div className="relative bg-gradient-to-br from-primary to-primary/85 p-4 pr-12 text-primary-foreground sm:p-5 sm:pr-14">
             <button
               type="button"
               onClick={handleClose}
               aria-label="Close"
-              className="absolute right-3 top-3 rounded-full bg-white/15 p-1.5 text-primary-foreground transition hover:bg-white/25"
+              className="absolute right-3 top-3 z-10 rounded-full bg-white/20 p-1.5 text-primary-foreground transition hover:bg-white/30"
             >
               <X className="h-4 w-4" />
             </button>
-            <DialogHeader className="pb-2">
-              <DialogTitle className="flex items-center gap-2 pr-8 text-xl text-primary-foreground">
-                <Gift className="h-5 w-5" /> Your Referral Network
+            <DialogHeader className="pb-1 space-y-0">
+              <DialogTitle className="flex items-center gap-2 text-base font-bold text-primary-foreground sm:text-lg">
+                <Gift className="h-4 w-4 sm:h-5 sm:w-5" /> Your Referral Network
               </DialogTitle>
             </DialogHeader>
-            <p className="pr-8 text-sm text-primary-foreground/90">
-              Invite friends to Planet Baltimore and earn points at every level of the chain.
+            <p className="mt-1 text-xs text-primary-foreground/90 sm:text-sm">
+              Invite friends and earn points at every level of the chain.
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {/* How it works */}
-          <div className="mb-6">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="mb-4">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               How it works
             </h3>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2">
               {TIERS.map((tier) => (
                 <div
                   key={tier.level}
-                  className="relative rounded-xl border border-border bg-card p-4 text-center transition hover:border-primary/30 hover:shadow-sm"
+                  className="relative rounded-lg border border-border bg-card p-2 pt-3 text-center"
                 >
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
-                    Tier {tier.level}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary-foreground">
+                    T{tier.level}
                   </div>
-                  <div className="mb-1 mt-2 text-2xl font-bold text-primary">
+                  <div className="text-lg font-bold text-primary sm:text-xl">
                     +{tier.points}
                   </div>
-                  <div className="text-xs font-semibold text-foreground">
+                  <div className="text-[10px] font-semibold text-foreground sm:text-xs">
                     {tier.label}
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {tier.description}
                   </div>
                 </div>
               ))}
@@ -218,58 +215,59 @@ export function ReferralNetworkDialog({
           </div>
 
           {/* Stats */}
-          <div className="mb-6 grid grid-cols-3 gap-3">
-            <div className="rounded-xl border border-border bg-muted/30 p-4 text-center">
-              <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Users className="h-3.5 w-3.5" /> Total Invited
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            <div className="rounded-lg border border-border bg-muted/30 p-2 text-center">
+              <div className="flex items-center justify-center gap-1 text-[10px] font-medium text-muted-foreground sm:text-xs">
+                <Users className="h-3 w-3" /> Invited
               </div>
-              <div className="mt-1 text-2xl font-bold text-foreground">{stats.total}</div>
+              <div className="mt-0.5 text-lg font-bold text-foreground sm:text-xl">{stats.total}</div>
             </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-4 text-center">
-              <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <UserCheck className="h-3.5 w-3.5" /> Joined
+            <div className="rounded-lg border border-border bg-muted/30 p-2 text-center">
+              <div className="flex items-center justify-center gap-1 text-[10px] font-medium text-muted-foreground sm:text-xs">
+                <UserCheck className="h-3 w-3" /> Joined
               </div>
-              <div className="mt-1 text-2xl font-bold text-foreground">{stats.joined}</div>
+              <div className="mt-0.5 text-lg font-bold text-foreground sm:text-xl">{stats.joined}</div>
             </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-4 text-center">
-              <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Crown className="h-3.5 w-3.5" /> Points Earned
+            <div className="rounded-lg border border-border bg-muted/30 p-2 text-center">
+              <div className="flex items-center justify-center gap-1 text-[10px] font-medium text-muted-foreground sm:text-xs">
+                <Crown className="h-3 w-3" /> Points
               </div>
-              <div className="mt-1 text-2xl font-bold text-primary">{stats.points}</div>
+              <div className="mt-0.5 text-lg font-bold text-primary sm:text-xl">{stats.points}</div>
             </div>
           </div>
 
           {/* Tabs */}
           <Tabs value={tab} onValueChange={setTab} className="w-full">
             <TabsList className="w-full">
-              <TabsTrigger value="link" className="flex-1 gap-1.5">
-                <Link2 className="h-4 w-4" /> Share Link
+              <TabsTrigger value="link" className="flex-1 gap-1.5 text-xs sm:text-sm">
+                <Link2 className="h-3.5 w-3.5" /> Share Link
               </TabsTrigger>
-              <TabsTrigger value="email" className="flex-1 gap-1.5">
-                <Mail className="h-4 w-4" /> Email Invite
+              <TabsTrigger value="email" className="flex-1 gap-1.5 text-xs sm:text-sm">
+                <Mail className="h-3.5 w-3.5" /> Email
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="link" className="mt-4 space-y-4">
-              <div className="rounded-xl border border-border bg-muted/20 p-4">
-                <label className="mb-1.5 block text-sm font-semibold text-foreground">
+            <TabsContent value="link" className="mt-3 space-y-3">
+              <div className="rounded-lg border border-border bg-muted/20 p-3">
+                <label className="mb-1.5 block text-xs font-semibold text-foreground">
                   Your personal referral link
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex-1 overflow-hidden rounded-md border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
+                  <div className="min-w-0 flex-1 overflow-hidden rounded-md border border-border bg-background px-2 py-2 text-xs text-muted-foreground">
                     <span className="block truncate">{inviteUrl || "..."}</span>
                   </div>
                   <Button
                     onClick={handleCopy}
                     variant="outline"
-                    className="gap-1.5 border-primary text-primary hover:bg-primary/10"
+                    size="sm"
+                    className="shrink-0 gap-1.5 border-primary text-primary hover:bg-primary/10"
                   >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     {copied ? "Copied" : "Copy"}
                   </Button>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Share this link anywhere. Anyone who signs up through it counts toward your network.
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Anyone who signs up through this link counts toward your network.
                 </p>
               </div>
 
@@ -280,9 +278,9 @@ export function ReferralNetworkDialog({
                     const text = `Join me on Planet Baltimore! ${inviteUrl}`;
                     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteUrl)}&quote=${encodeURIComponent(text)}`, "_blank");
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted transition"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted transition sm:text-sm"
                 >
-                  Share on Facebook
+                  Facebook
                 </button>
                 <button
                   type="button"
@@ -290,17 +288,17 @@ export function ReferralNetworkDialog({
                     const text = `Join me on Planet Baltimore! ${inviteUrl}`;
                     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteUrl)}`, "_blank");
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted transition"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted transition sm:text-sm"
                 >
-                  Share on LinkedIn
+                  LinkedIn
                 </button>
               </div>
             </TabsContent>
 
-            <TabsContent value="email" className="mt-4 space-y-4">
+            <TabsContent value="email" className="mt-3 space-y-3">
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-semibold text-foreground">
+                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
                     Email address
                   </label>
                   <Input
@@ -309,20 +307,20 @@ export function ReferralNetworkDialog({
                     placeholder="friend@example.com"
                     type="email"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-[11px] text-muted-foreground">
                     You can add multiple emails separated by commas.
                   </p>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-semibold text-foreground">
+                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
                     Personal message (optional)
                   </label>
                   <Textarea
                     ref={messageRef}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell them why you think they'd love Planet Baltimore..."
-                    rows={4}
+                    placeholder="Tell them why they'd love Planet Baltimore..."
+                    rows={3}
                   />
                 </div>
                 <Button
@@ -342,22 +340,22 @@ export function ReferralNetworkDialog({
           </Tabs>
 
           {/* Recent invites */}
-          <div className="mt-6">
-            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="mt-4">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Recent invites
             </h3>
             {loadingInvites ? (
-              <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center py-4 text-xs text-muted-foreground">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading...
               </div>
             ) : invites.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-muted/20 py-8 text-center">
-                <Gift className="mx-auto h-8 w-8 text-muted-foreground/60" />
-                <p className="mt-2 text-sm font-medium text-muted-foreground">
+              <div className="rounded-lg border border-dashed border-border bg-muted/20 py-5 text-center">
+                <Gift className="mx-auto h-6 w-6 text-muted-foreground/60" />
+                <p className="mt-2 text-xs font-medium text-muted-foreground">
                   No invites yet
                 </p>
-                <p className="text-xs text-muted-foreground/70">
-                  Start sharing and watch your network grow.
+                <p className="text-[11px] text-muted-foreground/70">
+                  Start sharing to grow your network.
                 </p>
               </div>
             ) : (
@@ -365,22 +363,22 @@ export function ReferralNetworkDialog({
                 {invites.slice(0, 5).map((invite) => (
                   <div
                     key={invite.id}
-                    className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                        <Mail className="h-4 w-4 text-primary" />
+                    <div className="flex min-w-0 items-center gap-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                        <Mail className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-foreground">
+                      <div className="min-w-0">
+                        <div className="truncate text-xs font-medium text-foreground">
                           {invite.email}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          Invited {new Date(invite.created_at).toLocaleDateString()}
+                        <div className="text-[10px] text-muted-foreground">
+                          {new Date(invite.created_at).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
+                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                       Pending
                     </span>
                   </div>
