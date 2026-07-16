@@ -1229,14 +1229,12 @@ function StripeTab() {
           </li>
           <li>
             <strong>Set ticket prices on your events.</strong> Enter the amount <em>you</em> want to receive
-            per ticket. We automatically add Stripe's processing fee (2.9% + $0.30) and Baltimore City's
-            10% Admissions &amp; Amusement Tax on top - so the buyer pays the all-in total and you net your
-            advertised price.
+            per ticket. We automatically add Stripe's processing fee (2.9% + $0.30) and the Planet Baltimore
+            platform fee ($0.69) on top, so the buyer pays the all-in total and you net your advertised price.
           </li>
           <li>
-            <strong>Buyers pay through Stripe Checkout.</strong> Stripe deducts its fee, sends the Baltimore
-            tax portion to Planet Baltimore (we file and remit it to the city), and pays the rest directly to
-            your connected bank account.
+            <strong>Buyers pay through Stripe Checkout.</strong> Stripe deducts its fee, sends the $0.69
+            platform fee to Planet Baltimore, and pays the rest directly to your connected bank account.
           </li>
           <li>
             <strong>Payouts</strong> arrive on Stripe's standard schedule (typically 2 business days for new
@@ -1247,9 +1245,9 @@ function StripeTab() {
         <h4 className="mt-6 mb-2 text-sm font-semibold text-foreground">Example: $20 ticket</h4>
         <ul className="space-y-1 text-sm">
           <li>You set price: <strong>$20.00</strong> (what you keep)</li>
-          <li>Baltimore A&amp;A tax (10%): <strong>$2.00</strong> (routed to Planet Baltimore)</li>
-          <li>Stripe fee (~2.9% + $0.30): <strong>~$0.98</strong></li>
-          <li>Buyer pays: <strong>~$22.98</strong></li>
+          <li>Planet Baltimore platform fee: <strong>$0.69</strong></li>
+          <li>Stripe fee (~2.9% + $0.30): <strong>~$0.92</strong></li>
+          <li>Buyer pays: <strong>~$21.61</strong></li>
         </ul>
       </div>
     </div>

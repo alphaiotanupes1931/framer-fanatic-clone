@@ -382,7 +382,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Stripe fees + Baltimore's 10% admissions tax are added on top automatically - you net the
+                  Stripe fees + the $0.69 Planet Baltimore platform fee are added on top automatically, you net the
                   exact amount you enter.
                 </p>
               </div>
