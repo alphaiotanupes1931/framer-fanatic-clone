@@ -1147,6 +1147,7 @@ export type Database = {
           neighborhood: string | null
           neighborhood_names: string[]
           onboarded: boolean
+          referred_by: string | null
           role: string
           stripe_account_id: string | null
           stripe_account_status: string | null
@@ -1179,6 +1180,7 @@ export type Database = {
           neighborhood?: string | null
           neighborhood_names?: string[]
           onboarded?: boolean
+          referred_by?: string | null
           role?: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
@@ -1211,6 +1213,7 @@ export type Database = {
           neighborhood?: string | null
           neighborhood_names?: string[]
           onboarded?: boolean
+          referred_by?: string | null
           role?: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
@@ -1707,6 +1710,7 @@ export type Database = {
           title: string
         }[]
       }
+      resolve_referrer: { Args: { _username: string }; Returns: string }
       search_all_users: {
         Args: { lim?: number; q?: string }
         Returns: {
