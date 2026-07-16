@@ -142,8 +142,8 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     }
 
     const breakdown = priceBreakdown(event.price_cents);
-    // Platform fee = Baltimore tax. Routed to platform Stripe via application_fee_amount.
-    const applicationFee = breakdown.platformTaxCents;
+    // Platform fee = flat 69¢ Planet Baltimore fee. Routed via application_fee_amount.
+    const applicationFee = breakdown.platformFeeCents;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
