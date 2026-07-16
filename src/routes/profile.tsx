@@ -523,6 +523,11 @@ function ProfilePage() {
         onClose={() => setInviteOpen(false)}
         inviteUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile?.username ?? ""}`}
       />
+      <ReferralNetworkDialog
+        open={referralOpen}
+        onClose={() => setReferralOpen(false)}
+        profile={profile}
+      />
     </AppLayout>
   );
 }
