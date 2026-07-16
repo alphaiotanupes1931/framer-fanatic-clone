@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Twitter, Facebook, Linkedin, MessageCircle, Mail, Copy, Users, Instagram, Send as SendIcon } from "lucide-react";
+import { X, Facebook, Linkedin, MessageCircle, Mail, Copy, Users, Instagram, Send as SendIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
@@ -43,7 +43,6 @@ export function ExternalShareDialog({
   const enc = encodeURIComponent;
   const apps = [
     { name: "Facebook", icon: Facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`, color: "#1877F2" },
-    { name: "X (Twitter)", icon: Twitter, href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`, color: "#000000" },
     { name: "IG Stories", icon: Instagram, href: `https://www.instagram.com/`, color: "#E1306C" },
     { name: "WhatsApp", icon: MessageCircle, href: `https://wa.me/?text=${enc(text + " " + url)}`, color: "#25D366" },
     { name: "LinkedIn", icon: Linkedin, href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`, color: "#0A66C2" },
