@@ -88,7 +88,7 @@ function DiscoverPage() {
         {show("Events") && fEvents.length > 0 && (
           <section>
             <SectionHead icon={TrendingUp} title="Trending Events" to="/events" />
-             <div className="mx-auto flex max-w-2xl flex-col gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {fEvents.slice(0, 4).map((e) => <EventCard key={e.id} event={{ ...e, venue_name: e.location }} />)}
             </div>
           </section>
@@ -97,16 +97,16 @@ function DiscoverPage() {
         {show("Artists") && fArtists.length > 0 && (
           <section>
             <SectionHead icon={Palette} title="Artists to Follow" to="/artists" />
-             <div className="mx-auto flex max-w-2xl flex-col gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {fArtists.slice(0, 6).map((a) => (
                 <Link key={a.id} to="/u/$username" params={{ username: a.username || a.id }}
-                  className="bg-card border border-border rounded-xl p-4 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
-                  <Avatar className="w-16 h-16 mx-auto mb-3">
+                  className="bg-card border border-border rounded-xl p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
+                  <Avatar className="w-20 h-20 mx-auto mb-3">
                     <AvatarImage src={a.avatar_url ?? undefined} />
                     <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a] font-bold">{(a.display_name || a.username || "?").charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <p className="text-sm font-semibold truncate group-hover:text-[#d4580a] transition-colors">{a.display_name || a.username}</p>
-                  {a.neighborhood && <p className="text-xs text-muted-foreground truncate">{a.neighborhood}</p>}
+                  <p className="font-semibold truncate group-hover:text-[#d4580a] transition-colors">{a.display_name || a.username}</p>
+                  <p className="text-xs text-muted-foreground truncate capitalize">{a.role || a.neighborhood || ""}</p>
                 </Link>
               ))}
             </div>
@@ -116,7 +116,7 @@ function DiscoverPage() {
         {show("Communities") && fGroups.length > 0 && (
           <section>
             <SectionHead icon={Users} title="Communities" to="/groups" />
-             <div className="mx-auto flex max-w-2xl flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {fGroups.slice(0, 6).map((g) => <OrgRow key={g.id} o={g} />)}
             </div>
           </section>
@@ -125,16 +125,16 @@ function DiscoverPage() {
         {show("Businesses") && fBiz.length > 0 && (
           <section>
             <SectionHead icon={Building2} title="Businesses" to="/businesses" />
-             <div className="mx-auto flex max-w-2xl flex-col gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {fBiz.slice(0, 6).map((b) => (
                 <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }}
-                  className="bg-card border border-border rounded-xl p-4 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
-                  <Avatar className="w-14 h-14 mx-auto mb-2 rounded-xl">
+                  className="bg-card border border-border rounded-xl p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
+                  <Avatar className="w-20 h-20 mx-auto mb-3 rounded-xl">
                     <AvatarImage src={b.avatar_url ?? undefined} className="rounded-xl" />
                     <AvatarFallback className="rounded-xl bg-[#d4580a]/10 text-[#d4580a] font-bold">{b.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <p className="text-sm font-semibold truncate group-hover:text-[#d4580a] transition-colors">{b.name}</p>
-                  {b.neighborhood && <p className="text-xs text-muted-foreground truncate">{b.neighborhood}</p>}
+                  <p className="font-semibold truncate group-hover:text-[#d4580a] transition-colors">{b.name}</p>
+                  <p className="text-xs text-muted-foreground truncate capitalize">{b.neighborhood || "Business"}</p>
                 </Link>
               ))}
             </div>
@@ -143,8 +143,8 @@ function DiscoverPage() {
 
         {show("Stories") && fStories.length > 0 && (
           <section>
-            <SectionHead icon={BookOpen} title="Trending Stories" to="/stories" />
-             <div className="mx-auto flex max-w-2xl flex-col gap-4">
+            <SectionHead icon={BookOpen} title="Latest Stories" to="/stories" />
+            <div className="flex flex-col gap-4">
               {fStories.slice(0, 4).map((s) => <StoryCard key={s.id} story={s as never} />)}
             </div>
           </section>
@@ -153,12 +153,17 @@ function DiscoverPage() {
         {show("Neighborhoods") && fNbh.length > 0 && (
           <section>
             <SectionHead icon={MapPin} title="Neighborhoods" to="/neighborhoods" />
-             <div className="mx-auto flex max-w-2xl flex-col gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {fNbh.slice(0, 12).map((n) => (
                 <Link key={n.id} to="/neighborhoods"
-                  className="bg-card border border-border rounded-xl p-3 hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
-                  <p className="text-sm font-semibold truncate group-hover:text-[#d4580a] transition-colors">{n.name}</p>
-                  {n.region && <p className="text-xs text-muted-foreground truncate">{n.region}</p>}
+                  className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
+                  <div className="h-24 bg-secondary flex items-center justify-center">
+                    <MapPin className="w-8 h-8 text-muted-foreground/50" />
+                  </div>
+                  <div className="p-3">
+                    <p className="font-semibold truncate group-hover:text-[#d4580a] transition-colors">{n.name}</p>
+                    {n.region && <p className="text-xs text-muted-foreground truncate">{n.region}</p>}
+                  </div>
                 </Link>
               ))}
             </div>
@@ -173,7 +178,7 @@ function OrgRow({ o }: { o: Org }) {
   return (
     <Link to="/o/$slug" params={{ slug: o.slug }}
       className="flex items-center gap-3 bg-card border border-border rounded-xl p-3 hover:shadow-md hover:-translate-y-[1px] transition-all duration-200">
-      <Avatar className="w-12 h-12 rounded-xl flex-shrink-0">
+      <Avatar className="w-14 h-14 rounded-xl flex-shrink-0">
         <AvatarImage src={o.avatar_url ?? undefined} className="rounded-xl" />
         <AvatarFallback className="rounded-xl bg-[#d4580a]/10 text-[#d4580a] font-bold">{o.name.charAt(0)}</AvatarFallback>
       </Avatar>
