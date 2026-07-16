@@ -7,7 +7,7 @@ import { EventCard } from "@/components/shared/event-card";
 import { StoryCard } from "@/components/shared/story-card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Sparkles, TrendingUp, Users, Building2, MapPin, BookOpen } from "lucide-react";
+import { Search, Palette, TrendingUp, Users, Building2, MapPin, BookOpen } from "lucide-react";
 
 type EventRow = { id: string; title: string; description: string | null; image_url: string | null; starts_at: string; location: string | null; category?: string | null };
 type Creator = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood?: string | null; role?: string | null };
@@ -96,7 +96,7 @@ function DiscoverPage() {
 
         {show("Artists") && fArtists.length > 0 && (
           <section>
-            <SectionHead icon={Sparkles} title="Artists to Follow" to="/artists" />
+            <SectionHead icon={Palette} title="Artists to Follow" to="/artists" />
              <div className="mx-auto flex max-w-2xl flex-col gap-3">
               {fArtists.slice(0, 6).map((a) => (
                 <Link key={a.id} to="/u/$username" params={{ username: a.username || a.id }}
@@ -185,7 +185,7 @@ function OrgRow({ o }: { o: Org }) {
   );
 }
 
-function SectionHead({ icon: Icon, title, to }: { icon: typeof Sparkles; title: string; to: string }) {
+function SectionHead({ icon: Icon, title, to }: { icon: typeof Palette; title: string; to: string }) {
   return (
     <div className="flex items-center justify-between mb-4">
       <h2 className="text-lg font-semibold flex items-center gap-2"><Icon className="w-5 h-5" style={{ color: "#d4580a" }} />{title}</h2>

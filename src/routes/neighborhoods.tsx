@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { MapPin, Calendar, X, Building2, Users, Palette, Landmark, Sparkles } from "lucide-react";
+import { MapPin, Calendar, X, Building2, Users, Palette, Landmark } from "lucide-react";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventImage } from "@/components/event-image";
@@ -175,7 +175,7 @@ function NeighborhoodsPage() {
                 { key: "businesses", label: "Businesses", count: businesses.length, Icon: Building2 },
                 { key: "groups", label: "Groups / Communities", count: groups.length, Icon: Users },
                 { key: "artists", label: "Artists", count: artists.length, Icon: Palette },
-                { key: "arts_orgs", label: "Arts Orgs", count: artsOrgs.length, Icon: Sparkles },
+                { key: "arts_orgs", label: "Arts Orgs", count: artsOrgs.length, Icon: Landmark },
                 { key: "associations", label: "Associations", count: associations.length, Icon: Landmark },
               ];
               const activeOrgs =

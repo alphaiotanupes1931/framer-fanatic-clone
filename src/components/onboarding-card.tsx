@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Sparkles, Users, PenLine, Calendar } from "lucide-react";
+import { X, Palette, Users, PenLine, Calendar } from "lucide-react";
 
 const STORAGE_KEY = "pb_onboarding_v3_dismissed";
 
 const steps = [
-  { icon: Sparkles, color: "#d4580a", title: "Follow artists & creators", description: "Discover Baltimore talent and see their updates in your feed.", to: "/artists", cta: "Browse Artists" },
+  { icon: Palette, color: "#d4580a", title: "Follow artists & creators", description: "Discover Baltimore talent and see their updates in your feed.", to: "/artists", cta: "Browse Artists" },
   { icon: Users, color: "#2563eb", title: "Join a community", description: "Find neighborhoods, groups, and organizations near you.", to: "/neighborhoods", cta: "Find Communities" },
   { icon: PenLine, color: "#16a34a", title: "Share something", description: "Post an update, story, or event to connect with the city.", to: "/dashboard", cta: "Create a Post" },
   { icon: Calendar, color: "#7c3aed", title: "Explore local events", description: "RSVP to events happening around Baltimore.", to: "/events", cta: "See Events" },

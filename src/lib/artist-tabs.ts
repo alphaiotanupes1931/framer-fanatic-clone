@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   List, Disc3, Music2, Mic, Ticket, FileText, BookOpen, Calendar, MessageCircle,
   UserPlus2, Layers, Image as ImageIcon, Flame, Headphones, Mail, Shirt,
-  ShoppingBag, Sparkles, Users, Film, Camera, Radio,
+  ShoppingBag, Package, Users, Film, Camera, Radio,
 } from "lucide-react";
 
 export type ArtistTabKey =
@@ -53,7 +53,7 @@ const FASHION: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
   { key: "fashion_line", label: "Fashion Line", Icon: Layers },
   { key: "lookbook", label: "Lookbook", Icon: Shirt },
-  { key: "drops", label: "Drops", Icon: Sparkles },
+  { key: "drops", label: "Drops", Icon: Package },
   { key: "collabs", label: "Collabs", Icon: Users },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
