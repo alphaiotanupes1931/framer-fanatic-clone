@@ -20,6 +20,8 @@ import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
 import { tabsForArtist } from "@/lib/artist-tabs";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { ExternalShareDialog } from "@/components/external-share-dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -67,6 +69,8 @@ function ProfilePage() {
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
+  const [shareInAppOpen, setShareInAppOpen] = useState(false);
+  const [shareExternalOpen, setShareExternalOpen] = useState(false);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploadingBanner, setUploadingBanner] = useState(false);
