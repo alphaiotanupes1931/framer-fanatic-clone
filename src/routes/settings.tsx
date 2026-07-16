@@ -483,7 +483,7 @@ function StripeSection() {
           <li><span className="font-semibold text-foreground">Enter your info.</span> Stripe will ask for your legal name, date of birth, address, and the last 4 of your SSN. This is required by US law for anyone receiving money online. We never see this information.</li>
           <li><span className="font-semibold text-foreground">Add your bank account.</span> Choose the checking account where you want your money to land. Stripe sends payouts every 2 business days.</li>
           <li><span className="font-semibold text-foreground">Come back to Planet Baltimore.</span> Stripe will send you back here automatically. The badge above turns green when you're ready to sell items on the platform.</li>
-          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add Stripe's fee (2.9% + $0.30), the Platform fee, and the City of Baltimore's 10% admissions tax on top, so the buyer pays the total and you keep the full price you set. The total fee is the lowest in the industry.</li>
+          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add Stripe's fee (2.9% + $0.30) and the $0.69 Planet Baltimore platform fee on top, so the buyer pays the total and you keep the full price you set. The total fee is the lowest in the industry.</li>
         </ol>
         <div className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
           Need help? Email <a href="mailto:help@planetbaltimore.com" className="font-semibold text-orange hover:underline">help@planetbaltimore.com</a> and we'll walk you through it over the phone.
