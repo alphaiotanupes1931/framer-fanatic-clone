@@ -376,6 +376,7 @@ export function ReferralNetworkDialog({
             )}
           </div>
         </div>
+      </div>
       </DialogContent>
     </Dialog>
   );
