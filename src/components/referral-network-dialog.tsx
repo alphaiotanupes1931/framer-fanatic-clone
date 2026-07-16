@@ -221,7 +221,7 @@ export function ReferralNetworkDialog({
               <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <Crown className="h-3.5 w-3.5" /> Points Earned
               </div>
-              <div className="mt-1 text-2xl font-bold text-[#d4580a]">{stats.points}</div>
+              <div className="mt-1 text-2xl font-bold text-primary">{stats.points}</div>
             </div>
           </div>
 
