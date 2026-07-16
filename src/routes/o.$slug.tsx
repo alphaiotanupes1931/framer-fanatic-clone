@@ -189,7 +189,7 @@ function OrgProfile() {
           .insert({ organization_id: org.id, user_id: me });
         if (error) throw error;
         setJoined(true);
-        toast.success(`Following ${org.name}`);
+        toast.success(`${isAssoc ? "Joined" : "Following"} ${org.name}`);
       }
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -319,7 +319,7 @@ function OrgProfile() {
             disabled={joining}
             className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
           >
-            <Users className="h-4 w-4" /> {joined ? "Following" : "Follow"}
+            <Users className="h-4 w-4" /> {isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
           </button>
         </div>
       </div>
