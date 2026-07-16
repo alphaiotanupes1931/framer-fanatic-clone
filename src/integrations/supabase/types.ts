@@ -988,6 +988,7 @@ export type Database = {
           likes_count: number
           music_url: string | null
           neighborhood: string | null
+          pin_order: number | null
           post_type: string
           tag: string | null
           text_color: string | null
@@ -1009,6 +1010,7 @@ export type Database = {
           likes_count?: number
           music_url?: string | null
           neighborhood?: string | null
+          pin_order?: number | null
           post_type?: string
           tag?: string | null
           text_color?: string | null
@@ -1030,6 +1032,7 @@ export type Database = {
           likes_count?: number
           music_url?: string | null
           neighborhood?: string | null
+          pin_order?: number | null
           post_type?: string
           tag?: string | null
           text_color?: string | null
