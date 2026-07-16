@@ -94,6 +94,18 @@ function ProfilePage() {
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
+  const [postViewerIdx, setPostViewerIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (postViewerIdx === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPostViewerIdx(null);
+      if (e.key === "ArrowLeft") setPostViewerIdx((i) => (i === null ? null : (i - 1 + myPosts.length) % myPosts.length));
+      if (e.key === "ArrowRight") setPostViewerIdx((i) => (i === null ? null : (i + 1) % myPosts.length));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [postViewerIdx, myPosts.length]);
 
   useEffect(() => {
     if (!TABS.includes(tab)) setTab(TABS[0]);
