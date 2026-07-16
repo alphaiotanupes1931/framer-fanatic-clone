@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight } from "lucide-react";
 import { Flag } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ type Post = {
   content: string;
   image_url: string | null;
   video_url?: string | null;
+  media_urls?: string[] | null;
   music_url?: string | null;
   post_type?: string | null;
   bg_color?: string | null;
@@ -54,6 +55,24 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
   const [reportOpen, setReportOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [mediaIdx, setMediaIdx] = useState(0);
+
+  // Build unified media list. Prefer media_urls; fall back to legacy image_url / video_url.
+  const mediaList: { url: string; kind: "image" | "video" }[] = (() => {
+    const list: { url: string; kind: "image" | "video" }[] = [];
+    const inferKind = (u: string): "image" | "video" =>
+      /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u) ? "video" : "image";
+    if (post.media_urls && post.media_urls.length) {
+      for (const u of post.media_urls) list.push({ url: u, kind: inferKind(u) });
+    } else {
+      if (post.image_url) list.push({ url: post.image_url, kind: "image" });
+      if (post.video_url) list.push({ url: post.video_url, kind: "video" });
+    }
+    return list;
+  })();
+  const current = mediaList[mediaIdx];
+  const prevMedia = () => setMediaIdx((i) => (i - 1 + mediaList.length) % mediaList.length);
+  const nextMedia = () => setMediaIdx((i) => (i + 1) % mediaList.length);
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -192,31 +211,60 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
-      {post.image_url && (
-        <Link
-          to="/posts/$postId"
-          params={{ postId: post.id }}
-          className="mt-3 block w-full overflow-hidden focus:outline-none"
-        >
-          <img
-            src={post.image_url}
-            alt=""
-            className="w-full cursor-pointer"
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-          />
-        </Link>
-      )}
-      {post.video_url && (
-        <video
-          src={post.video_url}
-          controls
-          playsInline
-          preload="metadata"
-          className="mt-3 w-full max-h-[70vh] bg-black"
-        />
+      {current && (
+        <div className="relative mt-3 w-full">
+          {current.kind === "image" ? (
+            <Link
+              to="/posts/$postId"
+              params={{ postId: post.id }}
+              className="block w-full overflow-hidden focus:outline-none"
+            >
+              <img
+                src={current.url}
+                alt=""
+                className="w-full cursor-pointer"
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              />
+            </Link>
+          ) : (
+            <video
+              key={current.url}
+              src={current.url}
+              controls
+              playsInline
+              preload="metadata"
+              className="w-full max-h-[70vh] bg-black"
+            />
+          )}
+          {mediaList.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); prevMedia(); }}
+                aria-label="Previous"
+                className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); nextMedia(); }}
+                aria-label="Next"
+                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-full bg-black/40 px-2 py-1">
+                {mediaList.map((_, i) => (
+                  <span key={i} className={`h-1.5 w-1.5 rounded-full ${i === mediaIdx ? "bg-white" : "bg-white/50"}`} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       )}
       {post.content && (
         (post.post_type === "text" && post.bg_color) ? (
