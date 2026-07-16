@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff } from "lucide-react";
+import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, Gift } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { ExternalShareDialog } from "@/components/external-share-dialog";
+import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -79,12 +80,13 @@ function ProfilePage() {
     : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
-  const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
+  const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
   const [shareInAppOpen, setShareInAppOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [shareExternalOpen, setShareExternalOpen] = useState(false);
+  const [referralOpen, setReferralOpen] = useState(false);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploadingBanner, setUploadingBanner] = useState(false);
@@ -101,12 +103,13 @@ function ProfilePage() {
   useEffect(() => {
     if (!profile) return;
     (async () => {
-      const [{ count: posts }, { count: followers }, { count: following }] = await Promise.all([
+      const [{ count: posts }, { count: followers }, { count: following }, { count: referrals }] = await Promise.all([
         supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", profile.id).eq("is_deleted", false),
         supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", profile.id),
         supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", profile.id),
+        supabase.from("invites").select("id", { count: "exact", head: true }).eq("invited_by", profile.id),
       ]);
-      setStats({ posts: posts || 0, followers: followers || 0, following: following || 0 });
+      setStats({ posts: posts || 0, followers: followers || 0, following: following || 0, referrals: referrals || 0 });
     })();
   }, [profile]);
 
@@ -275,6 +278,7 @@ function ProfilePage() {
               <Link to="/edit-profile" aria-label="Edit profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <button type="button" onClick={() => setInviteOpen(true)} aria-label="Invite friends" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
+              <button type="button" onClick={() => setReferralOpen(true)} aria-label="Referral network" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><Gift className="h-4 w-4" /></button>
             </div>
           </div>
 
@@ -358,7 +362,11 @@ function ProfilePage() {
             <div><div className="text-base font-bold sm:text-lg">{stats.posts}</div><div className="text-muted-foreground">Posts</div></div>
             <button type="button" onClick={() => setFollowList("followers")} className="hover:text-[#d4580a]"><div className="text-base font-bold sm:text-lg">{stats.followers}</div><div className="text-muted-foreground">Followers</div></button>
             <button type="button" onClick={() => setFollowList("following")} className="hover:text-[#d4580a]"><div className="text-base font-bold sm:text-lg">{stats.following}</div><div className="text-muted-foreground">Following</div></button>
-            <div><div className="text-base font-bold sm:text-lg">0</div><div className="text-muted-foreground">Referrals</div></div>
+            <button type="button" onClick={() => setReferralOpen(true)} className="group relative rounded-lg px-2 py-1 transition hover:bg-[#d4580a]/10 hover:text-[#d4580a] sm:px-3">
+              <div className="text-base font-bold sm:text-lg">{stats.referrals ?? 0}</div>
+              <div className="text-muted-foreground group-hover:text-[#d4580a]">Referrals</div>
+              <span className="absolute -right-1 -top-1 hidden h-2 w-2 rounded-full bg-[#d4580a] sm:block" />
+            </button>
           </div>
 
           {profile && followList && (
@@ -515,6 +523,11 @@ function ProfilePage() {
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
         inviteUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile?.username ?? ""}`}
+      />
+      <ReferralNetworkDialog
+        open={referralOpen}
+        onClose={() => setReferralOpen(false)}
+        profile={profile}
       />
     </AppLayout>
   );
