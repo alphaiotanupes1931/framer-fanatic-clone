@@ -275,7 +275,6 @@ function ProfilePage() {
               <Link to="/edit-profile" aria-label="Edit profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <button type="button" onClick={() => setInviteOpen(true)} aria-label="Invite friends" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
-              <button type="button" onClick={() => setShareExternalOpen(true)} aria-label="Share profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Share2 className="h-4 w-4" /></button>
             </div>
           </div>
 
