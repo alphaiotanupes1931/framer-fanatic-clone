@@ -108,7 +108,7 @@ function ProfilePage() {
         supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", profile.id),
         supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", profile.id),
       ]);
-      setStats({ posts: posts || 0, followers: followers || 0, following: following || 0 });
+      setStats({ posts: posts || 0, followers: followers || 0, following: following || 0, referrals: 0 });
     })();
   }, [profile]);
 
