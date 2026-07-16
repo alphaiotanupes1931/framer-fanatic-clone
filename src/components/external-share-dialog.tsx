@@ -1,5 +1,10 @@
-import { X, Twitter, Facebook, Linkedin, MessageCircle, Mail, Link as LinkIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Twitter, Facebook, Linkedin, MessageCircle, Mail, Copy, Users, Instagram, Send as SendIcon } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useCurrentProfile } from "@/components/app-layout";
+
+type Person = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
 
 export function ExternalShareDialog({
   open,
@@ -12,51 +17,145 @@ export function ExternalShareDialog({
   url: string;
   title?: string;
 }) {
+  const me = useCurrentProfile();
+  const [people, setPeople] = useState<Person[]>([]);
+  const [sendingTo, setSendingTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open || !me?.id) return;
+    (async () => {
+      const [flw, fwg] = await Promise.all([
+        supabase.from("follows").select("follower_id").eq("following_id", me.id),
+        supabase.from("follows").select("following_id").eq("follower_id", me.id),
+      ]);
+      const ids = Array.from(new Set([
+        ...(flw.data ?? []).map((r: { follower_id: string }) => r.follower_id),
+        ...(fwg.data ?? []).map((r: { following_id: string }) => r.following_id),
+      ])).filter((id) => id !== me.id);
+      if (!ids.length) { setPeople([]); return; }
+      const { data } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+      setPeople(((data as Person[]) ?? []).slice(0, 12));
+    })();
+  }, [open, me?.id]);
+
   if (!open) return null;
   const text = title || "Check this out on Planet Baltimore";
   const enc = encodeURIComponent;
   const apps = [
-    { name: "X / Twitter", icon: Twitter, href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`, color: "#000" },
     { name: "Facebook", icon: Facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`, color: "#1877F2" },
-    { name: "LinkedIn", icon: Linkedin, href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`, color: "#0A66C2" },
+    { name: "X (Twitter)", icon: Twitter, href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`, color: "#000000" },
+    { name: "IG Stories", icon: Instagram, href: `https://www.instagram.com/`, color: "#E1306C" },
     { name: "WhatsApp", icon: MessageCircle, href: `https://wa.me/?text=${enc(text + " " + url)}`, color: "#25D366" },
-    { name: "Messages", icon: MessageCircle, href: `sms:?&body=${enc(text + " " + url)}`, color: "#34C759" },
-    { name: "Email", icon: Mail, href: `mailto:?subject=${enc(text)}&body=${enc(url)}`, color: "#6b7280" },
+    { name: "LinkedIn", icon: Linkedin, href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`, color: "#0A66C2" },
+    { name: "Telegram", icon: SendIcon, href: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`, color: "#26A5E4" },
+    { name: "Email", icon: Mail, href: `mailto:?subject=${enc(text)}&body=${enc(url)}`, color: "#d4580a" },
+    { name: "Message", icon: MessageCircle, href: `sms:?&body=${enc(text + " " + url)}`, color: "#25D366" },
   ];
 
   const copy = async () => {
-    try { await navigator.clipboard.writeText(url); toast.success("Link copied"); } catch { /* noop */ }
+    try { await navigator.clipboard.writeText(url); toast.success("Link copied"); } catch { toast.error("Could not copy"); }
   };
 
+  const sendToPerson = async (uid: string) => {
+    if (!me) { toast.error("Sign in first"); return; }
+    setSendingTo(uid);
+    try {
+      const { data: mine } = await supabase.from("conversation_members").select("conversation_id").eq("user_id", me.id);
+      const myIds = (mine ?? []).map((r: { conversation_id: string }) => r.conversation_id);
+      let convId: string | null = null;
+      if (myIds.length) {
+        const { data: shared } = await supabase.from("conversation_members").select("conversation_id").eq("user_id", uid).in("conversation_id", myIds);
+        convId = (shared ?? [])[0]?.conversation_id ?? null;
+      }
+      if (!convId) {
+        const { data: conv, error } = await supabase.from("conversations").insert({
+          is_group: false, created_by: me.id, user_a: me.id, user_b: uid,
+          last_message_preview: (title || url).slice(0, 140),
+        }).select("id").single();
+        if (error || !conv) throw error || new Error("Could not create conversation");
+        convId = conv.id;
+        const { error: mErr } = await supabase.from("conversation_members").insert([
+          { conversation_id: convId, user_id: me.id },
+          { conversation_id: convId, user_id: uid },
+        ]);
+        if (mErr) throw mErr;
+      }
+      const body = `${title ? title + "\n" : ""}${url}`;
+      const { error: msgErr } = await supabase.from("messages").insert({ conversation_id: convId, sender_id: me.id, content: body });
+      if (msgErr) throw msgErr;
+      toast.success("Sent");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to send");
+    } finally {
+      setSendingTo(null);
+    }
+  };
+
+  const initial = (name: string | null | undefined) => (name || "U").trim()[0]?.toUpperCase() || "U";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-t-2xl bg-background p-5 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
-          <div className="text-base font-semibold">Share to</div>
-          <button onClick={onClose} className="rounded-full p-1 hover:bg-secondary" aria-label="Close"><X className="h-4 w-4" /></button>
+    <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
+      <div className="w-full max-w-md overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 pb-2 pt-5">
+          <div className="text-lg font-bold text-neutral-900">Share</div>
+          <button onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100" aria-label="Close"><X className="h-5 w-5" /></button>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+
+        <div className="px-5">
+          <input readOnly value={title || ""} className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900" />
+        </div>
+
+        <div className="px-5 pt-4">
+          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-800">
+            <Users className="h-4 w-4" /> Send to people you know
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {people.length === 0 ? (
+              <div className="text-xs text-neutral-500">Follow people to share with them directly.</div>
+            ) : (
+              people.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  disabled={sendingTo === p.id}
+                  onClick={() => sendToPerson(p.id)}
+                  className="flex w-14 flex-shrink-0 flex-col items-center gap-1 text-center disabled:opacity-50"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 text-sm font-bold text-neutral-700">
+                    {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : initial(p.display_name || p.username)}
+                  </div>
+                  <div className="w-full truncate text-[11px] text-neutral-700">{(p.display_name || p.username || "").split(" ")[0]}</div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 px-5 pt-3">
           {apps.map((a) => (
             <a
               key={a.name}
               href={a.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 rounded-xl border border-border p-3 hover:bg-secondary"
+              className="flex flex-col items-center gap-1.5"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full text-white" style={{ backgroundColor: a.color }}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full text-white" style={{ backgroundColor: a.color }}>
                 <a.icon className="h-5 w-5" />
               </div>
-              <div className="text-xs font-medium text-center">{a.name}</div>
+              <div className="text-xs font-medium text-neutral-800">{a.name}</div>
             </a>
           ))}
         </div>
-        <button
-          onClick={copy}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-border py-2.5 text-sm font-medium hover:bg-secondary"
-        >
-          <LinkIcon className="h-4 w-4" /> Copy link
-        </button>
+
+        <div className="px-5 py-4">
+          <div className="flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2">
+            <div className="min-w-0 flex-1 truncate text-xs text-neutral-700">{url}</div>
+            <button onClick={copy} className="flex items-center gap-1.5 rounded-md bg-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-300">
+              <Copy className="h-3.5 w-3.5" /> Copy
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
