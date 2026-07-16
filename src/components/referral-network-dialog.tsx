@@ -314,7 +314,7 @@ export function ReferralNetworkDialog({
                 <Button
                   onClick={handleSendInvite}
                   disabled={sending || !email.trim()}
-                  className="w-full gap-2 bg-[#d4580a] hover:opacity-90"
+                  className="w-full gap-2 bg-primary hover:opacity-90"
                 >
                   {sending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
