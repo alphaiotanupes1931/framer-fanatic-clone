@@ -31,6 +31,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GroupsRouteImport } from './routes/groups'
+import { Route as EditProfileRouteImport } from './routes/edit-profile'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CreateVisitorRouteImport } from './routes/create-visitor'
@@ -176,6 +177,11 @@ const LeaderboardRoute = LeaderboardRouteImport.update({
 const GroupsRoute = GroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditProfileRoute = EditProfileRouteImport.update({
+  id: '/edit-profile',
+  path: '/edit-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverRoute = DiscoverRouteImport.update({
@@ -381,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
+  '/edit-profile': typeof EditProfileRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
@@ -441,6 +448,7 @@ export interface FileRoutesByTo {
   '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
+  '/edit-profile': typeof EditProfileRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
@@ -502,6 +510,7 @@ export interface FileRoutesById {
   '/create-visitor': typeof CreateVisitorRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
+  '/edit-profile': typeof EditProfileRoute
   '/groups': typeof GroupsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
@@ -564,6 +573,7 @@ export interface FileRouteTypes {
     | '/create-visitor'
     | '/dashboard'
     | '/discover'
+    | '/edit-profile'
     | '/groups'
     | '/leaderboard'
     | '/marketplace'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/create-visitor'
     | '/dashboard'
     | '/discover'
+    | '/edit-profile'
     | '/groups'
     | '/leaderboard'
     | '/marketplace'
@@ -684,6 +695,7 @@ export interface FileRouteTypes {
     | '/create-visitor'
     | '/dashboard'
     | '/discover'
+    | '/edit-profile'
     | '/groups'
     | '/leaderboard'
     | '/marketplace'
@@ -745,6 +757,7 @@ export interface RootRouteChildren {
   CreateVisitorRoute: typeof CreateVisitorRoute
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
+  EditProfileRoute: typeof EditProfileRoute
   GroupsRoute: typeof GroupsRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
@@ -938,6 +951,13 @@ declare module '@tanstack/react-router' {
       path: '/groups'
       fullPath: '/groups'
       preLoaderRoute: typeof GroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/edit-profile': {
+      id: '/edit-profile'
+      path: '/edit-profile'
+      fullPath: '/edit-profile'
+      preLoaderRoute: typeof EditProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover': {
@@ -1228,6 +1248,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateVisitorRoute: CreateVisitorRoute,
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
+  EditProfileRoute: EditProfileRoute,
   GroupsRoute: GroupsRoute,
   LeaderboardRoute: LeaderboardRoute,
   MarketplaceRoute: MarketplaceRouteWithChildren,
