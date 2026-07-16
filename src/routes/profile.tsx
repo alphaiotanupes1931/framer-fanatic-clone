@@ -406,7 +406,7 @@ function ProfilePage() {
                     No posts yet. Share something with the community!
                   </div>
                 ) : (
-                  isArtist ? (
+                  (isArtist && tab === "Posts") ? (
                     <div className="grid grid-cols-3 gap-3">
                       {myPosts.map((p) => (
                         <Link
