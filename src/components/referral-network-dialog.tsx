@@ -22,6 +22,7 @@ import {
   Loader2,
   Crown,
   Send,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,15 +167,23 @@ export function ReferralNetworkDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0 top-[5%] translate-y-0">
-        <div className="flex max-h-[90vh] flex-col">
-          <div className="bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground">
+      <DialogContent className="w-[95vw] max-w-xl max-h-[85vh] overflow-hidden p-0 gap-0">
+        <div className="flex max-h-[85vh] flex-col">
+          <div className="relative bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground">
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Close"
+              className="absolute right-3 top-3 rounded-full bg-white/15 p-1.5 text-primary-foreground transition hover:bg-white/25"
+            >
+              <X className="h-4 w-4" />
+            </button>
             <DialogHeader className="pb-2">
-              <DialogTitle className="flex items-center gap-2 text-xl text-primary-foreground">
+              <DialogTitle className="flex items-center gap-2 pr-8 text-xl text-primary-foreground">
                 <Gift className="h-5 w-5" /> Your Referral Network
               </DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-primary-foreground/90">
+            <p className="pr-8 text-sm text-primary-foreground/90">
               Invite friends to Planet Baltimore and earn points at every level of the chain.
             </p>
           </div>
