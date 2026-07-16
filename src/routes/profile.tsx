@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, ArrowUp, ArrowDown } from "lucide-react";
+import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -160,24 +160,6 @@ function ProfilePage() {
         toast.success("Unpinned");
       }
     }
-  };
-
-  const handleReorderPin = async (id: string, direction: -1 | 1) => {
-    const pinned = myPosts.filter((p) => p.is_pinned).sort((a, b) => (a.pin_order ?? 0) - (b.pin_order ?? 0));
-    const idx = pinned.findIndex((p) => p.id === id);
-    const swapIdx = idx + direction;
-    if (idx < 0 || swapIdx < 0 || swapIdx >= pinned.length) return;
-    const a = pinned[idx];
-    const b = pinned[swapIdx];
-    const aOrder = a.pin_order ?? idx;
-    const bOrder = b.pin_order ?? swapIdx;
-    setMyPosts((prev) => sortPosts(prev.map((p) => {
-      if (p.id === a.id) return { ...p, pin_order: bOrder };
-      if (p.id === b.id) return { ...p, pin_order: aOrder };
-      return p;
-    })));
-    await supabase.from("posts").update({ pin_order: bOrder } as any).eq("id", a.id);
-    await supabase.from("posts").update({ pin_order: aOrder } as any).eq("id", b.id);
   };
 
   useEffect(() => {
