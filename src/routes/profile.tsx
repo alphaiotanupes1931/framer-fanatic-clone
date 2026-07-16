@@ -103,12 +103,13 @@ function ProfilePage() {
   useEffect(() => {
     if (!profile) return;
     (async () => {
-      const [{ count: posts }, { count: followers }, { count: following }] = await Promise.all([
+      const [{ count: posts }, { count: followers }, { count: following }, { count: referrals }] = await Promise.all([
         supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", profile.id).eq("is_deleted", false),
         supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", profile.id),
         supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", profile.id),
+        supabase.from("invites").select("id", { count: "exact", head: true }).eq("invited_by", profile.id),
       ]);
-      setStats({ posts: posts || 0, followers: followers || 0, following: following || 0, referrals: 0 });
+      setStats({ posts: posts || 0, followers: followers || 0, following: following || 0, referrals: referrals || 0 });
     })();
   }, [profile]);
 
