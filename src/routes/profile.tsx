@@ -455,6 +455,18 @@ function ProfilePage() {
         </div>
       </div>
       <MessageFollowersModal open={msgOpen} onClose={() => setMsgOpen(false)} />
+      <ShareToUsersDialog
+        open={shareInAppOpen}
+        onClose={() => setShareInAppOpen(false)}
+        url={`${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile?.username ?? ""}`}
+        title={profile?.display_name || profile?.username || "Profile"}
+      />
+      <ExternalShareDialog
+        open={shareExternalOpen}
+        onClose={() => setShareExternalOpen(false)}
+        url={`${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile?.username ?? ""}`}
+        title={`${profile?.display_name || profile?.username || "Profile"} on Planet Baltimore`}
+      />
     </AppLayout>
   );
 }
