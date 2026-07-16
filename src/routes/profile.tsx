@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff } from "lucide-react";
+import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, ArrowUp, ArrowDown } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -31,6 +31,18 @@ export const Route = createFileRoute("/profile")({
 
 const TABS_ARTIST_BASE = ["Posts","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Dashboard","Stripe"] as const;
 const TABS_RESIDENT_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
+
+function sortPosts(rows: any[]) {
+  return [...rows].sort((a, b) => {
+    const ap = a.is_pinned ? 1 : 0;
+    const bp = b.is_pinned ? 1 : 0;
+    if (ap !== bp) return bp - ap;
+    if (a.is_pinned && b.is_pinned) {
+      return (a.pin_order ?? 0) - (b.pin_order ?? 0);
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
   "Feed": Rss,
@@ -114,13 +126,7 @@ function ProfilePage() {
         author_avatar: profile.avatar_url,
       };
       const rows = (data || []).map((p: any) => ({ ...p, ...author }));
-      rows.sort((a: any, b: any) => {
-        const ap = a.is_pinned ? 1 : 0;
-        const bp = b.is_pinned ? 1 : 0;
-        if (ap !== bp) return bp - ap;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-      setMyPosts(rows);
+      setMyPosts(sortPosts(rows));
     })();
   }, [profile]);
 
@@ -130,23 +136,48 @@ function ProfilePage() {
   };
 
   const handleTogglePin = async (id: string, next: boolean) => {
-    setMyPosts((prev) => {
-      const updated = prev.map((p) => (p.id === id ? { ...p, is_pinned: next } : p));
-      updated.sort((a: any, b: any) => {
-        const ap = a.is_pinned ? 1 : 0;
-        const bp = b.is_pinned ? 1 : 0;
-        if (ap !== bp) return bp - ap;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-      return updated;
-    });
-    const { error } = await supabase.from("posts").update({ is_pinned: next }).eq("id", id);
-    if (error) {
-      toast.error("Could not update pin");
-      setMyPosts((prev) => prev.map((p) => (p.id === id ? { ...p, is_pinned: !next } : p)));
+    if (next) {
+      const pinnedCount = myPosts.filter((p) => p.is_pinned).length;
+      if (pinnedCount >= 3) {
+        toast.error("You can only pin up to 3 posts. Unpin one first.");
+        return;
+      }
+      const nextOrder = pinnedCount;
+      setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: true, pin_order: nextOrder } : p))));
+      const { error } = await supabase.from("posts").update({ is_pinned: true, pin_order: nextOrder } as any).eq("id", id);
+      if (error) {
+        toast.error("Could not update pin");
+        setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: false, pin_order: null } : p))));
+      } else {
+        toast.success("Pinned to top");
+      }
     } else {
-      toast.success(next ? "Pinned to top" : "Unpinned");
+      setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: false, pin_order: null } : p))));
+      const { error } = await supabase.from("posts").update({ is_pinned: false, pin_order: null } as any).eq("id", id);
+      if (error) {
+        toast.error("Could not update pin");
+      } else {
+        toast.success("Unpinned");
+      }
     }
+  };
+
+  const handleReorderPin = async (id: string, direction: -1 | 1) => {
+    const pinned = myPosts.filter((p) => p.is_pinned).sort((a, b) => (a.pin_order ?? 0) - (b.pin_order ?? 0));
+    const idx = pinned.findIndex((p) => p.id === id);
+    const swapIdx = idx + direction;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= pinned.length) return;
+    const a = pinned[idx];
+    const b = pinned[swapIdx];
+    const aOrder = a.pin_order ?? idx;
+    const bOrder = b.pin_order ?? swapIdx;
+    setMyPosts((prev) => sortPosts(prev.map((p) => {
+      if (p.id === a.id) return { ...p, pin_order: bOrder };
+      if (p.id === b.id) return { ...p, pin_order: aOrder };
+      return p;
+    })));
+    await supabase.from("posts").update({ pin_order: bOrder } as any).eq("id", a.id);
+    await supabase.from("posts").update({ pin_order: aOrder } as any).eq("id", b.id);
   };
 
   useEffect(() => {
@@ -448,6 +479,12 @@ function ProfilePage() {
                           {p.is_pinned && (
                             <div className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow">Pinned</div>
                           )}
+                          {p.is_pinned && (
+                            <div className="absolute left-2 bottom-2 z-10 flex gap-1">
+                              <button type="button" onClick={(e) => { e.preventDefault(); handleReorderPin(p.id, -1); }} className="rounded-full bg-white/90 p-1 shadow hover:bg-white" title="Move up"><ArrowUp className="h-3.5 w-3.5" /></button>
+                              <button type="button" onClick={(e) => { e.preventDefault(); handleReorderPin(p.id, 1); }} className="rounded-full bg-white/90 p-1 shadow hover:bg-white" title="Move down"><ArrowDown className="h-3.5 w-3.5" /></button>
+                            </div>
+                          )}
                           <Link
                             to="/posts/$postId"
                             params={{ postId: p.id }}
@@ -488,14 +525,22 @@ function ProfilePage() {
                             </div>
                           )}
                           <PostCard post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
-                          <button
+                          <div className="absolute right-3 top-3 z-10 flex gap-1">
+                            {p.is_pinned && (
+                              <>
+                                <button type="button" onClick={() => handleReorderPin(p.id, -1)} className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white" title="Move up"><ArrowUp className="h-4 w-4" /></button>
+                                <button type="button" onClick={() => handleReorderPin(p.id, 1)} className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white" title="Move down"><ArrowDown className="h-4 w-4" /></button>
+                              </>
+                            )}
+                            <button
                             type="button"
                             onClick={() => handleTogglePin(p.id, !p.is_pinned)}
-                            className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
+                            className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
                             title={p.is_pinned ? "Unpin" : "Pin to top"}
                           >
                             {p.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
                           </button>
+                          </div>
                         </div>
                       ))}
                     </div>
