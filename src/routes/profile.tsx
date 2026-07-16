@@ -490,26 +490,7 @@ function ProfilePage() {
                     No posts yet. Share something with the community!
                   </div>
                 ) : (
-                  (isArtist && tab === "Posts") ? (
-                    <div className="grid grid-cols-3 gap-3">
-                      {myPosts.map((p) => (
-                        <div key={p.id} className="relative group">
-                          <button
-                            type="button"
-                            onClick={(e) => { e.preventDefault(); handleTogglePin(p.id, !p.is_pinned); }}
-                            className="absolute right-2 top-2 z-10 rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
-                            title={p.is_pinned ? "Unpin" : "Pin to top"}
-                          >
-                            {p.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
-                          </button>
-                          {p.is_pinned && (
-                            <div className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow">Pinned</div>
-                          )}
-                          <PostCard post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
+                  tab === "Feed" ? (
                     <div className="space-y-4">
                       {myPosts.map((p) => (
                         <div key={p.id} className="relative">
@@ -531,6 +512,56 @@ function ProfilePage() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  ) : (
+                    <div className={`grid gap-2 ${isArtist ? "grid-cols-2" : "grid-cols-3"}`}>
+                      {myPosts.map((p, idx) => {
+                        const media: string[] = (p.media_urls && p.media_urls.length)
+                          ? p.media_urls
+                          : [p.image_url, p.video_url].filter(Boolean);
+                        const thumb = media[0] || null;
+                        const isVideo = thumb ? /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(thumb) : false;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => setPostViewerIdx(idx)}
+                            className="relative aspect-square overflow-hidden rounded-md bg-neutral-100 group"
+                          >
+                            {thumb ? (
+                              isVideo ? (
+                                <video src={thumb} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                              ) : (
+                                <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
+                              )
+                            ) : (
+                              <div
+                                className="flex h-full w-full items-center justify-center p-3 text-center text-[11px] font-medium leading-tight text-foreground"
+                                style={p.bg_color ? { background: p.bg_color, color: p.text_color || "#fff" } : undefined}
+                              >
+                                <span className="line-clamp-6">{p.content || "Post"}</span>
+                              </div>
+                            )}
+                            {media.length > 1 && (
+                              <div className="absolute right-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                                1/{media.length}
+                              </div>
+                            )}
+                            {isVideo && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="rounded-full bg-black/50 p-2 text-white">
+                                  <Play className="h-5 w-5 fill-current" />
+                                </div>
+                              </div>
+                            )}
+                            {p.is_pinned && (
+                              <div className="absolute left-1.5 top-1.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary-foreground">
+                                Pinned
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   )
                 )
