@@ -984,13 +984,13 @@ function ArtistEventsTab({ userId }: { userId: string }) {
       {upcoming.length > 0 && (
         <div>
           <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">UPCOMING</div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{upcoming.map(renderCard)}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{upcoming.map(renderCard)}</div>
         </div>
       )}
       {past.length > 0 && (
         <div>
           <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">PAST</div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{past.map(renderCard)}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{past.map(renderCard)}</div>
         </div>
       )}
     </div>
