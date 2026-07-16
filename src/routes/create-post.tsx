@@ -54,6 +54,7 @@ function CreatePostPage() {
   const [content, setContent] = useState("");
   const [imagePath, setImagePath] = useState("");
   const [videoPath, setVideoPath] = useState("");
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const [neighborhood, setNeighborhood] = useState("");
   const [category, setCategory] = useState<string>("General");
   const [tag, setTag] = useState<string>("");
@@ -67,8 +68,8 @@ function CreatePostPage() {
 
   const contentValid = content.trim().length === 0 || content.trim().length <= 2000;
   const hasMedia =
-    (postType === "photo" && !!imagePath) ||
-    (postType === "video" && !!videoPath);
+    (postType === "photo" && (mediaUrls.length > 0 || !!imagePath)) ||
+    (postType === "video" && (mediaUrls.length > 0 || !!videoPath));
   const canSubmit =
     contentValid &&
     (postType === "text" ? content.trim().length > 0 : hasMedia || content.trim().length > 0);
@@ -117,8 +118,9 @@ function CreatePostPage() {
       const { error } = await supabase.from("posts").insert({
         user_id: me.id,
         content: content.trim(),
-        image_url: postType === "photo" ? (imagePath || null) : null,
-        video_url: postType === "video" ? (videoPath || null) : null,
+        image_url: postType === "photo" ? (mediaUrls[0] || imagePath || null) : null,
+        video_url: postType === "video" ? (mediaUrls.find((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) || videoPath || null) : null,
+        media_urls: mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
         music_url: null,
         post_type: postType,
         bg_color: postType === "text" && bg.bg ? bg.bg : null,
@@ -222,59 +224,89 @@ function CreatePostPage() {
 
           {postType === "photo" && (
             <div className="space-y-1.5">
-              <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                const f = e.target.files?.[0]; if (!f) return;
-                const p = await uploadTo("post-media", f, "image"); if (p) setImagePath(p);
+              <input ref={imageRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={async (e) => {
+                const files = Array.from(e.target.files ?? []);
+                if (!files.length) return;
+                for (const f of files) {
+                  const kind: "image" | "video" = f.type.startsWith("video/") ? "video" : "image";
+                  const p = await uploadTo("post-media", f, kind);
+                  if (p) setMediaUrls((prev) => [...prev, p]);
+                }
+                if (imageRef.current) imageRef.current.value = "";
               }} />
-              {imagePath ? (
-                <div className="relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
-                  <img src={imagePath} alt="Preview" className="max-h-[420px] w-full object-contain bg-black/5" />
-                  <div className="flex items-center justify-between px-3 py-2 text-xs text-neutral-600">
-                    <span className="truncate">Preview — this is how your image will appear.</span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button type="button" onClick={() => imageRef.current?.click()} className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs font-medium hover:bg-neutral-100" disabled={uploading}>
-                        Replace
-                      </button>
-                      <button type="button" onClick={() => setImagePath("")} className="rounded-md p-1 text-neutral-500 hover:text-neutral-900" aria-label="Remove image">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
+              {mediaUrls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {mediaUrls.map((u, i) => {
+                    const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
+                    return (
+                      <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+                        {isVideo ? (
+                          <video src={u} className="h-32 w-full object-cover" />
+                        ) : (
+                          <img src={u} alt="" className="h-32 w-full object-cover" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setMediaUrls((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100"
+                          aria-label="Remove"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
-              ) : (
-                <Button type="button" variant="outline" onClick={() => imageRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
-                  {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />} Upload image
-                </Button>
               )}
+              <Button type="button" variant="outline" onClick={() => imageRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
+                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+                {mediaUrls.length ? "Add more" : "Upload images or videos"}
+              </Button>
+              <p className="text-xs text-neutral-500">You can upload multiple images and videos in one post.</p>
             </div>
           )}
 
           {postType === "video" && (
             <div className="space-y-1.5">
-              <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={async (e) => {
-                const f = e.target.files?.[0]; if (!f) return;
-                const p = await uploadTo("post-media", f, "video"); if (p) setVideoPath(p);
+              <input ref={videoRef} type="file" accept="video/*,image/*" multiple className="hidden" onChange={async (e) => {
+                const files = Array.from(e.target.files ?? []);
+                if (!files.length) return;
+                for (const f of files) {
+                  const kind: "image" | "video" = f.type.startsWith("video/") ? "video" : "image";
+                  const p = await uploadTo("post-media", f, kind);
+                  if (p) setMediaUrls((prev) => [...prev, p]);
+                }
+                if (videoRef.current) videoRef.current.value = "";
               }} />
-              {videoPath ? (
-                <div className="relative overflow-hidden rounded-lg border border-neutral-200 bg-black">
-                  <video src={videoPath} controls className="max-h-[420px] w-full bg-black" />
-                  <div className="flex items-center justify-between bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-                    <span className="truncate">Preview — this is how your video will appear.</span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button type="button" onClick={() => videoRef.current?.click()} className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs font-medium hover:bg-neutral-100" disabled={uploading}>
-                        Replace
-                      </button>
-                      <button type="button" onClick={() => setVideoPath("")} className="rounded-md p-1 text-neutral-500 hover:text-neutral-900" aria-label="Remove video">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
+              {mediaUrls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {mediaUrls.map((u, i) => {
+                    const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
+                    return (
+                      <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+                        {isVideo ? (
+                          <video src={u} className="h-32 w-full object-cover" />
+                        ) : (
+                          <img src={u} alt="" className="h-32 w-full object-cover" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setMediaUrls((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100"
+                          aria-label="Remove"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
-              ) : (
-                <Button type="button" variant="outline" onClick={() => videoRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
-                  {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <VideoIcon className="mr-2 h-4 w-4" />} Upload video (max 100MB)
-                </Button>
               )}
+              <Button type="button" variant="outline" onClick={() => videoRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
+                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <VideoIcon className="mr-2 h-4 w-4" />}
+                {mediaUrls.length ? "Add more" : "Upload videos or images"}
+              </Button>
+              <p className="text-xs text-neutral-500">Max 50MB per video. You can add multiple items.</p>
             </div>
           )}
 

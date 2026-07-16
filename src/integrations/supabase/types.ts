@@ -986,6 +986,7 @@ export type Database = {
           is_deleted: boolean
           is_pinned: boolean
           likes_count: number
+          media_urls: string[]
           music_url: string | null
           neighborhood: string | null
           pin_order: number | null
@@ -1008,6 +1009,7 @@ export type Database = {
           is_deleted?: boolean
           is_pinned?: boolean
           likes_count?: number
+          media_urls?: string[]
           music_url?: string | null
           neighborhood?: string | null
           pin_order?: number | null
@@ -1030,6 +1032,7 @@ export type Database = {
           is_deleted?: boolean
           is_pinned?: boolean
           likes_count?: number
+          media_urls?: string[]
           music_url?: string | null
           neighborhood?: string | null
           pin_order?: number | null
