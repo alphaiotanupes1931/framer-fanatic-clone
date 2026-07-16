@@ -984,6 +984,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_deleted: boolean
+          is_pinned: boolean
           likes_count: number
           music_url: string | null
           neighborhood: string | null
@@ -1004,6 +1005,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_deleted?: boolean
+          is_pinned?: boolean
           likes_count?: number
           music_url?: string | null
           neighborhood?: string | null
@@ -1024,6 +1026,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_deleted?: boolean
+          is_pinned?: boolean
           likes_count?: number
           music_url?: string | null
           neighborhood?: string | null
