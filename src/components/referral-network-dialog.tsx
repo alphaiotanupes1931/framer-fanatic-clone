@@ -165,11 +165,11 @@ export function ReferralNetworkDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-hidden p-0">
         <div className="bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground">
           <DialogHeader className="pb-2">
-            <DialogTitle className="flex items-center gap-2 text-xl text-white">
+            <DialogTitle className="flex items-center gap-2 text-xl text-primary-foreground">
               <Sparkles className="h-5 w-5" /> Your Referral Network
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-white/90">
+          <p className="text-sm text-primary-foreground/90">
             Invite friends to Planet Baltimore and earn points at every level of the chain.
           </p>
         </div>
