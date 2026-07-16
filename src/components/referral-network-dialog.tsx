@@ -162,19 +162,20 @@ export function ReferralNetworkDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-hidden p-0 top-[5%] translate-y-0">
-        <div className="bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground">
-          <DialogHeader className="pb-2">
-            <DialogTitle className="flex items-center gap-2 text-xl text-primary-foreground">
-              <Sparkles className="h-5 w-5" /> Your Referral Network
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-primary-foreground/90">
-            Invite friends to Planet Baltimore and earn points at every level of the chain.
-          </p>
-        </div>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0 top-[5%] translate-y-0">
+        <div className="flex max-h-[90vh] flex-col">
+          <div className="bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground">
+            <DialogHeader className="pb-2">
+              <DialogTitle className="flex items-center gap-2 text-xl text-primary-foreground">
+                <Sparkles className="h-5 w-5" /> Your Referral Network
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-primary-foreground/90">
+              Invite friends to Planet Baltimore and earn points at every level of the chain.
+            </p>
+          </div>
 
-        <div className="p-6">
+          <div className="flex-1 overflow-y-auto p-6">
           {/* How it works */}
           <div className="mb-6">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
