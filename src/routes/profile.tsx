@@ -31,6 +31,18 @@ export const Route = createFileRoute("/profile")({
 
 const TABS_ARTIST_BASE = ["Posts","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Dashboard","Stripe"] as const;
 const TABS_RESIDENT_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
+
+function sortPosts(rows: any[]) {
+  return [...rows].sort((a, b) => {
+    const ap = a.is_pinned ? 1 : 0;
+    const bp = b.is_pinned ? 1 : 0;
+    if (ap !== bp) return bp - ap;
+    if (a.is_pinned && b.is_pinned) {
+      return (a.pin_order ?? 0) - (b.pin_order ?? 0);
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
   "Feed": Rss,
