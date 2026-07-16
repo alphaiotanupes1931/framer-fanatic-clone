@@ -167,7 +167,7 @@ export function ReferralNetworkDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md sm:max-w-lg max-h-[85vh] overflow-hidden p-0 gap-0">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl max-h-[90vh] overflow-hidden p-0 gap-0 sm:w-[calc(100vw-2rem)]">
         <div className="flex max-h-[85vh] flex-col">
           <div className="relative bg-gradient-to-br from-primary to-primary/85 p-4 pr-12 text-primary-foreground sm:p-5 sm:pr-14">
             <button
