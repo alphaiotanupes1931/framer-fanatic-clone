@@ -11,7 +11,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FileText, Sparkles, Palette as PaletteIcon, Building2 as BusinessIcon, Landmark as LandmarkIcon, Users as UsersIcon, Shield as ShieldIcon, Home as HomeIcon, Plane as PlaneIcon } from "lucide-react";
+import { FileText, PenLine, Palette as PaletteIcon, Building2 as BusinessIcon, Landmark as LandmarkIcon, Users as UsersIcon, Shield as ShieldIcon, Home as HomeIcon, Plane as PlaneIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -23,7 +23,7 @@ type NavItem = { icon: typeof Home; label: string; to: string };
 
 const createItems: NavItem[] = [
   { icon: FileText, label: "New Post", to: "/create-post" },
-  { icon: Sparkles, label: "New Story", to: "/create-story" },
+  { icon: PenLine, label: "New Story", to: "/create-story" },
   { icon: PaletteIcon, label: "Artist Profile", to: "/create-artist" },
   { icon: HomeIcon, label: "Resident Profile", to: "/create-resident" },
   { icon: PlaneIcon, label: "Visitor Profile", to: "/create-visitor" },

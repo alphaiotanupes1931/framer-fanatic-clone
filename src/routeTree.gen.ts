@@ -30,6 +30,7 @@ import { Route as NeighborhoodsRouteImport } from './routes/neighborhoods'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as InviteRouteImport } from './routes/invite'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as EditProfileRouteImport } from './routes/edit-profile'
 import { Route as DiscoverRouteImport } from './routes/discover'
@@ -172,6 +173,11 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GroupsRoute = GroupsRouteImport.update({
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
   '/groups': typeof GroupsRoute
+  '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
@@ -450,6 +457,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
   '/groups': typeof GroupsRoute
+  '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
@@ -512,6 +520,7 @@ export interface FileRoutesById {
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
   '/groups': typeof GroupsRoute
+  '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/messages': typeof MessagesRoute
@@ -575,6 +584,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/edit-profile'
     | '/groups'
+    | '/invite'
     | '/leaderboard'
     | '/marketplace'
     | '/messages'
@@ -636,6 +646,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/edit-profile'
     | '/groups'
+    | '/invite'
     | '/leaderboard'
     | '/marketplace'
     | '/messages'
@@ -697,6 +708,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/edit-profile'
     | '/groups'
+    | '/invite'
     | '/leaderboard'
     | '/marketplace'
     | '/messages'
@@ -759,6 +771,7 @@ export interface RootRouteChildren {
   DiscoverRoute: typeof DiscoverRoute
   EditProfileRoute: typeof EditProfileRoute
   GroupsRoute: typeof GroupsRoute
+  InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
   MessagesRoute: typeof MessagesRoute
@@ -944,6 +957,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/groups': {
@@ -1250,6 +1270,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverRoute: DiscoverRoute,
   EditProfileRoute: EditProfileRoute,
   GroupsRoute: GroupsRoute,
+  InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,
   MarketplaceRoute: MarketplaceRouteWithChildren,
   MessagesRoute: MessagesRoute,

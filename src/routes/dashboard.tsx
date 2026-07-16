@@ -10,7 +10,7 @@ import { EventCard } from "@/components/shared/event-card";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Users, Sparkles, Compass, MapPin, Loader2 } from "lucide-react";
+import { Users, Compass, MapPin, Loader2, Globe2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Post, Story, Event, Follow } from "@/lib/entities";
 
@@ -260,7 +260,7 @@ function Dashboard() {
 
         {activeFilter === "Discover" && (
           <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent/5 p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">
-            <Sparkles className="h-4 w-4 flex-shrink-0 text-[#d4580a] sm:h-5 sm:w-5" />
+            <Globe2 className="h-4 w-4 flex-shrink-0 text-[#d4580a] sm:h-5 sm:w-5" />
             <span>Broadening your world, content from across Baltimore you haven't seen yet.</span>
           </div>
         )}

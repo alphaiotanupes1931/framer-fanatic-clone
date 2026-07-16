@@ -18,12 +18,10 @@ import {
   Link2,
   Mail,
   Users,
-  Zap,
+  UserCheck,
   Loader2,
   Crown,
-  ChevronRight,
   Send,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,7 +69,7 @@ export function ReferralNetworkDialog({
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const [stats, setStats] = useState({ total: 0, active: 0, points: 0 });
+  const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
   const messageRef = useRef<HTMLTextAreaElement>(null);
@@ -102,15 +100,21 @@ export function ReferralNetworkDialog({
       setLoadingInvites(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("invites")
-      .select("id, email, created_at")
-      .eq("invited_by", user.id)
-      .order("created_at", { ascending: false });
-    if (!error && data) {
-      setInvites(data);
-      setStats({ total: data.length, active: 0, points: data.length * 5 });
-    }
+    const [invitesRes, joinedRes] = await Promise.all([
+      supabase
+        .from("invites")
+        .select("id, email, created_at")
+        .eq("invited_by", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("referred_by", user.id),
+    ]);
+    const inviteRows = invitesRes.data ?? [];
+    const joined = joinedRes.count ?? 0;
+    setInvites(inviteRows);
+    setStats({ total: inviteRows.length, joined, points: joined * 5 });
     setLoadingInvites(false);
   };
 
@@ -167,7 +171,7 @@ export function ReferralNetworkDialog({
           <div className="bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground">
             <DialogHeader className="pb-2">
               <DialogTitle className="flex items-center gap-2 text-xl text-primary-foreground">
-                <Sparkles className="h-5 w-5" /> Your Referral Network
+                <Gift className="h-5 w-5" /> Your Referral Network
               </DialogTitle>
             </DialogHeader>
             <p className="text-sm text-primary-foreground/90">
@@ -214,9 +218,9 @@ export function ReferralNetworkDialog({
             </div>
             <div className="rounded-xl border border-border bg-muted/30 p-4 text-center">
               <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Zap className="h-3.5 w-3.5" /> Active
+                <UserCheck className="h-3.5 w-3.5" /> Joined
               </div>
-              <div className="mt-1 text-2xl font-bold text-foreground">{stats.active}</div>
+              <div className="mt-1 text-2xl font-bold text-foreground">{stats.joined}</div>
             </div>
             <div className="rounded-xl border border-border bg-muted/30 p-4 text-center">
               <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { TrendingUp, Sparkles, ArrowRight, Calendar, ChevronRight, ChevronLeft } from "lucide-react";
+import { TrendingUp, Palette, ArrowRight, Calendar, ChevronRight, ChevronLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { Story, Event } from "@/lib/entities";
@@ -86,7 +86,7 @@ export function RightSidebar() {
         )}
 
         {artists.length > 0 && (
-          <SuggestionSection title="Artists to Follow" icon={Sparkles} seeAllLink="/artists">
+          <SuggestionSection title="Artists to Follow" icon={Palette} seeAllLink="/artists">
             {artists.map((a: any) => (
               <Link
                 key={a.id}

@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Sparkles, List, LayoutGrid } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
@@ -269,7 +269,7 @@ function CalendarPage() {
         <div className="space-y-8">
           <section>
             <div className="mb-4 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[#d4580a]" />
+              <Star className="h-4 w-4 text-[#d4580a]" />
               <h2 className="text-lg font-bold text-neutral-900">For You</h2>
               <span className="rounded-full bg-[#d4580a]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#d4580a]">
                 Personalized
@@ -409,7 +409,7 @@ function ForYouCard({ event }: { event: Ev }) {
           Community
         </div>
         <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-neutral-800 shadow">
-          <Sparkles className="h-3 w-3 text-[#d4580a]" />
+          <Star className="h-3 w-3 text-[#d4580a]" />
           9.5/10
         </div>
       </div>

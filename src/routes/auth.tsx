@@ -72,6 +72,8 @@ function AuthPage() {
       role === "visitor"  ? "Visitor"  :
       null;
     setLoading(true);
+    let referredBy: string | null = null;
+    try { referredBy = sessionStorage.getItem("pb_referred_by"); } catch { /* ignore */ }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -80,6 +82,7 @@ function AuthPage() {
         data: {
           display_name: displayName || email.split("@")[0],
           role: finalRole,
+          referred_by: referredBy,
         },
       },
     });
@@ -105,6 +108,7 @@ function AuthPage() {
     }
     // Flag this session as a fresh signup so the onboarding tour auto-runs once.
     try { localStorage.setItem("pb_new_signup", "1"); } catch { /* ignore */ }
+    try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); } catch { /* ignore */ }
     navigate({ to: "/onboarding" });
   };
 
