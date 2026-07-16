@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send } from "lucide-react";
+import { Camera, MapPin, Pencil, Share2, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -113,13 +113,40 @@ function ProfilePage() {
         author_username: profile.username,
         author_avatar: profile.avatar_url,
       };
-      setMyPosts((data || []).map((p: any) => ({ ...p, ...author })));
+      const rows = (data || []).map((p: any) => ({ ...p, ...author }));
+      rows.sort((a: any, b: any) => {
+        const ap = a.is_pinned ? 1 : 0;
+        const bp = b.is_pinned ? 1 : 0;
+        if (ap !== bp) return bp - ap;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      setMyPosts(rows);
     })();
   }, [profile]);
 
   const handleDeleteMyPost = (id: string) => {
     setMyPosts((prev) => prev.filter((p) => p.id !== id));
     setStats((s) => ({ ...s, posts: Math.max(0, s.posts - 1) }));
+  };
+
+  const handleTogglePin = async (id: string, next: boolean) => {
+    setMyPosts((prev) => {
+      const updated = prev.map((p) => (p.id === id ? { ...p, is_pinned: next } : p));
+      updated.sort((a: any, b: any) => {
+        const ap = a.is_pinned ? 1 : 0;
+        const bp = b.is_pinned ? 1 : 0;
+        if (ap !== bp) return bp - ap;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      return updated;
+    });
+    const { error } = await supabase.from("posts").update({ is_pinned: next }).eq("id", id);
+    if (error) {
+      toast.error("Could not update pin");
+      setMyPosts((prev) => prev.map((p) => (p.id === id ? { ...p, is_pinned: !next } : p)));
+    } else {
+      toast.success(next ? "Pinned to top" : "Unpinned");
+    }
   };
 
   useEffect(() => {
@@ -409,12 +436,23 @@ function ProfilePage() {
                   (isArtist && tab === "Posts") ? (
                     <div className="grid grid-cols-3 gap-3">
                       {myPosts.map((p) => (
-                        <Link
-                          key={p.id}
-                          to="/posts/$postId"
-                          params={{ postId: p.id }}
-                          className="group block"
-                        >
+                        <div key={p.id} className="relative group">
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); handleTogglePin(p.id, !p.is_pinned); }}
+                            className="absolute right-2 top-2 z-10 rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
+                            title={p.is_pinned ? "Unpin" : "Pin to top"}
+                          >
+                            {p.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                          </button>
+                          {p.is_pinned && (
+                            <div className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow">Pinned</div>
+                          )}
+                          <Link
+                            to="/posts/$postId"
+                            params={{ postId: p.id }}
+                            className="block"
+                          >
                           {p.image_url ? (
                             <div className="overflow-hidden rounded-lg bg-neutral-100">
                               <img
@@ -436,13 +474,29 @@ function ProfilePage() {
                           {p.tag && (
                             <div className="mt-1 text-xs text-muted-foreground">#{p.tag}</div>
                           )}
-                        </Link>
+                          </Link>
+                        </div>
                       ))}
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {myPosts.map((p) => (
-                        <PostCard key={p.id} post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
+                        <div key={p.id} className="relative">
+                          {p.is_pinned && (
+                            <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              <Pin className="h-3.5 w-3.5" /> Pinned post
+                            </div>
+                          )}
+                          <PostCard post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePin(p.id, !p.is_pinned)}
+                            className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
+                            title={p.is_pinned ? "Unpin" : "Pin to top"}
+                          >
+                            {p.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )
