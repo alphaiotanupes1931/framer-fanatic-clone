@@ -231,6 +231,21 @@ function ProfilePage() {
     toast.success("Banner updated"); location.reload();
   };
 
+  const uploadAvatar = async (file: File) => {
+    if (!profile) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
+    setUploadingAvatar(true);
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `${profile.id}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || "image/jpeg", cacheControl: "3600" });
+    if (error) { setUploadingAvatar(false); toast.error(error.message); return; }
+    const { data, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    if (signErr || !data) { setUploadingAvatar(false); toast.error(signErr?.message || "Could not sign URL"); return; }
+    const { error: updErr } = await supabase.from("profiles").update({ avatar_url: data.signedUrl }).eq("id", profile.id);
+    if (updErr) { setUploadingAvatar(false); toast.error(updErr.message); return; }
+    toast.success("Avatar updated"); location.reload();
+  };
+
   const initials = (profile?.display_name || profile?.email || "U").slice(0, 2).toUpperCase();
   const currentTag = ((profile as { category?: string | null } | null)?.category as string | null) ||
     (isArtist ? "Artist" : isResident ? "Resident" : ((profile?.role || "resident").replace(/\b\w/g, (c) => c.toUpperCase())));
