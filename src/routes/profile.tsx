@@ -597,6 +597,58 @@ function ProfilePage() {
         onClose={() => setReferralOpen(false)}
         profile={profile}
       />
+      {postViewerIdx !== null && myPosts[postViewerIdx] && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setPostViewerIdx(null)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-2 sm:p-6"
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setPostViewerIdx(null); }}
+            aria-label="Close"
+            className="absolute right-3 top-3 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+          >
+            <XIcon className="h-5 w-5" />
+          </button>
+          {myPosts.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPostViewerIdx((i) => (i === null ? null : (i - 1 + myPosts.length) % myPosts.length)); }}
+                aria-label="Previous post"
+                className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:left-4"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPostViewerIdx((i) => (i === null ? null : (i + 1) % myPosts.length)); }}
+                aria-label="Next post"
+                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:right-4"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-background shadow-2xl"
+          >
+            <PostCard
+              post={myPosts[postViewerIdx]}
+              currentUserId={profile?.id}
+              onDelete={(id) => { handleDeleteMyPost(id); setPostViewerIdx(null); }}
+            />
+          </div>
+          {myPosts.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white">
+              {postViewerIdx + 1} / {myPosts.length}
+            </div>
+          )}
+        </div>
+      )}
     </AppLayout>
   );
 }
