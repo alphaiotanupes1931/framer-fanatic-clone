@@ -90,6 +90,8 @@ function ProfilePage() {
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showNeighborhoodPicker, setShowNeighborhoodPicker] = useState(false);
   const [showTagPicker, setShowTagPicker] = useState(false);
@@ -229,6 +231,21 @@ function ProfilePage() {
     toast.success("Banner updated"); location.reload();
   };
 
+  const uploadAvatar = async (file: File) => {
+    if (!profile) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
+    setUploadingAvatar(true);
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `${profile.id}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || "image/jpeg", cacheControl: "3600" });
+    if (error) { setUploadingAvatar(false); toast.error(error.message); return; }
+    const { data, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    if (signErr || !data) { setUploadingAvatar(false); toast.error(signErr?.message || "Could not sign URL"); return; }
+    const { error: updErr } = await supabase.from("profiles").update({ avatar_url: data.signedUrl }).eq("id", profile.id);
+    if (updErr) { setUploadingAvatar(false); toast.error(updErr.message); return; }
+    toast.success("Avatar updated"); location.reload();
+  };
+
   const initials = (profile?.display_name || profile?.email || "U").slice(0, 2).toUpperCase();
   const currentTag = ((profile as { category?: string | null } | null)?.category as string | null) ||
     (isArtist ? "Artist" : isResident ? "Resident" : ((profile?.role || "resident").replace(/\b\w/g, (c) => c.toUpperCase())));
@@ -280,10 +297,28 @@ function ProfilePage() {
 
         <div className="relative px-4 pb-6 sm:px-6">
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-            <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
-              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-              <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
-            </Avatar>
+            <div className="relative h-20 w-20 sm:h-24 sm:w-24">
+              <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
+                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
+              </Avatar>
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                aria-label="Change profile picture"
+                className="absolute bottom-0 right-0 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a] text-white ring-2 ring-background hover:bg-[#b3480a] disabled:opacity-60"
+              >
+                {uploadingAvatar ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Camera className="h-4 w-4" />}
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAvatar(f); e.target.value = ""; }}
+              />
+            </div>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <Link to="/create-story" aria-label="Write a story" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
               <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
