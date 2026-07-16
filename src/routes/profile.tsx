@@ -80,7 +80,7 @@ function ProfilePage() {
     : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
-  const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
+  const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
   const [shareInAppOpen, setShareInAppOpen] = useState(false);
