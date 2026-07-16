@@ -189,7 +189,7 @@ function OrgProfile() {
           .insert({ organization_id: org.id, user_id: me });
         if (error) throw error;
         setJoined(true);
-        toast.success(`Following ${org.name}`);
+        toast.success(`${isAssoc ? "Joined" : "Following"} ${org.name}`);
       }
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed");
