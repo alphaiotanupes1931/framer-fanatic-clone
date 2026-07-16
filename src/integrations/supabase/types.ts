@@ -338,6 +338,30 @@ export type Database = {
         }
         Relationships: []
       }
+      invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invite_url: string | null
+          invited_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invite_url?: string | null
+          invited_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invite_url?: string | null
+          invited_by?: string | null
+        }
+        Relationships: []
+      }
       marketplace_listings: {
         Row: {
           category: string

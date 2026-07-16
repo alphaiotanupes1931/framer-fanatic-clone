@@ -21,6 +21,7 @@ import { PostCard } from "@/components/shared/post-card";
 import { tabsForArtist } from "@/lib/artist-tabs";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { ExternalShareDialog } from "@/components/external-share-dialog";
 
 export const Route = createFileRoute("/profile")({
@@ -70,6 +71,7 @@ function ProfilePage() {
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
   const [shareInAppOpen, setShareInAppOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [shareExternalOpen, setShareExternalOpen] = useState(false);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -232,7 +234,7 @@ function ProfilePage() {
               <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
               <Link to="/edit-profile" aria-label="Edit profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
-              <button type="button" onClick={() => setShareInAppOpen(true)} aria-label="Invite / share with followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
+              <button type="button" onClick={() => setInviteOpen(true)} aria-label="Invite friends" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
               <button type="button" onClick={() => setShareExternalOpen(true)} aria-label="Share profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Share2 className="h-4 w-4" /></button>
             </div>
           </div>
@@ -466,6 +468,11 @@ function ProfilePage() {
         onClose={() => setShareExternalOpen(false)}
         url={`${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile?.username ?? ""}`}
         title={`${profile?.display_name || profile?.username || "Profile"} on Planet Baltimore`}
+      />
+      <InviteFriendsDialog
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        inviteUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile?.username ?? ""}`}
       />
     </AppLayout>
   );
