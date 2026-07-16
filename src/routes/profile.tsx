@@ -436,12 +436,23 @@ function ProfilePage() {
                   (isArtist && tab === "Posts") ? (
                     <div className="grid grid-cols-3 gap-3">
                       {myPosts.map((p) => (
-                        <Link
-                          key={p.id}
-                          to="/posts/$postId"
-                          params={{ postId: p.id }}
-                          className="group block"
-                        >
+                        <div key={p.id} className="relative group">
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); handleTogglePin(p.id, !p.is_pinned); }}
+                            className="absolute right-2 top-2 z-10 rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
+                            title={p.is_pinned ? "Unpin" : "Pin to top"}
+                          >
+                            {p.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                          </button>
+                          {p.is_pinned && (
+                            <div className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow">Pinned</div>
+                          )}
+                          <Link
+                            to="/posts/$postId"
+                            params={{ postId: p.id }}
+                            className="block"
+                          >
                           {p.image_url ? (
                             <div className="overflow-hidden rounded-lg bg-neutral-100">
                               <img
@@ -463,13 +474,29 @@ function ProfilePage() {
                           {p.tag && (
                             <div className="mt-1 text-xs text-muted-foreground">#{p.tag}</div>
                           )}
-                        </Link>
+                          </Link>
+                        </div>
                       ))}
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {myPosts.map((p) => (
-                        <PostCard key={p.id} post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
+                        <div key={p.id} className="relative">
+                          {p.is_pinned && (
+                            <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              <Pin className="h-3.5 w-3.5" /> Pinned post
+                            </div>
+                          )}
+                          <PostCard post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePin(p.id, !p.is_pinned)}
+                            className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
+                            title={p.is_pinned ? "Unpin" : "Pin to top"}
+                          >
+                            {p.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )
