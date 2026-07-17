@@ -220,7 +220,7 @@ function CalendarPage() {
             </button>
           </div>
           {/* Mobile: horizontal date strip */}
-          <div className="min-w-0 sm:hidden">
+          <div className="max-w-full sm:hidden">
             <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
             <button
               onClick={() => setExpanded(true)}
