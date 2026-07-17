@@ -26,10 +26,6 @@ type Ev = {
   neighborhood: string | null;
 };
 
-function sameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
 const ORGANIZERS = [
   { id: "all", label: "All Organizers", icon: "calendar" },
   { id: "business", label: "Businesses", icon: "business" },
