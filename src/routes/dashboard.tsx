@@ -234,7 +234,7 @@ function Dashboard() {
   return (
     <AppLayout>
       <div className="w-full space-y-5 sm:space-y-[22px]">
-        <HeroBanner title="Planet Baltimore" subtitle="Your city. Your community. Your feed." />
+        <HeroBanner title="Planet Baltimore" subtitle="Baltimore. Your community. Your feed." />
 
         {/* Filters */}
         <div className="scrollbar-hide flex flex-wrap gap-2 overflow-x-auto pb-5 pt-0">
