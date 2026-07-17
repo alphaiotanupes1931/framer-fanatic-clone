@@ -386,6 +386,7 @@ function CalendarPage() {
           </section>
         </div>
       </div>
+    )}
     </AppLayout>
   );
 }
