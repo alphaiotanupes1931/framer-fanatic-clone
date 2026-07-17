@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, Maximize2 } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, Maximize2, CalendarDays } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,10 +25,6 @@ type Ev = {
   image_url: string | null;
   neighborhood: string | null;
 };
-
-function sameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
 
 const ORGANIZERS = [
   { id: "all", label: "All Organizers", icon: "calendar" },
@@ -203,26 +199,24 @@ function CalendarPage() {
       </div>
 
       {/* Main two-column layout - constrained to match other pages */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
         {/* Left column: calendar + filters */}
         <div className="space-y-6">
-          <div className="hidden rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm sm:block sm:p-4">
-            <Calendar
-              mode="single"
-              selected={selected}
-              onSelect={setSelected}
-              modifiers={{ hasEvent: eventDays }}
-              modifiersClassNames={{
-                hasEvent:
-                  "relative font-semibold text-orange after:absolute after:bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-orange",
-              }}
-              className="pointer-events-auto mx-auto"
-            />
+          <div className="hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:block">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-bold text-neutral-800">
+                {selected ? selected.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+              </div>
+              <span className="grid h-2 w-2 rounded-full bg-[#d4580a]" />
+            </div>
+            <p className="mb-4 text-xs text-neutral-500">
+              {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
+            </p>
             <button
               onClick={() => setExpanded(true)}
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-1.5 text-xs font-semibold text-neutral-600 hover:border-orange-300 hover:text-[#d4580a]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#b84a08]"
             >
-              <Maximize2 className="h-3.5 w-3.5" /> Expand full month
+              <CalendarDays className="h-4 w-4" /> Mon. Calendar
             </button>
           </div>
           {/* Mobile: horizontal date strip */}
@@ -230,9 +224,9 @@ function CalendarPage() {
             <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
             <button
               onClick={() => setExpanded(true)}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-xs font-semibold text-neutral-600"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#d4580a] py-3 text-sm font-semibold text-white"
             >
-              <Maximize2 className="h-3.5 w-3.5" /> View full month
+              <CalendarDays className="h-4 w-4" /> Mon. Calendar
             </button>
           </div>
 
@@ -377,11 +371,14 @@ function CalendarPage() {
         </div>
       </div>
       <Dialog open={expanded} onOpenChange={setExpanded}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Full month</DialogTitle>
+        <DialogContent className="h-full max-h-screen w-full max-w-full p-0 pt-14 sm:h-auto sm:w-[calc(100%-2rem)] sm:max-w-[900px] sm:pt-0">
+          <DialogHeader className="px-6 pt-6">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <CalendarDays className="h-5 w-5 text-[#d4580a]" />
+              Mon. Calendar
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex justify-center p-2">
+          <div className="flex flex-1 items-start justify-center px-4 pb-6 sm:px-6">
             <Calendar
               mode="single"
               selected={selected}
@@ -389,9 +386,9 @@ function CalendarPage() {
               modifiers={{ hasEvent: eventDays }}
               modifiersClassNames={{
                 hasEvent:
-                  "relative font-semibold text-orange after:absolute after:bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-orange",
+                  "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
               }}
-              className="pointer-events-auto [&_.rdp-day]:h-14 [&_.rdp-day]:w-14 [&_.rdp-cell]:h-14 [&_.rdp-cell]:w-14 [&_.rdp-head_cell]:w-14"
+              className="pointer-events-auto origin-top [&_.rdp-day]:h-10 [&_.rdp-day]:w-10 [&_.rdp-cell]:h-10 [&_.rdp-cell]:w-10 [&_.rdp-head_cell]:w-10 sm:[&_.rdp-day]:h-16 sm:[&_.rdp-day]:w-16 sm:[&_.rdp-cell]:h-16 sm:[&_.rdp-cell]:w-16 sm:[&_.rdp-head_cell]:w-16"
             />
           </div>
         </DialogContent>
