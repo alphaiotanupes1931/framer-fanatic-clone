@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, Maximize2, CalendarDays } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, CalendarDays } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
