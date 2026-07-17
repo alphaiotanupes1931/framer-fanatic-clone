@@ -4,8 +4,9 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, Maximize2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
 
@@ -109,6 +110,7 @@ function CalendarPage() {
   const [neighborhoods, setNeighborhoods] = useState<{ id: string; name: string }[]>([]);
   const [foryouIdx, setForyouIdx] = useState(0);
   const [upcomingView, setUpcomingView] = useState<"list" | "grid">("list");
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -216,10 +218,22 @@ function CalendarPage() {
               }}
               className="pointer-events-auto mx-auto"
             />
+            <button
+              onClick={() => setExpanded(true)}
+              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-1.5 text-xs font-semibold text-neutral-600 hover:border-orange-300 hover:text-[#d4580a]"
+            >
+              <Maximize2 className="h-3.5 w-3.5" /> Expand full month
+            </button>
           </div>
           {/* Mobile: horizontal date strip */}
           <div className="sm:hidden">
             <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
+            <button
+              onClick={() => setExpanded(true)}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-xs font-semibold text-neutral-600"
+            >
+              <Maximize2 className="h-3.5 w-3.5" /> View full month
+            </button>
           </div>
 
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
@@ -362,6 +376,26 @@ function CalendarPage() {
           </section>
         </div>
       </div>
+      <Dialog open={expanded} onOpenChange={setExpanded}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Full month</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center p-2">
+            <Calendar
+              mode="single"
+              selected={selected}
+              onSelect={(d) => { setSelected(d); if (d) setExpanded(false); }}
+              modifiers={{ hasEvent: eventDays }}
+              modifiersClassNames={{
+                hasEvent:
+                  "relative font-semibold text-orange after:absolute after:bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-orange",
+              }}
+              className="pointer-events-auto [&_.rdp-day]:h-14 [&_.rdp-day]:w-14 [&_.rdp-cell]:h-14 [&_.rdp-cell]:w-14 [&_.rdp-head_cell]:w-14"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
