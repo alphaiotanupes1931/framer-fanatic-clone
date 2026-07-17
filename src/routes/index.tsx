@@ -373,7 +373,7 @@ function HeroParallax() {
       />
       {/* Desktop fallback image (behind video) */}
       <img
-        src={heroBaltimore}
+        src={assetUrl(heroMobileAsset.url)}
         alt=""
         aria-hidden
         loading="eager"
@@ -390,7 +390,7 @@ function HeroParallax() {
             loop
             playsInline
             preload="metadata"
-            poster={heroBaltimore}
+            poster={assetUrl(heroMobileAsset.url)}
             className="absolute inset-0 w-full h-full object-cover"
           >
             <source src={assetUrl(heroVideoWebmAsset.url)} type="video/webm" />
