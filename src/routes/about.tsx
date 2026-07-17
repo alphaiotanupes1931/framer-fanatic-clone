@@ -159,7 +159,11 @@ function CTA() {
           <Link to="/auth" className="inline-flex rounded-full bg-paper text-ink px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-orange hover:text-paper transition-colors">
             {siteText(content, "about.cta.primary")}
           </Link>
-          <Link to="/leaderboard" className="inline-flex rounded-full border border-paper/60 px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-paper hover:text-ink transition-colors">
+          <Link
+            to="/leaderboard"
+            onClick={() => { try { sessionStorage.setItem("pb_post_auth_redirect", "/leaderboard"); } catch { /* ignore */ } }}
+            className="inline-flex rounded-full border border-paper/60 px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-paper hover:text-ink transition-colors"
+          >
             {siteText(content, "about.cta.secondary")}
           </Link>
         </div>
