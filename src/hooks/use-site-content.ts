@@ -5,8 +5,8 @@ const CACHE_KEY = "pb_site_content_v1";
 
 // Default fallback values so the site renders before/without any DB rows.
 export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
-  "hero.line1": "Baltimore",
-  "hero.line2": "in One Place",
+  "hero.line1": "Baltimore is",
+  "hero.line2": "extraordinary",
   "hero.subtitle": "We all deserve to experience more of it.",
   "hero.cta": "Get Started",
   "quote.text":

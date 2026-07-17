@@ -18,7 +18,7 @@ import { SiteColorInjector } from "@/components/site-color-injector";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Planet Baltimore - Baltimore in One Place" },
+      { title: "Planet Baltimore - Baltimore is extraordinary" },
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
     links: [
