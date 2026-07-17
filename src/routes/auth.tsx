@@ -13,6 +13,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { becomeArtist } from "@/lib/stripe.functions";
 import { Eye, EyeOff } from "lucide-react";
 
+function popPostAuthRedirect(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const v = sessionStorage.getItem("pb_post_auth_redirect");
+    if (v) sessionStorage.removeItem("pb_post_auth_redirect");
+    return v;
+  } catch { return null; }
+}
+
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
   head: () => ({ meta: [{ title: "Sign in or create an account" }] }),
@@ -31,7 +40,11 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
+      if (data.session) {
+        const dest = popPostAuthRedirect();
+        if (dest) { window.location.replace(dest); return; }
+        navigate({ to: "/dashboard" });
+      }
     });
   }, [navigate]);
 
@@ -49,8 +62,12 @@ function AuthPage() {
       if (p?.must_reset_password) {
         return navigate({ to: "/reset-password" });
       }
+      const dest = popPostAuthRedirect();
+      if (dest && p?.onboarded) { window.location.replace(dest); return; }
       navigate({ to: p?.onboarded ? "/dashboard" : "/onboarding" });
     } else {
+      const dest = popPostAuthRedirect();
+      if (dest) { window.location.replace(dest); return; }
       navigate({ to: "/dashboard" });
     }
   };
