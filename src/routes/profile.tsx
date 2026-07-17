@@ -822,7 +822,7 @@ function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit: boolea
       {items.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">No artwork yet.</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {items.map((it) => (
             <div key={it.id} className="group relative overflow-hidden rounded-lg bg-muted">
               {it.media_url && <img src={it.media_url} alt={it.title ?? ""} className="w-full h-auto object-cover" loading="lazy" />}
@@ -933,7 +933,7 @@ function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean
         {kids.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground">No pieces in this series yet.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {kids.map((k) => (
               <div key={k.id} className="group relative overflow-hidden rounded-2xl border border-border">
                 {k.media_url && <img src={k.media_url} alt={k.title ?? ""} className="w-full h-64 object-cover" />}
@@ -980,7 +980,7 @@ function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean
       {series.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">No series yet. Create one to group related pieces.</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {series.map((s) => {
             const count = items.filter((i) => i.parent_id === s.id).length;
             return (
@@ -1246,7 +1246,7 @@ function MyTicketsTab() {
       {shown.length === 0 ? (
         <div className="rounded-xl border border-dashed border-neutral-200 py-10 text-center text-sm text-neutral-500">No {view} tickets</div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((t) => <TicketStub key={t.id} t={t} />)}
         </div>
       )}
