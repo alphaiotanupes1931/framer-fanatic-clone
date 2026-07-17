@@ -228,9 +228,9 @@ function CalendarPage() {
             <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
             <button
               onClick={() => setExpanded(true)}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-xs font-semibold text-neutral-600"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#d4580a] py-3 text-sm font-semibold text-white"
             >
-              <Maximize2 className="h-3.5 w-3.5" /> View full month
+              <CalendarDays className="h-4 w-4" /> Mon. Calendar
             </button>
           </div>
 
