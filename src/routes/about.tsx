@@ -9,7 +9,7 @@ import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import aboutFounders from "@/assets/about-founders.png.asset.json";
 import { assetUrl } from "@/lib/utils";
-import heroBaltimore from "@/assets/hero-baltimore.jpg";
+import heroBaltimore from "@/assets/baltimore-hero-mobile.png.asset.json";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -93,41 +93,36 @@ function Hero() {
   const { content } = useSiteContent();
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-10 md:pt-28 pb-6 md:pb-16">
-        <div className="grid gap-8 md:grid-cols-2 md:items-start md:gap-16">
-          <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
-            >
-              {siteText(content, "about.hero.title")}
-            </motion.h1>
-          </div>
-
-          <div className="flex flex-col gap-6">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="relative aspect-[16/10] md:aspect-[4/3] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
-            >
-              <img
-                src={heroBaltimore}
-                alt="Planet Baltimore"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </motion.div>
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="font-display text-[clamp(1.25rem,2.4vw,2rem)] font-medium leading-[1.25] tracking-tight italic text-ink/70"
-            >
-              {siteText(content, "about.hero.italic")}
-            </motion.p>
-          </div>
+      <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-10 md:pt-20 pb-6 md:pb-16">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          className="relative aspect-[16/9] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
+        >
+          <img
+            src={assetUrl(heroBaltimore.url)}
+            alt="Baltimore skyline at sunset from Patterson Park"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </motion.div>
+        <div className="mt-8 md:mt-12 flex flex-col gap-6">
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
+          >
+            {siteText(content, "about.hero.title")}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="font-display text-[clamp(1.25rem,2.4vw,2rem)] font-medium leading-[1.25] tracking-tight italic text-ink/70"
+          >
+            {siteText(content, "about.hero.italic")}
+          </motion.p>
         </div>
       </div>
     </section>
