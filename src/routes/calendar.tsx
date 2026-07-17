@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, Maximize2, CalendarDays } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, CalendarDays } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
@@ -208,86 +208,89 @@ function CalendarPage() {
         </button>
       </div>
 
+      {/* Full-width monthly calendar when active */}
+      {showMonthly && (
+        <section className="mt-6 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-[#d4580a]" />
+              <h2 className="text-lg font-bold text-neutral-900">Monthly Calendar</h2>
+            </div>
+            <span className="text-xs font-medium text-neutral-500">
+              {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
+            </span>
+          </div>
+          <div className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={selected}
+              onSelect={setSelected}
+              modifiers={{ hasEvent: eventDays }}
+              modifiersClassNames={{
+                hasEvent:
+                  "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
+              }}
+              className="pointer-events-auto [&_.rdp-day]:h-14 [&_.rdp-day]:w-14 [&_.rdp-cell]:h-14 [&_.rdp-cell]:w-14 [&_.rdp-head_cell]:w-14 md:[&_.rdp-day]:h-20 md:[&_.rdp-day]:w-20 md:[&_.rdp-cell]:h-20 md:[&_.rdp-cell]:w-20 md:[&_.rdp-head_cell]:w-20 lg:[&_.rdp-day]:h-24 lg:[&_.rdp-day]:w-24 lg:[&_.rdp-cell]:h-24 lg:[&_.rdp-cell]:w-24 lg:[&_.rdp-head_cell]:w-24"
+            />
+          </div>
+        </section>
+      )}
+
       {/* Main two-column layout - constrained to match other pages */}
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
-        {/* Left column: calendar + filters */}
-        <div className="space-y-6">
-          {/* Mobile: horizontal date strip */}
-          <div className="sm:hidden">
-            <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
-          </div>
-
-          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-neutral-800">
-              <MapPin className="h-4 w-4 text-[#d4580a]" /> Neighborhood
+      {!showMonthly && (
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
+          {/* Left column: calendar + filters */}
+          <div className="space-y-6">
+            {/* Mobile: horizontal date strip */}
+            <div className="sm:hidden">
+              <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
             </div>
-            <select
-              value={neighborhood}
-              onChange={(e) => setNeighborhood(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-neutral-700 focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30"
-            >
-              <option value="">All Neighborhoods</option>
-              {neighborhoods.map((n) => (
-                <option key={n.id} value={n.name}>
-                  {n.name}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-neutral-800">
-              <Filter className="h-4 w-4 text-[#d4580a]" /> Event Type
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {EVENT_TYPES.map((t) => {
-                const active = eventType === t;
-                return (
-                  <button
-                    key={t}
-                    onClick={() => setEventType(t)}
-                    className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition ${
-                      active
-                        ? "bg-neutral-800 text-white"
-                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Right column: For You + Upcoming */}
-        <div className="space-y-8">
-          {showMonthly && (
-            <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="h-5 w-5 text-[#d4580a]" />
-                  <h2 className="text-lg font-bold text-neutral-900">Monthly Calendar</h2>
-                </div>
-                <span className="text-xs font-medium text-neutral-500">
-                  {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
-                </span>
+            <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+              <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-neutral-800">
+                <MapPin className="h-4 w-4 text-[#d4580a]" /> Neighborhood
               </div>
-              <div className="flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={selected}
-                  onSelect={setSelected}
-                  modifiers={{ hasEvent: eventDays }}
-                  modifiersClassNames={{
-                    hasEvent:
-                      "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
-                  }}
-                  className="pointer-events-auto [&_.rdp-day]:h-12 [&_.rdp-day]:w-12 [&_.rdp-cell]:h-12 [&_.rdp-cell]:w-12 [&_.rdp-head_cell]:w-12 sm:[&_.rdp-day]:h-16 sm:[&_.rdp-day]:w-16 sm:[&_.rdp-cell]:h-16 sm:[&_.rdp-cell]:w-16 sm:[&_.rdp-head_cell]:w-16"
-                />
+              <select
+                value={neighborhood}
+                onChange={(e) => setNeighborhood(e.target.value)}
+                className="w-full appearance-none rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-neutral-700 focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30"
+              >
+                <option value="">All Neighborhoods</option>
+                {neighborhoods.map((n) => (
+                  <option key={n.id} value={n.name}>
+                    {n.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+              <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-neutral-800">
+                <Filter className="h-4 w-4 text-[#d4580a]" /> Event Type
               </div>
-            </section>
-          )}
+              <div className="flex flex-wrap gap-2">
+                {EVENT_TYPES.map((t) => {
+                  const active = eventType === t;
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => setEventType(t)}
+                      className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition ${
+                        active
+                          ? "bg-neutral-800 text-white"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right column: For You + Upcoming */}
+          <div className="space-y-8">
           <section>
             <div className="mb-4 flex items-center gap-2">
               <Star className="h-4 w-4 text-[#d4580a]" />
@@ -383,6 +386,7 @@ function CalendarPage() {
           </section>
         </div>
       </div>
+    )}
     </AppLayout>
   );
 }
