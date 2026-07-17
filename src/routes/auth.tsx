@@ -25,12 +25,18 @@ function popPostAuthRedirect(): string | null {
 }
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" && search.redirect.startsWith("/") && !search.redirect.startsWith("//")
+      ? search.redirect
+      : undefined,
+  }),
   component: AuthPage,
   head: () => ({ meta: [{ title: "Sign in or create an account" }] }),
 });
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
   const becomeArtistFn = useServerFn(becomeArtist);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -43,12 +49,12 @@ function AuthPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        const dest = popPostAuthRedirect();
+        const dest = redirect || popPostAuthRedirect();
         if (dest) { window.location.replace(dest); return; }
         navigate({ to: "/dashboard" });
       }
     });
-  }, [navigate]);
+  }, [navigate, redirect]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,11 +70,11 @@ function AuthPage() {
       if (p?.must_reset_password) {
         return navigate({ to: "/reset-password" });
       }
-      const dest = popPostAuthRedirect();
+       const dest = redirect || popPostAuthRedirect();
       if (dest && p?.onboarded) { window.location.replace(dest); return; }
       navigate({ to: p?.onboarded ? "/dashboard" : "/onboarding" });
     } else {
-      const dest = popPostAuthRedirect();
+       const dest = redirect || popPostAuthRedirect();
       if (dest) { window.location.replace(dest); return; }
       navigate({ to: "/dashboard" });
     }
