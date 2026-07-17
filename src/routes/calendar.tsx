@@ -199,7 +199,7 @@ function CalendarPage() {
       </div>
 
       {/* Main two-column layout - constrained to match other pages */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
         {/* Left column: calendar + filters */}
         <div className="space-y-6">
           <div className="hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:block">
