@@ -6,7 +6,6 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, Maximize2, CalendarDays } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
 
@@ -106,7 +105,7 @@ function CalendarPage() {
   const [neighborhoods, setNeighborhoods] = useState<{ id: string; name: string }[]>([]);
   const [foryouIdx, setForyouIdx] = useState(0);
   const [upcomingView, setUpcomingView] = useState<"list" | "grid">("list");
-  const [expanded, setExpanded] = useState(false);
+  const [showMonthly, setShowMonthly] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -196,38 +195,26 @@ function CalendarPage() {
             </button>
           );
         })}
+        <button
+          onClick={() => setShowMonthly((v) => !v)}
+          className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+            showMonthly
+              ? "bg-[#d4580a] text-white"
+              : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+          }`}
+        >
+          <CalendarDays className="h-4 w-4" />
+          Monthly Calendar
+        </button>
       </div>
 
       {/* Main two-column layout - constrained to match other pages */}
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
         {/* Left column: calendar + filters */}
         <div className="space-y-6">
-          <div className="hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:block">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="text-sm font-bold text-neutral-800">
-                {selected ? selected.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
-              </div>
-              <span className="grid h-2 w-2 rounded-full bg-[#d4580a]" />
-            </div>
-            <p className="mb-4 text-xs text-neutral-500">
-              {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
-            </p>
-            <button
-              onClick={() => setExpanded(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#b84a08]"
-            >
-              <CalendarDays className="h-4 w-4" /> Mon. Calendar
-            </button>
-          </div>
           {/* Mobile: horizontal date strip */}
           <div className="sm:hidden">
             <MobileDateStrip selected={selected} onSelect={setSelected} eventDays={eventDays} />
-            <button
-              onClick={() => setExpanded(true)}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#d4580a] py-3 text-sm font-semibold text-white"
-            >
-              <CalendarDays className="h-4 w-4" /> Mon. Calendar
-            </button>
           </div>
 
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
@@ -275,6 +262,32 @@ function CalendarPage() {
 
         {/* Right column: For You + Upcoming */}
         <div className="space-y-8">
+          {showMonthly && (
+            <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-5 w-5 text-[#d4580a]" />
+                  <h2 className="text-lg font-bold text-neutral-900">Monthly Calendar</h2>
+                </div>
+                <span className="text-xs font-medium text-neutral-500">
+                  {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
+                </span>
+              </div>
+              <div className="flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={selected}
+                  onSelect={setSelected}
+                  modifiers={{ hasEvent: eventDays }}
+                  modifiersClassNames={{
+                    hasEvent:
+                      "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
+                  }}
+                  className="pointer-events-auto [&_.rdp-day]:h-12 [&_.rdp-day]:w-12 [&_.rdp-cell]:h-12 [&_.rdp-cell]:w-12 [&_.rdp-head_cell]:w-12 sm:[&_.rdp-day]:h-16 sm:[&_.rdp-day]:w-16 sm:[&_.rdp-cell]:h-16 sm:[&_.rdp-cell]:w-16 sm:[&_.rdp-head_cell]:w-16"
+                />
+              </div>
+            </section>
+          )}
           <section>
             <div className="mb-4 flex items-center gap-2">
               <Star className="h-4 w-4 text-[#d4580a]" />
@@ -370,29 +383,6 @@ function CalendarPage() {
           </section>
         </div>
       </div>
-      <Dialog open={expanded} onOpenChange={setExpanded}>
-        <DialogContent className="h-full max-h-screen w-full max-w-full p-0 pt-14 sm:h-auto sm:w-[calc(100%-2rem)] sm:max-w-[900px] sm:pt-0">
-          <DialogHeader className="px-6 pt-6">
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <CalendarDays className="h-5 w-5 text-[#d4580a]" />
-              Mon. Calendar
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-1 items-start justify-center px-4 pb-6 sm:px-6">
-            <Calendar
-              mode="single"
-              selected={selected}
-              onSelect={(d) => { setSelected(d); if (d) setExpanded(false); }}
-              modifiers={{ hasEvent: eventDays }}
-              modifiersClassNames={{
-                hasEvent:
-                  "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
-              }}
-              className="pointer-events-auto origin-top [&_.rdp-day]:h-10 [&_.rdp-day]:w-10 [&_.rdp-cell]:h-10 [&_.rdp-cell]:w-10 [&_.rdp-head_cell]:w-10 sm:[&_.rdp-day]:h-16 sm:[&_.rdp-day]:w-16 sm:[&_.rdp-cell]:h-16 sm:[&_.rdp-cell]:w-16 sm:[&_.rdp-head_cell]:w-16"
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </AppLayout>
   );
 }
