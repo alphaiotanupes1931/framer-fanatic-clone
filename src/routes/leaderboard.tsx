@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
-import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FileText, MessageCircle, Heart } from "lucide-react";
@@ -39,7 +39,13 @@ function LeaderboardPage() {
   }, [auth.signedIn]);
 
   if (auth.loading) return null;
-  if (!auth.signedIn) return <AnonLeaderboard />;
+  if (!auth.signedIn) {
+    if (typeof window !== "undefined") {
+      try { sessionStorage.setItem("pb_post_auth_redirect", "/leaderboard"); } catch { /* ignore */ }
+      window.location.replace("/auth");
+    }
+    return null;
+  }
 
   return (
     <AppLayout>
