@@ -375,7 +375,7 @@ function CalendarPage() {
         </div>
       </div>
       <Dialog open={expanded} onOpenChange={setExpanded}>
-        <DialogContent className="max-w-[900px] p-0">
+        <DialogContent className="w-[calc(100%-2rem)] max-w-[900px] p-0 sm:w-auto">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle className="flex items-center gap-2 text-xl">
               <CalendarDays className="h-5 w-5 text-[#d4580a]" />
