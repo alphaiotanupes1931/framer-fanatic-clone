@@ -13,6 +13,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { becomeArtist } from "@/lib/stripe.functions";
 import { Eye, EyeOff } from "lucide-react";
 
+function popPostAuthRedirect(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const v = sessionStorage.getItem("pb_post_auth_redirect");
+    if (v) sessionStorage.removeItem("pb_post_auth_redirect");
+    return v;
+  } catch { return null; }
+}
+
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
   head: () => ({ meta: [{ title: "Sign in or create an account" }] }),
