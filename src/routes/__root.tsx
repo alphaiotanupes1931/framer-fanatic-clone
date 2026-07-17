@@ -55,32 +55,10 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  // Silently auto-retry transient errors. Show a loader during the retry
-  // attempt so users don't see the failure screen on flaky page loads.
-  const [retrying, setRetrying] = useState(true);
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
-    let cancelled = false;
-    const t = setTimeout(async () => {
-      try {
-        await router.invalidate();
-      } catch {}
-      if (cancelled) return;
-      reset();
-      // If the error persists, surface the fallback after a short delay.
-      setTimeout(() => { if (!cancelled) setRetrying(false); }, 1500);
-    }, 100);
-    return () => { cancelled = true; clearTimeout(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (retrying) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-foreground" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -93,8 +71,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => {
-              router.invalidate();
+            onClick={async () => {
+              try { await router.invalidate(); } catch {}
               reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
@@ -154,12 +132,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <head>
+    <html lang="en" suppressHydrationWarning>
+      <head suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>
