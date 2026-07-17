@@ -31,7 +31,11 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
+      if (data.session) {
+        const dest = popPostAuthRedirect();
+        if (dest) { window.location.replace(dest); return; }
+        navigate({ to: "/dashboard" });
+      }
     });
   }, [navigate]);
 
@@ -49,8 +53,12 @@ function AuthPage() {
       if (p?.must_reset_password) {
         return navigate({ to: "/reset-password" });
       }
+      const dest = popPostAuthRedirect();
+      if (dest && p?.onboarded) { window.location.replace(dest); return; }
       navigate({ to: p?.onboarded ? "/dashboard" : "/onboarding" });
     } else {
+      const dest = popPostAuthRedirect();
+      if (dest) { window.location.replace(dest); return; }
       navigate({ to: "/dashboard" });
     }
   };
