@@ -653,7 +653,7 @@ function DailyCreators() {
       const artists: DailyCreator[] = ((artistsRes.data ?? []) as DailyCreator[])
         .filter((c) => !!c.avatar_url && !c.is_founder)
         .map((c) => ({ ...c, kind: "artist" as const }));
-      const orgs: DailyCreator[] = ((orgsRes.data ?? []) ?? [])
+      const orgs: DailyCreator[] = (orgsRes.data ?? [])
         .filter((o) => !!o.avatar_url && !!o.slug)
         .map((o) => ({
           id: o.id,
