@@ -1,0 +1,1 @@
+UPDATE site_content SET value = to_jsonb('Extraordinary'::text) WHERE key = 'hero.line2';
