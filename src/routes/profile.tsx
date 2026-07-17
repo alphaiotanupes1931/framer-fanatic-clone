@@ -549,7 +549,7 @@ function ProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className={`grid gap-2 ${isArtist ? "grid-cols-2" : "grid-cols-3"}`}>
+                    <div className="grid grid-cols-3 gap-2">
                       {myPosts.map((p, idx) => {
                         const media: string[] = (p.media_urls && p.media_urls.length)
                           ? p.media_urls
