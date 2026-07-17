@@ -361,22 +361,10 @@ function HeroParallax() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    let cutoff = 0;
-    const onLoaded = () => {
-      cutoff = Math.max(0, video.duration - 30);
-    };
-    const onTimeUpdate = () => {
-      if (cutoff > 0 && video.currentTime >= cutoff) {
-        video.currentTime = 0;
-        video.play().catch(() => {});
-      }
-    };
-    video.addEventListener("loadedmetadata", onLoaded);
-    video.addEventListener("timeupdate", onTimeUpdate);
-    if (video.readyState >= 1) onLoaded();
+    const tryPlay = () => video.play().catch(() => {});
+    video.addEventListener("canplay", tryPlay);
     return () => {
-      video.removeEventListener("loadedmetadata", onLoaded);
-      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("canplay", tryPlay);
     };
   }, [showVideo]);
 
@@ -400,8 +388,9 @@ function HeroParallax() {
             src={assetUrl(heroVideoAsset.url)}
             autoPlay
             muted
+            loop
             playsInline
-            preload="metadata"
+            preload="auto"
             className="absolute inset-0 w-full h-full object-cover"
           />
         </div>
