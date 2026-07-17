@@ -376,6 +376,26 @@ function CalendarPage() {
           </section>
         </div>
       </div>
+      <Dialog open={expanded} onOpenChange={setExpanded}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Full month</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center p-2">
+            <Calendar
+              mode="single"
+              selected={selected}
+              onSelect={(d) => { setSelected(d); if (d) setExpanded(false); }}
+              modifiers={{ hasEvent: eventDays }}
+              modifiersClassNames={{
+                hasEvent:
+                  "relative font-semibold text-orange after:absolute after:bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-orange",
+              }}
+              className="pointer-events-auto [&_.rdp-day]:h-14 [&_.rdp-day]:w-14 [&_.rdp-cell]:h-14 [&_.rdp-cell]:w-14 [&_.rdp-head_cell]:w-14"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
