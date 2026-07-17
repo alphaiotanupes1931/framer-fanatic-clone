@@ -507,6 +507,15 @@ function CreatorsFans() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  const openAppPage = (destination: string) => {
+    if (signedIn) {
+      window.location.assign(destination);
+      return;
+    }
+    try { sessionStorage.setItem("pb_post_auth_redirect", destination); } catch { /* ignore */ }
+    window.location.assign("/auth");
+  };
+
   return (
     <section
       id="creators"
@@ -538,9 +547,9 @@ function CreatorsFans() {
             >
               <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight">{c.t}</h3>
               <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md">{c.b}</p>
-              <Link
-                to={signedIn ? c.destination : "/auth"}
-                search={signedIn ? undefined : { redirect: c.destination }}
+              <button
+                type="button"
+                onClick={() => openAppPage(c.destination)}
                 className={
                   "mt-8 inline-flex items-center gap-2 rounded-full pl-5 pr-1.5 py-1.5 text-sm font-medium transition-colors " +
                   (c.primary
@@ -552,7 +561,7 @@ function CreatorsFans() {
                 <span className={"inline-flex items-center justify-center w-7 h-7 rounded-full " + (c.primary ? "bg-ink text-paper" : "bg-paper/10 text-paper group-hover:bg-ink group-hover:text-paper")}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </span>
-              </Link>
+              </button>
             </div>
           ))}
         </motion.div>
