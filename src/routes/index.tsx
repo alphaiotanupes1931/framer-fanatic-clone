@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import heroVideoWebmAsset from "@/assets/hero.webm.asset.json";
+import heroMobileAsset from "@/assets/baltimore-hero-mobile.png.asset.json";
 import { assetUrl } from "@/lib/utils";
 import { stripHtml, truncateText } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
     links: [
-      { rel: "preload", as: "image", href: heroBaltimore, fetchpriority: "high" },
+      { rel: "preload", as: "image", href: heroMobileAsset.url, fetchpriority: "high" },
     ],
   }),
   component: Index,
@@ -360,14 +361,24 @@ function HeroParallax() {
 
   return (
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
-      {/* Image: visible on mobile, fallback on desktop */}
+      {/* Mobile hero image */}
       <img
-        src={heroBaltimore}
-        alt="A vibrant event space filled with people connecting in Baltimore"
+        src={assetUrl(heroMobileAsset.url)}
+        alt="Baltimore skyline at sunset from Patterson Park"
         loading="eager"
         fetchPriority="high"
         decoding="async"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover md:hidden"
+        style={{ width: "100%", height: "100%" }}
+      />
+      {/* Desktop fallback image (behind video) */}
+      <img
+        src={heroBaltimore}
+        alt=""
+        aria-hidden
+        loading="eager"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover hidden md:block"
         style={{ width: "100%", height: "100%" }}
       />
       {/* Video: desktop only */}
