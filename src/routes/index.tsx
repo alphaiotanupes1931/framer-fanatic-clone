@@ -760,9 +760,8 @@ function NextRefreshCountdown() {
   useEffect(() => {
     const tick = () => {
       const now = new Date();
-      const next = new Date(now);
-      next.setUTCHours(24, 0, 0, 0);
-      const ms = next.getTime() - now.getTime();
+      const period = 6 * 3_600_000;
+      const ms = period - (now.getTime() % period);
       const h = Math.floor(ms / 3_600_000);
       const m = Math.floor((ms % 3_600_000) / 60_000);
       const s = Math.floor((ms % 60_000) / 1000);
