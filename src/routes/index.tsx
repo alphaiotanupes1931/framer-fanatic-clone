@@ -6,6 +6,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
+import heroVideoWebmAsset from "@/assets/hero.webm.asset.json";
 import { assetUrl } from "@/lib/utils";
 import { stripHtml, truncateText } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
@@ -373,14 +374,17 @@ function HeroParallax() {
       {showVideo && (
         <div className="absolute inset-0 hidden md:block pointer-events-none">
           <video
-            src={assetUrl(heroVideoAsset.url)}
             autoPlay
             muted
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
+            poster={heroBaltimore}
             className="absolute inset-0 w-full h-full object-cover"
-          />
+          >
+            <source src={assetUrl(heroVideoWebmAsset.url)} type="video/webm" />
+            <source src={assetUrl(heroVideoAsset.url)} type="video/mp4" />
+          </video>
         </div>
       )}
     </motion.div>
