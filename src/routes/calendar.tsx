@@ -375,14 +375,14 @@ function CalendarPage() {
         </div>
       </div>
       <Dialog open={expanded} onOpenChange={setExpanded}>
-        <DialogContent className="w-[calc(100%-2rem)] max-w-[900px] p-0 sm:w-auto">
+        <DialogContent className="h-full w-full p-0 sm:h-auto sm:w-[calc(100%-2rem)] sm:max-w-[900px]">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle className="flex items-center gap-2 text-xl">
               <CalendarDays className="h-5 w-5 text-[#d4580a]" />
               Mon. Calendar
             </DialogTitle>
           </DialogHeader>
-          <div className="flex justify-center px-6 pb-6">
+          <div className="flex flex-1 items-start justify-center px-4 pb-6 sm:px-6">
             <Calendar
               mode="single"
               selected={selected}
@@ -392,7 +392,7 @@ function CalendarPage() {
                 hasEvent:
                   "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
               }}
-              className="pointer-events-auto scale-[1.12] origin-top [&_.rdp-day]:h-16 [&_.rdp-day]:w-16 [&_.rdp-cell]:h-16 [&_.rdp-cell]:w-16 [&_.rdp-head_cell]:w-16"
+              className="pointer-events-auto origin-top [&_.rdp-day]:h-10 [&_.rdp-day]:w-10 [&_.rdp-cell]:h-10 [&_.rdp-cell]:w-10 [&_.rdp-head_cell]:w-10 sm:[&_.rdp-day]:h-16 sm:[&_.rdp-day]:w-16 sm:[&_.rdp-cell]:h-16 sm:[&_.rdp-cell]:w-16 sm:[&_.rdp-head_cell]:w-16"
             />
           </div>
         </DialogContent>
