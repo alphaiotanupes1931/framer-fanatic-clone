@@ -612,12 +612,16 @@ type DailyCreator = {
   role: string | null;
   is_founder?: boolean | null;
   score?: number;
+  kind?: "artist" | "business" | "arts_org";
+  slug?: string | null;
 };
 
 function formatCreatorLabel(category?: string | null) {
   if (!category) return "Artist";
   const c = category.trim().toLowerCase();
   if (!c || c === "resident" || c === "visitor") return "Artist";
+  if (c === "business") return "Business";
+  if (c === "arts_org" || c === "arts organization") return "Arts Organization";
   // Only show recognized creator categories; everything else (legacy
   // imports like "resident", "business_owner") collapses to "Artist".
   const allowed = new Set([
@@ -637,24 +641,41 @@ function DailyCreators() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // Fetch a wide pool (broadened RPC fills with public profiles if not enough artists)
-      const { data } = await supabase.rpc("top_creators", { lim: 30 });
+      // Pool: artists (profiles) + businesses + arts orgs, rotating every 6 hours.
+      const [artistsRes, orgsRes] = await Promise.all([
+        supabase.rpc("top_creators", { lim: 60 }),
+        supabase
+          .from("organizations")
+          .select("id, name, slug, avatar_url, type")
+          .in("type", ["business", "arts_org"]) as unknown as Promise<{ data: Array<{ id: string; name: string | null; slug: string | null; avatar_url: string | null; type: string }> | null }>,
+      ]);
       if (cancelled) return;
-      const withAvatars = ((data ?? []) as DailyCreator[]).filter((c) => !!c.avatar_url);
-      // Prefer non-founders but fall back to founders if needed so we always show 3.
-      const nonFounders = withAvatars.filter((c) => !c.is_founder);
-      const pool = nonFounders.length >= 3 ? nonFounders : withAvatars;
+      const artists: DailyCreator[] = ((artistsRes.data ?? []) as DailyCreator[])
+        .filter((c) => !!c.avatar_url && !c.is_founder)
+        .map((c) => ({ ...c, kind: "artist" as const }));
+      const orgs: DailyCreator[] = ((orgsRes.data ?? []) ?? [])
+        .filter((o) => !!o.avatar_url && !!o.slug)
+        .map((o) => ({
+          id: o.id,
+          display_name: o.name,
+          username: null,
+          avatar_url: o.avatar_url,
+          category: o.type,
+          role: null,
+          slug: o.slug,
+          kind: o.type === "business" ? ("business" as const) : ("arts_org" as const),
+        }));
+      const pool = [...artists, ...orgs];
       if (pool.length <= 3) {
         setCreators(pool);
       } else {
-        const now = new Date();
-        const start = Date.UTC(now.getUTCFullYear(), 0, 0);
-        const dayOfYear = Math.floor((now.getTime() - start) / 86_400_000);
+        // Rotate every 6 hours (4 buckets per day)
+        const bucket = Math.floor(Date.now() / (6 * 3_600_000));
         const picked: DailyCreator[] = [];
         const used = new Set<number>();
         let i = 0;
         while (picked.length < 3 && used.size < pool.length) {
-          const idx = (dayOfYear * 3 + i * 7) % pool.length;
+          const idx = (bucket * 3 + i * 7) % pool.length;
           if (!used.has(idx)) {
             used.add(idx);
             picked.push(pool[idx]);
@@ -694,7 +715,11 @@ function DailyCreators() {
       {creators.map((c, i) => (
         <motion.a
           key={c.id}
-          href={c.username ? `/u/${c.username}` : "#"}
+          href={
+            c.kind === "business" || c.kind === "arts_org"
+              ? c.slug ? `/o/${c.slug}` : "#"
+              : c.username ? `/u/${c.username}` : "#"
+          }
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
