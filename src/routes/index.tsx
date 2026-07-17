@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import heroBaltimore from "@/assets/hero-baltimore.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import heroVideoWebmAsset from "@/assets/hero.webm.asset.json";
 import heroMobileAsset from "@/assets/baltimore-hero-mobile.png.asset.json";
