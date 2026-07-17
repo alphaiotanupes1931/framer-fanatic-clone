@@ -206,23 +206,21 @@ function CalendarPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
         {/* Left column: calendar + filters */}
         <div className="space-y-6">
-          <div className="hidden rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm sm:block sm:p-4">
-            <Calendar
-              mode="single"
-              selected={selected}
-              onSelect={setSelected}
-              modifiers={{ hasEvent: eventDays }}
-              modifiersClassNames={{
-                hasEvent:
-                  "relative font-semibold text-orange after:absolute after:bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-orange",
-              }}
-              className="pointer-events-auto mx-auto"
-            />
+          <div className="hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:block">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-bold text-neutral-800">
+                {selected ? selected.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+              </div>
+              <span className="grid h-2 w-2 rounded-full bg-[#d4580a]" />
+            </div>
+            <p className="mb-4 text-xs text-neutral-500">
+              {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
+            </p>
             <button
               onClick={() => setExpanded(true)}
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-1.5 text-xs font-semibold text-neutral-600 hover:border-orange-300 hover:text-[#d4580a]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#b84a08]"
             >
-              <Maximize2 className="h-3.5 w-3.5" /> Expand full month
+              <CalendarDays className="h-4 w-4" /> Mon. Calendar
             </button>
           </div>
           {/* Mobile: horizontal date strip */}
