@@ -16,9 +16,11 @@ import { Eye, EyeOff } from "lucide-react";
 function popPostAuthRedirect(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    const v = sessionStorage.getItem("pb_post_auth_redirect");
+    const fromUrl = new URLSearchParams(window.location.search).get("redirect");
+    const stored = sessionStorage.getItem("pb_post_auth_redirect");
+    const v = fromUrl || stored;
     if (v) sessionStorage.removeItem("pb_post_auth_redirect");
-    return v;
+    return v?.startsWith("/") && !v.startsWith("//") ? v : null;
   } catch { return null; }
 }
 
