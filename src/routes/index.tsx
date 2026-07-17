@@ -340,7 +340,6 @@ function QuoteSection() {
 
 function HeroParallax() {
   const ref = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [showVideo, setShowVideo] = useState(false);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
@@ -358,16 +357,6 @@ function HeroParallax() {
     };
   }, []);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const tryPlay = () => video.play().catch(() => {});
-    video.addEventListener("canplay", tryPlay);
-    return () => {
-      video.removeEventListener("canplay", tryPlay);
-    };
-  }, [showVideo]);
-
   return (
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
       {/* Image: visible on mobile, fallback on desktop */}
@@ -384,7 +373,6 @@ function HeroParallax() {
       {showVideo && (
         <div className="absolute inset-0 hidden md:block pointer-events-none">
           <video
-            ref={videoRef}
             src={assetUrl(heroVideoAsset.url)}
             autoPlay
             muted
