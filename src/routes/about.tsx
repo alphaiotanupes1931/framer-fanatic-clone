@@ -94,7 +94,7 @@ function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto max-w-[1280px] px-5 md:px-10 pt-10 md:pt-28 pb-6 md:pb-16">
-        <div className="grid gap-8 md:grid-cols-2 md:items-center md:gap-16">
+        <div className="grid gap-8 md:grid-cols-2 md:items-start md:gap-16">
           <div>
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
@@ -103,22 +103,31 @@ function Hero() {
               className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
             >
               {siteText(content, "about.hero.title")}
-              <span className="block italic text-ink/55">{siteText(content, "about.hero.italic")}</span>
             </motion.h1>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="relative aspect-[16/10] md:aspect-[4/3] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
-          >
-            <img
-              src={heroBaltimore}
-              alt="Planet Baltimore"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </motion.div>
+          <div className="flex flex-col gap-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="relative aspect-[16/10] md:aspect-[4/3] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
+            >
+              <img
+                src={heroBaltimore}
+                alt="Planet Baltimore"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="font-display text-[clamp(1.25rem,2.4vw,2rem)] font-medium leading-[1.25] tracking-tight italic text-ink/70"
+            >
+              {siteText(content, "about.hero.italic")}
+            </motion.p>
+          </div>
         </div>
       </div>
     </section>
