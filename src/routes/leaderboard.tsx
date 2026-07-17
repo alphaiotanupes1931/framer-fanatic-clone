@@ -91,5 +91,4 @@ function LeaderboardPage() {
   );
 }
 
-function AnonLeaderboard() {
-// AnonLeaderboard removed — unauthenticated users are redirected to /auth.
+// AnonLeaderboard removed. Unauthenticated users are redirected to /auth.
