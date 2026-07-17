@@ -948,7 +948,25 @@ function Footer() {
             <div key={c.h} className="min-w-0">
               <div className="text-[10px] md:text-xs uppercase tracking-widest text-paper/50 mb-3 md:mb-4">{c.h}</div>
               <ul className="space-y-2.5 md:space-y-3 text-sm">
-                {c.l.map((i) => (<li key={i.label}><Link to={i.to} className="hover:text-blue transition-colors">{i.label}</Link></li>))}
+                {c.l.map((i) => {
+                  const publicRoutes = ["/privacy", "/terms", "/cookies", "/auth"];
+                  const needsAuth = !signedIn && !publicRoutes.includes(i.to);
+                  return (
+                    <li key={i.label}>
+                      <Link
+                        to={needsAuth ? "/auth" : i.to}
+                        onClick={() => {
+                          if (needsAuth) {
+                            try { sessionStorage.setItem("pb_post_auth_redirect", i.to); } catch { /* ignore */ }
+                          }
+                        }}
+                        className="hover:text-blue transition-colors"
+                      >
+                        {i.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
