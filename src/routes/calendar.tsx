@@ -110,6 +110,7 @@ function CalendarPage() {
   const [neighborhoods, setNeighborhoods] = useState<{ id: string; name: string }[]>([]);
   const [foryouIdx, setForyouIdx] = useState(0);
   const [upcomingView, setUpcomingView] = useState<"list" | "grid">("list");
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     (async () => {
