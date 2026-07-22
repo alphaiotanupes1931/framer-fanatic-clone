@@ -7,8 +7,8 @@ export function HeroBanner({
   subtitle,
   cta,
 }: {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
   cta?: ReactNode;
 }) {
   return (
