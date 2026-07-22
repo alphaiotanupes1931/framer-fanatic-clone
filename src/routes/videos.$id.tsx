@@ -2,7 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, X } from "lucide-react";
-import pbLogo from "@/assets/pb-logo-dark.png";
+import pbLogoAsset from "@/assets/pb-logo-mark.png.asset.json";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -58,7 +58,7 @@ function VideoDetail() {
       <div className="mx-auto flex max-w-[1800px] flex-col px-4 py-4 sm:px-6">
         <div className="mb-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="w-8 h-8 invert" />
+            <img src={pbLogoAsset.url} alt="Planet Baltimore" width={32} height={32} className="w-8 h-8 invert" />
             <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </Link>
           <Link to="/videos" className="rounded-full p-2 text-neutral-300 hover:bg-neutral-800 hover:text-white" aria-label="Close">
