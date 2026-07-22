@@ -235,7 +235,16 @@ function Dashboard() {
   return (
     <AppLayout>
       <div className="w-full space-y-5 sm:space-y-[22px]">
-        <HeroBanner title="Planet Baltimore" subtitle="Baltimore. Your community. Your feed." />
+        <HeroBanner
+          title={
+            <span className="flex items-center gap-2">
+              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={36} height={36} className="h-8 w-8 sm:h-9 sm:w-9" />
+              <span className="font-display text-[24px] font-extrabold leading-[1.15] tracking-tight text-[#d4580a] sm:text-[38px]">Planet Baltimore</span>
+              <span className="rounded border border-[#d4580a]/30 bg-[#d4580a]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#d4580a]">BETA</span>
+            </span>
+          }
+          subtitle="Baltimore. Your community. Your feed."
+        />
 
         {/* Filters */}
         <div className="scrollbar-hide flex flex-wrap gap-2 overflow-x-auto pb-5 pt-0">
