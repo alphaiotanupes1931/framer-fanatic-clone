@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/app-layout";
 import { useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, MessageCircle, Heart } from "lucide-react";
+import { FileText, MessageCircle, Heart, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/leaderboard")({
   component: LeaderboardPage,
@@ -53,9 +53,10 @@ function LeaderboardPage() {
       <div className="h-6" />
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-neutral-200 bg-white px-6 py-4 text-sm text-neutral-600">
-          <span className="flex items-center gap-1.5"><FileText className="h-4 w-4" /> <b>5</b> / post</span>
-          <span className="flex items-center gap-1.5"><MessageCircle className="h-4 w-4" /> <b>2</b> / comment</span>
-          <span className="flex items-center gap-1.5"><Heart className="h-4 w-4" /> <b>1</b> / like received</span>
+          <span className="flex items-center gap-1.5"><FileText className="h-4 w-4" /> <b>5 pts</b> / post</span>
+          <span className="flex items-center gap-1.5"><MessageCircle className="h-4 w-4" /> <b>2 pts</b> / comment</span>
+          <span className="flex items-center gap-1.5"><Heart className="h-4 w-4" /> <b>1 pt</b> / like received</span>
+          <span className="flex items-center gap-1.5"><Gift className="h-4 w-4" /> <b>5 pts</b> / referral</span>
         </div>
 
         {rows.length === 0 && <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">No activity yet.</div>}
