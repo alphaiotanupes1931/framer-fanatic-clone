@@ -11,6 +11,7 @@ import { OnboardingCard } from "@/components/onboarding-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Users, Compass, MapPin, Loader2, Globe2 } from "lucide-react";
+import pbLogoAsset from "@/assets/pb-logo-mark.png.asset.json";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Post, Story, Event, Follow } from "@/lib/entities";
 
