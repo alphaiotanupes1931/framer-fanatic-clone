@@ -54,7 +54,7 @@ function VideoDetail() {
 
   return (
     <div className="fixed inset-0 z-50 bg-neutral-950 text-neutral-100 overflow-y-auto">
-      <div className="mx-auto flex max-w-[1400px] flex-col px-4 py-4 sm:px-6">
+      <div className="mx-auto flex max-w-[1800px] flex-col px-4 py-4 sm:px-6">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <span className="font-semibold">Planet Baltimore</span>
@@ -69,7 +69,7 @@ function VideoDetail() {
         ) : !video ? (
           <div className="text-sm text-neutral-400">Video not found.</div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
             <div className="min-w-0">
               <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
               <h1 className="mt-4 text-xl font-bold sm:text-2xl">{video.title}</h1>
