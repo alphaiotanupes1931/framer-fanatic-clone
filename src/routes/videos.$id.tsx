@@ -2,6 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, X } from "lucide-react";
+import pbLogo from "@/assets/pb-logo-dark.png";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -56,10 +57,10 @@ function VideoDetail() {
     <div className="fixed inset-0 z-50 bg-neutral-950 text-neutral-100 overflow-y-auto">
       <div className="mx-auto flex max-w-[1800px] flex-col px-4 py-4 sm:px-6">
         <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-semibold">Planet Baltimore</span>
-            {!loading && video && <><span className="text-neutral-500">·</span><span className="text-neutral-400">{related.length + 1} videos</span></>}
-          </div>
+          <Link to="/" className="flex items-center gap-2">
+            <img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="w-8 h-8 invert" />
+            <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
+          </Link>
           <Link to="/videos" className="rounded-full p-2 text-neutral-300 hover:bg-neutral-800 hover:text-white" aria-label="Close">
             <X className="h-5 w-5" />
           </Link>
