@@ -28,9 +28,10 @@ function LeaderboardPage() {
     const results: Row[] = await Promise.all(list.map(async (p: any) => {
       const { count: posts } = await supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", p.id);
       const { data: postRows } = await supabase.from("posts").select("likes_count, comments_count").eq("user_id", p.id);
+      const { count: referrals } = await supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", p.id);
       const likes = (postRows || []).reduce((a, r: any) => a + (r.likes_count || 0), 0);
       const comments = (postRows || []).reduce((a, r: any) => a + (r.comments_count || 0), 0);
-      const points = (posts || 0) * 5 + comments * 2 + likes * 1;
+      const points = (posts || 0) * 5 + comments * 2 + likes * 1 + (referrals || 0) * 5;
       return { ...p, posts: posts || 0, comments, likes, points };
     }));
     results.sort((a, b) => b.points - a.points);
