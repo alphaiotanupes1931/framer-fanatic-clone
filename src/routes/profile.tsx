@@ -18,7 +18,6 @@ import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
-import { tabsForArtist } from "@/lib/artist-tabs";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
