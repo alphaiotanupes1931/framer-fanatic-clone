@@ -118,21 +118,20 @@ function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
   const info = parseEmbed(url || "");
   if (info.kind === "youtube" || info.kind === "vimeo") {
     return (
-      <div className="relative aspect-video overflow-hidden rounded-2xl bg-black">
+      <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
         <iframe src={info.embed} className="absolute inset-0 h-full w-full" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen title="Video player" />
       </div>
     );
   }
   return (
-    <div className="relative aspect-video overflow-hidden rounded-2xl bg-black">
+    <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
       <video
         src={url}
         controls
         autoPlay
         playsInline
         poster={poster || undefined}
-        style={{ backgroundColor: "#000" }}
-        className="absolute inset-0 h-full w-full bg-black object-contain"
+        className="absolute inset-0 h-full w-full bg-black object-cover"
       />
     </div>
   );
