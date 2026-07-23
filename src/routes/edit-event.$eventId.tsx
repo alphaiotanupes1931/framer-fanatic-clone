@@ -131,7 +131,6 @@ function EditEventPage() {
         address: form.address.trim() || null,
         location: form.venue_name.trim() || form.address.trim() || null,
         neighborhood: form.neighborhood || null,
-        category: form.category,
         price_cents: priceCents,
         capacity,
       }).eq("id", eventId);
