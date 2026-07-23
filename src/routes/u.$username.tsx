@@ -14,7 +14,7 @@ import { PostCard } from "@/components/shared/post-card";
 import { EventCard } from "@/components/shared/event-card";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
-import { tabsForArtist, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
+import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
 import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
 import {
   ArtistPostsGrid,
@@ -235,8 +235,8 @@ function PublicProfilePage() {
   }
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
-  const tabs = tabsForArtist(profile.category, profile.role);
-  const isArtistView = tabs.some((t) => ["studio","series","gallery","cv","talk","contact"].includes(t.key as string));
+  const isArtistView = isArtistProfile(profile.category, profile.role);
+  const tabs = isArtistView ? tabsForArtist(profile.category, profile.role) : tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
   return (
