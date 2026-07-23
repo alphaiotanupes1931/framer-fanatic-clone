@@ -255,8 +255,15 @@ function PublicProfilePage() {
   const roleIsArtist = (profile.role || "").toLowerCase() === "artist";
   const detectedArtist = roleIsArtist || (hasArtistRole && !["resident", "visitor"].includes((profile.role || "").toLowerCase()));
   const isArtistView = forceArtist || (detectedArtist && !forceResident);
+  // Artist page = simple community tabs (Posts/Events/Talk/Invite).
+  // Resident/Visitor page = full rich tab set via tabsForProfile.
   const tabs = isArtistView
-    ? tabsForArtist(profile.category, profile.role)
+    ? [
+        { key: "posts", label: "Posts", Icon: List },
+        { key: "events", label: "Events", Icon: Calendar },
+        { key: "talk", label: "Talk", Icon: MessageCircle },
+        { key: "invite", label: "Invite", Icon: UserPlus2 },
+      ] as ReturnType<typeof tabsForArtist>
     : tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
