@@ -9,12 +9,20 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {posts.map((p) => {
-        const img = p.image_url || p.media_url;
+        const firstMedia = Array.isArray(p.media_urls) ? p.media_urls[0] : null;
+        const candidate = p.image_url || firstMedia || p.media_url;
+        const isVideo = typeof candidate === "string" && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(candidate);
+        const img = isVideo ? null : candidate;
+        const videoUrl = isVideo ? candidate : null;
         return (
         <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="group block">
           {img ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
               <img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+            </div>
+          ) : videoUrl ? (
+            <div className="aspect-square overflow-hidden rounded-xl bg-black">
+              <video src={videoUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
             </div>
           ) : (
             <div className="aspect-square rounded-xl bg-neutral-100 p-4 text-sm text-neutral-700 flex items-center justify-center text-center">
