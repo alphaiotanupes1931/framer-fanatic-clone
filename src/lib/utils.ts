@@ -5,11 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Lovable-hosted assets are served from /__l5e/... only on lovable.app deployments.
-// On other hosts (Vercel, custom domains) we must hit the absolute Lovable URL.
-const LOVABLE_ASSET_ORIGIN = "https://framer-fanatic-clone.lovable.app";
+// Hosted assets need an absolute project URL on external deployments.
+const ASSET_ORIGIN = "https://project--16fbc371-fc48-45be-a38e-cfde7916c8b6-dev.lovable.app";
 export function assetUrl(url: string): string {
   if (!url) return url;
-  if (url.startsWith("/__l5e/")) return `${LOVABLE_ASSET_ORIGIN}${url}`;
+  if (url.startsWith("/__l5e/")) return `${ASSET_ORIGIN}${url}`;
   return url;
 }
