@@ -251,20 +251,19 @@ function PublicProfilePage() {
   // requested). Residents whose creative category happens to match an art
   // discipline (e.g. Music) should still land on their Resident page by
   // default; the Artist page is accessible from "My Pages" or ?view=artist.
-  const forceArtist = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "artist";
-  const roleIsArtist = (profile.role || "").toLowerCase() === "artist";
-  const detectedArtist = roleIsArtist || (hasArtistRole && !["resident", "visitor"].includes((profile.role || "").toLowerCase()));
-  const isArtistView = forceArtist || (detectedArtist && !forceResident);
-  // Artist page = simple community tabs (Posts/Events/Talk/Invite).
-  // Resident/Visitor page = full rich tab set via tabsForProfile.
+  // Default landing = Resident page (simple community tabs). The rich
+  // Artist page is only reachable via ?view=artist (linked from "My Pages"
+  // on the owner's own profile). This keeps a creator's public identity
+  // as their Resident page unless someone explicitly opens their Artist page.
+  const isArtistView = forceArtist;
   const tabs = isArtistView
-    ? ([
+    ? tabsForProfile(profile.category, profile.role)
+    : ([
         { key: "posts", label: "Posts", Icon: List },
         { key: "events", label: "Events", Icon: Calendar },
         { key: "talk", label: "Talk", Icon: MessageCircle },
         { key: "invite", label: "Invite", Icon: UserPlus },
-      ] as ReturnType<typeof tabsForArtist>)
-    : tabsForProfile(profile.category, profile.role);
+      ] as ReturnType<typeof tabsForArtist>);
   const canEdit = !!isSelf;
 
   return (
