@@ -246,8 +246,15 @@ function PublicProfilePage() {
   }
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
-  const detectedArtist = isArtistProfile(profile.category, profile.role) || hasArtistRole;
-  const isArtistView = detectedArtist && !forceResident;
+  // Default to the user's primary role page. Only surface the artist layout
+  // when the profile's role is explicitly "artist" (or when ?view=artist is
+  // requested). Residents whose creative category happens to match an art
+  // discipline (e.g. Music) should still land on their Resident page by
+  // default; the Artist page is accessible from "My Pages" or ?view=artist.
+  const forceArtist = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "artist";
+  const roleIsArtist = (profile.role || "").toLowerCase() === "artist";
+  const detectedArtist = roleIsArtist || (hasArtistRole && !["resident", "visitor"].includes((profile.role || "").toLowerCase()));
+  const isArtistView = forceArtist || (detectedArtist && !forceResident);
   const tabs = isArtistView
     ? tabsForArtist(profile.category, profile.role)
     : tabsForProfile(profile.category, profile.role);
