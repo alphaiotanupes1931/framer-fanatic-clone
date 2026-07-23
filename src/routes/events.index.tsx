@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
-import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, MessageCircle, Heart, Share2, Clock } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Share2, Clock } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -120,14 +120,8 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
             <Ticket className="h-3.5 w-3.5" /> {priced ? "Get Tickets" : "RSVP"}
           </button>
         </div>
-        <div className="flex items-center justify-between border-t border-neutral-100 pt-3 text-sm text-neutral-500">
-          <button className="inline-flex items-center gap-1.5 hover:text-neutral-800">
-            <MessageCircle className="h-4 w-4" /> Hype this event
-          </button>
-          <div className="flex items-center gap-4">
-            <button className="hover:text-neutral-800"><Heart className="h-4 w-4" /></button>
-            <button type="button" onClick={() => setShareOpen(true)} className="inline-flex items-center gap-1 hover:text-neutral-800"><Share2 className="h-4 w-4" /> Share</button>
-          </div>
+        <div className="flex items-center justify-end gap-4 border-t border-neutral-100 pt-3 text-sm text-neutral-500">
+          <button type="button" onClick={() => setShareOpen(true)} className="inline-flex items-center gap-1 hover:text-neutral-800"><Share2 className="h-4 w-4" /> Share</button>
         </div>
       </div>
       <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={shareUrl} title={e.title} />
