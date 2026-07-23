@@ -482,18 +482,10 @@ function PublicProfilePage() {
           {contentLoading && tab === "posts" ? (
             <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
           ) : tab === "posts" ? (
-            true ? (
-              posts.length === 0 ? (
-                <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
-              ) : (
-                <ArtistPostsGrid posts={posts} />
-              )
+            posts.length === 0 ? (
+              <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
             ) : (
-              posts.length === 0 ? (
-                <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
-              ) : (
-                <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}</div>
-              )
+              <ArtistPostsGrid posts={posts} />
             )
           ) : tab === "studio" ? (
             <ArtistStudioTab posts={posts} />
@@ -508,14 +500,10 @@ function PublicProfilePage() {
           ) : tab === "invite" ? (
             <ArtistInviteTab profile={profile} />
           ) : tab === "events" ? (
-            true ? (
-              <ArtistEventsGrouped events={events as never} />
+            events.length === 0 ? (
+              <EmptyTab icon={Calendar} label="No events yet." />
             ) : (
-              events.length === 0 ? (
-                <EmptyTab icon={Calendar} label="No events yet." />
-              ) : (
-                <div className="space-y-4">{events.map((e) => <EventCard key={e.id} event={e} />)}</div>
-              )
+              <ArtistEventsGrouped events={events as never} />
             )
           ) : tab === "episodes" ? (
             <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
