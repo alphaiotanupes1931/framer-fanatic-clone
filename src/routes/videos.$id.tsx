@@ -54,54 +54,54 @@ function VideoDetail() {
   }, [id]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-neutral-950 text-neutral-100 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-white text-neutral-900 overflow-y-auto">
       <div className="mx-auto flex max-w-[1800px] flex-col px-4 py-4 sm:px-6">
         <div className="mb-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={pbLogoAsset.url} alt="Planet Baltimore" width={32} height={32} className="w-8 h-8 invert" />
+            <img src={pbLogoAsset.url} alt="Planet Baltimore" width={32} height={32} className="w-8 h-8" />
             <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </Link>
-          <Link to="/videos" className="rounded-full p-2 text-neutral-300 hover:bg-neutral-800 hover:text-white" aria-label="Close">
+          <Link to="/videos" className="rounded-full p-2 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Close">
             <X className="h-5 w-5" />
           </Link>
         </div>
         {loading ? (
-          <div className="text-sm text-neutral-400">Loading…</div>
+          <div className="text-sm text-neutral-500">Loading…</div>
         ) : !video ? (
-          <div className="text-sm text-neutral-400">Video not found.</div>
+          <div className="text-sm text-neutral-500">Video not found.</div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
             <div className="min-w-0">
               <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
               <h1 className="mt-4 text-xl font-bold sm:text-2xl">{video.title}</h1>
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-300">
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
                 {video.author?.username ? (
-                  <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-400">
+                  <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
                     {video.author.avatar_url ? (
                       <img src={video.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
                     ) : (
-                      <div className="h-9 w-9 rounded-full bg-neutral-700" />
+                      <div className="h-9 w-9 rounded-full bg-neutral-200" />
                     )}
                     <span>
                       <div>{video.author.display_name || video.author.username}</div>
-                      <div className="text-xs font-normal text-neutral-400">{new Date(video.created_at).toLocaleDateString()}</div>
+                      <div className="text-xs font-normal text-neutral-500">{new Date(video.created_at).toLocaleDateString()}</div>
                     </span>
                   </Link>
                 ) : (
                   <span className="font-semibold">{video.author?.display_name || "Anonymous"}</span>
                 )}
                 {video.category && (
-                  <span className="ml-auto rounded-full bg-neutral-800 px-3 py-1 text-xs font-semibold text-neutral-200">{video.category}</span>
+                  <span className="ml-auto rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">{video.category}</span>
                 )}
               </div>
               {video.description && (
-                <div className="mt-4 rounded-xl bg-neutral-900 p-4 text-sm leading-relaxed text-neutral-200 whitespace-pre-wrap">
+                <div className="mt-4 rounded-xl bg-neutral-50 border border-neutral-200 p-4 text-sm leading-relaxed text-neutral-800 whitespace-pre-wrap">
                   {video.description}
                 </div>
               )}
             </div>
             <aside className="min-w-0">
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-400">Up next</h2>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-500">Up next</h2>
               <div className="space-y-3">
                 {related.map((r) => <RelatedCard key={r.id} v={r} />)}
                 {related.length === 0 && <div className="text-sm text-neutral-500">No more videos yet.</div>}
@@ -125,7 +125,7 @@ function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
   }
   return (
     <div className="relative aspect-video overflow-hidden rounded-2xl bg-black">
-      <video src={url} controls autoPlay playsInline poster={poster || undefined} className="absolute inset-0 h-full w-full object-contain" />
+      <video src={url} controls autoPlay playsInline poster={poster || undefined} className="absolute inset-0 h-full w-full object-cover" />
     </div>
   );
 }
@@ -135,18 +135,18 @@ function RelatedCard({ v }: { v: Video }) {
   const poster = v.thumbnail_url || info.poster;
   return (
     <Link to="/videos/$id" params={{ id: v.id }} className="group flex gap-3">
-      <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-800">
+      <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-200">
         {poster ? (
           <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : info.kind === "file" ? (
           <video src={`${v.video_url}#t=0.5`} preload="metadata" muted playsInline className="absolute inset-0 h-full w-full object-cover" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-white/60"><Play className="h-6 w-6" /></div>
+          <div className="absolute inset-0 flex items-center justify-center text-neutral-500"><Play className="h-6 w-6" /></div>
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="line-clamp-2 text-sm font-semibold text-neutral-100 group-hover:text-orange-400">{v.title}</div>
-        <div className="mt-1 truncate text-xs text-neutral-400">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
+        <div className="line-clamp-2 text-sm font-semibold text-neutral-900 group-hover:text-orange-600">{v.title}</div>
+        <div className="mt-1 truncate text-xs text-neutral-500">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
       </div>
     </Link>
   );
