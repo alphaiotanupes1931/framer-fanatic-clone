@@ -345,9 +345,8 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-5 w-5" />
         </button>
-        <button onClick={toggleSave} className={`ml-auto flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
-          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
-          {saved ? "Saved" : "Save"}
+        <button onClick={toggleSave} className={`ml-auto flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
+          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
         </button>
         {isAdmin && (
           <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
