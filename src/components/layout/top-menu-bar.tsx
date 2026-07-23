@@ -9,6 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import pbLogoAsset from "@/assets/pb-logo-mark.png.asset.json";
 
 type Item = { icon: typeof Home; label: string; to: string };
 
@@ -56,10 +57,9 @@ export function TopMenuBar() {
       style={{ paddingTop: "env(safe-area-inset-top)", paddingLeft: "env(safe-area-inset-left)", paddingRight: "env(safe-area-inset-right)" }}
     >
       <div className="flex min-h-[52px] items-center justify-between px-4 py-3">
-        <Link to="/dashboard" className="flex items-center gap-1.5">
-          <span className="text-lg font-bold" style={{ color: "#d4580a" }}>Planet</span>
-          <span className="text-lg font-light text-foreground">Baltimore</span>
-          <span className="rounded-full bg-[#d4580a]/15 px-1.5 py-0.5 text-[10px] font-bold leading-none tracking-wide text-[#d4580a]">BETA</span>
+        <Link to="/dashboard" className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5">
+          <img src={pbLogoAsset.url} alt="Planet Baltimore" width={18} height={18} className="h-[18px] w-[18px] invert" />
+          <span className="font-display text-sm font-extrabold uppercase tracking-wide text-white">Planet Baltimore</span>
         </Link>
 
         <div className="flex items-center gap-1">
