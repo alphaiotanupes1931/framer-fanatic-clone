@@ -259,9 +259,18 @@ function PublicProfilePage() {
         }
       >
         {categoryLabel && (
-          <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-            {categoryLabel}
-          </span>
+          <div className="absolute left-4 top-4 flex items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur ${
+                isArtistView ? "bg-[#d4580a]" : "bg-emerald-600"
+              }`}
+            >
+              {isArtistView ? "Artist Page" : (profile.category?.toLowerCase() === "visitor" ? "Visitor Page" : "Resident Page")}
+            </span>
+            <span className="inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+              {categoryLabel}
+            </span>
+          </div>
         )}
         <div className="absolute right-3 top-3 flex items-center gap-2">
           <button
