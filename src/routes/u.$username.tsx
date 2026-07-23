@@ -67,6 +67,8 @@ function PublicProfilePage() {
   const [showHoodPicker, setShowHoodPicker] = useState(false);
   const [hasArtistRole, setHasArtistRole] = useState(false);
   const forceResident = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "resident";
+  const forceArtist = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "artist";
+  void forceResident;
 
   const isOwner = !!me && !!profile && me.id === profile.id;
 
