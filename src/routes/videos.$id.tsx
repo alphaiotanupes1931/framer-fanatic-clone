@@ -57,7 +57,7 @@ function VideoDetail() {
     <div className="fixed inset-0 z-50 bg-white text-neutral-900 overflow-y-auto">
       <div className="mx-auto flex max-w-[1800px] flex-col px-4 py-4 sm:px-6">
         <div className="mb-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="h-8 w-8 object-contain" />
             <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </Link>
