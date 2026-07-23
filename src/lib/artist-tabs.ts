@@ -70,6 +70,13 @@ const DEFAULT_TABS: ArtistTab[] = [
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
+const RESIDENT_TABS: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
 // Marker icons reserved for future domain-specific rendering.
 void ShoppingBag; void Film; void Camera; void Radio;
 
@@ -91,6 +98,19 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   return DEFAULT_TABS;
 }
 
+export function isArtistProfile(category?: string | null, role?: string | null): boolean {
+  const hay = `${norm(category)} ${norm(role)}`;
+  if (/resident|visitor/.test(hay) && !/artist|music|dj|producer|podcast|fashion|photograph|videograph|film|visual art|muralist|painter|sculpt|illustrat|designer|writer|poet|dancer|performance|mixed media|literary/.test(hay)) {
+    return false;
+  }
+  return /artist|music|musician|dj|producer|podcast|fashion|mixed media|performance|photograph|videograph|film|visual art|literary|poet|writer|dancer|muralist|painter|sculpt|illustrat|designer|creative/.test(hay);
+}
+
+export function tabsForProfile(category?: string | null, role?: string | null): ArtistTab[] {
+  if (isArtistProfile(category, role)) return tabsForArtist(category, role);
+  return RESIDENT_TABS;
+}
+
 export function bannerLabelForArtist(category?: string | null, role?: string | null): string | null {
   const hay = `${norm(category)} ${norm(role)}`;
   if (/podcast/.test(hay)) return "Podcaster";
@@ -104,5 +124,7 @@ export function bannerLabelForArtist(category?: string | null, role?: string | n
   if (/videograph|film/.test(hay)) return "Video";
   if (/visual art|muralist/.test(hay)) return "Visual Art";
   if (/literary|poet|writer/.test(hay)) return "Literary";
+  if (/resident/.test(hay)) return "Resident";
+  if (/visitor/.test(hay)) return "Visitor";
   return null;
 }
