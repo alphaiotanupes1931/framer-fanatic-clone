@@ -75,9 +75,12 @@ function ProfilePage() {
   // that differs from the generic default (Posts/Gallery/Events/CV/Bio/Invite).
   const isArtist = roleIsArtist || artistTabLabels.some((l) => ["Studio","Series","Album","Singles","EPK","Episodes","Fashion Line","Lookbook","Drops"].includes(l));
   const categoryTabs = isArtist ? [] : tabsForCategory(category);
+  // Swapped per product decision: the Artist page shows the simple
+  // community tab set, and the Resident/Visitor page shows the full
+  // rich tab set (Studio, Series, Gallery, etc.).
   const baseTabs = isArtist
-    ? TABS_ARTIST_BASE
-    : TABS_RESIDENT_BASE;
+    ? (["Posts","Events","Talk","Invite"] as const)
+    : TABS_ARTIST_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
