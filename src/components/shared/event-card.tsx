@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Share2, Bookmark, Send } from "lucide-react";
+import { Calendar, MapPin, Clock, Share2, Bookmark, Send, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useEventImageUrl } from "@/components/event-image";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { externalShare } from "@/lib/share-preview";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type EventRow = {
   id: string;
@@ -22,9 +23,10 @@ type EventRow = {
   neighborhood_name?: string | null;
   category?: string | null;
   is_free?: boolean;
+  user_id?: string | null;
 };
 
-export function EventCard({ event, compact = false }: { event: EventRow; compact?: boolean }) {
+export function EventCard({ event, compact = false, onDeleted }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void }) {
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
   const resolvedImage = useEventImageUrl(event.image_url);
@@ -32,6 +34,10 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
   useEffect(() => { setImgFailed(false); }, [resolvedImage]);
   const showImage = !!resolvedImage && !imgFailed;
   const me = useCurrentProfile();
+  const isAdmin = useIsAdmin();
+  const isOwner = !!me?.id && !!event.user_id && me.id === event.user_id;
+  const canDelete = isOwner || isAdmin;
+  const [deleting, setDeleting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const eventUrl = typeof window !== "undefined" ? `${window.location.origin}/events/${event.id}` : `/events/${event.id}`;
@@ -60,6 +66,21 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
 
   const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
   const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(eventUrl, event.title, event.description || undefined); };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!canDelete || deleting) return;
+    const msg = isOwner ? "Delete this event? This can't be undone." : "Delete this event as admin? This can't be undone.";
+    if (!window.confirm(msg)) return;
+    setDeleting(true);
+    const res = isOwner
+      ? await supabase.from("events").delete().eq("id", event.id)
+      : await supabase.rpc("admin_delete_event", { _id: event.id });
+    setDeleting(false);
+    if (res.error) { toast.error(res.error.message); return; }
+    toast.success("Event deleted");
+    onDeleted?.(event.id);
+  };
 
   if (compact) {
     return (
@@ -131,6 +152,11 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
           {saved ? "Saved" : "Save"}
         </button>
+        {canDelete && (
+          <button type="button" onClick={handleDelete} disabled={deleting} className="flex items-center text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
+            <Trash2 className="h-5 w-5" />
+          </button>
+        )}
       </div>
       <ShareToUsersDialog
         open={shareOpen}
