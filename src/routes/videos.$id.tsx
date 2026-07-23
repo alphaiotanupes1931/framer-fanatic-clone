@@ -125,7 +125,15 @@ function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
   }
   return (
     <div className="relative aspect-video overflow-hidden rounded-2xl bg-black">
-      <video src={url} controls autoPlay playsInline poster={poster || undefined} className="absolute inset-0 h-full w-full object-cover" />
+      <video
+        src={url}
+        controls
+        autoPlay
+        playsInline
+        poster={poster || undefined}
+        style={{ backgroundColor: "#000" }}
+        className="absolute inset-0 h-full w-full bg-black object-contain"
+      />
     </div>
   );
 }
