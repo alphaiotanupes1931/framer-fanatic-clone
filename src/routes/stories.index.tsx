@@ -452,6 +452,7 @@ function StoriesSignedIn() {
                     author_avatar: s.author?.avatar_url || undefined,
                     category: s.format,
                     created_at: s.created_at,
+                    featured: (s as any).featured,
                   }}
                 />
               ))}
