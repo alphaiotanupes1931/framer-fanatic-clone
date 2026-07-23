@@ -84,13 +84,13 @@ export function LeftSidebar() {
         {/* Logo */}
         <div className={`flex h-16 items-center border-b border-border px-4 sm:px-5 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
-            <Link to="/dashboard" className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5">
-              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={20} height={20} className="h-5 w-5 invert" />
+            <Link to="/dashboard" className="flex items-center gap-2">
+              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6" />
             </Link>
           ) : (
-            <Link to="/dashboard" className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5">
-              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={20} height={20} className="h-5 w-5 invert" />
-              <span className="font-display text-sm font-extrabold uppercase tracking-wide text-white">Planet Baltimore</span>
+            <Link to="/dashboard" className="flex items-center gap-2">
+              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6" />
+              <span className="font-display text-sm font-extrabold uppercase tracking-wide text-foreground">Planet Baltimore</span>
             </Link>
           )}
         </div>

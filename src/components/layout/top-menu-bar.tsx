@@ -57,9 +57,9 @@ export function TopMenuBar() {
       style={{ paddingTop: "env(safe-area-inset-top)", paddingLeft: "env(safe-area-inset-left)", paddingRight: "env(safe-area-inset-right)" }}
     >
       <div className="flex min-h-[52px] items-center justify-between px-4 py-3">
-        <Link to="/dashboard" className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5">
-          <img src={pbLogoAsset.url} alt="Planet Baltimore" width={18} height={18} className="h-[18px] w-[18px] invert" />
-          <span className="font-display text-sm font-extrabold uppercase tracking-wide text-white">Planet Baltimore</span>
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <img src={pbLogoAsset.url} alt="Planet Baltimore" width={22} height={22} className="h-[22px] w-[22px]" />
+          <span className="font-display text-sm font-extrabold uppercase tracking-wide text-foreground">Planet Baltimore</span>
         </Link>
 
         <div className="flex items-center gap-1">
