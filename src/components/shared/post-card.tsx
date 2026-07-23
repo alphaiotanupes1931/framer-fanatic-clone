@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { Flag } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -193,6 +193,13 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {isMine && onDelete && (
+              <DropdownMenuItem asChild>
+                <Link to="/edit-post/$id" params={{ id: post.id }}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Link>
+              </DropdownMenuItem>
+            )}
             {isMine && onDelete && (
               <DropdownMenuItem
                 className="text-destructive"
