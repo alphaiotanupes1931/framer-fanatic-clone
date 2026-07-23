@@ -134,7 +134,7 @@ function PostDetail() {
         <article className="overflow-hidden rounded-3xl border border-border bg-card">
           <header className="flex items-center gap-3 px-5 pt-5">
             {author ? (
-              <Link to="/u/$username" params={{ username: author.username || author.id }} className="flex items-center gap-3">
+              <Link to="/u/$username" params={{ username: author.username || author.id }} search={{ view: "resident" }} className="flex items-center gap-3">
                 <Avatar className="h-11 w-11">
                   {author.avatar_url && <AvatarImage src={author.avatar_url} alt="" />}
                   <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>

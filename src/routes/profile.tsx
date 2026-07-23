@@ -76,7 +76,7 @@ function ProfilePage() {
   const isArtist = roleIsArtist || artistTabLabels.some((l) => ["Studio","Series","Album","Singles","EPK","Episodes","Fashion Line","Lookbook","Drops"].includes(l));
   const categoryTabs = isArtist ? [] : tabsForCategory(category);
   const baseTabs = isArtist
-    ? [...TABS_RESIDENT_BASE, "Events", "Stripe"]
+    ? TABS_ARTIST_BASE
     : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
@@ -1426,7 +1426,7 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
       key: "artist",
       title: "Artist Page",
       subtitle: "Public artist profile — Studio, Series, Gallery, CV/Bio",
-      href: `/u/${username}`,
+      href: `/u/${username}?view=artist`,
       color: "bg-[#d4580a]",
     },
     username && {
