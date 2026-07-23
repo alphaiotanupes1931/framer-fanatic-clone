@@ -16,9 +16,9 @@ export const Route = createFileRoute("/search")({
 type Person = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null; role: string | null };
 type Org = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
 type Ev = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
-type PostLite = { id: string; content: string | null; image_url: string | null; user_id: string; created_at: string };
+type Business = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
 
-const TABS = ["All", "People", "Organizations", "Events", "Posts"] as const;
+const TABS = ["All", "People", "Organizations", "Events", "Businesses"] as const;
 type Tab = (typeof TABS)[number];
 
 function SearchPage() {
@@ -28,7 +28,7 @@ function SearchPage() {
   const [people, setPeople] = useState<Person[]>([]);
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [events, setEvents] = useState<Ev[]>([]);
-  const [posts, setPosts] = useState<PostLite[]>([]);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -42,34 +42,34 @@ function SearchPage() {
       setLoading(true);
       const hasQ = debounced.length > 0;
       const like = `%${debounced}%`;
-      const [pplRes, orgRes, evRes, postRes] = await Promise.all([
+      const [pplRes, orgRes, evRes, bizRes] = await Promise.all([
         hasQ
           ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
           : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
         hasQ
-          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").ilike("name", like).limit(24)
-          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").order("created_at", { ascending: false }).limit(24),
+          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").neq("type", "business").ilike("name", like).limit(24)
+          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").neq("type", "business").order("created_at", { ascending: false }).limit(24),
         hasQ
           ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").ilike("title", like).order("starts_at", { ascending: true }).limit(24)
           : supabase.from("events").select("id,title,starts_at,venue_name,image_url").order("starts_at", { ascending: true }).limit(24),
         hasQ
-          ? supabase.from("posts").select("id,content,image_url,user_id,created_at").ilike("content", like).order("created_at", { ascending: false }).limit(24)
-          : supabase.from("posts").select("id,content,image_url,user_id,created_at").order("created_at", { ascending: false }).limit(24),
+          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").ilike("name", like).limit(24)
+          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").order("created_at", { ascending: false }).limit(24),
       ]);
       if (cancelled) return;
       setPeople((pplRes.data ?? []) as Person[]);
       setOrgs((orgRes.data ?? []) as Org[]);
       setEvents((evRes.data ?? []) as Ev[]);
-      setPosts((postRes.data ?? []) as PostLite[]);
+      setBusinesses((bizRes.data ?? []) as Business[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [debounced]);
 
   const totals = useMemo(() => ({
-    People: people.length, Organizations: orgs.length, Events: events.length, Posts: posts.length,
-    All: people.length + orgs.length + events.length + posts.length,
-  }), [people, orgs, events, posts]);
+    People: people.length, Organizations: orgs.length, Events: events.length, Businesses: businesses.length,
+    All: people.length + orgs.length + events.length + businesses.length,
+  }), [people, orgs, events, businesses]);
 
   return (
     <AppLayout>
@@ -167,15 +167,19 @@ function SearchPage() {
               </Section>
             )}
 
-            {(tab === "All" || tab === "Posts") && posts.length > 0 && (
-              <Section title="Posts">
-                <div className="space-y-3">
-                  {posts.slice(0, tab === "All" ? 4 : 24).map((p) => (
-                    <div key={p.id} className="rounded-xl border border-border bg-card p-4">
-                      {p.content && <p className="text-sm text-foreground line-clamp-3">{p.content}</p>}
-                      {p.image_url && <img src={p.image_url} alt="" loading="lazy" decoding="async" className="mt-2 max-h-48 rounded-lg object-cover" />}
-                      <div className="mt-2 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
-                    </div>
+            {(tab === "All" || tab === "Businesses") && businesses.length > 0 && (
+              <Section title="Businesses">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {businesses.slice(0, tab === "All" ? 6 : 24).map((b) => (
+                    <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
+                        {b.avatar_url && <img src={b.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-foreground">{b.name}</div>
+                        <div className="text-xs text-muted-foreground">Business{b.neighborhood ? ` · ${b.neighborhood}` : ""}</div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               </Section>
