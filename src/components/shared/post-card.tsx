@@ -14,6 +14,7 @@ import { X } from "lucide-react";
 import { ReportDialog } from "@/components/report-dialog";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type Post = {
   id: string;
@@ -37,6 +38,7 @@ type Post = {
   is_founder?: boolean;
   tag?: string | null;
   category?: string | null;
+  featured?: boolean | null;
 };
 
 export function PostCard({ post, currentUserId, onDelete, reason }: {
@@ -56,6 +58,21 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
   const [reportOpen, setReportOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [mediaIdx, setMediaIdx] = useState(0);
+  const isAdmin = useIsAdmin();
+  const [isFeatured, setIsFeatured] = useState(!!post.featured);
+  const [featuring, setFeaturing] = useState(false);
+
+  const toggleFeatured = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!isAdmin || featuring) return;
+    setFeaturing(true);
+    const next = !isFeatured;
+    setIsFeatured(next);
+    const { error } = await supabase.from("posts").update({ featured: next } as never).eq("id", post.id);
+    setFeaturing(false);
+    if (error) { setIsFeatured(!next); toast.error(error.message); return; }
+    toast.success(next ? "Marked as featured" : "Removed from featured");
+  };
 
   // Build unified media list. Prefer media_urls; fall back to legacy image_url / video_url.
   const mediaList: { url: string; kind: "image" | "video" }[] = (() => {
@@ -180,6 +197,9 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
               <span title="Founding Member" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
                 <Star className="h-3 w-3" strokeWidth={2} /> Founding Member
               </span>
+            )}
+            {isFeatured && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>
             )}
           </div>
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
@@ -329,6 +349,11 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
           {saved ? "Saved" : "Save"}
         </button>
+        {isAdmin && (
+          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
+            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
+          </button>
+        )}
       </footer>
       {lightbox && post.image_url && (
         <div
