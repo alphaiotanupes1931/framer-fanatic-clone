@@ -6,12 +6,10 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Layers,
-  Image as ImageIcon, Calendar, FileText, ChevronDown, List,
+  Image as ImageIcon, Calendar, FileText, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
-import { PostCard } from "@/components/shared/post-card";
-import { EventCard } from "@/components/shared/event-card";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
