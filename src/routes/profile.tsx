@@ -484,6 +484,8 @@ function ProfilePage() {
               <StripeTab />
             ) : tab === "My Tickets" ? (
               <MyTicketsTab />
+            ) : tab === "My Pages" ? (
+              <MyPagesTab profile={profile} isArtist={isArtist} />
             ) : (isArtist && ["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
               profile ? (
                 tab === "Gallery" ? (
