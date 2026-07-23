@@ -67,6 +67,7 @@ import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$
 import { Route as EventsNewRouteImport } from './routes/events.new'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as EditStoryIdRouteImport } from './routes/edit-story.$id'
+import { Route as EditPostIdRouteImport } from './routes/edit-post.$id'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -362,6 +363,11 @@ const EditStoryIdRoute = EditStoryIdRouteImport.update({
   path: '/edit-story/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EditPostIdRoute = EditPostIdRouteImport.update({
+  id: '/edit-post/$id',
+  path: '/edit-post/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -425,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
@@ -488,6 +495,7 @@ export interface FileRoutesByTo {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
@@ -552,6 +560,7 @@ export interface FileRoutesById {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
@@ -617,6 +626,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/edit-post/$id'
     | '/edit-story/$id'
     | '/events/$eventId'
     | '/events/new'
@@ -680,6 +690,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/edit-post/$id'
     | '/edit-story/$id'
     | '/events/$eventId'
     | '/events/new'
@@ -743,6 +754,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/edit-post/$id'
     | '/edit-story/$id'
     | '/events/$eventId'
     | '/events/new'
@@ -807,6 +819,7 @@ export interface RootRouteChildren {
   TicketingRoute: typeof TicketingRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  EditPostIdRoute: typeof EditPostIdRoute
   EditStoryIdRoute: typeof EditStoryIdRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
@@ -1231,6 +1244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditStoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/edit-post/$id': {
+      id: '/edit-post/$id'
+      path: '/edit-post/$id'
+      fullPath: '/edit-post/$id'
+      preLoaderRoute: typeof EditPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -1314,6 +1334,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketingRoute: TicketingRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
+  EditPostIdRoute: EditPostIdRoute,
   EditStoryIdRoute: EditStoryIdRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
