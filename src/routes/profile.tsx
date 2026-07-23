@@ -1397,3 +1397,94 @@ function StripeTab() {
     </div>
   );
 }
+
+function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) {
+  const [orgs, setOrgs] = useState<any[]>([]);
+  useEffect(() => {
+    if (!profile?.id) return;
+    (async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("id, name, slug, type, subtype, avatar_url")
+        .eq("owner_id", profile.id);
+      setOrgs(data ?? []);
+    })();
+  }, [profile?.id]);
+
+  const username = profile?.username;
+  const pages = [
+    isArtist && username && {
+      key: "artist",
+      title: "Artist Page",
+      subtitle: "Public artist profile — Studio, Series, Gallery, CV/Bio",
+      href: `/u/${username}`,
+      color: "bg-[#d4580a]",
+    },
+    username && {
+      key: "resident",
+      title: profile?.category?.toLowerCase() === "visitor" ? "Visitor Page" : "Resident Page",
+      subtitle: "Public community profile — Posts, Feed, Talk",
+      href: `/u/${username}?view=resident`,
+      color: "bg-emerald-600",
+    },
+  ].filter(Boolean) as Array<{ key: string; title: string; subtitle: string; href: string; color: string }>;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">Personal Pages</h3>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {pages.map((p) => (
+            <a
+              key={p.key}
+              href={p.href}
+              className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
+            >
+              <span className={`grid h-12 w-12 place-items-center rounded-full text-white ${p.color}`}>
+                <Shield className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-neutral-900">{p.title}</div>
+                <div className="truncate text-xs text-neutral-500">{p.subtitle}</div>
+              </div>
+              <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          Organizations & Community Pages ({orgs.length})
+        </h3>
+        {orgs.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-center text-sm text-neutral-500">
+            You don't own any organization pages yet.
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {orgs.map((o) => (
+              <a
+                key={o.id}
+                href={`/o/${o.slug}`}
+                className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
+              >
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={o.avatar_url ?? undefined} />
+                  <AvatarFallback>{o.name?.[0] ?? "?"}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold text-neutral-900">{o.name}</div>
+                  <div className="truncate text-xs uppercase tracking-wider text-neutral-500">
+                    {[o.type, o.subtype].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
