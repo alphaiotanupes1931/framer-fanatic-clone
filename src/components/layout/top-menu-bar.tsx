@@ -9,7 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import pbLogoAsset from "@/assets/pb-logo-mark.png.asset.json";
+import pbLogo from "@/assets/pb-logo.png";
 
 type Item = { icon: typeof Home; label: string; to: string };
 
@@ -58,7 +58,7 @@ export function TopMenuBar() {
     >
       <div className="flex min-h-[52px] items-center justify-between px-4 py-3">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <img src={pbLogoAsset.url} alt="Planet Baltimore" width={22} height={22} className="h-[22px] w-[22px]" />
+          <img src={pbLogo} alt="Planet Baltimore" width={22} height={22} className="h-[22px] w-[22px] object-contain" />
           <span className="font-display text-sm font-extrabold uppercase tracking-wide text-foreground">Planet Baltimore</span>
         </Link>
 

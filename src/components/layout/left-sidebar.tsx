@@ -17,7 +17,7 @@ import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useSidebar } from "./sidebar-context";
-import pbLogoAsset from "@/assets/pb-logo-mark.png.asset.json";
+import pbLogo from "@/assets/pb-logo.png";
 
 // Route-path map: repo path -> this app's existing TanStack route.
 type NavItem = { icon: typeof Home; label: string; to: string };
@@ -85,11 +85,11 @@ export function LeftSidebar() {
         <div className={`flex h-16 items-center border-b border-border px-4 sm:px-5 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
             <Link to="/dashboard" className="flex items-center gap-2">
-              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6" />
+              <img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain" />
             </Link>
           ) : (
             <Link to="/dashboard" className="flex items-center gap-2">
-              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6" />
+              <img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain" />
               <span className="font-display text-sm font-extrabold uppercase tracking-wide text-foreground">Planet Baltimore</span>
             </Link>
           )}
