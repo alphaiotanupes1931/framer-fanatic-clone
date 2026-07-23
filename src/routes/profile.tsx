@@ -272,7 +272,7 @@ function ProfilePage() {
                 isArtist ? "bg-[#d4580a]" : "bg-emerald-600"
               }`}
             >
-              {isArtist ? "Artist Page" : (profile?.category?.toLowerCase() === "visitor" ? "Visitor Page" : "Resident Page")}
+              {isArtist ? "Artist Page" : ((category || "").toLowerCase() === "visitor" ? "Visitor Page" : "Resident Page")}
             </span>
           </div>
           {uploadingBanner && (
