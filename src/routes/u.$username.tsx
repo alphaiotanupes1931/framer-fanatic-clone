@@ -267,9 +267,11 @@ function PublicProfilePage() {
             >
               {isArtistView ? "Artist Page" : (profile.category?.toLowerCase() === "visitor" ? "Visitor Page" : "Resident Page")}
             </span>
-            <span className="inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-              {categoryLabel}
-            </span>
+            {!isArtistView && (
+              <span className="inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+                {categoryLabel}
+              </span>
+            )}
           </div>
         )}
         <div className="absolute right-3 top-3 flex items-center gap-2">
