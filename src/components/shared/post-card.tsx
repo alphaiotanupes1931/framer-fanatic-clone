@@ -212,7 +212,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="z-[120]">
             {isMine && (
               <DropdownMenuItem asChild>
                 <Link to="/edit-post/$id" params={{ id: post.id }}>

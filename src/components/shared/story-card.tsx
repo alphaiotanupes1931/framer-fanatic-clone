@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2, Send, Star } from "lucide-react";
+import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2, Send, Star, MoreHorizontal, Pencil } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,10 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { stripHtml, timeAgo } from "@/lib/text-utils";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Story = {
   id: string;
@@ -103,9 +107,36 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
     else toast.success(was ? "Removed from saved" : "Saved");
   };
 
+  const ownerMenu = isOwner ? (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+          aria-label="Story options"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="z-[120]">
+        <DropdownMenuItem asChild>
+          <Link to="/edit-story/$id" params={{ id: story.id }}>
+            <Pencil className="mr-2 h-4 w-4" /> Edit
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive" onSelect={(event) => void handleDelete(event as unknown as React.MouseEvent)}>
+          <Trash2 className="mr-2 h-4 w-4" /> Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ) : null;
+
   if (featured) {
     return (
-      <Link to="/stories/$storyId" params={{ storyId: story.id }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
+      <article className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
+        <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         <div className="flex items-center gap-2 px-4 pt-3">
           <Avatar className="h-7 w-7">
             <AvatarImage src={story.author_avatar ?? undefined} />
@@ -116,7 +147,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           <span className="truncate text-xs font-extrabold text-slate-800">{story.author_name}</span>
           {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
           {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
-          {story.created_at && <span className="ml-auto text-[11px] text-slate-500">{timeAgo(story.created_at)}</span>}
+          {story.created_at && <span className={`${isOwner ? "mr-9" : "ml-auto"} text-[11px] text-slate-500`}>{timeAgo(story.created_at)}</span>}
         </div>
         {story.cover_url && (
           <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
@@ -135,24 +166,23 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
             {story.read_minutes || 5} min read
           </div>
         </div>
-      </Link>
+        </Link>
+        {isOwner && <div className="absolute right-2 top-2 z-10">{ownerMenu}</div>}
+      </article>
     );
   }
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
-      <Link
-        to="/stories/$storyId"
-        params={{ storyId: story.id }}
-        className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5"
-      >
-        <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
-          <AvatarImage src={story.author_avatar ?? undefined} />
-          <AvatarFallback className="bg-muted text-sm text-muted-foreground">
-            {story.author_name?.charAt(0) ?? "?"}
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
+      <div className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+        <Link to="/stories/$storyId" params={{ storyId: story.id }} className="flex min-w-0 flex-1 items-center gap-3">
+          <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
+            <AvatarImage src={story.author_avatar ?? undefined} />
+            <AvatarFallback className="bg-muted text-sm text-muted-foreground">
+              {story.author_name?.charAt(0) ?? "?"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground sm:text-base">
             <span className="truncate">{story.author_name || "Someone"}</span>
             {story.category && (
@@ -165,8 +195,10 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
             {story.created_at ? timeAgo(story.created_at) : ""}
           </div>
-        </div>
-      </Link>
+          </div>
+        </Link>
+        {ownerMenu}
+      </div>
       {story.cover_url && (
         <Link
           to="/stories/$storyId"
