@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { EventImage } from "@/components/event-image";
 
 type EventPin = {
   id: string;
@@ -157,8 +158,8 @@ export function BaltimoreMap({
             center={[g.latitude, g.longitude]}
             radius={g.list.length > 1 ? 12 : 10}
             pathOptions={{
-              color: "#d4580a",
-              fillColor: "#d4580a",
+              color: "var(--map-accent)",
+              fillColor: "var(--map-accent)",
               fillOpacity: 0.85,
               weight: 2,
             }}
@@ -196,12 +197,12 @@ function EventPopup({
   const next = () => setIdx((i) => (i + 1) % list.length);
   return (
     <div className="event-map-popup-inner w-[280px] overflow-hidden">
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-orange-100 to-orange-50">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-map-accent/10">
         {e.image_url ? (
-          <img src={e.image_url} alt={e.title} className="h-full w-full object-cover" />
+          <EventImage src={e.image_url} alt={e.title} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <Calendar className="h-10 w-10 text-orange-400/70" />
+            <Calendar className="h-10 w-10 text-map-accent/70" />
           </div>
         )}
         {multi && (
@@ -230,7 +231,7 @@ function EventPopup({
         </div>
         {e.location && (
           <div className="flex items-start gap-1.5 text-[12.5px] text-neutral-700">
-            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d4580a]" />
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-map-accent" />
             <span className="line-clamp-1">{e.location}</span>
           </div>
         )}
@@ -242,7 +243,7 @@ function EventPopup({
         <Link
           to="/events/$eventId"
           params={{ eventId: e.id }}
-          className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#d4580a] hover:text-[#b8490a] transition"
+          className="inline-flex items-center gap-1 text-[13px] font-semibold text-map-accent transition hover:opacity-80"
         >
           View event <span aria-hidden>→</span>
         </Link>

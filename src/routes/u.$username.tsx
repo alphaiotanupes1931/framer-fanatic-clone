@@ -248,24 +248,12 @@ function PublicProfilePage() {
   }
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
-  // Default to the user's primary role page. Only surface the artist layout
-  // when the profile's role is explicitly "artist" (or when ?view=artist is
-  // requested). Residents whose creative category happens to match an art
-  // discipline (e.g. Music) should still land on their Resident page by
-  // default; the Artist page is accessible from "My Pages" or ?view=artist.
-  // Default landing = Resident page (simple community tabs). The rich
-  // Artist page is only reachable via ?view=artist (linked from "My Pages"
-  // on the owner's own profile). This keeps a creator's public identity
-  // as their Resident page unless someone explicitly opens their Artist page.
+  // Every normal profile link opens the complete Resident Page. Artist Page
+  // remains an explicit secondary page reached with ?view=artist.
   const isArtistView = forceArtist;
   const tabs = isArtistView
-    ? tabsForProfile(profile.category, profile.role)
-    : ([
-        { key: "posts", label: "Posts", Icon: List },
-        { key: "events", label: "Events", Icon: Calendar },
-        { key: "talk", label: "Talk", Icon: MessageCircle },
-        { key: "invite", label: "Invite", Icon: UserPlus },
-      ] as ReturnType<typeof tabsForArtist>);
+    ? tabsForArtist(profile.category, profile.role)
+    : tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
   return (
@@ -494,7 +482,7 @@ function PublicProfilePage() {
           {contentLoading && tab === "posts" ? (
             <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
           ) : tab === "posts" ? (
-            isArtistView ? (
+            true ? (
               posts.length === 0 ? (
                 <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
               ) : (
@@ -520,7 +508,7 @@ function PublicProfilePage() {
           ) : tab === "invite" ? (
             <ArtistInviteTab profile={profile} />
           ) : tab === "events" ? (
-            isArtistView ? (
+            true ? (
               <ArtistEventsGrouped events={events as never} />
             ) : (
               events.length === 0 ? (

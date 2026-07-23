@@ -9,7 +9,7 @@ export type ArtistTabKey =
   | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
   | "episodes" | "guests" | "listen" | "contact"
   | "studio" | "series" | "gallery"
-  | "fashion_line" | "lookbook" | "drops" | "collabs";
+  | "fashion_line" | "lookbook" | "drops" | "collabs" | "saved" | "tickets";
 
 export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
 
@@ -72,9 +72,16 @@ const DEFAULT_TABS: ArtistTab[] = [
 
 const RESIDENT_TABS: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "studio", label: "Studio", Icon: Flame },
+  { key: "series", label: "Series", Icon: Layers },
+  { key: "gallery", label: "Gallery", Icon: ImageIcon },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
+  { key: "saved", label: "Saved", Icon: ShoppingBag },
+  { key: "tickets", label: "My Tickets", Icon: Ticket },
 ];
 
 // Marker icons reserved for future domain-specific rendering.
@@ -107,9 +114,9 @@ export function isArtistProfile(category?: string | null, role?: string | null):
 }
 
 export function tabsForProfile(category?: string | null, role?: string | null): ArtistTab[] {
-  // Resident/Visitor pages get the full rich tab set (Studio, Series,
-  // Gallery, etc.) so residents can showcase their work in depth.
-  return tabsForArtist(category, role);
+  void category;
+  void role;
+  return RESIDENT_TABS;
 }
 
 export function bannerLabelForArtist(category?: string | null, role?: string | null): string | null {
