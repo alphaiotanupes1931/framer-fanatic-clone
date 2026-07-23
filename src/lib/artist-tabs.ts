@@ -107,7 +107,10 @@ export function isArtistProfile(category?: string | null, role?: string | null):
 }
 
 export function tabsForProfile(category?: string | null, role?: string | null): ArtistTab[] {
-  if (isArtistProfile(category, role)) return tabsForArtist(category, role);
+  // A resident/visitor page must keep the community tabs even when the
+  // person also has a creative category such as Music or Visual Art.
+  void category;
+  void role;
   return RESIDENT_TABS;
 }
 

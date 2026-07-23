@@ -182,7 +182,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         </div>
       )}
       <header className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
-        <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="shrink-0">
+        <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} search={{ view: "resident" }} className="shrink-0">
           <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
             {post.author_avatar && <AvatarImage src={post.author_avatar} />}
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
@@ -190,7 +190,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground sm:text-base">
-            <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="truncate hover:text-[#d4580a]">
+            <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} search={{ view: "resident" }} className="truncate hover:text-[#d4580a]">
               {authorName}
             </Link>
             {post.is_founder && (
