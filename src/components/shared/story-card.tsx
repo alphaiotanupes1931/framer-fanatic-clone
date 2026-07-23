@@ -28,9 +28,10 @@ type Story = {
   category?: string | null;
   created_at?: string | null;
   featured?: boolean | null;
+  featured_at?: string | null;
 };
 
-export function StoryCard({ story, featured = false, currentUserId, isAdmin: isAdminProp, onDeleted }: { story: Story; featured?: boolean; currentUserId?: string; isAdmin?: boolean; onDeleted?: (id: string) => void }) {
+export function StoryCard({ story, featured = false, currentUserId, isAdmin: isAdminProp, onDeleted, onPinnedChange }: { story: Story; featured?: boolean; currentUserId?: string; isAdmin?: boolean; onDeleted?: (id: string) => void; onPinnedChange?: (id: string, pinned: boolean, pinnedAt: string | null) => void }) {
   const detectedAdmin = useIsAdmin();
   const isAdmin = isAdminProp ?? detectedAdmin;
   const cleanExcerpt = stripHtml(story.excerpt);
@@ -50,11 +51,17 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
     if (!isAdmin || featuring) return;
     setFeaturing(true);
     const next = !isFeatured;
+    const pinnedAt = next ? new Date().toISOString() : null;
     setIsFeatured(next);
-    const { error } = await supabase.from("stories").update({ featured: next }).eq("id", story.id);
+    const { error } = await supabase.rpc("admin_toggle_content_pin", {
+      _content_type: "story",
+      _content_id: story.id,
+      _pinned: next,
+    });
     setFeaturing(false);
     if (error) { setIsFeatured(!next); toast.error(error.message); return; }
-    toast.success(next ? "Marked as featured" : "Removed from featured");
+    onPinnedChange?.(story.id, next, pinnedAt);
+    toast.success(next ? "Pinned to the top" : "Unpinned");
   };
 
   useEffect(() => {
@@ -258,8 +265,8 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           </button>
         )}
         {isAdmin && (
-          <button onClick={toggleFeatured} disabled={featuring} className={`ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
-            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
+          <button onClick={toggleFeatured} disabled={featuring} className={`ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unpin" : "Pin to top"}>
+            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Pinned" : "Pin"}
           </button>
         )}
       </footer>

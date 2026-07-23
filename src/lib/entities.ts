@@ -75,9 +75,10 @@ export const Post = {
     const { column, ascending } = parseOrder(order);
     const { data, error } = await supabase
       .from("posts")
-      .select("id, user_id, content, image_url, video_url, music_url, post_type, bg_color, text_color, likes_count, comments_count, neighborhood, is_deleted, featured, created_at")
+      .select("id, user_id, content, image_url, video_url, media_urls, music_url, post_type, bg_color, text_color, likes_count, comments_count, neighborhood, is_deleted, featured, featured_at, created_at")
       .eq("is_deleted", false)
       .order("featured", { ascending: false, nullsFirst: false })
+      .order("featured_at", { ascending: false, nullsFirst: false })
       .order(column, { ascending })
       .limit(limit);
     if (error) throw error;
@@ -105,10 +106,11 @@ export const Post = {
 export const Story = {
   async filter(where: Record<string, unknown>, order?: string, limit = 15) {
     const { column, ascending } = parseOrder(order);
-    let q = supabase.from("stories").select("id, user_id, title, excerpt, cover_url, likes_count, comments_count, status, featured, created_at");
+    let q = supabase.from("stories").select("id, user_id, title, excerpt, cover_url, likes_count, comments_count, status, featured, featured_at, created_at");
     for (const [k, v] of Object.entries(where)) q = q.eq(k, v as never);
     const { data, error } = await q
       .order("featured", { ascending: false, nullsFirst: false })
+      .order("featured_at", { ascending: false, nullsFirst: false })
       .order(column, { ascending })
       .limit(limit);
     if (error) throw error;

@@ -40,6 +40,7 @@ type Story = {
   id: string; user_id: string; title: string; excerpt: string | null;
   cover_url: string | null; format: string; read_minutes: number | null;
   likes_count: number; comments_count: number; created_at: string;
+  featured?: boolean; featured_at?: string | null;
   author?: { display_name: string | null; avatar_url: string | null; username: string | null; neighborhood: string | null; is_founder: boolean };
 };
 
@@ -233,9 +234,9 @@ function StoriesSignedIn() {
   const buildQuery = (from: number, to: number) => {
     let q = supabase.from("stories").select("*").range(from, to);
     if (tab === "Trending") {
-      q = q.order("featured", { ascending: false, nullsFirst: false }).order("likes_count", { ascending: false });
+      q = q.order("featured", { ascending: false, nullsFirst: false }).order("featured_at", { ascending: false, nullsFirst: false }).order("likes_count", { ascending: false });
     } else {
-      q = q.order("featured", { ascending: false, nullsFirst: false });
+      q = q.order("featured", { ascending: false, nullsFirst: false }).order("featured_at", { ascending: false, nullsFirst: false });
       switch (sort) {
         case "oldest": q = q.order("created_at", { ascending: true }); break;
         case "most_liked": q = q.order("likes_count", { ascending: false }); break;
@@ -440,6 +441,7 @@ function StoriesSignedIn() {
                   currentUserId={me?.id}
                   isAdmin={isAdmin}
                   onDeleted={(id) => setStories((prev) => prev.filter((x) => x.id !== id))}
+                  onPinnedChange={(id, pinned, pinnedAt) => setStories((prev) => [...prev.map((story) => story.id === id ? { ...story, featured: pinned, featured_at: pinnedAt } : story)].sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || +new Date(b.featured_at || b.created_at) - +new Date(a.featured_at || a.created_at)))}
                   story={{
                     id: s.id,
                     user_id: s.user_id,
@@ -454,6 +456,7 @@ function StoriesSignedIn() {
                     category: s.format,
                     created_at: s.created_at,
                     featured: (s as any).featured,
+                    featured_at: (s as any).featured_at,
                   }}
                 />
               ))}
