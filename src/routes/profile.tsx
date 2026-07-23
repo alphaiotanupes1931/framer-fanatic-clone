@@ -274,13 +274,15 @@ function ProfilePage() {
           style={profile?.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         >
           <div className="absolute left-3 top-3 z-10 flex items-center gap-2 sm:left-4 sm:top-4">
-            <span
-              className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur sm:text-xs ${
-                isArtist ? "bg-[#d4580a]" : "bg-emerald-600"
-              }`}
-            >
-              {isArtist ? "Artist Page" : ((category || "").toLowerCase() === "visitor" ? "Visitor Page" : "Resident Page")}
-            </span>
+            {isArtist ? (
+              <span className="inline-flex items-center rounded-full bg-[#d4580a] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur sm:text-xs">
+                Artist Page
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur sm:text-xs">
+                {(category || "").toLowerCase() === "visitor" ? "Visitor" : "Resident"}
+              </span>
+            )}
           </div>
           {uploadingBanner && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-sm">
