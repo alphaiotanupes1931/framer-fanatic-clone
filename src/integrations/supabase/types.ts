@@ -981,6 +981,7 @@ export type Database = {
           content: string
           created_at: string
           excluded_user_ids: string[]
+          featured: boolean
           id: string
           image_url: string | null
           is_deleted: boolean
@@ -1004,6 +1005,7 @@ export type Database = {
           content: string
           created_at?: string
           excluded_user_ids?: string[]
+          featured?: boolean
           id?: string
           image_url?: string | null
           is_deleted?: boolean
@@ -1027,6 +1029,7 @@ export type Database = {
           content?: string
           created_at?: string
           excluded_user_ids?: string[]
+          featured?: boolean
           id?: string
           image_url?: string | null
           is_deleted?: boolean
