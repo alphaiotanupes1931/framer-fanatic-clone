@@ -207,7 +207,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               </span>
             )}
             {isFeatured && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Pinned</span>
             )}
           </div>
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
