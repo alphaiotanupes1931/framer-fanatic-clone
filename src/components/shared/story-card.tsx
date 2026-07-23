@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2, Send } from "lucide-react";
+import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2, Send, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ type Story = {
   author_avatar?: string | null;
   category?: string | null;
   created_at?: string | null;
+  featured?: boolean | null;
 };
 
 export function StoryCard({ story, featured = false, currentUserId, isAdmin = false, onDeleted }: { story: Story; featured?: boolean; currentUserId?: string; isAdmin?: boolean; onDeleted?: (id: string) => void }) {
@@ -31,9 +32,23 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin = fa
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(!!story.featured);
+  const [featuring, setFeaturing] = useState(false);
   const isOwner = !!currentUserId && !!story.user_id && currentUserId === story.user_id;
   const canDelete = isOwner || isAdmin;
   const storyUrl = typeof window !== "undefined" ? `${window.location.origin}/stories/${story.id}` : `/stories/${story.id}`;
+
+  const toggleFeatured = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!isAdmin || featuring) return;
+    setFeaturing(true);
+    const next = !isFeatured;
+    setIsFeatured(next);
+    const { error } = await supabase.from("stories").update({ featured: next }).eq("id", story.id);
+    setFeaturing(false);
+    if (error) { setIsFeatured(!next); toast.error(error.message); return; }
+    toast.success(next ? "Marked as featured" : "Removed from featured");
+  };
 
   useEffect(() => {
     if (!currentUserId) return;
