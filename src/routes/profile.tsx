@@ -18,7 +18,6 @@ import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
-import { tabsForArtist } from "@/lib/artist-tabs";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
@@ -27,11 +26,20 @@ import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
-  head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
+  head: () => ({
+    meta: [
+      { title: "My Profile | Planet Baltimore" },
+      { name: "description", content: "Manage your Planet Baltimore resident profile, posts, events, saved items, and community activity." },
+      { property: "og:title", content: "My Profile | Planet Baltimore" },
+      { property: "og:description", content: "Manage your Planet Baltimore resident profile and community activity." },
+      { property: "og:type", content: "profile" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
-const TABS_ARTIST_BASE = ["Posts","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Dashboard","Stripe"] as const;
-const TABS_RESIDENT_BASE = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
+const TABS_ARTIST_BASE = ["Posts","Events","Talk","Invite","Stripe"] as const;
+const TABS_RESIDENT_BASE = ["Posts","Feed","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Pages","My Dashboard"] as const;
 
 function sortPosts(rows: any[]) {
   return [...rows].sort((a, b) => {
@@ -70,17 +78,11 @@ function ProfilePage() {
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
   const category = (profile as { category?: string | null } | null)?.category ?? null;
   const role = (profile as { role?: string | null } | null)?.role ?? null;
-  const artistTabLabels = tabsForArtist(category, role).map((t) => t.label);
-  // Treat as artist if role says so OR the profile's category maps to an artist tab set
-  // that differs from the generic default (Posts/Gallery/Events/CV/Bio/Invite).
-  const isArtist = roleIsArtist || artistTabLabels.some((l) => ["Studio","Series","Album","Singles","EPK","Episodes","Fashion Line","Lookbook","Drops"].includes(l));
-  const categoryTabs = isArtist ? [] : tabsForCategory(category);
-  // Swapped per product decision: the Artist page shows the simple
-  // community tab set, and the Resident/Visitor page shows the full
-  // rich tab set (Studio, Series, Gallery, etc.).
-  const baseTabs = isArtist
-    ? (["Posts","Events","Talk","Invite"] as const)
-    : TABS_ARTIST_BASE;
+  // Creative interests such as Music do not turn a Resident page into an
+  // Artist page. The user's explicit profile role decides the page type.
+  const isArtist = roleIsArtist && !isResident && role?.toLowerCase() === "artist";
+  const categoryTabs = isArtist ? tabsForCategory(category) : [];
+  const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_RESIDENT_BASE;
   const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
@@ -498,7 +500,7 @@ function ProfilePage() {
               <MyTicketsTab />
             ) : tab === "My Pages" ? (
               <MyPagesTab profile={profile} isArtist={isArtist} />
-            ) : (isArtist && ["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
+            ) : (["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
               profile ? (
                 tab === "Gallery" ? (
                   <ArtistGalleryTab userId={profile.id} canEdit />
@@ -517,11 +519,11 @@ function ProfilePage() {
                   />
                 )
               ) : null
-            ) : (isArtist && tab === "Contact") ? (
+            ) : tab === "Contact" ? (
               <ArtistBookCollaborateTab profile={profile} />
-            ) : (isArtist && tab === "Invite") ? (
+            ) : tab === "Invite" ? (
               <ArtistInviteTab profile={profile} />
-            ) : (isArtist && tab === "Events") ? (
+            ) : tab === "Events" ? (
               profile ? <ArtistEventsTab userId={profile.id} /> : null
             ) : categoryTabs.find((t) => t.label === tab) ? (
               profile ? (
