@@ -37,13 +37,19 @@ function EventDetail() {
   const [rsvping, setRsvping] = useState(false);
   const [rsvped, setRsvped] = useState(false);
   const [me, setMe] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const checkoutFn = useServerFn(createTicketCheckout);
   const rsvpFn = useServerFn(rsvpFreeEvent);
 
   useEffect(() => {
     (async () => {
       const { data: s } = await supabase.auth.getSession();
-      setMe(s.session?.user.id ?? null);
+      const uid = s.session?.user.id ?? null;
+      setMe(uid);
+      if (uid) {
+        const { data: r } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle();
+        setIsAdmin(!!r);
+      }
       const { data } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
       if (data) {
         setEvt(data as EventRow);
@@ -92,7 +98,18 @@ function EventDetail() {
 
   const remove = async () => {
     if (!evt || !window.confirm("Delete this event?")) return;
-    const { error } = await supabase.from("events").delete().eq("id", evt.id);
+    const isOwnerLocal = !!me && evt.user_id === me;
+    let error: { message: string } | null = null;
+    if (isOwnerLocal) {
+      const res = await supabase.from("events").delete().eq("id", evt.id);
+      error = res.error;
+    } else if (isAdmin) {
+      const res = await supabase.rpc("admin_delete_event", { _id: evt.id });
+      error = res.error;
+    } else {
+      toast.error("Not allowed");
+      return;
+    }
     if (error) { toast.error(error.message); return; }
     toast.success("Event deleted");
     navigate({ to: "/events" });
@@ -122,6 +139,7 @@ function EventDetail() {
   const locationText = evt.address || evt.location;
   const mapsUrl = locationText ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationText)}` : "";
   const isOwner = me && evt.user_id === me;
+  const canDelete = isOwner || isAdmin;
 
   const monthShort = eventDate ? eventDate.toLocaleString(undefined, { month: "short" }).toUpperCase() : "";
   const dayNum = eventDate ? eventDate.getDate() : "";
@@ -217,11 +235,13 @@ function EventDetail() {
           </Button>
         </div>
 
-        {isOwner && (
+        {canDelete && (
           <div className="flex gap-3">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Edit coming soon")}>
-              <Edit3 className="w-4 h-4" />Edit Event
-            </Button>
+            {isOwner && (
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Edit coming soon")}>
+                <Edit3 className="w-4 h-4" />Edit Event
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={remove} className="text-destructive hover:bg-destructive/10 hover:border-destructive transition-all duration-150">
               <Trash2 className="w-4 h-4 mr-2" />Delete Event
             </Button>
