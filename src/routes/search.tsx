@@ -47,14 +47,14 @@ function SearchPage() {
           ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
           : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
         hasQ
-          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").neq("type", "business").ilike("name", like).limit(24)
-          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").neq("type", "business").order("created_at", { ascending: false }).limit(24),
+          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group"]).ilike("name", like).limit(24)
+          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group"]).order("created_at", { ascending: false }).limit(24),
         hasQ
           ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").ilike("title", like).order("starts_at", { ascending: true }).limit(24)
           : supabase.from("events").select("id,title,starts_at,venue_name,image_url").order("starts_at", { ascending: true }).limit(24),
         hasQ
-          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").ilike("name", like).limit(24)
-          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").order("created_at", { ascending: false }).limit(24),
+          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).ilike("name", like).limit(24)
+          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).order("created_at", { ascending: false }).limit(24),
       ]);
       if (cancelled) return;
       setPeople((pplRes.data ?? []) as Person[]);
