@@ -6,7 +6,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Layers,
-  Image as ImageIcon, Calendar, FileText, ChevronDown,
+  Image as ImageIcon, Calendar, FileText, ChevronDown, List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -258,12 +258,12 @@ function PublicProfilePage() {
   // Artist page = simple community tabs (Posts/Events/Talk/Invite).
   // Resident/Visitor page = full rich tab set via tabsForProfile.
   const tabs = isArtistView
-    ? [
+    ? ([
         { key: "posts", label: "Posts", Icon: List },
         { key: "events", label: "Events", Icon: Calendar },
         { key: "talk", label: "Talk", Icon: MessageCircle },
-        { key: "invite", label: "Invite", Icon: UserPlus2 },
-      ] as ReturnType<typeof tabsForArtist>
+        { key: "invite", label: "Invite", Icon: UserPlus },
+      ] as ReturnType<typeof tabsForArtist>)
     : tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
