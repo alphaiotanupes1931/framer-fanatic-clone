@@ -7,6 +7,7 @@ import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
+import { GROUP_SUBTYPES } from "@/lib/categories";
 
 function prettyLabel(v: string) {
   return v
@@ -25,7 +26,7 @@ type Org = {
   created_at?: string;
 };
 
-const CATEGORIES = ["All", "Neighborhood", "Arts", "Activism", "Wellness", "Education", "Social", "Civic"] as const;
+const CATEGORIES = ["All", ...GROUP_SUBTYPES] as const;
 
 export function GroupsPage() {
   const { isArtist, isAdmin } = useUserRole();

@@ -7,6 +7,7 @@ import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
+import { COMMUNITY_ASSOC_SUBTYPES } from "@/lib/categories";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -20,6 +21,7 @@ export function CommunityAssociationsPage() {
   const canCreate = true;
   const [items, setItems] = useState<Org[]>([]);
   const [q, setQ] = useState("");
+  const [subtype, setSubtype] = useState<string>("All");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +33,9 @@ export function CommunityAssociationsPage() {
       .eq("type", "community_assoc")
       .order("name", { ascending: true });
     let list = (data ?? []) as Org[];
+    if (subtype !== "All") {
+      list = list.filter((o) => (o.subtype ?? "").toLowerCase() === subtype.toLowerCase());
+    }
     if (q.trim()) {
       const needle = q.toLowerCase();
       list = list.filter(
@@ -49,7 +54,7 @@ export function CommunityAssociationsPage() {
   useEffect(() => {
     const t = setTimeout(() => void load(), 200);
     return () => clearTimeout(t); /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [q]);
+  }, [q, subtype]);
 
   return (
     <AppLayout title="Community Associations" subtitle="Official community governance hubs for Baltimore neighborhoods.">
@@ -72,14 +77,26 @@ export function CommunityAssociationsPage() {
           }
         />
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search associations or neighborhoods..."
-            className="w-full rounded-2xl border border-neutral-200 bg-white py-3.5 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none"
-          />
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative min-w-[220px] flex-1">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search associations or neighborhoods..."
+              className="w-full rounded-2xl border border-neutral-200 bg-white py-3.5 pl-11 pr-4 text-sm placeholder:text-neutral-400 focus:border-orange-400 focus:outline-none"
+            />
+          </div>
+          <select
+            value={subtype}
+            onChange={(e) => setSubtype(e.target.value)}
+            className="rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none"
+          >
+            <option value="All">All types</option>
+            {COMMUNITY_ASSOC_SUBTYPES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
         </div>
 
         {loading ? (
