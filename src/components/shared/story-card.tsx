@@ -112,11 +112,17 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin = fa
           </Avatar>
           <span className="truncate text-xs font-extrabold text-slate-800">{story.author_name}</span>
           {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
+          {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
           {story.created_at && <span className="ml-auto text-[11px] text-slate-500">{timeAgo(story.created_at)}</span>}
         </div>
         {story.cover_url && (
           <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
             <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+            {isAdmin && (
+              <button onClick={toggleFeatured} disabled={featuring} className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${isFeatured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}>
+                <Star className={`h-3.5 w-3.5 ${isFeatured ? "" : "fill-yellow-900"}`} /> {isFeatured ? "Unfeature" : "Feature"}
+              </button>
+            )}
           </div>
         )}
         <div className="p-5">
@@ -151,6 +157,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin = fa
                 {story.category}
               </Badge>
             )}
+            {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
           </div>
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
             {story.created_at ? timeAgo(story.created_at) : ""}
@@ -214,6 +221,11 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin = fa
         {canDelete && (
           <button onClick={handleDelete} disabled={deleting} className="flex items-center gap-2 text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
             <Trash2 className="h-5 w-5" />
+          </button>
+        )}
+        {isAdmin && (
+          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
+            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
           </button>
         )}
       </footer>
