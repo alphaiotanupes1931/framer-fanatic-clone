@@ -61,7 +61,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
     setFeaturing(false);
     if (error) { setIsFeatured(!next); toast.error(error.message); return; }
     onPinnedChange?.(story.id, next, pinnedAt);
-    toast.success(next ? "Pinned to the top" : "Unpinned");
+    toast.success(next ? "Featured" : "Unfeatured");
   };
 
   useEffect(() => {
@@ -153,7 +153,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           </Avatar>
           <span className="truncate text-xs font-extrabold text-slate-800">{story.author_name}</span>
           {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
-          {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Pinned</span>}
+          {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
           {story.created_at && <span className={`${isOwner ? "mr-9" : "ml-auto"} text-[11px] text-slate-500`}>{timeAgo(story.created_at)}</span>}
         </div>
         {story.cover_url && (
@@ -161,7 +161,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
             <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
             {isAdmin && (
               <button onClick={toggleFeatured} disabled={featuring} className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${isFeatured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}>
-                <Star className={`h-3.5 w-3.5 ${isFeatured ? "" : "fill-yellow-900"}`} /> {isFeatured ? "Unpin" : "Pin"}
+                <Star className={`h-3.5 w-3.5 ${isFeatured ? "" : "fill-yellow-900"}`} /> {isFeatured ? "Unfeature" : "Feature"}
               </button>
             )}
           </div>
@@ -197,7 +197,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
                 {story.category}
               </Badge>
             )}
-            {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Pinned</span>}
+            {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
           </div>
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
             {story.created_at ? timeAgo(story.created_at) : ""}
@@ -265,8 +265,8 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           </button>
         )}
         {isAdmin && (
-          <button onClick={toggleFeatured} disabled={featuring} className={`ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unpin" : "Pin to top"}>
-            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Pinned" : "Pin"}
+          <button onClick={toggleFeatured} disabled={featuring} className={`ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
+            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
           </button>
         )}
       </footer>

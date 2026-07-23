@@ -79,7 +79,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     setFeaturing(false);
     if (error) { setIsFeatured(!next); toast.error(error.message); return; }
     onPinnedChange?.(post.id, next, pinnedAt);
-    toast.success(next ? "Pinned to the top" : "Unpinned");
+    toast.success(next ? "Featured" : "Unfeatured");
   };
 
   // Build unified media list. Prefer media_urls; fall back to legacy image_url / video_url.
@@ -207,7 +207,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               </span>
             )}
             {isFeatured && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Pinned</span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>
             )}
           </div>
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
@@ -357,8 +357,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
         </button>
         {isAdmin && (
-          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unpin" : "Pin to top"}>
-            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Pinned" : "Pin"}
+          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
+            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
           </button>
         )}
       </footer>
