@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { MapPin, Calendar, X, Building2, Users, Palette, Landmark } from "lucide-react";
+import { MapPin, Calendar, X, Building2, Users, Palette, Landmark, Search } from "lucide-react";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventImage } from "@/components/event-image";
@@ -56,6 +56,7 @@ function NeighborhoodsPage() {
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<TabKey>("events");
+  const [nq, setNq] = useState("");
 
   useEffect(() => { (async () => {
     const { data } = await supabase.from("neighborhoods").select("id, name, region").order("name");
@@ -285,9 +286,26 @@ function NeighborhoodsPage() {
         )}
 
         <div>
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">All Neighborhoods</h2>
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">All Neighborhoods</h2>
+            <div className="relative ml-auto w-full sm:w-80">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={nq}
+                onChange={(e) => setNq(e.target.value)}
+                placeholder="Search neighborhoods..."
+                className="w-full rounded-full border border-border bg-card py-2.5 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-orange focus:outline-none"
+              />
+            </div>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {list.map((n) => (
+            {list
+              .filter((n) => {
+                const q = nq.trim().toLowerCase();
+                if (!q) return true;
+                return n.name.toLowerCase().includes(q) || (n.region || "").toLowerCase().includes(q);
+              })
+              .map((n) => (
               <button
                 key={n.id}
                 onClick={() => setSelected(n)}
