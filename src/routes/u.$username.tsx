@@ -65,6 +65,8 @@ function PublicProfilePage() {
   const [muted, setMuted] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showHoodPicker, setShowHoodPicker] = useState(false);
+  const [hasArtistRole, setHasArtistRole] = useState(false);
+  const forceResident = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "resident";
 
   const isOwner = !!me && !!profile && me.id === profile.id;
 
@@ -96,6 +98,15 @@ function PublicProfilePage() {
       setProfile(publicProfile || null);
       if (publicProfile) {
         setMuted(window.localStorage.getItem(`pb_mute_user_${publicProfile.id}`) === "1");
+        // Detect artist role from user_roles so artist pages render as such
+        // even when profile.role is stored as "resident".
+        const { data: artistRoleRow } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("user_id", publicProfile.id)
+          .eq("role", "artist")
+          .maybeSingle();
+        if (!cancelled) setHasArtistRole(!!artistRoleRow);
         const [{ count: followers }, { count: following }, { count: posts }] = await Promise.all([
           supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
           supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
@@ -235,8 +246,11 @@ function PublicProfilePage() {
   }
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
-  const isArtistView = isArtistProfile(profile.category, profile.role);
-  const tabs = isArtistView ? tabsForArtist(profile.category, profile.role) : tabsForProfile(profile.category, profile.role);
+  const detectedArtist = isArtistProfile(profile.category, profile.role) || hasArtistRole;
+  const isArtistView = detectedArtist && !forceResident;
+  const tabs = isArtistView
+    ? tabsForArtist(profile.category, profile.role)
+    : tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
   return (
