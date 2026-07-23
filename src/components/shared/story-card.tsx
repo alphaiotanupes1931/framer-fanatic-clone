@@ -84,7 +84,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
   };
   const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
   const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(storyUrl, story.title, cleanExcerpt || undefined); };
-  const handleDelete = async (e: React.MouseEvent) => {
+  const handleDelete = async (e: { preventDefault: () => void; stopPropagation: () => void }) => {
     e.preventDefault(); e.stopPropagation();
     if (!canDelete || deleting) return;
     const msg = isOwner ? "Delete this story? This can't be undone." : "Delete this story as admin? This can't be undone.";
@@ -126,7 +126,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
             <Pencil className="mr-2 h-4 w-4" /> Edit
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive" onSelect={(event) => void handleDelete(event as unknown as React.MouseEvent)}>
+        <DropdownMenuItem className="text-destructive" onSelect={(event) => void handleDelete(event)}>
           <Trash2 className="mr-2 h-4 w-4" /> Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
