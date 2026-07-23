@@ -137,7 +137,7 @@ function Dashboard() {
         }));
 
       const postStream: FeedItem[] = filteredPosts
-        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+        .sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || +new Date(b.featured_at || b.created_at) - +new Date(a.featured_at || a.created_at))
         .slice(0, 25)
         .map((p) => ({
           type: "post" as const,
@@ -210,9 +210,16 @@ function Dashboard() {
     return shuffleSeed(all, dayOfYear).slice(0, 40);
   }, [activeFilter, posts, stories, events, follows, currentUser]);
 
-  const isEmpty = !isLoading && feedItems.length === 0;
-  const visibleItems = feedItems.slice(0, visibleCount);
-  const hasMore = visibleCount < feedItems.length;
+  const orderedFeedItems = useMemo(() => [...feedItems].sort((a, b) => {
+    const aPinned = a.type !== "event" && !!a.data.featured;
+    const bPinned = b.type !== "event" && !!b.data.featured;
+    if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
+    if (aPinned && bPinned) return +new Date(b.data.featured_at || b.date) - +new Date(a.data.featured_at || a.date);
+    return 0;
+  }), [feedItems]);
+  const isEmpty = !isLoading && orderedFeedItems.length === 0;
+  const visibleItems = orderedFeedItems.slice(0, visibleCount);
+  const hasMore = visibleCount < orderedFeedItems.length;
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -312,11 +319,11 @@ function Dashboard() {
             <>
             {visibleItems.map((item, idx) => {
               const inner = (() => {
-                if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} reason={item.reason} />;
+                if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} onPinnedChange={(id, pinned, pinnedAt) => qc.setQueryData<any[]>(["home-posts"], (old = []) => old.map((post) => post.id === id ? { ...post, featured: pinned, featured_at: pinnedAt } : post))} reason={item.reason} />;
                 if (item.type === "story") return (
                   <div className="space-y-0">
                     <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Story</span>
-                    <StoryCard story={item.data} currentUserId={currentUser?.id} />
+                    <StoryCard story={item.data} currentUserId={currentUser?.id} onPinnedChange={(id, pinned, pinnedAt) => qc.setQueryData<any[]>(["home-stories"], (old = []) => old.map((story) => story.id === id ? { ...story, featured: pinned, featured_at: pinnedAt } : story))} />
                   </div>
                 );
                 return (

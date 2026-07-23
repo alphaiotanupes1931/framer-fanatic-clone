@@ -39,12 +39,14 @@ type Post = {
   tag?: string | null;
   category?: string | null;
   featured?: boolean | null;
+  featured_at?: string | null;
 };
 
-export function PostCard({ post, currentUserId, onDelete, reason }: {
+export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason }: {
   post: Post;
   currentUserId?: string;
   onDelete?: (id: string) => void;
+  onPinnedChange?: (id: string, pinned: boolean, pinnedAt: string | null) => void;
   reason?: string;
 }) {
   const [liked, setLiked] = useState(false);
@@ -67,11 +69,17 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
     if (!isAdmin || featuring) return;
     setFeaturing(true);
     const next = !isFeatured;
+    const pinnedAt = next ? new Date().toISOString() : null;
     setIsFeatured(next);
-    const { error } = await supabase.from("posts").update({ featured: next } as never).eq("id", post.id);
+    const { error } = await supabase.rpc("admin_toggle_content_pin", {
+      _content_type: "post",
+      _content_id: post.id,
+      _pinned: next,
+    });
     setFeaturing(false);
     if (error) { setIsFeatured(!next); toast.error(error.message); return; }
-    toast.success(next ? "Marked as featured" : "Removed from featured");
+    onPinnedChange?.(post.id, next, pinnedAt);
+    toast.success(next ? "Pinned to the top" : "Unpinned");
   };
 
   // Build unified media list. Prefer media_urls; fall back to legacy image_url / video_url.
@@ -199,7 +207,7 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
               </span>
             )}
             {isFeatured && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Pinned</span>
             )}
           </div>
           <div className="text-[12px] text-muted-foreground sm:text-[13px]">
@@ -349,8 +357,8 @@ export function PostCard({ post, currentUserId, onDelete, reason }: {
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
         </button>
         {isAdmin && (
-          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
-            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
+          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unpin" : "Pin to top"}>
+            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Pinned" : "Pin"}
           </button>
         )}
       </footer>

@@ -127,8 +127,8 @@ function PublicProfilePage() {
         // Load their content
         setContentLoading(true);
         const [postsRes, storiesRes, eventsRes] = await Promise.all([
-          supabase.from("posts").select("*").eq("user_id", publicProfile.id).order("created_at", { ascending: false }).limit(30),
-          supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("created_at", { ascending: false }).limit(30),
+          supabase.from("posts").select("*").eq("user_id", publicProfile.id).order("featured", { ascending: false }).order("featured_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(30),
+          supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("featured", { ascending: false }).order("featured_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(30),
           supabase.from("events").select("*").eq("user_id", publicProfile.id).is("organization_id", null).order("starts_at", { ascending: false }).limit(30),
         ]);
         if (cancelled) return;
