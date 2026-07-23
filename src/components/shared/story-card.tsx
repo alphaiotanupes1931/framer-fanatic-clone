@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { stripHtml, timeAgo } from "@/lib/text-utils";
 import { externalShare } from "@/lib/share-preview";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type Story = {
   id: string;
@@ -25,7 +26,9 @@ type Story = {
   featured?: boolean | null;
 };
 
-export function StoryCard({ story, featured = false, currentUserId, isAdmin = false, onDeleted }: { story: Story; featured?: boolean; currentUserId?: string; isAdmin?: boolean; onDeleted?: (id: string) => void }) {
+export function StoryCard({ story, featured = false, currentUserId, isAdmin: isAdminProp, onDeleted }: { story: Story; featured?: boolean; currentUserId?: string; isAdmin?: boolean; onDeleted?: (id: string) => void }) {
+  const detectedAdmin = useIsAdmin();
+  const isAdmin = isAdminProp ?? detectedAdmin;
   const cleanExcerpt = stripHtml(story.excerpt);
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(story.likes_count || 0);
