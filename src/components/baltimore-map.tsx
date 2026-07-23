@@ -208,8 +208,10 @@ export function BaltimoreMap({
 
 function EventPopup({
   list,
+  onSelectNeighborhood,
 }: {
   list: EventPin[];
+  onSelectNeighborhood?: (n: NeighborhoodPin) => void;
 }) {
   const [idx, setIdx] = useState(0);
   const e = list[idx];
@@ -268,6 +270,16 @@ function EventPopup({
         >
           View event <span aria-hidden>→</span>
         </Link>
+        {e.neighborhood && (
+          <button
+            type="button"
+            onClick={() => e.neighborhood && onSelectNeighborhood?.(e.neighborhood)}
+            className="ml-3 inline-flex items-center gap-1 text-[13px] font-semibold text-neutral-700 underline-offset-2 hover:underline"
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            {e.neighborhood.name}
+          </button>
+        )}
         {multi && (
           <div className="flex items-center justify-between border-t border-neutral-100 pt-2">
             <button
