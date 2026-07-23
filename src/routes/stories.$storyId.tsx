@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Heart, MessageCircle, Clock, Share2, Trash2, Send } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Clock, Share2, Trash2, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import DOMPurify from "isomorphic-dompurify";
 
