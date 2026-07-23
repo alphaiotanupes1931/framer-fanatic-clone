@@ -238,7 +238,7 @@ function EventDetail() {
         {canDelete && (
           <div className="flex gap-3">
             {isOwner && (
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Edit coming soon")}>
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate({ to: "/edit-event/$eventId", params: { eventId: evt.id } })}>
                 <Edit3 className="w-4 h-4" />Edit Event
               </Button>
             )}
