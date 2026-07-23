@@ -68,6 +68,7 @@ import { Route as EventsNewRouteImport } from './routes/events.new'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as EditStoryIdRouteImport } from './routes/edit-story.$id'
 import { Route as EditPostIdRouteImport } from './routes/edit-post.$id'
+import { Route as EditEventEventIdRouteImport } from './routes/edit-event.$eventId'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -368,6 +369,11 @@ const EditPostIdRoute = EditPostIdRouteImport.update({
   path: '/edit-post/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EditEventEventIdRoute = EditEventEventIdRouteImport.update({
+  id: '/edit-event/$eventId',
+  path: '/edit-event/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -431,6 +437,7 @@ export interface FileRoutesByFullPath {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -495,6 +502,7 @@ export interface FileRoutesByTo {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -560,6 +568,7 @@ export interface FileRoutesById {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -626,6 +635,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
     | '/events/$eventId'
@@ -690,6 +700,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
     | '/events/$eventId'
@@ -754,6 +765,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
     | '/events/$eventId'
@@ -819,6 +831,7 @@ export interface RootRouteChildren {
   TicketingRoute: typeof TicketingRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  EditEventEventIdRoute: typeof EditEventEventIdRoute
   EditPostIdRoute: typeof EditPostIdRoute
   EditStoryIdRoute: typeof EditStoryIdRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
@@ -1251,6 +1264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/edit-event/$eventId': {
+      id: '/edit-event/$eventId'
+      path: '/edit-event/$eventId'
+      fullPath: '/edit-event/$eventId'
+      preLoaderRoute: typeof EditEventEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -1334,6 +1354,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketingRoute: TicketingRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
+  EditEventEventIdRoute: EditEventEventIdRoute,
   EditPostIdRoute: EditPostIdRoute,
   EditStoryIdRoute: EditStoryIdRoute,
   EventsEventIdRoute: EventsEventIdRoute,
