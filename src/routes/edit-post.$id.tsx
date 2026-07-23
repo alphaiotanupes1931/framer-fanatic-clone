@@ -98,7 +98,6 @@ function EditPostPage() {
         tag: tag || null,
         visibility,
         neighborhood: neighborhood.trim() || null,
-        updated_at: new Date().toISOString(),
       }).eq("id", id);
       if (error) throw error;
       toast.success("Post updated");
