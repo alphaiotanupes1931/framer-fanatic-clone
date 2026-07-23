@@ -246,8 +246,11 @@ function PublicProfilePage() {
   }
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
-  const isArtistView = isArtistProfile(profile.category, profile.role);
-  const tabs = isArtistView ? tabsForArtist(profile.category, profile.role) : tabsForProfile(profile.category, profile.role);
+  const detectedArtist = isArtistProfile(profile.category, profile.role) || hasArtistRole;
+  const isArtistView = detectedArtist && !forceResident;
+  const tabs = isArtistView
+    ? tabsForArtist(profile.category, profile.role)
+    : tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
   return (
