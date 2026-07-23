@@ -18,7 +18,7 @@ const primaryItems: Primary[] = [
 
 const createItems = [
   { icon: Ticket, label: "Event", to: "/events/new" },
-  { icon: Users, label: "Community", to: "/groups" },
+  { icon: Users, label: "Group", to: "/groups" },
   { icon: Palette, label: "Artist Page", to: "/artists" },
   { icon: Landmark, label: "Arts Org", to: "/arts-orgs" },
   { icon: Building2, label: "Business", to: "/businesses" },
@@ -34,7 +34,7 @@ const moreItems: Primary[] = [
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: Bookmark, label: "Saved", to: "/saved" },
-  { icon: Users, label: "Communities", to: "/groups" },
+  { icon: Users, label: "Groups", to: "/groups" },
   { icon: Shield, label: "Associations", to: "/community-associations" },
   { icon: Palette, label: "Artists", to: "/artists" },
   { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
