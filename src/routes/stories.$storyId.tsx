@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Heart, MessageCircle, Clock, Share2, Trash2, Send } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Clock, Share2, Trash2, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import DOMPurify from "isomorphic-dompurify";
 
@@ -137,11 +137,23 @@ function StoryDetail() {
 
         <div className="mt-6 flex items-start justify-between gap-3">
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl break-words">{story.title}</h1>
-          {canDelete && (
-            <button onClick={remove} aria-label="Delete story" className="shrink-0 rounded-full border border-border bg-card p-2 text-red-600 hover:bg-red-50">
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {isOwner && (
+              <Link
+                to="/edit-story/$id"
+                params={{ id: story.id }}
+                aria-label="Edit story"
+                className="rounded-full border border-border bg-card p-2 text-foreground hover:bg-accent"
+              >
+                <Pencil className="h-4 w-4" />
+              </Link>
+            )}
+            {canDelete && (
+              <button onClick={remove} aria-label="Delete story" className="rounded-full border border-border bg-card p-2 text-red-600 hover:bg-red-50">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
         {excerptText && <p className="mt-2 text-lg text-muted-foreground break-words">{excerptText}</p>}
 

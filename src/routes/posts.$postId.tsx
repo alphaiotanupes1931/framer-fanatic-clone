@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Heart, MessageCircle, Share2, Trash2, Send, Bookmark } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Share2, Trash2, Send, Bookmark, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 
@@ -146,9 +146,19 @@ function PostDetail() {
               </Link>
             ) : <div className="text-sm text-muted-foreground">Someone · {timeAgo(post.created_at)}</div>}
             {isOwner && (
-              <button onClick={remove} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50">
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <div className="ml-auto flex items-center gap-2">
+                <Link
+                  to="/edit-post/$id"
+                  params={{ id: post.id }}
+                  aria-label="Edit post"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Link>
+                <button onClick={remove} aria-label="Delete post" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             )}
           </header>
 
