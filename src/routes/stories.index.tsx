@@ -233,8 +233,9 @@ function StoriesSignedIn() {
   const buildQuery = (from: number, to: number) => {
     let q = supabase.from("stories").select("*").range(from, to);
     if (tab === "Trending") {
-      q = q.order("likes_count", { ascending: false });
+      q = q.order("featured", { ascending: false, nullsFirst: false }).order("likes_count", { ascending: false });
     } else {
+      q = q.order("featured", { ascending: false, nullsFirst: false });
       switch (sort) {
         case "oldest": q = q.order("created_at", { ascending: true }); break;
         case "most_liked": q = q.order("likes_count", { ascending: false }); break;

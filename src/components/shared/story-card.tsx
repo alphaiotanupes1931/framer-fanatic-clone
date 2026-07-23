@@ -228,38 +228,37 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           </p>
         )}
       </Link>
-      <footer className="flex items-center gap-5 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-6 sm:py-4">
-        <button onClick={toggleLike} className={`flex items-center gap-2 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Like">
+      <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm text-muted-foreground sm:px-6 sm:py-4">
+        <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Like">
           <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
         <Link
           to="/stories/$storyId"
           params={{ storyId: story.id }}
           hash="comments"
-          className="flex items-center gap-2 transition hover:text-foreground"
+          className="flex items-center gap-1.5 transition hover:text-foreground"
         >
           <MessageCircle className="h-5 w-5" /> {story.comments_count || 0}
         </Link>
-        <span className="flex items-center gap-2 text-muted-foreground/80">
+        <span className="flex items-center gap-1.5 text-muted-foreground/80">
           <Clock className="h-5 w-5" />{story.read_minutes || 5}m
         </span>
-        <button onClick={openShare} className="ml-auto flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
+        <button onClick={openShare} className="flex items-center transition hover:text-foreground" aria-label="Share in app" title="Share in app">
           <Send className="h-5 w-5" />
         </button>
-        <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+        <button onClick={sendExternal} className="flex items-center transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-5 w-5" />
         </button>
-        <button onClick={toggleSave} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
-          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
-          {saved ? "Saved" : "Save"}
+        <button onClick={toggleSave} className={`flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
+          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
         </button>
         {canDelete && (
-          <button onClick={handleDelete} disabled={deleting} className="flex items-center gap-2 text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
+          <button onClick={handleDelete} disabled={deleting} className="flex items-center text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
             <Trash2 className="h-5 w-5" />
           </button>
         )}
         {isAdmin && (
-          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
+          <button onClick={toggleFeatured} disabled={featuring} className={`ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
             <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
           </button>
         )}
