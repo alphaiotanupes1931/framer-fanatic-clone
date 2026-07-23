@@ -17,6 +17,7 @@ import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useSidebar } from "./sidebar-context";
+import pbLogoAsset from "@/assets/pb-logo-mark.png.asset.json";
 
 // Route-path map: repo path -> this app's existing TanStack route.
 type NavItem = { icon: typeof Home; label: string; to: string };
@@ -83,12 +84,13 @@ export function LeftSidebar() {
         {/* Logo */}
         <div className={`flex h-16 items-center border-b border-border px-4 sm:px-5 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
-            <span className="text-xl font-bold" style={{ color: "#d4580a" }}>P</span>
+            <Link to="/dashboard" className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5">
+              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={20} height={20} className="h-5 w-5 invert" />
+            </Link>
           ) : (
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <span className="text-xl font-bold" style={{ color: "#d4580a" }}>Planet</span>
-              <span className="text-xl font-light text-foreground">Baltimore</span>
-              <span className="rounded-full bg-[#d4580a]/15 px-1.5 py-0.5 text-[10px] font-bold leading-none tracking-wide text-[#d4580a]">BETA</span>
+            <Link to="/dashboard" className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5">
+              <img src={pbLogoAsset.url} alt="Planet Baltimore" width={20} height={20} className="h-5 w-5 invert" />
+              <span className="font-display text-sm font-extrabold uppercase tracking-wide text-white">Planet Baltimore</span>
             </Link>
           )}
         </div>
