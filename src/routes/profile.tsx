@@ -38,13 +38,10 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-// Artist page = the rich creator layout (Studio, Series, Gallery, plus
-// category-specific tabs like Album/Singles/EPK for musicians). This is
-// only visible to owners on their own /profile or via ?view=artist on
-// their public /u/:username page.
-const TABS_ARTIST_BASE = ["Posts","Feed","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Pages","My Dashboard","Stripe"] as const;
-// Resident page = the default public identity: simple community tabs.
-const TABS_RESIDENT_BASE = ["Posts","Events","Talk","Invite","Saved","My Tickets","My Pages","My Dashboard"] as const;
+const FULL_PROFILE_TABS = ["Posts","Feed","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Pages","My Dashboard"] as const;
+const TABS_ARTIST_BASE = [...FULL_PROFILE_TABS, "Stripe"] as const;
+// Resident Page is the default identity and always uses the complete profile layout.
+const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
 function sortPosts(rows: any[]) {
   return [...rows].sort((a, b) => {

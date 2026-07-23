@@ -6,12 +6,10 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Share2, Star, Trash2, Volume2, VolumeX, Grid3x3, Layers,
-  Image as ImageIcon, Calendar, FileText, ChevronDown, List,
+  Image as ImageIcon, Calendar, FileText, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
-import { PostCard } from "@/components/shared/post-card";
-import { EventCard } from "@/components/shared/event-card";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
@@ -248,24 +246,12 @@ function PublicProfilePage() {
   }
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
-  // Default to the user's primary role page. Only surface the artist layout
-  // when the profile's role is explicitly "artist" (or when ?view=artist is
-  // requested). Residents whose creative category happens to match an art
-  // discipline (e.g. Music) should still land on their Resident page by
-  // default; the Artist page is accessible from "My Pages" or ?view=artist.
-  // Default landing = Resident page (simple community tabs). The rich
-  // Artist page is only reachable via ?view=artist (linked from "My Pages"
-  // on the owner's own profile). This keeps a creator's public identity
-  // as their Resident page unless someone explicitly opens their Artist page.
+  // Every normal profile link opens the complete Resident Page. Artist Page
+  // remains an explicit secondary page reached with ?view=artist.
   const isArtistView = forceArtist;
   const tabs = isArtistView
-    ? tabsForProfile(profile.category, profile.role)
-    : ([
-        { key: "posts", label: "Posts", Icon: List },
-        { key: "events", label: "Events", Icon: Calendar },
-        { key: "talk", label: "Talk", Icon: MessageCircle },
-        { key: "invite", label: "Invite", Icon: UserPlus },
-      ] as ReturnType<typeof tabsForArtist>);
+    ? tabsForArtist(profile.category, profile.role)
+    : tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
   return (
@@ -494,18 +480,10 @@ function PublicProfilePage() {
           {contentLoading && tab === "posts" ? (
             <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
           ) : tab === "posts" ? (
-            isArtistView ? (
-              posts.length === 0 ? (
-                <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
-              ) : (
-                <ArtistPostsGrid posts={posts} />
-              )
+            posts.length === 0 ? (
+              <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
             ) : (
-              posts.length === 0 ? (
-                <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
-              ) : (
-                <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} currentUserId={me?.id} />)}</div>
-              )
+              <ArtistPostsGrid posts={posts} />
             )
           ) : tab === "studio" ? (
             <ArtistStudioTab posts={posts} />
@@ -520,14 +498,10 @@ function PublicProfilePage() {
           ) : tab === "invite" ? (
             <ArtistInviteTab profile={profile} />
           ) : tab === "events" ? (
-            isArtistView ? (
-              <ArtistEventsGrouped events={events as never} />
+            events.length === 0 ? (
+              <EmptyTab icon={Calendar} label="No events yet." />
             ) : (
-              events.length === 0 ? (
-                <EmptyTab icon={Calendar} label="No events yet." />
-              ) : (
-                <div className="space-y-4">{events.map((e) => <EventCard key={e.id} event={e} />)}</div>
-              )
+              <ArtistEventsGrouped events={events as never} />
             )
           ) : tab === "episodes" ? (
             <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
