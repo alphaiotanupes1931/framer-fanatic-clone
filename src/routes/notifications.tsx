@@ -169,8 +169,7 @@ function NotificationsPage() {
               const name = n.actor?.display_name || n.actor?.username || "Someone";
               return (
                 <li key={n.id}>
-                  <button
-                    onClick={() => onClick(n)}
+                  <div
                     className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/60 ${!n.is_read ? "bg-[#d4580a]/5" : ""}`}
                   >
                     {n.actor?.username ? (
@@ -195,13 +194,29 @@ function NotificationsPage() {
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-foreground">
-                        <span className="font-semibold">{name}</span>{" "}
-                        <span className="text-muted-foreground">{n.message || defaultText(n.type)}</span>
+                        {n.actor?.username ? (
+                          <Link
+                            to="/u/$username"
+                            params={{ username: n.actor.username }}
+                            className="font-semibold hover:underline"
+                          >
+                            {name}
+                          </Link>
+                        ) : (
+                          <span className="font-semibold">{name}</span>
+                        )}{" "}
+                        <button
+                          type="button"
+                          onClick={() => onClick(n)}
+                          className="text-left text-muted-foreground hover:text-foreground"
+                        >
+                          {n.message || defaultText(n.type)}
+                        </button>
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">{relTime(n.created_at)}</p>
                     </div>
                     {!n.is_read && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: "#d4580a" }} />}
-                  </button>
+                  </div>
                 </li>
               );
             })}
