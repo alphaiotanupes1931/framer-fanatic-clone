@@ -44,7 +44,7 @@ const navItems: NavItem[] = [
   { icon: Compass, label: "Discover", to: "/discover" },
   { icon: Ticket, label: "Events", to: "/events" },
   { icon: LayoutDashboard, label: "Organizer Studio", to: "/organizer-studio" },
-  { icon: Users, label: "Groups/Communities", to: "/groups" },
+  { icon: Users, label: "Groups", to: "/groups" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
   { icon: Bell, label: "Notifications", to: "/notifications" },

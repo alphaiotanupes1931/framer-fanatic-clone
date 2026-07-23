@@ -70,10 +70,10 @@ export function GroupsPage() {
   }, [items, q, cat]);
 
   return (
-    <AppLayout title="Groups / Communities" subtitle="Find your people and build something together in Baltimore.">
+    <AppLayout title="Groups" subtitle="Find your people and build something together in Baltimore.">
       <div className="space-y-6">
         <HeroBanner
-          title="Groups / Communities"
+          title="Groups"
           subtitle="Find your people and build something together in Baltimore."
           cta={
             <div className="flex flex-wrap items-center gap-2">
@@ -83,7 +83,7 @@ export function GroupsPage() {
                   onClick={() => setOpen(true)}
                   className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
                 >
-                  <Plus className="h-4 w-4" /> Create Group/Community
+                  <Plus className="h-4 w-4" /> Create Group
                 </button>
               )}
             </div>

@@ -18,7 +18,7 @@ const navItems: Item[] = [
   { icon: Palette, label: "Artists", to: "/artists" },
   { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
   { icon: Building2, label: "Businesses", to: "/businesses" },
-  { icon: Users, label: "Communities", to: "/groups" },
+  { icon: Users, label: "Groups", to: "/groups" },
   { icon: Calendar, label: "Community Calendar", to: "/calendar" },
   { icon: Compass, label: "Discover", to: "/search" },
   { icon: Ticket, label: "Events", to: "/events" },

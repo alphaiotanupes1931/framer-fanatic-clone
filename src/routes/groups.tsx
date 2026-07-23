@@ -4,7 +4,7 @@ export const Route = createFileRoute("/groups")({
   component: GroupsPage,
   head: () => ({
     meta: [
-      { title: "Groups / Communities - Planet Baltimore" },
+      { title: "Groups - Planet Baltimore" },
       { name: "description", content: "Find your people and build something together in Baltimore." },
     ],
   }),

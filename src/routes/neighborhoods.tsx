@@ -174,7 +174,7 @@ function NeighborhoodsPage() {
               const tabs: { key: TabKey; label: string; count: number; Icon: any }[] = [
                 { key: "events", label: "Events", count: events.length, Icon: Calendar },
                 { key: "businesses", label: "Businesses", count: businesses.length, Icon: Building2 },
-                { key: "groups", label: "Groups / Communities", count: groups.length, Icon: Users },
+                { key: "groups", label: "Groups", count: groups.length, Icon: Users },
                 { key: "artists", label: "Artists", count: artists.length, Icon: Palette },
                 { key: "arts_orgs", label: "Arts Orgs", count: artsOrgs.length, Icon: Landmark },
                 { key: "associations", label: "Associations", count: associations.length, Icon: Landmark },
