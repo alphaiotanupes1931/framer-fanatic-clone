@@ -13,6 +13,7 @@ type EventPin = {
   description: string | null;
   latitude: number;
   longitude: number;
+  neighborhood?: NeighborhoodPin | null;
 };
 
 type NeighborhoodPin = {
@@ -62,18 +63,26 @@ export function BaltimoreMap({
           .not("longitude", "is", null),
       ]);
       const nMap = new Map<string, { lat: number; lng: number }>();
+      const nFull = new Map<string, NeighborhoodPin>();
       for (const n of (nData || []) as any[]) {
-        if (n?.name) nMap.set(String(n.name).toLowerCase(), { lat: n.latitude, lng: n.longitude });
+        if (n?.name) {
+          nMap.set(String(n.name).toLowerCase(), { lat: n.latitude, lng: n.longitude });
+          nFull.set(String(n.name).toLowerCase(), { id: n.id, name: n.name, region: n.region ?? null, latitude: n.latitude, longitude: n.longitude });
+        }
       }
       const resolved: EventPin[] = [];
       for (const e of (evData || []) as any[]) {
         let lat = e.latitude, lng = e.longitude;
+        let nb: NeighborhoodPin | null = null;
         if ((lat == null || lng == null) && e.neighborhood) {
           const hit = nMap.get(String(e.neighborhood).toLowerCase());
           if (hit) { lat = hit.lat; lng = hit.lng; }
         }
+        if (e.neighborhood) {
+          nb = nFull.get(String(e.neighborhood).toLowerCase()) ?? null;
+        }
         if (lat != null && lng != null) {
-          resolved.push({ id: e.id, title: e.title, starts_at: e.starts_at, location: e.location, image_url: e.image_url, description: e.description ?? null, latitude: lat, longitude: lng });
+          resolved.push({ id: e.id, title: e.title, starts_at: e.starts_at, location: e.location, image_url: e.image_url, description: e.description ?? null, latitude: lat, longitude: lng, neighborhood: nb });
         }
       }
       setEvents(resolved);
@@ -98,6 +107,10 @@ export function BaltimoreMap({
   }
 
   const { MapContainer, TileLayer, CircleMarker, Tooltip, Popup } = Lib;
+
+  // Slightly offset event markers when they share exact coords with a neighborhood
+  // so the neighborhood dot stays clickable underneath.
+  const nCoordKeys = new Set(neighborhoods.map((n) => `${n.latitude.toFixed(4)}|${n.longitude.toFixed(4)}`));
 
   const groups = new Map<string, EventPin[]>();
   for (const e of events) {
@@ -153,9 +166,15 @@ export function BaltimoreMap({
           </CircleMarker>
         ))}
         {eventGroups.map((g) => (
+          (() => {
+          const key = `${g.latitude.toFixed(4)}|${g.longitude.toFixed(4)}`;
+          const overlapsNeighborhood = nCoordKeys.has(key);
+          const lat = overlapsNeighborhood ? g.latitude + 0.0009 : g.latitude;
+          const lng = overlapsNeighborhood ? g.longitude + 0.0009 : g.longitude;
+          return (
           <CircleMarker
             key={g.key}
-            center={[g.latitude, g.longitude]}
+            center={[lat, lng]}
             radius={g.list.length > 1 ? 12 : 10}
             pathOptions={{
               color: "var(--map-accent)",
@@ -170,9 +189,11 @@ export function BaltimoreMap({
               </span>
             </Tooltip>
             <Popup maxWidth={320} minWidth={280} className="event-map-popup" autoPan autoPanPadding={[16, 16]}>
-              <EventPopup list={g.list} />
+              <EventPopup list={g.list} onSelectNeighborhood={onSelectNeighborhood} />
             </Popup>
           </CircleMarker>
+          );
+          })()
         ))}
         {events.length === 0 && null}
       </MapContainer>
