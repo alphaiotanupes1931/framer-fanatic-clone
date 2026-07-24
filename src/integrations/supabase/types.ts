@@ -629,6 +629,131 @@ export type Database = {
           },
         ]
       }
+      organization_dues_payments: {
+        Row: {
+          amount_cents: number
+          buyer_total_cents: number
+          created_at: string
+          id: string
+          interval: string
+          member_id: string
+          org_id: string
+          owner_id: string
+          owner_net_cents: number
+          period_end: string | null
+          period_start: string | null
+          platform_fee_cents: number
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_fee_cents: number
+          stripe_payment_intent_id: string | null
+          tier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          buyer_total_cents: number
+          created_at?: string
+          id?: string
+          interval: string
+          member_id: string
+          org_id: string
+          owner_id: string
+          owner_net_cents: number
+          period_end?: string | null
+          period_start?: string | null
+          platform_fee_cents: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_fee_cents: number
+          stripe_payment_intent_id?: string | null
+          tier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          buyer_total_cents?: number
+          created_at?: string
+          id?: string
+          interval?: string
+          member_id?: string
+          org_id?: string
+          owner_id?: string
+          owner_net_cents?: number
+          period_end?: string | null
+          period_start?: string | null
+          platform_fee_cents?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_fee_cents?: number
+          stripe_payment_intent_id?: string | null
+          tier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_dues_payments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_dues_payments_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "organization_dues_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_dues_tiers: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          description: string | null
+          id: string
+          interval: string
+          is_active: boolean
+          name: string
+          org_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_dues_tiers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_followers: {
         Row: {
           created_at: string
