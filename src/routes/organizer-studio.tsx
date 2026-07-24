@@ -36,7 +36,7 @@ function OrganizerStudioPage() {
   const [tab, setTab] = useState<"manage" | "create">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
-  const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number } | null>(null);
+  const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
 
   const load = () => {
     if (!me) return;
@@ -49,20 +49,21 @@ function OrganizerStudioPage() {
   useEffect(load, [me?.id]);
 
   useEffect(() => {
-    if (!events || events.length === 0) { setOverview({ revenue: 0, net: 0, orders: 0 }); return; }
+    if (!events || events.length === 0) { setOverview({ revenue: 0, net: 0, orders: 0, promoters: 0 }); return; }
     const ids = events.map((e) => e.id);
-    supabase.from("tickets")
-      .select("buyer_total_cents,artist_net_cents,status,event_id")
-      .in("event_id", ids)
-      .eq("status", "paid")
-      .then(({ data }) => {
-        const rows = (data as { buyer_total_cents: number; artist_net_cents: number }[] | null) ?? [];
-        setOverview({
-          revenue: rows.reduce((s, r) => s + (r.buyer_total_cents ?? 0), 0),
-          net: rows.reduce((s, r) => s + (r.artist_net_cents ?? 0), 0),
-          orders: rows.length,
-        });
+    (async () => {
+      const [{ data: tRows }, { count: pCount }] = await Promise.all([
+        supabase.from("tickets").select("buyer_total_cents,artist_net_cents,status,event_id").in("event_id", ids).eq("status", "paid"),
+        supabase.from("event_promoters").select("id", { count: "exact", head: true }).in("event_id", ids),
+      ]);
+      const rows = (tRows as { buyer_total_cents: number; artist_net_cents: number }[] | null) ?? [];
+      setOverview({
+        revenue: rows.reduce((s, r) => s + (r.buyer_total_cents ?? 0), 0),
+        net: rows.reduce((s, r) => s + (r.artist_net_cents ?? 0), 0),
+        orders: rows.length,
+        promoters: pCount ?? 0,
       });
+    })();
   }, [events]);
 
   const duplicate = async (e: MyEvent) => {
@@ -155,7 +156,7 @@ function OrganizerStudioPage() {
                 <Stat label="Revenue" value={fmt(overview?.revenue ?? 0)} subtitle={`${fmt(overview?.net ?? 0)} net`} />
                 <Stat label="Tickets sold" value={(overview?.orders ?? 0).toString()} subtitle={`${overview?.orders ?? 0} orders`} />
                 <Stat label="Checked in" value="0" subtitle={`of ${overview?.orders ?? 0} total`} />
-                <Stat label="Promoters" value="1" subtitle="0 via promo" />
+                <Stat label="Promoters" value={(overview?.promoters ?? 0).toString()} subtitle="0 via promo" />
               </div>
               <div className="rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
                 Tip: click an event above to view its attendees, check-in QR scans, promoter links, and payouts.
