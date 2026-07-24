@@ -160,7 +160,7 @@ function OrganizerStudioPage() {
                 <Stat label="Promoters" value={(overview?.promoters ?? 0).toString()} subtitle="0 via promo" />
               </div>
               <div className="rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
-                Tip: click an event above to view its attendees, check-in QR scans, promoter links, and payouts.
+                Tip: Click an event above to view its attendees, check-in QR scans, promoter links, and payouts.
               </div>
               </>
             )}
