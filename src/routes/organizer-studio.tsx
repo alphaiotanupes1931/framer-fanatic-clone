@@ -205,13 +205,6 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   const revenue = paid.reduce((s, t) => s + t.buyer_total_cents, 0);
   const net = paid.reduce((s, t) => s + t.artist_net_cents, 0);
 
-  const filteredBuyers = paid.filter((t) => {
-    if (!search.trim()) return true;
-    const b = buyers[t.buyer_id];
-    const q = search.toLowerCase();
-    return (b?.name?.toLowerCase().includes(q) || b?.email?.toLowerCase().includes(q) || t.id.toLowerCase().includes(q));
-  });
-
   const tabs = [
     { id: "tickets", label: "Tickets", icon: Ticket },
     { id: "attendees", label: "Attendees", icon: Users },
