@@ -1364,7 +1364,7 @@ function StripeTab() {
       }});
       window.location.href = url;
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Could not start onboarding";
+      const msg = sanitizeErrorMessage(e, "Could not start onboarding");
       setErrorMsg(msg);
       toast.error(msg);
       setBusy(false);
