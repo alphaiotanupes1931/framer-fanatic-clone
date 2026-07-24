@@ -294,3 +294,45 @@ function Field({ label, children, required, optional }: { label: string; childre
     </div>
   );
 }
+
+function VideoField({
+  value, uploading, onPick, onClear, inputRef,
+}: {
+  value: string; uploading: boolean; onPick: (f: File) => void; onClear: () => void; inputRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const url = useEventImageUrl(value || null);
+  if (value) {
+    return (
+      <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-black">
+        {url ? (
+          <video src={url} controls className="w-full aspect-video bg-black" />
+        ) : (
+          <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading preview…</div>
+        )}
+        <button type="button" onClick={onClear} className="absolute top-2 right-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-black" aria-label="Remove video">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => inputRef.current?.click()}
+      className="w-full rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 hover:border-[#d4580a]/40 hover:bg-[#d4580a]/[0.03] flex flex-col items-center justify-center text-neutral-500 py-8"
+    >
+      {uploading ? (
+        <><Loader2 className="w-6 h-6 animate-spin mb-2" /><span className="text-sm">Uploading…</span></>
+      ) : (
+        <><VideoIcon className="w-7 h-7 mb-2" /><span className="text-sm font-medium">Add event video</span><span className="text-xs text-neutral-400 mt-0.5">Up to 200MB</span></>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="video/*"
+        hidden
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onPick(f); e.target.value = ""; }}
+      />
+    </button>
+  );
+}
