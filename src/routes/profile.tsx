@@ -267,6 +267,15 @@ function ProfilePage() {
 
   return (
     <AppLayout title="" hero={false}>
+      {!profile && (
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#d4580a] border-t-transparent" />
+            <p className="text-sm font-medium text-muted-foreground">Loading your profile…</p>
+          </div>
+        </div>
+      )}
+      {profile && (
       <div className="rounded-2xl border border-border bg-card overflow-hidden sm:rounded-3xl">
         <div
           className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
@@ -638,6 +647,7 @@ function ProfilePage() {
           </div>
         </div>
       </div>
+      )}
       <MessageFollowersModal open={msgOpen} onClose={() => setMsgOpen(false)} />
       <ShareToUsersDialog
         open={shareInAppOpen}
@@ -1612,13 +1622,19 @@ function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boo
     { to: "/organizer-studio", label: "Organizer Studio", desc: "Manage events, tickets, payouts and Stripe." },
     { to: "/promoter-dashboard", label: "Promoter Dashboard", desc: "Track ticket sales and event performance." },
     { to: "/saved", label: "Saved", desc: "Everything you've bookmarked." },
+    { to: "/settings", label: "Stripe", desc: "Connect Stripe to sell tickets and get paid directly. Takes about 3 minutes: tap Connect Stripe, enter your legal info, add your bank account, and you're ready to accept payments." },
   ];
   if (isAdmin) links.unshift({ to: "/admin/trash", label: "Admin Trash", desc: "Restore or purge deleted content." });
   void isArtist;
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {links.map((l) => (
-        <Link key={l.to} to={l.to} className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm">
+        <Link
+          key={l.label}
+          to={l.to}
+          hash={l.label === "Stripe" ? "stripe" : undefined}
+          className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
+        >
           <div className="min-w-0">
             <div className="font-semibold text-neutral-900">{l.label}</div>
             <div className="truncate text-xs text-muted-foreground">{l.desc}</div>
