@@ -752,9 +752,9 @@ function PayoutsTab({ paid, buyers, revenue, net }: { paid: Ticket[]; buyers: Re
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-neutral-600">Platform fee</div>
-              <div className="text-xs text-neutral-400">Stripe 2.9% + $0.30/order + Planet Baltimore $0.69/order</div>
+              <div className="text-xs text-neutral-400">2.9% + $0.30/order + $0.69/order</div>
             </div>
-            <span className="font-semibold text-red-500">-{fmt(totalFees)}</span>
+            <span className="font-semibold text-red-500">-{fmt(totalFees)} {revenue > 0 && <span className="text-xs font-normal">({(totalFees / revenue * 100).toFixed(1)}%)</span>}</span>
           </div>
           <div className="flex items-center justify-between border-t border-neutral-100 pt-3"><span className="font-semibold text-neutral-900">Your Take-Home</span><span className="text-lg font-bold text-neutral-900">{fmt(takeHome)}</span></div>
         </div>
