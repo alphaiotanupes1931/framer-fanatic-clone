@@ -40,7 +40,7 @@ const ASSOC_TABS = [
   "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
-  "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About",
+  "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
   "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
@@ -59,7 +59,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
-  Artists: Users, Support: Heart, Exhibition: ImageIcon,
+  Artists: Users, Support: Heart, Exhibition: ImageIcon, Dues: Heart,
 };
 type Tab = string;
 
