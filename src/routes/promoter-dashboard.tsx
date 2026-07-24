@@ -69,7 +69,6 @@ function PromoterDashboardPage() {
   const TABS: { id: TabId; label: string }[] = [
     { id: "events", label: "My Events" },
     { id: "analytics", label: "Analytics" },
-    { id: "promo", label: "Promo Codes" },
     { id: "message", label: "Message" },
     { id: "social", label: "Social" },
   ];
