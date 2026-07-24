@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, ArrowLeft, Share2, MessageSquare, Tag, BarChart3, ExternalLink } from "lucide-react";
+import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, ArrowLeft, Share2, MessageSquare, BarChart3, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/promoter-dashboard")({
