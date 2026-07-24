@@ -38,7 +38,7 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Stripe"] as const;
+const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
 const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
@@ -507,9 +507,7 @@ function ProfilePage() {
           </div>
 
           <div className="py-8">
-            {tab === "Stripe" && isArtist ? (
-              <StripeTab />
-            ) : tab === "My Tickets" ? (
+            {tab === "My Tickets" ? (
               <MyTicketsTab />
             ) : tab === "My Pages" ? (
               <MyPagesTab profile={profile} isArtist={isArtist} />
@@ -709,7 +707,9 @@ function ProfilePage() {
           )}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-background shadow-2xl"
+            className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-background shadow-2xl"
+          >
+            <div className="max-h-[92vh] overflow-y-auto"
           >
             <PostCard
               post={myPosts[postViewerIdx]}
