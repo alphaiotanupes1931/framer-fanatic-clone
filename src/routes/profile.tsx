@@ -38,9 +38,8 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-const FULL_PROFILE_TABS = ["Posts","Feed","Studio","Series","Gallery","Events","Talk","Contact","CV/Bio","Invite","Saved","My Tickets","My Pages","My Dashboard"] as const;
-const TABS_ARTIST_BASE = [...FULL_PROFILE_TABS, "Stripe"] as const;
-// Resident Page is the default identity and always uses the complete profile layout.
+const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
+const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
 function sortPosts(rows: any[]) {
@@ -83,9 +82,9 @@ function ProfilePage() {
   // Creative interests such as Music do not turn a Resident page into an
   // Artist page. The user's explicit profile role decides the page type.
   const isArtist = roleIsArtist && !isResident && role?.toLowerCase() === "artist";
-  const categoryTabs = isArtist ? tabsForCategory(category) : [];
-  const baseTabs = isArtist ? TABS_ARTIST_BASE : TABS_RESIDENT_BASE;
-  const TABS: readonly string[] = [...baseTabs, ...categoryTabs.map((t) => t.label)];
+  const categoryTabs: Array<{ label: string; kind: string }> = [];
+  void category; void isArtist;
+  const TABS: readonly string[] = FULL_PROFILE_TABS;
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
