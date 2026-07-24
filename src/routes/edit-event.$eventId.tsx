@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Loader2 } from "lucide-react";
-import { EventImage } from "@/components/event-image";
+import { ArrowLeft, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
+import { EventImage, useEventImageUrl } from "@/components/event-image";
 
 export const Route = createFileRoute("/edit-event/$eventId")({
   component: EditEventPage,
@@ -27,13 +27,16 @@ function EditEventPage() {
   const navigate = useNavigate();
   const { eventId } = Route.useParams();
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
 
   const [form, setForm] = useState({
     image_url: "",
+    video_url: "",
     title: "",
     description: "",
     starts_at: "",
@@ -73,6 +76,7 @@ function EditEventPage() {
       const priceCents = (e.price_cents as number | null) ?? 0;
       setForm({
         image_url: (e.image_url as string | null) ?? "",
+        video_url: (e.video_url as string | null) ?? "",
         title: (e.title as string | null) ?? "",
         description: (e.description as string | null) ?? "",
         starts_at: toLocalInput(e.starts_at as string | null),
@@ -108,6 +112,24 @@ function EditEventPage() {
     }
   };
 
+  const onPickVideo = async (file: File) => {
+    if (!me) return;
+    if (file.size > 200 * 1024 * 1024) { toast.error("Video must be under 200MB"); return; }
+    setUploadingVideo(true);
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      set("video_url", path);
+      toast.success("Video uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
   const canSubmit = form.title.trim().length > 0 && form.starts_at.length > 0;
 
   const submit = async () => {
@@ -125,6 +147,7 @@ function EditEventPage() {
         title: form.title.trim(),
         description: form.description.trim() || null,
         image_url: form.image_url || null,
+        video_url: form.video_url || null,
         starts_at: starts,
         ends_at: ends,
         venue_name: form.venue_name.trim() || null,
@@ -188,6 +211,11 @@ function EditEventPage() {
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickImage(f); e.target.value = ""; }}
           />
         </button>
+
+        <div className="mb-8">
+          <label className="block text-sm font-semibold mb-2">Event Video <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span></label>
+          <VideoField value={form.video_url} uploading={uploadingVideo} onPick={onPickVideo} onClear={() => set("video_url", "")} inputRef={videoRef} />
+        </div>
 
         <div className="space-y-6">
           <Field label="Event Title" required>
@@ -264,5 +292,47 @@ function Field({ label, children, required, optional }: { label: string; childre
       </label>
       {children}
     </div>
+  );
+}
+
+function VideoField({
+  value, uploading, onPick, onClear, inputRef,
+}: {
+  value: string; uploading: boolean; onPick: (f: File) => void; onClear: () => void; inputRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const url = useEventImageUrl(value || null);
+  if (value) {
+    return (
+      <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-black">
+        {url ? (
+          <video src={url} controls className="w-full aspect-video bg-black" />
+        ) : (
+          <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading preview…</div>
+        )}
+        <button type="button" onClick={onClear} className="absolute top-2 right-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-black" aria-label="Remove video">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => inputRef.current?.click()}
+      className="w-full rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 hover:border-[#d4580a]/40 hover:bg-[#d4580a]/[0.03] flex flex-col items-center justify-center text-neutral-500 py-8"
+    >
+      {uploading ? (
+        <><Loader2 className="w-6 h-6 animate-spin mb-2" /><span className="text-sm">Uploading…</span></>
+      ) : (
+        <><VideoIcon className="w-7 h-7 mb-2" /><span className="text-sm font-medium">Add event video</span><span className="text-xs text-neutral-400 mt-0.5">Up to 200MB</span></>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="video/*"
+        hidden
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onPick(f); e.target.value = ""; }}
+      />
+    </button>
   );
 }
