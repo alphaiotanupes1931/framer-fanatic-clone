@@ -748,7 +748,7 @@ function PayoutsTab({ paid, buyers, revenue, net }: { paid: Ticket[]; buyers: Re
       <div className="rounded-xl border border-neutral-200 bg-white p-5">
         <div className="font-semibold text-neutral-900">Financial Summary</div>
         <div className="mt-4 space-y-3 text-sm">
-          <div className="flex items-center justify-between"><span className="text-neutral-600">Net Ticket Sales</span><span className="font-semibold text-neutral-900">{fmt(revenue)}</span></div>
+          <div className="flex items-center justify-between"><span className="text-neutral-600">Gross Ticket Sales</span><span className="font-semibold text-neutral-900">{fmt(revenue)}</span></div>
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-neutral-600">Platform fee</div>
