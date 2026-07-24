@@ -6,7 +6,7 @@ import { MapPin, Navigation, Ticket, ArrowLeft, Share2, Trash2, Edit3, EyeOff } 
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
-import { EventImage } from "@/components/event-image";
+import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,7 +17,7 @@ type EventRow = {
   venue_name: string | null; address: string | null; location: string | null;
   image_url: string | null; starts_at: string; ends_at: string | null;
   price_cents: number | null; status: string; is_published: boolean;
-  neighborhood: string | null;
+  neighborhood: string | null; video_url: string | null;
 };
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
@@ -219,6 +219,8 @@ function EventDetail() {
           </div>
         )}
 
+        {evt.video_url && <EventVideo path={evt.video_url} />}
+
         <div className="flex flex-col gap-3 border-t border-border pt-6">
           {priced ? (
             <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
@@ -249,5 +251,21 @@ function EventDetail() {
         )}
       </div>
     </AppLayout>
+  );
+}
+
+function EventVideo({ path }: { path: string }) {
+  const url = useEventImageUrl(path);
+  return (
+    <div>
+      <h2 className="font-semibold text-foreground mb-2">Video</h2>
+      <div className="overflow-hidden rounded-2xl border border-border bg-black">
+        {url ? (
+          <video src={url} controls playsInline className="w-full aspect-video bg-black" />
+        ) : (
+          <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading…</div>
+        )}
+      </div>
+    </div>
   );
 }
