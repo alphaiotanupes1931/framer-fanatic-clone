@@ -1445,6 +1445,65 @@ export type Database = {
           },
         ]
       }
+      ticket_types: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          max_per_buyer: number | null
+          name: string
+          perks: string[]
+          price_cents: number
+          quantity: number | null
+          sale_ends_at: string | null
+          sale_starts_at: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          max_per_buyer?: number | null
+          name: string
+          perks?: string[]
+          price_cents?: number
+          quantity?: number | null
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          max_per_buyer?: number | null
+          name?: string
+          perks?: string[]
+          price_cents?: number
+          quantity?: number | null
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_types_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           artist_id: string

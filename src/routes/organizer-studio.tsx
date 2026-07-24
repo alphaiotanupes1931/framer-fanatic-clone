@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
+  Zap, Crown, Star, Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -363,45 +364,214 @@ function filteredBuyersHelper(
   });
 }
 
-function TicketsTab({ evt, soldCount }: { evt: MyEvent; soldCount: number }) {
-  const hasType = evt.price_cents !== null && evt.price_cents !== undefined;
+type TicketType = {
+  id: string; event_id: string; category: string; name: string;
+  price_cents: number; quantity: number | null; max_per_buyer: number | null;
+  sale_starts_at: string | null; sale_ends_at: string | null;
+  description: string | null; perks: string[];
+};
+
+const CATEGORIES = [
+  { key: "general", label: "General Admission", Icon: Ticket },
+  { key: "early_bird", label: "Early Bird", Icon: Zap },
+  { key: "vip", label: "VIP", Icon: Crown },
+  { key: "group", label: "Group", Icon: Users },
+  { key: "free_rsvp", label: "Free / RSVP", Icon: Star },
+  { key: "donation", label: "Donation", Icon: Tag },
+] as const;
+
+function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
+  const [types, setTypes] = useState<TicketType[] | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const load = () => {
+    supabase.from("ticket_types").select("*").eq("event_id", evt.id).order("created_at", { ascending: true })
+      .then(({ data }) => setTypes((data as TicketType[] | null) ?? []));
+  };
+  useEffect(load, [evt.id]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-neutral-900">Ticket Types</h3>
-          <p className="text-xs text-neutral-500">{hasType ? "1 type" : "0 types"} · Add multiple ticket tiers for your event</p>
+          <p className="text-xs text-neutral-500">{types?.length ?? 0} types · Add multiple ticket tiers for your event</p>
         </div>
-        <Link to="/edit-event/$eventId" params={{ eventId: evt.id }} className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
-          <Plus className="h-4 w-4" /> Add Ticket Type
-        </Link>
+        {!showForm && (
+          <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-[#d4580a] px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
+            <Plus className="h-4 w-4" /> Add Ticket Type
+          </button>
+        )}
       </div>
 
-      {hasType ? (
-        <div className="rounded-xl border border-neutral-200 bg-white p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-semibold text-neutral-900">General Admission</div>
-              <div className="mt-0.5 text-xs text-neutral-500">Sold: {soldCount}</div>
+      {showForm && (
+        <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); load(); }} />
+      )}
+
+      {types && types.length > 0 ? (
+        <div className="space-y-2">
+          {types.map(t => (
+            <div key={t.id} className="rounded-xl border border-neutral-200 bg-white p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-neutral-900">{t.name}</div>
+                  <div className="mt-0.5 text-xs text-neutral-500 capitalize">{t.category.replace("_", " ")}{t.quantity ? ` · ${t.quantity} available` : ""}</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-lg font-semibold text-neutral-900">{t.price_cents ? fmt(t.price_cents) : "Free"}</div>
+                  <button
+                    onClick={async () => {
+                      if (!confirm("Delete this ticket type?")) return;
+                      const { error } = await supabase.from("ticket_types").delete().eq("id", t.id);
+                      if (error) toast.error(error.message); else { toast.success("Deleted"); load(); }
+                    }}
+                    className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-red-600"
+                  ><Trash2 className="h-4 w-4" /></button>
+                </div>
+              </div>
             </div>
-            <div className="text-lg font-semibold text-neutral-900">{evt.price_cents ? fmt(evt.price_cents) : "Free"}</div>
-          </div>
-          <Link to="/events/$eventId" params={{ eventId: evt.id }} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
-            <ExternalLink className="h-3 w-3" /> View public event page
-          </Link>
+          ))}
         </div>
-      ) : (
+      ) : !showForm ? (
         <div className="rounded-xl border-2 border-dashed border-neutral-200 bg-white p-12 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-100 text-neutral-500">
             <Ticket className="h-6 w-6" />
           </div>
           <div className="mt-4 text-base font-semibold text-neutral-900">No ticket types yet</div>
           <div className="mt-1 text-sm text-neutral-500">Create your first ticket type to start selling</div>
-          <Link to="/edit-event/$eventId" params={{ eventId: evt.id }} className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
+          <button onClick={() => setShowForm(true)} className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#d4580a] px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
             <Plus className="h-4 w-4" /> Add Ticket Type
-          </Link>
+          </button>
         </div>
-      )}
+      ) : null}
+    </div>
+  );
+}
+
+function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; onCancel: () => void; onCreated: () => void }) {
+  const [category, setCategory] = useState<string>("general");
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState<string>("0");
+  const [quantity, setQuantity] = useState<string>("");
+  const [maxPer, setMaxPer] = useState<string>("");
+  const [starts, setStarts] = useState<string>("");
+  const [ends, setEnds] = useState<string>("");
+  const [description, setDescription] = useState("");
+  const [perks, setPerks] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const canSubmit = name.trim().length > 0 && !saving;
+
+  const submit = async () => {
+    if (!canSubmit) return;
+    setSaving(true);
+    const priceCents = Math.max(0, Math.round(parseFloat(price || "0") * 100));
+    const { error } = await supabase.from("ticket_types").insert({
+      event_id: eventId,
+      category,
+      name: name.trim(),
+      price_cents: category === "free_rsvp" ? 0 : priceCents,
+      quantity: quantity ? parseInt(quantity, 10) : null,
+      max_per_buyer: maxPer ? parseInt(maxPer, 10) : null,
+      sale_starts_at: starts ? new Date(starts).toISOString() : null,
+      sale_ends_at: ends ? new Date(ends).toISOString() : null,
+      description: description.trim() || null,
+      perks: perks.split(",").map(p => p.trim()).filter(Boolean),
+    });
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Ticket type created");
+    onCreated();
+  };
+
+  const label = "text-[11px] font-semibold uppercase tracking-wide text-neutral-500";
+  const input = "mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none";
+
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white">
+      <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
+        <div className="font-semibold text-neutral-900">New Ticket Type</div>
+        <button onClick={onCancel} className="text-sm text-neutral-500 hover:text-neutral-900">Cancel</button>
+      </div>
+      <div className="space-y-5 p-5">
+        <div>
+          <div className={label}>Ticket Category</div>
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {CATEGORIES.map(c => {
+              const active = category === c.key;
+              const Icon = c.Icon;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setCategory(c.key)}
+                  className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition ${active ? "border-neutral-900 bg-white text-neutral-900" : "border-neutral-200 bg-neutral-50 text-neutral-700 hover:bg-neutral-100"}`}
+                >
+                  <Icon className="h-4 w-4" /> {c.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div className={label}>Ticket Name *</div>
+          <input value={name} onChange={e => setName(e.target.value)} className={input} placeholder="e.g., General Admission, VIP Pass, Early Bird..." />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <div className={label}>Price ($) *</div>
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 pt-[3px] text-sm text-neutral-400">$</span>
+              <input
+                type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)}
+                disabled={category === "free_rsvp"}
+                className={`${input} pl-7 disabled:bg-neutral-50 disabled:text-neutral-400`}
+              />
+            </div>
+          </div>
+          <div>
+            <div className={label}>Quantity Available *</div>
+            <input type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} className={input} placeholder="e.g., 100" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <div className={label}>Max Per Buyer</div>
+            <input type="number" min="1" value={maxPer} onChange={e => setMaxPer(e.target.value)} className={input} placeholder="No limit" />
+          </div>
+          <div>
+            <div className={label}>Sale Starts</div>
+            <input type="datetime-local" value={starts} onChange={e => setStarts(e.target.value)} className={input} />
+          </div>
+        </div>
+
+        <div>
+          <div className={label}>Sale Ends</div>
+          <input type="datetime-local" value={ends} onChange={e => setEnds(e.target.value)} className={`${input} sm:max-w-[calc(50%-8px)]`} />
+        </div>
+
+        <div>
+          <div className={label}>Description</div>
+          <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} className={input} placeholder="What's included? Any restrictions or details..." />
+        </div>
+
+        <div>
+          <div className={label}>Perks / Inclusions <span className="text-neutral-400 normal-case">(comma-separated)</span></div>
+          <input value={perks} onChange={e => setPerks(e.target.value)} className={input} placeholder="Early Entry, Meet & Greet, Open Bar, Backstage Access..." />
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={submit}
+            disabled={!canSubmit}
+            className="flex-1 rounded-lg bg-[#d4580a] py-3 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:bg-neutral-300"
+          >{saving ? "Creating..." : "Create Ticket Type"}</button>
+          <button onClick={onCancel} className="rounded-lg border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">Cancel</button>
+        </div>
+      </div>
     </div>
   );
 }
