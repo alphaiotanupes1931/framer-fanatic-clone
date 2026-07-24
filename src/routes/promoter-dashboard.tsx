@@ -18,7 +18,7 @@ export const Route = createFileRoute("/promoter-dashboard")({
 });
 
 type Row = { id: string; title: string; starts_at: string; sold: number; revenue_cents: number };
-type TabId = "events" | "analytics" | "promo" | "message" | "social";
+type TabId = "events" | "analytics" | "message" | "social";
 
 const COMMISSION_RATE = 0.10; // 10% of gross for the promoter (indicative)
 
