@@ -6,6 +6,8 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { ORG_TYPE_LABEL, subtypesFor } from "@/lib/categories";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { Plus, MapPin, Search, Building2, List } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
@@ -71,6 +73,17 @@ export function OrgListPage({
     });
     setItems(list); setLoading(false);
   };
+
+  const handleDelete = async (e: React.MouseEvent, o: Org) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`Delete "${o.name}"? This can be restored from Admin Trash.`)) return;
+    const { error } = await supabase.rpc("admin_delete_organization", { _id: o.id });
+    if (error) { toast.error(error.message); return; }
+    setItems((prev) => prev.filter((x) => x.id !== o.id));
+    toast.success("Deleted");
+  };
+
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sub, sort]);
   useEffect(() => { const t = setTimeout(() => void load(), 200); return () => clearTimeout(t); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [q]);
 
@@ -207,7 +220,17 @@ export function OrgListPage({
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((o) => (
               <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }}
-                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
+                className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleDelete(e, o)}
+                    aria-label="Delete organization"
+                    className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-red-600 shadow-sm ring-1 ring-black/10 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
                 <div className="relative h-40 bg-neutral-100"
                   style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
                   <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
