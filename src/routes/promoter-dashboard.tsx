@@ -1,9 +1,9 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, ArrowLeft, Share2, MessageSquare, BarChart3, ExternalLink } from "lucide-react";
+import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, Share2, MessageSquare, BarChart3, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/promoter-dashboard")({
@@ -26,7 +26,6 @@ function PromoterDashboardPage() {
   const me = useCurrentProfile();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [tab, setTab] = useState<TabId>("events");
-  const router = useRouter();
 
   useEffect(() => {
     if (!me) return;
@@ -77,14 +76,7 @@ function PromoterDashboardPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
         {/* Header banner */}
-        <div className="relative rounded-2xl border border-[#d4580a]/40 bg-gradient-to-br from-[#fff4ec] to-white p-6">
-          <button
-            onClick={() => router.history.back()}
-            aria-label="Back"
-            className="absolute right-4 top-4 rounded-full p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
+        <div className="rounded-2xl border border-[#d4580a]/40 bg-gradient-to-br from-[#fff4ec] to-white p-6">
           <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">Promoter Dashboard</h1>
           <p className="mt-1 text-sm text-neutral-600">Track your sales, commissions, and event performance</p>
         </div>
