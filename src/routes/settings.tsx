@@ -47,6 +47,15 @@ function SettingsPage() {
   const profile = useCurrentProfile();
   const navigate = useNavigate();
   const [section, setSection] = useState("profile");
+  useEffect(() => {
+    const applyHash = () => {
+      const h = typeof window !== "undefined" ? window.location.hash.replace("#", "") : "";
+      if (h) setSection(h);
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
   const [form, setForm] = useState({ display_name: "", bio: "", website: "", neighborhood: "" });
   const [dirty, setDirty] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<{ name: string }[]>([]);
