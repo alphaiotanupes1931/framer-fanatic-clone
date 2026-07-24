@@ -14,6 +14,8 @@ import pbLogo from "../assets/pb-logo.png";
 import { CookieBanner } from "../components/cookie-banner";
 import { OnboardingTour } from "../components/onboarding-tour";
 import { Toaster } from "../components/ui/sonner";
+import { AnimatePresence, motion } from "motion/react";
+import { useRouterState } from "@tanstack/react-router";
 
 const themeScript = `
   (function() {
@@ -123,6 +125,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
       },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -148,10 +154,21 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={pathname}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Outlet />
+        </motion.div>
+      </AnimatePresence>
       <CookieBanner />
       <OnboardingTour />
       <Toaster />
