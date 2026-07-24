@@ -707,15 +707,15 @@ function ProfilePage() {
           )}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-background shadow-2xl"
+            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-background shadow-2xl"
           >
-            <div className="max-h-[92vh] overflow-y-auto"
-          >
-            <PostCard
-              post={myPosts[postViewerIdx]}
-              currentUserId={profile?.id}
-              onDelete={(id) => { handleDeleteMyPost(id); setPostViewerIdx(null); }}
-            />
+            <div className="max-h-[92vh] overflow-y-auto">
+              <PostCard
+                post={myPosts[postViewerIdx]}
+                currentUserId={profile?.id}
+                onDelete={(id) => { handleDeleteMyPost(id); setPostViewerIdx(null); }}
+              />
+            </div>
           </div>
           {myPosts.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white">
