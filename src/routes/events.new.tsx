@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Loader2 } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
+import { useEventImageUrl } from "@/components/event-image";
 
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
@@ -26,13 +27,16 @@ function NewEventPage() {
   const isExhibition = kind === "exhibition";
   const [orgName, setOrgName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
 
   const [form, setForm] = useState({
     image_url: "",
+    video_url: "",
     title: "",
     description: "",
     starts_at: "",
@@ -80,6 +84,27 @@ function NewEventPage() {
     }
   };
 
+  const onPickVideo = async (file: File) => {
+    if (!me) return;
+    if (file.size > 200 * 1024 * 1024) {
+      toast.error("Video must be under 200MB");
+      return;
+    }
+    setUploadingVideo(true);
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      set("video_url", path);
+      toast.success("Video uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
   const canSubmit = form.title.trim().length > 0 && (startMode === "now" || form.starts_at.length > 0);
 
   const submit = async () => {
@@ -100,6 +125,7 @@ function NewEventPage() {
         title: form.title.trim(),
         description: form.description.trim() || null,
         image_url: form.image_url || null,
+        video_url: form.video_url || null,
         starts_at: starts,
         ends_at: ends,
         venue_name: form.venue_name.trim() || null,
@@ -176,6 +202,17 @@ function NewEventPage() {
 
           <Field label="Description" optional>
             <textarea className={`${inputCls} min-h-[120px]`} placeholder="Tell people about your event..." value={form.description} onChange={(e) => set("description", e.target.value)} maxLength={5000} />
+          </Field>
+
+          <Field label="Event Video" optional>
+            <VideoPicker
+              value={form.video_url}
+              uploading={uploadingVideo}
+              onPick={(f) => void onPickVideo(f)}
+              onClear={() => set("video_url", "")}
+              inputRef={videoRef}
+            />
+            <p className="mt-1 text-[11px] text-neutral-500">Shows below the event description. MP4 / MOV up to 200MB.</p>
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
