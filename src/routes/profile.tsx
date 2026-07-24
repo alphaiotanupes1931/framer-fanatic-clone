@@ -1354,8 +1354,8 @@ function StripeTab() {
     try {
       await ensureFn();
       const { url } = await linkFn({ data: {
-        returnUrl: `${window.location.origin}/profile?tab=Stripe&onboarded=1`,
-        refreshUrl: `${window.location.origin}/profile?tab=Stripe&refresh=1`,
+        returnUrl: `${window.location.origin}/settings?stripe=ok`,
+        refreshUrl: `${window.location.origin}/settings?stripe=refresh`,
       }});
       window.location.href = url;
     } catch (e) {
@@ -1366,72 +1366,56 @@ function StripeTab() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div className="rounded-2xl border border-border p-6">
+      <div>
+        <h2 className="text-lg font-bold text-foreground">Stripe Payments</h2>
+        <p className="text-sm text-muted-foreground">Connect Stripe so you can sell tickets and get paid directly. Planet Baltimore never holds your money.</p>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-start gap-3">
-          <CreditCard className="mt-0.5 h-5 w-5 text-[#d4580a]" />
-          <div>
-            <h3 className="text-base font-semibold">Payouts via Stripe</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Connect your Stripe account to sell tickets on Planet Baltimore. We use Stripe Connect so payouts
-              go directly to your bank - Planet Baltimore never holds your money.
-            </p>
+          <CreditCard className="mt-0.5 h-5 w-5 text-orange" />
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-foreground">Your payout account</div>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              {status?.chargesEnabled ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Connected & active
+                </span>
+              ) : status?.connected ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                  <AlertCircle className="h-3.5 w-3.5" /> Onboarding incomplete
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                  Not connected
+                </span>
+              )}
+              <button onClick={onboard} disabled={busy}
+                className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
+                {busy ? "Opening Stripe…" : status?.chargesEnabled ? "Update Stripe account" : "Connect Stripe"} <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="mt-4 flex items-center gap-3">
-          {status?.chargesEnabled ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Connected & active
-            </span>
-          ) : status?.connected ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-              <AlertCircle className="h-3.5 w-3.5" /> Onboarding incomplete
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-muted-foreground">
-              Not connected
-            </span>
-          )}
-          <button
-            onClick={onboard}
-            disabled={busy}
-            className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
-          >
-            {busy ? "Opening Stripe…" : status?.chargesEnabled ? "Update Stripe account" : "Connect Stripe"} <ExternalLink className="h-3.5 w-3.5" />
-          </button>
+      <div className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground">
+        <h4 className="mb-3 text-base font-semibold">How to connect Stripe (3 minutes)</h4>
+        <ol className="list-decimal space-y-3 pl-5 text-muted-foreground">
+          <li><span className="font-semibold text-foreground">Tap "Connect Stripe"</span> above. A new tab opens to Stripe, the company that handles payments for us.</li>
+          <li><span className="font-semibold text-foreground">Enter your info.</span> Stripe will ask for your legal name, date of birth, address, and the last 4 of your SSN. This is required by US law for anyone receiving money online. We never see this information.</li>
+          <li><span className="font-semibold text-foreground">Add your bank account.</span> Choose the checking account where you want your money to land. Stripe sends payouts every 2 business days.</li>
+          <li><span className="font-semibold text-foreground">Come back to Planet Baltimore.</span> Stripe will send you back here automatically. The badge above turns green when you're ready to sell items on the platform.</li>
+          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add Stripe's fee and the platform fee on top, so the buyer pays the total and you keep the full price you set. The total fee is the lowest in the industry.</li>
+        </ol>
+        <div className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
+          Need help? Email <a href="mailto:help@planetbaltimore.com" className="font-semibold text-orange hover:underline">help@planetbaltimore.com</a> and we'll walk you through it over the phone.
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border p-6 text-sm leading-relaxed text-neutral-700">
-        <h4 className="mb-3 text-base font-semibold text-foreground">How payments work</h4>
-        <ol className="list-decimal space-y-2 pl-5">
-          <li>
-            <strong>Click "Connect Stripe"</strong> above. You'll be redirected to Stripe to enter your
-            personal info, bank account, and tax details. This is required by US payment regulations.
-          </li>
-          <li>
-            <strong>Set ticket prices on your events.</strong> Enter the amount <em>you</em> want to receive
-            per ticket. We automatically add Stripe's processing fee and the platform fee on top, so the
-            buyer pays the all-in total and you net your advertised price.
-          </li>
-          <li>
-            <strong>Buyers pay through Stripe Checkout.</strong> Stripe deducts its fee, sends the platform
-            fee to Planet Baltimore, and pays the rest directly to your connected bank account.
-          </li>
-          <li>
-            <strong>Payouts</strong> arrive on Stripe's standard schedule (typically 2 business days for new
-            accounts). You can view all transactions inside your Stripe dashboard.
-          </li>
-        </ol>
-
-        <h4 className="mt-6 mb-2 text-sm font-semibold text-foreground">Example: $20 ticket</h4>
-        <ul className="space-y-1 text-sm">
-          <li>You set price: <strong>$20.00</strong> (what you keep)</li>
-          <li>Platform fee applied on top</li>
-          <li>Stripe processing fee applied on top</li>
-          <li>Buyer pays the total, you keep <strong>$20.00</strong></li>
-        </ul>
-      </div>
+      <Link to="/settings" hash="stripe" className="block rounded-2xl border border-border bg-card p-4 text-sm font-semibold text-foreground hover:bg-accent">
+        Open full Stripe settings <ExternalLink className="ml-2 inline h-3.5 w-3.5 text-muted-foreground" />
+      </Link>
     </div>
   );
 }
