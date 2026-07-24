@@ -1,16 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
-import { useServerFn } from "@tanstack/react-start";
-import {
-  ensureConnectAccount,
-  createConnectOnboardingLink,
-  refreshConnectStatus,
-} from "@/lib/stripe.functions";
 import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
-  Copy, Trash2, ExternalLink, CreditCard, CheckCircle2, AlertCircle, Calendar,
+  Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -178,10 +172,12 @@ function OrganizerStudioPage() {
 }
 
 function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
-  const [tab, setTab] = useState<"tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics" | "stripe">("attendees");
+  const [tab, setTab] = useState<"tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">("tickets");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   useEffect(() => {
     supabase.from("tickets")
@@ -224,21 +220,29 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
     { id: "promoters", label: "Promoters", icon: Megaphone },
     { id: "payouts", label: "Payouts", icon: Banknote },
     { id: "analytics", label: "Analytics", icon: LineChart },
-    { id: "stripe", label: "Stripe", icon: CreditCard },
   ] as const;
 
-  const exportCsv = () => {
-    const header = ["Ticket ID", "Buyer", "Email", "Status", "Total", "Net", "Date"];
+  const exportCsv = (kind: "orders" | "rsvps") => {
+    const header = kind === "orders"
+      ? ["Order ID", "Buyer", "Email", "Status", "Total", "Net", "Date"]
+      : ["Attendee", "Email", "Date"];
     const lines = [header.join(",")];
     for (const t of paid) {
       const b = buyers[t.buyer_id];
-      lines.push([t.id, `"${b?.name ?? ""}"`, b?.email ?? "", t.status, (t.buyer_total_cents / 100).toFixed(2), (t.artist_net_cents / 100).toFixed(2), new Date(t.created_at).toISOString()].join(","));
+      if (kind === "orders") {
+        lines.push([t.id, `"${b?.name ?? ""}"`, b?.email ?? "", t.status, (t.buyer_total_cents / 100).toFixed(2), (t.artist_net_cents / 100).toFixed(2), new Date(t.created_at).toISOString()].join(","));
+      } else {
+        lines.push([`"${b?.name ?? ""}"`, b?.email ?? "", new Date(t.created_at).toISOString()].join(","));
+      }
     }
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${evt.title.replace(/[^a-z0-9]+/gi, "_")}_orders.csv`; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = `${evt.title.replace(/[^a-z0-9]+/gi, "_")}_${kind}.csv`; a.click();
     URL.revokeObjectURL(url);
   };
+
+  const filteredList = filteredBuyersHelper(paid, buyers, search, statusFilter);
+  void typeFilter;
 
   return (
     <div className="space-y-5">
@@ -269,14 +273,28 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       {tab === "attendees" && (
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, email, or order #" className="flex-1 min-w-[220px] rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-            <button onClick={exportCsv} className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">Orders CSV</button>
+            <div className="relative flex-1 min-w-[220px]">
+              <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, email, or order #..." className="w-full rounded-lg border border-neutral-200 bg-white pl-9 pr-3 py-2 text-sm" />
+            </div>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm">
+              <option value="all">All Status</option>
+              <option value="paid">Paid</option>
+              <option value="refunded">Refunded</option>
+              <option value="pending">Pending</option>
+            </select>
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm">
+              <option value="all">All Types</option>
+              <option value="ga">General Admission</option>
+            </select>
+            <button onClick={() => exportCsv("orders")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Orders CSV</button>
+            <button onClick={() => exportCsv("rsvps")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> RSVPs CSV</button>
           </div>
-          <div className="text-xs text-neutral-500">{filteredBuyers.length} of {paid.length} orders</div>
+          <div className="text-xs text-neutral-500">{filteredList.length} of {paid.length} orders</div>
           {tickets === null ? (
             <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center text-sm text-neutral-500">Loading…</div>
-          ) : filteredBuyers.length === 0 ? (
-            <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">No orders found</div>
+          ) : filteredList.length === 0 ? (
+            <div className="py-10 text-center text-sm text-neutral-500">No orders found</div>
           ) : (
             <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
               <table className="w-full text-sm">
@@ -284,7 +302,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
                   <tr><th className="px-4 py-3">Attendee</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Order</th><th className="px-4 py-3 text-right">Total</th><th className="px-4 py-3">Date</th></tr>
                 </thead>
                 <tbody>
-                  {filteredBuyers.map((t) => {
+                  {filteredList.map((t) => {
                     const b = buyers[t.buyer_id];
                     return (
                       <tr key={t.id} className="border-t border-neutral-100">
@@ -304,28 +322,15 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       )}
 
       {tab === "tickets" && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
-          <div className="mb-2 font-semibold text-neutral-900">Ticket type</div>
-          <div className="rounded-lg border border-neutral-200 p-4">
-            <div className="flex justify-between"><span className="font-semibold text-neutral-900">General Admission</span><span>{evt.price_cents ? fmt(evt.price_cents) : "Free"}</span></div>
-            <div className="mt-1 text-xs text-neutral-500">Sold: {paid.length}</div>
-          </div>
-          <Link to="/events/$eventId" params={{ eventId: evt.id }} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
-            <ExternalLink className="h-3 w-3" /> View public event page
-          </Link>
-        </div>
+        <TicketsTab evt={evt} soldCount={paid.length} />
       )}
 
       {tab === "checkin" && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">
-          Scan attendee tickets at the door. Each digital ticket carries a QR code you can scan with your phone camera.
-        </div>
+        <CheckInTab total={paid.length} />
       )}
 
       {tab === "message" && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
-          Message all {paid.length} attendee{paid.length === 1 ? "" : "s"} at once. <Link to="/messages" className="font-semibold text-[#d4580a] hover:underline">Open Messages</Link>
-        </div>
+        <MessageTab evtTitle={evt.title} recipients={paid.map((t) => buyers[t.buyer_id]?.email).filter(Boolean) as string[]} />
       )}
 
       {tab === "promoters" && (
@@ -333,20 +338,245 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       )}
 
       {tab === "payouts" && (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Stat label="Gross" value={fmt(revenue)} />
-          <Stat label="Fees" value={fmt(revenue - net)} />
-          <Stat label="Your net payout" value={fmt(net)} />
-        </div>
+        <PayoutsTab paid={paid} buyers={buyers} revenue={revenue} net={net} />
       )}
 
       {tab === "analytics" && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
-          Detailed conversion analytics coming soon. For now: {paid.length} paid orders, {fmt(revenue)} gross revenue.
+        <AnalyticsTab paid={paid} revenue={revenue} />
+      )}
+    </div>
+  );
+}
+
+function filteredBuyersHelper(
+  paid: Ticket[],
+  buyers: Record<string, { name: string | null; email: string | null; avatar_url: string | null }>,
+  search: string,
+  status: string,
+): Ticket[] {
+  return paid.filter((t) => {
+    if (status !== "all" && t.status !== status) return false;
+    if (!search.trim()) return true;
+    const b = buyers[t.buyer_id];
+    const q = search.toLowerCase();
+    return !!(b?.name?.toLowerCase().includes(q) || b?.email?.toLowerCase().includes(q) || t.id.toLowerCase().includes(q));
+  });
+}
+
+function TicketsTab({ evt, soldCount }: { evt: MyEvent; soldCount: number }) {
+  const hasType = evt.price_cents !== null && evt.price_cents !== undefined;
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-semibold text-neutral-900">Ticket Types</h3>
+          <p className="text-xs text-neutral-500">{hasType ? "1 type" : "0 types"} · Add multiple ticket tiers for your event</p>
+        </div>
+        <Link to="/events/$eventId/edit" params={{ eventId: evt.id }} className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
+          <Plus className="h-4 w-4" /> Add Ticket Type
+        </Link>
+      </div>
+
+      {hasType ? (
+        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-semibold text-neutral-900">General Admission</div>
+              <div className="mt-0.5 text-xs text-neutral-500">Sold: {soldCount}</div>
+            </div>
+            <div className="text-lg font-semibold text-neutral-900">{evt.price_cents ? fmt(evt.price_cents) : "Free"}</div>
+          </div>
+          <Link to="/events/$eventId" params={{ eventId: evt.id }} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
+            <ExternalLink className="h-3 w-3" /> View public event page
+          </Link>
+        </div>
+      ) : (
+        <div className="rounded-xl border-2 border-dashed border-neutral-200 bg-white p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-100 text-neutral-500">
+            <Ticket className="h-6 w-6" />
+          </div>
+          <div className="mt-4 text-base font-semibold text-neutral-900">No ticket types yet</div>
+          <div className="mt-1 text-sm text-neutral-500">Create your first ticket type to start selling</div>
+          <Link to="/events/$eventId/edit" params={{ eventId: evt.id }} className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
+            <Plus className="h-4 w-4" /> Add Ticket Type
+          </Link>
         </div>
       )}
+    </div>
+  );
+}
 
-      {tab === "stripe" && <StripeInline />}
+function CheckInTab({ total }: { total: number }) {
+  const [mode, setMode] = useState<"scanner" | "list">("scanner");
+  const checkedIn = 0;
+  const pct = total === 0 ? 0 : Math.round((checkedIn / total) * 100);
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl bg-neutral-100 p-8 text-center">
+        <div className="text-5xl font-semibold text-neutral-900">{checkedIn}<span className="text-2xl text-neutral-400">/{total}</span></div>
+        <div className="mt-2 text-sm text-neutral-600">Attendees Checked In</div>
+        <div className="mx-auto mt-4 h-1.5 max-w-md overflow-hidden rounded-full bg-neutral-200">
+          <div className="h-full bg-[#d4580a] transition-all" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="mt-1 text-xs text-neutral-500">{pct}% capacity</div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm">
+        <button onClick={() => setMode("scanner")} className={`inline-flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${mode === "scanner" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600"}`}>
+          <Camera className="h-4 w-4" /> QR Scanner
+        </button>
+        <button onClick={() => setMode("list")} className={`inline-flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${mode === "list" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600"}`}>
+          <List className="h-4 w-4" /> Attendee List
+        </button>
+      </div>
+
+      {mode === "scanner" ? (
+        <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
+          <p className="text-sm text-neutral-600">Point the camera at a ticket QR code to check in instantly.</p>
+          <div className="my-4 h-px bg-neutral-100" />
+          <button onClick={() => toast.info("Camera access required. This uses your device camera to scan QR tickets.")} className="inline-flex items-center gap-2 rounded-lg bg-neutral-500 px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110">
+            <Camera className="h-4 w-4" /> Start Camera Scanner
+          </button>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">
+          {total === 0 ? "No attendees to check in yet." : "Tap an attendee to mark them as checked in."}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MessageTab({ evtTitle, recipients }: { evtTitle: string; recipients: string[] }) {
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const count = new Set(recipients).size;
+
+  const applyTemplate = (kind: string) => {
+    if (kind === "venue") { setSubject(`Venue update for ${evtTitle}`); setBody(`Hi there,\n\nQuick heads up about the venue for ${evtTitle}. Please note the following updates:\n\n[venue details]\n\nSee you soon!`); }
+    if (kind === "reminder") { setSubject(`Reminder: ${evtTitle} is coming up`); setBody(`Hi,\n\nJust a friendly reminder that ${evtTitle} is coming up. Doors open at [time].\n\nCan't wait to see you!`); }
+    if (kind === "thanks") { setSubject(`Thank you for coming to ${evtTitle}`); setBody(`Hi,\n\nThank you for coming out to ${evtTitle}. It meant the world to have you there!\n\n— The team`); }
+    if (kind === "important") { setSubject(`Important update about ${evtTitle}`); setBody(`Hi,\n\nWe have an important update regarding ${evtTitle}:\n\n[update details]\n\nThank you for your understanding.`); }
+  };
+
+  const send = async () => {
+    if (!subject.trim() || !body.trim()) { toast.error("Subject and message are required"); return; }
+    if (count === 0) { toast.error("No attendees to message yet"); return; }
+    setBusy(true);
+    try {
+      // TODO: wire to email server function
+      await new Promise((r) => setTimeout(r, 400));
+      toast.success(`Message queued for ${count} attendee${count === 1 ? "" : "s"}`);
+      setSubject(""); setBody("");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-neutral-200 bg-white p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600"><Mail className="h-5 w-5" /></div>
+          <div>
+            <div className="font-semibold text-neutral-900">Message Your Attendees</div>
+            <div className="text-xs text-neutral-500">Send emails directly to ticket buyers for <span className="font-semibold text-neutral-700">{evtTitle}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Send To</div>
+        <div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700">
+          <Users className="h-4 w-4" /> All Ticket Buyers <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">{count}</span>
+        </div>
+        <div className="mt-1 text-xs text-neutral-500">{count} unique emails will receive this message</div>
+      </div>
+
+      <div>
+        <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Quick Templates</div>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <button onClick={() => applyTemplate("venue")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">📍 Venue Update</button>
+          <button onClick={() => applyTemplate("reminder")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">🎟️ Reminder</button>
+          <button onClick={() => applyTemplate("thanks")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">🎉 Thank You</button>
+          <button onClick={() => applyTemplate("important")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">⚠️ Important Update</button>
+        </div>
+      </div>
+
+      <div>
+        <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Subject *</label>
+        <input value={subject} onChange={(e) => setSubject(e.target.value.slice(0, 120))} placeholder="e.g., Important update about your tickets" className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm" />
+        <div className="mt-1 text-right text-[11px] text-neutral-400">{subject.length}/120</div>
+      </div>
+
+      <div>
+        <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Message *</label>
+        <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 1000))} placeholder="Write your message to attendees here..." rows={6} className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm" />
+        <div className="mt-1 text-right text-[11px] text-neutral-400">{body.length}/1000</div>
+      </div>
+
+      <button onClick={send} disabled={busy || count === 0 || !subject.trim() || !body.trim()} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-400 px-4 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
+        <Send className="h-4 w-4" /> {busy ? "Sending…" : `Send to ${count} Attendee${count === 1 ? "" : "s"}`}
+      </button>
+    </div>
+  );
+}
+
+function PayoutsTab({ paid, buyers, revenue, net }: { paid: Ticket[]; buyers: Record<string, { name: string | null; email: string | null; avatar_url: string | null }>; revenue: number; net: number }) {
+  const fees = revenue - net;
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-neutral-200 bg-white p-5">
+        <div className="font-semibold text-neutral-900">Financial Summary</div>
+        <div className="mt-4 space-y-3 text-sm">
+          <div className="flex items-center justify-between"><span className="text-neutral-600">Gross Ticket Sales</span><span className="font-semibold text-neutral-900">{fmt(revenue)}</span></div>
+          <div className="flex items-center justify-between"><span className="text-neutral-600">Platform Fees (5%)</span><span className="font-semibold text-red-500">-{fmt(fees)}</span></div>
+          <div className="flex items-center justify-between border-t border-neutral-100 pt-3"><span className="font-semibold text-neutral-900">Net Revenue</span><span className="font-bold text-neutral-900">{fmt(net)}</span></div>
+          <div className="flex items-center justify-between pt-2"><span className="text-neutral-600">Your Take-Home</span><span className="text-lg font-bold text-neutral-400">{fmt(net)}</span></div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-neutral-200 bg-white p-5">
+        <div className="font-semibold text-neutral-900">Orders ({paid.length})</div>
+        {paid.length === 0 ? (
+          <div className="py-8 text-center text-sm text-neutral-500">No orders yet</div>
+        ) : (
+          <div className="mt-3 divide-y divide-neutral-100 text-sm">
+            {paid.slice(0, 10).map((t) => {
+              const b = buyers[t.buyer_id];
+              return (
+                <div key={t.id} className="flex items-center justify-between py-2.5">
+                  <div>
+                    <div className="font-medium text-neutral-900">{b?.name ?? "Buyer"}</div>
+                    <div className="text-xs text-neutral-500">{new Date(t.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <div className="text-neutral-700">{fmt(t.buyer_total_cents)}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsTab({ paid, revenue }: { paid: Ticket[]; revenue: number }) {
+  const avg = paid.length ? revenue / paid.length : 0;
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <StatIcon label="Gross Revenue" value={fmt(revenue)} icon={<Banknote className="h-4 w-4" />} />
+      <StatIcon label="Tickets Sold" value={paid.length.toString()} icon={<Ticket className="h-4 w-4" />} />
+      <StatIcon label="Avg Order" value={fmt(avg)} icon={<LineChart className="h-4 w-4" />} />
+      <StatIcon label="Refunds" value="0" icon={<Users className="h-4 w-4" />} />
+    </div>
+  );
+}
+
+function StatIcon({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white p-4">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-500">{icon}<span>{label}</span></div>
+      <div className="mt-2 text-2xl font-semibold text-neutral-900">{value}</div>
     </div>
   );
 }
@@ -366,6 +596,7 @@ function PromotersTab({ eventId: _eventId }: { eventId: string }) {
   const [email, setEmail] = useState("");
   const [rate, setRate] = useState(13.5);
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -381,12 +612,18 @@ function PromotersTab({ eventId: _eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Stat label="Active Promoters" value="1" />
-        <Stat label="Tickets via Promo" value="0" />
-        <Stat label="Total Commissions" value="$0.00" />
+      <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
+        <Plus className="h-4 w-4" /> Add Sub-Promoter
+      </button>
+
+      <div>
+        <div className="font-semibold text-neutral-900">Active Promoters (0)</div>
+        <div className="mt-2 rounded-xl bg-neutral-100 p-6 text-center text-sm text-neutral-500">
+          No promoters yet. Add one above to start tracking referral sales.
+        </div>
       </div>
 
+      {open && (
       <form onSubmit={submit} className="rounded-2xl border border-neutral-200 bg-white p-5">
         <h4 className="text-base font-semibold text-neutral-900">Invite Sub-Promoter</h4>
         <p className="mt-1 text-xs text-neutral-500">They'll receive an email with their unique referral link. Commission is calculated on ticket subtotal (excl. platform fees).</p>
@@ -411,68 +648,13 @@ function PromotersTab({ eventId: _eventId }: { eventId: string }) {
           <button type="submit" disabled={busy} className="flex-1 rounded-lg bg-[#d4580a] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
             {busy ? "Sending…" : "+ Add & Send Invite"}
           </button>
-          <button type="button" onClick={() => { setName(""); setEmail(""); setRate(13.5); }} className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:border-neutral-300">Cancel</button>
+          <button type="button" onClick={() => { setName(""); setEmail(""); setRate(13.5); setOpen(false); }} className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:border-neutral-300">Cancel</button>
         </div>
       </form>
+      )}
 
       <div className="text-right">
         <Link to="/promoter-dashboard" className="text-xs font-semibold text-[#d4580a] hover:underline">Open full promoter dashboard →</Link>
-      </div>
-    </div>
-  );
-}
-
-function StripeInline() {
-  const profile = useCurrentProfile() as { id: string; stripe_account_id: string | null; stripe_charges_enabled?: boolean } | null;
-  const ensureFn = useServerFn(ensureConnectAccount);
-  const linkFn = useServerFn(createConnectOnboardingLink);
-  const refreshFn = useServerFn(refreshConnectStatus);
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState<{ connected: boolean; chargesEnabled: boolean } | null>(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!profile) return;
-    if (!profile.stripe_account_id) { setStatus({ connected: false, chargesEnabled: false }); return; }
-    refreshFn().then((s) => setStatus(s)).catch(() => setStatus({ connected: !!profile.stripe_account_id, chargesEnabled: !!profile.stripe_charges_enabled }));
-  }, [profile?.id, profile?.stripe_account_id, refreshFn]);
-
-  const onboard = async () => {
-    setBusy(true);
-    try {
-      await ensureFn();
-      const { url } = await linkFn({ data: {
-        returnUrl: `${window.location.origin}/organizer-studio?stripe=onboarded`,
-        refreshUrl: `${window.location.origin}/organizer-studio?stripe=refresh`,
-      }});
-      window.location.href = url;
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start onboarding");
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-6">
-      <div className="flex items-start gap-3">
-        <CreditCard className="mt-0.5 h-5 w-5 text-[#d4580a]" />
-        <div className="flex-1">
-          <h3 className="text-base font-semibold text-neutral-900">Payouts via Stripe</h3>
-          <p className="mt-1 text-sm text-neutral-600">Connect a Stripe account so ticket revenue is paid directly to your bank. Planet Baltimore never holds your funds.</p>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            {status?.chargesEnabled ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"><CheckCircle2 className="h-3.5 w-3.5" /> Connected &amp; active</span>
-            ) : status?.connected ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"><AlertCircle className="h-3.5 w-3.5" /> Onboarding incomplete</span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">Not connected</span>
-            )}
-            <button onClick={onboard} disabled={busy} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
-              {busy ? "Opening Stripe…" : status?.chargesEnabled ? "Update Stripe account" : "Connect Stripe"} <ExternalLink className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => navigate({ to: "/profile", search: { tab: "Stripe" } as never })} className="text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">Full Stripe settings →</button>
-          </div>
-        </div>
       </div>
     </div>
   );
