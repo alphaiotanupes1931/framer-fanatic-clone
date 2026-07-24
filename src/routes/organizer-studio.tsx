@@ -10,7 +10,7 @@ import {
 } from "@/lib/stripe.functions";
 import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
-  Copy, Trash2, ExternalLink, CreditCard, CheckCircle2, AlertCircle, Calendar,
+  Copy, Trash2, ExternalLink, CreditCard, CheckCircle2, AlertCircle, Calendar, ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +39,7 @@ function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
 
 function OrganizerStudioPage() {
   const me = useCurrentProfile();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<"manage" | "create">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
@@ -96,7 +97,14 @@ function OrganizerStudioPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
         {/* Header banner */}
-        <div className="rounded-2xl border border-[#d4580a]/30 bg-gradient-to-br from-[#fff4ec] to-white p-6">
+        <div className="relative rounded-2xl border border-[#d4580a]/30 bg-gradient-to-br from-[#fff4ec] to-white p-6">
+          <button
+            onClick={() => { if (typeof window !== "undefined" && window.history.length > 1) window.history.back(); else navigate({ to: "/events" }); }}
+            aria-label="Back"
+            className="absolute right-4 top-4 rounded-full p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4580a]/15 text-[#d4580a]">
               <Ticket className="h-5 w-5" />
