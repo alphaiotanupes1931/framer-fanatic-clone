@@ -372,7 +372,7 @@ function TicketsTab({ evt, soldCount }: { evt: MyEvent; soldCount: number }) {
           <h3 className="text-lg font-semibold text-neutral-900">Ticket Types</h3>
           <p className="text-xs text-neutral-500">{hasType ? "1 type" : "0 types"} · Add multiple ticket tiers for your event</p>
         </div>
-        <Link to="/events/$eventId/edit" params={{ eventId: evt.id }} className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
+        <Link to="/edit-event/$eventId" params={{ eventId: evt.id }} className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
           <Plus className="h-4 w-4" /> Add Ticket Type
         </Link>
       </div>
@@ -397,7 +397,7 @@ function TicketsTab({ evt, soldCount }: { evt: MyEvent; soldCount: number }) {
           </div>
           <div className="mt-4 text-base font-semibold text-neutral-900">No ticket types yet</div>
           <div className="mt-1 text-sm text-neutral-500">Create your first ticket type to start selling</div>
-          <Link to="/events/$eventId/edit" params={{ eventId: evt.id }} className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
+          <Link to="/edit-event/$eventId" params={{ eventId: evt.id }} className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-neutral-500 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
             <Plus className="h-4 w-4" /> Add Ticket Type
           </Link>
         </div>
