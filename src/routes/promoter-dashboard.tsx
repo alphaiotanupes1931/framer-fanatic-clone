@@ -172,15 +172,6 @@ function PromoterDashboardPage() {
           </div>
         )}
 
-        {tab === "promo" && (
-          <div className="rounded-xl border border-neutral-200 bg-white p-6">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-900"><Tag className="h-4 w-4 text-[#d4580a]" /> Your promo link</div>
-            <p className="text-sm text-neutral-600">Every event has a personal referral link tagged with your username. Copy it from the My Events tab and share it anywhere.</p>
-            <div className="mt-3 rounded-lg bg-neutral-50 p-3 font-mono text-xs text-neutral-700">
-              {typeof window !== "undefined" ? `${window.location.origin}/events/<eventId>?ref=${me?.username ?? "you"}` : `/events/<eventId>?ref=${me?.username ?? "you"}`}
-            </div>
-          </div>
-        )}
 
         {tab === "message" && (
           <div className="rounded-xl border border-neutral-200 bg-white p-6">
