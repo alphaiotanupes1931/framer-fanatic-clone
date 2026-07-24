@@ -185,14 +185,14 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                 </div>
                 <div className="mt-1 space-y-0.5">
                   {dayEvents.slice(0, 2).map((e) => (
-                    <Link
+                    <button
                       key={e.id}
-                      to="/events/$eventId"
-                      params={{ eventId: e.id }}
-                      className="block truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-[10px] font-medium text-[#d4580a] hover:bg-[#d4580a]/20"
+                      type="button"
+                      onClick={() => openEventPopup(e)}
+                      className="block w-full truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-left text-[10px] font-medium text-[#d4580a] hover:bg-[#d4580a]/20"
                     >
                       {e.title}
-                    </Link>
+                    </button>
                   ))}
                   {dayEvents.length > 2 && (
                     <div className="px-1 text-[10px] text-neutral-500">+{dayEvents.length - 2} more</div>
@@ -212,15 +212,15 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
         ) : (
           <div className="space-y-2">
             {upcoming.map((e) => (
-              <Link
+              <button
                 key={e.id}
-                to="/events/$eventId"
-                params={{ eventId: e.id }}
-                className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white p-3 text-sm hover:border-[#d4580a]"
+                type="button"
+                onClick={() => openEventPopup(e)}
+                className="flex w-full items-center justify-between rounded-xl border border-neutral-200 bg-white p-3 text-left text-sm hover:border-[#d4580a]"
               >
                 <div className="font-medium text-neutral-900">{e.title}</div>
                 <div className="text-xs text-neutral-500">{new Date(e.starts_at!).toLocaleString()}</div>
-              </Link>
+              </button>
             ))}
           </div>
         )}
