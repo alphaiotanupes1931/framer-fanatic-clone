@@ -722,6 +722,7 @@ function ProfilePage() {
           )}
         </div>
       )}
+      )}
     </AppLayout>
   );
 }
