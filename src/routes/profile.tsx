@@ -1515,3 +1515,117 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
     </div>
   );
 }
+
+function MyWritingsTab({ userId }: { userId: string }) {
+  const [rows, setRows] = useState<Array<{ id: string; title: string; excerpt: string | null; cover_image_url: string | null; created_at: string; status: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("stories")
+        .select("id,title,excerpt,cover_image_url,created_at,status")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      setRows((data ?? []) as never);
+      setLoading(false);
+    })();
+  }, [userId]);
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading writings…</div>;
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-neutral-200 py-12 text-center">
+        <div className="text-sm text-muted-foreground">You haven't written any stories yet.</div>
+        <Link to="/create-story" className="mt-3 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Write a story</Link>
+      </div>
+    );
+  }
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {rows.map((s) => (
+        <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
+          {s.cover_image_url && <img src={s.cover_image_url} alt={s.title} className="w-full h-40 object-cover" />}
+          <div className="p-4 space-y-1.5">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.status === "published" ? "Published" : "Draft"} · {new Date(s.created_at).toLocaleDateString()}</div>
+            <div className="font-bold leading-tight line-clamp-2">{s.title}</div>
+            {s.excerpt && <p className="text-xs text-muted-foreground line-clamp-2">{s.excerpt}</p>}
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function SavedTab() {
+  return (
+    <div className="rounded-2xl border border-dashed border-neutral-200 py-12 text-center">
+      <Bookmark className="mx-auto h-8 w-8 text-neutral-400" />
+      <div className="mt-3 text-sm text-muted-foreground">All of your saved posts, stories and events live here.</div>
+      <Link to="/saved" className="mt-4 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Open Saved</Link>
+    </div>
+  );
+}
+
+function AttendingTab() {
+  type Row = { id: string; event_id: string; events: { title: string; starts_at: string; location: string | null; venue_name: string | null; image_url: string | null } | null };
+  const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) { setLoading(false); return; }
+      const { data } = await supabase
+        .from("tickets")
+        .select("id,event_id,events(title,starts_at,location,venue_name,image_url)")
+        .eq("buyer_id", uid)
+        .eq("status", "paid");
+      setRows((data ?? []) as Row[]);
+      setLoading(false);
+    })();
+  }, []);
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
+  const now = Date.now();
+  const upcoming = rows.filter((r) => r.events && new Date(r.events.starts_at).getTime() >= now)
+    .sort((a, b) => +new Date(a.events!.starts_at) - +new Date(b.events!.starts_at));
+  if (upcoming.length === 0) return <div className="py-12 text-center text-muted-foreground">You aren't attending any upcoming events yet.</div>;
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {upcoming.map((r) => (
+        <Link key={r.id} to="/events/$eventId" params={{ eventId: r.event_id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
+          {r.events?.image_url && <img src={r.events.image_url} alt={r.events.title} className="w-full h-40 object-cover" />}
+          <div className="p-4 space-y-1.5">
+            <div className="text-xs text-muted-foreground">
+              {new Date(r.events!.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {new Date(r.events!.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+            </div>
+            <div className="font-bold leading-tight line-clamp-2">{r.events?.title}</div>
+            {(r.events?.venue_name || r.events?.location) && <div className="text-xs text-muted-foreground">📍 {r.events?.venue_name ?? r.events?.location}</div>}
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boolean }) {
+  const links: Array<{ to: string; label: string; desc: string }> = [
+    { to: "/organizer-studio", label: "Organizer Studio", desc: "Manage events, tickets, payouts and Stripe." },
+    { to: "/promoter-dashboard", label: "Promoter Dashboard", desc: "Track ticket sales and event performance." },
+    { to: "/saved", label: "Saved", desc: "Everything you've bookmarked." },
+  ];
+  if (isAdmin) links.unshift({ to: "/admin/trash", label: "Admin Trash", desc: "Restore or purge deleted content." });
+  void isArtist;
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {links.map((l) => (
+        <Link key={l.to} to={l.to} className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm">
+          <div className="min-w-0">
+            <div className="font-semibold text-neutral-900">{l.label}</div>
+            <div className="truncate text-xs text-muted-foreground">{l.desc}</div>
+          </div>
+          <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
+        </Link>
+      ))}
+    </div>
+  );
+}
