@@ -340,9 +340,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       )}
 
       {tab === "promoters" && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
-          <Link to="/promoter-dashboard" className="font-semibold text-[#d4580a] hover:underline">Open promoter dashboard →</Link>
-        </div>
+        <PromotersTab eventId={evt.id} />
       )}
 
       {tab === "payouts" && (
