@@ -42,6 +42,7 @@ function OrganizerStudioPage() {
   const [tab, setTab] = useState<"manage" | "create">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
+  const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number } | null>(null);
 
   const load = () => {
     if (!me) return;
@@ -52,6 +53,23 @@ function OrganizerStudioPage() {
       .then(({ data }) => setEvents((data as MyEvent[] | null) ?? []));
   };
   useEffect(load, [me?.id]);
+
+  useEffect(() => {
+    if (!events || events.length === 0) { setOverview({ revenue: 0, net: 0, orders: 0 }); return; }
+    const ids = events.map((e) => e.id);
+    supabase.from("tickets")
+      .select("buyer_total_cents,artist_net_cents,status,event_id")
+      .in("event_id", ids)
+      .eq("status", "paid")
+      .then(({ data }) => {
+        const rows = (data as { buyer_total_cents: number; artist_net_cents: number }[] | null) ?? [];
+        setOverview({
+          revenue: rows.reduce((s, r) => s + (r.buyer_total_cents ?? 0), 0),
+          net: rows.reduce((s, r) => s + (r.artist_net_cents ?? 0), 0),
+          orders: rows.length,
+        });
+      });
+  }, [events]);
 
   const duplicate = async (e: MyEvent) => {
     if (!me) return;
@@ -109,6 +127,7 @@ function OrganizerStudioPage() {
                 No events yet. <Link to="/events/new" className="font-semibold text-[#d4580a] hover:underline">Create your first event</Link>.
               </div>
             ) : (
+              <>
               <div className="grid gap-3 sm:grid-cols-2">
                 {events.map((e) => {
                   const isPast = new Date(e.starts_at).getTime() < Date.now();
@@ -137,6 +156,20 @@ function OrganizerStudioPage() {
                   );
                 })}
               </div>
+
+              <div className="mt-6 space-y-3">
+                <div className="text-sm font-semibold text-neutral-700">All-events overview</div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <Stat label="Events" value={events.length.toString()} subtitle={`${events.filter((e) => new Date(e.starts_at).getTime() >= Date.now()).length} upcoming`} />
+                  <Stat label="Tickets sold" value={(overview?.orders ?? 0).toString()} subtitle="paid orders" />
+                  <Stat label="Gross revenue" value={fmt(overview?.revenue ?? 0)} subtitle="across all events" />
+                  <Stat label="Your net" value={fmt(overview?.net ?? 0)} subtitle="after fees" />
+                </div>
+                <div className="rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
+                  Tip: click an event above to view its attendees, check‑in QR scans, promoter links, and payouts.
+                </div>
+              </div>
+              </>
             )}
           </>
         ) : (
