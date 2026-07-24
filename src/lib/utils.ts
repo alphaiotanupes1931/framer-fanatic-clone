@@ -12,3 +12,13 @@ export function assetUrl(url: string): string {
   if (url.startsWith("/__l5e/")) return `${ASSET_ORIGIN}${url}`;
   return url;
 }
+
+// Strip any accidental "Lovable" branding from error messages surfaced to users.
+export function sanitizeErrorMessage(input: unknown, fallback = "Something went wrong"): string {
+  const raw = input instanceof Error ? input.message : typeof input === "string" ? input : "";
+  if (!raw) return fallback;
+  return raw
+    .replace(/https?:\/\/[^\s]*lovable\.app[^\s]*/gi, "Planet Baltimore")
+    .replace(/lovable\s+cloud/gi, "Planet Baltimore")
+    .replace(/lovable/gi, "Planet Baltimore");
+}

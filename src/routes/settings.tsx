@@ -15,6 +15,7 @@ import {
   refreshConnectStatus,
 } from "@/lib/stripe.functions";
 import { useTheme, THEMES, type Theme } from "@/hooks/use-theme";
+import { sanitizeErrorMessage } from "@/lib/utils";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -445,7 +446,7 @@ function StripeSection() {
       }});
       window.location.href = url;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start onboarding");
+      toast.error(sanitizeErrorMessage(e, "Could not start onboarding"));
       setBusy(false);
     }
   };
