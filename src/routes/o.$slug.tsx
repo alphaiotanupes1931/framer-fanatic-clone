@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
+import { DuesTab } from "@/components/org/dues-tab";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
@@ -472,6 +473,7 @@ function OrgProfile() {
             <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
+          {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
         </div>
       </div>
     </AppLayout>
