@@ -61,6 +61,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const rawMessage = typeof error?.message === "string" ? error.message : "";
+  const safeMessage = rawMessage.replace(/lovable(\s+cloud)?/gi, "Planet Baltimore");
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
