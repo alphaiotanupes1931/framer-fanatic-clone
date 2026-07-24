@@ -1450,19 +1450,12 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
 
   const username = profile?.username;
   const pages = [
-    isArtist && username && {
+    username && {
       key: "artist",
       title: "Artist Page",
-      subtitle: "Public artist profile — Studio, Series, Gallery, CV/Bio",
+      subtitle: "Public artist profile, Studio, Series, Gallery, CV/Bio",
       href: `/u/${username}?view=artist`,
       color: "bg-[#d4580a]",
-    },
-    username && {
-      key: "resident",
-      title: profile?.category?.toLowerCase() === "visitor" ? "Visitor Page" : "Resident Page",
-      subtitle: "Public community profile — Posts, Feed, Talk",
-      href: `/u/${username}?view=resident`,
-      color: "bg-emerald-600",
     },
   ].filter(Boolean) as Array<{ key: string; title: string; subtitle: string; href: string; color: string }>;
 
