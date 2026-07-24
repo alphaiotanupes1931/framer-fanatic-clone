@@ -590,7 +590,9 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
         .eq("is_exhibition", false)
         .order("starts_at", { ascending: false })
         .limit(50);
-      setEvents((data ?? []) as OrgEvent[]);
+      const rows = (data ?? []) as OrgEvent[];
+      const seen = new Set<string>();
+      setEvents(rows.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true))));
       setLoading(false);
     })();
   }, [_orgId]);
@@ -664,7 +666,9 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
         .eq("is_exhibition", true)
         .order("starts_at", { ascending: false })
         .limit(50);
-      setEvents((data ?? []) as OrgEvent[]);
+      const rows = (data ?? []) as OrgEvent[];
+      const seen = new Set<string>();
+      setEvents(rows.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true))));
       setLoading(false);
     })();
   }, [orgId]);
