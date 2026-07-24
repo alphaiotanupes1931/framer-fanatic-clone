@@ -15,6 +15,7 @@ import {
   refreshConnectStatus,
 } from "@/lib/stripe.functions";
 import { useTheme, THEMES, type Theme } from "@/hooks/use-theme";
+import { sanitizeErrorMessage } from "@/lib/utils";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
