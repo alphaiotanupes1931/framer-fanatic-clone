@@ -72,9 +72,6 @@ const DEFAULT_TABS: ArtistTab[] = [
 
 const RESIDENT_TABS: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
-  { key: "studio", label: "Studio", Icon: Flame },
-  { key: "series", label: "Series", Icon: Layers },
-  { key: "gallery", label: "Gallery", Icon: ImageIcon },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
