@@ -5,7 +5,6 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, CalendarDays } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
 
@@ -93,6 +92,135 @@ function MobileDateStrip({
         })}
       </div>
     </div>
+  );
+}
+
+function MonthlyGrid({ events }: { events: Ev[] }) {
+  const [cursor, setCursor] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+  const monthLabel = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
+  const firstDow = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay();
+  const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+  const prevMonthDays = new Date(cursor.getFullYear(), cursor.getMonth(), 0).getDate();
+  const cells: Array<{ day: number; inMonth: boolean; date: Date }> = [];
+  for (let i = firstDow - 1; i >= 0; i--) {
+    cells.push({ day: prevMonthDays - i, inMonth: false, date: new Date(cursor.getFullYear(), cursor.getMonth() - 1, prevMonthDays - i) });
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d, inMonth: true, date: new Date(cursor.getFullYear(), cursor.getMonth(), d) });
+  }
+  while (cells.length % 7 !== 0) {
+    const d = cells.length - firstDow - daysInMonth + 1;
+    cells.push({ day: d, inMonth: false, date: new Date(cursor.getFullYear(), cursor.getMonth() + 1, d) });
+  }
+  const today = new Date();
+  const isToday = (d: Date) => d.toDateString() === today.toDateString();
+  const eventsByDay = new Map<string, Ev[]>();
+  const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+  const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+  const monthEvents = events.filter((e) => {
+    if (!e.starts_at) return false;
+    const t = new Date(e.starts_at);
+    return t >= monthStart && t < monthEnd;
+  });
+  for (const e of monthEvents) {
+    const key = new Date(e.starts_at!).toDateString();
+    const arr = eventsByDay.get(key) ?? [];
+    arr.push(e);
+    eventsByDay.set(key, arr);
+  }
+  const dowLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const upcoming = monthEvents
+    .filter((e) => new Date(e.starts_at!) >= today)
+    .slice(0, 8);
+
+  return (
+    <section className="mt-6 space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <button
+          onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
+          className="rounded-full p-2 hover:bg-neutral-100"
+          aria-label="Previous month"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <div className="text-lg font-semibold text-neutral-900">{monthLabel}</div>
+        <button
+          onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
+          className="rounded-full p-2 hover:bg-neutral-100"
+          aria-label="Next month"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+        <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-600">
+          {dowLabels.map((d) => (
+            <div key={d} className="px-3 py-2">{d}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7">
+          {cells.map((c, i) => {
+            const dayEvents = eventsByDay.get(c.date.toDateString()) ?? [];
+            return (
+              <div
+                key={i}
+                className={`min-h-[80px] border-b border-r border-neutral-100 p-2 text-sm ${
+                  c.inMonth ? "text-neutral-900" : "bg-neutral-50 text-neutral-400"
+                }`}
+              >
+                <div
+                  className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                    isToday(c.date) ? "border border-neutral-900" : ""
+                  }`}
+                >
+                  {c.day}
+                </div>
+                <div className="mt-1 space-y-0.5">
+                  {dayEvents.slice(0, 2).map((e) => (
+                    <Link
+                      key={e.id}
+                      to="/events/$eventId"
+                      params={{ eventId: e.id }}
+                      className="block truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-[10px] font-medium text-[#d4580a] hover:bg-[#d4580a]/20"
+                    >
+                      {e.title}
+                    </Link>
+                  ))}
+                  {dayEvents.length > 2 && (
+                    <div className="px-1 text-[10px] text-neutral-500">+{dayEvents.length - 2} more</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div>
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-neutral-900">
+          <CalendarDays className="h-4 w-4" /> Upcoming Events
+        </div>
+        {upcoming.length === 0 ? (
+          <div className="py-8 text-center text-sm text-neutral-500">No upcoming events.</div>
+        ) : (
+          <div className="space-y-2">
+            {upcoming.map((e) => (
+              <Link
+                key={e.id}
+                to="/events/$eventId"
+                params={{ eventId: e.id }}
+                className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white p-3 text-sm hover:border-[#d4580a]"
+              >
+                <div className="font-medium text-neutral-900">{e.title}</div>
+                <div className="text-xs text-neutral-500">{new Date(e.starts_at!).toLocaleString()}</div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -209,32 +337,7 @@ function CalendarPage() {
       </div>
 
       {/* Full-width monthly calendar when active */}
-      {showMonthly && (
-        <section className="mt-6 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-[#d4580a]" />
-              <h2 className="text-lg font-bold text-neutral-900">Monthly Calendar</h2>
-            </div>
-            <span className="text-xs font-medium text-neutral-500">
-              {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
-            </span>
-          </div>
-          <div className="flex justify-center">
-            <Calendar
-              mode="single"
-              selected={selected}
-              onSelect={setSelected}
-              modifiers={{ hasEvent: eventDays }}
-              modifiersClassNames={{
-                hasEvent:
-                  "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
-              }}
-              className="pointer-events-auto [&_.rdp-day]:h-14 [&_.rdp-day]:w-14 [&_.rdp-cell]:h-14 [&_.rdp-cell]:w-14 [&_.rdp-head_cell]:w-14 md:[&_.rdp-day]:h-20 md:[&_.rdp-day]:w-20 md:[&_.rdp-cell]:h-20 md:[&_.rdp-cell]:w-20 md:[&_.rdp-head_cell]:w-20 lg:[&_.rdp-day]:h-24 lg:[&_.rdp-day]:w-24 lg:[&_.rdp-cell]:h-24 lg:[&_.rdp-cell]:w-24 lg:[&_.rdp-head_cell]:w-24"
-            />
-          </div>
-        </section>
-      )}
+      {showMonthly && <MonthlyGrid events={filtered} />}
 
       {/* Main two-column layout - constrained to match other pages */}
       {!showMonthly && (
