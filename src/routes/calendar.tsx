@@ -209,32 +209,7 @@ function CalendarPage() {
       </div>
 
       {/* Full-width monthly calendar when active */}
-      {showMonthly && (
-        <section className="mt-6 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-[#d4580a]" />
-              <h2 className="text-lg font-bold text-neutral-900">Monthly Calendar</h2>
-            </div>
-            <span className="text-xs font-medium text-neutral-500">
-              {eventDays.length} event{eventDays.length === 1 ? "" : "s"} this month
-            </span>
-          </div>
-          <div className="flex justify-center">
-            <Calendar
-              mode="single"
-              selected={selected}
-              onSelect={setSelected}
-              modifiers={{ hasEvent: eventDays }}
-              modifiersClassNames={{
-                hasEvent:
-                  "relative font-semibold text-[#d4580a] after:absolute after:bottom-2 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-[#d4580a]",
-              }}
-              className="pointer-events-auto [&_.rdp-day]:h-14 [&_.rdp-day]:w-14 [&_.rdp-cell]:h-14 [&_.rdp-cell]:w-14 [&_.rdp-head_cell]:w-14 md:[&_.rdp-day]:h-20 md:[&_.rdp-day]:w-20 md:[&_.rdp-cell]:h-20 md:[&_.rdp-cell]:w-20 md:[&_.rdp-head_cell]:w-20 lg:[&_.rdp-day]:h-24 lg:[&_.rdp-day]:w-24 lg:[&_.rdp-cell]:h-24 lg:[&_.rdp-cell]:w-24 lg:[&_.rdp-head_cell]:w-24"
-            />
-          </div>
-        </section>
-      )}
+      {showMonthly && <MonthlyGrid events={filtered} />}
 
       {/* Main two-column layout - constrained to match other pages */}
       {!showMonthly && (
