@@ -495,7 +495,69 @@ function CalendarPage() {
         </div>
       </div>
     )}
+    <EventPopup />
     </AppLayout>
+  );
+}
+
+function EventPopup() {
+  const [ev, setEv] = useState<Ev | null>(null);
+  useEffect(() => {
+    const onOpen = (e: Event) => setEv((e as CustomEvent<Ev>).detail);
+    window.addEventListener("pb-open-event", onOpen as EventListener);
+    return () => window.removeEventListener("pb-open-event", onOpen as EventListener);
+  }, []);
+  const d = ev?.starts_at ? new Date(ev.starts_at) : null;
+  const where = ev?.venue_name || ev?.location;
+  return (
+    <Dialog open={!!ev} onOpenChange={(o) => !o && setEv(null)}>
+      <DialogContent className="max-w-lg overflow-hidden p-0">
+        {ev && (
+          <div>
+            {ev.image_url && (
+              <div className="aspect-[16/9] w-full overflow-hidden bg-neutral-100">
+                <EventImage src={ev.image_url} alt={ev.title} className="h-full w-full object-cover" />
+              </div>
+            )}
+            <div className="space-y-3 p-5">
+              <h2 className="text-xl font-bold text-neutral-900">{ev.title}</h2>
+              {d && (
+                <div className="flex items-center gap-2 text-sm font-medium text-[#d4580a]">
+                  <CalendarDays className="h-4 w-4" />
+                  {d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                  {" · "}
+                  {d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                </div>
+              )}
+              {where && (
+                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <MapPin className="h-4 w-4" /> {where}
+                </div>
+              )}
+              {ev.description && (
+                <p className="line-clamp-5 text-sm leading-relaxed text-neutral-600">{ev.description}</p>
+              )}
+              <div className="flex gap-2 pt-2">
+                <Link
+                  to="/events/$eventId"
+                  params={{ eventId: ev.id }}
+                  onClick={() => setEv(null)}
+                  className="inline-flex flex-1 items-center justify-center rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]"
+                >
+                  View full event
+                </Link>
+                <button
+                  onClick={() => setEv(null)}
+                  className="inline-flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
