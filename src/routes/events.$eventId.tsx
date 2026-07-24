@@ -6,7 +6,7 @@ import { MapPin, Navigation, Ticket, ArrowLeft, Share2, Trash2, Edit3, EyeOff } 
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
-import { EventImage } from "@/components/event-image";
+import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,7 +17,7 @@ type EventRow = {
   venue_name: string | null; address: string | null; location: string | null;
   image_url: string | null; starts_at: string; ends_at: string | null;
   price_cents: number | null; status: string; is_published: boolean;
-  neighborhood: string | null;
+  neighborhood: string | null; video_url: string | null;
 };
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
