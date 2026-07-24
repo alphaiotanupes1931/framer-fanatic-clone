@@ -36,7 +36,7 @@ function OrganizerStudioPage() {
   const [tab, setTab] = useState<"manage" | "create">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
-  const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number } | null>(null);
+  const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
 
   const load = () => {
     if (!me) return;
@@ -49,20 +49,21 @@ function OrganizerStudioPage() {
   useEffect(load, [me?.id]);
 
   useEffect(() => {
-    if (!events || events.length === 0) { setOverview({ revenue: 0, net: 0, orders: 0 }); return; }
+    if (!events || events.length === 0) { setOverview({ revenue: 0, net: 0, orders: 0, promoters: 0 }); return; }
     const ids = events.map((e) => e.id);
-    supabase.from("tickets")
-      .select("buyer_total_cents,artist_net_cents,status,event_id")
-      .in("event_id", ids)
-      .eq("status", "paid")
-      .then(({ data }) => {
-        const rows = (data as { buyer_total_cents: number; artist_net_cents: number }[] | null) ?? [];
-        setOverview({
-          revenue: rows.reduce((s, r) => s + (r.buyer_total_cents ?? 0), 0),
-          net: rows.reduce((s, r) => s + (r.artist_net_cents ?? 0), 0),
-          orders: rows.length,
-        });
+    (async () => {
+      const [{ data: tRows }, { count: pCount }] = await Promise.all([
+        supabase.from("tickets").select("buyer_total_cents,artist_net_cents,status,event_id").in("event_id", ids).eq("status", "paid"),
+        supabase.from("event_promoters").select("id", { count: "exact", head: true }).in("event_id", ids),
+      ]);
+      const rows = (tRows as { buyer_total_cents: number; artist_net_cents: number }[] | null) ?? [];
+      setOverview({
+        revenue: rows.reduce((s, r) => s + (r.buyer_total_cents ?? 0), 0),
+        net: rows.reduce((s, r) => s + (r.artist_net_cents ?? 0), 0),
+        orders: rows.length,
+        promoters: pCount ?? 0,
       });
+    })();
   }, [events]);
 
   const duplicate = async (e: MyEvent) => {
@@ -155,7 +156,7 @@ function OrganizerStudioPage() {
                 <Stat label="Revenue" value={fmt(overview?.revenue ?? 0)} subtitle={`${fmt(overview?.net ?? 0)} net`} />
                 <Stat label="Tickets sold" value={(overview?.orders ?? 0).toString()} subtitle={`${overview?.orders ?? 0} orders`} />
                 <Stat label="Checked in" value="0" subtitle={`of ${overview?.orders ?? 0} total`} />
-                <Stat label="Promoters" value="1" subtitle="0 via promo" />
+                <Stat label="Promoters" value={(overview?.promoters ?? 0).toString()} subtitle="0 via promo" />
               </div>
               <div className="rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
                 Tip: click an event above to view its attendees, check-in QR scans, promoter links, and payouts.
@@ -178,6 +179,12 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [promoterCount, setPromoterCount] = useState(0);
+
+  useEffect(() => {
+    supabase.from("event_promoters").select("id", { count: "exact", head: true }).eq("event_id", evt.id)
+      .then(({ count }) => setPromoterCount(count ?? 0));
+  }, [evt.id]);
 
   useEffect(() => {
     supabase.from("tickets")
@@ -251,7 +258,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
         <Stat label="Revenue" value={fmt(revenue)} subtitle={`${fmt(net)} net`} />
         <Stat label="Tickets sold" value={paid.length.toString()} subtitle={`${paid.length} orders`} />
         <Stat label="Checked in" value="0" subtitle={`of ${paid.length} total`} />
-        <Stat label="Promoters" value="1" subtitle="0 via promo" />
+        <Stat label="Promoters" value={promoterCount.toString()} subtitle="0 via promo" />
       </div>
 
       {/* Sub-tabs */}
@@ -592,24 +599,63 @@ function Stat({ label, value, subtitle }: { label: string; value: string; subtit
   );
 }
 
-function PromotersTab({ eventId: _eventId }: { eventId: string }) {
+type PromoterRow = { id: string; name: string; email: string; commission_rate: number; referral_code: string; status: string; created_at: string };
+
+function PromotersTab({ eventId }: { eventId: string }) {
+  const me = useCurrentProfile();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [rate, setRate] = useState(13.5);
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
+  const [promoters, setPromoters] = useState<PromoterRow[] | null>(null);
+
+  const load = () => {
+    supabase.from("event_promoters")
+      .select("id,name,email,commission_rate,referral_code,status,created_at")
+      .eq("event_id", eventId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setPromoters((data as PromoterRow[] | null) ?? []));
+  };
+  useEffect(load, [eventId]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return toast.error("Name and email required");
+    if (!me) return toast.error("Sign in required");
     setBusy(true);
     try {
-      // TODO: wire to invite backend when available
-      await new Promise((r) => setTimeout(r, 400));
-      toast.success(`Invite sent to ${email}`);
-      setName(""); setEmail(""); setRate(13.5);
+      const { error } = await supabase.from("event_promoters").insert({
+        event_id: eventId,
+        organizer_id: me.id,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        commission_rate: rate,
+      } as never);
+      if (error) throw error;
+      toast.success(`Promoter added: ${email}`);
+      setName(""); setEmail(""); setRate(13.5); setOpen(false);
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not add promoter");
     } finally { setBusy(false); }
   };
+
+  const removePromoter = async (id: string) => {
+    if (!window.confirm("Remove this promoter?")) return;
+    const { error } = await supabase.from("event_promoters").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Removed");
+    load();
+  };
+
+  const copyLink = (code: string) => {
+    const url = `${window.location.origin}/events/${eventId}?ref=${code}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Referral link copied");
+  };
+
+  const count = promoters?.length ?? 0;
 
   return (
     <div className="space-y-4">
@@ -618,10 +664,31 @@ function PromotersTab({ eventId: _eventId }: { eventId: string }) {
       </button>
 
       <div>
-        <div className="font-semibold text-neutral-900">Active Promoters (0)</div>
-        <div className="mt-2 rounded-xl bg-neutral-100 p-6 text-center text-sm text-neutral-500">
-          No promoters yet. Add one above to start tracking referral sales.
-        </div>
+        <div className="font-semibold text-neutral-900">Active Promoters ({count})</div>
+        {promoters === null ? (
+          <div className="mt-2 rounded-xl bg-neutral-100 p-6 text-center text-sm text-neutral-500">Loading…</div>
+        ) : count === 0 ? (
+          <div className="mt-2 rounded-xl bg-neutral-100 p-6 text-center text-sm text-neutral-500">
+            No promoters yet. Add one above to start tracking referral sales.
+          </div>
+        ) : (
+          <div className="mt-2 divide-y divide-neutral-100 overflow-hidden rounded-xl border border-neutral-200 bg-white">
+            {promoters.map((p) => (
+              <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div className="min-w-0">
+                  <div className="font-semibold text-neutral-900">{p.name}</div>
+                  <div className="truncate text-xs text-neutral-500">{p.email} · {p.commission_rate}% commission</div>
+                  <div className="mt-1 font-mono text-[11px] text-neutral-400">ref: {p.referral_code}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-neutral-500">{p.status}</span>
+                  <button onClick={() => copyLink(p.referral_code)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">Copy link</button>
+                  <button onClick={() => removePromoter(p.id)} title="Remove" className="rounded p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {open && (
@@ -647,7 +714,7 @@ function PromotersTab({ eventId: _eventId }: { eventId: string }) {
         </div>
         <div className="mt-4 flex gap-2">
           <button type="submit" disabled={busy} className="flex-1 rounded-lg bg-[#d4580a] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
-            {busy ? "Sending…" : "+ Add & Send Invite"}
+            {busy ? "Adding…" : "+ Add Promoter"}
           </button>
           <button type="button" onClick={() => { setName(""); setEmail(""); setRate(13.5); setOpen(false); }} className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:border-neutral-300">Cancel</button>
         </div>

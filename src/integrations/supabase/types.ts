@@ -214,6 +214,53 @@ export type Database = {
         }
         Relationships: []
       }
+      event_promoters: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          email: string
+          event_id: string
+          id: string
+          name: string
+          organizer_id: string
+          promoter_user_id: string | null
+          referral_code: string
+          status: string
+        }
+        Insert: {
+          commission_rate?: number
+          created_at?: string
+          email: string
+          event_id: string
+          id?: string
+          name: string
+          organizer_id: string
+          promoter_user_id?: string | null
+          referral_code?: string
+          status?: string
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          email?: string
+          event_id?: string
+          id?: string
+          name?: string
+          organizer_id?: string
+          promoter_user_id?: string | null
+          referral_code?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_promoters_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_saves: {
         Row: {
           created_at: string
