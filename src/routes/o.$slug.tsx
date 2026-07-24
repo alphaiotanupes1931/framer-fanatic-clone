@@ -8,7 +8,7 @@ import {
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
-  ChevronLeft, ChevronRight, Heart,
+  ChevronLeft, ChevronRight, Heart, DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
@@ -60,7 +60,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
-  Artists: Users, Support: Heart, Exhibition: ImageIcon, Dues: Heart,
+  Artists: Users, Support: Heart, Exhibition: ImageIcon, Dues: DollarSign,
 };
 type Tab = string;
 
