@@ -1342,6 +1342,7 @@ function StripeTab() {
   const refreshFn = useServerFn(refreshConnectStatus);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ connected: boolean; chargesEnabled: boolean; status?: string } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile?.stripe_account_id) { setStatus({ connected: false, chargesEnabled: false }); return; }
@@ -1353,6 +1354,7 @@ function StripeTab() {
 
   const onboard = async () => {
     setBusy(true);
+    setErrorMsg(null);
     try {
       await ensureFn();
       const { url } = await linkFn({ data: {
@@ -1361,7 +1363,9 @@ function StripeTab() {
       }});
       window.location.href = url;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start onboarding");
+      const msg = e instanceof Error ? e.message : "Could not start onboarding";
+      setErrorMsg(msg);
+      toast.error(msg);
       setBusy(false);
     }
   };
@@ -1399,6 +1403,21 @@ function StripeTab() {
             </div>
           </div>
         </div>
+        {errorMsg ? (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+            <div className="font-semibold">Stripe couldn't start onboarding</div>
+            <div className="mt-1 whitespace-pre-wrap break-words">{errorMsg}</div>
+            {errorMsg.includes("platform-profile") ? (
+              <div className="mt-2 text-xs">
+                The Planet Baltimore Stripe account owner needs to complete the platform profile at{" "}
+                <a href="https://dashboard.stripe.com/settings/connect/platform-profile" target="_blank" rel="noreferrer" className="font-semibold underline">
+                  dashboard.stripe.com/settings/connect/platform-profile
+                </a>{" "}
+                (accept responsibility for losses). After that, this button will work for everyone.
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground">

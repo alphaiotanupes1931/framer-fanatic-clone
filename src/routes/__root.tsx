@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import pbLogo from "../assets/pb-logo.png";
 import { CookieBanner } from "../components/cookie-banner";
 import { OnboardingTour } from "../components/onboarding-tour";
+import { Toaster } from "../components/ui/sonner";
 
 const themeScript = `
   (function() {
@@ -153,6 +154,7 @@ function RootComponent() {
       <Outlet />
       <CookieBanner />
       <OnboardingTour />
+      <Toaster />
     </QueryClientProvider>
   );
 }
