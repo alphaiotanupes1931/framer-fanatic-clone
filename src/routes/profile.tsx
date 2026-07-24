@@ -267,14 +267,15 @@ function ProfilePage() {
 
   return (
     <AppLayout title="" hero={false}>
-      {!profile ? (
+      {!profile && (
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-center">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#d4580a] border-t-transparent" />
             <p className="text-sm font-medium text-muted-foreground">Loading your profile…</p>
           </div>
         </div>
-      ) : (
+      )}
+      {profile && (
       <div className="rounded-2xl border border-border bg-card overflow-hidden sm:rounded-3xl">
         <div
           className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
