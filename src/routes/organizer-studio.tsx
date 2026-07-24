@@ -331,7 +331,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       )}
 
       {tab === "message" && (
-        <MessageTab evtTitle={evt.title} recipients={paid.map((t) => buyers[t.buyer_id]?.email).filter(Boolean) as string[]} />
+        <MessageTab eventId={evt.id} evtTitle={evt.title} recipients={paid.map((t) => buyers[t.buyer_id]?.email).filter(Boolean) as string[]} />
       )}
 
       {tab === "promoters" && (
