@@ -10,7 +10,7 @@ import {
 } from "@/lib/stripe.functions";
 import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
-  Copy, Trash2, ExternalLink, CreditCard, CheckCircle2, AlertCircle, Calendar, ArrowLeft,
+  Copy, Trash2, ExternalLink, CreditCard, CheckCircle2, AlertCircle, Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 
