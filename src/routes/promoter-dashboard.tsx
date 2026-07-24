@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, ArrowLeft, Share2, MessageSquare, Tag, BarChart3, ExternalLink } from "lucide-react";
+import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, ArrowLeft, Share2, MessageSquare, BarChart3, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/promoter-dashboard")({
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/promoter-dashboard")({
 });
 
 type Row = { id: string; title: string; starts_at: string; sold: number; revenue_cents: number };
-type TabId = "events" | "analytics" | "promo" | "message" | "social";
+type TabId = "events" | "analytics" | "message" | "social";
 
 const COMMISSION_RATE = 0.10; // 10% of gross for the promoter (indicative)
 
@@ -69,7 +69,6 @@ function PromoterDashboardPage() {
   const TABS: { id: TabId; label: string }[] = [
     { id: "events", label: "My Events" },
     { id: "analytics", label: "Analytics" },
-    { id: "promo", label: "Promo Codes" },
     { id: "message", label: "Message" },
     { id: "social", label: "Social" },
   ];
@@ -173,15 +172,6 @@ function PromoterDashboardPage() {
           </div>
         )}
 
-        {tab === "promo" && (
-          <div className="rounded-xl border border-neutral-200 bg-white p-6">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-900"><Tag className="h-4 w-4 text-[#d4580a]" /> Your promo link</div>
-            <p className="text-sm text-neutral-600">Every event has a personal referral link tagged with your username. Copy it from the My Events tab and share it anywhere.</p>
-            <div className="mt-3 rounded-lg bg-neutral-50 p-3 font-mono text-xs text-neutral-700">
-              {typeof window !== "undefined" ? `${window.location.origin}/events/<eventId>?ref=${me?.username ?? "you"}` : `/events/<eventId>?ref=${me?.username ?? "you"}`}
-            </div>
-          </div>
-        )}
 
         {tab === "message" && (
           <div className="rounded-xl border border-neutral-200 bg-white p-6">
