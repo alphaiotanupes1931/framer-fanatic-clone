@@ -180,7 +180,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
   }
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
         <Link to="/stories/$storyId" params={{ storyId: story.id }} className="flex min-w-0 flex-1 items-center gap-3">
           <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">

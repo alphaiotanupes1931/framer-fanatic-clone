@@ -38,7 +38,7 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Stripe"] as const;
+const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard"] as const;
 const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
@@ -507,9 +507,7 @@ function ProfilePage() {
           </div>
 
           <div className="py-8">
-            {tab === "Stripe" && isArtist ? (
-              <StripeTab />
-            ) : tab === "My Tickets" ? (
+            {tab === "My Tickets" ? (
               <MyTicketsTab />
             ) : tab === "My Pages" ? (
               <MyPagesTab profile={profile} isArtist={isArtist} />
@@ -709,13 +707,15 @@ function ProfilePage() {
           )}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-background shadow-2xl"
+            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-background shadow-2xl"
           >
-            <PostCard
-              post={myPosts[postViewerIdx]}
-              currentUserId={profile?.id}
-              onDelete={(id) => { handleDeleteMyPost(id); setPostViewerIdx(null); }}
-            />
+            <div className="max-h-[92vh] overflow-y-auto">
+              <PostCard
+                post={myPosts[postViewerIdx]}
+                currentUserId={profile?.id}
+                onDelete={(id) => { handleDeleteMyPost(id); setPostViewerIdx(null); }}
+              />
+            </div>
           </div>
           {myPosts.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white">
@@ -1600,7 +1600,6 @@ function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boo
     { to: "/organizer-studio", label: "Organizer Studio", desc: "Manage events, tickets, payouts and Stripe." },
     { to: "/promoter-dashboard", label: "Promoter Dashboard", desc: "Track ticket sales and event performance." },
     { to: "/saved", label: "Saved", desc: "Everything you've bookmarked." },
-    { to: "/settings", label: "Stripe", desc: "Connect Stripe to sell tickets and get paid directly. Takes about 3 minutes: tap Connect Stripe, enter your legal info, add your bank account, and you're ready to accept payments." },
   ];
   if (isAdmin) links.unshift({ to: "/admin/trash", label: "Admin Trash", desc: "Restore or purge deleted content." });
   void isArtist;
@@ -1610,7 +1609,6 @@ function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boo
         <Link
           key={l.label}
           to={l.to}
-          hash={l.label === "Stripe" ? "stripe" : undefined}
           className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
         >
           <div className="min-w-0">
