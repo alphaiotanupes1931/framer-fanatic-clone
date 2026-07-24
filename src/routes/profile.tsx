@@ -521,6 +521,8 @@ function ProfilePage() {
               profile ? <ArtistEventsTab userId={profile.id} /> : null
             ) : tab === "My Dashboard" ? (
               <MyDashboardTab isAdmin={isAdmin} isArtist={isArtist} />
+            ) : tab === "Stripe" ? (
+              <StripeTab />
             ) : (["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
               profile ? (
                 tab === "Gallery" ? (
