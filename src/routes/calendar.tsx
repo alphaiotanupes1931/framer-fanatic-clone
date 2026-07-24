@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+function openEventPopup(ev: Ev) {
+  window.dispatchEvent(new CustomEvent<Ev>("pb-open-event", { detail: ev }));
+}
 
 export const Route = createFileRoute("/calendar")({
   component: CalendarPage,
@@ -180,14 +185,14 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                 </div>
                 <div className="mt-1 space-y-0.5">
                   {dayEvents.slice(0, 2).map((e) => (
-                    <Link
+                    <button
                       key={e.id}
-                      to="/events/$eventId"
-                      params={{ eventId: e.id }}
-                      className="block truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-[10px] font-medium text-[#d4580a] hover:bg-[#d4580a]/20"
+                      type="button"
+                      onClick={() => openEventPopup(e)}
+                      className="block w-full truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-left text-[10px] font-medium text-[#d4580a] hover:bg-[#d4580a]/20"
                     >
                       {e.title}
-                    </Link>
+                    </button>
                   ))}
                   {dayEvents.length > 2 && (
                     <div className="px-1 text-[10px] text-neutral-500">+{dayEvents.length - 2} more</div>
@@ -207,15 +212,15 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
         ) : (
           <div className="space-y-2">
             {upcoming.map((e) => (
-              <Link
+              <button
                 key={e.id}
-                to="/events/$eventId"
-                params={{ eventId: e.id }}
-                className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white p-3 text-sm hover:border-[#d4580a]"
+                type="button"
+                onClick={() => openEventPopup(e)}
+                className="flex w-full items-center justify-between rounded-xl border border-neutral-200 bg-white p-3 text-left text-sm hover:border-[#d4580a]"
               >
                 <div className="font-medium text-neutral-900">{e.title}</div>
                 <div className="text-xs text-neutral-500">{new Date(e.starts_at!).toLocaleString()}</div>
-              </Link>
+              </button>
             ))}
           </div>
         )}
@@ -490,7 +495,69 @@ function CalendarPage() {
         </div>
       </div>
     )}
+    <EventPopup />
     </AppLayout>
+  );
+}
+
+function EventPopup() {
+  const [ev, setEv] = useState<Ev | null>(null);
+  useEffect(() => {
+    const onOpen = (e: Event) => setEv((e as CustomEvent<Ev>).detail);
+    window.addEventListener("pb-open-event", onOpen as EventListener);
+    return () => window.removeEventListener("pb-open-event", onOpen as EventListener);
+  }, []);
+  const d = ev?.starts_at ? new Date(ev.starts_at) : null;
+  const where = ev?.venue_name || ev?.location;
+  return (
+    <Dialog open={!!ev} onOpenChange={(o) => !o && setEv(null)}>
+      <DialogContent className="max-w-lg overflow-hidden p-0">
+        {ev && (
+          <div>
+            {ev.image_url && (
+              <div className="aspect-[16/9] w-full overflow-hidden bg-neutral-100">
+                <EventImage src={ev.image_url} alt={ev.title} className="h-full w-full object-cover" />
+              </div>
+            )}
+            <div className="space-y-3 p-5">
+              <h2 className="text-xl font-bold text-neutral-900">{ev.title}</h2>
+              {d && (
+                <div className="flex items-center gap-2 text-sm font-medium text-[#d4580a]">
+                  <CalendarDays className="h-4 w-4" />
+                  {d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                  {" · "}
+                  {d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                </div>
+              )}
+              {where && (
+                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <MapPin className="h-4 w-4" /> {where}
+                </div>
+              )}
+              {ev.description && (
+                <p className="line-clamp-5 text-sm leading-relaxed text-neutral-600">{ev.description}</p>
+              )}
+              <div className="flex gap-2 pt-2">
+                <Link
+                  to="/events/$eventId"
+                  params={{ eventId: ev.id }}
+                  onClick={() => setEv(null)}
+                  className="inline-flex flex-1 items-center justify-center rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]"
+                >
+                  View full event
+                </Link>
+                <button
+                  onClick={() => setEv(null)}
+                  className="inline-flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -524,10 +591,10 @@ function OrgIcon({ id }: { id: string }) {
 function ForYouCard({ event }: { event: Ev }) {
   const d = event.starts_at ? new Date(event.starts_at) : null;
   return (
-    <Link
-      to="/events/$eventId"
-      params={{ eventId: event.id }}
-      className="group block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
+    <button
+      type="button"
+      onClick={() => openEventPopup(event)}
+      className="group block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left transition hover:border-[#d4580a]/40 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         {event.image_url ? (
@@ -554,7 +621,7 @@ function ForYouCard({ event }: { event: Ev }) {
           </p>
         )}
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -573,9 +640,13 @@ function UpcomingRow({ event }: { event: Ev }) {
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <Link to="/events/$eventId" params={{ eventId: event.id }} className="line-clamp-1 text-[15px] font-semibold text-neutral-900 hover:text-[#d4580a]">
+          <button
+            type="button"
+            onClick={() => openEventPopup(event)}
+            className="line-clamp-1 text-left text-[15px] font-semibold text-neutral-900 hover:text-[#d4580a]"
+          >
             {event.title}
-          </Link>
+          </button>
           <div className="mt-1 text-xs text-neutral-500">
             {d
               ? d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) +
