@@ -165,17 +165,14 @@ function OrganizerStudioPage() {
                 })}
               </div>
 
-              <div className="mt-6 space-y-3">
-                <div className="text-sm font-semibold text-neutral-700">All-events overview</div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <Stat label="Events" value={events.length.toString()} subtitle={`${events.filter((e) => new Date(e.starts_at).getTime() >= Date.now()).length} upcoming`} />
-                  <Stat label="Tickets sold" value={(overview?.orders ?? 0).toString()} subtitle="paid orders" />
-                  <Stat label="Gross revenue" value={fmt(overview?.revenue ?? 0)} subtitle="across all events" />
-                  <Stat label="Your net" value={fmt(overview?.net ?? 0)} subtitle="after fees" />
-                </div>
-                <div className="rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
-                  Tip: click an event above to view its attendees, check‑in QR scans, promoter links, and payouts.
-                </div>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Stat label="Revenue" value={fmt(overview?.revenue ?? 0)} subtitle={`${fmt(overview?.net ?? 0)} net`} />
+                <Stat label="Tickets sold" value={(overview?.orders ?? 0).toString()} subtitle={`${overview?.orders ?? 0} orders`} />
+                <Stat label="Checked in" value="0" subtitle={`of ${overview?.orders ?? 0} total`} />
+                <Stat label="Promoters" value="1" subtitle="0 via promo" />
+              </div>
+              <div className="rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
+                Tip: click an event above to view its attendees, check-in QR scans, promoter links, and payouts.
               </div>
               </>
             )}
