@@ -529,10 +529,10 @@ function OrgIcon({ id }: { id: string }) {
 function ForYouCard({ event }: { event: Ev }) {
   const d = event.starts_at ? new Date(event.starts_at) : null;
   return (
-    <Link
-      to="/events/$eventId"
-      params={{ eventId: event.id }}
-      className="group block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#d4580a]/40 hover:shadow-md"
+    <button
+      type="button"
+      onClick={() => openEventPopup(event)}
+      className="group block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left transition hover:border-[#d4580a]/40 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         {event.image_url ? (
@@ -559,7 +559,7 @@ function ForYouCard({ event }: { event: Ev }) {
           </p>
         )}
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -578,9 +578,13 @@ function UpcomingRow({ event }: { event: Ev }) {
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <Link to="/events/$eventId" params={{ eventId: event.id }} className="line-clamp-1 text-[15px] font-semibold text-neutral-900 hover:text-[#d4580a]">
+          <button
+            type="button"
+            onClick={() => openEventPopup(event)}
+            className="line-clamp-1 text-left text-[15px] font-semibold text-neutral-900 hover:text-[#d4580a]"
+          >
             {event.title}
-          </Link>
+          </button>
           <div className="mt-1 text-xs text-neutral-500">
             {d
               ? d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) +
