@@ -181,7 +181,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const initial = authorName.slice(0, 1).toUpperCase();
 
   return (
-    <article className="overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
+    <article className="overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
       {reason && (
         <div className="px-5 pt-3">
           <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
