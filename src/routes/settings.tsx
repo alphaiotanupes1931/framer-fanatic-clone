@@ -446,7 +446,7 @@ function StripeSection() {
       }});
       window.location.href = url;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start onboarding");
+      toast.error(sanitizeErrorMessage(e, "Could not start onboarding"));
       setBusy(false);
     }
   };
