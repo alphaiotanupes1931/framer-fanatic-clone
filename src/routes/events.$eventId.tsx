@@ -253,3 +253,19 @@ function EventDetail() {
     </AppLayout>
   );
 }
+
+function EventVideo({ path }: { path: string }) {
+  const url = useEventImageUrl(path);
+  return (
+    <div>
+      <h2 className="font-semibold text-foreground mb-2">Video</h2>
+      <div className="overflow-hidden rounded-2xl border border-border bg-black">
+        {url ? (
+          <video src={url} controls playsInline className="w-full aspect-video bg-black" />
+        ) : (
+          <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading…</div>
+        )}
+      </div>
+    </div>
+  );
+}
