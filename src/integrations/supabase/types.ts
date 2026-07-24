@@ -981,6 +981,8 @@ export type Database = {
           content: string
           created_at: string
           excluded_user_ids: string[]
+          featured: boolean
+          featured_at: string | null
           id: string
           image_url: string | null
           is_deleted: boolean
@@ -1004,6 +1006,8 @@ export type Database = {
           content: string
           created_at?: string
           excluded_user_ids?: string[]
+          featured?: boolean
+          featured_at?: string | null
           id?: string
           image_url?: string | null
           is_deleted?: boolean
@@ -1027,6 +1031,8 @@ export type Database = {
           content?: string
           created_at?: string
           excluded_user_ids?: string[]
+          featured?: boolean
+          featured_at?: string | null
           id?: string
           image_url?: string | null
           is_deleted?: boolean
@@ -1256,6 +1262,7 @@ export type Database = {
           created_at: string
           excerpt: string | null
           featured: boolean
+          featured_at: string | null
           format: string
           id: string
           likes_count: number
@@ -1274,6 +1281,7 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           featured?: boolean
+          featured_at?: string | null
           format?: string
           id?: string
           likes_count?: number
@@ -1292,6 +1300,7 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           featured?: boolean
+          featured_at?: string | null
           format?: string
           id?: string
           likes_count?: number
@@ -1609,6 +1618,10 @@ export type Database = {
       }
       admin_set_showcase_hidden: {
         Args: { _hidden: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_toggle_content_pin: {
+        Args: { _content_id: string; _content_type: string; _pinned: boolean }
         Returns: undefined
       }
       admin_update_profile: {
