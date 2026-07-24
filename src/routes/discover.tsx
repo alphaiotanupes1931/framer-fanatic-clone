@@ -18,6 +18,19 @@ type StoryRow = { id: string; title: string; excerpt: string | null; cover_image
 const CATS = ["All", "Events", "Artists", "Communities", "Businesses", "Stories", "Neighborhoods"] as const;
 type Cat = (typeof CATS)[number];
 
+// Deterministic shuffle that changes every 10 minutes so the discover
+// page rotates its picks without being different on every render.
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const a = arr.slice();
+  let s = seed || 1;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function DiscoverPage() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<Cat>("All");
@@ -27,22 +40,30 @@ function DiscoverPage() {
   const [businesses, setBusinesses] = useState<Org[]>([]);
   const [neighborhoods, setNeighborhoods] = useState<N[]>([]);
   const [stories, setStories] = useState<StoryRow[]>([]);
+  const [seed, setSeed] = useState(() => Math.floor(Date.now() / (10 * 60 * 1000)));
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSeed(Math.floor(Date.now() / (10 * 60 * 1000)));
+    }, 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     (async () => {
       const nowIso = new Date().toISOString();
       const [evUp, evPast, ar, gr, bu, ne, st] = await Promise.all([
-        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(8),
-        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(8),
-        supabase.rpc("public_creators", { lim: 12 }),
-        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "group").limit(8),
-        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(8),
-        supabase.from("neighborhoods").select("id,name,region").order("name").limit(24),
-        supabase.from("stories").select("id,title,excerpt,cover_image_url,created_at,user_id,read_time_minutes,category").eq("status", "published").order("created_at", { ascending: false }).limit(8),
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(40),
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(20),
+        supabase.rpc("public_creators", { lim: 60 }),
+        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "group").limit(40),
+        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(40),
+        supabase.from("neighborhoods").select("id,name,region").order("name").limit(80),
+        supabase.from("stories").select("id,title,excerpt,cover_image_url,created_at,user_id,read_time_minutes,category").eq("status", "published").order("created_at", { ascending: false }).limit(40),
       ]);
       const up = (evUp.data ?? []) as EventRow[];
       const past = (evPast.data ?? []) as EventRow[];
-      setEvents([...up, ...past].slice(0, 8));
+      setEvents([...up, ...past]);
       setArtists(((ar.data ?? []) as unknown) as Creator[]);
       setGroups(((gr.data ?? []) as unknown) as Org[]);
       setBusinesses(((bu.data ?? []) as unknown) as Org[]);
@@ -57,12 +78,12 @@ function DiscoverPage() {
     const n = (x.name || x.title || x.display_name || x.username || "").toLowerCase();
     return n.includes(s);
   };
-  const fEvents = events.filter(filterName);
-  const fArtists = artists.filter(filterName);
-  const fGroups = groups.filter(filterName);
-  const fBiz = businesses.filter(filterName);
-  const fNbh = neighborhoods.filter(filterName);
-  const fStories = stories.filter(filterName);
+  const fEvents = seededShuffle(events.filter(filterName), seed);
+  const fArtists = seededShuffle(artists.filter(filterName), seed + 1);
+  const fGroups = seededShuffle(groups.filter(filterName), seed + 2);
+  const fBiz = seededShuffle(businesses.filter(filterName), seed + 3);
+  const fNbh = seededShuffle(neighborhoods.filter(filterName), seed + 4);
+  const fStories = seededShuffle(stories.filter(filterName), seed + 5);
 
   const show = (k: Cat) => cat === "All" || cat === k;
 
