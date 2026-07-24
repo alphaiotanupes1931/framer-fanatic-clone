@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+function openEventPopup(ev: Ev) {
+  window.dispatchEvent(new CustomEvent<Ev>("pb-open-event", { detail: ev }));
+}
 
 export const Route = createFileRoute("/calendar")({
   component: CalendarPage,
