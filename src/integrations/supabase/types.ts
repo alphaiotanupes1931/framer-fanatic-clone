@@ -245,7 +245,6 @@ export type Database = {
           address: string | null
           capacity: number | null
           created_at: string
-          deleted_at: string | null
           description: string | null
           ends_at: string | null
           id: string
@@ -269,7 +268,6 @@ export type Database = {
           address?: string | null
           capacity?: number | null
           created_at?: string
-          deleted_at?: string | null
           description?: string | null
           ends_at?: string | null
           id?: string
@@ -293,7 +291,6 @@ export type Database = {
           address?: string | null
           capacity?: number | null
           created_at?: string
-          deleted_at?: string | null
           description?: string | null
           ends_at?: string | null
           id?: string
@@ -785,7 +782,6 @@ export type Database = {
           banner_url: string | null
           bio: string | null
           created_at: string
-          deleted_at: string | null
           email: string | null
           hours: Json | null
           id: string
@@ -807,7 +803,6 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           created_at?: string
-          deleted_at?: string | null
           email?: string | null
           hours?: Json | null
           id?: string
@@ -829,7 +824,6 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           created_at?: string
-          deleted_at?: string | null
           email?: string | null
           hours?: Json | null
           id?: string
@@ -986,7 +980,6 @@ export type Database = {
           comments_count: number
           content: string
           created_at: string
-          deleted_at: string | null
           excluded_user_ids: string[]
           featured: boolean
           featured_at: string | null
@@ -1012,7 +1005,6 @@ export type Database = {
           comments_count?: number
           content: string
           created_at?: string
-          deleted_at?: string | null
           excluded_user_ids?: string[]
           featured?: boolean
           featured_at?: string | null
@@ -1038,7 +1030,6 @@ export type Database = {
           comments_count?: number
           content?: string
           created_at?: string
-          deleted_at?: string | null
           excluded_user_ids?: string[]
           featured?: boolean
           featured_at?: string | null
@@ -1149,7 +1140,6 @@ export type Database = {
           category: string | null
           city: string | null
           created_at: string
-          deleted_at: string | null
           display_name: string | null
           email: string | null
           geo_lat: number | null
@@ -1183,7 +1173,6 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
-          deleted_at?: string | null
           display_name?: string | null
           email?: string | null
           geo_lat?: number | null
@@ -1217,7 +1206,6 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
-          deleted_at?: string | null
           display_name?: string | null
           email?: string | null
           geo_lat?: number | null
@@ -1272,7 +1260,6 @@ export type Database = {
           content: string | null
           cover_url: string | null
           created_at: string
-          deleted_at: string | null
           excerpt: string | null
           featured: boolean
           featured_at: string | null
@@ -1292,7 +1279,6 @@ export type Database = {
           content?: string | null
           cover_url?: string | null
           created_at?: string
-          deleted_at?: string | null
           excerpt?: string | null
           featured?: boolean
           featured_at?: string | null
@@ -1312,7 +1298,6 @@ export type Database = {
           content?: string | null
           cover_url?: string | null
           created_at?: string
-          deleted_at?: string | null
           excerpt?: string | null
           featured?: boolean
           featured_at?: string | null
@@ -1494,7 +1479,6 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
-          deleted_at: string | null
           description: string | null
           featured: boolean
           id: string
@@ -1506,7 +1490,6 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
-          deleted_at?: string | null
           description?: string | null
           featured?: boolean
           id?: string
@@ -1518,7 +1501,6 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
-          deleted_at?: string | null
           description?: string | null
           featured?: boolean
           id?: string
@@ -1612,17 +1594,6 @@ export type Database = {
           type: string
         }[]
       }
-      admin_list_trash: {
-        Args: never
-        Returns: {
-          deleted_at: string
-          id: string
-          kind: string
-          owner_id: string
-          owner_name: string
-          title: string
-        }[]
-      }
       admin_list_users: {
         Args: never
         Returns: {
@@ -1641,24 +1612,12 @@ export type Database = {
           username: string
         }[]
       }
-      admin_purge_content: {
-        Args: { _id: string; _kind: string }
-        Returns: undefined
-      }
-      admin_restore_content: {
-        Args: { _id: string; _kind: string }
-        Returns: undefined
-      }
       admin_set_banned: {
         Args: { _banned: boolean; _user_id: string }
         Returns: undefined
       }
       admin_set_showcase_hidden: {
         Args: { _hidden: boolean; _user_id: string }
-        Returns: undefined
-      }
-      admin_soft_delete: {
-        Args: { _id: string; _kind: string }
         Returns: undefined
       }
       admin_toggle_content_pin: {
