@@ -331,7 +331,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       )}
 
       {tab === "message" && (
-        <MessageTab evtTitle={evt.title} recipients={paid.map((t) => buyers[t.buyer_id]?.email).filter(Boolean) as string[]} />
+        <MessageTab eventId={evt.id} evtTitle={evt.title} recipients={paid.map((t) => buyers[t.buyer_id]?.email).filter(Boolean) as string[]} />
       )}
 
       {tab === "promoters" && (
@@ -617,11 +617,38 @@ function CheckInTab({ total }: { total: number }) {
   );
 }
 
-function MessageTab({ evtTitle, recipients }: { evtTitle: string; recipients: string[] }) {
+function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTitle: string; recipients: string[] }) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
-  const count = new Set(recipients).size;
+  const [types, setTypes] = useState<Array<{ id: string; name: string; category: string | null }>>([]);
+  const [selected, setSelected] = useState<string>("all");
+  const totalCount = new Set(recipients).size;
+  const count = selected === "all" ? totalCount : 0;
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("ticket_types")
+        .select("id,name,category")
+        .eq("event_id", eventId)
+        .order("created_at", { ascending: true });
+      if (alive && data) setTypes(data as any);
+    })();
+    return () => { alive = false; };
+  }, [eventId]);
+
+  const iconFor = (cat: string | null) => {
+    switch (cat) {
+      case "early_bird": return "⚡";
+      case "vip": return "⭐";
+      case "group": return "👥";
+      case "student": return "🎓";
+      case "general": return "🎟️";
+      default: return "🎟️";
+    }
+  };
 
   const applyTemplate = (kind: string) => {
     if (kind === "venue") { setSubject(`Venue update for ${evtTitle}`); setBody(`Hi there,\n\nQuick heads up about the venue for ${evtTitle}. Please note the following updates:\n\n[venue details]\n\nSee you soon!`); }
@@ -656,8 +683,24 @@ function MessageTab({ evtTitle, recipients }: { evtTitle: string; recipients: st
 
       <div>
         <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Send To</div>
-        <div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700">
-          <Users className="h-4 w-4" /> All Ticket Buyers <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">{count}</span>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelected("all")}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === "all" ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
+          >
+            <Users className="h-4 w-4" /> All Ticket Buyers
+            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">{totalCount}</span>
+          </button>
+          {types.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setSelected(t.id)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === t.id ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
+            >
+              <span>{iconFor(t.category)}</span> {t.name}
+              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">0</span>
+            </button>
+          ))}
         </div>
         <div className="mt-1 text-xs text-neutral-500">{count} unique emails will receive this message</div>
       </div>
