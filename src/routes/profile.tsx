@@ -503,6 +503,16 @@ function ProfilePage() {
               <MyTicketsTab />
             ) : tab === "My Pages" ? (
               <MyPagesTab profile={profile} isArtist={isArtist} />
+            ) : tab === "My Writings" ? (
+              profile ? <MyWritingsTab userId={profile.id} /> : null
+            ) : tab === "Saved" ? (
+              <SavedTab />
+            ) : tab === "Attending" ? (
+              <AttendingTab />
+            ) : tab === "Organized" ? (
+              profile ? <ArtistEventsTab userId={profile.id} /> : null
+            ) : tab === "My Dashboard" ? (
+              <MyDashboardTab isAdmin={isAdmin} isArtist={isArtist} />
             ) : (["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
               profile ? (
                 tab === "Gallery" ? (
