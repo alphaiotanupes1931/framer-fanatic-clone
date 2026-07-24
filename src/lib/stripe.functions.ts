@@ -250,3 +250,93 @@ export const rsvpFreeEvent = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+/** Create a Stripe Checkout Session for a community association dues payment. */
+export const createDuesCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      tierId: z.string().uuid(),
+      returnOrigin: z.string().url(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { getStripe, priceBreakdown } = await import("./stripe.server");
+    const stripe = getStripe();
+
+    const { data: tier, error: tErr } = await supabase
+      .from("organization_dues_tiers")
+      .select("id, org_id, name, amount_cents, interval, is_active")
+      .eq("id", data.tierId)
+      .maybeSingle();
+    if (tErr || !tier) throw new Error("Dues tier not found");
+    if (!tier.is_active) throw new Error("This dues tier isn't available.");
+
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("id, owner_id, name, slug")
+      .eq("id", tier.org_id)
+      .maybeSingle();
+    if (!org) throw new Error("Organization not found");
+
+    const { data: owner } = await supabase
+      .from("profiles")
+      .select("stripe_account_id, stripe_charges_enabled")
+      .eq("id", org.owner_id)
+      .maybeSingle();
+    if (!owner?.stripe_account_id || !owner.stripe_charges_enabled) {
+      throw new Error("This association's payout account isn't ready yet. Please try again later.");
+    }
+
+    const breakdown = priceBreakdown(tier.amount_cents);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      success_url: `${data.returnOrigin}/o/${org.slug}?dues=success`,
+      cancel_url: `${data.returnOrigin}/o/${org.slug}?dues=cancelled`,
+      customer_email: (context.claims as { email?: string } | null)?.email,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: breakdown.buyerTotalCents,
+            product_data: {
+              name: `${org.name} Dues: ${tier.name}`,
+              description: `Dues payment (${tier.interval.replace("_", " ")})`,
+            },
+          },
+        },
+      ],
+      payment_intent_data: {
+        application_fee_amount: breakdown.platformFeeCents,
+        transfer_data: { destination: owner.stripe_account_id },
+      },
+      metadata: {
+        kind: "dues",
+        dues_tier_id: tier.id,
+        org_id: org.id,
+        member_id: userId,
+        owner_id: org.owner_id,
+      },
+    });
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("organization_dues_payments").insert({
+      org_id: org.id,
+      tier_id: tier.id,
+      member_id: userId,
+      owner_id: org.owner_id,
+      amount_cents: tier.amount_cents,
+      buyer_total_cents: breakdown.buyerTotalCents,
+      owner_net_cents: breakdown.artistNetCents,
+      platform_fee_cents: breakdown.platformFeeCents,
+      stripe_fee_cents: breakdown.stripeFeeCents,
+      interval: tier.interval,
+      status: "pending",
+      stripe_checkout_session_id: session.id,
+    });
+
+    return { url: session.url };
+  });
