@@ -752,6 +752,7 @@ function CalendarTab({ orgId: _orgId }: { orgId: string }) {
       const { data } = await supabase
         .from("events")
         .select("id,title,starts_at")
+        .eq("organization_id", _orgId)
         .gte("starts_at", from)
         .lt("starts_at", to)
         .order("starts_at", { ascending: true });
