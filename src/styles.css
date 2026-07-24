@@ -95,7 +95,7 @@
 }
 
 :root {
-  --radius: 0.375rem;
+  --radius: 0.75rem;
   /* Light: pure white background */
   --background: oklch(1 0 0);
   --foreground: oklch(0.14 0.005 60);
@@ -125,7 +125,7 @@
   --paper: oklch(0.99 0.002 90);
   --chat-bg: oklch(0.97 0.005 200);
 
-  --font-display: "Fraunces", "Playfair Display", ui-serif, Georgia, serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", "Times New Roman", ui-serif, serif;
   --chart-1: oklch(0.646 0.222 41.116);
@@ -316,69 +316,6 @@
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Global de-vibe pass. Flattens gradients, glassmorphism, purple
-   accents, and oversized radii site-wide without touching every
-   component. Keeps rounded-full (avatars, pills) intact.
-   ───────────────────────────────────────────────────────────── */
-
-/* Kill background gradients everywhere — flat neutral surfaces. */
-[class*="bg-gradient-"],
-[class*="from-purple"],
-[class*="from-violet"],
-[class*="from-indigo"],
-[class*="from-fuchsia"],
-[class*="from-pink"] {
-  background-image: none !important;
-}
-
-/* Kill glassmorphism / frosted blur. */
-[class*="backdrop-blur"] {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Neutralize purple / violet / indigo / fuchsia utility colors. */
-[class*="bg-purple"], [class*="bg-violet"], [class*="bg-indigo"], [class*="bg-fuchsia"] {
-  background-color: var(--secondary) !important;
-}
-[class*="text-purple"], [class*="text-violet"], [class*="text-indigo"], [class*="text-fuchsia"] {
-  color: var(--blue) !important;
-}
-[class*="border-purple"], [class*="border-violet"], [class*="border-indigo"], [class*="border-fuchsia"] {
-  border-color: var(--border) !important;
-}
-.dark [class*="bg-purple"], .dark [class*="bg-violet"], .dark [class*="bg-indigo"], .dark [class*="bg-fuchsia"] {
-  background-color: var(--muted) !important;
-}
-
-/* Collapse oversized radii — favor rounded-md as the visual default.
-   rounded-full is untouched so avatars / pills stay circular. */
-[class*="rounded-3xl"], [class*="rounded-4xl"], [class*="rounded-\\[2rem\\]"] {
-  border-radius: 0.375rem !important;
-}
-[class*="rounded-2xl"] { border-radius: 0.375rem !important; }
-[class*="rounded-xl"]:not([class*="rounded-full"]) { border-radius: 0.375rem !important; }
-
-/* Replace big drop shadows with 1px hairline borders where possible. */
-[class*="shadow-2xl"], [class*="shadow-xl"], [class*="shadow-lg"] {
-  box-shadow: none !important;
-}
-
-/* Kill CSS scale-on-hover — motion handles interaction now. */
-[class*="hover:scale-"]:hover,
-[class*="group-hover:scale-"]:hover,
-.group:hover [class*="group-hover:scale-"] {
-  transform: none !important;
-}
-
-/* Display font for headings uses a distinct serif so the app doesn't
-   read as "default AI Inter everywhere". */
-h1, h2, h3 {
-  font-family: var(--font-display);
-  font-feature-settings: "ss01", "ss02";
 }
 
 /* ─────────────────────────────────────────────────────────────
