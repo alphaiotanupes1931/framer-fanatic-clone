@@ -1600,7 +1600,6 @@ function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boo
     { to: "/organizer-studio", label: "Organizer Studio", desc: "Manage events, tickets, payouts and Stripe." },
     { to: "/promoter-dashboard", label: "Promoter Dashboard", desc: "Track ticket sales and event performance." },
     { to: "/saved", label: "Saved", desc: "Everything you've bookmarked." },
-    { to: "/settings", label: "Stripe", desc: "Connect Stripe to sell tickets and get paid directly. Takes about 3 minutes: tap Connect Stripe, enter your legal info, add your bank account, and you're ready to accept payments." },
   ];
   if (isAdmin) links.unshift({ to: "/admin/trash", label: "Admin Trash", desc: "Restore or purge deleted content." });
   void isArtist;
@@ -1610,7 +1609,6 @@ function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boo
         <Link
           key={l.label}
           to={l.to}
-          hash={l.label === "Stripe" ? "stripe" : undefined}
           className="group flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
         >
           <div className="min-w-0">
