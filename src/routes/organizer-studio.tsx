@@ -6,6 +6,7 @@ import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
   Zap, Crown, Star, Tag,
+  ChevronUp, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -385,10 +386,25 @@ function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
   const [showForm, setShowForm] = useState(false);
 
   const load = () => {
-    supabase.from("ticket_types").select("*").eq("event_id", evt.id).order("created_at", { ascending: true })
+    supabase.from("ticket_types").select("*").eq("event_id", evt.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true })
       .then(({ data }) => setTypes((data as TicketType[] | null) ?? []));
   };
   useEffect(load, [evt.id]);
+
+  const move = async (index: number, dir: -1 | 1) => {
+    if (!types) return;
+    const target = index + dir;
+    if (target < 0 || target >= types.length) return;
+    const next = types.slice();
+    [next[index], next[target]] = [next[target], next[index]];
+    setTypes(next);
+    const updates = next.map((t, i) =>
+      supabase.from("ticket_types").update({ sort_order: i }).eq("id", t.id)
+    );
+    const results = await Promise.all(updates);
+    const err = results.find(r => r.error)?.error;
+    if (err) { toast.error(err.message); load(); }
+  };
 
   return (
     <div className="space-y-4">
@@ -410,12 +426,30 @@ function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
 
       {types && types.length > 0 ? (
         <div className="space-y-2">
-          {types.map(t => (
+          {types.map((t, i) => (
             <div key={t.id} className="rounded-xl border border-neutral-200 bg-white p-5">
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-neutral-900">{t.name}</div>
-                  <div className="mt-0.5 text-xs text-neutral-500 capitalize">{t.category.replace("_", " ")}{t.quantity ? ` · ${t.quantity} available` : ""}</div>
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => move(i, -1)}
+                      disabled={i === 0}
+                      aria-label="Move up"
+                      className="rounded p-0.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                    ><ChevronUp className="h-4 w-4" /></button>
+                    <button
+                      type="button"
+                      onClick={() => move(i, 1)}
+                      disabled={i === (types?.length ?? 0) - 1}
+                      aria-label="Move down"
+                      className="rounded p-0.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                    ><ChevronDown className="h-4 w-4" /></button>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-neutral-900">{t.name}</div>
+                    <div className="mt-0.5 text-xs text-neutral-500 capitalize">{t.category.replace("_", " ")}{t.quantity ? ` · ${t.quantity} available` : ""}</div>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-lg font-semibold text-neutral-900">{t.price_cents ? fmt(t.price_cents) : "Free"}</div>
