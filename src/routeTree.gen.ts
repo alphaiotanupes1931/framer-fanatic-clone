@@ -69,6 +69,7 @@ import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as EditStoryIdRouteImport } from './routes/edit-story.$id'
 import { Route as EditPostIdRouteImport } from './routes/edit-post.$id'
 import { Route as EditEventEventIdRouteImport } from './routes/edit-event.$eventId'
+import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -374,6 +375,11 @@ const EditEventEventIdRoute = EditEventEventIdRouteImport.update({
   path: '/edit-event/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTrashRoute = AdminTrashRouteImport.update({
+  id: '/admin/trash',
+  path: '/admin/trash',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -437,6 +443,7 @@ export interface FileRoutesByFullPath {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/trash': typeof AdminTrashRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -502,6 +509,7 @@ export interface FileRoutesByTo {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/trash': typeof AdminTrashRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -568,6 +576,7 @@ export interface FileRoutesById {
   '/ticketing': typeof TicketingRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/trash': typeof AdminTrashRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -635,6 +644,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/admin/trash'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -700,6 +710,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/admin/trash'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -765,6 +776,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/admin/content'
     | '/admin/login'
+    | '/admin/trash'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -831,6 +843,7 @@ export interface RootRouteChildren {
   TicketingRoute: typeof TicketingRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminTrashRoute: typeof AdminTrashRoute
   EditEventEventIdRoute: typeof EditEventEventIdRoute
   EditPostIdRoute: typeof EditPostIdRoute
   EditStoryIdRoute: typeof EditStoryIdRoute
@@ -1271,6 +1284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditEventEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/trash': {
+      id: '/admin/trash'
+      path: '/admin/trash'
+      fullPath: '/admin/trash'
+      preLoaderRoute: typeof AdminTrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -1354,6 +1374,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketingRoute: TicketingRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminTrashRoute: AdminTrashRoute,
   EditEventEventIdRoute: EditEventEventIdRoute,
   EditPostIdRoute: EditPostIdRoute,
   EditStoryIdRoute: EditStoryIdRoute,
@@ -1374,13 +1395,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
