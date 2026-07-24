@@ -515,16 +515,24 @@ function MessageTab({ evtTitle, recipients }: { evtTitle: string; recipients: st
 }
 
 function PayoutsTab({ paid, buyers, revenue, net }: { paid: Ticket[]; buyers: Record<string, { name: string | null; email: string | null; avatar_url: string | null }>; revenue: number; net: number }) {
-  const fees = revenue - net;
+  const orders = paid.length;
+  // Stripe: 2.9% + 30¢ per successful charge
+  const stripeFees = Math.round(revenue * 0.029) + orders * 30;
+  // Planet Baltimore platform fee: $0.69 per order
+  const platformFees = orders * 69;
+  const totalFees = stripeFees + platformFees;
+  const takeHome = Math.max(0, revenue - totalFees);
+  void net;
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-neutral-200 bg-white p-5">
         <div className="font-semibold text-neutral-900">Financial Summary</div>
         <div className="mt-4 space-y-3 text-sm">
           <div className="flex items-center justify-between"><span className="text-neutral-600">Gross Ticket Sales</span><span className="font-semibold text-neutral-900">{fmt(revenue)}</span></div>
-          <div className="flex items-center justify-between"><span className="text-neutral-600">Platform Fees (5%)</span><span className="font-semibold text-red-500">-{fmt(fees)}</span></div>
-          <div className="flex items-center justify-between border-t border-neutral-100 pt-3"><span className="font-semibold text-neutral-900">Net Revenue</span><span className="font-bold text-neutral-900">{fmt(net)}</span></div>
-          <div className="flex items-center justify-between pt-2"><span className="text-neutral-600">Your Take-Home</span><span className="text-lg font-bold text-neutral-400">{fmt(net)}</span></div>
+          <div className="flex items-center justify-between"><span className="text-neutral-600">Stripe processing (2.9% + $0.30/order)</span><span className="font-semibold text-red-500">-{fmt(stripeFees)}</span></div>
+          <div className="flex items-center justify-between"><span className="text-neutral-600">Planet Baltimore fee ($0.69/order)</span><span className="font-semibold text-red-500">-{fmt(platformFees)}</span></div>
+          <div className="flex items-center justify-between border-t border-neutral-100 pt-3"><span className="font-semibold text-neutral-900">Total fees</span><span className="font-bold text-neutral-900">-{fmt(totalFees)}</span></div>
+          <div className="flex items-center justify-between pt-2"><span className="text-neutral-600">Your Take-Home</span><span className="text-lg font-bold text-neutral-900">{fmt(takeHome)}</span></div>
         </div>
       </div>
 
