@@ -310,6 +310,7 @@ export type Database = {
           updated_at: string
           user_id: string
           venue_name: string | null
+          video_url: string | null
         }
         Insert: {
           address?: string | null
@@ -333,6 +334,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           venue_name?: string | null
+          video_url?: string | null
         }
         Update: {
           address?: string | null
@@ -356,6 +358,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           venue_name?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {
