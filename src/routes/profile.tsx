@@ -723,7 +723,6 @@ function ProfilePage() {
           )}
         </div>
       )}
-      {/* end profile-loaded wrapper */}
     </AppLayout>
   );
 }
