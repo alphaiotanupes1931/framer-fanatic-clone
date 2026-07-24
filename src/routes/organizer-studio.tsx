@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
+  Zap, Crown, Star, Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 
