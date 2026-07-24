@@ -219,6 +219,8 @@ function EventDetail() {
           </div>
         )}
 
+        {evt.video_url && <EventVideo path={evt.video_url} />}
+
         <div className="flex flex-col gap-3 border-t border-border pt-6">
           {priced ? (
             <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
