@@ -1702,8 +1702,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
             </div>
           )}
 
-          <input value={form.link_url} onChange={(e) => setForm({...form, link_url: e.target.value})} placeholder="Link (optional)" className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm" />
-
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => { setOpen(false); resetForm(); }} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700">Cancel</button>
             <button onClick={add} disabled={uploading} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Post</button>
