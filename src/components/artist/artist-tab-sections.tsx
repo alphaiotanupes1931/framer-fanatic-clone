@@ -238,12 +238,12 @@ export function ArtistBookCollaborateTab({ profile }: { profile: any }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const intents = [
-    { key: "Collaborate", icon: "💬" },
-    { key: "Commission", icon: "🏛️" },
-    { key: "Book / Perform", icon: "🎵" },
-    { key: "Photography", icon: "📷" },
-    { key: "Other", icon: "💭" },
+  const intents: Array<{ key: string; icon: LucideIcon }> = [
+    { key: "Collaborate", icon: MessageSquare },
+    { key: "Commission", icon: Landmark },
+    { key: "Book / Perform", icon: Music },
+    { key: "Photography", icon: Camera },
+    { key: "Other", icon: Sparkles },
   ];
   const displayName = profile?.display_name || profile?.username || "this artist";
   const submit = async (e: React.FormEvent) => {
@@ -270,11 +270,14 @@ export function ArtistBookCollaborateTab({ profile }: { profile: any }) {
       <div>
         <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-2">I WANT TO...</div>
         <div className="flex flex-wrap gap-2">
-          {intents.map((i) => (
-            <button key={i.key} type="button" onClick={() => setIntent(i.key)} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-muted"}`}>
-              <span>{i.icon}</span> {i.key}
-            </button>
-          ))}
+          {intents.map((i) => {
+            const Icon = i.icon;
+            return (
+              <button key={i.key} type="button" onClick={() => setIntent(i.key)} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-muted"}`}>
+                <Icon className="h-4 w-4" /> {i.key}
+              </button>
+            );
+          })}
         </div>
       </div>
       <form onSubmit={submit} className="space-y-4">
