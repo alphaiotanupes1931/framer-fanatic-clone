@@ -1510,6 +1510,31 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const postFileRef = useRef<HTMLInputElement>(null);
+
+  const uploadPostImage = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (!uid) { toast.error("Sign in first"); return; }
+    setUploadingImg(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `${uid}/org-post-${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
+      setForm((f) => ({ ...f, media_url: signed.signedUrl }));
+      toast.success("Image uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploadingImg(false);
+    }
+  };
 
   const load = async () => {
     let q = supabase.from("organization_posts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
@@ -1553,14 +1578,26 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
           <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
           <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} placeholder="Details" rows={3} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
           <input value={form.link_url} onChange={(e) => setForm({...form, link_url: e.target.value})} placeholder="Link (optional)" className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
-          <input value={form.media_url} onChange={(e) => setForm({...form, media_url: e.target.value})} placeholder="Image URL (optional)" className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
+          <input ref={postFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadPostImage(f); e.target.value = ""; }} />
+          {form.media_url ? (
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-white p-2">
+              <img src={form.media_url} alt="preview" className="h-16 w-16 rounded-md object-cover" />
+              <div className="flex-1 text-xs text-neutral-600">Image attached</div>
+              <button type="button" onClick={() => setForm((f) => ({ ...f, media_url: "" }))} className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-700 hover:border-red-300 hover:text-red-600">Remove</button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => postFileRef.current?.click()} disabled={uploadingImg} className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-white px-3 py-3 text-sm font-medium text-neutral-600 hover:border-orange-300 hover:text-[#d4580a] disabled:opacity-60">
+              {uploadingImg ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+              {uploadingImg ? "Uploading…" : "Upload image (optional)"}
+            </button>
+          )}
           <button onClick={add} className="w-full rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Post</button>
         </div>
       )}
       {items.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">No {kind ?? "post"} entries yet.</div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {items.map((p) => (
             <div key={p.id} className="group relative overflow-hidden rounded-2xl border border-border bg-card">
               {p.media_url && <img src={p.media_url} alt={p.title} className="h-48 w-full object-cover" loading="lazy" decoding="async" />}
