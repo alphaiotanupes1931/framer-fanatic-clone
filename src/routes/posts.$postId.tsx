@@ -15,7 +15,7 @@ export const Route = createFileRoute("/posts/$postId")({
 type Post = {
   id: string; user_id: string; content: string; image_url: string | null;
   video_url: string | null; music_url: string | null; post_type: string | null;
-  bg_color: string | null; text_color: string | null;
+  bg_color: string | null; text_color: string | null; font_size: string | null;
   likes_count: number | null; comments_count: number | null;
   neighborhood: string | null; created_at: string;
 };
@@ -164,7 +164,12 @@ function PostDetail() {
 
           {post.content && (
             (post.post_type === "text" && post.bg_color) ? (
-              <div className="mx-5 my-4 rounded-2xl p-6 text-center text-lg font-medium whitespace-pre-wrap break-words sm:text-xl"
+              <div className={`mx-5 my-4 rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
+                  post.font_size === "sm" ? "text-base" :
+                  post.font_size === "lg" ? "text-3xl" :
+                  post.font_size === "xl" ? "text-5xl" :
+                  "text-xl"
+                }`}
                 style={{ background: post.bg_color, color: post.text_color || "#fff" }}>
                 {post.content}
               </div>
