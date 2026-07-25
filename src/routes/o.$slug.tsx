@@ -49,10 +49,10 @@ const COMMUNITY_ASSOC_TABS = [
   "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
-  "Menu", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+  "Feed", "Menu", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const SERVICE_TABS = [
-  "Services", "Feed", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+  "Feed", "Services", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const ARTS_ORG_TABS = [
   "Posts", "Events", "Artists", "Exhibition", "Support", "Opportunities", "Press", "Updates", "Invite", "About", "Comments",
