@@ -461,7 +461,7 @@ export function ArtistCVTab({ userId, profile, canEdit }: { userId: string; prof
   );
 }
 
-function CVSection({ section, userId, items, canEdit, onChange }: { section: { kind: string; label: string; icon: string }; userId: string; items: any[]; canEdit: boolean; onChange: () => void; }) {
+function CVSection({ section, userId, items, canEdit, onChange }: { section: CVSectionDef; userId: string; items: any[]; canEdit: boolean; onChange: () => void; }) {
   const [expanded, setExpanded] = useState(true);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ year: "", title: "", subtitle: "" });
@@ -472,15 +472,16 @@ function CVSection({ section, userId, items, canEdit, onChange }: { section: { k
     setForm({ year: "", title: "", subtitle: "" }); setAdding(false); onChange();
   };
   const remove = async (id: string) => { await supabase.from("profile_sections").delete().eq("id", id); onChange(); };
+  const Icon = section.icon;
   return (
     <div className="rounded-2xl border border-border">
       <button onClick={() => setExpanded((v) => !v)} className="w-full flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
-          <span>{section.icon}</span>
+          <Icon className="h-4 w-4 text-neutral-600" />
           <span className="font-semibold">{section.label}</span>
           <span className="text-sm text-muted-foreground">({items.length})</span>
         </div>
-        <span className="text-muted-foreground">{expanded ? "▲" : "▼"}</span>
+        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
       </button>
       {expanded && (
         <div className="border-t border-border p-4 space-y-3">
