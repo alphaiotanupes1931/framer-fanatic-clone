@@ -809,39 +809,54 @@ export type Database = {
       organization_posts: {
         Row: {
           author_id: string
+          bg_color: string | null
           body: string | null
           created_at: string
+          font_size: string | null
           id: string
           kind: string
           link_url: string | null
           media_url: string | null
+          media_urls: Json
           org_id: string
+          text_color: string | null
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           author_id: string
+          bg_color?: string | null
           body?: string | null
           created_at?: string
+          font_size?: string | null
           id?: string
           kind: string
           link_url?: string | null
           media_url?: string | null
+          media_urls?: Json
           org_id: string
+          text_color?: string | null
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           author_id?: string
+          bg_color?: string | null
           body?: string | null
           created_at?: string
+          font_size?: string | null
           id?: string
           kind?: string
           link_url?: string | null
           media_url?: string | null
+          media_urls?: Json
           org_id?: string
+          text_color?: string | null
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: [
           {
