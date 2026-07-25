@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send } from "lucide-react";
+import { Send, Trash2, ImageIcon, Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { createArtworkCheckout } from "@/lib/stripe.functions";
 
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="py-12 text-center text-muted-foreground">No posts yet.</div>;
