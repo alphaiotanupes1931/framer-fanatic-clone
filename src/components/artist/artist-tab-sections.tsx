@@ -321,18 +321,86 @@ const MUSIC_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = 
   { kind: "cv_press", label: "Press", icon: "📰" },
 ];
 
+const PODCAST_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Education & Background", icon: "🎓" },
+  { kind: "cv_shows", label: "Shows & Productions", icon: "🎙️" },
+  { kind: "cv_guests", label: "Notable Guests", icon: "👥" },
+  { kind: "cv_media_roles", label: "Production & Media Roles", icon: "🎛️" },
+  { kind: "cv_awards", label: "Awards & Recognition", icon: "🏆" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+];
+
+const LITERARY_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Education", icon: "🎓" },
+  { kind: "cv_books", label: "Published Books", icon: "📚" },
+  { kind: "cv_publications", label: "Selected Publications", icon: "📰" },
+  { kind: "cv_readings", label: "Readings & Appearances", icon: "🎤" },
+  { kind: "cv_awards", label: "Awards & Fellowships", icon: "🏆" },
+  { kind: "cv_residencies", label: "Residencies", icon: "📖" },
+];
+
+const PERFORMANCE_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Training", icon: "🎓" },
+  { kind: "cv_repertoire", label: "Repertoire", icon: "🎭" },
+  { kind: "cv_performances", label: "Notable Performances", icon: "🎤" },
+  { kind: "cv_companies", label: "Companies & Collaborations", icon: "🤝" },
+  { kind: "cv_awards", label: "Awards", icon: "🏆" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+];
+
+const FASHION_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Education", icon: "🎓" },
+  { kind: "cv_collections", label: "Collections", icon: "👗" },
+  { kind: "cv_shows", label: "Runway & Presentations", icon: "🎬" },
+  { kind: "cv_collabs", label: "Collaborations", icon: "🤝" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+  { kind: "cv_awards", label: "Awards", icon: "🏆" },
+];
+
+const MIXED_MEDIA_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Education", icon: "🎓" },
+  { kind: "cv_installations", label: "Installations", icon: "🏛️" },
+  { kind: "cv_commissions", label: "Commissions", icon: "🛠️" },
+  { kind: "cv_solo", label: "Solo Exhibitions", icon: "🌐" },
+  { kind: "cv_group", label: "Group Exhibitions", icon: "🌐" },
+  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+];
+
+const PHOTO_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Education", icon: "🎓" },
+  { kind: "cv_solo", label: "Solo Exhibitions", icon: "📸" },
+  { kind: "cv_group", label: "Group Exhibitions", icon: "🌐" },
+  { kind: "cv_publications", label: "Publications & Editorials", icon: "📚" },
+  { kind: "cv_clients", label: "Selected Clients", icon: "🤝" },
+  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+];
+
 function cvSectionsFor(category?: string | null, role?: string | null) {
   const hay = `${(category ?? "").toLowerCase()} ${(role ?? "").toLowerCase()}`;
+  if (/podcast/.test(hay)) return PODCAST_CV_SECTIONS;
   if (/videograph|film/.test(hay)) return VIDEO_CV_SECTIONS;
-  if (/music|musician|dj|producer|podcast/.test(hay)) return MUSIC_CV_SECTIONS;
+  if (/music|musician|dj|producer/.test(hay)) return MUSIC_CV_SECTIONS;
+  if (/literary|poet|writer/.test(hay)) return LITERARY_CV_SECTIONS;
+  if (/performance|dancer/.test(hay)) return PERFORMANCE_CV_SECTIONS;
+  if (/fashion/.test(hay)) return FASHION_CV_SECTIONS;
+  if (/mixed media/.test(hay)) return MIXED_MEDIA_CV_SECTIONS;
+  if (/photograph/.test(hay)) return PHOTO_CV_SECTIONS;
   return DEFAULT_CV_SECTIONS;
 }
 
 // Label shown above the CV block.
 function cvHeadingFor(category?: string | null, role?: string | null) {
   const hay = `${(category ?? "").toLowerCase()} ${(role ?? "").toLowerCase()}`;
+  if (/podcast/.test(hay)) return "Podcaster CV / Bio";
   if (/videograph|film/.test(hay)) return "Videographer CV / Bio";
-  if (/music|musician|dj|producer|podcast/.test(hay)) return "Artist CV / Bio";
+  if (/music|musician|dj|producer/.test(hay)) return "Musician CV / Bio";
+  if (/literary|poet|writer/.test(hay)) return "Writer CV / Bio";
+  if (/performance|dancer/.test(hay)) return "Performer CV / Bio";
+  if (/fashion/.test(hay)) return "Designer CV / Bio";
+  if (/mixed media/.test(hay)) return "Mixed Media CV / Bio";
+  if (/photograph/.test(hay)) return "Photographer CV / Bio";
   return "Curriculum Vitae";
 }
 
