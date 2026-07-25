@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send } from "lucide-react";
+import { Send, Trash2, ImageIcon, Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { createArtworkCheckout } from "@/lib/stripe.functions";
 
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="py-12 text-center text-muted-foreground">No posts yet.</div>;
@@ -566,6 +568,220 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+type WorkMeta = { price_cents?: number; edition?: string; status?: string };
+
+function parseWorkMeta(link_url: string | null | undefined): WorkMeta {
+  if (!link_url) return {};
+  try { return JSON.parse(link_url) as WorkMeta; } catch { return {}; }
+}
+
+export function ArtistAvailableWorksTab({ userId, canEdit }: { userId: string; canEdit: boolean }) {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [ownerReady, setOwnerReady] = useState<boolean>(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    title: "", medium: "", dimensions: "", description: "",
+    media_url: "", price: "", edition: "Original", status: "available",
+  });
+  const navigate = useNavigate();
+  const checkout = useServerFn(createArtworkCheckout);
+
+  const resetForm = () => setForm({ title: "", medium: "", dimensions: "", description: "", media_url: "", price: "", edition: "Original", status: "available" });
+
+  const load = async () => {
+    setLoading(true);
+    const [{ data: rows }, { data: owner }] = await Promise.all([
+      supabase.from("profile_sections").select("*").eq("user_id", userId).eq("kind", "available_work").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("stripe_account_id, stripe_charges_enabled").eq("id", userId).maybeSingle(),
+    ]);
+    setItems(rows ?? []);
+    setOwnerReady(!!(owner?.stripe_account_id && owner?.stripe_charges_enabled));
+    setLoading(false);
+  };
+  useEffect(() => { void load(); }, [userId]);
+
+  const save = async () => {
+    if (!form.title.trim()) { toast.error("Add a work title"); return; }
+    if (!form.media_url) { toast.error("Upload an image of the work"); return; }
+    const priceNum = Number(form.price);
+    if (!Number.isFinite(priceNum) || priceNum < 1) { toast.error("Set a price of $1 or more"); return; }
+    const meta: WorkMeta = { price_cents: Math.round(priceNum * 100), edition: form.edition, status: form.status };
+    const payload = {
+      user_id: userId,
+      kind: "available_work",
+      title: form.title.trim(),
+      subtitle: form.medium.trim() || null,
+      year: form.dimensions.trim() || null,
+      body: form.description.trim() || null,
+      media_url: form.media_url,
+      link_url: JSON.stringify(meta),
+    };
+    if (editingId) {
+      const { error } = await supabase.from("profile_sections").update(payload).eq("id", editingId);
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { error } = await supabase.from("profile_sections").insert(payload);
+      if (error) { toast.error(error.message); return; }
+    }
+    setShowForm(false); setEditingId(null); resetForm(); void load();
+  };
+
+  const startEdit = (it: any) => {
+    const meta = parseWorkMeta(it.link_url);
+    setForm({
+      title: it.title ?? "",
+      medium: it.subtitle ?? "",
+      dimensions: it.year ?? "",
+      description: it.body ?? "",
+      media_url: it.media_url ?? "",
+      price: meta.price_cents ? String((meta.price_cents / 100).toFixed(2)) : "",
+      edition: meta.edition || "Original",
+      status: meta.status || "available",
+    });
+    setEditingId(it.id); setShowForm(true);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this work? This cannot be undone.")) return;
+    const { error } = await supabase.from("profile_sections").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    void load();
+  };
+
+  const buy = async (it: any) => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) { toast.error("Please sign in to purchase."); navigate({ to: "/auth" }); return; }
+    setBusyId(it.id);
+    try {
+      const { url } = await checkout({ data: { workId: it.id, returnOrigin: window.location.origin } });
+      if (url) window.location.href = url;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not start checkout.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading available works…</div>;
+
+  return (
+    <div className="space-y-4">
+      {canEdit && !ownerReady && (
+        <div className="rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
+          Connect your Stripe account in <Link to="/settings" className="font-semibold underline">Settings</Link> so buyers can purchase your work directly.
+        </div>
+      )}
+
+      {canEdit && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => { setShowForm((v) => !v); setEditingId(null); resetForm(); }}
+            className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white"
+          >
+            {showForm ? "Close" : "+ Add work"}
+          </button>
+        </div>
+      )}
+
+      {canEdit && showForm && (
+        <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+          <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-4">
+            <div>
+              <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Image" />
+            </div>
+            <div className="space-y-3">
+              <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Work title *" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              <div className="flex gap-2">
+                <select value={form.edition} onChange={(e) => setForm({ ...form, edition: e.target.value })} className="flex-1 rounded-lg border border-neutral-200 px-3 py-2 text-sm">
+                  <option>Original</option>
+                  <option>Print</option>
+                  <option>Limited Edition</option>
+                </select>
+                <input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} inputMode="decimal" placeholder="Price (USD)" className="w-40 rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input value={form.medium} onChange={(e) => setForm({ ...form, medium: e.target.value })} placeholder="Medium (e.g. Oil on canvas)" className="rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+                <input value={form.dimensions} onChange={(e) => setForm({ ...form, dimensions: e.target.value })} placeholder="Dimensions (e.g. 24 x 36 in)" className="rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              </div>
+              <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Description / statement (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              <div className="flex items-center justify-between">
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="rounded-lg border border-neutral-200 px-3 py-2 text-sm">
+                  <option value="available">Available</option>
+                  <option value="sold">Sold</option>
+                  <option value="reserved">Reserved</option>
+                </select>
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }} className="rounded-full px-4 py-2 text-sm">Cancel</button>
+                  <button onClick={save} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">{editingId ? "Update" : "Save"}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {items.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-sm text-neutral-500">
+          <ImageIcon className="h-6 w-6 text-neutral-400" />
+          <div>No works listed yet.</div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((it) => {
+            const meta = parseWorkMeta(it.link_url);
+            const price = meta.price_cents ? `$${(meta.price_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : "—";
+            const status = meta.status || "available";
+            const soldOut = status !== "available";
+            return (
+              <div key={it.id} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                {it.media_url && (
+                  <div className="aspect-square overflow-hidden bg-neutral-100">
+                    <img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" loading="lazy" />
+                  </div>
+                )}
+                <div className="p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-bold text-neutral-900">{it.title}</div>
+                      <div className="mt-0.5 text-xs uppercase tracking-wider text-neutral-500">{meta.edition || "Original"}</div>
+                    </div>
+                    <div className="text-sm font-bold text-[#d4580a] shrink-0">{price}</div>
+                  </div>
+                  {(it.subtitle || it.year) && (
+                    <div className="mt-1 text-xs text-neutral-600 line-clamp-1">
+                      {[it.subtitle, it.year].filter(Boolean).join(" \u00b7 ")}
+                    </div>
+                  )}
+                  {it.body && <div className="mt-2 text-xs text-neutral-700 line-clamp-3">{it.body}</div>}
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    {canEdit ? (
+                      <div className="flex gap-2">
+                        <button onClick={() => startEdit(it)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">Edit</button>
+                        <button onClick={() => remove(it.id)} className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"><Trash2 className="h-3 w-3" /> Delete</button>
+                      </div>
+                    ) : soldOut ? (
+                      <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-semibold text-neutral-600 capitalize">{status}</span>
+                    ) : ownerReady ? (
+                      <button onClick={() => buy(it)} disabled={busyId === it.id} className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-60">
+                        {busyId === it.id ? <><Loader2 className="h-3 w-3 animate-spin" /> Loading…</> : <>Purchase {price}</>}
+                      </button>
+                    ) : (
+                      <span className="text-xs text-neutral-500">Artist has not set up a payment method yet.</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

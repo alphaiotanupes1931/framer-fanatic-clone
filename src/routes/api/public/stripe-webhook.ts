@@ -58,6 +58,53 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               }
               return new Response("ok");
             }
+            if (session.metadata?.kind === "artwork") {
+              const artistId = session.metadata?.artist_id ?? null;
+              const buyerId = session.metadata?.buyer_id ?? null;
+              const workId = session.metadata?.work_id ?? null;
+              const amountCents = Number(session.metadata?.amount_cents ?? "0") || 0;
+              // Mark work as sold by updating the JSON status in link_url
+              if (workId) {
+                const { data: work } = await supabaseAdmin
+                  .from("profile_sections")
+                  .select("link_url")
+                  .eq("id", workId)
+                  .maybeSingle();
+                let meta: Record<string, unknown> = {};
+                try { meta = work?.link_url ? JSON.parse(work.link_url) : {}; } catch { meta = {}; }
+                meta.status = "sold";
+                meta.sold_at = new Date().toISOString();
+                meta.buyer_id = buyerId;
+                meta.payment_intent = paymentIntentId;
+                await supabaseAdmin
+                  .from("profile_sections")
+                  .update({ link_url: JSON.stringify(meta) })
+                  .eq("id", workId);
+              }
+              if (artistId) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: artistId,
+                  actor_id: buyerId,
+                  type: "artwork_sold",
+                  target_type: "profile_section",
+                  target_id: workId,
+                  message: `You sold an artwork for $${(amountCents / 100).toFixed(2)}.`,
+                  metadata: { work_id: workId, amount_cents: amountCents, payment_intent: paymentIntentId },
+                });
+              }
+              if (buyerId) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: buyerId,
+                  actor_id: null,
+                  type: "artwork_purchased",
+                  target_type: "profile_section",
+                  target_id: workId,
+                  message: "Purchase confirmed. The artist will be in touch about delivery.",
+                  metadata: { work_id: workId, amount_cents: amountCents, payment_intent: paymentIntentId },
+                });
+              }
+              return new Response("ok");
+            }
             if (isDues) {
               const { data: dueRows } = await supabaseAdmin
                 .from("organization_dues_payments")
