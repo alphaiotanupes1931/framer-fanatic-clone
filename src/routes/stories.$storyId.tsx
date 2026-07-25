@@ -127,14 +127,15 @@ function StoryDetail() {
         <ArrowLeft className="h-4 w-4" /> Back
       </Link>
 
-      <article className="mx-auto max-w-3xl">
+      <article className={story.cover_url ? "mx-auto max-w-6xl overflow-hidden rounded-3xl border border-border bg-card md:grid md:grid-cols-[minmax(0,1.1fr)_minmax(320px,480px)]" : "mx-auto max-w-3xl"}>
         {story.cover_url && (
-          <div className="overflow-hidden rounded-2xl bg-muted">
-            <img src={story.cover_url} alt={story.title} className="block w-full object-cover" loading="lazy" decoding="async" />
+          <div className="bg-black md:sticky md:top-0 md:h-[85vh]">
+            <img src={story.cover_url} alt={story.title} className="h-full max-h-[85vh] w-full object-contain md:object-cover" loading="lazy" decoding="async" />
           </div>
         )}
 
-        <div className="mt-6 flex items-start justify-between gap-3">
+        <div className={story.cover_url ? "flex min-w-0 flex-col p-5 md:max-h-[85vh] md:overflow-y-auto" : ""}>
+        <div className="flex items-start justify-between gap-3">
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl break-words">{story.title}</h1>
           <div className="flex shrink-0 items-center gap-2">
             {isOwner && (
@@ -247,6 +248,7 @@ function StoryDetail() {
               {comments.length === 0 && <li className="text-sm text-muted-foreground">Be the first to comment.</li>}
             </ul>
           </section>
+        </div>
         </div>
       </article>
       <ShareToUsersDialog

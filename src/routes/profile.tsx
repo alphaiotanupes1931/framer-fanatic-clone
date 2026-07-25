@@ -19,6 +19,7 @@ import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
+import { PostSplitView } from "@/components/shared/post-split-view";
 import { sanitizeErrorMessage } from "@/lib/utils";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
@@ -682,13 +683,13 @@ function ProfilePage() {
           )}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-background shadow-2xl"
+            className="w-full max-w-6xl overflow-hidden rounded-2xl bg-background shadow-2xl"
           >
             <div className="max-h-[92vh] overflow-y-auto">
-              <PostCard
-                post={myPosts[postViewerIdx]}
-                currentUserId={profile?.id}
-                onDelete={(id) => { handleDeleteMyPost(id); setPostViewerIdx(null); }}
+              <PostSplitView
+                postId={myPosts[postViewerIdx].id}
+                meId={profile?.id}
+                onDeleted={() => { handleDeleteMyPost(myPosts[postViewerIdx].id); setPostViewerIdx(null); }}
               />
             </div>
           </div>
