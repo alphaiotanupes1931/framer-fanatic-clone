@@ -9,19 +9,39 @@ export type ArtistTabKey =
   | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
   | "episodes" | "guests" | "listen" | "contact"
   | "studio" | "series" | "gallery" | "available_works"
-  | "fashion_line" | "lookbook" | "drops" | "collabs" | "saved" | "tickets";
+  | "fashion_line" | "lookbook" | "drops" | "collabs" | "saved" | "tickets"
+  | "videos" | "shop" | "reviews"
+  | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support";
 
 export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
 
 const MUSIC: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "listen", label: "Listen", Icon: Headphones },
   { key: "album", label: "Album", Icon: Disc3 },
   { key: "singles", label: "Singles", Icon: Music2 },
-  { key: "shows", label: "Shows", Icon: Ticket },
   { key: "epk", label: "EPK", Icon: FileText },
   { key: "book", label: "Book", Icon: BookOpen },
+  { key: "videos", label: "Videos", Icon: Film },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "reviews", label: "Reviews", Icon: MessageCircle },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const VIDEO: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "filmography", label: "Filmography", Icon: Film },
+  { key: "reel", label: "Reel", Icon: Radio },
+  { key: "watch", label: "Watch", Icon: Camera },
+  { key: "screenings", label: "Screenings", Icon: Ticket },
+  { key: "awards", label: "Awards", Icon: Flame },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "support", label: "Support", Icon: UserPlus2 },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
@@ -82,7 +102,7 @@ const RESIDENT_TABS: ArtistTab[] = [
 ];
 
 // Marker icons reserved for future domain-specific rendering.
-void ImageIcon; void Film; void Camera; void Radio;
+void ImageIcon;
 
 function norm(s?: string | null) {
   return (s ?? "").toLowerCase().trim();
@@ -93,9 +113,10 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   const r = norm(role);
   const hay = `${c} ${r}`;
   if (/podcast/.test(hay)) return PODCAST;
+  if (/videograph|film/.test(hay)) return VIDEO;
   if (/music|musician|dj|producer/.test(hay)) return MUSIC;
   if (/fashion/.test(hay)) return FASHION;
-  if (/mixed media|performance|photograph|videograph|film|visual art|literary|poet|writer|dancer|muralist|artist|painter|sculpt|illustrat|designer|creative/.test(hay))
+  if (/mixed media|performance|photograph|visual art|literary|poet|writer|dancer|muralist|artist|painter|sculpt|illustrat|designer|creative/.test(hay))
     return STUDIO;
   // Any artist role falls back to the full studio tab set.
   if (/artist/.test(hay)) return STUDIO;
