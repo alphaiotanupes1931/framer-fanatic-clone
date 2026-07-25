@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
-import { MapPin, Navigation, Ticket, ArrowLeft, Share2, Trash2, Edit3, EyeOff } from "lucide-react";
+import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -40,6 +42,7 @@ function EventDetail() {
   const [isAdmin, setIsAdmin] = useState(false);
   const checkoutFn = useServerFn(createTicketCheckout);
   const rsvpFn = useServerFn(rsvpFreeEvent);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -88,12 +91,8 @@ function EventDetail() {
     }
   };
 
-  const share = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) await navigator.share({ title: evt?.title || "Event", url });
-      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
-    } catch { /* user cancelled */ }
+  const shareExternal = () => {
+    void externalShare(window.location.href, evt?.title || "Event", evt?.description || undefined);
   };
 
   const remove = async () => {
@@ -232,9 +231,14 @@ function EventDetail() {
               {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "I'm going"}
             </Button>
           )}
-          <Button onClick={share} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2">
-            <Share2 className="w-4 h-4" />Share Event
-          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Button onClick={() => setShareOpen(true)} variant="outline" className="rounded-lg h-10 font-medium gap-2" aria-label="Send to friends">
+              <Send className="w-4 h-4" />Send
+            </Button>
+            <Button onClick={shareExternal} variant="outline" className="rounded-lg h-10 font-medium gap-2" aria-label="Share outside the app">
+              <Send className="w-4 h-4 -rotate-45" />Share
+            </Button>
+          </div>
         </div>
 
         {canDelete && (
@@ -250,6 +254,21 @@ function EventDetail() {
           </div>
         )}
       </div>
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={typeof window !== "undefined" ? window.location.href : `/events/${eventId}`}
+        title={evt.title}
+        preview={{
+          type: "event",
+          id: evt.id,
+          url: typeof window !== "undefined" ? window.location.href : `/events/${eventId}`,
+          title: evt.title,
+          excerpt: evt.description || null,
+          image: evt.image_url || null,
+          author: host?.display_name || host?.username || evt.venue_name || null,
+        }}
+      />
     </AppLayout>
   );
 }
