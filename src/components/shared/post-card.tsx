@@ -27,6 +27,7 @@ type Post = {
   post_type?: string | null;
   bg_color?: string | null;
   text_color?: string | null;
+  font_size?: string | null;
   likes_count: number | null;
   comments_count: number | null;
   neighborhood: string | null;
