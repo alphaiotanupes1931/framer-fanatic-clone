@@ -518,17 +518,26 @@ function CVSection({ section, userId, items, canEdit, onChange }: { section: CVS
 }
 
 export function ArtistInviteTab({ profile }: { profile: any }) {
-  const url = typeof window !== "undefined" && profile?.username ? `${window.location.origin}/u/${profile.username}` : "";
+  const [open, setOpen] = useState(false);
+  const name = profile?.display_name || profile?.username || "your page";
   return (
-    <div className="rounded-xl border border-border p-6 space-y-4">
-      <div>
-        <div className="text-lg font-semibold">Invite people to your page</div>
-        <div className="text-sm text-muted-foreground">Share your public profile link.</div>
+    <div className="mx-auto max-w-2xl space-y-6 py-6">
+      <div className="rounded-2xl border border-border bg-neutral-50 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+          <UserPlus className="h-7 w-7 text-primary" />
+        </div>
+        <h2 className="text-xl font-bold text-neutral-900">Invite friends to {name}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Grow your following. Upload a contact list or paste emails, we handle the rest.
+        </p>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input readOnly value={url} className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <button onClick={() => { if (url) { navigator.clipboard.writeText(url); toast.success("Link copied"); } }} className="rounded-lg bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Copy link</button>
-      </div>
+      <button
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-200 px-6 py-4 text-base font-semibold text-neutral-800 transition hover:bg-neutral-300"
+      >
+        <UserPlus className="h-5 w-5" /> Invite Friends
+      </button>
+      <InviteFriendsDialog open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }
@@ -547,7 +556,7 @@ export function ArtistEventsGrouped({ events }: { events: Array<{ id: string; ti
         </div>
         <div className="font-bold text-lg">{e.title}</div>
         {e.description && <p className="text-sm text-muted-foreground line-clamp-2">{e.description}</p>}
-        {e.location && <div className="text-xs text-muted-foreground">📍 {e.location}</div>}
+        {e.location && <div className="text-xs text-muted-foreground inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {e.location}</div>}
       </div>
     </Link>
   );
@@ -623,7 +632,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
     <div className="space-y-6">
       <div className="rounded-2xl border border-border p-5 bg-muted/30">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a]">💬</div>
+          <MessageSquare className="mt-1 h-5 w-5 text-[#d4580a]" />
           <div>
             <div className="font-semibold text-[15px]">Community Discussion</div>
             <div className="text-sm text-muted-foreground">Ask questions, share thoughts, or start a conversation with {name} and their followers.</div>
@@ -632,7 +641,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
       </div>
 
       <div className="space-y-3">
-        <div className="text-lg font-semibold flex items-center gap-2">💬 Comments</div>
+        <div className="text-lg font-semibold flex items-center gap-2"><MessageSquare className="h-4 w-4" /> Comments</div>
         <div className="flex gap-2 items-start">
           <textarea
             value={text}
@@ -643,7 +652,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
             className="flex-1 rounded-2xl border border-border bg-background px-4 py-2.5 text-sm resize-none"
           />
           <button onClick={post} disabled={!me || !text.trim()} className="rounded-full bg-[#d4580a] p-2.5 text-white disabled:opacity-40 shrink-0" aria-label="Post comment">
-            ➤
+            <Send className="h-4 w-4 -rotate-45" />
           </button>
         </div>
 
