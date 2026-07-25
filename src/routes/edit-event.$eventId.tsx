@@ -197,11 +197,11 @@ function EditEventPage() {
           className="w-full aspect-[16/9] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50 hover:border-[#d4580a]/40 hover:bg-[#d4580a]/[0.03] flex flex-col items-center justify-center text-neutral-500 mb-8 overflow-hidden"
         >
           {form.image_url ? (
-            <EventImage src={form.image_url} alt="Event flyer" className="w-full h-full object-cover" />
+            <EventImage src={form.image_url} alt="Exhibition flyer" className="w-full h-full object-cover" />
           ) : uploading ? (
             <><Loader2 className="w-6 h-6 animate-spin mb-2" /><span className="text-sm">Uploading…</span></>
           ) : (
-            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Change event flyer</span></>
+            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Change Exhibition flyer</span></>
           )}
           <input
             ref={fileRef}

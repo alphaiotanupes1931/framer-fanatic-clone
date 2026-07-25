@@ -8,7 +8,7 @@ import {
 export type ArtistTabKey =
   | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
   | "episodes" | "guests" | "listen" | "contact"
-  | "studio" | "series" | "gallery"
+  | "studio" | "series" | "gallery" | "available_works"
   | "fashion_line" | "lookbook" | "drops" | "collabs" | "saved" | "tickets";
 
 export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
@@ -39,9 +39,9 @@ const PODCAST: ArtistTab[] = [
 
 const STUDIO: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "available_works", label: "Available Works", Icon: ShoppingBag },
   { key: "studio", label: "Studio", Icon: Flame },
   { key: "series", label: "Series", Icon: Layers },
-  { key: "gallery", label: "Gallery", Icon: ImageIcon },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
@@ -82,7 +82,7 @@ const RESIDENT_TABS: ArtistTab[] = [
 ];
 
 // Marker icons reserved for future domain-specific rendering.
-void ShoppingBag; void Film; void Camera; void Radio;
+void ImageIcon; void Film; void Camera; void Radio;
 
 function norm(s?: string | null) {
   return (s ?? "").toLowerCase().trim();
