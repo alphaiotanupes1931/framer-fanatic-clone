@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
-import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Share2, Clock, TrendingUp, Megaphone, Send } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Clock, TrendingUp, Megaphone, Send } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
