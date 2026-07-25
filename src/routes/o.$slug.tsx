@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { FileUpload } from "@/components/shared/file-upload";
 import { useUserRole } from "@/hooks/use-user-role";
 import {
   Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Send,
