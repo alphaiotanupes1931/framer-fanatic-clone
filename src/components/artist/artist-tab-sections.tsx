@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
+import { ImageUpload } from "@/components/shared/image-upload";
 
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="py-12 text-center text-muted-foreground">No posts yet.</div>;
