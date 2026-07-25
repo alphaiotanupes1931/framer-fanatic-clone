@@ -261,10 +261,28 @@ function ProfilePage() {
 
   const selectTag = async (tag: string) => {
     if (!profile) return;
-    const { error } = await supabase.from("profiles").update({ category: tag }).eq("id", profile.id);
+    const nextRole =
+      tag === "Resident" ? "resident" : tag === "Visitor" ? "visitor" : "artist";
+    const { error } = await supabase
+      .from("profiles")
+      .update({ category: tag, role: nextRole })
+      .eq("id", profile.id);
     if (error) { toast.error(error.message); return; }
+    // Keep user_roles in sync so artist-only surfaces render correctly.
+    if (nextRole === "artist") {
+      await supabase.from("user_roles").upsert(
+        { user_id: profile.id, role: "artist" },
+        { onConflict: "user_id,role" },
+      );
+    } else {
+      await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", profile.id)
+        .eq("role", "artist");
+    }
     setShowTagPicker(false);
-    toast.success("Tag updated");
+    toast.success("Page type updated");
     location.reload();
   };
 
