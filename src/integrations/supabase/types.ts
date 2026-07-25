@@ -1173,6 +1173,7 @@ export type Database = {
           excluded_user_ids: string[]
           featured: boolean
           featured_at: string | null
+          font_size: string | null
           id: string
           image_url: string | null
           is_deleted: boolean
@@ -1198,6 +1199,7 @@ export type Database = {
           excluded_user_ids?: string[]
           featured?: boolean
           featured_at?: string | null
+          font_size?: string | null
           id?: string
           image_url?: string | null
           is_deleted?: boolean
@@ -1223,6 +1225,7 @@ export type Database = {
           excluded_user_ids?: string[]
           featured?: boolean
           featured_at?: string | null
+          font_size?: string | null
           id?: string
           image_url?: string | null
           is_deleted?: boolean
