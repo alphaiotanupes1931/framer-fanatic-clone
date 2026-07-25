@@ -1459,8 +1459,8 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
                   <div className="mt-1 flex items-center gap-3 text-xs text-neutral-500">
                     <span>{new Date(r.created_at).toLocaleDateString()}</span>
                     {r.link_url && (
-                      <a href={r.link_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[#d4580a] hover:underline">
-                        <ExternalLink className="h-3 w-3" /> Read
+                      <a href={r.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 font-semibold text-[#d4580a] hover:underline">
+                        <ExternalLink className="h-3 w-3" /> Download / Open
                       </a>
                     )}
                   </div>
