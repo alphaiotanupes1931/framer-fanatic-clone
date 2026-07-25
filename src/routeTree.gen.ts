@@ -72,6 +72,7 @@ import { Route as EditEventEventIdRouteImport } from './routes/edit-event.$event
 import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as OSlugDonateRouteImport } from './routes/o.$slug.donate'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const TicketingRoute = TicketingRouteImport.update({
@@ -390,6 +391,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
   path: '/admin/content',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OSlugDonateRoute = OSlugDonateRouteImport.update({
+  id: '/donate',
+  path: '/donate',
+  getParentRoute: () => OSlugRoute,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -450,7 +456,7 @@ export interface FileRoutesByFullPath {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
-  '/o/$slug': typeof OSlugRoute
+  '/o/$slug': typeof OSlugRouteWithChildren
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
@@ -461,6 +467,7 @@ export interface FileRoutesByFullPath {
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/o/$slug/donate': typeof OSlugDonateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -516,7 +523,7 @@ export interface FileRoutesByTo {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
-  '/o/$slug': typeof OSlugRoute
+  '/o/$slug': typeof OSlugRouteWithChildren
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
@@ -527,6 +534,7 @@ export interface FileRoutesByTo {
   '/stories': typeof StoriesIndexRoute
   '/videos': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/o/$slug/donate': typeof OSlugDonateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -583,7 +591,7 @@ export interface FileRoutesById {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
-  '/o/$slug': typeof OSlugRoute
+  '/o/$slug': typeof OSlugRouteWithChildren
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
@@ -594,6 +602,7 @@ export interface FileRoutesById {
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/o/$slug/donate': typeof OSlugDonateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -662,6 +671,7 @@ export interface FileRouteTypes {
     | '/stories/'
     | '/videos/'
     | '/api/public/stripe-webhook'
+    | '/o/$slug/donate'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -728,6 +738,7 @@ export interface FileRouteTypes {
     | '/stories'
     | '/videos'
     | '/api/public/stripe-webhook'
+    | '/o/$slug/donate'
   id:
     | '__root__'
     | '/'
@@ -794,6 +805,7 @@ export interface FileRouteTypes {
     | '/stories/'
     | '/videos/'
     | '/api/public/stripe-webhook'
+    | '/o/$slug/donate'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -849,7 +861,7 @@ export interface RootRouteChildren {
   EditStoryIdRoute: typeof EditStoryIdRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
-  OSlugRoute: typeof OSlugRoute
+  OSlugRoute: typeof OSlugRouteWithChildren
   PostsPostIdRoute: typeof PostsPostIdRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
   TicketsTicketIdRoute: typeof TicketsTicketIdRoute
@@ -1305,6 +1317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$slug/donate': {
+      id: '/o/$slug/donate'
+      path: '/donate'
+      fullPath: '/o/$slug/donate'
+      preLoaderRoute: typeof OSlugDonateRouteImport
+      parentRoute: typeof OSlugRoute
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -1326,6 +1345,16 @@ const MarketplaceRouteChildren: MarketplaceRouteChildren = {
 const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
   MarketplaceRouteChildren,
 )
+
+interface OSlugRouteChildren {
+  OSlugDonateRoute: typeof OSlugDonateRoute
+}
+
+const OSlugRouteChildren: OSlugRouteChildren = {
+  OSlugDonateRoute: OSlugDonateRoute,
+}
+
+const OSlugRouteWithChildren = OSlugRoute._addFileChildren(OSlugRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -1380,7 +1409,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditStoryIdRoute: EditStoryIdRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
-  OSlugRoute: OSlugRoute,
+  OSlugRoute: OSlugRouteWithChildren,
   PostsPostIdRoute: PostsPostIdRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,
   TicketsTicketIdRoute: TicketsTicketIdRoute,

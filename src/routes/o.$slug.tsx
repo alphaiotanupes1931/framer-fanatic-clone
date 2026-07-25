@@ -1109,11 +1109,7 @@ function SupportTabImpl({ org, canManage }: { org: Org; canManage: boolean }) {
     setTiers((xs) => xs.filter((x) => x.id !== id));
   };
 
-  const donateHref = org.website
-    ? org.website
-    : org.email
-      ? `mailto:${org.email}?subject=${encodeURIComponent(`Donation to ${org.name}`)}`
-      : null;
+  const donateHref = `/o/${org.slug}/donate`;
 
   return (
     <div className="space-y-5">
@@ -1136,19 +1132,13 @@ function SupportTabImpl({ org, canManage }: { org: Org; canManage: boolean }) {
           >Yearly</button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {donateHref ? (
-            <a
-              href={donateHref}
-              target={donateHref.startsWith("http") ? "_blank" : undefined}
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-5 py-2 text-sm font-semibold text-white hover:bg-orange-700"
-            >
-              <Heart className="h-4 w-4" />
-              Donate {donateInterval === "yearly" ? "yearly" : "one-time"}
-            </a>
-          ) : (
-            <div className="text-xs text-neutral-500">Donation link not set yet.</div>
-          )}
+          <a
+            href={donateHref}
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-5 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+          >
+            <Heart className="h-4 w-4" />
+            Donate {donateInterval === "yearly" ? "yearly" : "one-time"}
+          </a>
           {org.email && (
             <a href={`mailto:${org.email}`}
               className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">
@@ -1210,8 +1200,8 @@ function SupportTabImpl({ org, canManage }: { org: Org; canManage: boolean }) {
                 )}
                 <div className="mt-3 flex items-center gap-2">
                   <a
-                    href={t.join_url || donateHref || "#"}
-                    target={(t.join_url || donateHref || "").startsWith("http") ? "_blank" : undefined}
+                    href={t.join_url || donateHref}
+                    target={(t.join_url || "").startsWith("http") ? "_blank" : undefined}
                     rel="noreferrer"
                     className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#d4580a] px-3 py-2 text-xs font-semibold text-white hover:bg-orange-700"
                   >
