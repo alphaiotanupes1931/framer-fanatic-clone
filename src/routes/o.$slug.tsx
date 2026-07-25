@@ -9,7 +9,7 @@ import {
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
   ChevronLeft, ChevronRight, Heart, DollarSign,
-  Loader2, ImagePlus,
+  Loader2, ImagePlus, Video as VideoIcon, Type as TypeIcon, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
@@ -32,7 +32,10 @@ type Org = {
 
 type OrgPost = {
   id: string; org_id: string; kind: "opportunity" | "press" | "update";
-  title: string; body: string | null; link_url: string | null; media_url: string | null; created_at: string;
+  title: string; body: string | null; link_url: string | null; media_url: string | null;
+  video_url?: string | null; media_urls?: string[] | null;
+  bg_color?: string | null; text_color?: string | null; font_size?: string | null;
+  created_at: string;
 };
 
 type Comment = { id: string; user_id: string; body: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
