@@ -44,6 +44,13 @@ const BG_COLORS = [
   { name: "Cream",       bg: "#FDF6E3",  fg: "#0F172A" },
 ];
 
+const FONT_SIZES: { id: "sm" | "md" | "lg" | "xl"; label: string; cls: string }[] = [
+  { id: "sm", label: "SM", cls: "text-base" },
+  { id: "md", label: "MD", cls: "text-xl" },
+  { id: "lg", label: "LG", cls: "text-3xl" },
+  { id: "xl", label: "XL", cls: "text-5xl" },
+];
+
 function CreatePostPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
@@ -59,6 +66,7 @@ function CreatePostPage() {
   const [category, setCategory] = useState<string>("General");
   const [tag, setTag] = useState<string>("");
   const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
+  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
   const [visibility, setVisibility] = useState<Visibility>("public");
   const [excludeQuery, setExcludeQuery] = useState("");
   const [excludeResults, setExcludeResults] = useState<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null }[]>([]);
@@ -125,6 +133,7 @@ function CreatePostPage() {
         post_type: postType,
         bg_color: postType === "text" && bg.bg ? bg.bg : null,
         text_color: postType === "text" && bg.bg ? bg.fg : null,
+        font_size: postType === "text" ? fontSize : null,
         category,
         tag: tag || null,
         visibility,
@@ -192,7 +201,7 @@ function CreatePostPage() {
                   maxLength={2000}
                   placeholder="Share your thoughts..."
                   style={{ color: bg.fg }}
-                  className="w-full resize-none border-0 bg-transparent text-center text-xl font-medium placeholder:opacity-60 focus-visible:ring-0"
+                  className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus-visible:ring-0 ${FONT_SIZES.find((f) => f.id === fontSize)!.cls}`}
                 />
               </div>
               <div>
@@ -209,6 +218,24 @@ function CreatePostPage() {
                         className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
                         style={{ background: c.bg || "linear-gradient(135deg, #fff 50%, #eee 50%)" }}
                       />
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Font size</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {FONT_SIZES.map((s) => {
+                    const active = fontSize === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setFontSize(s.id)}
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${active ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}
+                      >
+                        {s.label}
+                      </button>
                     );
                   })}
                 </div>

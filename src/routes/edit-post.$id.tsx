@@ -23,6 +23,24 @@ const POST_TAGS = [
   "Process","Announcement","Studio","Behind the Scenes","Work in Progress","New Release","Show","Collaboration","Sale","Tutorial",
 ];
 
+const BG_COLORS = [
+  { name: "None",        bg: "",         fg: "#0F172A" },
+  { name: "Baltimore",   bg: "#d4580a",  fg: "#FFFFFF" },
+  { name: "Deep Blue",   bg: "#0F172A",  fg: "#FCFCFA" },
+  { name: "Sky",         bg: "#0EA5E9",  fg: "#FFFFFF" },
+  { name: "Rose",        bg: "#EC4899",  fg: "#FFFFFF" },
+  { name: "Forest",      bg: "#16A34A",  fg: "#FFFFFF" },
+  { name: "Sunset",      bg: "#F59E0B",  fg: "#0F172A" },
+  { name: "Violet",      bg: "#7C3AED",  fg: "#FFFFFF" },
+  { name: "Cream",       bg: "#FDF6E3",  fg: "#0F172A" },
+];
+const FONT_SIZES: { id: "sm" | "md" | "lg" | "xl"; label: string; cls: string }[] = [
+  { id: "sm", label: "SM", cls: "text-base" },
+  { id: "md", label: "MD", cls: "text-xl" },
+  { id: "lg", label: "LG", cls: "text-3xl" },
+  { id: "xl", label: "XL", cls: "text-5xl" },
+];
+
 function EditPostPage() {
   const me = useCurrentProfile();
   const { id } = Route.useParams();
@@ -40,6 +58,8 @@ function EditPostPage() {
   const [category, setCategory] = useState("General");
   const [tag, setTag] = useState("");
   const [visibility, setVisibility] = useState<Visibility>("public");
+  const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
+  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
 
   useEffect(() => {
     (async () => {
@@ -56,6 +76,10 @@ function EditPostPage() {
       setCategory(data.category || "General");
       setTag(data.tag || "");
       setVisibility((data.visibility as Visibility) || "public");
+      const foundBg = BG_COLORS.find((c) => c.bg === (data.bg_color || "")) || BG_COLORS[0];
+      setBg(data.bg_color ? { bg: data.bg_color, fg: data.text_color || foundBg.fg } : BG_COLORS[0]);
+      const fs = (data.font_size as "sm" | "md" | "lg" | "xl" | null) || "md";
+      setFontSize(fs);
       setLoading(false);
     })();
   }, [id, navigate]);
@@ -98,6 +122,9 @@ function EditPostPage() {
         tag: tag || null,
         visibility,
         neighborhood: neighborhood.trim() || null,
+        bg_color: postType === "text" && bg.bg ? bg.bg : null,
+        text_color: postType === "text" && bg.bg ? bg.fg : null,
+        font_size: postType === "text" ? fontSize : null,
       }).eq("id", id);
       if (error) throw error;
       toast.success("Post updated");
@@ -130,8 +157,56 @@ function EditPostPage() {
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           <div className="space-y-2">
             <Label className="text-sm font-medium">Content</Label>
-            <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={5} maxLength={2000} placeholder="Share your thoughts..." />
+            {postType === "text" ? (
+              <div
+                className="rounded-2xl p-6 min-h-[180px] flex items-center justify-center"
+                style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
+              >
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  rows={5}
+                  maxLength={2000}
+                  placeholder="Share your thoughts..."
+                  style={{ color: bg.fg }}
+                  className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus-visible:ring-0 ${FONT_SIZES.find((f) => f.id === fontSize)!.cls}`}
+                />
+              </div>
+            ) : (
+              <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={5} maxLength={2000} placeholder="Share your thoughts..." />
+            )}
             <p className="text-xs text-neutral-500 text-right">{content.length}/2000</p>
+            {postType === "text" && (
+              <div className="space-y-3 pt-2">
+                <div>
+                  <Label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Background</Label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {BG_COLORS.map((c) => {
+                      const active = c.bg === bg.bg;
+                      return (
+                        <button key={c.name} type="button" onClick={() => setBg(c)} title={c.name}
+                          className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
+                          style={{ background: c.bg || "linear-gradient(135deg, #fff 50%, #eee 50%)" }} />
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Font size</Label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {FONT_SIZES.map((s) => {
+                      const active = fontSize === s.id;
+                      return (
+                        <button key={s.id} type="button" onClick={() => setFontSize(s.id)}
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold ${active ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
+                          {s.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {(postType === "photo" || postType === "video") && (

@@ -27,6 +27,7 @@ type Post = {
   post_type?: string | null;
   bg_color?: string | null;
   text_color?: string | null;
+  font_size?: string | null;
   likes_count: number | null;
   comments_count: number | null;
   neighborhood: string | null;
@@ -306,7 +307,12 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           <Link
             to="/posts/$postId"
             params={{ postId: post.id }}
-            className="mx-4 my-3 block rounded-2xl p-6 text-center text-lg font-medium whitespace-pre-wrap break-words sm:mx-6 sm:text-xl"
+            className={`mx-4 my-3 block rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
+              post.font_size === "sm" ? "text-base" :
+              post.font_size === "lg" ? "text-3xl" :
+              post.font_size === "xl" ? "text-5xl" :
+              "text-xl"
+            }`}
             style={{ background: post.bg_color, color: post.text_color || "#fff" }}
           >
             {post.content}
