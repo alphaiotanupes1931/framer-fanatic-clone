@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
-import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Share2, Clock, TrendingUp, Megaphone } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Clock, TrendingUp, Megaphone, Send } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -121,7 +121,7 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
           </button>
         </div>
         <div className="flex items-center justify-end gap-4 border-t border-neutral-100 pt-3 text-sm text-neutral-500">
-          <button type="button" onClick={() => setShareOpen(true)} className="inline-flex items-center gap-1 hover:text-neutral-800"><Share2 className="h-4 w-4" /> Share</button>
+          <button type="button" onClick={() => setShareOpen(true)} className="inline-flex items-center gap-1 hover:text-neutral-800"><Send className="h-4 w-4" /> Share</button>
         </div>
       </div>
       <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={shareUrl} title={e.title} />
