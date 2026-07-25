@@ -1488,7 +1488,6 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
               ) : (
                 <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Summary" rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               )}
-              <input value={form.link_url} onChange={(e) => setForm({ ...form, link_url: e.target.value })} placeholder="Link URL (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
             </div>
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setAddOpen(null)} className="rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-semibold text-neutral-700">Cancel</button>
@@ -1702,8 +1701,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
               </button>
             </div>
           )}
-
-          <input value={form.link_url} onChange={(e) => setForm({...form, link_url: e.target.value})} placeholder="Link (optional)" className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm" />
 
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => { setOpen(false); resetForm(); }} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700">Cancel</button>
