@@ -243,6 +243,21 @@ function PostDetail() {
           </section>
         </article>
       </div>
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={typeof window !== "undefined" ? window.location.href : `/posts/${postId}`}
+        title={post.content?.slice(0, 80) || "Post"}
+        preview={{
+          type: "post",
+          id: post.id,
+          url: typeof window !== "undefined" ? window.location.href : `/posts/${postId}`,
+          title: post.content?.slice(0, 80) || null,
+          excerpt: post.content?.slice(0, 200) || null,
+          image: post.image_url || null,
+          author: author?.display_name || author?.username || null,
+        }}
+      />
     </AppLayout>
   );
 }
