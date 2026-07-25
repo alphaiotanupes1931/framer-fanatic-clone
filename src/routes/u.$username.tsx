@@ -24,6 +24,7 @@ import {
   ArtistEventsGrouped,
   ArtistStudioTab,
   ArtistTalkTab,
+  ArtistAvailableWorksTab,
 } from "@/components/artist/artist-tab-sections";
 
 type PublicProfile = {
@@ -503,6 +504,8 @@ function PublicProfilePage() {
             <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
           ) : tab === "gallery" ? (
             <ArtistGalleryTab userId={profile.id} canEdit={canEdit} />
+          ) : tab === "available_works" ? (
+            <ArtistAvailableWorksTab userId={profile.id} canEdit={canEdit} />
           ) : (
             <EmptyTab icon={Layers} label="Nothing here yet." />
           )}
