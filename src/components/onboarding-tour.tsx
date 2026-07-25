@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Joyride, EVENTS, STATUS, type EventData, type Step } from "react-joyride";
-import { Share2 } from "lucide-react";
+import { Send } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "@tanstack/react-router";
 
@@ -169,7 +169,7 @@ export function OnboardingTour() {
         title="Share Planet Baltimore"
         className="fixed bottom-[132px] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-card-foreground shadow-md transition hover:bg-accent hover:text-orange md:bottom-24 md:right-6 md:h-12 md:w-12"
       >
-        <Share2 className="h-5 w-5" strokeWidth={1.75} />
+        <Send className="h-5 w-5 -rotate-45" strokeWidth={1.75} />
       </button>}
     </>
   );
