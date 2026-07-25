@@ -854,8 +854,7 @@ function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit: boolea
         <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
           <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="Title (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-          <input value={form.media_url} onChange={(e) => setForm({ ...form, media_url: e.target.value })}
-            placeholder="Image URL" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Upload artwork photo" />
           <div className="flex justify-end gap-2">
             <button onClick={() => setOpen(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
             <button onClick={add} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Save</button>
@@ -957,8 +956,7 @@ function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean
             <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
               <input value={itemForm.title} onChange={(e) => setItemForm({ ...itemForm, title: e.target.value })}
                 placeholder="Piece title" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-              <input value={itemForm.media_url} onChange={(e) => setItemForm({ ...itemForm, media_url: e.target.value })}
-                placeholder="Image URL" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              <ImageUpload value={itemForm.media_url} onChange={(url) => setItemForm({ ...itemForm, media_url: url })} label="Upload piece photo" />
               <textarea value={itemForm.body} onChange={(e) => setItemForm({ ...itemForm, body: e.target.value })}
                 placeholder="Description (optional)" rows={2}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
@@ -1012,8 +1010,7 @@ function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean
             placeholder="Series title (e.g. The Maroons: Rebellion)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
           <textarea value={seriesForm.body} onChange={(e) => setSeriesForm({ ...seriesForm, body: e.target.value })}
             placeholder="Series description" rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-          <input value={seriesForm.media_url} onChange={(e) => setSeriesForm({ ...seriesForm, media_url: e.target.value })}
-            placeholder="Cover image URL (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <ImageUpload value={seriesForm.media_url} onChange={(url) => setSeriesForm({ ...seriesForm, media_url: url })} label="Upload cover photo (optional)" />
           <div className="flex justify-end gap-2">
             <button onClick={() => setAddingSeries(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
             <button onClick={addSeries} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Create series</button>
