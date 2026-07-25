@@ -4,14 +4,17 @@ import {
   UserPlus2, Layers, Image as ImageIcon, Flame, Headphones, Mail, Shirt,
   ShoppingBag, Package, Users, Film, Camera, Radio,
 } from "lucide-react";
+import { DollarSign, Scissors, HelpCircle, Star, Palette, Hammer, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
 
 export type ArtistTabKey =
   | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
-  | "episodes" | "guests" | "listen" | "contact"
+  | "episodes" | "guests" | "listen" | "contact" | "sponsors" | "clips" | "qa" | "bonus"
   | "studio" | "series" | "gallery" | "available_works"
   | "fashion_line" | "lookbook" | "drops" | "collabs" | "saved" | "tickets"
   | "videos" | "shop" | "reviews"
-  | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support";
+  | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support"
+  | "materials" | "installations" | "commissions" | "press"
+  | "repertoire" | "writing" | "appearances" | "newsletter" | "books";
 
 export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
 
@@ -50,7 +53,11 @@ const PODCAST: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
   { key: "episodes", label: "Episodes", Icon: Mic },
   { key: "guests", label: "Guests", Icon: Users },
-  { key: "listen", label: "Listen On", Icon: Headphones },
+  { key: "sponsors", label: "Sponsors", Icon: DollarSign },
+  { key: "clips", label: "Clips", Icon: Scissors },
+  { key: "qa", label: "Q&A", Icon: HelpCircle },
+  { key: "bonus", label: "Bonus", Icon: Star },
+  { key: "reviews", label: "Reviews", Icon: MessageCircle },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "contact", label: "Contact", Icon: Mail },
   { key: "cv", label: "CV/Bio", Icon: FileText },
@@ -65,6 +72,49 @@ const STUDIO: ArtistTab[] = [
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const MIXED: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "materials", label: "Materials", Icon: Palette },
+  { key: "installations", label: "Installations", Icon: Building2 },
+  { key: "commissions", label: "Commissions", Icon: Hammer },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "press", label: "Press", Icon: Newspaper },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const PERFORMANCE: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "repertoire", label: "Repertoire", Icon: Layers },
+  { key: "reel", label: "Reel", Icon: Radio },
+  { key: "shows", label: "Shows", Icon: MapPin },
+  { key: "reviews", label: "Reviews", Icon: MessageCircle },
+  { key: "book", label: "Book", Icon: BookOpen },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const LITERARY: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "books", label: "Books", Icon: BookOpen },
+  { key: "writing", label: "Writing", Icon: PenTool },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "support", label: "Support", Icon: UserPlus2 },
+  { key: "appearances", label: "Appearances", Icon: MapPin },
+  { key: "newsletter", label: "Newsletter", Icon: Mail },
+  { key: "press", label: "Press", Icon: Newspaper },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
@@ -116,7 +166,10 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   if (/videograph|film/.test(hay)) return VIDEO;
   if (/music|musician|dj|producer/.test(hay)) return MUSIC;
   if (/fashion/.test(hay)) return FASHION;
-  if (/mixed media|performance|photograph|visual art|literary|poet|writer|dancer|muralist|artist|painter|sculpt|illustrat|designer|creative/.test(hay))
+  if (/literary|poet|writer/.test(hay)) return LITERARY;
+  if (/performance|dancer/.test(hay)) return PERFORMANCE;
+  if (/mixed media/.test(hay)) return MIXED;
+  if (/photograph|visual art|muralist|artist|painter|sculpt|illustrat|designer|creative/.test(hay))
     return STUDIO;
   // Any artist role falls back to the full studio tab set.
   if (/artist/.test(hay)) return STUDIO;
