@@ -272,7 +272,11 @@ function PublicProfilePage() {
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
   // Every normal profile link opens the complete Resident Page. Artist Page
   // remains an explicit secondary page reached with ?view=artist.
-  const isArtistView = forceArtist;
+  // Auto-switch to Artist Page when the profile has the artist role or a
+  // recognised artist category, so podcaster/videographer/etc layouts
+  // render for everyone (not only when ?view=artist is in the URL).
+  const hasArtistCategory = isArtistProfile(profile.category, profile.role);
+  const isArtistView = forceArtist || hasArtistRole || hasArtistCategory;
   const tabs = isArtistView
     ? tabsForArtist(profile.category, profile.role)
     : tabsForProfile(profile.category, profile.role);
