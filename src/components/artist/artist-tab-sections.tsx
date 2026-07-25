@@ -3,8 +3,14 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Trash2, ImageIcon, Loader2 } from "lucide-react";
+import {
+  Send, Trash2, ImageIcon, Loader2, MapPin, MessageSquare, Users, UserPlus,
+  GraduationCap, Award, BookOpen, Newspaper, Mic, Film, Ticket, Music, Camera,
+  Landmark, Wrench, Globe, Handshake, Drama, Shirt, Disc, Sparkles, ChevronDown, ChevronUp,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { createArtworkCheckout } from "@/lib/stripe.functions";
 
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
@@ -21,7 +27,7 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
         <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="group block">
           {img ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
-              <img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+              <img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
           ) : videoUrl ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-black">
@@ -232,12 +238,12 @@ export function ArtistBookCollaborateTab({ profile }: { profile: any }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const intents = [
-    { key: "Collaborate", icon: "💬" },
-    { key: "Commission", icon: "🏛️" },
-    { key: "Book / Perform", icon: "🎵" },
-    { key: "Photography", icon: "📷" },
-    { key: "Other", icon: "💭" },
+  const intents: Array<{ key: string; icon: LucideIcon }> = [
+    { key: "Collaborate", icon: MessageSquare },
+    { key: "Commission", icon: Landmark },
+    { key: "Book / Perform", icon: Music },
+    { key: "Photography", icon: Camera },
+    { key: "Other", icon: Sparkles },
   ];
   const displayName = profile?.display_name || profile?.username || "this artist";
   const submit = async (e: React.FormEvent) => {
@@ -264,11 +270,14 @@ export function ArtistBookCollaborateTab({ profile }: { profile: any }) {
       <div>
         <div className="text-xs font-semibold tracking-wider text-muted-foreground mb-2">I WANT TO...</div>
         <div className="flex flex-wrap gap-2">
-          {intents.map((i) => (
-            <button key={i.key} type="button" onClick={() => setIntent(i.key)} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-muted"}`}>
-              <span>{i.icon}</span> {i.key}
-            </button>
-          ))}
+          {intents.map((i) => {
+            const Icon = i.icon;
+            return (
+              <button key={i.key} type="button" onClick={() => setIntent(i.key)} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-muted"}`}>
+                <Icon className="h-4 w-4" /> {i.key}
+              </button>
+            );
+          })}
         </div>
       </div>
       <form onSubmit={submit} className="space-y-4">
@@ -295,86 +304,88 @@ export function ArtistBookCollaborateTab({ profile }: { profile: any }) {
   );
 }
 
-const DEFAULT_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Education", icon: "🎓" },
-  { kind: "cv_solo", label: "Solo Exhibitions", icon: "🌐" },
-  { kind: "cv_group", label: "Group Exhibitions", icon: "🌐" },
-  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
-  { kind: "cv_residencies", label: "Residencies", icon: "📖" },
-  { kind: "cv_publications", label: "Publications", icon: "📚" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
+type CVSectionDef = { kind: string; label: string; icon: LucideIcon };
+
+const DEFAULT_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Education", icon: GraduationCap },
+  { kind: "cv_solo", label: "Solo Exhibitions", icon: Globe },
+  { kind: "cv_group", label: "Group Exhibitions", icon: Users },
+  { kind: "cv_awards", label: "Awards & Grants", icon: Award },
+  { kind: "cv_residencies", label: "Residencies", icon: BookOpen },
+  { kind: "cv_publications", label: "Publications", icon: BookOpen },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
 ];
 
-const VIDEO_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Education & Training", icon: "🎓" },
-  { kind: "cv_filmography", label: "Selected Filmography", icon: "🎬" },
-  { kind: "cv_festivals", label: "Festivals & Screenings", icon: "🎟️" },
-  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
+const VIDEO_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Education & Training", icon: GraduationCap },
+  { kind: "cv_filmography", label: "Selected Filmography", icon: Film },
+  { kind: "cv_festivals", label: "Festivals & Screenings", icon: Ticket },
+  { kind: "cv_awards", label: "Awards & Grants", icon: Award },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
 ];
 
-const MUSIC_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Training", icon: "🎓" },
-  { kind: "cv_releases", label: "Selected Releases", icon: "💿" },
-  { kind: "cv_performances", label: "Notable Performances", icon: "🎤" },
-  { kind: "cv_awards", label: "Awards", icon: "🏆" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
+const MUSIC_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Training", icon: GraduationCap },
+  { kind: "cv_releases", label: "Selected Releases", icon: Disc },
+  { kind: "cv_performances", label: "Notable Performances", icon: Mic },
+  { kind: "cv_awards", label: "Awards", icon: Award },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
 ];
 
-const PODCAST_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Education & Background", icon: "🎓" },
-  { kind: "cv_shows", label: "Shows & Productions", icon: "🎙️" },
-  { kind: "cv_guests", label: "Notable Guests", icon: "👥" },
-  { kind: "cv_media_roles", label: "Production & Media Roles", icon: "🎛️" },
-  { kind: "cv_awards", label: "Awards & Recognition", icon: "🏆" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
+const PODCAST_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Education & Background", icon: GraduationCap },
+  { kind: "cv_shows", label: "Shows & Productions", icon: Mic },
+  { kind: "cv_guests", label: "Notable Guests", icon: Users },
+  { kind: "cv_media_roles", label: "Production & Media Roles", icon: Wrench },
+  { kind: "cv_awards", label: "Awards & Recognition", icon: Award },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
 ];
 
-const LITERARY_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Education", icon: "🎓" },
-  { kind: "cv_books", label: "Published Books", icon: "📚" },
-  { kind: "cv_publications", label: "Selected Publications", icon: "📰" },
-  { kind: "cv_readings", label: "Readings & Appearances", icon: "🎤" },
-  { kind: "cv_awards", label: "Awards & Fellowships", icon: "🏆" },
-  { kind: "cv_residencies", label: "Residencies", icon: "📖" },
+const LITERARY_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Education", icon: GraduationCap },
+  { kind: "cv_books", label: "Published Books", icon: BookOpen },
+  { kind: "cv_publications", label: "Selected Publications", icon: Newspaper },
+  { kind: "cv_readings", label: "Readings & Appearances", icon: Mic },
+  { kind: "cv_awards", label: "Awards & Fellowships", icon: Award },
+  { kind: "cv_residencies", label: "Residencies", icon: BookOpen },
 ];
 
-const PERFORMANCE_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Training", icon: "🎓" },
-  { kind: "cv_repertoire", label: "Repertoire", icon: "🎭" },
-  { kind: "cv_performances", label: "Notable Performances", icon: "🎤" },
-  { kind: "cv_companies", label: "Companies & Collaborations", icon: "🤝" },
-  { kind: "cv_awards", label: "Awards", icon: "🏆" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
+const PERFORMANCE_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Training", icon: GraduationCap },
+  { kind: "cv_repertoire", label: "Repertoire", icon: Drama },
+  { kind: "cv_performances", label: "Notable Performances", icon: Mic },
+  { kind: "cv_companies", label: "Companies & Collaborations", icon: Handshake },
+  { kind: "cv_awards", label: "Awards", icon: Award },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
 ];
 
-const FASHION_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Education", icon: "🎓" },
-  { kind: "cv_collections", label: "Collections", icon: "👗" },
-  { kind: "cv_shows", label: "Runway & Presentations", icon: "🎬" },
-  { kind: "cv_collabs", label: "Collaborations", icon: "🤝" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
-  { kind: "cv_awards", label: "Awards", icon: "🏆" },
+const FASHION_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Education", icon: GraduationCap },
+  { kind: "cv_collections", label: "Collections", icon: Shirt },
+  { kind: "cv_shows", label: "Runway & Presentations", icon: Film },
+  { kind: "cv_collabs", label: "Collaborations", icon: Handshake },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
+  { kind: "cv_awards", label: "Awards", icon: Award },
 ];
 
-const MIXED_MEDIA_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Education", icon: "🎓" },
-  { kind: "cv_installations", label: "Installations", icon: "🏛️" },
-  { kind: "cv_commissions", label: "Commissions", icon: "🛠️" },
-  { kind: "cv_solo", label: "Solo Exhibitions", icon: "🌐" },
-  { kind: "cv_group", label: "Group Exhibitions", icon: "🌐" },
-  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
+const MIXED_MEDIA_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Education", icon: GraduationCap },
+  { kind: "cv_installations", label: "Installations", icon: Landmark },
+  { kind: "cv_commissions", label: "Commissions", icon: Wrench },
+  { kind: "cv_solo", label: "Solo Exhibitions", icon: Globe },
+  { kind: "cv_group", label: "Group Exhibitions", icon: Users },
+  { kind: "cv_awards", label: "Awards & Grants", icon: Award },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
 ];
 
-const PHOTO_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
-  { kind: "cv_education", label: "Education", icon: "🎓" },
-  { kind: "cv_solo", label: "Solo Exhibitions", icon: "📸" },
-  { kind: "cv_group", label: "Group Exhibitions", icon: "🌐" },
-  { kind: "cv_publications", label: "Publications & Editorials", icon: "📚" },
-  { kind: "cv_clients", label: "Selected Clients", icon: "🤝" },
-  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
-  { kind: "cv_press", label: "Press", icon: "📰" },
+const PHOTO_CV_SECTIONS: CVSectionDef[] = [
+  { kind: "cv_education", label: "Education", icon: GraduationCap },
+  { kind: "cv_solo", label: "Solo Exhibitions", icon: Camera },
+  { kind: "cv_group", label: "Group Exhibitions", icon: Users },
+  { kind: "cv_publications", label: "Publications & Editorials", icon: BookOpen },
+  { kind: "cv_clients", label: "Selected Clients", icon: Handshake },
+  { kind: "cv_awards", label: "Awards & Grants", icon: Award },
+  { kind: "cv_press", label: "Press", icon: Newspaper },
 ];
 
 function cvSectionsFor(category?: string | null, role?: string | null) {
@@ -450,7 +461,7 @@ export function ArtistCVTab({ userId, profile, canEdit }: { userId: string; prof
   );
 }
 
-function CVSection({ section, userId, items, canEdit, onChange }: { section: { kind: string; label: string; icon: string }; userId: string; items: any[]; canEdit: boolean; onChange: () => void; }) {
+function CVSection({ section, userId, items, canEdit, onChange }: { section: CVSectionDef; userId: string; items: any[]; canEdit: boolean; onChange: () => void; }) {
   const [expanded, setExpanded] = useState(true);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ year: "", title: "", subtitle: "" });
@@ -461,15 +472,16 @@ function CVSection({ section, userId, items, canEdit, onChange }: { section: { k
     setForm({ year: "", title: "", subtitle: "" }); setAdding(false); onChange();
   };
   const remove = async (id: string) => { await supabase.from("profile_sections").delete().eq("id", id); onChange(); };
+  const Icon = section.icon;
   return (
     <div className="rounded-2xl border border-border">
       <button onClick={() => setExpanded((v) => !v)} className="w-full flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
-          <span>{section.icon}</span>
+          <Icon className="h-4 w-4 text-neutral-600" />
           <span className="font-semibold">{section.label}</span>
           <span className="text-sm text-muted-foreground">({items.length})</span>
         </div>
-        <span className="text-muted-foreground">{expanded ? "▲" : "▼"}</span>
+        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
       </button>
       {expanded && (
         <div className="border-t border-border p-4 space-y-3">
@@ -506,17 +518,26 @@ function CVSection({ section, userId, items, canEdit, onChange }: { section: { k
 }
 
 export function ArtistInviteTab({ profile }: { profile: any }) {
-  const url = typeof window !== "undefined" && profile?.username ? `${window.location.origin}/u/${profile.username}` : "";
+  const [open, setOpen] = useState(false);
+  const name = profile?.display_name || profile?.username || "your page";
   return (
-    <div className="rounded-xl border border-border p-6 space-y-4">
-      <div>
-        <div className="text-lg font-semibold">Invite people to your page</div>
-        <div className="text-sm text-muted-foreground">Share your public profile link.</div>
+    <div className="mx-auto max-w-2xl space-y-6 py-6">
+      <div className="rounded-2xl border border-border bg-neutral-50 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+          <UserPlus className="h-7 w-7 text-primary" />
+        </div>
+        <h2 className="text-xl font-bold text-neutral-900">Invite friends to {name}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Grow your following. Upload a contact list or paste emails, we handle the rest.
+        </p>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input readOnly value={url} className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <button onClick={() => { if (url) { navigator.clipboard.writeText(url); toast.success("Link copied"); } }} className="rounded-lg bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Copy link</button>
-      </div>
+      <button
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-200 px-6 py-4 text-base font-semibold text-neutral-800 transition hover:bg-neutral-300"
+      >
+        <UserPlus className="h-5 w-5" /> Invite Friends
+      </button>
+      <InviteFriendsDialog open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }
@@ -528,14 +549,22 @@ export function ArtistEventsGrouped({ events }: { events: Array<{ id: string; ti
   const past = events.filter((e) => new Date(e.starts_at).getTime() < now);
   const renderCard = (e: typeof events[number]) => (
     <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-      {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-56 object-cover" />}
+      {e.image_url && (
+        <img
+          src={e.image_url}
+          alt={e.title}
+          className="w-full h-56 object-cover bg-neutral-100"
+          loading="lazy"
+          onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }}
+        />
+      )}
       <div className="p-4 space-y-2">
         <div className="text-xs text-muted-foreground">
           {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {new Date(e.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
         </div>
         <div className="font-bold text-lg">{e.title}</div>
         {e.description && <p className="text-sm text-muted-foreground line-clamp-2">{e.description}</p>}
-        {e.location && <div className="text-xs text-muted-foreground">📍 {e.location}</div>}
+        {e.location && <div className="text-xs text-muted-foreground inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {e.location}</div>}
       </div>
     </Link>
   );
@@ -611,7 +640,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
     <div className="space-y-6">
       <div className="rounded-2xl border border-border p-5 bg-muted/30">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a]">💬</div>
+          <MessageSquare className="mt-1 h-5 w-5 text-[#d4580a]" />
           <div>
             <div className="font-semibold text-[15px]">Community Discussion</div>
             <div className="text-sm text-muted-foreground">Ask questions, share thoughts, or start a conversation with {name} and their followers.</div>
@@ -620,7 +649,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
       </div>
 
       <div className="space-y-3">
-        <div className="text-lg font-semibold flex items-center gap-2">💬 Comments</div>
+        <div className="text-lg font-semibold flex items-center gap-2"><MessageSquare className="h-4 w-4" /> Comments</div>
         <div className="flex gap-2 items-start">
           <textarea
             value={text}
@@ -631,7 +660,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
             className="flex-1 rounded-2xl border border-border bg-background px-4 py-2.5 text-sm resize-none"
           />
           <button onClick={post} disabled={!me || !text.trim()} className="rounded-full bg-[#d4580a] p-2.5 text-white disabled:opacity-40 shrink-0" aria-label="Post comment">
-            ➤
+            <Send className="h-4 w-4 -rotate-45" />
           </button>
         </div>
 
