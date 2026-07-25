@@ -196,7 +196,7 @@ function NewEventPage() {
         </button>
 
         <div className="space-y-6">
-          <Field label="Event Title" required>
+          <Field label="Exhibition Title" required>
             <input className={inputCls} placeholder="What's your event called?" value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={140} />
           </Field>
 
@@ -204,7 +204,7 @@ function NewEventPage() {
             <textarea className={`${inputCls} min-h-[120px]`} placeholder="Tell people about your event..." value={form.description} onChange={(e) => set("description", e.target.value)} maxLength={5000} />
           </Field>
 
-          <Field label="Event Video" optional>
+          <Field label="Exhibition Video" optional>
             <VideoPicker
               value={form.video_url}
               uploading={uploadingVideo}

@@ -213,12 +213,12 @@ function EditEventPage() {
         </button>
 
         <div className="mb-8">
-          <label className="block text-sm font-semibold mb-2">Event Video <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span></label>
+          <label className="block text-sm font-semibold mb-2">Exhibition Video <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span></label>
           <VideoField value={form.video_url} uploading={uploadingVideo} onPick={onPickVideo} onClear={() => set("video_url", "")} inputRef={videoRef} />
         </div>
 
         <div className="space-y-6">
-          <Field label="Event Title" required>
+          <Field label="Exhibition Title" required>
             <input className={inputCls} value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={140} />
           </Field>
 
