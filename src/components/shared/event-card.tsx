@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Share2, Bookmark, Send, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Bookmark, Send, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useEventImageUrl } from "@/components/event-image";
@@ -146,7 +146,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
           <Send className="h-5 w-5" />
         </button>
         <button type="button" onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
-          <Share2 className="h-5 w-5" />
+          <Send className="h-5 w-5 -rotate-45" />
         </button>
         <button type="button" onClick={toggleSave} className={`ml-auto flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, Share2, MessageSquare, BarChart3, ExternalLink } from "lucide-react";
+import { Copy, Megaphone, DollarSign, Ticket, Users, TrendingUp, Send, MessageSquare, BarChart3, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/promoter-dashboard")({
@@ -128,7 +128,7 @@ function PromoterDashboardPage() {
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
                           <Button size="sm" variant="outline" onClick={() => share(r.id)}><Copy className="mr-1 h-3 w-3" />Copy link</Button>
-                          <Button size="sm" variant="outline" onClick={() => webShare(r)}><Share2 className="mr-1 h-3 w-3" />Share</Button>
+                          <Button size="sm" variant="outline" onClick={() => webShare(r)}><Send className="mr-1 h-3 w-3 -rotate-45" />Share</Button>
                           <Link to="/events/$eventId" params={{ eventId: r.id }} className="inline-flex items-center rounded-md border border-neutral-200 px-2.5 py-1 text-xs font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">
                             <ExternalLink className="mr-1 h-3 w-3" /> View
                           </Link>
@@ -175,7 +175,7 @@ function PromoterDashboardPage() {
 
         {tab === "social" && (
           <div className="rounded-xl border border-neutral-200 bg-white p-6">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-900"><Share2 className="h-4 w-4 text-[#d4580a]" /> Share on social</div>
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-900"><Send className="h-4 w-4 -rotate-45 text-[#d4580a]" /> Share on social</div>
             {!rows || rows.length === 0 ? (
               <p className="text-sm text-neutral-500">Create an event first, then share it here.</p>
             ) : (
@@ -183,7 +183,7 @@ function PromoterDashboardPage() {
                 {rows.map((r) => (
                   <button key={r.id} onClick={() => webShare(r)} className="flex items-center justify-between rounded-lg border border-neutral-200 px-3 py-2 text-left text-sm hover:border-[#d4580a]">
                     <span className="truncate pr-2 font-medium text-neutral-900">{r.title}</span>
-                    <Share2 className="h-4 w-4 text-neutral-400" />
+                    <Send className="h-4 w-4 -rotate-45 text-neutral-400" />
                   </button>
                 ))}
               </div>

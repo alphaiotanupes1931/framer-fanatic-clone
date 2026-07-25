@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, MessageCircle, Trash2, Share2, Tag } from "lucide-react";
+import { ArrowLeft, MapPin, MessageCircle, Trash2, Send, Tag } from "lucide-react";
 import { toast } from "sonner";
 
 type Listing = {
@@ -145,7 +145,7 @@ function ListingDetail() {
                 </button>
               )}
               <button onClick={share} className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent">
-                <Share2 className="h-4 w-4" /> Share
+                <Send className="h-4 w-4 -rotate-45" /> Share
               </button>
               {isOwner && (
                 <>

@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Heart, MessageCircle, Clock, Share2, Trash2, Send, Pencil } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Clock, Trash2, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import DOMPurify from "isomorphic-dompurify";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 
 export const Route = createFileRoute("/stories/$storyId")({
   component: StoryDetail,
@@ -34,6 +36,7 @@ function StoryDetail() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -90,12 +93,8 @@ function StoryDetail() {
     setStory({ ...story, comments_count: list.length });
   };
 
-  const share = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) await navigator.share({ title: story?.title, url });
-      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
-    } catch { /* cancelled */ }
+  const shareExternal = () => {
+    void externalShare(window.location.href, story?.title, story?.excerpt || undefined);
   };
 
   const remove = async () => {
@@ -200,9 +199,14 @@ function StoryDetail() {
             <button onClick={toggleLike} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition ${liked ? "bg-[#d4580a] text-white" : "text-foreground hover:bg-accent"}`}>
               <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {story.likes_count}
             </button>
-            <button onClick={share} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
-              <Share2 className="h-4 w-4" /> Share
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShareOpen(true)} aria-label="Send to friends" title="Send to friends" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
+                <Send className="h-4 w-4" /> Send
+              </button>
+              <button onClick={shareExternal} aria-label="Share outside the app" title="Share outside the app" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
+                <Send className="h-4 w-4 -rotate-45" /> Share
+              </button>
+            </div>
           </div>
 
           <section className="mt-10">
@@ -245,6 +249,21 @@ function StoryDetail() {
           </section>
         </div>
       </article>
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={typeof window !== "undefined" ? window.location.href : `/stories/${storyId}`}
+        title={story.title}
+        preview={{
+          type: "story",
+          id: story.id,
+          url: typeof window !== "undefined" ? window.location.href : `/stories/${storyId}`,
+          title: story.title,
+          excerpt: excerptText || null,
+          image: story.cover_url || null,
+          author: author?.display_name || author?.username || null,
+        }}
+      />
     </AppLayout>
   );
 }
