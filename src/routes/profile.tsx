@@ -261,28 +261,10 @@ function ProfilePage() {
 
   const selectTag = async (tag: string) => {
     if (!profile) return;
-    const nextRole =
-      tag === "Resident" ? "resident" : tag === "Visitor" ? "visitor" : "artist";
-    const { error } = await supabase
-      .from("profiles")
-      .update({ category: tag, role: nextRole })
-      .eq("id", profile.id);
+    const { error } = await supabase.from("profiles").update({ category: tag }).eq("id", profile.id);
     if (error) { toast.error(error.message); return; }
-    // Keep user_roles in sync so artist-only surfaces render correctly.
-    if (nextRole === "artist") {
-      await supabase.from("user_roles").upsert(
-        { user_id: profile.id, role: "artist" },
-        { onConflict: "user_id,role" },
-      );
-    } else {
-      await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", profile.id)
-        .eq("role", "artist");
-    }
     setShowTagPicker(false);
-    toast.success("Page type updated");
+    toast.success("Tag updated");
     location.reload();
   };
 
@@ -428,35 +410,6 @@ function ProfilePage() {
               )}
             </div>
             {profile?.bio && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{profile.bio}</p>}
-            <div className="mt-2">
-              <div className="relative inline-block">
-                <button
-                  type="button"
-                  onClick={() => setShowTagPicker((v) => !v)}
-                  className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition hover:opacity-90"
-                  style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a", borderColor: "rgba(212,88,10,0.2)" }}
-                  aria-label="Change tag"
-                >
-                  {isArtist ? <Mic2 className="h-3 w-3" /> : <Users className="h-3 w-3" />}
-                  {currentTag}
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-                {showTagPicker && (
-                  <div className="absolute top-8 left-0 z-30 w-48 max-h-72 overflow-y-auto rounded-xl border border-border bg-card shadow-xl">
-                    {PROFILE_TAGS.map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => selectTag(t)}
-                        className={`w-full px-3 py-2 text-left text-sm hover:bg-secondary ${currentTag === t ? "font-semibold" : "text-foreground"}`}
-                        style={currentTag === t ? { color: "#d4580a" } : undefined}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
 
           <div className="mt-5 grid grid-cols-4 gap-2 text-center text-xs sm:flex sm:gap-8 sm:text-left sm:text-sm">

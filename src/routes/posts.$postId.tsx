@@ -195,7 +195,7 @@ function PostDetail() {
             </button>
             <div className="inline-flex items-center gap-2"><MessageCircle className="h-5 w-5" /> {comments.length}</div>
             <button onClick={() => setShareOpen(true)} aria-label="Send to friends" title="Send to friends" className="inline-flex items-center gap-2 hover:text-foreground">
-              <Send className="h-5 w-5" />
+              <Send className="h-5 w-5 -rotate-45" />
             </button>
             <button onClick={shareExternal} aria-label="Share outside the app" title="Share outside the app" className="inline-flex items-center gap-2 hover:text-foreground">
               <Send className="h-5 w-5 -rotate-45" />

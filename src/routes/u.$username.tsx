@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
+import { PROFILE_TAGS } from "@/lib/categories";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
@@ -65,6 +66,7 @@ function PublicProfilePage() {
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showHoodPicker, setShowHoodPicker] = useState(false);
   const [hasArtistRole, setHasArtistRole] = useState(false);
+  const [showTypePicker, setShowTypePicker] = useState(false);
   const forceResident = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "resident";
   const forceArtist = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "artist";
   void forceResident;
@@ -86,6 +88,27 @@ function PublicProfilePage() {
     setProfile({ ...profile, neighborhood: name });
     setShowHoodPicker(false);
     toast.success("Neighborhood updated");
+  };
+
+  const updatePageType = async (tag: string) => {
+    if (!profile) return;
+    const nextRole = tag === "Resident" ? "resident" : tag === "Visitor" ? "visitor" : "artist";
+    const { error } = await supabase
+      .from("profiles")
+      .update({ category: tag, role: nextRole })
+      .eq("id", profile.id);
+    if (error) { toast.error(error.message); return; }
+    if (nextRole === "artist") {
+      await supabase.from("user_roles").upsert(
+        { user_id: profile.id, role: "artist" },
+        { onConflict: "user_id,role" },
+      );
+    } else {
+      await supabase.from("user_roles").delete().eq("user_id", profile.id).eq("role", "artist");
+    }
+    setShowTypePicker(false);
+    toast.success("Page type updated");
+    location.reload();
   };
 
   useEffect(() => {
@@ -389,6 +412,32 @@ function PublicProfilePage() {
             {hashtags.map((h) => (
               <span key={h} className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">{h}</span>
             ))}
+          </div>
+        )}
+
+        {isOwner && isArtistView && (
+          <div className="mt-4 relative inline-block">
+            <button
+              type="button"
+              onClick={() => setShowTypePicker((v) => !v)}
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition hover:opacity-90"
+              style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a", borderColor: "rgba(212,88,10,0.2)" }}
+            >
+              {profile.category || "Artist"} <ChevronDown className="h-3 w-3" />
+            </button>
+            {showTypePicker && (
+              <div className="absolute left-0 top-9 z-30 max-h-72 w-48 overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-xl">
+                {PROFILE_TAGS.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => updatePageType(t)}
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-neutral-100 ${profile.category === t ? "font-semibold text-[#d4580a]" : "text-neutral-700"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

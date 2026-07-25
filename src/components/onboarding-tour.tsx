@@ -153,24 +153,6 @@ export function OnboardingTour() {
           buttonSkip: { color: "#9a9a9a", fontSize: 12 },
         }}
       />
-      {!hideShare && <button
-        onClick={async () => {
-          const url = `${window.location.origin}/`;
-          try {
-            if (navigator.share) {
-              await navigator.share({ title: "Planet Baltimore", text: "Join me on Planet Baltimore", url });
-            } else {
-              await navigator.clipboard.writeText(url);
-              toast.success("Invite link copied");
-            }
-          } catch { /* cancelled */ }
-        }}
-        aria-label="Share Planet Baltimore"
-        title="Share Planet Baltimore"
-        className="fixed bottom-[132px] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-card-foreground shadow-md transition hover:bg-accent hover:text-orange md:bottom-24 md:right-6 md:h-12 md:w-12"
-      >
-        <Send className="h-5 w-5 -rotate-45" strokeWidth={1.75} />
-      </button>}
     </>
   );
 }

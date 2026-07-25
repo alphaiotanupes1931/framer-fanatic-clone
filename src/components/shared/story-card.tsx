@@ -251,7 +251,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           <Clock className="h-5 w-5" />{story.read_minutes || 5}m
         </span>
         <button onClick={openShare} className="flex items-center transition hover:text-foreground" aria-label="Share in app" title="Share in app">
-          <Send className="h-5 w-5" />
+          <Send className="h-5 w-5 -rotate-45" />
         </button>
         <button onClick={sendExternal} className="flex items-center transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Send className="h-5 w-5 -rotate-45" />

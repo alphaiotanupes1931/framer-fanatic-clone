@@ -143,7 +143,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
       </Link>
       <div className="flex items-center gap-5 border-t border-border/50 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-5">
         <button type="button" onClick={openShare} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
-          <Send className="h-5 w-5" />
+          <Send className="h-5 w-5 -rotate-45" />
         </button>
         <button type="button" onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Send className="h-5 w-5 -rotate-45" />
