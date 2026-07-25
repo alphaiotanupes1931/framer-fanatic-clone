@@ -9,6 +9,7 @@ import {
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
   ChevronLeft, ChevronRight, Heart, DollarSign,
+  Loader2, ImagePlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
