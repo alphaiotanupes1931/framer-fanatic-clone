@@ -1487,7 +1487,14 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
               {addOpen === "image" ? (
                 <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Upload press image" />
               ) : (
-                <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Summary" rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+                <>
+                  <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Summary" rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+                  <FileUpload
+                    value={form.link_url}
+                    onChange={(url) => setForm({ ...form, link_url: url })}
+                    label="Attach PDF, DOC, CSV, or other file (optional)"
+                  />
+                </>
               )}
             </div>
             <div className="mt-4 flex justify-end gap-2">
