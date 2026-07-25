@@ -200,14 +200,9 @@ function StoryDetail() {
             <button onClick={toggleLike} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition ${liked ? "bg-[#d4580a] text-white" : "text-foreground hover:bg-accent"}`}>
               <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {story.likes_count}
             </button>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setShareOpen(true)} aria-label="Send to friends" title="Send to friends" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
-                <Send className="h-4 w-4" /> Send
-              </button>
-              <button onClick={shareExternal} aria-label="Share outside the app" title="Share outside the app" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
-                <Send className="h-4 w-4 -rotate-45" /> Share
-              </button>
-            </div>
+            <button onClick={() => setShareOpen(true)} aria-label="Share" title="Share" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
+              <Send className="h-4 w-4 -rotate-45" /> Share
+            </button>
           </div>
 
           <section className="mt-10">

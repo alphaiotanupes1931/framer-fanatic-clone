@@ -353,10 +353,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         <button onClick={openComments} className="flex items-center gap-2 transition hover:text-foreground">
           <MessageCircle className="h-5 w-5" /> {commentCount}
         </button>
-        <button onClick={share} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app">
-          <Send className="h-5 w-5 -rotate-45" />
-        </button>
-        <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+        <button onClick={share} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share" title="Share">
           <Send className="h-5 w-5 -rotate-45" />
         </button>
         <button onClick={toggleSave} className={`ml-auto flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>

@@ -77,6 +77,20 @@ const STUDIO: ArtistTab[] = [
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
+const PHOTO: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "gallery", label: "Portfolio", Icon: ImageIcon },
+  { key: "shop", label: "Print Shop", Icon: ShoppingBag },
+  { key: "book", label: "Bookings", Icon: BookOpen },
+  { key: "awards", label: "Recognition", Icon: Flame },
+  { key: "writing", label: "Field Notes", Icon: PenTool },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
 const MIXED: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
   { key: "materials", label: "Materials", Icon: Palette },
@@ -172,7 +186,8 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   if (/literary|poet|writer/.test(hay)) return LITERARY;
   if (/performance|dancer/.test(hay)) return PERFORMANCE;
   if (/mixed media/.test(hay)) return MIXED;
-  if (/photograph|visual art|muralist|artist|painter|sculpt|illustrat|designer|creative/.test(hay))
+  if (/photograph/.test(hay)) return PHOTO;
+  if (/visual art|muralist|artist|painter|sculpt|illustrat|designer|creative/.test(hay))
     return STUDIO;
   // Any artist role falls back to the full studio tab set.
   if (/artist/.test(hay)) return STUDIO;

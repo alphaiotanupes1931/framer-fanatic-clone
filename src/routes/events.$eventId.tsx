@@ -231,14 +231,9 @@ function EventDetail() {
               {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "I'm going"}
             </Button>
           )}
-          <div className="grid grid-cols-2 gap-2">
-            <Button onClick={() => setShareOpen(true)} variant="outline" className="rounded-lg h-10 font-medium gap-2" aria-label="Send to friends">
-              <Send className="w-4 h-4" />Send
-            </Button>
-            <Button onClick={shareExternal} variant="outline" className="rounded-lg h-10 font-medium gap-2" aria-label="Share outside the app">
-              <Send className="w-4 h-4 -rotate-45" />Share
-            </Button>
-          </div>
+          <Button onClick={() => setShareOpen(true)} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2" aria-label="Share">
+            <Send className="w-4 h-4 -rotate-45" />Share
+          </Button>
         </div>
 
         {canDelete && (

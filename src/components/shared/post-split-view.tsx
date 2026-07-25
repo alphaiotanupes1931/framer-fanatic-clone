@@ -220,10 +220,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
               <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {post.likes_count ?? 0}
             </button>
             <div className="flex items-center gap-1.5"><MessageCircle className="h-5 w-5" /> {comments.length}</div>
-            <button onClick={() => setShareOpen(true)} aria-label="Send to friends" className="hover:text-foreground">
-              <Send className="h-5 w-5 -rotate-45" />
-            </button>
-            <button onClick={shareExternal} aria-label="Share outside the app" className="hover:text-foreground">
+            <button onClick={() => setShareOpen(true)} aria-label="Share" title="Share" className="hover:text-foreground">
               <Send className="h-5 w-5 -rotate-45" />
             </button>
             <button onClick={toggleSave} className={`ml-auto transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"}>

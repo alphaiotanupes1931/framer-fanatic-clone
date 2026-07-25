@@ -250,10 +250,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         <span className="flex items-center gap-1.5 text-muted-foreground/80">
           <Clock className="h-5 w-5" />{story.read_minutes || 5}m
         </span>
-        <button onClick={openShare} className="flex items-center transition hover:text-foreground" aria-label="Share in app" title="Share in app">
-          <Send className="h-5 w-5 -rotate-45" />
-        </button>
-        <button onClick={sendExternal} className="flex items-center transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+        <button onClick={openShare} className="flex items-center transition hover:text-foreground" aria-label="Share" title="Share">
           <Send className="h-5 w-5 -rotate-45" />
         </button>
         <button onClick={toggleSave} className={`flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
