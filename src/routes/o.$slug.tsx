@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { FileUpload } from "@/components/shared/file-upload";
 import { useUserRole } from "@/hooks/use-user-role";
 import {
   Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Send,
@@ -1458,8 +1459,8 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
                   <div className="mt-1 flex items-center gap-3 text-xs text-neutral-500">
                     <span>{new Date(r.created_at).toLocaleDateString()}</span>
                     {r.link_url && (
-                      <a href={r.link_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[#d4580a] hover:underline">
-                        <ExternalLink className="h-3 w-3" /> Read
+                      <a href={r.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 font-semibold text-[#d4580a] hover:underline">
+                        <ExternalLink className="h-3 w-3" /> Download / Open
                       </a>
                     )}
                   </div>
@@ -1486,7 +1487,14 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
               {addOpen === "image" ? (
                 <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Upload press image" />
               ) : (
-                <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Summary" rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+                <>
+                  <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Summary" rows={4} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+                  <FileUpload
+                    value={form.link_url}
+                    onChange={(url) => setForm({ ...form, link_url: url })}
+                    label="Attach PDF, DOC, CSV, or other file (optional)"
+                  />
+                </>
               )}
             </div>
             <div className="mt-4 flex justify-end gap-2">
