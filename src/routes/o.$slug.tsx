@@ -1771,7 +1771,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
               </div>
             );
           })}
-          ))}
         </div>
       )}
     </div>
