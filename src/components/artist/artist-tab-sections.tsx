@@ -295,7 +295,7 @@ export function ArtistBookCollaborateTab({ profile }: { profile: any }) {
   );
 }
 
-const CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+const DEFAULT_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
   { kind: "cv_education", label: "Education", icon: "🎓" },
   { kind: "cv_solo", label: "Solo Exhibitions", icon: "🌐" },
   { kind: "cv_group", label: "Group Exhibitions", icon: "🌐" },
@@ -305,7 +305,40 @@ const CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
   { kind: "cv_press", label: "Press", icon: "📰" },
 ];
 
+const VIDEO_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Education & Training", icon: "🎓" },
+  { kind: "cv_filmography", label: "Selected Filmography", icon: "🎬" },
+  { kind: "cv_festivals", label: "Festivals & Screenings", icon: "🎟️" },
+  { kind: "cv_awards", label: "Awards & Grants", icon: "🏆" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+];
+
+const MUSIC_CV_SECTIONS: Array<{ kind: string; label: string; icon: string }> = [
+  { kind: "cv_education", label: "Training", icon: "🎓" },
+  { kind: "cv_releases", label: "Selected Releases", icon: "💿" },
+  { kind: "cv_performances", label: "Notable Performances", icon: "🎤" },
+  { kind: "cv_awards", label: "Awards", icon: "🏆" },
+  { kind: "cv_press", label: "Press", icon: "📰" },
+];
+
+function cvSectionsFor(category?: string | null, role?: string | null) {
+  const hay = `${(category ?? "").toLowerCase()} ${(role ?? "").toLowerCase()}`;
+  if (/videograph|film/.test(hay)) return VIDEO_CV_SECTIONS;
+  if (/music|musician|dj|producer|podcast/.test(hay)) return MUSIC_CV_SECTIONS;
+  return DEFAULT_CV_SECTIONS;
+}
+
+// Label shown above the CV block.
+function cvHeadingFor(category?: string | null, role?: string | null) {
+  const hay = `${(category ?? "").toLowerCase()} ${(role ?? "").toLowerCase()}`;
+  if (/videograph|film/.test(hay)) return "Videographer CV / Bio";
+  if (/music|musician|dj|producer|podcast/.test(hay)) return "Artist CV / Bio";
+  return "Curriculum Vitae";
+}
+
 export function ArtistCVTab({ userId, profile, canEdit }: { userId: string; profile: any; canEdit: boolean }) {
+  const CV_SECTIONS = cvSectionsFor(profile?.category, profile?.role);
+  const heading = cvHeadingFor(profile?.category, profile?.role);
   const [statement, setStatement] = useState<string>(profile?.bio || "");
   const [editStatement, setEditStatement] = useState(false);
   const [items, setItems] = useState<any[]>([]);
@@ -324,7 +357,7 @@ export function ArtistCVTab({ userId, profile, canEdit }: { userId: string; prof
   };
   return (
     <div className="space-y-4">
-      <div className="text-2xl font-bold">Curriculum Vitae</div>
+      <div className="text-2xl font-bold">{heading}</div>
       <div className="rounded-2xl border border-border p-5">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-semibold tracking-wider text-muted-foreground">ARTIST STATEMENT</div>
