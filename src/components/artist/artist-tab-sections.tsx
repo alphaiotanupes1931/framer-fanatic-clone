@@ -549,7 +549,15 @@ export function ArtistEventsGrouped({ events }: { events: Array<{ id: string; ti
   const past = events.filter((e) => new Date(e.starts_at).getTime() < now);
   const renderCard = (e: typeof events[number]) => (
     <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-      {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-56 object-cover" />}
+      {e.image_url && (
+        <img
+          src={e.image_url}
+          alt={e.title}
+          className="w-full h-56 object-cover bg-neutral-100"
+          loading="lazy"
+          onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }}
+        />
+      )}
       <div className="p-4 space-y-2">
         <div className="text-xs text-muted-foreground">
           {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {new Date(e.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
