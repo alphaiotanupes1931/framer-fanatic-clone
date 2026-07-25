@@ -231,6 +231,38 @@ export function OrgCreateDialog({
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickImage(f); e.target.value = ""; }}
           />
 
+          {/* Banner / background dropzone */}
+          <button
+            type="button"
+            onClick={() => bannerRef.current?.click()}
+            className="mb-6 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50/60 text-center transition hover:border-orange-300 hover:bg-orange-50/40"
+            style={
+              bannerPreviewUrl || form.banner_url
+                ? { backgroundImage: `url(${bannerPreviewUrl || form.banner_url})`, backgroundSize: "cover", backgroundPosition: "center", minHeight: 160 }
+                : { minHeight: 120 }
+            }
+          >
+            {uploadingBanner ? (
+              <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white">
+                <Loader2 className="h-4 w-4 animate-spin" /> Uploading…
+              </div>
+            ) : bannerPreviewUrl || form.banner_url ? (
+              <div className="rounded-full bg-black/50 px-3 py-1.5 text-sm text-white">Change background</div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 py-6 text-neutral-500">
+                <ImagePlus className="h-8 w-8" strokeWidth={1.5} />
+                <div className="text-[15px] font-medium">Add background image (optional)</div>
+              </div>
+            )}
+          </button>
+          <input
+            ref={bannerRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickBanner(f); e.target.value = ""; }}
+          />
+
           <div className="space-y-3">
             <input
               value={form.name}
