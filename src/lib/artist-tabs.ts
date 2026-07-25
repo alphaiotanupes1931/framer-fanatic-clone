@@ -9,7 +9,7 @@ import { DollarSign, Scissors, HelpCircle, Star, Palette, Hammer, Building2, New
 export type ArtistTabKey =
   | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
   | "episodes" | "guests" | "listen" | "contact" | "sponsors" | "clips" | "qa" | "bonus"
-  | "studio" | "series" | "gallery" | "available_works"
+  | "studio" | "series" | "gallery"
   | "fashion_line" | "lookbook" | "drops" | "collabs" | "saved" | "tickets"
   | "videos" | "shop" | "reviews"
   | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support"
@@ -57,6 +57,7 @@ const PODCAST: ArtistTab[] = [
   { key: "clips", label: "Clips", Icon: Scissors },
   { key: "qa", label: "Q&A", Icon: HelpCircle },
   { key: "bonus", label: "Bonus", Icon: Star },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "reviews", label: "Reviews", Icon: MessageCircle },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "contact", label: "Contact", Icon: Mail },
@@ -66,7 +67,7 @@ const PODCAST: ArtistTab[] = [
 
 const STUDIO: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
-  { key: "available_works", label: "Available Works", Icon: ShoppingBag },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "studio", label: "Studio", Icon: Flame },
   { key: "series", label: "Series", Icon: Layers },
   { key: "events", label: "Events", Icon: Calendar },
@@ -95,6 +96,7 @@ const PERFORMANCE: ArtistTab[] = [
   { key: "repertoire", label: "Repertoire", Icon: Layers },
   { key: "reel", label: "Reel", Icon: Radio },
   { key: "shows", label: "Shows", Icon: MapPin },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "reviews", label: "Reviews", Icon: MessageCircle },
   { key: "book", label: "Book", Icon: BookOpen },
   { key: "events", label: "Events", Icon: Calendar },
@@ -125,6 +127,7 @@ const FASHION: ArtistTab[] = [
   { key: "lookbook", label: "Lookbook", Icon: Shirt },
   { key: "drops", label: "Drops", Icon: Package },
   { key: "collabs", label: "Collabs", Icon: Users },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
