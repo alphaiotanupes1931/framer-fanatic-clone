@@ -292,7 +292,7 @@ function PublicProfilePage() {
         <ArrowLeft className="h-5 w-5" />
       </button>
 
-      {/* Banner with floating actions + category chip */}
+      {/* Banner (no overlays) */}
       <div
         className="relative h-44 overflow-hidden rounded-2xl sm:h-60"
         style={
@@ -300,40 +300,7 @@ function PublicProfilePage() {
             ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
             : { backgroundColor: "#e7e5e0" }
         }
-      >
-        {categoryLabel && (
-          <div className="absolute left-4 top-4 flex items-center gap-2">
-            {isArtistView && (
-              <span className="inline-flex items-center rounded-full bg-[#d4580a] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur">
-                Artist Page
-              </span>
-            )}
-            <span className="inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-              {categoryLabel}
-            </span>
-          </div>
-        )}
-        <div className="absolute right-3 top-3 flex items-center gap-2">
-          <button
-            onClick={share}
-            aria-label="Share"
-            className="grid h-9 w-9 place-items-center rounded-full bg-white/95 text-neutral-700 shadow-sm backdrop-blur hover:text-[#d4580a]"
-          >
-            <Send className="h-4 w-4 -rotate-45" />
-          </button>
-          {!isSelf && (
-            <button
-              onClick={toggleFollow}
-              disabled={working}
-              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 ${
-                isFollowing ? "bg-white/95 text-neutral-700" : "bg-white/95 text-neutral-800 hover:text-[#d4580a]"
-              }`}
-            >
-              {isFollowing ? <><UserCheck className="h-4 w-4" /> Following</> : <><UserPlus className="h-4 w-4" /> Follow</>}
-            </button>
-          )}
-        </div>
-      </div>
+      />
 
       {/* Avatar overlapping banner */}
       <div className="relative px-1 sm:px-2">
@@ -355,6 +322,39 @@ function PublicProfilePage() {
           <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
             <Star className="h-3 w-3" /> Grant Founding
           </span>
+        </div>
+        {/* Category + actions moved below the name */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {categoryLabel && (
+            <>
+              {isArtistView && (
+                <span className="inline-flex items-center rounded-full bg-[#d4580a] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                  Artist Page
+                </span>
+              )}
+              <span className="inline-flex items-center rounded-full bg-neutral-900 px-3 py-1 text-xs font-semibold text-white">
+                {categoryLabel}
+              </span>
+            </>
+          )}
+          <button
+            onClick={share}
+            aria-label="Share"
+            className="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 hover:text-[#d4580a]"
+          >
+            <Send className="h-4 w-4 -rotate-45" />
+          </button>
+          {!isSelf && (
+            <button
+              onClick={toggleFollow}
+              disabled={working}
+              className={`inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold disabled:opacity-60 ${
+                isFollowing ? "bg-white text-neutral-700" : "bg-white text-neutral-800 hover:text-[#d4580a]"
+              }`}
+            >
+              {isFollowing ? <><UserCheck className="h-4 w-4" /> Following</> : <><UserPlus className="h-4 w-4" /> Follow</>}
+            </button>
+          )}
         </div>
         {profile.bio && (
           <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{profile.bio}</p>
