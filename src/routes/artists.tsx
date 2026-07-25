@@ -22,7 +22,19 @@ type Creator = {
   category?: string | null;
 };
 
-const CATEGORIES = ["All", "Visual Art", "Music", "Video", "Photography", "Performance", "Literary", "Fashion", "Podcaster"] as const;
+const CATEGORIES = [
+  "All",
+  "Visual Art",
+  "Music",
+  "DJ",
+  "Video",
+  "Photography",
+  "Performance",
+  "Literary",
+  "Mixed Media",
+  "Fashion",
+  "Podcaster",
+] as const;
 type Category = (typeof CATEGORIES)[number];
 
 function normalize(v?: string | null) {
@@ -31,11 +43,27 @@ function normalize(v?: string | null) {
 
 function matchesCategory(c: Creator, cat: Category) {
   if (cat === "All") return true;
+  // Only actual artists — never residents/visitors.
+  const roleN = normalize(c.role);
+  if (roleN === "resident" || roleN === "visitor") return false;
+  const catN = normalize(c.category);
+  if (catN === "resident" || catN === "visitor") return false;
   const target = cat.toLowerCase();
-  const hay = `${normalize(c.category)} ${normalize(c.role)} ${normalize(c.bio)}`;
-  if (target === "visual art") return /visual|paint|mixed media|art(ist)?|illustrat/.test(hay);
-  if (target === "podcaster") return /podcast/.test(hay);
-  return hay.includes(target);
+  // Prefer exact category match (case-insensitive) — the dropdown writes
+  // the same label the filter uses.
+  if (catN === target) return true;
+  // Domain aliases so legacy values still land in the right bucket.
+  if (target === "visual art") return /visual art|painter|sculpt|illustrat|muralist/.test(catN);
+  if (target === "music") return /music|musician|producer/.test(catN);
+  if (target === "dj") return catN === "dj";
+  if (target === "video") return /video|videograph|film/.test(catN);
+  if (target === "photography") return /photo/.test(catN);
+  if (target === "performance") return /performance|dancer/.test(catN);
+  if (target === "literary") return /literary|poet|writer/.test(catN);
+  if (target === "mixed media") return /mixed media/.test(catN);
+  if (target === "fashion") return /fashion/.test(catN);
+  if (target === "podcaster") return /podcast/.test(catN);
+  return false;
 }
 
 function FindCreatorPage() {
