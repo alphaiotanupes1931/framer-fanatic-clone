@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Heart, MessageCircle, Share2, Trash2, Send, Bookmark, Pencil } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Trash2, Send, Bookmark, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 
 export const Route = createFileRoute("/posts/$postId")({
   component: PostDetail,
@@ -34,6 +36,7 @@ function PostDetail() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -96,12 +99,8 @@ function PostDetail() {
     await load();
   };
 
-  const share = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) await navigator.share({ url, title: "Planet Baltimore" });
-      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
-    } catch { /* cancelled */ }
+  const shareExternal = () => {
+    void externalShare(window.location.href, post?.content?.slice(0, 80) || "A post on Planet Baltimore");
   };
 
   const remove = async () => {
@@ -195,7 +194,12 @@ function PostDetail() {
               <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {post.likes_count ?? 0}
             </button>
             <div className="inline-flex items-center gap-2"><MessageCircle className="h-5 w-5" /> {comments.length}</div>
-            <button onClick={share} className="inline-flex items-center gap-2 hover:text-foreground"><Share2 className="h-5 w-5" /></button>
+            <button onClick={() => setShareOpen(true)} aria-label="Send to friends" title="Send to friends" className="inline-flex items-center gap-2 hover:text-foreground">
+              <Send className="h-5 w-5" />
+            </button>
+            <button onClick={shareExternal} aria-label="Share outside the app" title="Share outside the app" className="inline-flex items-center gap-2 hover:text-foreground">
+              <Send className="h-5 w-5 -rotate-45" />
+            </button>
             <button onClick={toggleSave} className={`ml-auto inline-flex items-center gap-2 transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`}>
               <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
             </button>
