@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Clock, Heart, MessageCircle, Share2, Bookmark, Trash2, Send, Star, MoreHorizontal, Pencil } from "lucide-react";
+import { Clock, Heart, MessageCircle, Bookmark, Trash2, Send, Star, MoreHorizontal, Pencil } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -254,7 +254,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           <Send className="h-5 w-5" />
         </button>
         <button onClick={sendExternal} className="flex items-center transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
-          <Share2 className="h-5 w-5" />
+          <Send className="h-5 w-5 -rotate-45" />
         </button>
         <button onClick={toggleSave} className={`flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
