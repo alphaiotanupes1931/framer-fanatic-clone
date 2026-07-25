@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
+import { ImageUpload } from "@/components/shared/image-upload";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Tag, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -161,7 +162,7 @@ function NewListingDialog({ onClose, onCreated, sellerId }: { onClose: () => voi
               {CONDITIONS.map((c) => <option key={c} value={c}>{c.replace("-", " ")}</option>)}
             </select>
           </div>
-          <input value={form.photo} onChange={(e) => setForm({ ...form, photo: e.target.value })} placeholder="Photo URL (optional)" className="w-full rounded-lg border border-border px-3 py-2" />
+          <ImageUpload value={form.photo} onChange={(url) => setForm({ ...form, photo: url })} label="Upload listing photo (optional)" />
         </div>
         <div className="mt-4 flex justify-end gap-2">
           <button onClick={onClose} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent">Cancel</button>
