@@ -3,8 +3,14 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Trash2, ImageIcon, Loader2 } from "lucide-react";
+import {
+  Send, Trash2, ImageIcon, Loader2, MapPin, MessageSquare, Users, UserPlus,
+  GraduationCap, Award, BookOpen, Newspaper, Mic, Film, Ticket, Music, Camera,
+  Landmark, Wrench, Globe, Handshake, Drama, Shirt, Disc, Sparkles, ChevronDown, ChevronUp,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { createArtworkCheckout } from "@/lib/stripe.functions";
 
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
