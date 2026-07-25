@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { useUserRole } from "@/hooks/use-user-role";
 import {
-  Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Share2,
+  Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Send,
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
@@ -323,7 +323,7 @@ function OrgProfile() {
             aria-label="Share"
             className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white p-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
           >
-            <Share2 className="h-4 w-4" />
+            <Send className="h-4 w-4 -rotate-45" />
           </button>
           <button
             onClick={toggleJoin}
