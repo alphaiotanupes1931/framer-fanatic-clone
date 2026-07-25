@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUpload } from "@/components/shared/image-upload";
 
 export type ProfileSection = {
   id: string;
@@ -92,8 +93,7 @@ export function ProfileSectionTab({
             placeholder="Title" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
           <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })}
             placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-          <input value={form.media_url} onChange={(e) => setForm({ ...form, media_url: e.target.value })}
-            placeholder="Image or media URL (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+          <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Upload photo (optional)" />
           <input value={form.link_url} onChange={(e) => setForm({ ...form, link_url: e.target.value })}
             placeholder="External link (optional)" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
           <div className="flex justify-end gap-2">
