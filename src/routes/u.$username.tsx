@@ -557,7 +557,7 @@ function PublicProfilePage() {
             <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
           ) : tab === "gallery" ? (
             <ArtistGalleryTab userId={profile.id} canEdit={canEdit} />
-          ) : tab === "available_works" ? (
+          ) : tab === "shop" ? (
             <ArtistAvailableWorksTab userId={profile.id} canEdit={canEdit} />
           ) : (
             <EmptyTab icon={Layers} label="Nothing here yet." />
