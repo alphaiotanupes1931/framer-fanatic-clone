@@ -194,6 +194,97 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     return { url: session.url };
   });
 
+/** Check whether an organization's owner has Stripe Connect ready to accept payments. */
+export const getOrgPaymentStatus = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ orgId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id, owner_id, name, slug")
+      .eq("id", data.orgId)
+      .maybeSingle();
+    if (!org) throw new Error("Organization not found");
+    const { data: owner } = await supabaseAdmin
+      .from("profiles")
+      .select("stripe_account_id, stripe_charges_enabled")
+      .eq("id", org.owner_id)
+      .maybeSingle();
+    return {
+      ready: !!(owner?.stripe_account_id && owner.stripe_charges_enabled),
+      orgName: org.name,
+      orgSlug: org.slug,
+    };
+  });
+
+/** Create a Stripe Checkout Session for a one-time donation to an organization. */
+export const createOrgDonationCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      orgId: z.string().uuid(),
+      amountCents: z.number().int().min(100).max(5_000_000),
+      returnOrigin: z.string().url(),
+      note: z.string().max(280).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { getStripe, priceBreakdown } = await import("./stripe.server");
+    const stripe = getStripe();
+
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("id, owner_id, name, slug")
+      .eq("id", data.orgId)
+      .maybeSingle();
+    if (!org) throw new Error("Organization not found");
+
+    const { data: owner } = await supabase
+      .from("profiles")
+      .select("stripe_account_id, stripe_charges_enabled")
+      .eq("id", org.owner_id)
+      .maybeSingle();
+    if (!owner?.stripe_account_id || !owner.stripe_charges_enabled) {
+      throw new Error("This organization has not yet set up a payment method.");
+    }
+
+    const breakdown = priceBreakdown(data.amountCents);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      success_url: `${data.returnOrigin}/o/${org.slug}?donation=success`,
+      cancel_url: `${data.returnOrigin}/o/${org.slug}/donate?cancelled=1`,
+      customer_email: (context.claims as { email?: string } | null)?.email,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: breakdown.buyerTotalCents,
+            product_data: {
+              name: `Donation to ${org.name}`,
+              description: data.note?.trim() ? data.note.trim().slice(0, 200) : undefined,
+            },
+          },
+        },
+      ],
+      payment_intent_data: {
+        application_fee_amount: breakdown.platformFeeCents,
+        transfer_data: { destination: owner.stripe_account_id },
+      },
+      metadata: {
+        kind: "donation",
+        org_id: org.id,
+        donor_id: userId,
+        owner_id: org.owner_id,
+        amount_cents: String(data.amountCents),
+      },
+    });
+
+    return { url: session.url };
+  });
+
 /** Upgrade the signed-in user to artist. Open to anyone; no location check. */
 export const becomeArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
