@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
+import { PROFILE_TAGS } from "@/lib/categories";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
