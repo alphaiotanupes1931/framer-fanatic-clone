@@ -483,6 +483,34 @@ function OrgProfile() {
 }
 
 function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org: Org; canManage: boolean; onChange: (o: Org) => void; initialEdit?: boolean; onEditClose?: () => void }) {
+  return AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose });
+}
+
+function InviteTab({ orgName }: { orgName: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mx-auto max-w-2xl space-y-6 py-6">
+      <div className="rounded-2xl border border-border bg-neutral-50 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+          <UserPlus className="h-7 w-7 text-primary" />
+        </div>
+        <h2 className="text-xl font-bold text-neutral-900">Invite friends to {orgName}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Grow the community. Upload a contact list or paste emails, we handle the rest.
+        </p>
+      </div>
+      <button
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-200 px-6 py-4 text-base font-semibold text-neutral-800 transition hover:bg-neutral-300"
+      >
+        <UserPlus className="h-5 w-5" /> Invite Friends
+      </button>
+      <InviteFriendsDialog open={open} onClose={() => setOpen(false)} />
+    </div>
+  );
+}
+
+function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { org: Org; canManage: boolean; onChange: (o: Org) => void; initialEdit?: boolean; onEditClose?: () => void }) {
   const [edit, setEdit] = useState(!!initialEdit);
   useEffect(() => { if (initialEdit) setEdit(true); }, [initialEdit]);
   const [form, setForm] = useState({
