@@ -285,6 +285,84 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
     return { url: session.url };
   });
 
+/** Create a Stripe Checkout Session for buying a listed artwork (Available Works). */
+export const createArtworkCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      workId: z.string().uuid(),
+      returnOrigin: z.string().url(),
+      shippingNote: z.string().max(500).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { getStripe, priceBreakdown } = await import("./stripe.server");
+    const stripe = getStripe();
+
+    const { data: work } = await supabase
+      .from("profile_sections")
+      .select("id, user_id, title, subtitle, year, media_url, link_url, kind")
+      .eq("id", data.workId)
+      .maybeSingle();
+    if (!work || work.kind !== "available_work") throw new Error("Artwork not found");
+
+    // Parse metadata JSON stored in link_url: { price_cents, edition, status }
+    let meta: { price_cents?: number; edition?: string; status?: string } = {};
+    try { meta = work.link_url ? JSON.parse(work.link_url) : {}; } catch { meta = {}; }
+    const priceCents = Number(meta.price_cents ?? 0);
+    if (!priceCents || priceCents < 100) throw new Error("This work is not priced for sale.");
+    if (meta.status && meta.status !== "available") throw new Error("This work is no longer available.");
+
+    const { data: owner } = await supabase
+      .from("profiles")
+      .select("stripe_account_id, stripe_charges_enabled, display_name, username")
+      .eq("id", work.user_id)
+      .maybeSingle();
+    if (!owner?.stripe_account_id || !owner.stripe_charges_enabled) {
+      throw new Error("This artist has not set up a payment method yet.");
+    }
+
+    const breakdown = priceBreakdown(priceCents);
+    const artistHandle = owner.username || owner.display_name || "artist";
+    const details = [work.subtitle, work.year, meta.edition].filter(Boolean).join(" \u00b7 ");
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      success_url: `${data.returnOrigin}/u/${artistHandle}?purchase=success`,
+      cancel_url: `${data.returnOrigin}/u/${artistHandle}?purchase=cancelled`,
+      customer_email: (context.claims as { email?: string } | null)?.email,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: breakdown.buyerTotalCents,
+            product_data: {
+              name: work.title || "Original artwork",
+              description: details || undefined,
+              images: work.media_url ? [work.media_url] : undefined,
+            },
+          },
+        },
+      ],
+      payment_intent_data: {
+        application_fee_amount: breakdown.platformFeeCents,
+        transfer_data: { destination: owner.stripe_account_id },
+      },
+      metadata: {
+        kind: "artwork",
+        work_id: work.id,
+        artist_id: work.user_id,
+        buyer_id: userId,
+        amount_cents: String(priceCents),
+        shipping_note: (data.shippingNote ?? "").slice(0, 400),
+      },
+    });
+
+    return { url: session.url };
+  });
+
 /** Upgrade the signed-in user to artist. Open to anyone; no location check. */
 export const becomeArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
