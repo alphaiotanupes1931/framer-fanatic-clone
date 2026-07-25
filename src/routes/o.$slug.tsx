@@ -470,7 +470,8 @@ function OrgProfile() {
           )}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
-          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Invite","Voting","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
+          {tab === "Invite" && <InviteTab orgName={org.name} />}
+          {(["Announcements","Threads","Polls","Gallery","Resources","Jobs","Leaderboard","Rules","Voting","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
