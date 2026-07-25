@@ -1513,30 +1513,58 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
 function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", body: "", link_url: "", media_url: "" });
-  const [uploadingImg, setUploadingImg] = useState(false);
-  const postFileRef = useRef<HTMLInputElement>(null);
+  type Mode = "text" | "photo" | "video";
+  const [mode, setMode] = useState<Mode>("text");
+  const [form, setForm] = useState({ title: "", body: "", link_url: "" });
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [bg, setBg] = useState<{ bg: string; fg: string }>({ bg: "", fg: "#0F172A" });
+  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const uploadPostImage = async (file: File) => {
-    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
-    if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+  const BG_COLORS = [
+    { name: "None",      bg: "",        fg: "#0F172A" },
+    { name: "Baltimore", bg: "#d4580a", fg: "#FFFFFF" },
+    { name: "Deep Blue", bg: "#0F172A", fg: "#FCFCFA" },
+    { name: "Sky",       bg: "#0EA5E9", fg: "#FFFFFF" },
+    { name: "Rose",      bg: "#EC4899", fg: "#FFFFFF" },
+    { name: "Forest",    bg: "#16A34A", fg: "#FFFFFF" },
+    { name: "Sunset",    bg: "#F59E0B", fg: "#0F172A" },
+    { name: "Violet",    bg: "#7C3AED", fg: "#FFFFFF" },
+    { name: "Cream",     bg: "#FDF6E3", fg: "#0F172A" },
+  ];
+  const FONT_SIZE_CLASS: Record<string, string> = { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-2xl" };
+
+  const resetForm = () => {
+    setForm({ title: "", body: "", link_url: "" });
+    setMediaUrls([]);
+    setBg({ bg: "", fg: "#0F172A" });
+    setFontSize("md");
+    setMode("text");
+  };
+
+  const uploadFile = async (file: File) => {
+    const isVideo = file.type.startsWith("video/");
+    const cap = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > cap) { toast.error(`${isVideo ? "Video" : "Image"} must be under ${cap / 1024 / 1024}MB`); return; }
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) { toast.error("Sign in first"); return; }
-    setUploadingImg(true);
+    setUploading(true);
+    const tId = toast.loading(`Uploading ${isVideo ? "video" : "image"}...`);
     try {
-      const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
-      const path = `${uid}/org-post-${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
+      const ext = (file.name.split(".").pop() || (isVideo ? "mp4" : "jpg")).toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `${uid}/org-${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
       if (upErr) throw upErr;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
-      setForm((f) => ({ ...f, media_url: signed.signedUrl }));
-      toast.success("Image uploaded");
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
+      setMediaUrls((prev) => [...prev, signed.signedUrl]);
+      toast.success("Uploaded", { id: tId });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
+      toast.error(e instanceof Error ? e.message : "Upload failed", { id: tId });
     } finally {
-      setUploadingImg(false);
+      setUploading(false);
     }
   };
 
@@ -1544,7 +1572,10 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
     let q = supabase.from("organization_posts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
     if (kind) q = q.eq("kind", kind);
     const { data } = await q;
-    setItems((data ?? []) as OrgPost[]);
+    setItems(((data ?? []) as unknown[]).map((r) => {
+      const row = r as Record<string, unknown>;
+      return { ...(row as object), media_urls: Array.isArray(row.media_urls) ? (row.media_urls as string[]) : [] } as OrgPost;
+    }));
   };
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId, kind]);
 
@@ -1553,19 +1584,30 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) return;
-    const { error } = await supabase.from("organization_posts").insert({
+    const firstImage = mediaUrls.find((u) => !/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) || null;
+    const firstVideo = mediaUrls.find((u) =>  /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) || null;
+    const payload: Record<string, unknown> = {
       org_id: orgId, author_id: uid, kind: kind ?? "update", title: form.title.trim(),
-      body: form.body.trim() || null, link_url: form.link_url.trim() || null, media_url: form.media_url.trim() || null,
-    });
+      body: form.body.trim() || null,
+      link_url: form.link_url.trim() || null,
+      media_url: firstImage,
+      video_url: firstVideo,
+      media_urls: mediaUrls,
+      bg_color: mode === "text" && bg.bg ? bg.bg : null,
+      text_color: mode === "text" && bg.bg ? bg.fg : null,
+      font_size: fontSize,
+    };
+    const { error } = await supabase.from("organization_posts").insert(payload as never);
     if (error) return toast.error(error.message);
-    setOpen(false); setForm({ title: "", body: "", link_url: "", media_url: "" });
+    setOpen(false); resetForm();
     void load();
   };
 
   const remove = async (id: string) => {
+    if (!confirm("Delete this post?")) return;
     const { error } = await supabase.from("organization_posts").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    void load();
+    setItems((prev) => prev.filter((p) => p.id !== id));
   };
 
   return (
@@ -1578,49 +1620,157 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
         </div>
       )}
       {open && canManage && (
-        <div className="space-y-2 rounded-2xl border border-border bg-neutral-50 p-4">
-          <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
-          <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} placeholder="Details" rows={3} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
-          <input value={form.link_url} onChange={(e) => setForm({...form, link_url: e.target.value})} placeholder="Link (optional)" className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
-          <input ref={postFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadPostImage(f); e.target.value = ""; }} />
-          {form.media_url ? (
-            <div className="flex items-center gap-3 rounded-lg border border-border bg-white p-2">
-              <img src={form.media_url} alt="preview" className="h-16 w-16 rounded-md object-cover" />
-              <div className="flex-1 text-xs text-neutral-600">Image attached</div>
-              <button type="button" onClick={() => setForm((f) => ({ ...f, media_url: "" }))} className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-700 hover:border-red-300 hover:text-red-600">Remove</button>
+        <div className="space-y-4 rounded-2xl border border-border bg-neutral-50 p-4">
+          {/* Mode tabs */}
+          <div className="flex flex-wrap gap-2">
+            {([
+              { id: "text",  label: "Text",  Icon: TypeIcon },
+              { id: "photo", label: "Photo", Icon: ImagePlus },
+              { id: "video", label: "Video", Icon: VideoIcon },
+            ] as { id: Mode; label: string; Icon: typeof TypeIcon }[]).map(({ id, label, Icon }) => {
+              const active = mode === id;
+              return (
+                <button key={id} type="button" onClick={() => setMode(id)}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? "border-[#d4580a] bg-[#d4580a] text-white" : "border-neutral-200 bg-white text-neutral-700 hover:border-orange-300"}`}>
+                  <Icon className="h-3.5 w-3.5" /> {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm" />
+
+          {mode === "text" ? (
+            <div className="space-y-3">
+              <div className="rounded-2xl p-6 min-h-[160px] flex items-center justify-center transition"
+                style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}>
+                <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} rows={4}
+                  placeholder="Share your thoughts..."
+                  style={{ color: bg.fg }}
+                  className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus:outline-none ${FONT_SIZE_CLASS[fontSize]}`} />
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600">Background</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {BG_COLORS.map((c) => {
+                    const active = c.bg === bg.bg;
+                    return (
+                      <button key={c.name} type="button" onClick={() => setBg(c)} title={c.name}
+                        className={`h-8 w-8 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
+                        style={{ background: c.bg || "linear-gradient(135deg, #fff 50%, #eee 50%)" }} />
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600">Font size</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(["sm","md","lg","xl"] as const).map((s) => (
+                    <button key={s} type="button" onClick={() => setFontSize(s)}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold ${fontSize === s ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
+                      {s.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
-            <button type="button" onClick={() => postFileRef.current?.click()} disabled={uploadingImg} className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-white px-3 py-3 text-sm font-medium text-neutral-600 hover:border-orange-300 hover:text-[#d4580a] disabled:opacity-60">
-              {uploadingImg ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-              {uploadingImg ? "Uploading…" : "Upload image (optional)"}
-            </button>
+            <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} placeholder="Caption (optional)" rows={3} className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm" />
           )}
-          <button onClick={add} className="w-full rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Post</button>
+
+          {(mode === "photo" || mode === "video") && (
+            <div className="space-y-2">
+              <input ref={fileRef} type="file" multiple
+                accept={mode === "video" ? "video/*,image/*" : "image/*,video/*"}
+                className="hidden"
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  for (const f of files) await uploadFile(f);
+                  if (fileRef.current) fileRef.current.value = "";
+                }} />
+              {mediaUrls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {mediaUrls.map((u, i) => {
+                    const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
+                    return (
+                      <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+                        {isVideo ? <video src={u} className="h-24 w-full object-cover" /> : <img src={u} alt="" className="h-24 w-full object-cover" />}
+                        <button type="button" onClick={() => setMediaUrls((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-white px-3 py-3 text-sm font-medium text-neutral-600 hover:border-orange-300 hover:text-[#d4580a] disabled:opacity-60">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (mode === "video" ? <VideoIcon className="h-4 w-4" /> : <ImagePlus className="h-4 w-4" />)}
+                {uploading ? "Uploading…" : mediaUrls.length ? "Add more" : mode === "video" ? "Upload video (up to 50MB)" : "Upload image or video"}
+              </button>
+            </div>
+          )}
+
+          <input value={form.link_url} onChange={(e) => setForm({...form, link_url: e.target.value})} placeholder="Link (optional)" className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm" />
+
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => { setOpen(false); resetForm(); }} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700">Cancel</button>
+            <button onClick={add} disabled={uploading} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Post</button>
+          </div>
         </div>
       )}
       {items.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">No {kind ?? "post"} entries yet.</div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {items.map((p) => (
-            <div key={p.id} className="group relative overflow-hidden rounded-2xl border border-border bg-card">
-              {p.media_url && <img src={p.media_url} alt={p.title} className="h-48 w-full object-cover" loading="lazy" decoding="async" />}
-              <div className="p-4">
-                <div className="font-semibold">{p.title}</div>
-                <div className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
-                {p.body && <p className="mt-2 text-sm text-neutral-700 whitespace-pre-wrap">{p.body}</p>}
-                {p.link_url && (
-                  <a href={p.link_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
-                    Open <ExternalLink className="h-3 w-3" />
-                  </a>
+          {items.map((p) => {
+            const media = (p.media_urls && p.media_urls.length ? p.media_urls : [p.video_url, p.media_url].filter(Boolean) as string[]);
+            const styled = !!(p.bg_color);
+            const sizeClass = FONT_SIZE_CLASS[p.font_size || "md"];
+            return (
+              <div key={p.id} className="group relative overflow-hidden rounded-2xl border border-border bg-card">
+                {media.length > 0 && (
+                  <div className="relative">
+                    {(() => {
+                      const u = media[0];
+                      const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
+                      return isVideo
+                        ? <video src={u} controls className="h-56 w-full bg-black object-cover" />
+                        : <img src={u} alt={p.title} className="h-56 w-full object-cover" loading="lazy" decoding="async" />;
+                    })()}
+                    {media.length > 1 && (
+                      <div className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">+{media.length - 1}</div>
+                    )}
+                  </div>
+                )}
+                <div className="p-4">
+                  <div className="font-semibold">{p.title}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
+                  {p.body && (
+                    styled ? (
+                      <div className={`mt-3 rounded-xl p-4 text-center font-medium whitespace-pre-wrap ${sizeClass}`}
+                        style={{ background: p.bg_color || undefined, color: p.text_color || "#fff" }}>
+                        {p.body}
+                      </div>
+                    ) : (
+                      <p className={`mt-2 whitespace-pre-wrap text-neutral-700 ${sizeClass}`}>{p.body}</p>
+                    )
+                  )}
+                  {p.link_url && (
+                    <a href={p.link_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
+                      Open <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+                {canManage && (
+                  <button onClick={() => remove(p.id)} className="absolute right-2 top-2 rounded-full bg-card/90 p-1.5 opacity-0 group-hover:opacity-100">
+                    <Trash2 className="h-3.5 w-3.5 text-red-600" />
+                  </button>
                 )}
               </div>
-              {canManage && (
-                <button onClick={() => remove(p.id)} className="absolute right-2 top-2 rounded-full bg-card/90 p-1.5 opacity-0 group-hover:opacity-100">
-                  <Trash2 className="h-3.5 w-3.5 text-red-600" />
-                </button>
-              )}
-            </div>
+            );
+          })}
           ))}
         </div>
       )}
