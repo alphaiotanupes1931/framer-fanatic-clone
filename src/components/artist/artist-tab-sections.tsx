@@ -27,7 +27,7 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
         <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="group block">
           {img ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
-              <img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+              <img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
           ) : videoUrl ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-black">
