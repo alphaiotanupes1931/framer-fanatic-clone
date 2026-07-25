@@ -28,6 +28,36 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               ? session.payment_intent
               : session.payment_intent?.id ?? null;
             const isDues = session.metadata?.kind === "dues";
+            const isDonation = session.metadata?.kind === "donation";
+            if (isDonation) {
+              const ownerId = session.metadata?.owner_id ?? null;
+              const donorId = session.metadata?.donor_id ?? null;
+              const orgId = session.metadata?.org_id ?? null;
+              const amountCents = Number(session.metadata?.amount_cents ?? "0") || 0;
+              if (ownerId) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: ownerId,
+                  actor_id: donorId,
+                  type: "donation_received",
+                  target_type: "organization",
+                  target_id: orgId,
+                  message: `You received a $${(amountCents / 100).toFixed(2)} donation.`,
+                  metadata: { org_id: orgId, amount_cents: amountCents, payment_intent: paymentIntentId },
+                });
+              }
+              if (donorId) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: donorId,
+                  actor_id: null,
+                  type: "donation_sent",
+                  target_type: "organization",
+                  target_id: orgId,
+                  message: "Thank you! Your donation is confirmed.",
+                  metadata: { org_id: orgId, amount_cents: amountCents, payment_intent: paymentIntentId },
+                });
+              }
+              return new Response("ok");
+            }
             if (isDues) {
               const { data: dueRows } = await supabaseAdmin
                 .from("organization_dues_payments")
