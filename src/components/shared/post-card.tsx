@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { Flag } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -357,7 +357,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           <Send className="h-5 w-5" />
         </button>
         <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
-          <Share2 className="h-5 w-5" />
+          <Send className="h-5 w-5 -rotate-45" />
         </button>
         <button onClick={toggleSave} className={`ml-auto flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
           <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
