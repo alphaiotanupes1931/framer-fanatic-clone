@@ -9,7 +9,7 @@ import { DollarSign, Scissors, HelpCircle, Star, Palette, Hammer, Building2, New
 export type ArtistTabKey =
   | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
   | "episodes" | "guests" | "listen" | "contact" | "sponsors" | "clips" | "qa" | "bonus"
-  | "studio" | "series" | "gallery" | "available_works"
+  | "studio" | "series" | "gallery"
   | "fashion_line" | "lookbook" | "drops" | "collabs" | "saved" | "tickets"
   | "videos" | "shop" | "reviews"
   | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support"
@@ -66,7 +66,7 @@ const PODCAST: ArtistTab[] = [
 
 const STUDIO: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
-  { key: "available_works", label: "Available Works", Icon: ShoppingBag },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "studio", label: "Studio", Icon: Flame },
   { key: "series", label: "Series", Icon: Layers },
   { key: "events", label: "Events", Icon: Calendar },
