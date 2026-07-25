@@ -29,7 +29,7 @@ export function OnboardingCard() {
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {steps.map(({ icon: Icon, title, description, to, cta }) => (
-          <Link key={to + title} to={to} className="group flex min-h-[62px] items-start gap-3 rounded-lg border border-slate-900 bg-white px-3 py-2.5 transition-colors hover:border-[#d4580a]">
+          <Link key={to + title} to={to} className="group flex min-h-[62px] items-start gap-3 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 transition-colors hover:border-[#d4580a]">
             <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center">
               <Icon className="h-4 w-4 text-slate-900 transition-colors group-hover:text-[#d4580a]" />
             </div>
