@@ -249,6 +249,21 @@ function StoryDetail() {
           </section>
         </div>
       </article>
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={typeof window !== "undefined" ? window.location.href : `/stories/${storyId}`}
+        title={story.title}
+        preview={{
+          type: "story",
+          id: story.id,
+          url: typeof window !== "undefined" ? window.location.href : `/stories/${storyId}`,
+          title: story.title,
+          excerpt: excerptText || null,
+          image: story.cover_url || null,
+          author: author?.display_name || author?.username || null,
+        }}
+      />
     </AppLayout>
   );
 }
