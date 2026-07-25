@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
+import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
