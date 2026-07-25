@@ -151,11 +151,15 @@ function OrgProfile() {
     setUploading(field);
     try {
       const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
-      const path = `orgs/${org.id}/${field}-${Date.now()}.${ext}`;
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) throw new Error("Sign in first");
+      const path = `${uid}/org-${org.id}-${field}-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      const url = data.publicUrl;
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
+      const url = signed.signedUrl;
       const patch = { [field]: url } as Partial<Org>;
       const { error } = await supabase.from("organizations").update(patch).eq("id", org.id);
       if (error) throw error;

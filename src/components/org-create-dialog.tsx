@@ -20,9 +20,12 @@ export function OrgCreateDialog({
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const bannerRef = useRef<HTMLInputElement>(null);
   const subs = subtypesFor(type);
   type DraftItem = { name: string; price: string; section: string; description: string };
   const [priceItems, setPriceItems] = useState<DraftItem[]>([]);
@@ -38,6 +41,7 @@ export function OrgCreateDialog({
     phone: "",
     hours: "",
     avatar_url: "",
+    banner_url: "",
   });
 
   useEffect(() => {
@@ -70,8 +74,9 @@ export function OrgCreateDialog({
       const path = `${uid}/org-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      set("avatar_url", data.publicUrl);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
+      set("avatar_url", signed.signedUrl);
       toast.success("Logo uploaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -80,7 +85,31 @@ export function OrgCreateDialog({
     }
   };
 
-  const canSubmit = form.name.trim().length > 0 && form.subtype.length > 0 && !busy && !uploading;
+  const onPickBanner = async (file: File) => {
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (!uid) { toast.error("Sign in first"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+    const localUrl = URL.createObjectURL(file);
+    setBannerPreviewUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return localUrl; });
+    setUploadingBanner(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${uid}/org-banner-${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
+      set("banner_url", signed.signedUrl);
+      toast.success("Background uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploadingBanner(false);
+    }
+  };
+
+  const canSubmit = form.name.trim().length > 0 && form.subtype.length > 0 && !busy && !uploading && !uploadingBanner;
 
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Name is required");
@@ -106,6 +135,7 @@ export function OrgCreateDialog({
         address: form.address.trim() || null,
         neighborhood: form.neighborhood.trim() || null,
         avatar_url: form.avatar_url.trim() || null,
+        banner_url: form.banner_url.trim() || null,
         hours: form.hours.trim() ? { text: form.hours.trim() } : null,
       }).select("slug").single();
       if (error) throw error;
@@ -199,6 +229,38 @@ export function OrgCreateDialog({
             accept="image/*"
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickImage(f); e.target.value = ""; }}
+          />
+
+          {/* Banner / background dropzone */}
+          <button
+            type="button"
+            onClick={() => bannerRef.current?.click()}
+            className="mb-6 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50/60 text-center transition hover:border-orange-300 hover:bg-orange-50/40"
+            style={
+              bannerPreviewUrl || form.banner_url
+                ? { backgroundImage: `url(${bannerPreviewUrl || form.banner_url})`, backgroundSize: "cover", backgroundPosition: "center", minHeight: 160 }
+                : { minHeight: 120 }
+            }
+          >
+            {uploadingBanner ? (
+              <div className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white">
+                <Loader2 className="h-4 w-4 animate-spin" /> Uploading…
+              </div>
+            ) : bannerPreviewUrl || form.banner_url ? (
+              <div className="rounded-full bg-black/50 px-3 py-1.5 text-sm text-white">Change background</div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 py-6 text-neutral-500">
+                <ImagePlus className="h-8 w-8" strokeWidth={1.5} />
+                <div className="text-[15px] font-medium">Add background image (optional)</div>
+              </div>
+            )}
+          </button>
+          <input
+            ref={bannerRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickBanner(f); e.target.value = ""; }}
           />
 
           <div className="space-y-3">
