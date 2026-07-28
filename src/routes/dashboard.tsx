@@ -264,8 +264,6 @@ function Dashboard() {
           ))}
         </div>
 
-        <div className="border-b border-slate-200" />
-
         {activeFilter === "For You" && <OnboardingCard />}
 
         {activeFilter === "Discover" && (
