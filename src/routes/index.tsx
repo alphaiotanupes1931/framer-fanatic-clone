@@ -816,6 +816,21 @@ function StoriesRotation() {
   const [stories, setStories] = useState<StoryRow[]>([]);
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSignedIn(!!s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const gate = (storyId: string) => (e: React.MouseEvent) => {
+    if (signedIn) return;
+    e.preventDefault();
+    const target = `/stories/${storyId}`;
+    try { sessionStorage.setItem("pb_post_auth_redirect", target); } catch { /* ignore */ }
+    window.location.href = `/auth?redirect=${encodeURIComponent(target)}`;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -875,7 +890,7 @@ function StoriesRotation() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="grid lg:grid-cols-[1fr_1.5fr] gap-10 md:gap-14 lg:gap-20 items-center"
         >
-          <Link to="/stories/$storyId" params={{ storyId: s.id }} className="relative mx-auto lg:mx-0 w-full max-w-[340px] sm:max-w-[400px] group">
+          <Link to="/stories/$storyId" params={{ storyId: s.id }} onClick={gate(s.id)} className="relative mx-auto lg:mx-0 w-full max-w-[340px] sm:max-w-[400px] group">
             <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] bg-ink/5">
               {s.cover_url ? (
                 <img
@@ -898,6 +913,7 @@ function StoriesRotation() {
             <Link
               to="/stories/$storyId"
               params={{ storyId: s.id }}
+              onClick={gate(s.id)}
               className="block font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em] line-clamp-2 break-words hover:underline"
             >
               {s.title || "Untitled story"}
