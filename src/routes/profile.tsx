@@ -1611,14 +1611,14 @@ function MyWritingsTab({ userId }: { userId: string }) {
     );
   }
   return (
-    <div className="flex flex-col gap-4 max-w-3xl mx-auto">
+    <div className="flex flex-col gap-4 max-w-5xl mx-auto">
       {rows.map((s) => (
         <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md">
-          {s.cover_url && <SmartImage src={s.cover_url} alt={s.title} bucket="story-covers" className="aspect-[16/9] w-full object-cover" />}
-          <div className="p-4 space-y-1.5 flex-1 min-w-0">
+          {s.cover_url && <SmartImage src={s.cover_url} alt={s.title} bucket="story-covers" className="aspect-[2/1] w-full object-cover" />}
+          <div className="p-3 space-y-1 flex-1 min-w-0">
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.status === "published" ? "Published" : "Draft"} · {new Date(s.created_at).toLocaleDateString()}</div>
-            <div className="font-bold leading-tight line-clamp-2">{s.title}</div>
-            {s.excerpt && <p className="text-sm text-muted-foreground line-clamp-3">{s.excerpt}</p>}
+            <div className="font-bold leading-tight line-clamp-1">{s.title}</div>
+            {s.excerpt && <p className="text-sm text-muted-foreground line-clamp-2">{s.excerpt}</p>}
           </div>
         </Link>
       ))}
