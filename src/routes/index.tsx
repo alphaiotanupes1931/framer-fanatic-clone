@@ -536,6 +536,7 @@ function CreatorsFans() {
       <div className="relative mx-auto max-w-[1280px]">
         <ScrollHeadline
           lines={[siteText(content, "creators.headline.line1"), siteText(content, "creators.headline.line2")]}
+          colors={[siteColor(content, "creators.headline.line1") || undefined, siteColor(content, "creators.headline.line2") || undefined]}
           className="font-display text-paper font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
         />
 
@@ -547,15 +548,15 @@ function CreatorsFans() {
           className="mt-14 md:mt-20 grid sm:grid-cols-2 gap-4 md:gap-5"
         >
           {[
-            { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), primary: true, destination: "/calendar" },
-            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), primary: false, destination: "/discover" },
+            { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), tc: siteColor(content, "creators.card1.title"), bc: siteColor(content, "creators.card1.body"), cc: siteColor(content, "creators.card1.cta"), primary: true, destination: "/calendar" },
+            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: false, destination: "/discover" },
           ].map((c) => (
             <div
               key={c.t}
               className="group relative rounded-3xl border border-paper/10 bg-paper/[0.03] backdrop-blur-sm p-8 md:p-10 hover:border-paper/25 hover:bg-paper/[0.05] transition-colors"
             >
-              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight">{c.t}</h3>
-              <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md">{c.b}</p>
+              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight" style={c.tc ? { color: c.tc } : undefined}>{c.t}</h3>
+              <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md" style={c.bc ? { color: c.bc } : undefined}>{c.b}</p>
               <button
                 type="button"
                 onClick={() => openAppPage(c.destination)}
@@ -566,7 +567,7 @@ function CreatorsFans() {
                     : "border border-paper/30 text-paper hover:bg-paper hover:text-ink")
                 }
               >
-                <span>{c.cta}</span>
+                <span style={c.cc ? { color: c.cc } : undefined}>{c.cta}</span>
                 <span className={"inline-flex items-center justify-center w-7 h-7 rounded-full " + (c.primary ? "bg-ink text-paper" : "bg-paper/10 text-paper group-hover:bg-ink group-hover:text-paper")}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </span>
