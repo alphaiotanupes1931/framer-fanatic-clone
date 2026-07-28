@@ -60,7 +60,20 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
   };
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, [postId, meId]);
 
-  if (loading) return <div className="p-8 text-sm text-muted-foreground">Loading post…</div>;
+  if (loading) return (
+    <div className="grid animate-pulse md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]">
+      <div className="aspect-square w-full bg-muted md:aspect-auto md:min-h-[70vh]" />
+      <div className="flex flex-col gap-3 p-4">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-full bg-muted" />
+          <div className="h-4 w-32 rounded bg-muted" />
+        </div>
+        <div className="h-3 w-full rounded bg-muted" />
+        <div className="h-3 w-4/5 rounded bg-muted" />
+        <div className="h-3 w-2/3 rounded bg-muted" />
+      </div>
+    </div>
+  );
   if (!post) return <div className="p-8 text-sm text-muted-foreground">Post not found.</div>;
 
   const mediaList: { url: string; kind: "image" | "video" }[] = (() => {

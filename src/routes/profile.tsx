@@ -1611,11 +1611,13 @@ function MyWritingsTab({ userId }: { userId: string }) {
     );
   }
   return (
-    <div className="flex flex-col gap-4 max-w-5xl mx-auto">
+    <div className="flex flex-col gap-3 max-w-6xl mx-auto w-full">
       {rows.map((s) => (
-        <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md">
-          {s.cover_url && <SmartImage src={s.cover_url} alt={s.title} bucket="story-covers" className="aspect-[2/1] w-full object-cover" />}
-          <div className="p-3 space-y-1 flex-1 min-w-0">
+        <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex items-stretch overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md">
+          {s.cover_url && (
+            <SmartImage src={s.cover_url} alt={s.title} bucket="story-covers" className="h-24 w-40 shrink-0 object-cover sm:h-28 sm:w-56" />
+          )}
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-3 sm:p-4">
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.status === "published" ? "Published" : "Draft"} · {new Date(s.created_at).toLocaleDateString()}</div>
             <div className="font-bold leading-tight line-clamp-1">{s.title}</div>
             {s.excerpt && <p className="text-sm text-muted-foreground line-clamp-2">{s.excerpt}</p>}

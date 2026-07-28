@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
-import { MapPin, Calendar, Download, Send, ArrowLeft } from "lucide-react";
+import { MapPin, Calendar, Download, Send, ArrowLeft, Share as ShareIcon } from "lucide-react";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 
 export const Route = createFileRoute("/tickets/$ticketId")({
   component: TicketDetailPage,
@@ -25,6 +27,7 @@ type TicketDetail = {
 function TicketDetailPage() {
   const { ticketId } = useParams({ from: "/tickets/$ticketId" });
   const [t, setT] = useState<TicketDetail | null | undefined>(undefined);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("tickets")
@@ -34,21 +37,26 @@ function TicketDetailPage() {
       .then(({ data }) => setT((data as TicketDetail | null) ?? null));
   }, [ticketId]);
 
-  const share = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) await navigator.share({ title: t?.events?.title ?? "My ticket", url });
-      else { await navigator.clipboard.writeText(url); }
-    } catch { /* cancelled */ }
+  const shareExternal = () => {
+    const url = t?.events?.id ? `${window.location.origin}/events/${t.events.id}` : window.location.href;
+    void externalShare(url, t?.events?.title || "Event", undefined);
   };
 
-  if (t === undefined) return <AppLayout><div className="py-24 text-center text-neutral-500">Loading…</div></AppLayout>;
+  if (t === undefined) return (
+    <AppLayout>
+      <div className="mx-auto w-full max-w-lg animate-pulse px-4 py-6 space-y-4">
+        <div className="h-64 rounded-3xl bg-muted" />
+        <div className="h-10 rounded-xl bg-muted" />
+      </div>
+    </AppLayout>
+  );
   if (!t) return <AppLayout><div className="py-24 text-center text-neutral-500">Ticket not found.</div></AppLayout>;
 
   const when = t.events ? new Date(t.events.starts_at) : null;
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&data=${encodeURIComponent(t.id)}`;
 
   return (
+    <>
     <AppLayout>
       <div className="mx-auto w-full max-w-lg px-4 py-6">
         <Link to="/profile" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">
@@ -117,8 +125,9 @@ function TicketDetailPage() {
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <button onClick={share} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Send className="h-4 w-4 -rotate-45" /> Share</button>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button onClick={() => setShareOpen(true)} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Send className="h-4 w-4 -rotate-45" /> Invite a friend</button>
+          <button onClick={shareExternal} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><ShareIcon className="h-4 w-4" /> Share externally</button>
           <a href={qr} download={`ticket-${t.id.slice(0, 8)}.png`} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Save QR</a>
           {t.events?.id ? (
             <Link to="/events/$eventId" params={{ eventId: t.events.id }} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Calendar className="h-4 w-4" /> Event</Link>
@@ -132,5 +141,23 @@ function TicketDetailPage() {
         )}
       </div>
     </AppLayout>
+      {t.events?.id && (
+        <ShareToUsersDialog
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          url={`${window.location.origin}/events/${t.events.id}`}
+          title={t.events.title}
+          preview={{
+            type: "event",
+            id: t.events.id,
+            url: `${window.location.origin}/events/${t.events.id}`,
+            title: t.events.title,
+            excerpt: t.events.venue_name || t.events.location || null,
+            image: t.events.image_url,
+            author: null,
+          }}
+        />
+      )}
+    </>
   );
 }

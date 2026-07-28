@@ -106,7 +106,20 @@ function StoryDetail() {
     toast.success("Deleted"); navigate({ to: "/stories" });
   };
 
-  if (loading) return <AppLayout title="" hero={false}><div className="text-muted-foreground text-sm">Loading story…</div></AppLayout>;
+  if (loading) return (
+    <AppLayout title="" hero={false}>
+      <div className="mx-auto max-w-3xl animate-pulse space-y-4">
+        <div className="aspect-[16/9] w-full rounded-2xl bg-muted" />
+        <div className="h-8 w-3/4 rounded bg-muted" />
+        <div className="h-4 w-1/2 rounded bg-muted" />
+        <div className="space-y-2 pt-4">
+          <div className="h-3 w-full rounded bg-muted" />
+          <div className="h-3 w-11/12 rounded bg-muted" />
+          <div className="h-3 w-10/12 rounded bg-muted" />
+        </div>
+      </div>
+    </AppLayout>
+  );
   if (!story) return (
     <AppLayout title="Story not found" hero={false}>
       <Link to="/stories" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
