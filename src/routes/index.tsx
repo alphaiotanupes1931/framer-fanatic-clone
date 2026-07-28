@@ -952,6 +952,9 @@ function CTAInner() {
   const line1 = siteText(content, "cta.line1");
   const line2 = siteText(content, "cta.line2");
   const btn = siteText(content, "cta.button");
+  const line1Color = siteColor(content, "cta.line1");
+  const line2Color = siteColor(content, "cta.line2");
+  const btnColor = siteColor(content, "cta.button");
   return (
     <section className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -963,7 +966,9 @@ function CTAInner() {
         className="mx-auto max-w-[1280px] text-center"
       >
         <h2 className="font-display text-white font-medium text-[clamp(2.5rem,9vw,9rem)] leading-[0.92] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.05em]">
-          {line1}<br />{line2}
+          <span style={line1Color ? { color: line1Color } : undefined}>{line1}</span>
+          <br />
+          <span style={line2Color ? { color: line2Color } : undefined}>{line2}</span>
         </h2>
         <div className="mt-10 md:mt-14 flex justify-center">
           <Magnetic className="sm:inline-flex">
@@ -971,7 +976,7 @@ function CTAInner() {
               to="/auth"
               className="group inline-flex items-center gap-2 rounded-full bg-ink text-paper pl-7 pr-2 py-2 text-sm md:text-base font-medium shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.45)] hover:bg-paper hover:text-ink transition-all"
             >
-              <span>{btn}</span>
+              <span style={btnColor ? { color: btnColor } : undefined}>{btn}</span>
               <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-paper text-ink group-hover:bg-ink group-hover:text-paper transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </span>
