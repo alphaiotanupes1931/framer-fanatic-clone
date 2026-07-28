@@ -401,11 +401,11 @@ function HeroParallax() {
   );
 }
 
-function AnimatedHeadline({ lines }: { lines: string[] }) {
+function AnimatedHeadline({ lines, colors }: { lines: string[]; colors?: (string | undefined)[] }) {
   return (
     <h1>
       {lines.map((line, li) => (
-        <span key={li} className="block overflow-hidden">
+        <span key={li} className="block overflow-hidden" style={colors?.[li] ? { color: colors[li] } : undefined}>
           <span className="block">
             {line.split(" ").map((word, wi) => (
               <span key={wi} className="inline-block overflow-hidden align-baseline mr-[0.25em]">
@@ -426,11 +426,11 @@ function AnimatedHeadline({ lines }: { lines: string[] }) {
   );
 }
 
-function ScrollHeadline({ lines, className }: { lines: string[]; className?: string }) {
+function ScrollHeadline({ lines, className, colors }: { lines: string[]; className?: string; colors?: (string | undefined)[] }) {
   return (
     <h2 className={className}>
       {lines.map((line, li) => (
-        <span key={li} className="block">{line}</span>
+        <span key={li} className="block" style={colors?.[li] ? { color: colors[li] } : undefined}>{line}</span>
       ))}
     </h2>
   );
