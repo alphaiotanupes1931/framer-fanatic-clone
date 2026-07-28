@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, X } from "lucide-react";
+import { Play, X, Bookmark } from "lucide-react";
+import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
 
 export const Route = createFileRoute("/videos/$id")({
@@ -73,7 +74,10 @@ function VideoDetail() {
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
             <div className="min-w-0">
               <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
-              <h1 className="mt-4 text-xl font-bold sm:text-2xl">{video.title}</h1>
+              <div className="mt-4 flex items-start gap-3">
+                <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
+                <SaveVideoButton videoId={video.id} />
+              </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
                 {video.author?.username ? (
                   <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
