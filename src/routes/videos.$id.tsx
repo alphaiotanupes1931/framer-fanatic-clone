@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, X } from "lucide-react";
+import { Play, X, Bookmark } from "lucide-react";
+import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
 
 export const Route = createFileRoute("/videos/$id")({
@@ -73,7 +74,10 @@ function VideoDetail() {
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
             <div className="min-w-0">
               <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
-              <h1 className="mt-4 text-xl font-bold sm:text-2xl">{video.title}</h1>
+              <div className="mt-4 flex items-start gap-3">
+                <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
+                <SaveVideoButton videoId={video.id} />
+              </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
                 {video.author?.username ? (
                   <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
@@ -156,5 +160,38 @@ function RelatedCard({ v }: { v: Video }) {
         <div className="mt-1 truncate text-xs text-neutral-500">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
       </div>
     </Link>
+  );
+}
+
+function SaveVideoButton({ videoId }: { videoId: string }) {
+  const [saved, setSaved] = useState(false);
+  const [meId, setMeId] = useState<string | null>(null);
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setMeId(user.id);
+      const { data } = await supabase.from("video_saves").select("video_id").eq("video_id", videoId).eq("user_id", user.id).maybeSingle();
+      setSaved(!!data);
+    })();
+  }, [videoId]);
+  const toggle = async () => {
+    if (!meId) { toast.error("Sign in to save"); return; }
+    const next = !saved; setSaved(next);
+    const { error } = next
+      ? await supabase.from("video_saves").insert({ video_id: videoId, user_id: meId })
+      : await supabase.from("video_saves").delete().eq("video_id", videoId).eq("user_id", meId);
+    if (error) { setSaved(!next); toast.error(error.message); return; }
+    toast.success(next ? "Saved" : "Unsaved");
+  };
+  return (
+    <button
+      onClick={toggle}
+      aria-label={saved ? "Unsave" : "Save"}
+      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-300 text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"}`}
+    >
+      <Bookmark className={`h-4 w-4 ${saved ? "fill-[#d4580a]" : ""}`} />
+      {saved ? "Saved" : "Save"}
+    </button>
   );
 }

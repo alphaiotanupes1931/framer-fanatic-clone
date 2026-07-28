@@ -80,7 +80,7 @@ export function LeftSidebar() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-card transition-all duration-300 lg:flex ${collapsed ? "w-[78px]" : "w-[250px]"}`}>
+      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-card transition-all duration-300 lg:flex ${collapsed ? "w-[78px]" : "w-[288px]"}`}>
         {/* Logo */}
         <div className={`flex h-16 items-center border-b border-border px-4 sm:px-5 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
