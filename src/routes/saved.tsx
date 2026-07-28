@@ -30,7 +30,6 @@ type SavedStory = {
   title: string | null;
   cover_url: string | null;
   excerpt: string | null;
-  slug: string | null;
   saved_at: string;
 };
 
@@ -97,8 +96,13 @@ function SavedPage() {
     const savedAt = new Map((saves || []).map((s: any) => [s.story_id, s.created_at]));
     const ids = Array.from(savedAt.keys());
     if (!ids.length) { setStories([]); return; }
-    const { data: ss } = await supabase.from("stories")
-      .select("id, title, cover_url, excerpt, slug").in("id", ids);
+    const { data: ss, error } = await supabase.from("stories")
+      .select("id, title, cover_url, excerpt").in("id", ids);
+    if (error) {
+      toast.error("Saved stories could not be loaded");
+      setStories([]);
+      return;
+    }
     const list = ((ss || []) as any[]).map((s) => ({ ...s, saved_at: savedAt.get(s.id) as string })) as SavedStory[];
     list.sort((a, b) => (a.saved_at < b.saved_at ? 1 : -1));
     setStories(list);
