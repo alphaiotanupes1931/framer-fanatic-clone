@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
-import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Clock, TrendingUp, Megaphone, Send } from "lucide-react";
+import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Clock, TrendingUp, Megaphone, Send, Bookmark } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -82,7 +82,32 @@ const CATEGORIES = ["All", "Music", "Art", "Community", "Nightlife", "Food", "We
 function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) => void; buying: boolean }) {
   const priced = (e.price_cents ?? 0) > 0;
   const [shareOpen, setShareOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/events/${e.id}` : `/events/${e.id}`;
+  const me = useCurrentProfile();
+
+  useEffect(() => {
+    if (!me?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("event_saves").select("event_id").eq("event_id", e.id).eq("user_id", me.id).maybeSingle();
+      if (!cancelled && data) setSaved(true);
+    })();
+    return () => { cancelled = true; };
+  }, [me?.id, e.id]);
+
+  const toggleSave = async (ev: React.MouseEvent) => {
+    ev.preventDefault(); ev.stopPropagation();
+    if (!me?.id) { toast.error("Sign in to save"); return; }
+    const was = saved;
+    setSaved(!was);
+    const res = was
+      ? await supabase.from("event_saves").delete().eq("event_id", e.id).eq("user_id", me.id)
+      : await supabase.from("event_saves").insert({ event_id: e.id, user_id: me.id });
+    if (res.error) { setSaved(was); toast.error(res.error.message); }
+    else toast.success(was ? "Removed from saved" : "Saved");
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
       <Link to="/events/$eventId" params={{ eventId: e.id }} className="relative block">
@@ -121,6 +146,9 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
           </button>
         </div>
         <div className="flex items-center justify-end gap-4 border-t border-neutral-100 pt-3 text-sm text-neutral-500">
+          <button type="button" onClick={toggleSave} className={`inline-flex items-center gap-1 transition ${saved ? "text-[#d4580a]" : "hover:text-neutral-800"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
+            <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} /> {saved ? "Saved" : "Save"}
+          </button>
           <button type="button" onClick={() => setShareOpen(true)} className="inline-flex items-center gap-1 hover:text-neutral-800"><Send className="h-4 w-4 -rotate-45" /> Share</button>
         </div>
       </div>
