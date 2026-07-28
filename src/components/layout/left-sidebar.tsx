@@ -31,7 +31,7 @@ const createItems: NavItem[] = [
   { icon: PlaneIcon, label: "Visitor Profile", to: "/create-visitor" },
   { icon: BusinessIcon, label: "Business", to: "/create-business" },
   { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: UsersIcon, label: "Community", to: "/create-community" },
+  { icon: UsersIcon, label: "Groups", to: "/create-community" },
   { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
 ];
 

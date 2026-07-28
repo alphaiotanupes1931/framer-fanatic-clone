@@ -43,7 +43,7 @@ const createItems: Item[] = [
   { icon: Plane, label: "Visitor Profile", to: "/create-visitor" },
   { icon: Building2, label: "Business", to: "/create-business" },
   { icon: Landmark, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: Users, label: "Community", to: "/create-community" },
+  { icon: Users, label: "Groups", to: "/create-community" },
   { icon: Shield, label: "Community Association", to: "/create-community-association" },
 ];
 
