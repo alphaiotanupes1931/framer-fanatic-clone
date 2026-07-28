@@ -637,6 +637,13 @@ function formatCreatorLabel(category?: string | null) {
 function DailyCreators() {
   const [creators, setCreators] = useState<DailyCreator[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSignedIn(!!s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -720,6 +727,18 @@ function DailyCreators() {
               ? c.slug ? `/o/${c.slug}` : "#"
               : c.username ? `/u/${c.username}` : "#"
           }
+          onClick={(e) => {
+            const target =
+              c.kind === "business" || c.kind === "arts_org"
+                ? c.slug ? `/o/${c.slug}` : null
+                : c.username ? `/u/${c.username}` : null;
+            if (!target) { e.preventDefault(); return; }
+            if (!signedIn) {
+              e.preventDefault();
+              try { sessionStorage.setItem("pb_post_auth_redirect", target); } catch { /* ignore */ }
+              window.location.href = `/auth?redirect=${encodeURIComponent(target)}`;
+            }
+          }}
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
