@@ -270,7 +270,7 @@ function Hero() {
   );
 }
 
-function StaggeredQuote({ text, className }: { text: string; className?: string }) {
+function StaggeredQuote({ text, className, color }: { text: string; className?: string; color?: string }) {
   return (
     <motion.blockquote
       initial={{ opacity: 0, y: 20 }}
@@ -278,6 +278,7 @@ function StaggeredQuote({ text, className }: { text: string; className?: string 
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       className={className}
+      style={color ? { color } : undefined}
     >
       {text}
     </motion.blockquote>
@@ -328,6 +329,7 @@ function QuoteSection() {
             <StaggeredQuote
               text={quoteText}
               className={"font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"}
+              color={quoteTextColor || undefined}
             />
             <motion.div
               initial={{ opacity: 0, x: -20 }}
