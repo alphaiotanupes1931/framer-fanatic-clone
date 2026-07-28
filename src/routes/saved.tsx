@@ -397,3 +397,33 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
     </div>
   );
 }
+
+function VideoTile({ video, onUnsave }: { video: SavedVideo; onUnsave: () => void }) {
+  const poster = video.thumbnail_url;
+  return (
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md">
+      <Link to="/videos/$id" params={{ id: video.id }} className="block">
+        <div className="relative aspect-video w-full bg-neutral-900">
+          {poster ? (
+            <img src={poster} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white/60"><Play className="h-8 w-8" /></div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="rounded-full bg-white/30 p-3 backdrop-blur"><Play className="h-5 w-5 fill-white text-white" /></div>
+          </div>
+        </div>
+        <div className="p-3">
+          <h4 className="line-clamp-2 text-sm font-semibold text-foreground">{video.title}</h4>
+        </div>
+      </Link>
+      <button
+        onClick={(e) => { e.preventDefault(); onUnsave(); }}
+        aria-label="Remove from saved"
+        className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-foreground shadow transition hover:bg-white"
+      >
+        <Bookmark className="h-4 w-4 fill-current" />
+      </button>
+    </div>
+  );
+}
