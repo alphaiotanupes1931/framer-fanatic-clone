@@ -19,7 +19,7 @@ export function OnboardingCard() {
   if (dismissed) return null;
   const dismiss = () => { localStorage.setItem(STORAGE_KEY, "true"); setDismissed(true); };
   return (
-    <div className="relative rounded-xl border-2 bg-white px-4 py-3.5 sm:px-[18px] sm:py-4" style={{ borderColor: "#d4580a" }}>
+    <div className="relative rounded-xl border bg-white px-4 py-3.5 sm:px-[18px] sm:py-4" style={{ borderColor: "#d4580a" }}>
       <button onClick={dismiss} aria-label="Dismiss" className="absolute right-3 top-3 rounded-full p-1 text-slate-500 transition-colors hover:bg-slate-100">
         <X className="h-3.5 w-3.5" />
       </button>
