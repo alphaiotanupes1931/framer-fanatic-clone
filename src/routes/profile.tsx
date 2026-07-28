@@ -1587,13 +1587,13 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
 }
 
 function MyWritingsTab({ userId }: { userId: string }) {
-  const [rows, setRows] = useState<Array<{ id: string; title: string; excerpt: string | null; cover_image_url: string | null; created_at: string; status: string }>>([]);
+  const [rows, setRows] = useState<Array<{ id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string; status: string }>>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("stories")
-        .select("id,title,excerpt,cover_image_url,created_at,status")
+        .select("id,title,excerpt,cover_url,created_at,status")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -1611,14 +1611,14 @@ function MyWritingsTab({ userId }: { userId: string }) {
     );
   }
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col gap-4 max-w-3xl mx-auto">
       {rows.map((s) => (
-        <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-          {s.cover_image_url && <SmartImage src={s.cover_image_url} alt={s.title} bucket="story-covers" className="w-full h-40 object-cover" />}
-          <div className="p-4 space-y-1.5">
+        <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex gap-4 rounded-2xl border border-border overflow-hidden hover:shadow-md transition bg-white">
+          {s.cover_url && <SmartImage src={s.cover_url} alt={s.title} bucket="story-covers" className="w-40 sm:w-56 h-32 sm:h-40 object-cover flex-shrink-0" />}
+          <div className="p-4 space-y-1.5 flex-1 min-w-0">
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.status === "published" ? "Published" : "Draft"} · {new Date(s.created_at).toLocaleDateString()}</div>
             <div className="font-bold leading-tight line-clamp-2">{s.title}</div>
-            {s.excerpt && <p className="text-xs text-muted-foreground line-clamp-2">{s.excerpt}</p>}
+            {s.excerpt && <p className="text-sm text-muted-foreground line-clamp-3">{s.excerpt}</p>}
           </div>
         </Link>
       ))}
