@@ -127,7 +127,7 @@ export function DuesTab({ orgId, ownerId, canManage, me }: { orgId: string; owne
 
       {canManage && !ownerReady && (
         <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          Connect your Stripe account under Profile &rarr; Stripe before members can pay dues. Payouts go straight to your bank.
+          Set up Stripe payment under Settings before members can pay dues. Payouts go straight to your bank.
         </div>
       )}
 
