@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
-import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff } from "lucide-react";
+import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
@@ -43,6 +43,8 @@ function EventDetail() {
   const checkoutFn = useServerFn(createTicketCheckout);
   const rsvpFn = useServerFn(rsvpFreeEvent);
   const [shareOpen, setShareOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [savingBk, setSavingBk] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -58,6 +60,10 @@ function EventDetail() {
         setEvt(data as EventRow);
         const { data: h } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").eq("id", (data as EventRow).user_id).maybeSingle();
         setHost((h as Host) || null);
+        if (uid) {
+          const { data: sv } = await supabase.from("event_saves").select("event_id").eq("event_id", eventId).eq("user_id", uid).maybeSingle();
+          setSaved(!!sv);
+        }
       }
       setLoading(false);
     })();
@@ -233,6 +239,26 @@ function EventDetail() {
           )}
           <Button onClick={() => setShareOpen(true)} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2" aria-label="Share">
             <Send className="w-4 h-4 -rotate-45" />Share
+          </Button>
+          <Button
+            onClick={async () => {
+              if (!me) { toast.error("Sign in to save"); return; }
+              if (savingBk) return;
+              setSavingBk(true);
+              const prev = saved;
+              setSaved(!prev);
+              const { error } = prev
+                ? await supabase.from("event_saves").delete().eq("event_id", eventId).eq("user_id", me)
+                : await supabase.from("event_saves").insert({ event_id: eventId, user_id: me });
+              if (error) { setSaved(prev); toast.error("Couldn't update save"); }
+              else toast.success(prev ? "Removed from saved" : "Saved");
+              setSavingBk(false);
+            }}
+            variant="outline"
+            className="w-full rounded-lg h-10 font-medium gap-2"
+            aria-label="Save"
+          >
+            <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />{saved ? "Saved" : "Save"}
           </Button>
         </div>
 
