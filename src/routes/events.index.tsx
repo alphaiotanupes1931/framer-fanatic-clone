@@ -8,7 +8,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useServerFn } from "@tanstack/react-start";
-import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
+import { createTicketCheckout } from "@/lib/stripe.functions";
 import { EventImage } from "@/components/event-image";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 
@@ -233,7 +233,6 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const me = useCurrentProfile();
   const { isArtist } = useUserRole();
   const checkoutFn = useServerFn(createTicketCheckout);
-  const rsvpFn = useServerFn(rsvpFreeEvent);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
   const [buying, setBuying] = useState<string | null>(null);
@@ -278,8 +277,10 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       const ev = events.find((e) => e.id === eventId);
       const isFree = !ev || (ev.price_cents ?? 0) <= 0;
       if (isFree) {
-        const res = await rsvpFn({ data: { eventId } });
-        toast.success(res.alreadyRsvped ? "You're already on the list" : "You're going!");
+        const { data, error } = await supabase.rpc("rsvp_free_event", { _event_id: eventId });
+        if (error) throw error;
+        const result = data as { alreadyRsvped?: boolean } | null;
+        toast.success(result?.alreadyRsvped ? "You're already on the list" : "You're going!");
       } else {
         const { url } = await checkoutFn({ data: { eventId, returnOrigin: window.location.origin } });
         if (url) window.location.href = url;
