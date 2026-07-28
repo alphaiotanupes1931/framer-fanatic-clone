@@ -140,5 +140,24 @@ function TicketDetailPage() {
         )}
       </div>
     </AppLayout>
+    <>
+      {t.events?.id && (
+        <ShareToUsersDialog
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          url={`${window.location.origin}/events/${t.events.id}`}
+          title={t.events.title}
+          preview={{
+            type: "event",
+            id: t.events.id,
+            url: `${window.location.origin}/events/${t.events.id}`,
+            title: t.events.title,
+            excerpt: t.events.venue_name || t.events.location || null,
+            image: t.events.image_url,
+            author: null,
+          }}
+        />
+      )}
+    </>
   );
 }
