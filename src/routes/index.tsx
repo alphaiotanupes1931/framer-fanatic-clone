@@ -200,6 +200,10 @@ function Hero() {
   const subtitle = siteText(content, "hero.subtitle");
   const ctaLabel = siteText(content, "hero.cta");
   const heroText = siteText(content, "colors.heroText").trim() || "#FCFCFA";
+  const line1Color = siteColor(content, "hero.line1");
+  const line2Color = siteColor(content, "hero.line2");
+  const subtitleColor = siteColor(content, "hero.subtitle");
+  const ctaColor = siteColor(content, "hero.cta");
   return (
     <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden">
       <HeroParallax />
@@ -214,7 +218,7 @@ function Hero() {
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10" style={{ color: heroText }}>
         <div className="font-display font-medium text-[clamp(2rem,10vw,11rem)] leading-[0.95] md:leading-[0.88] tracking-[-0.03em] md:tracking-[-0.045em] break-words">
-          <AnimatedHeadline lines={[line1, line2]} />
+          <AnimatedHeadline lines={[line1, line2]} colors={[line1Color || undefined, line2Color || undefined]} />
         </div>
 
         <motion.div
@@ -223,7 +227,7 @@ function Hero() {
           transition={{ duration: 0.7, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
         >
-          <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed">
+          <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed" style={subtitleColor ? { color: subtitleColor } : undefined}>
             {subtitle}
           </p>
 
@@ -233,7 +237,7 @@ function Hero() {
                 to="/auth"
                 className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-6 pr-2 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors"
               >
-                <span>{ctaLabel}</span>
+                <span style={ctaColor ? { color: ctaColor } : undefined}>{ctaLabel}</span>
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper group-hover:bg-paper group-hover:text-ink transition-colors">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </span>
@@ -254,7 +258,7 @@ function Hero() {
             to="/auth"
             className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-5 pr-1.5 py-1.5 text-sm font-medium"
           >
-            <span>{ctaLabel}</span>
+            <span style={ctaColor ? { color: ctaColor } : undefined}>{ctaLabel}</span>
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </span>
