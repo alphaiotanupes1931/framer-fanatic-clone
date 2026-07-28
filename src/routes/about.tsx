@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteContent, siteText } from "@/hooks/use-site-content";
+import { useSiteContent, siteText, siteColor } from "@/hooks/use-site-content";
 import { SiteColorInjector } from "@/components/site-color-injector";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
@@ -112,6 +112,7 @@ function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
+            style={siteColor(content, "about.hero.title") ? { color: siteColor(content, "about.hero.title") } : undefined}
           >
             {siteText(content, "about.hero.title")}
           </motion.h1>
@@ -120,6 +121,7 @@ function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="font-display text-[clamp(1.375rem,2.6vw,2.25rem)] font-medium leading-[1.1] tracking-[-0.02em] text-ink/80"
+            style={siteColor(content, "about.hero.italic") ? { color: siteColor(content, "about.hero.italic") } : undefined}
           >
             {siteText(content, "about.hero.italic")}
           </motion.p>
@@ -135,12 +137,12 @@ function Story() {
     <section className="px-5 md:px-10 py-16 md:py-28">
       <div className="mx-auto grid max-w-[1100px] gap-12 md:grid-cols-[1fr_1.4fr] md:gap-20">
         <div>
-          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">{siteText(content, "about.story.heading")}</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight" style={siteColor(content, "about.story.heading") ? { color: siteColor(content, "about.story.heading") } : undefined}>{siteText(content, "about.story.heading")}</h2>
         </div>
         <div className="space-y-6 text-[16px] leading-[1.75] text-ink/80 md:text-[17.5px] whitespace-pre-line">
-          <p>{siteText(content, "about.story.p1")}</p>
-          <p>{siteText(content, "about.story.p2")}</p>
-          <p>{siteText(content, "about.story.p3")}</p>
+          <p style={siteColor(content, "about.story.p1") ? { color: siteColor(content, "about.story.p1") } : undefined}>{siteText(content, "about.story.p1")}</p>
+          <p style={siteColor(content, "about.story.p2") ? { color: siteColor(content, "about.story.p2") } : undefined}>{siteText(content, "about.story.p2")}</p>
+          <p style={siteColor(content, "about.story.p3") ? { color: siteColor(content, "about.story.p3") } : undefined}>{siteText(content, "about.story.p3")}</p>
         </div>
       </div>
     </section>
@@ -152,17 +154,18 @@ function CTA() {
   return (
     <section className="bg-ink text-paper px-5 md:px-10 py-20 md:py-28">
       <div className="mx-auto max-w-[1100px] text-center">
-        <h2 className="font-display text-[clamp(2.25rem,7vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">
+        <h2 className="font-display text-[clamp(2.25rem,7vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]" style={siteColor(content, "about.cta.heading") ? { color: siteColor(content, "about.cta.heading") } : undefined}>
           {siteText(content, "about.cta.heading")}
         </h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/auth" className="inline-flex rounded-full bg-paper text-ink px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-orange hover:text-paper transition-colors">
+          <Link to="/auth" className="inline-flex rounded-full bg-paper text-ink px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-orange hover:text-paper transition-colors" style={siteColor(content, "about.cta.primary") ? { color: siteColor(content, "about.cta.primary") } : undefined}>
             {siteText(content, "about.cta.primary")}
           </Link>
           <Link
             to="/leaderboard"
             onClick={() => { try { sessionStorage.setItem("pb_post_auth_redirect", "/leaderboard"); } catch { /* ignore */ } }}
             className="inline-flex rounded-full border border-paper/60 px-7 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-paper hover:text-ink transition-colors"
+            style={siteColor(content, "about.cta.secondary") ? { color: siteColor(content, "about.cta.secondary") } : undefined}
           >
             {siteText(content, "about.cta.secondary")}
           </Link>

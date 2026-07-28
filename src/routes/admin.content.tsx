@@ -49,6 +49,63 @@ const FIELD_META: Record<string, { label: string; help: string; multiline?: bool
   "about.cta.secondary": { label: "About: secondary button label", help: "Secondary link button." },
 };
 
+// Grouped layout for the admin editor. Every key here comes from FIELD_META.
+const FIELD_GROUPS: { heading: string; blurb: string; keys: string[] }[] = [
+  {
+    heading: "Homepage - Hero",
+    blurb: "The giant title, subtitle, and button at the very top of the homepage.",
+    keys: ["hero.line1", "hero.line2", "hero.subtitle", "hero.cta"],
+  },
+  {
+    heading: "Homepage - Featured quote",
+    blurb: "The large pull quote and its author name.",
+    keys: ["quote.text", "quote.author"],
+  },
+  {
+    heading: "Homepage - Communities section",
+    blurb: "The two-line headline and the two side-by-side community cards.",
+    keys: [
+      "creators.headline.line1",
+      "creators.headline.line2",
+      "creators.card1.title",
+      "creators.card1.body",
+      "creators.card1.cta",
+      "creators.card2.title",
+      "creators.card2.body",
+      "creators.card2.cta",
+    ],
+  },
+  {
+    heading: "Homepage - Meet today's Baltimore",
+    blurb: "The big heading and subtitle above the three creator cards.",
+    keys: ["features.heading", "features.subtitle"],
+  },
+  {
+    heading: "Homepage - Bottom call to action",
+    blurb: "The final banner near the footer.",
+    keys: ["cta.line1", "cta.line2", "cta.button"],
+  },
+  {
+    heading: "About page",
+    blurb: "Everything shown on /about.",
+    keys: [
+      "about.hero.title",
+      "about.hero.italic",
+      "about.story.heading",
+      "about.story.p1",
+      "about.story.p2",
+      "about.story.p3",
+      "about.cta.heading",
+      "about.cta.primary",
+      "about.cta.secondary",
+    ],
+  },
+];
+
+const TEXT_KEYS = FIELD_GROUPS.flatMap((g) => g.keys);
+const TEXT_KEY_SET = new Set(TEXT_KEYS);
+const COLOR_OVERRIDE_KEYS = TEXT_KEYS.map((k) => `${k}.color`);
+
 const COLOR_FIELDS: { key: string; label: string; help: string }[] = [
   { key: "colors.blue", label: "Primary blue", help: "Main blue used on the hero background, Features and CTA sections." },
   { key: "colors.blueDeep", label: "Deep blue", help: "Darker blue behind the Communities section." },
@@ -75,8 +132,16 @@ function AdminContentPage() {
   const navigate = useNavigate();
   const [unlocked, setUnlocked] = useState(false);
   const [gateChecked, setGateChecked] = useState(false);
-  const [values, setValues] = useState<Record<string, string>>({ ...SITE_CONTENT_DEFAULTS });
-  const [initial, setInitial] = useState<Record<string, string>>({ ...SITE_CONTENT_DEFAULTS });
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const base: Record<string, string> = { ...SITE_CONTENT_DEFAULTS };
+    COLOR_OVERRIDE_KEYS.forEach((k) => { if (!(k in base)) base[k] = ""; });
+    return base;
+  });
+  const [initial, setInitial] = useState<Record<string, string>>(() => {
+    const base: Record<string, string> = { ...SITE_CONTENT_DEFAULTS };
+    COLOR_OVERRIDE_KEYS.forEach((k) => { if (!(k in base)) base[k] = ""; });
+    return base;
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -94,7 +159,8 @@ function AdminContentPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("site_content").select("key, value");
-      const merged = { ...SITE_CONTENT_DEFAULTS };
+      const merged: Record<string, string> = { ...SITE_CONTENT_DEFAULTS };
+      COLOR_OVERRIDE_KEYS.forEach((k) => { if (!(k in merged)) merged[k] = ""; });
       (data || []).forEach((row: { key: string; value: unknown }) => {
         if (typeof row.value === "string") merged[row.key] = row.value;
         else if (row.value != null) merged[row.key] = String(row.value);
@@ -105,7 +171,8 @@ function AdminContentPage() {
     })();
   }, []);
 
-  const dirtyKeys = SITE_CONTENT_KEYS.filter((k) => values[k] !== initial[k]);
+  const allKeys = [...new Set([...SITE_CONTENT_KEYS, ...COLOR_OVERRIDE_KEYS])];
+  const dirtyKeys = allKeys.filter((k) => (values[k] ?? "") !== (initial[k] ?? ""));
 
   const save = async () => {
     if (dirtyKeys.length === 0) return;
@@ -240,35 +307,106 @@ function AdminContentPage() {
               </div>
             </div>
 
-            {SITE_CONTENT_KEYS.map((key) => {
-              if (COLOR_KEY_SET.has(key)) return null;
-              const meta = FIELD_META[key] ?? { label: key, help: "" };
-              const dirty = values[key] !== initial[key];
-              return (
-                <div key={key} className={`rounded-2xl border p-5 ${dirty ? "border-orange bg-orange/5" : "border-border bg-card"}`}>
-                  <Label htmlFor={key} className="text-sm font-semibold">
-                    {meta.label}
-                    {dirty && <span className="ml-2 text-xs text-orange">• unsaved</span>}
-                  </Label>
-                  {meta.help && <p className="mb-2 text-xs text-muted-foreground">{meta.help}</p>}
-                  {meta.multiline ? (
-                    <Textarea
-                      id={key}
-                      rows={3}
-                      value={values[key] ?? ""}
-                      onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                    />
-                  ) : (
-                    <Input
-                      id={key}
-                      value={values[key] ?? ""}
-                      onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                    />
-                  )}
-                  <p className="mt-1 text-[11px] text-muted-foreground">Key: <code>{key}</code></p>
+            {/* Unrecognized keys still saved in DB but not in a group */}
+            {SITE_CONTENT_KEYS.filter((k) => !COLOR_KEY_SET.has(k) && !TEXT_KEY_SET.has(k)).length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="mb-3 text-base font-semibold">Other content</h2>
+                <div className="space-y-4">
+                  {SITE_CONTENT_KEYS.filter((k) => !COLOR_KEY_SET.has(k) && !TEXT_KEY_SET.has(k)).map((key) => {
+                    const meta = FIELD_META[key] ?? { label: key, help: "" };
+                    const dirty = values[key] !== initial[key];
+                    return (
+                      <div key={key}>
+                        <Label htmlFor={key} className="text-sm font-semibold">
+                          {meta.label}
+                          {dirty && <span className="ml-2 text-xs text-orange">• unsaved</span>}
+                        </Label>
+                        <Input id={key} value={values[key] ?? ""} onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))} />
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            )}
+
+            {FIELD_GROUPS.map((group) => (
+              <div key={group.heading} className="rounded-2xl border border-border bg-card p-5">
+                <div className="mb-4">
+                  <h2 className="text-base font-semibold">{group.heading}</h2>
+                  <p className="text-xs text-muted-foreground">{group.blurb}</p>
+                </div>
+                <div className="space-y-4">
+                  {group.keys.map((key) => {
+                    const meta = FIELD_META[key] ?? { label: key, help: "" };
+                    const dirty = values[key] !== initial[key];
+                    const colorKey = `${key}.color`;
+                    const colorVal = (values[colorKey] ?? "").trim();
+                    const savedColorVal = (initial[colorKey] ?? "").trim();
+                    const colorDirty = colorVal !== savedColorVal;
+                    const colorValid = colorVal === "" || HEX_RE.test(colorVal);
+                    return (
+                      <div key={key} className={`rounded-xl border p-4 ${(dirty || colorDirty) ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
+                        <Label htmlFor={key} className="text-sm font-semibold">
+                          {meta.label}
+                          {(dirty || colorDirty) && <span className="ml-2 text-xs text-orange">• unsaved</span>}
+                        </Label>
+                        {meta.help && <p className="mb-2 text-xs text-muted-foreground">{meta.help}</p>}
+                        {meta.multiline ? (
+                          <Textarea
+                            id={key}
+                            rows={3}
+                            value={values[key] ?? ""}
+                            onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                          />
+                        ) : (
+                          <Input
+                            id={key}
+                            value={values[key] ?? ""}
+                            onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                          />
+                        )}
+                        <div className="mt-3 rounded-lg border border-dashed border-border p-3">
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="text-xs font-medium text-neutral-700">Text color</span>
+                            <span className="text-[11px] text-muted-foreground">Leave empty to use the default color</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={HEX_RE.test(colorVal) ? colorVal : "#000000"}
+                              onChange={(e) => setValues((v) => ({ ...v, [colorKey]: e.target.value }))}
+                              className="h-9 w-12 shrink-0 cursor-pointer rounded-md border border-border bg-transparent"
+                              aria-label={`${meta.label} text color`}
+                            />
+                            <Input
+                              value={colorVal}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                setValues((v) => ({ ...v, [colorKey]: raw.trim() === "" ? "" : normalizeHex(raw) }));
+                              }}
+                              placeholder="empty = use default"
+                              className={colorValid ? "h-9" : "h-9 border-destructive"}
+                            />
+                            {colorVal !== "" && (
+                              <button
+                                type="button"
+                                onClick={() => setValues((v) => ({ ...v, [colorKey]: "" }))}
+                                className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-50"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                          {!colorValid && (
+                            <p className="mt-1 text-[11px] text-destructive">Enter a valid hex like #E61E43 (or leave empty).</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
 
             <div className="sticky bottom-4 flex justify-end">
               <Button onClick={save} disabled={saving || dirtyKeys.length === 0} className="gap-2 shadow-lg">

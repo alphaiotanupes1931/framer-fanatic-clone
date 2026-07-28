@@ -12,7 +12,7 @@ import { stripHtml, truncateText } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
-import { useSiteContent, siteText } from "@/hooks/use-site-content";
+import { useSiteContent, siteText, siteColor } from "@/hooks/use-site-content";
 import { SiteColorInjector } from "@/components/site-color-injector";
 
 export const Route = createFileRoute("/")({
@@ -200,6 +200,10 @@ function Hero() {
   const subtitle = siteText(content, "hero.subtitle");
   const ctaLabel = siteText(content, "hero.cta");
   const heroText = siteText(content, "colors.heroText").trim() || "#FCFCFA";
+  const line1Color = siteColor(content, "hero.line1");
+  const line2Color = siteColor(content, "hero.line2");
+  const subtitleColor = siteColor(content, "hero.subtitle");
+  const ctaColor = siteColor(content, "hero.cta");
   return (
     <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden">
       <HeroParallax />
@@ -214,7 +218,7 @@ function Hero() {
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10" style={{ color: heroText }}>
         <div className="font-display font-medium text-[clamp(2rem,10vw,11rem)] leading-[0.95] md:leading-[0.88] tracking-[-0.03em] md:tracking-[-0.045em] break-words">
-          <AnimatedHeadline lines={[line1, line2]} />
+          <AnimatedHeadline lines={[line1, line2]} colors={[line1Color || undefined, line2Color || undefined]} />
         </div>
 
         <motion.div
@@ -223,7 +227,7 @@ function Hero() {
           transition={{ duration: 0.7, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
         >
-          <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed">
+          <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed" style={subtitleColor ? { color: subtitleColor } : undefined}>
             {subtitle}
           </p>
 
@@ -233,7 +237,7 @@ function Hero() {
                 to="/auth"
                 className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-6 pr-2 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors"
               >
-                <span>{ctaLabel}</span>
+                <span style={ctaColor ? { color: ctaColor } : undefined}>{ctaLabel}</span>
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper group-hover:bg-paper group-hover:text-ink transition-colors">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </span>
@@ -254,7 +258,7 @@ function Hero() {
             to="/auth"
             className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-5 pr-1.5 py-1.5 text-sm font-medium"
           >
-            <span>{ctaLabel}</span>
+            <span style={ctaColor ? { color: ctaColor } : undefined}>{ctaLabel}</span>
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </span>
@@ -266,7 +270,7 @@ function Hero() {
   );
 }
 
-function StaggeredQuote({ text, className }: { text: string; className?: string }) {
+function StaggeredQuote({ text, className, color }: { text: string; className?: string; color?: string }) {
   return (
     <motion.blockquote
       initial={{ opacity: 0, y: 20 }}
@@ -274,6 +278,7 @@ function StaggeredQuote({ text, className }: { text: string; className?: string 
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       className={className}
+      style={color ? { color } : undefined}
     >
       {text}
     </motion.blockquote>
@@ -285,6 +290,8 @@ function QuoteSection() {
   const { content } = useSiteContent();
   const quoteText = siteText(content, "quote.text");
   const quoteAuthor = siteText(content, "quote.author");
+  const quoteTextColor = siteColor(content, "quote.text");
+  const quoteAuthorColor = siteColor(content, "quote.author");
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -321,7 +328,8 @@ function QuoteSection() {
           <div className="text-ink">
             <StaggeredQuote
               text={quoteText}
-              className="font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"
+              className={"font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"}
+              color={quoteTextColor || undefined}
             />
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -329,6 +337,7 @@ function QuoteSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60"
+              style={quoteAuthorColor ? { color: quoteAuthorColor } : undefined}
             >
               {quoteAuthor}
             </motion.div>
@@ -401,11 +410,11 @@ function HeroParallax() {
   );
 }
 
-function AnimatedHeadline({ lines }: { lines: string[] }) {
+function AnimatedHeadline({ lines, colors }: { lines: string[]; colors?: (string | undefined)[] }) {
   return (
     <h1>
       {lines.map((line, li) => (
-        <span key={li} className="block overflow-hidden">
+        <span key={li} className="block overflow-hidden" style={colors?.[li] ? { color: colors[li] } : undefined}>
           <span className="block">
             {line.split(" ").map((word, wi) => (
               <span key={wi} className="inline-block overflow-hidden align-baseline mr-[0.25em]">
@@ -426,11 +435,11 @@ function AnimatedHeadline({ lines }: { lines: string[] }) {
   );
 }
 
-function ScrollHeadline({ lines, className }: { lines: string[]; className?: string }) {
+function ScrollHeadline({ lines, className, colors }: { lines: string[]; className?: string; colors?: (string | undefined)[] }) {
   return (
     <h2 className={className}>
       {lines.map((line, li) => (
-        <span key={li} className="block">{line}</span>
+        <span key={li} className="block" style={colors?.[li] ? { color: colors[li] } : undefined}>{line}</span>
       ))}
     </h2>
   );
@@ -527,6 +536,7 @@ function CreatorsFans() {
       <div className="relative mx-auto max-w-[1280px]">
         <ScrollHeadline
           lines={[siteText(content, "creators.headline.line1"), siteText(content, "creators.headline.line2")]}
+          colors={[siteColor(content, "creators.headline.line1") || undefined, siteColor(content, "creators.headline.line2") || undefined]}
           className="font-display text-paper font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
         />
 
@@ -538,15 +548,15 @@ function CreatorsFans() {
           className="mt-14 md:mt-20 grid sm:grid-cols-2 gap-4 md:gap-5"
         >
           {[
-            { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), primary: true, destination: "/calendar" },
-            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), primary: false, destination: "/discover" },
+            { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), tc: siteColor(content, "creators.card1.title"), bc: siteColor(content, "creators.card1.body"), cc: siteColor(content, "creators.card1.cta"), primary: true, destination: "/calendar" },
+            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: false, destination: "/discover" },
           ].map((c) => (
             <div
               key={c.t}
               className="group relative rounded-3xl border border-paper/10 bg-paper/[0.03] backdrop-blur-sm p-8 md:p-10 hover:border-paper/25 hover:bg-paper/[0.05] transition-colors"
             >
-              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight">{c.t}</h3>
-              <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md">{c.b}</p>
+              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight" style={c.tc ? { color: c.tc } : undefined}>{c.t}</h3>
+              <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md" style={c.bc ? { color: c.bc } : undefined}>{c.b}</p>
               <button
                 type="button"
                 onClick={() => openAppPage(c.destination)}
@@ -557,7 +567,7 @@ function CreatorsFans() {
                     : "border border-paper/30 text-paper hover:bg-paper hover:text-ink")
                 }
               >
-                <span>{c.cta}</span>
+                <span style={c.cc ? { color: c.cc } : undefined}>{c.cta}</span>
                 <span className={"inline-flex items-center justify-center w-7 h-7 rounded-full " + (c.primary ? "bg-ink text-paper" : "bg-paper/10 text-paper group-hover:bg-ink group-hover:text-paper")}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </span>
@@ -574,6 +584,8 @@ function CreatorsFans() {
 
 function Features() {
   const { content } = useSiteContent();
+  const headingColor = siteColor(content, "features.heading");
+  const subtitleColor = siteColor(content, "features.subtitle");
   return (
     <section id="features" className="relative bg-blue px-5 md:px-10 py-24 md:py-32">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -584,6 +596,7 @@ function Features() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           className="font-display text-white font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] max-w-5xl"
+          style={headingColor ? { color: headingColor } : undefined}
         >
           {siteText(content, "features.heading")}
         </motion.h2>
@@ -593,6 +606,7 @@ function Features() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.1 }}
           className="mt-5 max-w-xl text-white/80 text-base md:text-lg"
+          style={subtitleColor ? { color: subtitleColor } : undefined}
         >
           {siteText(content, "features.subtitle")}
         </motion.p>
@@ -938,6 +952,9 @@ function CTAInner() {
   const line1 = siteText(content, "cta.line1");
   const line2 = siteText(content, "cta.line2");
   const btn = siteText(content, "cta.button");
+  const line1Color = siteColor(content, "cta.line1");
+  const line2Color = siteColor(content, "cta.line2");
+  const btnColor = siteColor(content, "cta.button");
   return (
     <section className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -949,7 +966,9 @@ function CTAInner() {
         className="mx-auto max-w-[1280px] text-center"
       >
         <h2 className="font-display text-white font-medium text-[clamp(2.5rem,9vw,9rem)] leading-[0.92] md:leading-[0.88] tracking-[-0.04em] md:tracking-[-0.05em]">
-          {line1}<br />{line2}
+          <span style={line1Color ? { color: line1Color } : undefined}>{line1}</span>
+          <br />
+          <span style={line2Color ? { color: line2Color } : undefined}>{line2}</span>
         </h2>
         <div className="mt-10 md:mt-14 flex justify-center">
           <Magnetic className="sm:inline-flex">
@@ -957,7 +976,7 @@ function CTAInner() {
               to="/auth"
               className="group inline-flex items-center gap-2 rounded-full bg-ink text-paper pl-7 pr-2 py-2 text-sm md:text-base font-medium shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.45)] hover:bg-paper hover:text-ink transition-all"
             >
-              <span>{btn}</span>
+              <span style={btnColor ? { color: btnColor } : undefined}>{btn}</span>
               <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-paper text-ink group-hover:bg-ink group-hover:text-paper transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </span>
