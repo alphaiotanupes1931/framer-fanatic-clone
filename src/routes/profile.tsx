@@ -1278,7 +1278,7 @@ function ArtistEventsTab({ userId }: { userId: string }) {
   const past = events.filter((e) => new Date(e.starts_at).getTime() < now);
   const renderCard = (e: typeof events[number]) => (
     <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-      {e.image_url && <img src={e.image_url} alt={e.title} className="w-full h-56 object-cover" />}
+      {e.image_url && <SmartImage src={e.image_url} alt={e.title} bucket="event-images" className="w-full h-56 object-cover" />}
       <div className="p-4 space-y-2">
         <div className="text-xs text-muted-foreground">
           {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
@@ -1613,7 +1613,7 @@ function MyWritingsTab({ userId }: { userId: string }) {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {rows.map((s) => (
         <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-          {s.cover_image_url && <img src={s.cover_image_url} alt={s.title} className="w-full h-40 object-cover" />}
+          {s.cover_image_url && <SmartImage src={s.cover_image_url} alt={s.title} bucket="story-covers" className="w-full h-40 object-cover" />}
           <div className="p-4 space-y-1.5">
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.status === "published" ? "Published" : "Draft"} · {new Date(s.created_at).toLocaleDateString()}</div>
             <div className="font-bold leading-tight line-clamp-2">{s.title}</div>
@@ -1662,7 +1662,7 @@ function AttendingTab() {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {upcoming.map((r) => (
         <Link key={r.id} to="/events/$eventId" params={{ eventId: r.event_id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-          {r.events?.image_url && <img src={r.events.image_url} alt={r.events.title} className="w-full h-40 object-cover" />}
+          {r.events?.image_url && <SmartImage src={r.events.image_url} alt={r.events.title} bucket="event-images" className="w-full h-40 object-cover" />}
           <div className="p-4 space-y-1.5">
             <div className="text-xs text-muted-foreground">
               {new Date(r.events!.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {new Date(r.events!.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
