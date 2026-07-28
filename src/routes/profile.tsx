@@ -112,6 +112,8 @@ function ProfilePage() {
     if (postViewerIdx === null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setPostViewerIdx(null);
+      // Skip arrow navigation on small screens (touch users scroll vertically).
+      if (typeof window !== "undefined" && window.innerWidth < 640) return;
       if (e.key === "ArrowLeft") setPostViewerIdx((i) => (i === null ? null : (i - 1 + myPosts.length) % myPosts.length));
       if (e.key === "ArrowRight") setPostViewerIdx((i) => (i === null ? null : (i + 1) % myPosts.length));
     };
@@ -667,7 +669,7 @@ function ProfilePage() {
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setPostViewerIdx((i) => (i === null ? null : (i - 1 + myPosts.length) % myPosts.length)); }}
                 aria-label="Previous post"
-                className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:left-4"
+                className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:left-4 sm:inline-flex"
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
@@ -675,7 +677,7 @@ function ProfilePage() {
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setPostViewerIdx((i) => (i === null ? null : (i + 1) % myPosts.length)); }}
                 aria-label="Next post"
-                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:right-4"
+                className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:right-4 sm:inline-flex"
               >
                 <ChevronRight className="h-6 w-6" />
               </button>
