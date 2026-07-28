@@ -1598,7 +1598,7 @@ function MyWritingsTab({ userId }: { userId: string }) {
   const [rows, setRows] = useState<Array<{ id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string; status: string }>>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    (async () => {
+    const load = async () => {
       const { data } = await supabase
         .from("stories")
         .select("id,title,excerpt,cover_url,created_at,status")
@@ -1607,7 +1607,15 @@ function MyWritingsTab({ userId }: { userId: string }) {
         .limit(50);
       setRows((data ?? []) as never);
       setLoading(false);
-    })();
+    };
+    void load();
+    const onFocus = () => { if (document.visibilityState === "visible") void load(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
   }, [userId]);
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading writings…</div>;
   if (rows.length === 0) {
