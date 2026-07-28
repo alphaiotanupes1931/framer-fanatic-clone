@@ -121,7 +121,21 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
   const isTextOnly = !hasMedia;
 
   return (
-    <div className={`grid overflow-hidden bg-background ${isTextOnly ? "grid-cols-1" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
+    <div className={`grid overflow-hidden bg-background ${isTextOnly ? "md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
+      {isTextOnly && post.content && (
+        <div
+          className="flex aspect-square w-full items-center justify-center p-8 md:aspect-auto md:min-h-[85vh]"
+          style={{ background: post.bg_color || "#111827", color: post.text_color || "#ffffff" }}
+        >
+          <div
+            className={`whitespace-pre-wrap break-words text-center font-semibold leading-snug ${
+              post.font_size === "sm" ? "text-lg" : post.font_size === "lg" ? "text-3xl" : post.font_size === "xl" ? "text-5xl" : "text-2xl"
+            }`}
+          >
+            {post.content}
+          </div>
+        </div>
+      )}
       {hasMedia && (
         <div className="relative flex items-center justify-center bg-black">
           {current.kind === "image" ? (
@@ -175,7 +189,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
         </header>
 
         <div className="flex-1 overflow-y-auto">
-          {post.content && (
+          {post.content && !isTextOnly && (
             (post.post_type === "text" && post.bg_color) ? (
               <div className={`m-4 rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
                 post.font_size === "sm" ? "text-base" : post.font_size === "lg" ? "text-2xl" : post.font_size === "xl" ? "text-4xl" : "text-xl"
