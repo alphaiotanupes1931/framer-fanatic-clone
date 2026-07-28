@@ -6,7 +6,7 @@ const STORAGE_KEY = "pb_onboarding_v3_dismissed";
 
 const steps = [
   { icon: Palette, title: "Follow artists & creators", description: "Discover Baltimore talent and see their updates in your feed.", to: "/artists", cta: "Browse Artists" },
-  { icon: Users, title: "Join a community", description: "Find neighborhoods, groups, and organizations near you.", to: "/neighborhoods", cta: "Find Communities" },
+  { icon: Users, title: "Join a community", description: "Find neighborhoods, groups, and organizations near you.", to: "/groups", cta: "Find Communities" },
   { icon: PenLine, title: "Share something", description: "Post an update, story, or event to connect with the city.", to: "/dashboard", cta: "Create a Post" },
   { icon: Calendar, title: "Explore local events", description: "RSVP to events happening around Baltimore.", to: "/events", cta: "See Events" },
 ] as const;
