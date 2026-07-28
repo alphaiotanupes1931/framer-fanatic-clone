@@ -6,6 +6,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bookmark, ImageIcon, Heart, MessageCircle, BookOpen, Ticket, Calendar as CalendarIcon, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { useEventImageUrl } from "@/components/event-image";
 
 export const Route = createFileRoute("/saved")({
   component: SavedPage,
@@ -247,11 +248,24 @@ function StoryTile({ story, onUnsave }: { story: SavedStory; onUnsave: () => voi
 
 function EventTile({ event, onUnsave }: { event: SavedEvent; onUnsave: () => void }) {
   const when = event.starts_at ? new Date(event.starts_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : null;
+  const resolvedImage = useEventImageUrl(event.image_url);
+  const [imgOk, setImgOk] = useState(false);
+  useEffect(() => {
+    setImgOk(false);
+    if (!resolvedImage) return;
+    let cancelled = false;
+    const probe = new Image();
+    probe.onload = () => { if (!cancelled) setImgOk(true); };
+    probe.onerror = () => { if (!cancelled) setImgOk(false); };
+    probe.src = resolvedImage;
+    return () => { cancelled = true; };
+  }, [resolvedImage]);
+  const showImg = !!resolvedImage && imgOk;
   return (
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md">
       <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
-        {event.image_url ? (
-          <img src={event.image_url} alt="" loading="lazy" className="h-40 w-full object-cover" />
+        {showImg ? (
+          <img src={resolvedImage!} alt="" loading="lazy" onError={() => setImgOk(false)} className="h-40 w-full object-cover" />
         ) : (
           <div className="flex h-40 w-full items-center justify-center bg-gradient-to-br from-orange/10 to-muted text-muted-foreground">
             <Ticket className="h-8 w-8" />
