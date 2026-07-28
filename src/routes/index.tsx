@@ -289,6 +289,8 @@ function QuoteSection() {
   const { content } = useSiteContent();
   const quoteText = siteText(content, "quote.text");
   const quoteAuthor = siteText(content, "quote.author");
+  const quoteTextColor = siteColor(content, "quote.text");
+  const quoteAuthorColor = siteColor(content, "quote.author");
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -325,7 +327,7 @@ function QuoteSection() {
           <div className="text-ink">
             <StaggeredQuote
               text={quoteText}
-              className="font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"
+              className={"font-display text-[clamp(1.35rem,3.2vw,3.2rem)] leading-[1.2] md:leading-[1.15] tracking-[-0.02em]"}
             />
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -333,6 +335,7 @@ function QuoteSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="mt-6 md:mt-10 font-display text-sm md:text-lg tracking-wide text-ink/60"
+              style={quoteAuthorColor ? { color: quoteAuthorColor } : undefined}
             >
               {quoteAuthor}
             </motion.div>
