@@ -584,6 +584,8 @@ function CreatorsFans() {
 
 function Features() {
   const { content } = useSiteContent();
+  const headingColor = siteColor(content, "features.heading");
+  const subtitleColor = siteColor(content, "features.subtitle");
   return (
     <section id="features" className="relative bg-blue px-5 md:px-10 py-24 md:py-32">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -594,6 +596,7 @@ function Features() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           className="font-display text-white font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] max-w-5xl"
+          style={headingColor ? { color: headingColor } : undefined}
         >
           {siteText(content, "features.heading")}
         </motion.h2>
@@ -603,6 +606,7 @@ function Features() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.1 }}
           className="mt-5 max-w-xl text-white/80 text-base md:text-lg"
+          style={subtitleColor ? { color: subtitleColor } : undefined}
         >
           {siteText(content, "features.subtitle")}
         </motion.p>
