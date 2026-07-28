@@ -121,7 +121,21 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
   const isTextOnly = !hasMedia;
 
   return (
-    <div className={`grid overflow-hidden bg-background ${isTextOnly ? "grid-cols-1" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
+    <div className={`grid overflow-hidden bg-background ${isTextOnly ? "md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
+      {isTextOnly && post.content && (
+        <div
+          className="flex aspect-square w-full items-center justify-center p-8 md:aspect-auto md:min-h-[85vh]"
+          style={{ background: post.bg_color || "#111827", color: post.text_color || "#ffffff" }}
+        >
+          <div
+            className={`whitespace-pre-wrap break-words text-center font-semibold leading-snug ${
+              post.font_size === "sm" ? "text-lg" : post.font_size === "lg" ? "text-3xl" : post.font_size === "xl" ? "text-5xl" : "text-2xl"
+            }`}
+          >
+            {post.content}
+          </div>
+        </div>
+      )}
       {hasMedia && (
         <div className="relative flex items-center justify-center bg-black">
           {current.kind === "image" ? (
