@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bookmark, ImageIcon, Heart, MessageCircle, BookOpen, Ticket, Calendar as CalendarIcon, MapPin } from "lucide-react";
+import { Bookmark, ImageIcon, Heart, MessageCircle, BookOpen, Ticket, Calendar as CalendarIcon, MapPin, Video as VideoIcon, Play } from "lucide-react";
 import { toast } from "sonner";
 import { useEventImageUrl } from "@/components/event-image";
 
@@ -42,7 +42,15 @@ type SavedEvent = {
   saved_at: string;
 };
 
-type Tab = "posts" | "stories" | "events";
+type SavedVideo = {
+  id: string;
+  title: string;
+  thumbnail_url: string | null;
+  video_url: string | null;
+  saved_at: string;
+};
+
+type Tab = "posts" | "stories" | "events" | "videos";
 
 function SavedPage() {
   const navigate = useNavigate();
@@ -51,6 +59,7 @@ function SavedPage() {
   const [posts, setPosts] = useState<SavedPost[]>([]);
   const [stories, setStories] = useState<SavedStory[]>([]);
   const [events, setEvents] = useState<SavedEvent[]>([]);
+  const [videos, setVideos] = useState<SavedVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,7 +73,7 @@ function SavedPage() {
 
   const loadAll = async (uid: string) => {
     setLoading(true);
-    await Promise.all([loadPosts(uid), loadStories(uid), loadEvents(uid)]);
+    await Promise.all([loadPosts(uid), loadStories(uid), loadEvents(uid), loadVideos(uid)]);
     setLoading(false);
   };
 
@@ -122,6 +131,20 @@ function SavedPage() {
     setEvents(list);
   };
 
+  const loadVideos = async (uid: string) => {
+    const { data: saves } = await supabase
+      .from("video_saves").select("video_id, created_at")
+      .eq("user_id", uid).order("created_at", { ascending: false }).limit(120);
+    const savedAt = new Map((saves || []).map((s: any) => [s.video_id, s.created_at]));
+    const ids = Array.from(savedAt.keys());
+    if (!ids.length) { setVideos([]); return; }
+    const { data: vs } = await supabase.from("videos")
+      .select("id, title, thumbnail_url, video_url").in("id", ids);
+    const list = ((vs || []) as any[]).map((v) => ({ ...v, saved_at: savedAt.get(v.id) as string })) as SavedVideo[];
+    list.sort((a, b) => (a.saved_at < b.saved_at ? 1 : -1));
+    setVideos(list);
+  };
+
   const unsavePost = async (id: string) => {
     if (!me) return;
     const prev = posts;
@@ -143,11 +166,19 @@ function SavedPage() {
     const { error } = await supabase.from("event_saves").delete().eq("event_id", id).eq("user_id", me);
     if (error) { toast.error(error.message); setEvents(prev); } else toast.success("Removed");
   };
+  const unsaveVideo = async (id: string) => {
+    if (!me) return;
+    const prev = videos;
+    setVideos((cur) => cur.filter((v) => v.id !== id));
+    const { error } = await supabase.from("video_saves").delete().eq("video_id", id).eq("user_id", me);
+    if (error) { toast.error(error.message); setVideos(prev); } else toast.success("Removed");
+  };
 
   const tabs: { key: Tab; label: string; count: number; icon: typeof BookOpen }[] = [
     { key: "posts", label: "Posts", count: posts.length, icon: ImageIcon },
     { key: "stories", label: "Stories", count: stories.length, icon: BookOpen },
     { key: "events", label: "Events", count: events.length, icon: Ticket },
+    { key: "videos", label: "Videos", count: videos.length, icon: VideoIcon },
   ];
 
   return (
@@ -194,12 +225,20 @@ function SavedPage() {
               {stories.map((s) => <StoryTile key={s.id} story={s} onUnsave={() => unsaveStory(s.id)} />)}
             </div>
           )
-        ) : (
+        ) : tab === "events" ? (
           events.length === 0 ? (
             <EmptyState icon={Ticket} title="No saved events" hint="Tap the bookmark on any event to save it here." cta="Browse events" to="/events" />
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {events.map((e) => <EventTile key={e.id} event={e} onUnsave={() => unsaveEvent(e.id)} />)}
+            </div>
+          )
+        ) : (
+          videos.length === 0 ? (
+            <EmptyState icon={VideoIcon} title="No saved videos" hint="Tap the bookmark on any video to save it here." cta="Browse videos" to="/videos" />
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {videos.map((v) => <VideoTile key={v.id} video={v} onUnsave={() => unsaveVideo(v.id)} />)}
             </div>
           )
         )}
