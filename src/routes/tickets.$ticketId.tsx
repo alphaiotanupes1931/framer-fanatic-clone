@@ -2,6 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
+import { SmartImage } from "@/components/smart-image";
 import { MapPin, Calendar, Download, Send, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/tickets/$ticketId")({
