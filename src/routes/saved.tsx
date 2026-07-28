@@ -6,6 +6,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bookmark, ImageIcon, Heart, MessageCircle, BookOpen, Ticket, Calendar as CalendarIcon, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { useEventImageUrl } from "@/components/event-image";
 
 export const Route = createFileRoute("/saved")({
   component: SavedPage,
