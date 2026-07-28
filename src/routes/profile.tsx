@@ -653,13 +653,14 @@ function ProfilePage() {
           role="dialog"
           aria-modal="true"
           onClick={() => setPostViewerIdx(null)}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-2 sm:p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 sm:p-6"
+          style={{ overscrollBehavior: "contain" }}
         >
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setPostViewerIdx(null); }}
             aria-label="Close"
-            className="absolute right-3 top-3 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+            className="absolute right-3 top-3 z-20 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
           >
             <XIcon className="h-5 w-5" />
           </button>
@@ -683,9 +684,10 @@ function ProfilePage() {
               </button>
             </>
           )}
+          {/* Desktop: single post with left/right arrow navigation */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-6xl overflow-hidden rounded-2xl bg-background shadow-2xl"
+            className="hidden w-full max-w-6xl overflow-hidden rounded-2xl bg-background shadow-2xl sm:block"
           >
             <div className="max-h-[92vh] overflow-y-auto">
               <PostSplitView
@@ -695,8 +697,16 @@ function ProfilePage() {
               />
             </div>
           </div>
+          {/* Mobile: vertical scrollable feed of all posts, snapped */}
+          <MobilePostFeed
+            posts={myPosts}
+            startIndex={postViewerIdx}
+            meId={profile?.id}
+            onIndexChange={setPostViewerIdx}
+            onDeleted={(id) => { handleDeleteMyPost(id); }}
+          />
           {myPosts.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white">
+            <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white sm:block">
               {postViewerIdx + 1} / {myPosts.length}
             </div>
           )}
