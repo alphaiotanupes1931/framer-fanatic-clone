@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { SmartImage } from "@/components/smart-image";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
