@@ -90,8 +90,8 @@ function EventDetail() {
       const res = await rsvpFn({ data: { eventId: evt.id } });
       setRsvped(true);
       toast.success(res.alreadyRsvped ? "You're already on the list" : "You're going!");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not RSVP");
+    } catch {
+      toast.error("Planet Baltimore could not complete your RSVP. Please try again.");
     } finally {
       setRsvping(false);
     }
