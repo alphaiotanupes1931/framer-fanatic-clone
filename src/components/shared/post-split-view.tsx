@@ -189,7 +189,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
         </header>
 
         <div className="flex-1 overflow-y-auto">
-          {post.content && (
+          {post.content && !isTextOnly && (
             (post.post_type === "text" && post.bg_color) ? (
               <div className={`m-4 rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
                 post.font_size === "sm" ? "text-base" : post.font_size === "lg" ? "text-2xl" : post.font_size === "xl" ? "text-4xl" : "text-xl"
