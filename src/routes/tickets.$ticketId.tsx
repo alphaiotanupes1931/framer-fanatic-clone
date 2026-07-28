@@ -56,6 +56,7 @@ function TicketDetailPage() {
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&data=${encodeURIComponent(t.id)}`;
 
   return (
+    <>
     <AppLayout>
       <div className="mx-auto w-full max-w-lg px-4 py-6">
         <Link to="/profile" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">
@@ -140,7 +141,6 @@ function TicketDetailPage() {
         )}
       </div>
     </AppLayout>
-    <>
       {t.events?.id && (
         <ShareToUsersDialog
           open={shareOpen}
