@@ -49,6 +49,63 @@ const FIELD_META: Record<string, { label: string; help: string; multiline?: bool
   "about.cta.secondary": { label: "About: secondary button label", help: "Secondary link button." },
 };
 
+// Grouped layout for the admin editor. Every key here comes from FIELD_META.
+const FIELD_GROUPS: { heading: string; blurb: string; keys: string[] }[] = [
+  {
+    heading: "Homepage - Hero",
+    blurb: "The giant title, subtitle, and button at the very top of the homepage.",
+    keys: ["hero.line1", "hero.line2", "hero.subtitle", "hero.cta"],
+  },
+  {
+    heading: "Homepage - Featured quote",
+    blurb: "The large pull quote and its author name.",
+    keys: ["quote.text", "quote.author"],
+  },
+  {
+    heading: "Homepage - Communities section",
+    blurb: "The two-line headline and the two side-by-side community cards.",
+    keys: [
+      "creators.headline.line1",
+      "creators.headline.line2",
+      "creators.card1.title",
+      "creators.card1.body",
+      "creators.card1.cta",
+      "creators.card2.title",
+      "creators.card2.body",
+      "creators.card2.cta",
+    ],
+  },
+  {
+    heading: "Homepage - Meet today's Baltimore",
+    blurb: "The big heading and subtitle above the three creator cards.",
+    keys: ["features.heading", "features.subtitle"],
+  },
+  {
+    heading: "Homepage - Bottom call to action",
+    blurb: "The final banner near the footer.",
+    keys: ["cta.line1", "cta.line2", "cta.button"],
+  },
+  {
+    heading: "About page",
+    blurb: "Everything shown on /about.",
+    keys: [
+      "about.hero.title",
+      "about.hero.italic",
+      "about.story.heading",
+      "about.story.p1",
+      "about.story.p2",
+      "about.story.p3",
+      "about.cta.heading",
+      "about.cta.primary",
+      "about.cta.secondary",
+    ],
+  },
+];
+
+const TEXT_KEYS = FIELD_GROUPS.flatMap((g) => g.keys);
+const TEXT_KEY_SET = new Set(TEXT_KEYS);
+const COLOR_OVERRIDE_KEYS = TEXT_KEYS.map((k) => `${k}.color`);
+
 const COLOR_FIELDS: { key: string; label: string; help: string }[] = [
   { key: "colors.blue", label: "Primary blue", help: "Main blue used on the hero background, Features and CTA sections." },
   { key: "colors.blueDeep", label: "Deep blue", help: "Darker blue behind the Communities section." },
@@ -75,8 +132,16 @@ function AdminContentPage() {
   const navigate = useNavigate();
   const [unlocked, setUnlocked] = useState(false);
   const [gateChecked, setGateChecked] = useState(false);
-  const [values, setValues] = useState<Record<string, string>>({ ...SITE_CONTENT_DEFAULTS });
-  const [initial, setInitial] = useState<Record<string, string>>({ ...SITE_CONTENT_DEFAULTS });
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const base: Record<string, string> = { ...SITE_CONTENT_DEFAULTS };
+    COLOR_OVERRIDE_KEYS.forEach((k) => { if (!(k in base)) base[k] = ""; });
+    return base;
+  });
+  const [initial, setInitial] = useState<Record<string, string>>(() => {
+    const base: Record<string, string> = { ...SITE_CONTENT_DEFAULTS };
+    COLOR_OVERRIDE_KEYS.forEach((k) => { if (!(k in base)) base[k] = ""; });
+    return base;
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -94,7 +159,8 @@ function AdminContentPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("site_content").select("key, value");
-      const merged = { ...SITE_CONTENT_DEFAULTS };
+      const merged: Record<string, string> = { ...SITE_CONTENT_DEFAULTS };
+      COLOR_OVERRIDE_KEYS.forEach((k) => { if (!(k in merged)) merged[k] = ""; });
       (data || []).forEach((row: { key: string; value: unknown }) => {
         if (typeof row.value === "string") merged[row.key] = row.value;
         else if (row.value != null) merged[row.key] = String(row.value);
@@ -105,7 +171,8 @@ function AdminContentPage() {
     })();
   }, []);
 
-  const dirtyKeys = SITE_CONTENT_KEYS.filter((k) => values[k] !== initial[k]);
+  const allKeys = [...new Set([...SITE_CONTENT_KEYS, ...COLOR_OVERRIDE_KEYS])];
+  const dirtyKeys = allKeys.filter((k) => (values[k] ?? "") !== (initial[k] ?? ""));
 
   const save = async () => {
     if (dirtyKeys.length === 0) return;
