@@ -89,3 +89,14 @@ export function useSiteContent() {
 export function siteText(content: Record<string, string>, key: string): string {
   return content[key] ?? SITE_CONTENT_DEFAULTS[key] ?? "";
 }
+
+/**
+ * Returns the admin-set color override for a text key (stored under
+ * `<key>.color`), or an empty string when no override is set. Consumers
+ * should pass the return value through `style={{ color: value || undefined }}`
+ * so the default token color still applies when empty.
+ */
+export function siteColor(content: Record<string, string>, key: string): string {
+  const v = content[`${key}.color`];
+  return typeof v === "string" ? v.trim() : "";
+}
