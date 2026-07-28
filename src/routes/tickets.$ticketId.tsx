@@ -58,7 +58,7 @@ function TicketDetailPage() {
           {/* Cover */}
           {t.events?.image_url && (
             <div className="relative h-40 w-full">
-              <img src={t.events.image_url} alt="" className="h-full w-full object-cover opacity-70" />
+              <SmartImage src={t.events.image_url} alt="" bucket="event-images" className="h-full w-full object-cover opacity-70" />
               <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 to-transparent" />
             </div>
           )}
