@@ -307,35 +307,106 @@ function AdminContentPage() {
               </div>
             </div>
 
-            {SITE_CONTENT_KEYS.map((key) => {
-              if (COLOR_KEY_SET.has(key)) return null;
-              const meta = FIELD_META[key] ?? { label: key, help: "" };
-              const dirty = values[key] !== initial[key];
-              return (
-                <div key={key} className={`rounded-2xl border p-5 ${dirty ? "border-orange bg-orange/5" : "border-border bg-card"}`}>
-                  <Label htmlFor={key} className="text-sm font-semibold">
-                    {meta.label}
-                    {dirty && <span className="ml-2 text-xs text-orange">• unsaved</span>}
-                  </Label>
-                  {meta.help && <p className="mb-2 text-xs text-muted-foreground">{meta.help}</p>}
-                  {meta.multiline ? (
-                    <Textarea
-                      id={key}
-                      rows={3}
-                      value={values[key] ?? ""}
-                      onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                    />
-                  ) : (
-                    <Input
-                      id={key}
-                      value={values[key] ?? ""}
-                      onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                    />
-                  )}
-                  <p className="mt-1 text-[11px] text-muted-foreground">Key: <code>{key}</code></p>
+            {/* Unrecognized keys still saved in DB but not in a group */}
+            {SITE_CONTENT_KEYS.filter((k) => !COLOR_KEY_SET.has(k) && !TEXT_KEY_SET.has(k)).length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="mb-3 text-base font-semibold">Other content</h2>
+                <div className="space-y-4">
+                  {SITE_CONTENT_KEYS.filter((k) => !COLOR_KEY_SET.has(k) && !TEXT_KEY_SET.has(k)).map((key) => {
+                    const meta = FIELD_META[key] ?? { label: key, help: "" };
+                    const dirty = values[key] !== initial[key];
+                    return (
+                      <div key={key}>
+                        <Label htmlFor={key} className="text-sm font-semibold">
+                          {meta.label}
+                          {dirty && <span className="ml-2 text-xs text-orange">• unsaved</span>}
+                        </Label>
+                        <Input id={key} value={values[key] ?? ""} onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))} />
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            )}
+
+            {FIELD_GROUPS.map((group) => (
+              <div key={group.heading} className="rounded-2xl border border-border bg-card p-5">
+                <div className="mb-4">
+                  <h2 className="text-base font-semibold">{group.heading}</h2>
+                  <p className="text-xs text-muted-foreground">{group.blurb}</p>
+                </div>
+                <div className="space-y-4">
+                  {group.keys.map((key) => {
+                    const meta = FIELD_META[key] ?? { label: key, help: "" };
+                    const dirty = values[key] !== initial[key];
+                    const colorKey = `${key}.color`;
+                    const colorVal = (values[colorKey] ?? "").trim();
+                    const savedColorVal = (initial[colorKey] ?? "").trim();
+                    const colorDirty = colorVal !== savedColorVal;
+                    const colorValid = colorVal === "" || HEX_RE.test(colorVal);
+                    return (
+                      <div key={key} className={`rounded-xl border p-4 ${(dirty || colorDirty) ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
+                        <Label htmlFor={key} className="text-sm font-semibold">
+                          {meta.label}
+                          {(dirty || colorDirty) && <span className="ml-2 text-xs text-orange">• unsaved</span>}
+                        </Label>
+                        {meta.help && <p className="mb-2 text-xs text-muted-foreground">{meta.help}</p>}
+                        {meta.multiline ? (
+                          <Textarea
+                            id={key}
+                            rows={3}
+                            value={values[key] ?? ""}
+                            onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                          />
+                        ) : (
+                          <Input
+                            id={key}
+                            value={values[key] ?? ""}
+                            onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                          />
+                        )}
+                        <div className="mt-3 rounded-lg border border-dashed border-border p-3">
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="text-xs font-medium text-neutral-700">Text color</span>
+                            <span className="text-[11px] text-muted-foreground">Leave empty to use the default color</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={HEX_RE.test(colorVal) ? colorVal : "#000000"}
+                              onChange={(e) => setValues((v) => ({ ...v, [colorKey]: e.target.value }))}
+                              className="h-9 w-12 shrink-0 cursor-pointer rounded-md border border-border bg-transparent"
+                              aria-label={`${meta.label} text color`}
+                            />
+                            <Input
+                              value={colorVal}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                setValues((v) => ({ ...v, [colorKey]: raw.trim() === "" ? "" : normalizeHex(raw) }));
+                              }}
+                              placeholder="empty = use default"
+                              className={colorValid ? "h-9" : "h-9 border-destructive"}
+                            />
+                            {colorVal !== "" && (
+                              <button
+                                type="button"
+                                onClick={() => setValues((v) => ({ ...v, [colorKey]: "" }))}
+                                className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-50"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                          {!colorValid && (
+                            <p className="mt-1 text-[11px] text-destructive">Enter a valid hex like #E61E43 (or leave empty).</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
 
             <div className="sticky bottom-4 flex justify-end">
               <Button onClick={save} disabled={saving || dirtyKeys.length === 0} className="gap-2 shadow-lg">
