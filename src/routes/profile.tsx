@@ -142,7 +142,7 @@ function ProfilePage() {
 
   useEffect(() => {
     if (!profile) return;
-    (async () => {
+    const loadPosts = async () => {
       const { data } = await supabase
         .from("posts")
         .select("*")
@@ -157,7 +157,15 @@ function ProfilePage() {
       };
       const rows = (data || []).map((p: any) => ({ ...p, ...author }));
       setMyPosts(sortPosts(rows));
-    })();
+    };
+    void loadPosts();
+    const onFocus = () => { if (document.visibilityState === "visible") void loadPosts(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
   }, [profile]);
 
   const handleDeleteMyPost = (id: string) => {
