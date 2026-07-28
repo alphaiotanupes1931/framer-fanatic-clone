@@ -12,7 +12,7 @@ import { stripHtml, truncateText } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
-import { useSiteContent, siteText } from "@/hooks/use-site-content";
+import { useSiteContent, siteText, siteColor } from "@/hooks/use-site-content";
 import { SiteColorInjector } from "@/components/site-color-injector";
 
 export const Route = createFileRoute("/")({
