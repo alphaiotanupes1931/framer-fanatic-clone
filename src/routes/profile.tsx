@@ -716,6 +716,83 @@ function ProfilePage() {
   );
 }
 
+function MobilePostFeed({
+  posts,
+  startIndex,
+  meId,
+  onIndexChange,
+  onDeleted,
+}: {
+  posts: any[];
+  startIndex: number;
+  meId?: string | null;
+  onIndexChange: (i: number) => void;
+  onDeleted: (id: string) => void;
+}) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const didInitialScroll = useRef(false);
+
+  useEffect(() => {
+    if (didInitialScroll.current) return;
+    const el = itemRefs.current[startIndex];
+    if (el) {
+      el.scrollIntoView({ block: "start" });
+      didInitialScroll.current = true;
+    }
+  }, [startIndex]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const mid = scroller.scrollTop + scroller.clientHeight / 2;
+        let bestIdx = 0;
+        let bestDist = Infinity;
+        itemRefs.current.forEach((el, i) => {
+          if (!el) return;
+          const c = el.offsetTop + el.offsetHeight / 2;
+          const d = Math.abs(c - mid);
+          if (d < bestDist) { bestDist = d; bestIdx = i; }
+        });
+        onIndexChange(bestIdx);
+      });
+    };
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => scroller.removeEventListener("scroll", onScroll);
+  }, [onIndexChange]);
+
+  return (
+    <div
+      ref={scrollerRef}
+      onClick={(e) => e.stopPropagation()}
+      className="absolute inset-0 z-10 h-full w-full snap-y snap-mandatory overflow-y-auto overscroll-contain bg-background sm:hidden"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
+      {posts.map((p, i) => (
+        <div
+          key={p.id}
+          ref={(el) => { itemRefs.current[i] = el; }}
+          className="min-h-full snap-start border-b border-border"
+        >
+          <PostSplitView
+            postId={p.id}
+            meId={meId}
+            onDeleted={() => onDeleted(p.id)}
+          />
+        </div>
+      ))}
+      <div className="pointer-events-none fixed bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white">
+        {Math.min(startIndex + 1, posts.length)} / {posts.length}
+      </div>
+    </div>
+  );
+}
+
 function ArtistBookCollaborateTab({ profile }: { profile: any }) {
   const [intent, setIntent] = useState<string>("Collaborate");
   const [name, setName] = useState("");
