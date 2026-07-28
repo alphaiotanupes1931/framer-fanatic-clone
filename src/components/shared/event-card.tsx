@@ -30,9 +30,18 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
   const resolvedImage = useEventImageUrl(event.image_url);
-  const [imgFailed, setImgFailed] = useState(false);
-  useEffect(() => { setImgFailed(false); }, [resolvedImage]);
-  const showImage = !!resolvedImage && !imgFailed;
+  const [imgOk, setImgOk] = useState(false);
+  useEffect(() => {
+    setImgOk(false);
+    if (!resolvedImage) return;
+    let cancelled = false;
+    const probe = new Image();
+    probe.onload = () => { if (!cancelled) setImgOk(true); };
+    probe.onerror = () => { if (!cancelled) setImgOk(false); };
+    probe.src = resolvedImage;
+    return () => { cancelled = true; };
+  }, [resolvedImage]);
+  const showImage = !!resolvedImage && imgOk;
   const me = useCurrentProfile();
   const isAdmin = useIsAdmin();
   const isOwner = !!me?.id && !!event.user_id && me.id === event.user_id;
@@ -117,7 +126,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
             alt={event.title}
             loading="lazy"
             decoding="async"
-            onError={() => setImgFailed(true)}
+            onError={() => setImgOk(false)}
             className="h-full w-full object-cover"
           />
           {event.is_free && (
