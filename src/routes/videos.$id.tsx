@@ -162,3 +162,36 @@ function RelatedCard({ v }: { v: Video }) {
     </Link>
   );
 }
+
+function SaveVideoButton({ videoId }: { videoId: string }) {
+  const [saved, setSaved] = useState(false);
+  const [meId, setMeId] = useState<string | null>(null);
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setMeId(user.id);
+      const { data } = await supabase.from("video_saves").select("video_id").eq("video_id", videoId).eq("user_id", user.id).maybeSingle();
+      setSaved(!!data);
+    })();
+  }, [videoId]);
+  const toggle = async () => {
+    if (!meId) { toast.error("Sign in to save"); return; }
+    const next = !saved; setSaved(next);
+    const { error } = next
+      ? await supabase.from("video_saves").insert({ video_id: videoId, user_id: meId })
+      : await supabase.from("video_saves").delete().eq("video_id", videoId).eq("user_id", meId);
+    if (error) { setSaved(!next); toast.error(error.message); return; }
+    toast.success(next ? "Saved" : "Unsaved");
+  };
+  return (
+    <button
+      onClick={toggle}
+      aria-label={saved ? "Unsave" : "Save"}
+      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-300 text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"}`}
+    >
+      <Bookmark className={`h-4 w-4 ${saved ? "fill-[#d4580a]" : ""}`} />
+      {saved ? "Saved" : "Save"}
+    </button>
+  );
+}
