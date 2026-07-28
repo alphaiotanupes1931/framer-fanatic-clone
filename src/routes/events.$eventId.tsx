@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { createTicketCheckout, rsvpFreeEvent } from "@/lib/stripe.functions";
+import { createTicketCheckout } from "@/lib/stripe.functions";
 import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,6 @@ function EventDetail() {
   const [me, setMe] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const checkoutFn = useServerFn(createTicketCheckout);
-  const rsvpFn = useServerFn(rsvpFreeEvent);
   const [shareOpen, setShareOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savingBk, setSavingBk] = useState(false);
@@ -87,9 +86,11 @@ function EventDetail() {
     if (!me) { toast.error("Sign in to RSVP"); return; }
     setRsvping(true);
     try {
-      const res = await rsvpFn({ data: { eventId: evt.id } });
+      const { data, error } = await supabase.rpc("rsvp_free_event", { _event_id: evt.id });
+      if (error) throw error;
+      const result = data as { alreadyRsvped?: boolean } | null;
       setRsvped(true);
-      toast.success(res.alreadyRsvped ? "You're already on the list" : "You're going!");
+      toast.success(result?.alreadyRsvped ? "You're already on the list" : "You're going!");
     } catch {
       toast.error("Planet Baltimore could not complete your RSVP. Please try again.");
     } finally {
