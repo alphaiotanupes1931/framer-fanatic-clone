@@ -138,7 +138,7 @@ function OrganizerStudioPage() {
                             {new Date(e.starts_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                           </div>
                           {(e.venue_name || e.location) && (
-                            <div className="mt-0.5 truncate text-xs text-neutral-500">📍 {e.venue_name || e.location}</div>
+                            <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-neutral-500"><MapPin className="h-3 w-3" /> {e.venue_name || e.location}</div>
                           )}
                         </button>
                         <div className="flex flex-col items-end gap-2">
