@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +37,7 @@ function CreateArtistPage() {
     bio: "",
     website: "",
     avatar_url: "",
+    banner_url: "",
   });
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -68,6 +70,7 @@ function CreateArtistPage() {
         bio: me.bio || f.bio,
         website: me.website || f.website,
         avatar_url: me.avatar_url || f.avatar_url,
+        banner_url: (me as { banner_url?: string }).banner_url || f.banner_url,
       }));
     }
   }, [me]);
@@ -86,6 +89,7 @@ function CreateArtistPage() {
         bio: form.bio.trim() || null,
         website: form.website.trim() || null,
         avatar_url: form.avatar_url.trim() || null,
+        banner_url: form.banner_url.trim() || null,
       }).eq("id", me.id);
       if (error) throw error;
       toast.success("Artist profile saved");
@@ -155,6 +159,10 @@ function CreateArtistPage() {
                 <p className="mt-1 text-xs text-neutral-500">PNG or JPG, up to 10MB.</p>
               </div>
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">Banner image</Label>
+            <ImageUpload value={form.banner_url} onChange={(v) => setForm((f) => ({ ...f, banner_url: v }))} label="Upload banner image" bucket="avatars" />
           </div>
           <div className="flex justify-end">
             <Button onClick={submit} disabled={!canSubmit || saving}>
