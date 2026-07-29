@@ -983,3 +983,149 @@ function PromotersTab({ eventId }: { eventId: string }) {
     </div>
   );
 }
+const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+function CampaignTab({ events }: { events: MyEvent[] }) {
+  const [raw, setRaw] = useState("");
+  const [eventId, setEventId] = useState<string>("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [drafted, setDrafted] = useState(false);
+
+  const emails = useMemo(
+    () => Array.from(new Set((raw.match(EMAIL_RE) ?? []).map((e) => e.toLowerCase()))),
+    [raw],
+  );
+  const evt = events.find((e) => e.id === eventId) || null;
+  const eventUrl = evt && typeof window !== "undefined" ? `${window.location.origin}/events/${evt.id}` : "";
+
+  const buildDraft = () => {
+    if (!evt) return toast.error("Pick an event first");
+    if (emails.length === 0) return toast.error("Paste at least one email address");
+    const when = new Date(evt.starts_at).toLocaleString(undefined, {
+      weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit",
+    });
+    const where = evt.venue_name || evt.location || "Baltimore";
+    setSubject(`You're invited: ${evt.title}`);
+    setBody(
+      `Hi there,\n\n` +
+      `I'd love to see you at ${evt.title}.\n\n` +
+      `When: ${when}\n` +
+      `Where: ${where}\n` +
+      `${evt.price_cents ? `Tickets: ${fmt(evt.price_cents)}` : "Free to attend"}\n\n` +
+      `Details and RSVP: ${eventUrl}\n\n` +
+      `Hope to see you there,\nPlanet Baltimore`,
+    );
+    setDrafted(true);
+    toast.success(`Draft ready for ${emails.length} recipient${emails.length === 1 ? "" : "s"}`);
+  };
+
+  const send = () => {
+    if (!drafted || emails.length === 0) return;
+    const href = `mailto:?bcc=${encodeURIComponent(emails.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = href;
+  };
+
+  const copyAll = async () => {
+    try {
+      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
+      toast.success("Draft copied");
+    } catch { toast.error("Could not copy"); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <div className="flex items-center gap-2 text-base font-semibold text-neutral-900">
+          <Mail className="h-4 w-4 text-[#d4580a]" /> Email campaign
+        </div>
+        <p className="mt-1 text-sm text-neutral-600">
+          Paste a list of emails, pick an event, and we&apos;ll build a polished draft you can send from your own inbox.
+        </p>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Event</label>
+            <select
+              value={eventId}
+              onChange={(e) => { setEventId(e.target.value); setDrafted(false); }}
+              className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-[#d4580a]"
+            >
+              <option value="">Select an event…</option>
+              {events.map((e) => <option key={e.id} value={e.id}>{e.title}</option>)}
+            </select>
+          </div>
+          <div className="flex items-end">
+            <div className="rounded-xl bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700">
+              <span className="font-semibold text-neutral-900">{emails.length}</span> valid email{emails.length === 1 ? "" : "s"} detected
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Recipients</label>
+          <textarea
+            value={raw}
+            onChange={(e) => { setRaw(e.target.value); setDrafted(false); }}
+            rows={6}
+            placeholder="Paste emails here, any format: name@example.com, other@example.com — commas, spaces, or one per line all work."
+            className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-[#d4580a]"
+          />
+          {emails.length > 0 && (
+            <div className="mt-2 flex max-h-24 flex-wrap gap-1.5 overflow-y-auto">
+              {emails.map((e) => (
+                <span key={e} className="rounded-full bg-[#fff4ec] px-2.5 py-1 text-xs font-medium text-[#d4580a]">{e}</span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={buildDraft}
+          className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a]"
+        >
+          <List className="h-4 w-4" /> Build draft
+        </button>
+      </div>
+
+      {drafted && (
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-base font-semibold text-neutral-900">Draft</div>
+            <div className="text-xs text-neutral-500">{emails.length} recipient{emails.length === 1 ? "" : "s"} (BCC)</div>
+          </div>
+
+          <div className="mt-3 space-y-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Subject</label>
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm font-medium text-neutral-900 outline-none focus:border-[#d4580a]"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Message</label>
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={14}
+                className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm leading-relaxed text-neutral-900 outline-none focus:border-[#d4580a]"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button onClick={send} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a]">
+              <Send className="h-4 w-4" /> Send
+            </button>
+            <button onClick={copyAll} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+              <Copy className="h-4 w-4" /> Copy draft
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-neutral-500">Send opens your own email app with everyone on BCC, so addresses stay private.</p>
+        </div>
+      )}
+    </div>
+  );
+}
