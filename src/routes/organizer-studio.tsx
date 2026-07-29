@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
-  Zap, Crown, Star, Tag,
+  Zap, Crown, Star, Tag, MapPin, PartyPopper, AlertTriangle, GraduationCap,
   ChevronUp, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -138,7 +138,7 @@ function OrganizerStudioPage() {
                             {new Date(e.starts_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                           </div>
                           {(e.venue_name || e.location) && (
-                            <div className="mt-0.5 truncate text-xs text-neutral-500">📍 {e.venue_name || e.location}</div>
+                            <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-neutral-500"><MapPin className="h-3 w-3" /> {e.venue_name || e.location}</div>
                           )}
                         </button>
                         <div className="flex flex-col items-end gap-2">
@@ -675,12 +675,12 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
 
   const iconFor = (cat: string | null) => {
     switch (cat) {
-      case "early_bird": return "⚡";
-      case "vip": return "⭐";
-      case "group": return "👥";
-      case "student": return "🎓";
-      case "general": return "🎟️";
-      default: return "🎟️";
+      case "early_bird": return Zap;
+      case "vip": return Crown;
+      case "group": return Users;
+      case "student": return GraduationCap;
+      case "general": return Ticket;
+      default: return Ticket;
     }
   };
 
@@ -731,7 +731,7 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
               onClick={() => setSelected(t.id)}
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === t.id ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
             >
-              <span>{iconFor(t.category)}</span> {t.name}
+              {(() => { const Icon = iconFor(t.category); return <Icon className="h-4 w-4" />; })()} {t.name}
               <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">0</span>
             </button>
           ))}
@@ -742,10 +742,10 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
       <div>
         <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Quick Templates</div>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <button onClick={() => applyTemplate("venue")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">📍 Venue Update</button>
-          <button onClick={() => applyTemplate("reminder")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">🎟️ Reminder</button>
-          <button onClick={() => applyTemplate("thanks")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">🎉 Thank You</button>
-          <button onClick={() => applyTemplate("important")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">⚠️ Important Update</button>
+          <button onClick={() => applyTemplate("venue")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><MapPin className="h-4 w-4" /> Venue Update</button>
+          <button onClick={() => applyTemplate("reminder")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><Ticket className="h-4 w-4" /> Reminder</button>
+          <button onClick={() => applyTemplate("thanks")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><PartyPopper className="h-4 w-4" /> Thank You</button>
+          <button onClick={() => applyTemplate("important")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><AlertTriangle className="h-4 w-4" /> Important Update</button>
         </div>
       </div>
 
