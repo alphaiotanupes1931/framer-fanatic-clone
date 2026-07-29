@@ -742,10 +742,10 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
       <div>
         <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Quick Templates</div>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <button onClick={() => applyTemplate("venue")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">📍 Venue Update</button>
-          <button onClick={() => applyTemplate("reminder")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">🎟️ Reminder</button>
-          <button onClick={() => applyTemplate("thanks")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">🎉 Thank You</button>
-          <button onClick={() => applyTemplate("important")} className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]">⚠️ Important Update</button>
+          <button onClick={() => applyTemplate("venue")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><MapPin className="h-4 w-4" /> Venue Update</button>
+          <button onClick={() => applyTemplate("reminder")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><Ticket className="h-4 w-4" /> Reminder</button>
+          <button onClick={() => applyTemplate("thanks")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><PartyPopper className="h-4 w-4" /> Thank You</button>
+          <button onClick={() => applyTemplate("important")} className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-neutral-700 hover:border-[#d4580a]"><AlertTriangle className="h-4 w-4" /> Important Update</button>
         </div>
       </div>
 
