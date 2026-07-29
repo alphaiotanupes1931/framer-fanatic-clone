@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,6 +20,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
     bio: "",
     website: "",
     avatar_url: "",
+    banner_url: "",
   });
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -31,6 +33,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         bio: me.bio || f.bio,
         website: me.website || f.website,
         avatar_url: me.avatar_url || f.avatar_url,
+        banner_url: (me as { banner_url?: string }).banner_url || f.banner_url,
       }));
     }
   }, [me]);
@@ -49,6 +52,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         bio: form.bio.trim() || null,
         website: form.website.trim() || null,
         avatar_url: form.avatar_url.trim() || null,
+        banner_url: form.banner_url.trim() || null,
       }).eq("id", me.id);
       if (error) throw error;
       toast.success("Profile saved");
@@ -74,14 +78,18 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         <Label className="text-sm font-medium">Bio</Label>
         <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={1000} />
       </div>
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Website</Label>
+        <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">Website</Label>
-          <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
+          <Label className="text-sm font-medium">Avatar image</Label>
+          <ImageUpload value={form.avatar_url} onChange={(v) => set("avatar_url", v)} label="Upload avatar image" bucket="avatars" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">Avatar image URL</Label>
-          <Input value={form.avatar_url} onChange={(e) => set("avatar_url", e.target.value)} placeholder="https://" maxLength={500} />
+          <Label className="text-sm font-medium">Banner image</Label>
+          <ImageUpload value={form.banner_url} onChange={(v) => set("banner_url", v)} label="Upload banner image" bucket="avatars" />
         </div>
       </div>
       <div className="flex justify-end">
