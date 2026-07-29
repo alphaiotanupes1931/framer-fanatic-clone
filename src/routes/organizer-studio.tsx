@@ -731,7 +731,7 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
               onClick={() => setSelected(t.id)}
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === t.id ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
             >
-              <span>{iconFor(t.category)}</span> {t.name}
+              {(() => { const Icon = iconFor(t.category); return <Icon className="h-4 w-4" />; })()} {t.name}
               <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">0</span>
             </button>
           ))}
