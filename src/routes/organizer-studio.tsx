@@ -675,12 +675,12 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
 
   const iconFor = (cat: string | null) => {
     switch (cat) {
-      case "early_bird": return "⚡";
-      case "vip": return "⭐";
-      case "group": return "👥";
-      case "student": return "🎓";
-      case "general": return "🎟️";
-      default: return "🎟️";
+      case "early_bird": return Zap;
+      case "vip": return Crown;
+      case "group": return Users;
+      case "student": return GraduationCap;
+      case "general": return Ticket;
+      default: return Ticket;
     }
   };
 
