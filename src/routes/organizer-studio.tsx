@@ -997,7 +997,6 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
     [raw],
   );
   const evt = events.find((e) => e.id === eventId) || null;
-  const eventUrl = evt && typeof window !== "undefined" ? `${window.location.origin}/events/${evt.id}` : "";
 
   const buildDraft = () => {
     if (!evt) return toast.error("Pick an event first");
@@ -1013,7 +1012,6 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
       `When: ${when}\n` +
       `Where: ${where}\n` +
       `${evt.price_cents ? `Tickets: ${fmt(evt.price_cents)}` : "Free to attend"}\n\n` +
-      `Details and RSVP: ${eventUrl}\n\n` +
       `Hope to see you there,\nPlanet Baltimore`,
     );
     setDrafted(true);
