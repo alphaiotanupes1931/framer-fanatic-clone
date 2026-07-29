@@ -35,7 +35,7 @@ function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
 
 function OrganizerStudioPage() {
   const me = useCurrentProfile();
-  const [tab, setTab] = useState<"manage" | "create">("manage");
+  const [tab, setTab] = useState<"manage" | "create" | "campaign">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
   const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
@@ -107,14 +107,19 @@ function OrganizerStudioPage() {
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm">
+        <div className="grid grid-cols-3 gap-2 rounded-full bg-neutral-100 p-1 text-sm">
           <button onClick={() => { setTab("manage"); setSelected(null); }} className={`rounded-full py-2 font-semibold transition ${tab === "manage" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>Manage Events</button>
           <Link to="/events/new" onClick={() => setTab("create")} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "create" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
             <Plus className="h-4 w-4" /> Create Event
           </Link>
+          <button onClick={() => { setTab("campaign"); setSelected(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "campaign" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
+            <Mail className="h-4 w-4" /> Campaign
+          </button>
         </div>
 
-        {!selected ? (
+        {tab === "campaign" ? (
+          <CampaignTab events={events ?? []} />
+        ) : !selected ? (
           <>
             <div className="text-sm font-semibold text-neutral-700">Select an event</div>
             {events === null ? (
