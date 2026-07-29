@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
   Zap, Crown, Star, Tag, MapPin, PartyPopper, AlertTriangle, GraduationCap,
-  ChevronUp, ChevronDown,
+  ChevronUp, ChevronDown, Upload, Eye, X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -985,42 +985,166 @@ function PromotersTab({ eventId }: { eventId: string }) {
 }
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
+type Audience = { id: string; title: string; created_at: string; count: number };
+type Contact = { id: string; email: string; name: string | null };
+
+function parseEmails(text: string) {
+  return Array.from(new Set((text.match(EMAIL_RE) ?? []).map((e) => e.toLowerCase())));
+}
+
+const TEMPLATES: { key: string; label: string; subject: (t: string) => string; body: (t: string, when: string, where: string) => string }[] = [
+  {
+    key: "save-the-date", label: "Save the Date",
+    subject: (t) => `Save the date: ${t}`,
+    body: (t, when, where) => `Mark your calendar. ${t} is happening ${when} at ${where}.\n\nMore details coming soon, but we wanted you to have first notice.`,
+  },
+  {
+    key: "youre-invited", label: "You're Invited",
+    subject: (t) => `You're invited: ${t}`,
+    body: (t, when, where) => `I'd love to see you at ${t}.\n\nWhen: ${when}\nWhere: ${where}\n\nHope to see you there.`,
+  },
+  {
+    key: "tickets", label: "Tickets On Sale",
+    subject: (t) => `Tickets are live for ${t}`,
+    body: (t, when, where) => `Tickets for ${t} are officially on sale.\n\nWhen: ${when}\nWhere: ${where}\n\nGrab yours before they're gone.`,
+  },
+  {
+    key: "lineup", label: "Lineup Announcement",
+    subject: () => `The lineup for our event is here`,
+    body: (t, when) => `We've locked in the lineup for ${t}, and it does not disappoint.\n\nThis is your crew. This is your night ${when}. Lock in your ticket now and we'll see you there.`,
+  },
+  {
+    key: "early-bird", label: "Early Bird Ending",
+    subject: (t) => `Last call for early bird tickets to ${t}`,
+    body: (t, when, where) => `Early bird pricing for ${t} ends soon.\n\nWhen: ${when}\nWhere: ${where}\n\nDon't wait, prices go up shortly.`,
+  },
+];
+
 function CampaignTab({ events }: { events: MyEvent[] }) {
-  const [raw, setRaw] = useState("");
-  const [eventId, setEventId] = useState<string>("");
+  const [audiences, setAudiences] = useState<Audience[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openAudience, setOpenAudience] = useState<Audience | null>(null);
+
+  const [fromName, setFromName] = useState("Planet Baltimore");
+  const [eventId, setEventId] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [drafted, setDrafted] = useState(false);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [extraRaw, setExtraRaw] = useState("");
+  const [pickedEmails, setPickedEmails] = useState<Record<string, string[]>>({});
+  const [preview, setPreview] = useState(false);
 
-  const emails = useMemo(
-    () => Array.from(new Set((raw.match(EMAIL_RE) ?? []).map((e) => e.toLowerCase()))),
-    [raw],
-  );
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const loadAudiences = async () => {
+    setLoading(true);
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) { setAudiences([]); setLoading(false); return; }
+    const { data } = await supabase
+      .from("email_audiences")
+      .select("id,title,created_at,email_audience_contacts(count)")
+      .eq("owner_id", uid)
+      .order("created_at", { ascending: false });
+    setAudiences(
+      (data ?? []).map((a: any) => ({
+        id: a.id, title: a.title, created_at: a.created_at,
+        count: a.email_audience_contacts?.[0]?.count ?? 0,
+      })),
+    );
+    setLoading(false);
+  };
+
+  useEffect(() => { void loadAudiences(); }, []);
+
+  const uploadFiles = async (files: FileList) => {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return toast.error("Sign in first");
+    let made = 0;
+    for (const file of Array.from(files)) {
+      const text = await file.text();
+      const emails = parseEmails(text);
+      if (emails.length === 0) { toast.error(`No emails found in ${file.name}`); continue; }
+      const title = file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim() || "Untitled list";
+      const { data: aud, error } = await supabase
+        .from("email_audiences").insert({ owner_id: uid, title }).select("id").single();
+      if (error || !aud) { toast.error(error?.message ?? "Could not create audience"); continue; }
+      const rows = emails.map((email) => ({ audience_id: aud.id, owner_id: uid, email }));
+      const { error: cErr } = await supabase.from("email_audience_contacts").insert(rows);
+      if (cErr) toast.error(cErr.message);
+      made += 1;
+    }
+    if (made) toast.success(`Created ${made} audience${made === 1 ? "" : "s"}`);
+    await loadAudiences();
+  };
+
+  const createEmptyAudience = async () => {
+    const title = window.prompt("Name this audience");
+    if (!title?.trim()) return;
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return;
+    const { error } = await supabase.from("email_audiences").insert({ owner_id: uid, title: title.trim() });
+    if (error) return toast.error(error.message);
+    toast.success("Audience created");
+    await loadAudiences();
+  };
+
+  const renameAudience = async (a: Audience) => {
+    const title = window.prompt("Rename audience", a.title);
+    if (!title?.trim() || title === a.title) return;
+    const { error } = await supabase.from("email_audiences").update({ title: title.trim() }).eq("id", a.id);
+    if (error) return toast.error(error.message);
+    await loadAudiences();
+  };
+
+  const deleteAudience = async (a: Audience) => {
+    if (!window.confirm(`Delete "${a.title}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from("email_audiences").delete().eq("id", a.id);
+    if (error) return toast.error(error.message);
+    setPicked((p) => p.filter((id) => id !== a.id));
+    toast.success("Audience deleted");
+    await loadAudiences();
+  };
+
+  const toggleAudience = async (a: Audience) => {
+    if (picked.includes(a.id)) {
+      setPicked((p) => p.filter((id) => id !== a.id));
+      return;
+    }
+    if (!pickedEmails[a.id]) {
+      const { data } = await supabase.from("email_audience_contacts").select("email").eq("audience_id", a.id);
+      setPickedEmails((m) => ({ ...m, [a.id]: (data ?? []).map((r: any) => r.email) }));
+    }
+    setPicked((p) => [...p, a.id]);
+  };
+
   const evt = events.find((e) => e.id === eventId) || null;
 
-  const buildDraft = () => {
-    if (!evt) return toast.error("Pick an event first");
-    if (emails.length === 0) return toast.error("Paste at least one email address");
-    const when = new Date(evt.starts_at).toLocaleString(undefined, {
-      weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit",
-    });
-    const where = evt.venue_name || evt.location || "Baltimore";
-    setSubject(`You're invited: ${evt.title}`);
-    setBody(
-      `Hi there,\n\n` +
-      `I'd love to see you at ${evt.title}.\n\n` +
-      `When: ${when}\n` +
-      `Where: ${where}\n` +
-      `${evt.price_cents ? `Tickets: ${fmt(evt.price_cents)}` : "Free to attend"}\n\n` +
-      `Hope to see you there,\nPlanet Baltimore`,
-    );
-    setDrafted(true);
-    toast.success(`Draft ready for ${emails.length} recipient${emails.length === 1 ? "" : "s"}`);
+  const recipients = useMemo(() => {
+    const set = new Set<string>();
+    picked.forEach((id) => (pickedEmails[id] ?? []).forEach((e) => set.add(e.toLowerCase())));
+    parseEmails(extraRaw).forEach((e) => set.add(e));
+    return Array.from(set);
+  }, [picked, pickedEmails, extraRaw]);
+
+  const applyTemplate = (key: string) => {
+    const tpl = TEMPLATES.find((t) => t.key === key);
+    if (!tpl) return;
+    const title = evt?.title ?? "our event";
+    const when = evt
+      ? new Date(evt.starts_at).toLocaleString(undefined, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })
+      : "soon";
+    const where = evt?.venue_name || evt?.location || "Baltimore";
+    setSubject(tpl.subject(title));
+    setBody(`${tpl.body(title, when, where)}\n\n${fromName}`);
   };
 
   const send = () => {
-    if (!drafted || emails.length === 0) return;
-    const href = `mailto:?bcc=${encodeURIComponent(emails.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    if (recipients.length === 0) return toast.error("Add at least one recipient");
+    if (!subject.trim()) return toast.error("Add a subject");
+    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = href;
   };
 
@@ -1035,95 +1159,264 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
     <div className="space-y-4">
       <div className="rounded-2xl border border-neutral-200 bg-white p-5">
         <div className="flex items-center gap-2 text-base font-semibold text-neutral-900">
-          <Mail className="h-4 w-4 text-[#d4580a]" /> Email campaign
+          <Mail className="h-4 w-4 text-[#d4580a]" /> New invitation campaign
         </div>
-        <p className="mt-1 text-sm text-neutral-600">
-          Paste a list of emails, pick an event, and we&apos;ll build a polished draft you can send from your own inbox.
-        </p>
+
+        <div className="mt-4">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Start from a template</div>
+          <div className="flex flex-wrap gap-2">
+            {TEMPLATES.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => applyTemplate(t.key)}
+                className="rounded-full border border-neutral-200 px-3.5 py-1.5 text-sm font-medium text-neutral-700 transition hover:border-[#d4580a] hover:text-[#d4580a]"
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Event</label>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">From name</label>
+            <input
+              value={fromName}
+              onChange={(e) => setFromName(e.target.value)}
+              className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-[#d4580a]"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Link to event (optional)</label>
             <select
               value={eventId}
-              onChange={(e) => { setEventId(e.target.value); setDrafted(false); }}
+              onChange={(e) => setEventId(e.target.value)}
               className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-[#d4580a]"
             >
-              <option value="">Select an event…</option>
+              <option value="">None</option>
               {events.map((e) => <option key={e.id} value={e.id}>{e.title}</option>)}
             </select>
-          </div>
-          <div className="flex items-end">
-            <div className="rounded-xl bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700">
-              <span className="font-semibold text-neutral-900">{emails.length}</span> valid email{emails.length === 1 ? "" : "s"} detected
-            </div>
           </div>
         </div>
 
         <div className="mt-4">
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Recipients</label>
-          <textarea
-            value={raw}
-            onChange={(e) => { setRaw(e.target.value); setDrafted(false); }}
-            rows={6}
-            placeholder="Paste emails here, any format: name@example.com, other@example.com — commas, spaces, or one per line all work."
-            className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-[#d4580a]"
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Subject</label>
+          <input
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Write your subject line"
+            className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm font-medium text-neutral-900 outline-none focus:border-[#d4580a]"
           />
-          {emails.length > 0 && (
-            <div className="mt-2 flex max-h-24 flex-wrap gap-1.5 overflow-y-auto">
-              {emails.map((e) => (
-                <span key={e} className="rounded-full bg-[#fff4ec] px-2.5 py-1 text-xs font-medium text-[#d4580a]">{e}</span>
-              ))}
-            </div>
-          )}
         </div>
 
-        <button
-          onClick={buildDraft}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a]"
-        >
-          <List className="h-4 w-4" /> Build draft
-        </button>
+        <div className="mt-4">
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Message</label>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={10}
+            placeholder="Write your email here, or start from a template above."
+            className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm leading-relaxed text-neutral-900 outline-none focus:border-[#d4580a] focus:bg-white"
+          />
+        </div>
+
+        <div className="mt-5 border-t border-neutral-100 pt-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+            <Users className="h-4 w-4 text-neutral-500" /> Send to
+          </div>
+          <p className="mt-0.5 text-xs text-neutral-500">Add the list(s) you want to send this email to.</p>
+
+          <div className="mt-3 space-y-2">
+            {loading && <div className="text-sm text-neutral-500">Loading audiences…</div>}
+            {!loading && audiences.length === 0 && (
+              <div className="rounded-xl border border-dashed border-neutral-200 p-4 text-sm text-neutral-500">
+                No audiences yet. Upload a CSV below to create one.
+              </div>
+            )}
+            {audiences.map((a) => {
+              const on = picked.includes(a.id);
+              return (
+                <div key={a.id} className="flex items-center gap-3 rounded-xl border border-neutral-200 px-3.5 py-2.5">
+                  <button onClick={() => setOpenAudience(a)} className="flex-1 truncate text-left text-sm font-medium text-neutral-900 hover:underline">
+                    {a.title}
+                  </button>
+                  <span className="shrink-0 text-xs text-neutral-500">{a.count} contact{a.count === 1 ? "" : "s"}</span>
+                  <button
+                    onClick={() => void toggleAudience(a)}
+                    className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${on ? "bg-neutral-900 text-white" : "bg-[#d4580a] text-white hover:bg-[#b8480a]"}`}
+                  >
+                    {on ? "Added" : "Add"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv,.txt,text/csv,text/plain"
+              multiple
+              className="hidden"
+              onChange={(e) => { if (e.target.files?.length) void uploadFiles(e.target.files); if (fileRef.current) fileRef.current.value = ""; }}
+            />
+            <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+              <Upload className="h-4 w-4" /> Upload CSV files
+            </button>
+            <button onClick={() => void createEmptyAudience()} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+              <Plus className="h-4 w-4" /> New audience
+            </button>
+          </div>
+
+          <div className="mt-4">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Or paste extra emails</label>
+            <textarea
+              value={extraRaw}
+              onChange={(e) => setExtraRaw(e.target.value)}
+              rows={3}
+              placeholder="name@example.com, other@example.com"
+              className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm text-neutral-900 outline-none focus:border-[#d4580a]"
+            />
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-neutral-100 pt-4">
+          <button onClick={() => setPreview((v) => !v)} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+            <Eye className="h-4 w-4" /> {preview ? "Hide preview" : "Preview"}
+          </button>
+          <button onClick={copyAll} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+            <Copy className="h-4 w-4" /> Copy draft
+          </button>
+          <div className="flex-1" />
+          <button onClick={send} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a]">
+            <Send className="h-4 w-4" /> Send to {recipients.length} recipient{recipients.length === 1 ? "" : "s"}
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-neutral-500">Send opens your own email app with everyone on BCC, so addresses stay private.</p>
+
+        {preview && (
+          <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="text-xs text-neutral-500">From</div>
+            <div className="text-sm font-semibold text-neutral-900">{fromName || "—"}</div>
+            <div className="mt-2 text-xs text-neutral-500">Subject</div>
+            <div className="text-sm font-semibold text-neutral-900">{subject || "(no subject)"}</div>
+            <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">{body || "(empty message)"}</div>
+          </div>
+        )}
       </div>
 
-      {drafted && (
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-base font-semibold text-neutral-900">Draft</div>
-            <div className="text-xs text-neutral-500">{emails.length} recipient{emails.length === 1 ? "" : "s"} (BCC)</div>
-          </div>
-
-          <div className="mt-3 space-y-3">
-            <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Subject</label>
-              <input
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm font-medium text-neutral-900 outline-none focus:border-[#d4580a]"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Message</label>
-              <textarea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                rows={14}
-                className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm leading-relaxed text-neutral-900 outline-none focus:border-[#d4580a]"
-              />
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button onClick={send} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a]">
-              <Send className="h-4 w-4" /> Send
-            </button>
-            <button onClick={copyAll} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
-              <Copy className="h-4 w-4" /> Copy draft
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-neutral-500">Send opens your own email app with everyone on BCC, so addresses stay private.</p>
-        </div>
+      {openAudience && (
+        <AudienceEditor
+          audience={openAudience}
+          onClose={() => { setOpenAudience(null); void loadAudiences(); }}
+          onRename={() => void renameAudience(openAudience)}
+          onDelete={async () => { await deleteAudience(openAudience); setOpenAudience(null); }}
+          onChanged={(emails) => setPickedEmails((m) => ({ ...m, [openAudience.id]: emails }))}
+        />
       )}
+    </div>
+  );
+}
+
+function AudienceEditor({
+  audience, onClose, onRename, onDelete, onChanged,
+}: {
+  audience: Audience;
+  onClose: () => void;
+  onRename: () => void;
+  onDelete: () => void;
+  onChanged: (emails: string[]) => void;
+}) {
+  const [contacts, setContacts] = useState<Contact[] | null>(null);
+  const [add, setAdd] = useState("");
+  const addRef = useRef<HTMLInputElement>(null);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("email_audience_contacts")
+      .select("id,email,name")
+      .eq("audience_id", audience.id)
+      .order("email");
+    const rows = (data ?? []) as Contact[];
+    setContacts(rows);
+    onChanged(rows.map((r) => r.email));
+  };
+
+  useEffect(() => { void load(); }, [audience.id]);
+
+  const addEmails = async (text: string) => {
+    const emails = parseEmails(text);
+    if (emails.length === 0) return toast.error("No valid emails found");
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return;
+    const existing = new Set((contacts ?? []).map((c) => c.email));
+    const rows = emails.filter((e) => !existing.has(e)).map((email) => ({ audience_id: audience.id, owner_id: uid, email }));
+    if (rows.length === 0) return toast.error("Those emails are already in this audience");
+    const { error } = await supabase.from("email_audience_contacts").insert(rows);
+    if (error) return toast.error(error.message);
+    setAdd("");
+    toast.success(`Added ${rows.length} contact${rows.length === 1 ? "" : "s"}`);
+    await load();
+  };
+
+  const remove = async (c: Contact) => {
+    setContacts((prev) => (prev ?? []).filter((x) => x.id !== c.id));
+    const { error } = await supabase.from("email_audience_contacts").delete().eq("id", c.id);
+    if (error) { toast.error(error.message); await load(); return; }
+    await load();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-base font-semibold text-neutral-900">{audience.title}</div>
+            <div className="text-xs text-neutral-500">{contacts?.length ?? 0} contacts</div>
+          </div>
+          <button onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <input
+            ref={addRef}
+            value={add}
+            onChange={(e) => setAdd(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") void addEmails(add); }}
+            placeholder="Add emails, comma or newline separated"
+            className="flex-1 rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-[#d4580a]"
+          />
+          <button onClick={() => void addEmails(add)} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#b8480a]">
+            Add
+          </button>
+        </div>
+
+        <div className="mt-3 divide-y divide-neutral-100 rounded-xl border border-neutral-200">
+          {contacts === null && <div className="p-3 text-sm text-neutral-500">Loading…</div>}
+          {contacts?.length === 0 && <div className="p-3 text-sm text-neutral-500">No contacts yet.</div>}
+          {contacts?.map((c) => (
+            <div key={c.id} className="flex items-center gap-2 px-3 py-2">
+              <span className="flex-1 truncate text-sm text-neutral-800">{c.email}</span>
+              <button onClick={() => void remove(c)} className="rounded-full p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button onClick={onRename} className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 hover:bg-neutral-50">
+            Rename
+          </button>
+          <button onClick={onDelete} className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">
+            Delete audience
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
