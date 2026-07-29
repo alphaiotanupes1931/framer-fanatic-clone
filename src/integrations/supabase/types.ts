@@ -184,6 +184,65 @@ export type Database = {
         }
         Relationships: []
       }
+      email_audience_contacts: {
+        Row: {
+          audience_id: string
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          owner_id: string
+        }
+        Insert: {
+          audience_id: string
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          owner_id: string
+        }
+        Update: {
+          audience_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_audience_contacts_audience_id_fkey"
+            columns: ["audience_id"]
+            isOneToOne: false
+            referencedRelation: "email_audiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_audiences: {
+        Row: {
+          created_at: string
+          id: string
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ephemeral_stories: {
         Row: {
           caption: string | null
