@@ -333,7 +333,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       )}
 
       {tab === "checkin" && (
-        <CheckInTab total={paid.length} />
+        <CheckInTab eventId={evt.id} paid={paid} buyers={buyers} />
       )}
 
       {tab === "message" && (
