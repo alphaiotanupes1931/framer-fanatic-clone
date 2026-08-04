@@ -395,12 +395,7 @@ function StoriesSignedIn() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {FORMATS.map((f) => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold capitalize transition ${filter===f ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}>{f}</button>
-            ))}
-          </div>
+          <div />
           <label className="flex items-center gap-2 text-xs font-semibold text-neutral-500">
             <span className="uppercase tracking-wider">Sort</span>
             <select
