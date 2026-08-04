@@ -256,6 +256,16 @@ function CalendarPage() {
     })();
   }, []);
 
+  const [orgTypeById, setOrgTypeById] = useState<Record<string, string>>({});
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("organizations").select("id,type");
+      const map: Record<string, string> = {};
+      for (const o of (data ?? []) as Array<{ id: string; type: string }>) map[o.id] = o.type;
+      setOrgTypeById(map);
+    })();
+  }, []);
+
   const now = new Date();
   const filtered = useMemo(() => {
     return events.filter((e) => {
