@@ -170,7 +170,7 @@ function VideosSignedIn() {
           <select value={sort} onChange={(e) => setSort(e.target.value as "newest" | "oldest")}
             className="rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none">
             <option value="newest">Newest</option>
-            <option value="popular">Most Popular</option>
+            <option value="oldest">Oldest</option>
           </select>
         </div>
 
