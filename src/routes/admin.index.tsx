@@ -476,7 +476,6 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
   const [profiles, setProfiles] = useState<{ id: string; display_name: string | null; email: string | null }[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [pwOpen, setPwOpen] = useState<null | { kind: "event" | "user" | "org"; id: string; label: string }>(null);
-  const [pw, setPw] = useState("");
   const [q, setQ] = useState("");
 
   const reload = async () => {
@@ -498,7 +497,6 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
 
   const confirmDelete = async () => {
     if (!pwOpen) return;
-    if (pw !== "admin123") { toast.error("Incorrect password"); return; }
     setBusy(pwOpen.id);
     const rpc = pwOpen.kind === "event" ? "admin_delete_event" : pwOpen.kind === "org" ? "admin_delete_organization" : "admin_delete_profile";
     try {
@@ -510,7 +508,6 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
     if (pwOpen.kind === "org") setOrgs((prev) => prev.filter((x) => x.id !== pwOpen.id));
     if (pwOpen.kind === "user") { setProfiles((prev) => prev.filter((x) => x.id !== pwOpen.id)); onUserDeleted(pwOpen.id); }
     setPwOpen(null);
-    setPw("");
   };
 
   const filterFn = (s: string) => !q.trim() || s.toLowerCase().includes(q.trim().toLowerCase());
@@ -520,7 +517,7 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
       <div className="mb-4 flex items-center gap-2">
         <Lock className="h-4 w-4 text-rose-700" />
         <h3 className="font-semibold text-rose-700">Danger zone</h3>
-        <span className="text-xs text-rose-700/70">Password required for every delete</span>
+        <span className="text-xs text-rose-700/70">Confirmation required for every delete</span>
       </div>
       <div className="mb-3 flex flex-wrap gap-2">
         {(["events", "users", "orgs"] as const).map((t) => (
@@ -540,7 +537,7 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
                   <div className="truncate font-medium">{e.title}</div>
                   <div className="truncate text-xs text-neutral-500">{e.host_name || "Unknown host"} {e.starts_at ? "- " + new Date(e.starts_at).toLocaleDateString() : ""}</div>
                 </div>
-                <button disabled={busy === e.id} onClick={() => { setPw(""); setPwOpen({ kind: "event", id: e.id, label: e.title }); }} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                <button disabled={busy === e.id} onClick={() => setPwOpen({ kind: "event", id: e.id, label: e.title })} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
                   <Trash2 className="h-3 w-3" /> Delete
                 </button>
               </li>
@@ -556,7 +553,7 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
                   <div className="truncate font-medium">{p.display_name || "Unnamed"}</div>
                   <div className="truncate text-xs text-neutral-500">{p.email}</div>
                 </div>
-                <button disabled={busy === p.id} onClick={() => { setPw(""); setPwOpen({ kind: "user", id: p.id, label: p.display_name || p.email || "user" }); }} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                <button disabled={busy === p.id} onClick={() => setPwOpen({ kind: "user", id: p.id, label: p.display_name || p.email || "user" })} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
                   <Trash2 className="h-3 w-3" /> Delete
                 </button>
               </li>
@@ -572,7 +569,7 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
                   <div className="truncate font-medium">{o.name}</div>
                   <div className="truncate text-xs text-neutral-500">{o.type} - /{o.slug}</div>
                 </div>
-                <button disabled={busy === o.id} onClick={() => { setPw(""); setPwOpen({ kind: "org", id: o.id, label: o.name }); }} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                <button disabled={busy === o.id} onClick={() => setPwOpen({ kind: "org", id: o.id, label: o.name })} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50">
                   <Trash2 className="h-3 w-3" /> Delete
                 </button>
               </li>
@@ -582,17 +579,16 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
         )}
       </div>
 
-      <Dialog open={!!pwOpen} onOpenChange={(o) => { if (!o) { setPwOpen(null); setPw(""); } }}>
+      <Dialog open={!!pwOpen} onOpenChange={(o) => { if (!o) setPwOpen(null); }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Lock className="h-4 w-4 text-rose-600" /> Confirm delete</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">You are about to permanently delete <b>{pwOpen?.label}</b>. Enter the admin password to confirm.</p>
-            <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Admin password" autoFocus onKeyDown={(e) => { if (e.key === "Enter") void confirmDelete(); }} />
+            <p className="text-sm text-muted-foreground">You are about to permanently delete <b>{pwOpen?.label}</b>. This action cannot be undone.</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setPwOpen(null); setPw(""); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => setPwOpen(null)}>Cancel</Button>
             <Button onClick={confirmDelete} disabled={busy !== null} className="bg-rose-600 text-white hover:bg-rose-700">
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Delete
             </Button>
