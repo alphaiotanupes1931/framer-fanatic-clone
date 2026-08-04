@@ -1976,6 +1976,16 @@ export type Database = {
         Returns: undefined
       }
       admin_upsert_site_content: { Args: { _rows: Json }; Returns: number }
+      event_buyer_contacts: {
+        Args: { _event_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          email: string
+          id: string
+          username: string
+        }[]
+      }
       generate_unique_username: {
         Args: { _base: string; _self: string }
         Returns: string
@@ -2000,6 +2010,29 @@ export type Database = {
       is_conversation_member: {
         Args: { _conv: string; _uid: string }
         Returns: boolean
+      }
+      my_profile: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          banner_url: string
+          bio: string
+          category: string
+          display_name: string
+          email: string
+          id: string
+          is_founder: boolean
+          must_reset_password: boolean
+          neighborhood: string
+          neighborhood_names: string[]
+          onboarded: boolean
+          role: string
+          stripe_account_id: string
+          stripe_account_status: string
+          stripe_charges_enabled: boolean
+          username: string
+          website: string
+        }[]
       }
       public_artists: {
         Args: { lim?: number; search?: string; sort_by?: string }
