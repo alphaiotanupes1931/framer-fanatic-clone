@@ -95,10 +95,17 @@ cron.job  relation does not exist
 
 **Neither extension is enabled, and there are no scheduled jobs on this database at all.** So "what triggers the endpoint" today is: nothing. Item 5 has to enable `pg_cron` and `pg_net` first, then create the job. Every 15 minutes, re-checking only unconfirmed orders from the last 24 hours, as described.
 
-**Where the secret lives.** Also a correction worth making: a `pg_cron` job body is stored as **plaintext in the `cron.job` table**, so a literal secret pasted into the schedule sits readable in the database. Two consequences:
+**Where the secret lives: Vault is available, so we use it.** I checked. `supabase_vault` version 0.3.1 is installed and the `vault` schema exists. It is also correctly locked down: my restricted database role gets `permission denied for schema vault`, which is exactly what you want to see.
 
-- I will not invent a custom `CRON_SECRET` header. The endpoint authenticates with the project's publishable key in an `apikey` header, which is the supported pattern and is already a public value, so there is nothing sensitive in the job body.
-- The real protection on that endpoint is that it is idempotent and only ever *confirms* orders that Stripe already reports as paid. Calling it repeatedly, even by a stranger, cannot create a ticket for an unpaid order.
+So your objection is accepted in full and the design changes. A `pg_cron` job body is stored as plaintext in the `cron.job` table, so the secret never goes in it. Instead:
+
+1. The shared secret is generated and stored in Vault under a named entry.
+2. The cron job body contains a *lookup*, not a value: it selects the decrypted secret from Vault at run time and puts it in the request header. Anyone who reads `cron.job` sees the query, not the secret.
+3. The endpoint rejects any request whose header does not match, before it does anything else.
+
+That closes the surface you identified. You are right that an `apikey`-only endpoint is an unauthenticated cost surface even when it is not a fraud surface: every anonymous call would fan out to Stripe, and someone looping it costs you Stripe rate-limit budget and response time for nothing. With the Vault secret required up front, an unauthenticated caller is rejected before a single outbound Stripe call is made, so the fan-out surface is gone rather than rate-limited.
+
+The endpoint stays idempotent and confirm-only on top of that, so even a leaked secret cannot create a ticket for an unpaid order.
 
 **Constraint confirmed partial:**
 
@@ -120,8 +127,12 @@ Route guards are **defense-in-depth, not access control**. They run in the visit
 
 ## Backup, still your gate
 
-I cannot verify a snapshot from my tooling and will not pretend otherwise. Restore path is a manual re-import of the export you are downloading now. Every migration is written to be individually reversible: policy and function changes only, no dropped columns, no deleted rows. The one destructive action in the whole plan is deleting superseded storage objects in item 7, which happens last, after you have seen the count and approved it separately.
+Export confirmed by you. Restore path is a manual re-import of that export. Every migration is written to be individually reversible: policy and function changes only, no dropped columns, no deleted rows.
+
+**Item 7 deletion is gated, as you asked.** Sequence is: produce the count, produce the CSV of affected objects, hand both to you, stop. Deletion is a separate step that only happens on your explicit approval, after you have read the list. Nothing in storage is removed before that.
+
+**The base44 CSV ships early and standalone.** It is not part of the remediation gate. I generate it as the first action of execution so you can forward it to the client immediately, together with the finding that a single post image measured 4.2 MB unresized and nothing on the site resizes uploads.
 
 ## Order
 
-Your export confirmation, then item 1 step 1 alone, then stop. Nothing batched.
+Item 1 step 1 alone, then stop. Nothing batched.
