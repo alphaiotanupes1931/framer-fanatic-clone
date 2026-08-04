@@ -89,7 +89,14 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       toast.success(`${kindLabel} created`);
       navigate({ to: "/o/$slug", params: { slug: data.slug } });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not create");
+      const msg = e instanceof Error ? e.message : "";
+      if (/row-level security|permission denied|policy/i.test(msg)) {
+        toast.error(`Your account is not allowed to create a ${kindLabel.toLowerCase()} yet. Switch your profile role in Settings, or contact Planet Baltimore for access.`);
+      } else if (/duplicate key|unique/i.test(msg)) {
+        toast.error("That name is already taken. Try a slightly different one.");
+      } else {
+        toast.error(msg || "Could not create");
+      }
     } finally {
       setSaving(false);
     }
