@@ -27,6 +27,8 @@ type Ev = {
   description: string | null;
   image_url: string | null;
   neighborhood: string | null;
+  category: string | null;
+  organization_id: string | null;
 };
 
 const ORGANIZERS = [
@@ -244,7 +246,7 @@ function CalendarPage() {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id, title, starts_at, location, venue_name, description, image_url, neighborhood")
+        .select("id, title, starts_at, location, venue_name, description, image_url, neighborhood, category, organization_id")
         .order("starts_at", { ascending: true });
       setEvents((data || []) as Ev[]);
     })();
