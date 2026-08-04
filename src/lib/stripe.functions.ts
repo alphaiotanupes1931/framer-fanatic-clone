@@ -223,6 +223,7 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
       amountCents: z.number().int().min(100).max(5_000_000),
       returnOrigin: z.string().url(),
       note: z.string().max(280).optional(),
+      interval: z.enum(["once", "monthly", "yearly"]).default("once"),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -248,8 +249,26 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
 
     const breakdown = priceBreakdown(data.amountCents);
 
+    const recurring = data.interval !== "once";
+    const metadata = {
+      kind: "donation",
+      org_id: org.id,
+      donor_id: userId,
+      owner_id: org.owner_id,
+      amount_cents: String(data.amountCents),
+      interval: data.interval,
+    };
+    const productName = recurring
+      ? `${data.interval === "yearly" ? "Yearly" : "Monthly"} support for ${org.name}`
+      : `Donation to ${org.name}`;
+    // Application fee is a share of the total so it holds on every renewal.
+    const feePercent = Math.min(
+      50,
+      Math.round((breakdown.platformFeeCents / breakdown.buyerTotalCents) * 10000) / 100,
+    );
+
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: recurring ? "subscription" : "payment",
       success_url: `${data.returnOrigin}/o/${org.slug}?donation=success`,
       cancel_url: `${data.returnOrigin}/o/${org.slug}/donate?cancelled=1`,
       customer_email: (context.claims as { email?: string } | null)?.email,
@@ -260,23 +279,30 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
             currency: "usd",
             unit_amount: breakdown.buyerTotalCents,
             product_data: {
-              name: `Donation to ${org.name}`,
+              name: productName,
               description: data.note?.trim() ? data.note.trim().slice(0, 200) : undefined,
             },
+            ...(recurring
+              ? { recurring: { interval: data.interval === "yearly" ? ("year" as const) : ("month" as const) } }
+              : {}),
           },
         },
       ],
-      payment_intent_data: {
-        application_fee_amount: breakdown.platformFeeCents,
-        transfer_data: { destination: owner.stripe_account_id },
-      },
-      metadata: {
-        kind: "donation",
-        org_id: org.id,
-        donor_id: userId,
-        owner_id: org.owner_id,
-        amount_cents: String(data.amountCents),
-      },
+      ...(recurring
+        ? {
+            subscription_data: {
+              application_fee_percent: feePercent,
+              transfer_data: { destination: owner.stripe_account_id },
+              metadata,
+            },
+          }
+        : {
+            payment_intent_data: {
+              application_fee_amount: breakdown.platformFeeCents,
+              transfer_data: { destination: owner.stripe_account_id },
+            },
+          }),
+      metadata,
     });
 
     return { url: session.url };
