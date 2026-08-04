@@ -75,7 +75,7 @@ function VideosSignedIn() {
   const [vids, setVids] = useState<Video[]>([]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [sort, setSort] = useState<"newest" | "popular">("newest");
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
   const UPLOAD_CATEGORIES = VIDEO_CATEGORIES.filter((c) => c !== "All");
   const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "" });
@@ -128,8 +128,8 @@ function VideosSignedIn() {
     )
     .slice()
     .sort((a, b) =>
-      sort === "popular"
-        ? (b.views_count ?? 0) - (a.views_count ?? 0)
+      sort === "oldest"
+        ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         : new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
   const featured = filtered.filter((v) => v.featured);
@@ -167,7 +167,7 @@ function VideosSignedIn() {
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search videos…"
               className="w-full rounded-full border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-orange-400 focus:outline-none" />
           </div>
-          <select value={sort} onChange={(e) => setSort(e.target.value as "newest" | "popular")}
+          <select value={sort} onChange={(e) => setSort(e.target.value as "newest" | "oldest")}
             className="rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none">
             <option value="newest">Newest</option>
             <option value="popular">Most Popular</option>
