@@ -1110,7 +1110,7 @@ function SupportTabImpl({ org, canManage }: { org: Org; canManage: boolean }) {
     setTiers((xs) => xs.filter((x) => x.id !== id));
   };
 
-  const donateHref = `/o/${org.slug}/donate`;
+  const donateHref = `/o/${org.slug}/donate${donateInterval === "yearly" ? "?interval=yearly" : ""}`;
 
   return (
     <div className="space-y-5">

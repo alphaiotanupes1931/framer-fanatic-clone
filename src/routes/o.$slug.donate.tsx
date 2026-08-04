@@ -29,6 +29,11 @@ function DonatePage() {
   const [custom, setCustom] = useState<string>("");
   const [note, setNote] = useState<string>("");
   const [interval, setInterval] = useState<"once" | "monthly" | "yearly">("once");
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("interval");
+    if (q === "yearly" || q === "monthly") setInterval(q);
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const donate = useServerFn(createOrgDonationCheckout);
 
