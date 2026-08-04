@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
     ],
     links: [
-      { rel: "preload", as: "image", href: heroMobileAsset.url, fetchpriority: "high" },
+      { rel: "preload", as: "image", href: heroMobileAsset.url, fetchPriority: "high" },
     ],
   }),
   component: Index,
