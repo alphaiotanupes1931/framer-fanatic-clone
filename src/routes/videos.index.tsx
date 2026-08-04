@@ -121,10 +121,17 @@ function VideosSignedIn() {
     }
   };
 
-  const filtered = vids.filter((v) =>
-    v.title.toLowerCase().includes(query.toLowerCase()) &&
-    (cat === "All" || (v.category || "") === cat)
-  );
+  const filtered = vids
+    .filter((v) =>
+      v.title.toLowerCase().includes(query.toLowerCase()) &&
+      (cat === "All" || (v.category || "") === cat)
+    )
+    .slice()
+    .sort((a, b) =>
+      sort === "popular"
+        ? (b.views_count ?? 0) - (a.views_count ?? 0)
+        : new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   const featured = filtered.filter((v) => v.featured);
   const rest = filtered.filter((v) => !v.featured);
 
