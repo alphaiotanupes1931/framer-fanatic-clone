@@ -12,28 +12,19 @@ import {
 export const unlockAdminSite = createServerFn({ method: "POST" })
   .inputValidator((data: { username: string; password: string }) => data)
   .handler(async ({ data }) => {
-    const expectedUser = process.env.ADMIN_SHARED_USERNAME || "planetbaltimore";
-    // TEMPORARY (remediation item 1, step 2 only): each candidate carries a
-    // label so a successful login can prove WHICH credential matched. Labels
-    // never contain the secret value. Step 3 deletes the legacy entries and
-    // this labelling entirely.
-    const candidates = [
-      { label: "env" as const, value: process.env.ADMIN_SHARED_PASSWORD },
-      { label: "legacy-admin123" as const, value: "admin123" },
-      { label: "legacy-planetbaltimore" as const, value: "planetbaltimore" },
-    ].filter((c): c is { label: "env" | "legacy-admin123" | "legacy-planetbaltimore"; value: string } =>
-      Boolean(c.value),
-    );
+    const expectedUser = process.env.ADMIN_SHARED_USERNAME;
+    const expectedPassword = process.env.ADMIN_SHARED_PASSWORD;
+    if (!expectedUser || !expectedPassword || !process.env.ADMIN_SESSION_SECRET_V2) {
+      return { ok: false as const, reason: "not_configured" as const };
+    }
     const userOk = timingSafeMatches(normalizeAdminUsername(data.username), normalizeAdminUsername(expectedUser));
-    const matchedCandidate = candidates.find((candidate) =>
-      timingSafeMatches(
-        normalizeAdminPassword(data.password, candidate.value),
-        normalizeAdminPassword(candidate.value, candidate.value),
-      ),
+    const passwordOk = timingSafeMatches(
+      normalizeAdminPassword(data.password, expectedPassword),
+      normalizeAdminPassword(expectedPassword, expectedPassword),
     );
-    if (!userOk || !matchedCandidate) return { ok: false as const, reason: "invalid" as const };
+    if (!userOk || !passwordOk) return { ok: false as const, reason: "invalid" as const };
     await setAdminUnlocked();
-    return { ok: true as const, adminToken: createAdminToken(), matched: matchedCandidate.label };
+    return { ok: true as const, adminToken: createAdminToken(), matched: "env" as const };
   });
 
 export const lockAdminSite = createServerFn({ method: "POST" }).handler(async () => {

@@ -7,16 +7,10 @@ const SESSION_NAME = "pb-admin-gate";
 const ADMIN_TOKEN_SCOPE = "pb-admin";
 const ADMIN_TOKEN_MAX_AGE = 60 * 60 * 24 * 7;
 
-// Rotated secret. ADMIN_SESSION_SECRET_V2 supersedes the original variable and
-// the public source fallback. Rotating here invalidates every previously issued
-// admin cookie and token, which is intentional: the old fallback was public.
-// STEP 3 of remediation removes the legacy fallbacks below entirely.
 function sessionSecret() {
-  return (
-    process.env.ADMIN_SESSION_SECRET_V2 ||
-    process.env.ADMIN_SESSION_SECRET ||
-    "pb-admin-dev-fallback-secret-please-change"
-  );
+  const secret = process.env.ADMIN_SESSION_SECRET_V2;
+  if (!secret) throw new Error("Admin login is not configured on this deployment");
+  return secret;
 }
 
 export function adminSessionConfig() {
