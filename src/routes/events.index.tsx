@@ -16,6 +16,7 @@ type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
   location: string | null; image_url: string | null; starts_at: string;
   price_cents?: number | null;
+  category?: string | null;
 };
 
 export const Route = createFileRoute("/events/")({
@@ -244,6 +245,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return events.filter((e) => {
+      if (cat !== "All" && (e.category ?? "").toLowerCase() !== cat.toLowerCase()) return false;
       if (!q) return true;
       return (
         e.title.toLowerCase().includes(q) ||
@@ -251,7 +253,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         (e.description ?? "").toLowerCase().includes(q)
       );
     });
-  }, [events, query]);
+  }, [events, query, cat]);
 
   const onPickImage = async (file: File) => {
     if (!me) return;
