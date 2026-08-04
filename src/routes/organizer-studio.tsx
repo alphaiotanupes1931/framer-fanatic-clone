@@ -746,7 +746,7 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600"><Mail className="h-5 w-5" /></div>
           <div>
             <div className="font-semibold text-neutral-900">Message Your Attendees</div>
-            <div className="text-xs text-neutral-500">Send emails directly to ticket buyers for <span className="font-semibold text-neutral-700">{evtTitle}</span></div>
+            <div className="text-xs text-neutral-500">Send a message straight to the inbox of ticket buyers for <span className="font-semibold text-neutral-700">{evtTitle}</span></div>
           </div>
         </div>
       </div>
