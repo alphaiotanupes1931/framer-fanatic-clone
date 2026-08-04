@@ -260,9 +260,16 @@ function CalendarPage() {
   const filtered = useMemo(() => {
     return events.filter((e) => {
       if (neighborhood && e.neighborhood !== neighborhood) return false;
+      if (eventType !== "All Types" && (e.category ?? "").toLowerCase() !== eventType.toLowerCase()) return false;
+      if (organizer !== "all") {
+        const orgType = e.organization_id ? orgTypeById[e.organization_id] : null;
+        if (organizer === "business" && orgType !== "business") return false;
+        if (organizer === "community" && orgType !== "community_assoc") return false;
+        if (organizer === "arts" && orgType !== "arts_org") return false;
+      }
       return true;
     });
-  }, [events, neighborhood]);
+  }, [events, neighborhood, eventType, organizer, orgTypeById]);
 
   const upcoming = useMemo(
     () => {
