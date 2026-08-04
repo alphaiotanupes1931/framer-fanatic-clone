@@ -23,15 +23,14 @@ export function useCurrentUser() {
     const { data: session } = await supabase.auth.getUser();
     const authUser = session.user;
     if (!authUser) { setUser(null); setLoading(false); return; }
-    const { data: p } = await supabase
-      .from("profiles")
-      .select("id, email, display_name, username, avatar_url, role, neighborhood, neighborhood_names, is_founder, onboarded")
-      .eq("id", authUser.id)
-      .maybeSingle();
+    const { data: rows } = await supabase.rpc("my_profile");
+    const p = (rows as unknown as Array<Record<string, unknown>> | null)?.[0] as
+      | (CurrentUser & { onboarded?: boolean; neighborhood_names?: string[] | null })
+      | undefined;
     if (p) {
       setUser({
         id: p.id,
-        email: p.email,
+        email: p.email ?? authUser.email ?? null,
         display_name: p.display_name,
         username: p.username,
         avatar_url: p.avatar_url,
