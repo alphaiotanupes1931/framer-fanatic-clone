@@ -701,10 +701,41 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
     if (count === 0) { toast.error("No attendees to message yet"); return; }
     setBusy(true);
     try {
-      // TODO: wire to email server function
-      await new Promise((r) => setTimeout(r, 400));
-      toast.success(`Message queued for ${count} attendee${count === 1 ? "" : "s"}`);
+      const { data: auth } = await supabase.auth.getUser();
+      const meId = auth.user?.id;
+      if (!meId) { toast.error("Please sign in first"); return; }
+      const ids = Array.from(new Set(recipients)).filter((id) => id && id !== meId);
+      if (ids.length === 0) { toast.error("No attendees to message yet"); return; }
+
+      const { data: conv, error: cErr } = await supabase
+        .from("conversations")
+        .insert({
+          is_group: true,
+          title: subject.trim().slice(0, 120),
+          created_by: meId,
+          last_message_preview: body.trim().slice(0, 140),
+        })
+        .select("id")
+        .single();
+      if (cErr || !conv) throw cErr || new Error("Could not start the conversation");
+
+      const { error: mErr } = await supabase.from("conversation_members").insert([
+        { conversation_id: conv.id, user_id: meId },
+        ...ids.map((id) => ({ conversation_id: conv.id, user_id: id })),
+      ]);
+      if (mErr) throw mErr;
+
+      const { error: msgErr } = await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: meId,
+        content: `${subject.trim()}\n\n${body.trim()}`,
+      });
+      if (msgErr) throw msgErr;
+
+      toast.success(`Sent to ${ids.length} attendee${ids.length === 1 ? "" : "s"}`);
       setSubject(""); setBody("");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not send the message");
     } finally { setBusy(false); }
   };
 
