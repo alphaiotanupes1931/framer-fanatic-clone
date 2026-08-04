@@ -375,7 +375,7 @@ function StoriesSignedIn() {
               className="w-full appearance-none rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-800 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
             >
               {STORY_FORMATS.map((f) => (
-                <option key={f} value={f}>{f}</option>
+                <option key={f.value} value={f.value}>{f.label}</option>
               ))}
             </select>
             <svg
