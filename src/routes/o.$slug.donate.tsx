@@ -28,6 +28,12 @@ function DonatePage() {
   const [amount, setAmount] = useState<number>(25);
   const [custom, setCustom] = useState<string>("");
   const [note, setNote] = useState<string>("");
+  const [interval, setInterval] = useState<"once" | "monthly" | "yearly">("once");
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("interval");
+    if (q === "yearly" || q === "monthly") setInterval(q);
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const donate = useServerFn(createOrgDonationCheckout);
 
@@ -88,6 +94,7 @@ function DonatePage() {
           amountCents: finalCents,
           returnOrigin: window.location.origin,
           note: note.trim() || undefined,
+          interval,
         },
       });
       if (url) window.location.href = url;
@@ -130,6 +137,26 @@ function DonatePage() {
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-[#d4580a]">Donate to</div>
                 <div className="text-lg font-bold text-neutral-900">{org.name}</div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <div className="text-sm font-semibold text-neutral-700">How often</div>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {([
+                  { k: "once", label: "One time" },
+                  { k: "monthly", label: "Monthly" },
+                  { k: "yearly", label: "Yearly" },
+                ] as const).map((o) => (
+                  <button
+                    key={o.k}
+                    type="button"
+                    onClick={() => setInterval(o.k)}
+                    className={`rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${interval === o.k ? "border-[#d4580a] bg-orange-50 text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300"}`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -180,10 +207,13 @@ function DonatePage() {
               className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#d4580a] px-5 py-3 text-sm font-bold text-white hover:bg-orange-700 disabled:opacity-50"
             >
               <Heart className="h-4 w-4" />
-              {submitting ? "Redirecting to checkout…" : `Donate $${(finalCents / 100).toFixed(2)}`}
+              {submitting
+                ? "Redirecting to checkout…"
+                : `Donate $${(finalCents / 100).toFixed(2)}${interval === "monthly" ? " / month" : interval === "yearly" ? " / year" : ""}`}
             </button>
             <p className="mt-2 text-center text-[11px] text-neutral-500">
               Secure checkout powered by Stripe. 100% of your contribution goes to {org.name} minus standard processing fees.
+              {interval !== "once" && " You can cancel a recurring donation at any time."}
             </p>
           </div>
         )}

@@ -171,6 +171,26 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                 });
               }
             }
+          } else if (event.type === "invoice.paid") {
+            // Renewal of a recurring donation.
+            const invoice = event.data.object as import("stripe").Stripe.Invoice;
+            const meta = (invoice as unknown as {
+              subscription_details?: { metadata?: Record<string, string> | null };
+            }).subscription_details?.metadata ?? null;
+            if (meta?.kind === "donation" && invoice.billing_reason === "subscription_cycle") {
+              const amount = (invoice.amount_paid ?? 0) / 100;
+              if (meta.owner_id) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: meta.owner_id,
+                  actor_id: meta.donor_id ?? null,
+                  type: "donation_received",
+                  target_type: "organization",
+                  target_id: meta.org_id ?? null,
+                  message: `A recurring donation of $${amount.toFixed(2)} just renewed.`,
+                  metadata: { org_id: meta.org_id, amount_cents: invoice.amount_paid ?? 0 },
+                });
+              }
+            }
           } else if (event.type === "checkout.session.expired") {
             const session = event.data.object as import("stripe").Stripe.Checkout.Session;
             if (session.metadata?.kind === "dues") {
