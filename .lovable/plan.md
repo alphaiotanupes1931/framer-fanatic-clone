@@ -1,46 +1,44 @@
-# Big Batch Plan
+# Security and Launch-Blocker Remediation
 
-Given the scope, here's how I'll tackle everything in order. A few items depend on info from you — flagged below.
+Fix the P0 issues found in the independent audit, in dependency order. No new features.
 
-## 1. Headers
-- Add the standard `HeroBanner` to **Settings** and **Messages** pages so they match the rest of the app.
+## 1. Close the admin backdoor
+Anyone can act as an administrator right now by sending a fixed header value that is committed in the source code. Verified live: an anonymous request returned the full member list.
 
-## 2. Quick activations
-- **Search page**: wire the search input to query profiles, events, orgs, posts (already have `search_creators` RPC — extend for other tables).
-- **Notifications page**: it already reads from `notifications` table + realtime. I'll verify realtime subscription is live and unread badges update instantly.
+- Rewrite the `is_admin_caller` database function to drop the header check. Admin status comes only from a real signed-in admin role or trusted server-side access.
+- Change `src/lib/admin-supabase.server.ts` to use the privileged server client instead of the public key plus the leaked header.
+- Remove the hardcoded fallback passwords (`admin123`, `planetbaltimore`) and the fallback session secret from `src/lib/admin-site.functions.ts` and `src/lib/admin-session.server.ts`. Admin login fails closed if the real secret is not configured.
 
-## 3. Neighborhoods map rework
-- Remove colored region dots + legend.
-- Query all upcoming events with lat/lng, drop one pin per event.
-- Clicking a pin opens the event dialog (title, time, location, link to `/events/$eventId`).
-- Requires event rows to have `latitude`/`longitude`. Events table currently stores `location` text + `neighborhood`. I'll add nullable `latitude`/`longitude` columns via migration and geocode from `location` when a user creates an event (using a lightweight geocoder — Nominatim, free, no key).
+## 2. Stop exposing member email addresses
+Every profile's email is readable by anyone today. Restrict public profile reads to display fields only (name, username, avatar, bio, neighbourhood, role). Email stays visible to the account owner and to admins.
 
-## 4. Content migration from planetbaltimore.us
-I'll use Firecrawl to scrape:
-- `planetbaltimore.us/baltimore-100` → seed Baltimore 100 page
-- `planetbaltimore.us/videos` → seed Videos page
-- `planetbaltimore.us/groups` (or equivalent) → seed Groups/Communities
+## 3. Make private posts actually private
+Posts marked "only me", "close friends", or "followers" are readable by anyone. Rewrite the post read rule so visibility is enforced in the database, not just hidden in the interface.
 
-**Base44**: you mentioned Base44 keys — I see `BASE44_API_KEY` is set. If you want me to pull structured data from your Base44 app instead of scraping, tell me the Base44 app ID and I'll hit their API. Otherwise I'll go with Firecrawl on the live site.
+## 4. Real protection on signed-in pages
+Ten pages redirect logged-out visitors only after the page has already loaded and fetched data. Move them behind a proper authenticated layout so the check happens before anything renders.
 
-Firecrawl requires the Firecrawl connector. If not linked, I'll ask you to link it before this step.
+## 5. Payment safety net
+If Stripe's confirmation call never arrives, a buyer is charged and never receives a ticket. Add a verification step on the ticket success screen and a scheduled endpoint that re-checks recent unconfirmed orders against Stripe and completes them.
 
-## 5. Admin dashboard: landing page text
-- New `/admin/content` section (visible only to admins via `has_role`).
-- New `site_content` table: `key text PRIMARY KEY`, `value jsonb`, `updated_at`. Public read (anon SELECT), admin-only write.
-- Landing page (`src/routes/index.tsx`) reads keys like `hero.title`, `hero.subtitle`, `about.body` from `site_content` with sensible defaults.
-- Admin page: simple form per key, save button.
+## 6. Remove the fake "message attendees" send
+The Organizer Studio shows a success message for an email that is never sent. Disable the control with honest wording until a real email provider is connected.
 
-## Execution order
-1. Headers (Settings, Messages) — 1 edit each
-2. Site content table + admin page + landing page wiring
-3. Search activation
-4. Notifications realtime verification
-5. Neighborhoods map (migration + geocoding + map rewrite)
-6. Firecrawl scrape → seed Baltimore 100, Videos, Groups (needs connector link)
+## 7. Storage limits
+Add file size caps and allowed file types to all five upload buckets, and restrict post media so it is not readable by every signed-in account.
 
-## What I need from you
-- **Confirm Firecrawl** as the scrape source, or give the Base44 app ID if you'd rather I pull from there.
-- **Landing page keys to make editable** — I'll default to hero title/subtitle/CTA + any about section. Tell me if there's more.
+## 8. Correct the social preview domain
+The shared link preview points at an old placeholder domain, so link previews break everywhere.
 
-Reply "go" and I'll start with steps 1–5 immediately while you decide on the content source for step 6.
+## 9. Repair the broken admin trash page
+The admin panel calls four database functions that do not exist. Either build them or remove the Trash tab.
+
+## Technical notes
+- Items 1, 2, 3 and 7 need database migrations: `is_admin_caller`, the `profiles` select policy plus column grants, the `posts` select policy, and `storage.buckets` limits with the `post-media` select policy.
+- Item 4 introduces `src/routes/_authenticated/route.tsx` and moves `dashboard`, `saved`, `notifications`, `messages`, `onboarding`, `invite`, `leaderboard`, `marketplace`, `settings`, and `profile` under it.
+- Item 5 adds a public scheduled route under `src/routes/api/public/` plus a session lookup on the ticket page.
+- Item 8 is a one-line change to `SITE_ORIGIN` in `src/routes/__root.tsx`.
+- Item 9 touches `ALLOWED_ADMIN_RPCS` in `src/lib/admin-site.functions.ts` and `src/routes/admin.trash.tsx`.
+
+## Not in this plan (needs you first)
+Connecting an email provider, switching Stripe to live keys, deleting seed accounts and fake organisation phone numbers, and installing analytics. These need external accounts or content decisions and are listed in the audit's "Needs a human" section.
