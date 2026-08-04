@@ -303,48 +303,59 @@ function AppearanceSection() {
 }
 
 type NotifPrefs = {
-  email_events: boolean;
-  email_messages: boolean;
-  email_followers: boolean;
-  push_likes: boolean;
-  push_comments: boolean;
-  push_tickets: boolean;
-  digest_weekly: boolean;
+  new_follower: boolean;
+  new_message: boolean;
+  event_reminders: boolean;
+  post_likes: boolean;
+  post_comments: boolean;
+  email_digest: boolean;
 };
-const NOTIF_KEY = "pb-notif-prefs";
 const DEFAULT_NOTIFS: NotifPrefs = {
-  email_events: true, email_messages: true, email_followers: false,
-  push_likes: true, push_comments: true, push_tickets: true, digest_weekly: true,
+  new_follower: true, new_message: true, event_reminders: true,
+  post_likes: true, post_comments: true, email_digest: false,
 };
 
 function NotificationsSection() {
+  const me = useCurrentProfile();
   const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_NOTIFS);
+
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(NOTIF_KEY);
-      if (raw) setPrefs({ ...DEFAULT_NOTIFS, ...JSON.parse(raw) });
-    } catch {}
-  }, []);
-  const toggle = (k: keyof NotifPrefs) => {
+    if (!me) return;
+    supabase
+      .from("notification_preferences")
+      .select("*")
+      .eq("user_id", me.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setPrefs({ ...DEFAULT_NOTIFS, ...(data as NotifPrefs) }); });
+  }, [me?.id]);
+
+  const toggle = async (k: keyof NotifPrefs) => {
+    if (!me) { toast.error("Please sign in"); return; }
     const next = { ...prefs, [k]: !prefs[k] };
     setPrefs(next);
-    window.localStorage.setItem(NOTIF_KEY, JSON.stringify(next));
+    const { error } = await supabase
+      .from("notification_preferences")
+      .upsert({ user_id: me.id, ...next });
+    if (error) {
+      setPrefs(prefs);
+      toast.error(error.message);
+      return;
+    }
     toast.success("Preference saved");
   };
 
   const groups: { title: string; items: { k: keyof NotifPrefs; label: string; sub: string }[] }[] = [
-    { title: "Email", items: [
-      { k: "email_events", label: "New events near me", sub: "Get an email when an Artist posts an event in your neighborhood." },
-      { k: "email_messages", label: "Direct messages", sub: "Email when someone sends you a message and you are offline." },
-      { k: "email_followers", label: "New followers", sub: "Email when someone new follows your profile." },
+    { title: "People", items: [
+      { k: "new_follower", label: "New followers", sub: "When someone new follows your profile." },
+      { k: "new_message", label: "Direct messages", sub: "When someone sends you a message." },
     ]},
-    { title: "In-app", items: [
-      { k: "push_likes", label: "Likes on my posts", sub: "Show a notification when someone likes your post." },
-      { k: "push_comments", label: "Comments and replies", sub: "Show a notification for new comments on your posts and events." },
-      { k: "push_tickets", label: "Ticket sales", sub: "Show a notification when someone buys a ticket to your event." },
+    { title: "Activity", items: [
+      { k: "post_likes", label: "Likes on my posts", sub: "When someone likes your post." },
+      { k: "post_comments", label: "Comments and replies", sub: "When someone comments on your posts and events." },
+      { k: "event_reminders", label: "Event reminders", sub: "Reminders for events you are going to." },
     ]},
     { title: "Digest", items: [
-      { k: "digest_weekly", label: "Weekly Baltimore digest", sub: "A summary of the week in Baltimore: top artists, events, and stories." },
+      { k: "email_digest", label: "Weekly Baltimore digest", sub: "A summary of the week in Baltimore: top artists, events, and stories." },
     ]},
   ];
 
