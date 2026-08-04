@@ -38,7 +38,15 @@ function AdminLoginPage() {
         toast.error(msg);
         return;
       }
-      toast.success("Welcome");
+      // TEMPORARY (remediation item 1, step 2): surface which credential matched
+      // so the new password can be verified specifically. Removed in step 3.
+      if (result.matched && result.matched !== "env") {
+        toast.warning(`Signed in via ${result.matched} — the new password did NOT match`, { duration: 12000 });
+      } else if (result.matched === "env") {
+        toast.success("Welcome — matched: env (new password verified)", { duration: 8000 });
+      } else {
+        toast.success("Welcome");
+      }
       navigate({ to: "/admin" });
     } catch (err) {
       setSubmitting(false);

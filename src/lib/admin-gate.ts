@@ -28,18 +28,20 @@ export function isAdminUnlocked(): boolean {
 }
 
 export type AdminUnlockResult =
-  | { ok: true }
+  | { ok: true; matched?: string }
   | { ok: false; reason: "invalid" | "not_configured" | "error" };
 
 export async function unlockAdmin(username: string, password: string): Promise<AdminUnlockResult> {
   try {
-    const { ok, adminToken, reason } = await unlockAdminSite({ data: { username, password } });
+    const { ok, adminToken, reason, matched } = (await unlockAdminSite({
+      data: { username, password },
+    })) as { ok: boolean; adminToken?: string; reason?: "invalid"; matched?: string };
     if (!ok) return { ok: false, reason: reason ?? "invalid" };
     try { sessionStorage.setItem(KEY, "1"); } catch { /* ignore */ }
     if (adminToken) {
       try { sessionStorage.setItem(TOKEN_KEY, adminToken); } catch { /* ignore */ }
     }
-    return { ok: true };
+    return { ok: true, matched };
   } catch {
     return { ok: false, reason: "error" };
   }
