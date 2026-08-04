@@ -27,6 +27,8 @@ type Ev = {
   description: string | null;
   image_url: string | null;
   neighborhood: string | null;
+  category: string | null;
+  organization_id: string | null;
 };
 
 const ORGANIZERS = [
@@ -244,7 +246,7 @@ function CalendarPage() {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id, title, starts_at, location, venue_name, description, image_url, neighborhood")
+        .select("id, title, starts_at, location, venue_name, description, image_url, neighborhood, category, organization_id")
         .order("starts_at", { ascending: true });
       setEvents((data || []) as Ev[]);
     })();
@@ -254,13 +256,30 @@ function CalendarPage() {
     })();
   }, []);
 
+  const [orgTypeById, setOrgTypeById] = useState<Record<string, string>>({});
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("organizations").select("id,type");
+      const map: Record<string, string> = {};
+      for (const o of (data ?? []) as Array<{ id: string; type: string }>) map[o.id] = o.type;
+      setOrgTypeById(map);
+    })();
+  }, []);
+
   const now = new Date();
   const filtered = useMemo(() => {
     return events.filter((e) => {
       if (neighborhood && e.neighborhood !== neighborhood) return false;
+      if (eventType !== "All Types" && (e.category ?? "").toLowerCase() !== eventType.toLowerCase()) return false;
+      if (organizer !== "all") {
+        const orgType = e.organization_id ? orgTypeById[e.organization_id] : null;
+        if (organizer === "business" && orgType !== "business") return false;
+        if (organizer === "community" && orgType !== "community_assoc") return false;
+        if (organizer === "arts" && orgType !== "arts_org") return false;
+      }
       return true;
     });
-  }, [events, neighborhood]);
+  }, [events, neighborhood, eventType, organizer, orgTypeById]);
 
   const upcoming = useMemo(
     () => {

@@ -45,8 +45,22 @@ type Story = {
 };
 
 const STORY_FORMATS = [
-  "All Formats","Novels","Short Stories","Poetry","Plays","Screenplays",
-  "Memoirs","Novellas","Flash Fiction","Spoken Word","Journals / Diaries",
+  { value: "All Formats", label: "All Formats" },
+  { value: "blog", label: "Blog" },
+  { value: "essay", label: "Essay" },
+  { value: "poetry", label: "Poetry" },
+  { value: "review", label: "Review" },
+  { value: "interview", label: "Interview" },
+  { value: "resource", label: "Resource" },
+  { value: "short story", label: "Short Story" },
+  { value: "novel", label: "Novel" },
+  { value: "novella", label: "Novella" },
+  { value: "play", label: "Play" },
+  { value: "screenplay", label: "Screenplay" },
+  { value: "memoir", label: "Memoir" },
+  { value: "flash fiction", label: "Flash Fiction" },
+  { value: "spoken word", label: "Spoken Word" },
+  { value: "journal", label: "Journal" },
 ] as const;
 const FORMATS = ["All","poetry","blog","essay","resource"];
 const TABS = ["Discover","Trending","Featured"] as const;
@@ -201,7 +215,7 @@ function StoriesSignedIn() {
   const [stories, setStories] = useState<Story[]>([]);
   const [filter, setFilter] = useState("All");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
-  const [storyFormat, setStoryFormat] = useState<(typeof STORY_FORMATS)[number]>("All Formats");
+  const [storyFormat, setStoryFormat] = useState<string>("All Formats");
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
@@ -246,7 +260,7 @@ function StoriesSignedIn() {
       }
     }
     if (filter !== "All") q = q.eq("format", filter);
-    if (storyFormat !== "All Formats") q = q.ilike("format", storyFormat);
+    if (storyFormat !== "All Formats") q = q.eq("format", storyFormat);
     if (tab === "Featured") q = q.eq("featured", true);
     if (search) q = q.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
     return q;
@@ -357,11 +371,11 @@ function StoriesSignedIn() {
           <div className="relative max-w-md">
             <select
               value={storyFormat}
-              onChange={(e) => setStoryFormat(e.target.value as (typeof STORY_FORMATS)[number])}
+              onChange={(e) => setStoryFormat(e.target.value)}
               className="w-full appearance-none rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-800 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
             >
               {STORY_FORMATS.map((f) => (
-                <option key={f} value={f}>{f}</option>
+                <option key={f.value} value={f.value}>{f.label}</option>
               ))}
             </select>
             <svg
@@ -381,12 +395,7 @@ function StoriesSignedIn() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {FORMATS.map((f) => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold capitalize transition ${filter===f ? "bg-orange-600 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"}`}>{f}</button>
-            ))}
-          </div>
+          <div />
           <label className="flex items-center gap-2 text-xs font-semibold text-neutral-500">
             <span className="uppercase tracking-wider">Sort</span>
             <select

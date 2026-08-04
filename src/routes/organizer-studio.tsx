@@ -185,8 +185,17 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
   const [promoterCount, setPromoterCount] = useState(0);
+  const [checkedInCount, setCheckedInCount] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from("tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", evt.id)
+      .not("checked_in_at", "is", null)
+      .then(({ count }) => setCheckedInCount(count ?? 0));
+  }, [evt.id]);
 
   useEffect(() => {
     supabase.from("event_promoters").select("id", { count: "exact", head: true }).eq("event_id", evt.id)
@@ -249,7 +258,6 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   };
 
   const filteredList = filteredBuyersHelper(paid, buyers, search, statusFilter);
-  void typeFilter;
 
   return (
     <div className="space-y-5">
@@ -264,7 +272,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Revenue" value={fmt(revenue)} subtitle={`${fmt(net)} net`} />
         <Stat label="Tickets sold" value={paid.length.toString()} subtitle={`${paid.length} orders`} />
-        <Stat label="Checked in" value="0" subtitle={`of ${paid.length} total`} />
+        <Stat label="Checked in" value={checkedInCount.toString()} subtitle={`of ${paid.length} total`} />
         <Stat label="Promoters" value={promoterCount.toString()} subtitle="0 via promo" />
       </div>
 
@@ -289,10 +297,6 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
               <option value="paid">Paid</option>
               <option value="refunded">Refunded</option>
               <option value="pending">Pending</option>
-            </select>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm">
-              <option value="all">All Types</option>
-              <option value="ga">General Admission</option>
             </select>
             <button onClick={() => exportCsv("orders")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Orders CSV</button>
             <button onClick={() => exportCsv("rsvps")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> RSVPs CSV</button>
@@ -333,11 +337,11 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       )}
 
       {tab === "checkin" && (
-        <CheckInTab total={paid.length} />
+        <CheckInTab eventId={evt.id} paid={paid} buyers={buyers} />
       )}
 
       {tab === "message" && (
-        <MessageTab eventId={evt.id} evtTitle={evt.title} recipients={paid.map((t) => buyers[t.buyer_id]?.email).filter(Boolean) as string[]} />
+        <MessageTab eventId={evt.id} evtTitle={evt.title} recipients={paid.map((t) => t.buyer_id).filter(Boolean)} />
       )}
 
       {tab === "promoters" && (
@@ -615,9 +619,68 @@ function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; 
   );
 }
 
-function CheckInTab({ total }: { total: number }) {
-  const [mode, setMode] = useState<"scanner" | "list">("scanner");
-  const checkedIn = 0;
+function CheckInTab({
+  eventId,
+  paid,
+  buyers,
+}: {
+  eventId: string;
+  paid: Ticket[];
+  buyers: Record<string, { name: string | null; email: string | null; avatar_url: string | null }>;
+}) {
+  const [mode, setMode] = useState<"list" | "scanner">("list");
+  const [state, setState] = useState<Record<string, string | null>>({});
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const total = paid.length;
+
+  useEffect(() => {
+    let alive = true;
+    supabase
+      .from("tickets")
+      .select("id, checked_in_at")
+      .eq("event_id", eventId)
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        const next: Record<string, string | null> = {};
+        for (const t of data as Array<{ id: string; checked_in_at: string | null }>) next[t.id] = t.checked_in_at;
+        setState(next);
+      });
+    return () => { alive = false; };
+  }, [eventId]);
+
+  const toggle = async (ticketId: string) => {
+    const isIn = !!state[ticketId];
+    setBusyId(ticketId);
+    const nextValue = isIn ? null : new Date().toISOString();
+    const prev = state[ticketId] ?? null;
+    setState((s) => ({ ...s, [ticketId]: nextValue }));
+    const { data: auth } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("tickets")
+      .update({ checked_in_at: nextValue, checked_in_by: nextValue ? auth.user?.id ?? null : null })
+      .eq("id", ticketId);
+    setBusyId(null);
+    if (error) {
+      setState((s) => ({ ...s, [ticketId]: prev }));
+      toast.error(error.message);
+      return;
+    }
+    toast.success(nextValue ? "Checked in" : "Check-in undone");
+  };
+
+  const checkInByCode = async () => {
+    const raw = code.trim();
+    if (!raw) return;
+    const id = raw.split("/").pop()?.trim() ?? raw;
+    const match = paid.find((t) => t.id === id || t.id.startsWith(id));
+    if (!match) { toast.error("No ticket for this event matches that code"); return; }
+    if (state[match.id]) { toast.info("That ticket is already checked in"); setCode(""); return; }
+    await toggle(match.id);
+    setCode("");
+  };
+
+  const checkedIn = paid.filter((t) => state[t.id]).length;
   const pct = total === 0 ? 0 : Math.round((checkedIn / total) * 100);
   return (
     <div className="space-y-4">
@@ -631,25 +694,70 @@ function CheckInTab({ total }: { total: number }) {
       </div>
 
       <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm">
-        <button onClick={() => setMode("scanner")} className={`inline-flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${mode === "scanner" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600"}`}>
-          <Camera className="h-4 w-4" /> QR Scanner
-        </button>
         <button onClick={() => setMode("list")} className={`inline-flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${mode === "list" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600"}`}>
           <List className="h-4 w-4" /> Attendee List
+        </button>
+        <button onClick={() => setMode("scanner")} className={`inline-flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${mode === "scanner" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600"}`}>
+          <Camera className="h-4 w-4" /> Ticket Code
         </button>
       </div>
 
       {mode === "scanner" ? (
-        <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
-          <p className="text-sm text-neutral-600">Point the camera at a ticket QR code to check in instantly.</p>
-          <div className="my-4 h-px bg-neutral-100" />
-          <button onClick={() => toast.info("Camera access required. This uses your device camera to scan QR tickets.")} className="inline-flex items-center gap-2 rounded-lg bg-neutral-500 px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110">
-            <Camera className="h-4 w-4" /> Start Camera Scanner
-          </button>
+        <div className="rounded-xl border border-neutral-200 bg-white p-6">
+          <p className="text-sm text-neutral-600">
+            Type or paste the ticket code shown under the attendee's QR code, then check them in.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") void checkInByCode(); }}
+              placeholder="Ticket code"
+              className="flex-1 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm"
+            />
+            <button
+              onClick={() => void checkInByCode()}
+              disabled={!code.trim()}
+              className="rounded-lg bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+            >
+              Check in
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">
-          {total === 0 ? "No attendees to check in yet." : "Tap an attendee to mark them as checked in."}
+        <div className="rounded-xl border border-neutral-200 bg-white">
+          {total === 0 ? (
+            <div className="p-10 text-center text-sm text-neutral-500">No attendees to check in yet.</div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {paid.map((t) => {
+                const b = buyers[t.buyer_id];
+                const isIn = !!state[t.id];
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => void toggle(t.id)}
+                    disabled={busyId === t.id}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-neutral-50 disabled:opacity-60"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-neutral-900">{b?.name ?? "Attendee"}</div>
+                      <div className="text-xs text-neutral-500">
+                        {isIn ? `Checked in ${new Date(state[t.id] as string).toLocaleTimeString()}` : `Code ${t.id.slice(0, 8)}`}
+                      </div>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                        isIn ? "bg-[#d4580a] text-white" : "border border-neutral-200 text-neutral-600"
+                      }`}
+                    >
+                      {isIn ? "Checked in" : "Check in"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -660,23 +768,8 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
-  const [types, setTypes] = useState<Array<{ id: string; name: string; category: string | null }>>([]);
-  const [selected, setSelected] = useState<string>("all");
   const totalCount = new Set(recipients).size;
-  const count = selected === "all" ? totalCount : 0;
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const { data } = await supabase
-        .from("ticket_types")
-        .select("id,name,category")
-        .eq("event_id", eventId)
-        .order("created_at", { ascending: true });
-      if (alive && data) setTypes(data as any);
-    })();
-    return () => { alive = false; };
-  }, [eventId]);
+  const count = totalCount;
 
   const iconFor = (cat: string | null) => {
     switch (cat) {
@@ -701,10 +794,41 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
     if (count === 0) { toast.error("No attendees to message yet"); return; }
     setBusy(true);
     try {
-      // TODO: wire to email server function
-      await new Promise((r) => setTimeout(r, 400));
-      toast.success(`Message queued for ${count} attendee${count === 1 ? "" : "s"}`);
+      const { data: auth } = await supabase.auth.getUser();
+      const meId = auth.user?.id;
+      if (!meId) { toast.error("Please sign in first"); return; }
+      const ids = Array.from(new Set(recipients)).filter((id) => id && id !== meId);
+      if (ids.length === 0) { toast.error("No attendees to message yet"); return; }
+
+      const { data: conv, error: cErr } = await supabase
+        .from("conversations")
+        .insert({
+          is_group: true,
+          title: subject.trim().slice(0, 120),
+          created_by: meId,
+          last_message_preview: body.trim().slice(0, 140),
+        })
+        .select("id")
+        .single();
+      if (cErr || !conv) throw cErr || new Error("Could not start the conversation");
+
+      const { error: mErr } = await supabase.from("conversation_members").insert([
+        { conversation_id: conv.id, user_id: meId },
+        ...ids.map((id) => ({ conversation_id: conv.id, user_id: id })),
+      ]);
+      if (mErr) throw mErr;
+
+      const { error: msgErr } = await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: meId,
+        content: `${subject.trim()}\n\n${body.trim()}`,
+      });
+      if (msgErr) throw msgErr;
+
+      toast.success(`Sent to ${ids.length} attendee${ids.length === 1 ? "" : "s"}`);
       setSubject(""); setBody("");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not send the message");
     } finally { setBusy(false); }
   };
 
@@ -715,33 +839,18 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600"><Mail className="h-5 w-5" /></div>
           <div>
             <div className="font-semibold text-neutral-900">Message Your Attendees</div>
-            <div className="text-xs text-neutral-500">Send emails directly to ticket buyers for <span className="font-semibold text-neutral-700">{evtTitle}</span></div>
+            <div className="text-xs text-neutral-500">Send a message straight to the inbox of ticket buyers for <span className="font-semibold text-neutral-700">{evtTitle}</span></div>
           </div>
         </div>
       </div>
 
       <div>
         <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Send To</div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelected("all")}
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === "all" ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
-          >
-            <Users className="h-4 w-4" /> All Ticket Buyers
-            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">{totalCount}</span>
-          </button>
-          {types.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setSelected(t.id)}
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === t.id ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
-            >
-              {(() => { const Icon = iconFor(t.category); return <Icon className="h-4 w-4" />; })()} {t.name}
-              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">0</span>
-            </button>
-          ))}
+        <div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-[#d4580a] bg-[#fff4ec] px-3 py-2 text-sm text-[#d4580a]">
+          <Users className="h-4 w-4" /> All Ticket Buyers
+          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-neutral-500">{totalCount}</span>
         </div>
-        <div className="mt-1 text-xs text-neutral-500">{count} unique emails will receive this message</div>
+        <div className="mt-1 text-xs text-neutral-500">{count} attendee{count === 1 ? "" : "s"} will receive this message</div>
       </div>
 
       <div>

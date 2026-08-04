@@ -350,6 +350,7 @@ export type Database = {
         Row: {
           address: string | null
           capacity: number | null
+          category: string | null
           created_at: string
           description: string | null
           ends_at: string | null
@@ -374,6 +375,7 @@ export type Database = {
         Insert: {
           address?: string | null
           capacity?: number | null
+          category?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
@@ -398,6 +400,7 @@ export type Database = {
         Update: {
           address?: string | null
           capacity?: number | null
+          category?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
@@ -1715,6 +1718,8 @@ export type Database = {
           artist_net_cents: number
           buyer_id: string
           buyer_total_cents: number
+          checked_in_at: string | null
+          checked_in_by: string | null
           created_at: string
           event_id: string
           id: string
@@ -1730,6 +1735,8 @@ export type Database = {
           artist_net_cents: number
           buyer_id: string
           buyer_total_cents: number
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           created_at?: string
           event_id: string
           id?: string
@@ -1745,6 +1752,8 @@ export type Database = {
           artist_net_cents?: number
           buyer_id?: string
           buyer_total_cents?: number
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           created_at?: string
           event_id?: string
           id?: string
