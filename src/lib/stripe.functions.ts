@@ -10,11 +10,8 @@ export const ensureConnectAccount = createServerFn({ method: "POST" })
     const { getStripe } = await import("./stripe.server");
     const stripe = getStripe();
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("stripe_account_id, email")
-      .eq("id", userId)
-      .maybeSingle();
+    const { data: profileRows } = await supabase.rpc("my_profile");
+    const profile = (profileRows as unknown as Array<{ stripe_account_id: string | null; email: string | null }> | null)?.[0] ?? null;
 
     let accountId = profile?.stripe_account_id ?? null;
 

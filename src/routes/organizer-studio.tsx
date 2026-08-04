@@ -203,7 +203,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
         setTickets(rows);
         const ids = Array.from(new Set(rows.map((r) => r.buyer_id)));
         if (ids.length) {
-          const { data: profs } = await supabase.from("profiles").select("id, display_name, username, email, avatar_url").in("id", ids);
+          const { data: profs } = await supabase.rpc("event_buyer_contacts", { _event_id: evt.id });
           const map: Record<string, { name: string | null; email: string | null; avatar_url: string | null }> = {};
           for (const p of profs ?? []) map[(p as { id: string }).id] = {
             name: (p as { display_name?: string; username?: string }).display_name ?? (p as { username?: string }).username ?? null,
