@@ -136,6 +136,7 @@ function NewEventPage() {
         capacity,
       }).select("id").single();
 
+
       if (error) {
         toast.error(error.message.includes("row-level security")
           ? "Only Artists can post events. Upgrade in your profile."
