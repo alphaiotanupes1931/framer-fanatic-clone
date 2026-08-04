@@ -185,8 +185,17 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
   const [promoterCount, setPromoterCount] = useState(0);
+  const [checkedInCount, setCheckedInCount] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from("tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", evt.id)
+      .not("checked_in_at", "is", null)
+      .then(({ count }) => setCheckedInCount(count ?? 0));
+  }, [evt.id]);
 
   useEffect(() => {
     supabase.from("event_promoters").select("id", { count: "exact", head: true }).eq("event_id", evt.id)
@@ -249,7 +258,6 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   };
 
   const filteredList = filteredBuyersHelper(paid, buyers, search, statusFilter);
-  void typeFilter;
 
   return (
     <div className="space-y-5">
@@ -264,7 +272,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Revenue" value={fmt(revenue)} subtitle={`${fmt(net)} net`} />
         <Stat label="Tickets sold" value={paid.length.toString()} subtitle={`${paid.length} orders`} />
-        <Stat label="Checked in" value="0" subtitle={`of ${paid.length} total`} />
+        <Stat label="Checked in" value={checkedInCount.toString()} subtitle={`of ${paid.length} total`} />
         <Stat label="Promoters" value={promoterCount.toString()} subtitle="0 via promo" />
       </div>
 
@@ -289,10 +297,6 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
               <option value="paid">Paid</option>
               <option value="refunded">Refunded</option>
               <option value="pending">Pending</option>
-            </select>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm">
-              <option value="all">All Types</option>
-              <option value="ga">General Admission</option>
             </select>
             <button onClick={() => exportCsv("orders")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Orders CSV</button>
             <button onClick={() => exportCsv("rsvps")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> RSVPs CSV</button>
