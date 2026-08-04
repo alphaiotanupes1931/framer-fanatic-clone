@@ -1,0 +1,23 @@
+REVOKE ALL ON FUNCTION public.admin_list_users() FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_list_events() FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_list_organizations() FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_set_banned(uuid, boolean) FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_set_showcase_hidden(uuid, boolean) FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_delete_event(uuid) FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_delete_organization(uuid) FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_delete_profile(uuid) FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_toggle_content_pin(text, uuid, boolean) FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_update_profile(uuid, text, text, text, text, text) FROM anon, public;
+REVOKE ALL ON FUNCTION public.admin_upsert_site_content(jsonb) FROM anon, public;
+
+GRANT EXECUTE ON FUNCTION public.admin_list_users() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_list_events() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_list_organizations() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_set_banned(uuid, boolean) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_set_showcase_hidden(uuid, boolean) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_delete_event(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_delete_organization(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_delete_profile(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_toggle_content_pin(text, uuid, boolean) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_update_profile(uuid, text, text, text, text, text) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_upsert_site_content(jsonb) TO authenticated, service_role;
