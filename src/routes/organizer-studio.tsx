@@ -768,23 +768,8 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
-  const [types, setTypes] = useState<Array<{ id: string; name: string; category: string | null }>>([]);
-  const [selected, setSelected] = useState<string>("all");
   const totalCount = new Set(recipients).size;
-  const count = selected === "all" ? totalCount : 0;
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const { data } = await supabase
-        .from("ticket_types")
-        .select("id,name,category")
-        .eq("event_id", eventId)
-        .order("created_at", { ascending: true });
-      if (alive && data) setTypes(data as any);
-    })();
-    return () => { alive = false; };
-  }, [eventId]);
+  const count = totalCount;
 
   const iconFor = (cat: string | null) => {
     switch (cat) {
@@ -861,26 +846,11 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
 
       <div>
         <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Send To</div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelected("all")}
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === "all" ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
-          >
-            <Users className="h-4 w-4" /> All Ticket Buyers
-            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">{totalCount}</span>
-          </button>
-          {types.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setSelected(t.id)}
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selected === t.id ? "border-[#d4580a] bg-[#fff4ec] text-[#d4580a]" : "border-neutral-200 bg-white text-neutral-700"}`}
-            >
-              {(() => { const Icon = iconFor(t.category); return <Icon className="h-4 w-4" />; })()} {t.name}
-              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">0</span>
-            </button>
-          ))}
+        <div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-[#d4580a] bg-[#fff4ec] px-3 py-2 text-sm text-[#d4580a]">
+          <Users className="h-4 w-4" /> All Ticket Buyers
+          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-neutral-500">{totalCount}</span>
         </div>
-        <div className="mt-1 text-xs text-neutral-500">{count} unique emails will receive this message</div>
+        <div className="mt-1 text-xs text-neutral-500">{count} attendee{count === 1 ? "" : "s"} will receive this message</div>
       </div>
 
       <div>
