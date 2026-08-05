@@ -29,7 +29,8 @@ export const ensureConnectAccount = createServerFn({ method: "POST" })
         },
       });
       accountId = account.id;
-      await supabase
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
         .from("profiles")
         .update({ stripe_account_id: accountId, stripe_account_status: "pending" })
         .eq("id", userId);
@@ -93,7 +94,8 @@ export const refreshConnectStatus = createServerFn({ method: "POST" })
         ? "pending_review"
         : "incomplete";
 
-    await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
       .from("profiles")
       .update({ stripe_charges_enabled: chargesEnabled, stripe_account_status: status })
       .eq("id", userId);
