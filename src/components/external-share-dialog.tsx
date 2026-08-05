@@ -3,6 +3,7 @@ import { X, Facebook, Linkedin, MessageCircle, Mail, Copy, Users, Instagram, Sen
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
+import { Img } from "@/components/shared/smart-img";
 
 type Person = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
 
@@ -121,7 +122,7 @@ export function ExternalShareDialog({
                   className="flex w-14 flex-shrink-0 flex-col items-center gap-1 text-center disabled:opacity-50"
                 >
                   <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 text-sm font-bold text-neutral-700">
-                    {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : initial(p.display_name || p.username)}
+                    {p.avatar_url ? <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : initial(p.display_name || p.username)}
                   </div>
                   <div className="w-full truncate text-[11px] text-neutral-700">{(p.display_name || p.username || "").split(" ")[0]}</div>
                 </button>

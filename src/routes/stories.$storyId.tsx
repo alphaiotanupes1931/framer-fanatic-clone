@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Heart, MessageCircle, Clock, Trash2, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import DOMPurify from "isomorphic-dompurify";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartImage } from "@/components/smart-image";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/stories/$storyId")({
   component: StoryDetail,
@@ -188,7 +189,7 @@ function StoryDetail() {
         {author && (
           <Link to="/u/$username" params={{ username: author.username || author.id }} className="mt-5 flex items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-3">
             <Avatar className="h-11 w-11">
-              {author.avatar_url && <AvatarImage src={author.avatar_url} alt="" />}
+              {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
               <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>
             </Avatar>
             <div>
@@ -247,7 +248,7 @@ function StoryDetail() {
                 return (
                   <li key={c.id} className="flex gap-3">
                     <Avatar className="h-8 w-8 shrink-0">
-                      {c.author?.avatar_url && <AvatarImage src={c.author.avatar_url} alt="" />}
+                      {c.author?.avatar_url && <SmartAvatarImage src={c.author.avatar_url} alt="" />}
                       <AvatarFallback className="bg-[#d4580a]/10 text-xs text-[#d4580a]">{ci}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1 rounded-2xl bg-secondary px-3 py-2">

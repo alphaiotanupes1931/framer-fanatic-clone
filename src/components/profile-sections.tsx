@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { Img } from "@/components/shared/smart-img";
 
 export type ProfileSection = {
   id: string;
@@ -113,7 +114,7 @@ export function ProfileSectionTab({
             <div key={it.id} className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white">
               {it.media_url && (
                 <div className="aspect-video bg-neutral-100">
-                  <img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                  <Img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
                 </div>
               )}
               <div className="p-4">

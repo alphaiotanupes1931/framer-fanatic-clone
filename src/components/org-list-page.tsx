@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
+import { Img } from "@/components/shared/smart-img";
 
 function prettyLabel(v: string) {
   return v
@@ -183,7 +184,7 @@ export function OrgListPage({
                   <div className="relative h-40 bg-neutral-100"
                     style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
                     <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
-                      {o.avatar_url && <img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                      {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                     </div>
                   </div>
                   <div className="px-4 pb-4 pt-8">
@@ -234,7 +235,7 @@ export function OrgListPage({
                 <div className="relative h-40 bg-neutral-100"
                   style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
                   <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
-                    {o.avatar_url && <img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                    {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
                 </div>
                 <div className="px-4 pb-4 pt-8">

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/create-artist")({
   component: CreateArtistPage,
@@ -139,7 +140,7 @@ function CreateArtistPage() {
             <div className="flex items-center gap-4">
               <div className="relative h-20 w-20 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
                 {form.avatar_url ? (
-                  <img src={form.avatar_url} alt="" className="h-full w-full object-cover" />
+                  <Img src={form.avatar_url} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-neutral-400"><Camera className="h-6 w-6" /></div>
                 )}

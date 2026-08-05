@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { isAdminUnlocked, lockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
 import pbLogo from "@/assets/pb-logo-dark.png";
 import { Toaster } from "@/components/ui/sonner";
+import { Img } from "@/components/shared/smart-img";
 
 export function AdminShell({
   title,
@@ -24,7 +25,7 @@ export function AdminShell({
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex w-full max-w-[1120px] items-center justify-between px-4 py-3 sm:px-6">
           <Link to="/admin" className="flex items-center gap-2 font-semibold text-neutral-900">
-            <img src={pbLogo} alt="Planet Baltimore" className="h-7 w-7 rounded-full bg-neutral-900 object-contain p-1" />
+            <Img src={pbLogo} alt="Planet Baltimore" className="h-7 w-7 rounded-full bg-neutral-900 object-contain p-1" />
             Planet Baltimore Admin
           </Link>
           {unlocked && (

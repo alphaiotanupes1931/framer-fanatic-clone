@@ -5,6 +5,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Mic, Plus, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
+import { Img } from "@/components/shared/smart-img";
 
 type Pod = {
   id: string;
@@ -75,7 +76,7 @@ function PodcastsPage() {
                 >
                   <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100">
                     {p.avatar_url ? (
-                      <img src={p.avatar_url} alt={name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                      <Img src={p.avatar_url} alt={name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-neutral-400">
                         <Mic className="h-6 w-6" />

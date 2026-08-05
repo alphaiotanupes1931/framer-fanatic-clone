@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/create-post")({
   component: CreatePostPage,
@@ -270,7 +271,7 @@ function CreatePostPage() {
                         {isVideo ? (
                           <video src={u} className="h-32 w-full object-cover" />
                         ) : (
-                          <img src={u} alt="" className="h-32 w-full object-cover" />
+                          <Img src={u} alt="" className="h-32 w-full object-cover" />
                         )}
                         <button
                           type="button"
@@ -314,7 +315,7 @@ function CreatePostPage() {
                         {isVideo ? (
                           <video src={u} className="h-32 w-full object-cover" />
                         ) : (
-                          <img src={u} alt="" className="h-32 w-full object-cover" />
+                          <Img src={u} alt="" className="h-32 w-full object-cover" />
                         )}
                         <button
                           type="button"
@@ -425,7 +426,7 @@ function CreatePostPage() {
                     className="flex w-full items-center gap-2 border-b border-neutral-100 px-3 py-2 text-left text-sm last:border-b-0 hover:bg-neutral-50"
                   >
                     {r.avatar_url ? (
-                      <img src={r.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                      <Img src={r.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
                     ) : (
                       <span className="h-6 w-6 rounded-full bg-neutral-200" />
                     )}

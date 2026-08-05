@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 type FollowPerson = {
   id: string;
@@ -84,7 +85,7 @@ export function FollowListDialog({
                 className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary"
               >
                 <Avatar className="h-11 w-11">
-                  <AvatarImage src={person.avatar_url ?? undefined} alt="" />
+                  <SmartAvatarImage src={person.avatar_url ?? undefined} alt="" />
                   <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
+import { Img } from "@/components/shared/smart-img";
 
 type Person = {
   id: string;
@@ -220,7 +221,7 @@ export function ShareToUsersDialog({
                     >
                       <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
                         {p.avatar_url ? (
-                          <img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                          <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
                         ) : (
                           initials(p.display_name || p.username)
                         )}

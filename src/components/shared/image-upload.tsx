@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Img } from "@/components/shared/smart-img";
 
 type Props = {
   value: string;
@@ -48,7 +49,7 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
       />
       {value ? (
         <div className="relative overflow-hidden rounded-lg border border-border">
-          <img src={value} alt="" className="w-full max-h-56 object-cover" />
+          <Img src={value} alt="" className="w-full max-h-56 object-cover" />
           <div className="absolute inset-x-0 bottom-0 flex justify-between gap-2 bg-black/50 p-2">
             <button type="button" onClick={() => ref.current?.click()} disabled={busy}
               className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-neutral-900">

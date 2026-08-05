@@ -9,10 +9,11 @@ import { createTicketCheckout } from "@/lib/stripe.functions";
 import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -208,7 +209,7 @@ function EventDetail() {
         {host && (
           <Link to="/u/$username" params={{ username: host.username || host.id }} className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors">
             <Avatar className="w-10 h-10">
-              <AvatarImage src={host.avatar_url ?? undefined} />
+              <SmartAvatarImage src={host.avatar_url ?? undefined} />
               <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>{(host.display_name || host.username || "?").charAt(0)}</AvatarFallback>
             </Avatar>
             <div>

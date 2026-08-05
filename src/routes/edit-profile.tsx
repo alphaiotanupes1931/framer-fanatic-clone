@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { ArrowLeft, Upload } from "lucide-react";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/edit-profile")({
   head: () => ({ meta: [{ title: "Edit Profile - Planet Baltimore" }, { name: "robots", content: "noindex" }] }),
@@ -107,7 +108,7 @@ function EditProfilePage() {
 
       <div className="mb-6 overflow-hidden rounded-xl border border-border">
         <div className="relative h-40 w-full bg-secondary">
-          {form.banner_url && <img src={form.banner_url} alt="" className="h-full w-full object-cover" />}
+          {form.banner_url && <Img src={form.banner_url} alt="" className="h-full w-full object-cover" />}
           <label className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-2 rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black">
             <Upload className="h-3.5 w-3.5" />
             {uploading === "banner" ? "Uploading..." : "Change banner"}
@@ -116,7 +117,7 @@ function EditProfilePage() {
         </div>
         <div className="flex items-center gap-4 p-4">
           <div className="h-20 w-20 overflow-hidden rounded-full bg-secondary ring-2 ring-background">
-            {form.avatar_url && <img src={form.avatar_url} alt="" className="h-full w-full object-cover" />}
+            {form.avatar_url && <Img src={form.avatar_url} alt="" className="h-full w-full object-cover" />}
           </div>
           <label className="flex cursor-pointer items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">
             <Upload className="h-4 w-4" />

@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search as SearchIcon, MapPin, Calendar } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
@@ -114,7 +115,7 @@ function SearchPage() {
                   {people.slice(0, tab === "All" ? 6 : 24).map((p) => (
                     <Link key={p.id} to="/u/$username" params={{ username: p.username || p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <Avatar className="h-11 w-11 shrink-0">
-                        {p.avatar_url && <AvatarImage src={p.avatar_url} />}
+                        {p.avatar_url && <SmartAvatarImage src={p.avatar_url} />}
                         <AvatarFallback>{(p.display_name || p.username || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
@@ -136,7 +137,7 @@ function SearchPage() {
                   {orgs.slice(0, tab === "All" ? 6 : 24).map((o) => (
                     <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
-                        {o.avatar_url && <img src={o.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                        {o.avatar_url && <Img src={o.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{o.name}</div>
@@ -173,7 +174,7 @@ function SearchPage() {
                   {businesses.slice(0, tab === "All" ? 6 : 24).map((b) => (
                     <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
-                        {b.avatar_url && <img src={b.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                        {b.avatar_url && <Img src={b.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{b.name}</div>

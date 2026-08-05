@@ -12,13 +12,14 @@ import { Heart, MessageCircle, Clock, Plus, X, Send, Loader2, Trash2, Share2, Bo
 
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
+import { Img } from "@/components/shared/smart-img";
 
 function StoryCover({ storyId, url }: { storyId: string; url: string | null }) {
   const [error, setError] = useState(false);
   if (!url || error) return null;
   return (
     <Link to="/stories/$storyId" params={{ storyId }} className="block">
-      <img
+      <Img
         src={url}
         alt=""
         className="aspect-[16/9] w-full rounded-xl object-cover bg-muted"
@@ -133,7 +134,7 @@ function CommentsDialog({ story, onClose, onCountChange }: { story: Story; onClo
           ) : items.map((c) => (
             <div key={c.id} className="flex gap-3">
               <Avatar className="h-8 w-8 shrink-0">
-                {c.author?.avatar_url && <img src={c.author.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                {c.author?.avatar_url && <Img src={c.author.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                 <AvatarFallback className="bg-orange-100 text-xs text-orange-700">{(c.author?.display_name || "U")[0].toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">

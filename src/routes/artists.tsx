@@ -9,6 +9,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserRole } from "@/hooks/use-user-role";
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 type Creator = {
   id: string;
@@ -113,7 +114,7 @@ function FindCreatorPage() {
       <div className="group h-full overflow-hidden rounded-2xl bg-secondary/40 transition-all duration-200 hover:shadow-lg">
         <div className="relative aspect-square w-full overflow-hidden bg-secondary">
           {c.avatar_url && !imgError ? (
-            <img
+            <Img
               src={c.avatar_url}
               alt={name}
               loading="lazy"

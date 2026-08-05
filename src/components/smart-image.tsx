@@ -28,6 +28,8 @@ function cacheKey(bucket: string, path: string) {
 
 async function resolveSrc(src: string, bucketHint?: string): Promise<string | null> {
   if (!src) return null;
+  // Local, inline, or object URLs never need signing.
+  if (/^(data:|blob:|\/)/.test(src)) return src;
   // Bare storage path (e.g. "<uid>/<file>.jpg") — needs a bucket to sign.
   if (!src.startsWith("http")) {
     if (!bucketHint) return null;

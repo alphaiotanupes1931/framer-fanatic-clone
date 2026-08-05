@@ -7,6 +7,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Tag, Search } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
+import { Img } from "@/components/shared/smart-img";
 
 type Listing = {
   id: string; seller_id: string; title: string; description: string | null;
@@ -94,7 +95,7 @@ function MarketplacePage() {
               <Link key={it.id} to="/marketplace/$listingId" params={{ listingId: it.id }} className="group overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md">
                 <div className="aspect-[4/3] w-full overflow-hidden bg-secondary">
                   {it.photos[0] ? (
-                    <img src={it.photos[0]} alt={it.title} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" decoding="async" />
+                    <Img src={it.photos[0]} alt={it.title} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" decoding="async" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Tag className="h-8 w-8" /></div>
                   )}

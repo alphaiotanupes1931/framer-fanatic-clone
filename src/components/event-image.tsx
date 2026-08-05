@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Img } from "@/components/shared/smart-img";
 
 const SUPABASE_HOST = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || "";
 
@@ -51,7 +52,7 @@ export function EventImage({ src, alt, className }: { src: string | null | undef
   const [failed, setFailed] = useState(false);
   useEffect(() => { setFailed(false); }, [url]);
   if (!url || failed) return null;
-  return <img src={url} alt={alt} className={className} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+  return <Img src={url} alt={alt} className={className} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
 }
 
 export { SUPABASE_HOST };

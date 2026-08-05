@@ -9,6 +9,7 @@ import {
   Loader2, Quote, RemoveFormatting, Save, Strikethrough, Underline, X, ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/create-story")({
   component: CreateStoryPage,
@@ -189,7 +190,7 @@ function CreateStoryPage() {
             onChange={(e) => { const f = e.target.files?.[0]; if (f) onPickCover(f); e.currentTarget.value = ""; }} />
           {form.cover_url ? (
             <div className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
-              <img src={form.cover_url} alt="Cover preview" className="max-h-80 w-full object-cover" />
+              <Img src={form.cover_url} alt="Cover preview" className="max-h-80 w-full object-cover" />
               <div className="absolute right-3 top-3 flex items-center gap-2">
                 <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
                   className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow hover:bg-white">Replace</button>

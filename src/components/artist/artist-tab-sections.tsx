@@ -12,6 +12,7 @@ import type { LucideIcon } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { createArtworkCheckout } from "@/lib/stripe.functions";
+import { Img } from "@/components/shared/smart-img";
 
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="py-12 text-center text-muted-foreground">No posts yet.</div>;
@@ -27,7 +28,7 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
         <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="group block">
           {img ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
-              <img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
+              <Img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
           ) : videoUrl ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-black">
@@ -98,7 +99,7 @@ export function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit:
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {items.map((it) => (
             <div key={it.id} className="group relative overflow-hidden rounded-lg bg-muted">
-              {it.media_url && <img src={it.media_url} alt={it.title ?? ""} className="w-full h-auto object-cover" loading="lazy" />}
+              {it.media_url && <Img src={it.media_url} alt={it.title ?? ""} className="w-full h-auto object-cover" loading="lazy" />}
               {it.title && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                   <div className="text-sm font-semibold text-white">{it.title}</div>
@@ -153,7 +154,7 @@ export function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: 
       <div className="space-y-4">
         <button onClick={() => setOpenId(null)} className="text-sm font-semibold text-[#d4580a]">Back to Series</button>
         <div className="rounded-2xl border border-border overflow-hidden">
-          {s.media_url && <img src={s.media_url} alt={s.title} className="w-full h-56 object-cover" />}
+          {s.media_url && <Img src={s.media_url} alt={s.title} className="w-full h-56 object-cover" />}
           <div className="p-5">
             <div className="text-2xl font-bold">{s.title}</div>
             {s.body && <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>}
@@ -178,7 +179,7 @@ export function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {kids.map((k) => (
               <div key={k.id} className="group relative overflow-hidden rounded-2xl border border-border">
-                {k.media_url && <img src={k.media_url} alt={k.title ?? ""} className="w-full h-64 object-cover" />}
+                {k.media_url && <Img src={k.media_url} alt={k.title ?? ""} className="w-full h-64 object-cover" />}
                 <div className="p-3">
                   {k.title && <div className="font-semibold">{k.title}</div>}
                   {k.body && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{k.body}</p>}
@@ -217,7 +218,7 @@ export function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: 
             const count = items.filter((i) => i.parent_id === s.id).length;
             return (
               <button key={s.id} onClick={() => setOpenId(s.id)} className="text-left rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-                {s.media_url && <img src={s.media_url} alt={s.title} className="w-full h-48 object-cover" />}
+                {s.media_url && <Img src={s.media_url} alt={s.title} className="w-full h-48 object-cover" />}
                 <div className="p-4">
                   <div className="font-bold">{s.title}</div>
                   {s.body && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{s.body}</p>}
@@ -550,7 +551,7 @@ export function ArtistEventsGrouped({ events }: { events: Array<{ id: string; ti
   const renderCard = (e: typeof events[number]) => (
     <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
       {e.image_url && (
-        <img
+        <Img
           src={e.image_url}
           alt={e.title}
           className="w-full h-56 object-cover bg-neutral-100"
@@ -673,7 +674,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
             {comments.map((c) => (
               <div key={c.id} className="flex gap-3 rounded-xl border border-border p-3">
                 {c.author?.avatar_url ? (
-                  <img src={c.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+                  <Img src={c.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
                 ) : (
                   <div className="h-9 w-9 rounded-full bg-muted" />
                 )}
@@ -873,7 +874,7 @@ export function ArtistAvailableWorksTab({ userId, canEdit }: { userId: string; c
               <div key={it.id} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white">
                 {it.media_url && (
                   <div className="aspect-square overflow-hidden bg-neutral-100">
-                    <img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" loading="lazy" />
+                    <Img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" loading="lazy" />
                   </div>
                 )}
                 <div className="p-3">

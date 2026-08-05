@@ -6,8 +6,9 @@ import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-prev
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { MapPin, Calendar, X, Building2, Users, Palette, Landmark, Search } from "lucide-react";
 import { BaltimoreMap } from "@/components/baltimore-map";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { EventImage } from "@/components/event-image";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
@@ -244,7 +245,7 @@ function NeighborhoodsPage() {
                             <li key={a.id}>
                               <Link to="/u/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
                                 <Avatar className="h-12 w-12 rounded-lg">
-                                  {a.avatar_url && <AvatarImage src={a.avatar_url} />}
+                                  {a.avatar_url && <SmartAvatarImage src={a.avatar_url} />}
                                   <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0 flex-1">
@@ -264,7 +265,7 @@ function NeighborhoodsPage() {
                           <li key={o.id}>
                             <Link to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
                               <Avatar className="h-12 w-12 rounded-lg">
-                                {o.avatar_url && <AvatarImage src={o.avatar_url} className="rounded-lg object-cover" />}
+                                {o.avatar_url && <SmartAvatarImage src={o.avatar_url} className="rounded-lg object-cover" />}
                                 <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{o.name.slice(0, 1).toUpperCase()}</AvatarFallback>
                               </Avatar>
                               <div className="min-w-0 flex-1">

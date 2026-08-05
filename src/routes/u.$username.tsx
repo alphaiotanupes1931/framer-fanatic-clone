@@ -27,6 +27,7 @@ import {
   ArtistTalkTab,
   ArtistAvailableWorksTab,
 } from "@/components/artist/artist-tab-sections";
+import { Img } from "@/components/shared/smart-img";
 
 type PublicProfile = {
   id: string;
@@ -307,7 +308,7 @@ function PublicProfilePage() {
         <div className="relative -mt-8 inline-block">
           <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
             {profile.avatar_url && (
-              <img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+              <Img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
           </div>
         </div>

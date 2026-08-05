@@ -10,6 +10,7 @@ import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { Img } from "@/components/shared/smart-img";
 
 type EventRow = {
   id: string;
@@ -121,7 +122,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
       <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
         {showImage && (
         <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-          <img
+          <Img
             src={resolvedImage}
             alt={event.title}
             loading="lazy"

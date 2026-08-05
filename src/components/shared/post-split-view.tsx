@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Send, Bookmark, Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -152,7 +153,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
       {hasMedia && (
         <div className="relative flex items-center justify-center bg-black">
           {current.kind === "image" ? (
-            <img src={current.url} alt="" className="max-h-[85vh] w-full object-contain" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+            <Img src={current.url} alt="" className="max-h-[85vh] w-full object-contain" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
           ) : (
             <video key={current.url} src={current.url} controls playsInline preload="metadata" className="max-h-[85vh] w-full bg-black" />
           )}
@@ -180,7 +181,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
           {author ? (
             <Link to="/u/$username" params={{ username: author.username || author.id }} search={{ view: "resident" }} className="flex min-w-0 items-center gap-2.5">
               <Avatar className="h-9 w-9 shrink-0">
-                {author.avatar_url && <AvatarImage src={author.avatar_url} alt="" />}
+                {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
                 <AvatarFallback className="bg-[#d4580a]/10 text-xs text-[#d4580a]">{initials}</AvatarFallback>
               </Avatar>
               <div className="min-w-0">
@@ -225,7 +226,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
               return (
                 <li key={c.id} className="flex gap-2.5">
                   <Avatar className="h-7 w-7 shrink-0">
-                    {c.author?.avatar_url && <AvatarImage src={c.author.avatar_url} alt="" />}
+                    {c.author?.avatar_url && <SmartAvatarImage src={c.author.avatar_url} alt="" />}
                     <AvatarFallback className="bg-[#d4580a]/10 text-[10px] text-[#d4580a]">{ci}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">

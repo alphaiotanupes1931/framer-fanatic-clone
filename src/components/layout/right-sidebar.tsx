@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { TrendingUp, Palette, ArrowRight, Calendar, ChevronRight, ChevronLeft } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { Story, Event } from "@/lib/entities";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
 import { useSidebar } from "@/components/layout/sidebar-context";
 import type { ReactNode, ComponentType } from "react";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
   return (
@@ -71,7 +72,7 @@ export function RightSidebar() {
               >
                 <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
                   {s.cover_url ? (
-                    <img src={s.cover_url} alt="" className="h-full w-full object-cover" loading={i < 2 ? "eager" : "lazy"} />
+                    <Img src={s.cover_url} alt="" className="h-full w-full object-cover" loading={i < 2 ? "eager" : "lazy"} />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-sm font-bold text-slate-500">{s.title?.charAt(0)}</div>
                   )}
@@ -96,7 +97,7 @@ export function RightSidebar() {
               >
                 <div className="flex-shrink-0">
                   <Avatar className="h-11 w-11 rounded-lg">
-                    <AvatarImage src={a.avatar_url} className="rounded-lg object-cover" />
+                    <SmartAvatarImage src={a.avatar_url} className="rounded-lg object-cover" />
                     <AvatarFallback className="rounded-lg bg-slate-100 text-sm font-bold text-slate-600">{a.display_name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </div>

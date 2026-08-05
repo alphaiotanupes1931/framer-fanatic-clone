@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
+import { Img } from "@/components/shared/smart-img";
 
 type Item = { icon: typeof Home; label: string; to: string };
 
@@ -59,8 +60,8 @@ export function TopMenuBar() {
     >
       <div className="flex min-h-[52px] items-center justify-between px-4 py-3">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <img src={pbLogo} alt="Planet Baltimore" width={22} height={22} className="h-[22px] w-[22px] object-contain dark:hidden" />
-          <img src={pbLogoWhite} alt="" aria-hidden="true" width={22} height={22} className="hidden h-[22px] w-[22px] object-contain dark:block" />
+          <Img src={pbLogo} alt="Planet Baltimore" width={22} height={22} className="h-[22px] w-[22px] object-contain dark:hidden" />
+          <Img src={pbLogoWhite} alt="" aria-hidden="true" width={22} height={22} className="hidden h-[22px] w-[22px] object-contain dark:block" />
           <span className="font-display text-sm font-extrabold uppercase tracking-wide text-foreground">Planet Baltimore</span>
         </Link>
 

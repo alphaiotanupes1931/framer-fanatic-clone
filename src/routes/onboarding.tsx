@@ -17,6 +17,7 @@ import { Camera, Upload } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { CREATOR_CATEGORIES } from "@/lib/categories";
 import { Textarea } from "@/components/ui/textarea";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
@@ -105,7 +106,7 @@ function Onboarding() {
       <Toaster richColors />
       <Card className="w-full max-w-md border-orange-200">
         <CardHeader className="text-center">
-          <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
+          <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Add a profile photo</CardTitle>
           <CardDescription>All fields below are required so your neighbors can recognize you.</CardDescription>
         </CardHeader>
@@ -118,7 +119,7 @@ function Onboarding() {
               className="group relative h-32 w-32 overflow-hidden rounded-full border-4 border-dashed border-orange-300 bg-orange-50 transition hover:border-orange-500"
             >
               {preview ? (
-                <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                <Img src={preview} alt="Preview" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center text-orange-500">
                   <Camera className="mb-1 h-7 w-7" />

@@ -19,6 +19,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { useSidebar } from "./sidebar-context";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
+import { Img } from "@/components/shared/smart-img";
 
 // Route-path map: repo path -> this app's existing TanStack route.
 type NavItem = { icon: typeof Home; label: string; to: string };
@@ -85,13 +86,13 @@ export function LeftSidebar() {
         <div className={`flex h-16 items-center border-b border-border px-4 sm:px-5 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
             <Link to="/dashboard" className="flex items-center gap-2">
-              <img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
-              <img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
+              <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
+              <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
             </Link>
           ) : (
             <Link to="/dashboard" className="flex items-center gap-2">
-              <img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
-              <img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
+              <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
+              <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
               <span className="font-display text-sm font-extrabold uppercase tracking-wide text-foreground">Planet Baltimore</span>
             </Link>
           )}

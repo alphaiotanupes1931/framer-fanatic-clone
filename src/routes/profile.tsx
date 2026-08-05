@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, Gift, ChevronLeft, ChevronRight, X as XIcon, Play } from "lucide-react";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { ExternalShareDialog } from "@/components/external-share-dialog";
 import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -340,7 +341,7 @@ function ProfilePage() {
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <div className="relative h-20 w-20 sm:h-24 sm:w-24">
               <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
-                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                {profile?.avatar_url && <SmartAvatarImage src={profile.avatar_url} />}
                 <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
               </Avatar>
               <button
@@ -450,7 +451,7 @@ function ProfilePage() {
                 <div className="flex -space-x-2">
                   {followerPreview.slice(0, 4).map((u) => (
                     <Link key={u.id} to="/u/$username" params={{ username: u.username || u.id }}>
-                      <img
+                      <Img
                         src={(u as any).avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.display_name || u.username || "u")}`}
                         alt=""
                         className="h-6 w-6 rounded-full border-2 border-background object-cover"
@@ -591,7 +592,7 @@ function ProfilePage() {
                               isVideo ? (
                                 <video src={thumb} className="h-full w-full object-cover" muted playsInline preload="metadata" />
                               ) : (
-                                <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
+                                <Img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
                               )
                             ) : (
                               <div
@@ -938,7 +939,7 @@ function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit: boolea
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {items.map((it) => (
             <div key={it.id} className="group relative overflow-hidden rounded-lg bg-muted">
-              {it.media_url && <img src={it.media_url} alt={it.title ?? ""} className="w-full h-auto object-cover" loading="lazy" />}
+              {it.media_url && <Img src={it.media_url} alt={it.title ?? ""} className="w-full h-auto object-cover" loading="lazy" />}
               {it.title && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                   <div className="text-sm font-semibold text-white">{it.title}</div>
@@ -1016,7 +1017,7 @@ function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean
       <div className="space-y-4">
         <button onClick={() => setOpenId(null)} className="text-sm font-semibold text-[#d4580a]">← Back to Series</button>
         <div className="rounded-2xl border border-border overflow-hidden">
-          {s.media_url && <img src={s.media_url} alt={s.title} className="w-full h-56 object-cover" />}
+          {s.media_url && <Img src={s.media_url} alt={s.title} className="w-full h-56 object-cover" />}
           <div className="p-5">
             <div className="text-2xl font-bold">{s.title}</div>
             {s.body && <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>}
@@ -1048,7 +1049,7 @@ function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {kids.map((k) => (
               <div key={k.id} className="group relative overflow-hidden rounded-2xl border border-border">
-                {k.media_url && <img src={k.media_url} alt={k.title ?? ""} className="w-full h-64 object-cover" />}
+                {k.media_url && <Img src={k.media_url} alt={k.title ?? ""} className="w-full h-64 object-cover" />}
                 <div className="p-3">
                   {k.title && <div className="font-semibold">{k.title}</div>}
                   {k.body && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{k.body}</p>}
@@ -1097,7 +1098,7 @@ function ArtistSeriesTab({ userId, canEdit }: { userId: string; canEdit: boolean
             return (
               <button key={s.id} onClick={() => setOpenId(s.id)}
                 className="text-left rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
-                {s.media_url && <img src={s.media_url} alt={s.title} className="w-full h-48 object-cover" />}
+                {s.media_url && <Img src={s.media_url} alt={s.title} className="w-full h-48 object-cover" />}
                 <div className="p-4">
                   <div className="font-bold">{s.title}</div>
                   {s.body && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{s.body}</p>}
@@ -1575,7 +1576,7 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
                 className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
               >
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={o.avatar_url ?? undefined} />
+                  <SmartAvatarImage src={o.avatar_url ?? undefined} />
                   <AvatarFallback>{o.name?.[0] ?? "?"}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
