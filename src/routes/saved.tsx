@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bookmark, ImageIcon, Heart, MessageCircle, BookOpen, Ticket, Calendar as CalendarIcon, MapPin, Video as VideoIcon, Play } from "lucide-react";
 import { toast } from "sonner";
 import { useEventImageUrl } from "@/components/event-image";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/saved")({
   component: SavedPage,
@@ -267,7 +268,7 @@ function StoryTile({ story, onUnsave }: { story: SavedStory; onUnsave: () => voi
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md">
       <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         {story.cover_url ? (
-          <img src={story.cover_url} alt="" loading="lazy" className="h-40 w-full object-cover" />
+          <Img src={story.cover_url} alt="" loading="lazy" className="h-40 w-full object-cover" />
         ) : (
           <div className="flex h-40 w-full items-center justify-center bg-gradient-to-br from-orange/10 to-muted text-muted-foreground">
             <BookOpen className="h-8 w-8" />
@@ -308,7 +309,7 @@ function EventTile({ event, onUnsave }: { event: SavedEvent; onUnsave: () => voi
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md">
       <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
         {showImg ? (
-          <img src={resolvedImage!} alt="" loading="lazy" onError={() => setImgOk(false)} className="h-40 w-full object-cover" />
+          <Img src={resolvedImage!} alt="" loading="lazy" onError={() => setImgOk(false)} className="h-40 w-full object-cover" />
         ) : (
           <div className="flex h-40 w-full items-center justify-center bg-gradient-to-br from-orange/10 to-muted text-muted-foreground">
             <Ticket className="h-8 w-8" />
@@ -337,7 +338,7 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
   return (
     <div className="group relative aspect-square overflow-hidden rounded-md bg-muted">
       {post.image_url ? (
-        <img
+        <Img
           src={post.image_url}
           alt=""
           loading="lazy"
@@ -352,7 +353,7 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
           <p className="line-clamp-6 text-[12.5px] leading-snug text-foreground">{post.content}</p>
           <div className="flex items-center gap-2">
             <Avatar className="h-5 w-5">
-              {post.author?.avatar_url && <AvatarImage src={post.author.avatar_url} />}
+              {post.author?.avatar_url && <SmartAvatarImage src={post.author.avatar_url} />}
               <AvatarFallback className="bg-muted text-[9px]">
                 {(post.author?.display_name || post.author?.username || "U").slice(0, 1).toUpperCase()}
               </AvatarFallback>
@@ -384,7 +385,7 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
           className="absolute inset-x-0 top-0 flex items-center gap-2 bg-gradient-to-b from-black/55 to-transparent px-2.5 py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         >
           <Avatar className="h-5 w-5">
-            {post.author.avatar_url && <AvatarImage src={post.author.avatar_url} />}
+            {post.author.avatar_url && <SmartAvatarImage src={post.author.avatar_url} />}
             <AvatarFallback className="bg-muted text-[9px]">
               {(post.author.display_name || post.author.username || "U").slice(0, 1).toUpperCase()}
             </AvatarFallback>
@@ -405,7 +406,7 @@ function VideoTile({ video, onUnsave }: { video: SavedVideo; onUnsave: () => voi
       <Link to="/videos/$id" params={{ id: video.id }} className="block">
         <div className="relative aspect-video w-full bg-neutral-900">
           {poster ? (
-            <img src={poster} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            <Img src={poster} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-white/60"><Play className="h-8 w-8" /></div>
           )}

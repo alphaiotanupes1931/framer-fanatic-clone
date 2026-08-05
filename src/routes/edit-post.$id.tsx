@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ImagePlus, Loader2, Save, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/edit-post/$id")({
   component: EditPostPage,
@@ -223,7 +224,7 @@ function EditPostPage() {
                     const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                     return (
                       <div key={u + i} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                        {isVideo ? <video src={u} className="h-32 w-full object-cover" /> : <img src={u} alt="" className="h-32 w-full object-cover" />}
+                        {isVideo ? <video src={u} className="h-32 w-full object-cover" /> : <Img src={u} alt="" className="h-32 w-full object-cover" />}
                         <button type="button" onClick={() => setMediaUrls((p) => p.filter((_, idx) => idx !== i))}
                           className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove">
                           <X className="h-3.5 w-3.5" />

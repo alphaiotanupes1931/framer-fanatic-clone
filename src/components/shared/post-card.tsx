@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { Flag } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -15,6 +15,7 @@ import { ReportDialog } from "@/components/report-dialog";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 type Post = {
   id: string;
@@ -193,7 +194,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       <header className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
         <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} search={{ view: "resident" }} className="shrink-0">
           <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
-            {post.author_avatar && <AvatarImage src={post.author_avatar} />}
+            {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
           </Avatar>
         </Link>
@@ -255,7 +256,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               params={{ postId: post.id }}
               className="block w-full overflow-hidden focus:outline-none"
             >
-              <img
+              <Img
                 src={current.url}
                 alt=""
                 className="w-full cursor-pointer"
@@ -380,7 +381,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           >
             <X className="h-5 w-5" />
           </button>
-          <img
+          <Img
             src={post.image_url}
             alt=""
             onClick={(e) => e.stopPropagation()}

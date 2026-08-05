@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin-shell";
 import { isAdminUnlocked, getAdminToken } from "@/lib/admin-gate";
 import { adminRpc } from "@/lib/admin-site.functions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Trash2, Lock } from "lucide-react";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminPage,
@@ -239,7 +240,7 @@ function AdminPage() {
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar className="h-9 w-9">
-                      {u.avatar_url && <AvatarImage src={u.avatar_url} />}
+                      {u.avatar_url && <SmartAvatarImage src={u.avatar_url} />}
                       <AvatarFallback className="bg-neutral-900 text-[11px] text-white">
                         {initials}
                       </AvatarFallback>
@@ -419,7 +420,7 @@ function EditUserDialog({
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              {avatarUrl && <SmartAvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-neutral-900 text-white">{initials}</AvatarFallback>
             </Avatar>
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent">

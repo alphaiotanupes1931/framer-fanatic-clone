@@ -11,6 +11,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/videos/")({
   component: VideosPage,
@@ -54,7 +55,7 @@ function AnonVideos() {
             <div className="rounded-2xl overflow-hidden border border-paper/10 bg-paper/5 h-full">
               <div className="aspect-video bg-paper/10 relative overflow-hidden">
                 {(v as Video).thumbnail_url
-                  ? <img src={(v as Video).thumbnail_url!} alt={(v as Video).title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                  ? <Img src={(v as Video).thumbnail_url!} alt={(v as Video).title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   : <div className="w-full h-full flex items-center justify-center text-paper/30"><Play className="w-10 h-10" /></div>}
               </div>
               <div className="p-4">
@@ -278,7 +279,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
     <Link to="/videos/$id" params={{ id: v.id }} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white block">
       <div className="relative aspect-video bg-neutral-900 overflow-hidden">
         {poster ? (
-          <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+          <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
         ) : isDirect || url.startsWith("blob:") || url.startsWith("http") ? (
           <video
             src={`${url}${url.includes("#") ? "" : "#t=0.5"}`}

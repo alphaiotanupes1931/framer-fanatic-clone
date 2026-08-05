@@ -12,6 +12,7 @@ import pbLogo from "@/assets/pb-logo.png";
 import { useServerFn } from "@tanstack/react-start";
 import { becomeArtist } from "@/lib/stripe.functions";
 import { Eye, EyeOff } from "lucide-react";
+import { Img } from "@/components/shared/smart-img";
 
 function popPostAuthRedirect(): string | null {
   if (typeof window === "undefined") return null;
@@ -142,7 +143,7 @@ function AuthPage() {
       <Toaster richColors />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
+          <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>Sign in or create a new account</CardDescription>
         </CardHeader>

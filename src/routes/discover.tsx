@@ -6,14 +6,15 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { EventCard } from "@/components/shared/event-card";
 import { StoryCard } from "@/components/shared/story-card";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, Palette, TrendingUp, Users, Building2, MapPin, BookOpen } from "lucide-react";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 type EventRow = { id: string; title: string; description: string | null; image_url: string | null; starts_at: string; location: string | null; category?: string | null };
 type Creator = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood?: string | null; role?: string | null };
 type Org = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
 type N = { id: string; name: string; region: string | null };
-type StoryRow = { id: string; title: string; excerpt: string | null; cover_image_url: string | null; created_at: string; user_id: string; read_time_minutes: number | null; category: string | null };
+type StoryRow = { id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string; user_id: string; read_minutes: number | null; format: string | null };
 
 const CATS = ["All", "Events", "Artists", "Communities", "Businesses", "Stories", "Neighborhoods"] as const;
 type Cat = (typeof CATS)[number];
@@ -59,7 +60,7 @@ function DiscoverPage() {
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "group").limit(40),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(40),
         supabase.from("neighborhoods").select("id,name,region").order("name").limit(80),
-        supabase.from("stories").select("id,title,excerpt,cover_image_url,created_at,user_id,read_time_minutes,category").eq("status", "published").order("created_at", { ascending: false }).limit(40),
+        supabase.from("stories").select("id,title,excerpt,cover_url,created_at,user_id,read_minutes,format").eq("status", "published").order("created_at", { ascending: false }).limit(40),
       ]);
       const up = (evUp.data ?? []) as EventRow[];
       const past = (evPast.data ?? []) as EventRow[];
@@ -123,7 +124,7 @@ function DiscoverPage() {
                 <Link key={a.id} to="/u/$username" params={{ username: a.username || a.id }}
                   className="bg-card border border-border rounded-xl p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
                   <Avatar className="w-20 h-20 mx-auto mb-3">
-                    <AvatarImage src={a.avatar_url ?? undefined} />
+                    <SmartAvatarImage src={a.avatar_url ?? undefined} />
                     <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a] font-bold">{(a.display_name || a.username || "?").charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <p className="font-semibold truncate group-hover:text-[#d4580a] transition-colors">{a.display_name || a.username}</p>
@@ -151,7 +152,7 @@ function DiscoverPage() {
                 <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }}
                   className="bg-card border border-border rounded-xl p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
                   <Avatar className="w-20 h-20 mx-auto mb-3 rounded-xl">
-                    <AvatarImage src={b.avatar_url ?? undefined} className="rounded-xl" />
+                    <SmartAvatarImage src={b.avatar_url ?? undefined} className="rounded-xl" />
                     <AvatarFallback className="rounded-xl bg-[#d4580a]/10 text-[#d4580a] font-bold">{b.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <p className="font-semibold truncate group-hover:text-[#d4580a] transition-colors">{b.name}</p>
@@ -200,7 +201,7 @@ function OrgRow({ o }: { o: Org }) {
     <Link to="/o/$slug" params={{ slug: o.slug }}
       className="flex items-center gap-3 bg-card border border-border rounded-xl p-3 hover:shadow-md hover:-translate-y-[1px] transition-all duration-200">
       <Avatar className="w-14 h-14 rounded-xl flex-shrink-0">
-        <AvatarImage src={o.avatar_url ?? undefined} className="rounded-xl" />
+        <SmartAvatarImage src={o.avatar_url ?? undefined} className="rounded-xl" />
         <AvatarFallback className="rounded-xl bg-[#d4580a]/10 text-[#d4580a] font-bold">{o.name.charAt(0)}</AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">

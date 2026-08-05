@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Clock, Heart, MessageCircle, Bookmark, Trash2, Send, Star, MoreHorizontal, Pencil } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 type Story = {
   id: string;
@@ -146,7 +147,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         <div className="flex items-center gap-2 px-4 pt-3">
           <Avatar className="h-7 w-7">
-            <AvatarImage src={story.author_avatar ?? undefined} />
+            <SmartAvatarImage src={story.author_avatar ?? undefined} />
             <AvatarFallback className="bg-slate-100 text-[10px] font-bold text-slate-500">
               {story.author_name?.charAt(0) ?? "?"}
             </AvatarFallback>
@@ -158,7 +159,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         </div>
         {story.cover_url && (
           <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
-            <img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+            <Img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
             {isAdmin && (
               <button onClick={toggleFeatured} disabled={featuring} className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${isFeatured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}>
                 <Star className={`h-3.5 w-3.5 ${isFeatured ? "" : "fill-yellow-900"}`} /> {isFeatured ? "Unfeature" : "Feature"}
@@ -184,7 +185,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
       <div className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
         <Link to="/stories/$storyId" params={{ storyId: story.id }} className="flex min-w-0 flex-1 items-center gap-3">
           <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
-            <AvatarImage src={story.author_avatar ?? undefined} />
+            <SmartAvatarImage src={story.author_avatar ?? undefined} />
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">
               {story.author_name?.charAt(0) ?? "?"}
             </AvatarFallback>
@@ -212,7 +213,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           params={{ storyId: story.id }}
           className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-muted"
         >
-          <img
+          <Img
             src={story.cover_url}
             alt=""
             className="h-full w-full object-cover"

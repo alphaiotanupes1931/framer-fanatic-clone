@@ -2,9 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, MapPin, MessageCircle, Trash2, Send, Tag } from "lucide-react";
 import { toast } from "sonner";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 type Listing = {
   id: string; seller_id: string; title: string; description: string | null;
@@ -102,7 +103,7 @@ function ListingDetail() {
         <div className="overflow-hidden rounded-3xl border border-border bg-card">
           <div className="aspect-[4/3] w-full overflow-hidden bg-secondary">
             {cover ? (
-              <img src={cover} alt={item.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+              <Img src={cover} alt={item.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Tag className="h-12 w-12" /></div>
             )}
@@ -111,7 +112,7 @@ function ListingDetail() {
             <div className="flex gap-2 overflow-x-auto p-3">
               {item.photos.map((p, i) => (
                 <button key={i} onClick={() => setPhotoIdx(i)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${i === photoIdx ? "border-[#d4580a]" : "border-transparent"}`}>
-                  <img src={p} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                  <Img src={p} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>
@@ -165,7 +166,7 @@ function ListingDetail() {
               <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Seller</div>
               <Link to="/u/$username" params={{ username: seller.username || seller.id }} className="flex items-center gap-3">
                 <Avatar className="h-11 w-11">
-                  {seller.avatar_url && <AvatarImage src={seller.avatar_url} alt="" />}
+                  {seller.avatar_url && <SmartAvatarImage src={seller.avatar_url} alt="" />}
                   <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>
                 </Avatar>
                 <div>

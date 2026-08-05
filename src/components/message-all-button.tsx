@@ -3,8 +3,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { MessageSquarePlus, Search, X, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 export type MessageAllCandidate = {
   id: string;
@@ -204,7 +205,7 @@ export function MessageAllButton({
                       }`}
                     >
                       <Avatar className="h-9 w-9">
-                        {p.avatar_url && <AvatarImage src={p.avatar_url} alt="" />}
+                        {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
                         <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">
                           {initials(p.display_name || p.username)}
                         </AvatarFallback>

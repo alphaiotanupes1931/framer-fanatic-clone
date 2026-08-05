@@ -14,6 +14,8 @@ import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import { useSiteContent, siteText, siteColor } from "@/hooks/use-site-content";
 import { SiteColorInjector } from "@/components/site-color-injector";
+import { Img } from "@/components/shared/smart-img";
+import { useSmartImageUrl } from "@/components/smart-image";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -165,7 +167,7 @@ function Nav() {
       >
         <div className="flex items-center justify-between px-6 pt-6">
           <div className="flex items-center gap-2">
-            <img src={pbLogo} alt="" width={32} height={32} className="w-8 h-8 invert" />
+            <Img src={pbLogo} alt="" width={32} height={32} className="w-8 h-8 invert" />
             <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </div>
           <button
@@ -760,14 +762,7 @@ function DailyCreators() {
           className="group relative rounded-3xl bg-ink text-paper overflow-hidden block max-md:w-[82vw] max-md:shrink-0 max-md:snap-start aspect-square"
         >
           {c.avatar_url ? (
-            <motion.img
-              src={c.avatar_url}
-              alt={c.display_name ?? "Creator"}
-              loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              whileHover={{ scale: 1.06 }}
-              transition={{ duration: 0.6 }}
-            />
+            <CreatorAvatar src={c.avatar_url} alt={c.display_name ?? "Creator"} />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-paper/40 text-6xl max-md:text-4xl font-display bg-ink/60">
               {(c.display_name ?? "?").slice(0, 1).toUpperCase()}
@@ -789,6 +784,25 @@ function DailyCreators() {
 
 
 function NextRefreshCountdown() {
+  return <NextRefreshCountdownInner />;
+}
+
+function CreatorAvatar({ src, alt }: { src: string; alt: string }) {
+  const url = useSmartImageUrl(src);
+  if (!url) return null;
+  return (
+    <motion.img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      className="absolute inset-0 w-full h-full object-cover object-center"
+      whileHover={{ scale: 1.06 }}
+      transition={{ duration: 0.6 }}
+    />
+  );
+}
+
+function NextRefreshCountdownInner() {
   const [label, setLabel] = useState("");
   useEffect(() => {
     const tick = () => {
@@ -907,7 +921,7 @@ function StoriesRotation() {
           <Link to="/stories/$storyId" params={{ storyId: s.id }} onClick={gate(s.id)} className="relative mx-auto lg:mx-0 w-full max-w-[340px] sm:max-w-[400px] group">
             <div className="relative aspect-square overflow-hidden rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] bg-ink/5">
               {s.cover_url ? (
-                <img
+                <Img
                   src={s.cover_url}
                   alt={s.title ?? ""}
                   loading="lazy"
@@ -915,7 +929,7 @@ function StoriesRotation() {
                   className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
                 />
               ) : s.author_avatar ? (
-                <img src={s.author_avatar} alt={s.author_name ?? ""} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
+                <Img src={s.author_avatar} alt={s.author_name ?? ""} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-ink/30 text-6xl font-display">
                   {(s.author_name ?? "B").slice(0, 1).toUpperCase()}
@@ -1038,7 +1052,7 @@ function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-[1.5fr_repeat(5,1fr)] gap-x-6 gap-y-10 md:gap-12 mb-14 md:mb-20">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-3">
-              <img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0 invert" />
+              <Img src={pbLogo} alt="Planet Baltimore" width={36} height={36} className="w-9 h-9 shrink-0 invert" />
               <div className="font-display text-xl md:text-2xl font-extrabold tracking-tight uppercase truncate">Planet Baltimore</div>
             </div>
           </div>

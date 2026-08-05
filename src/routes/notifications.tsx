@@ -3,11 +3,12 @@ import { useEffect, useState, type ElementType } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Bell, Heart, MessageCircle, UserPlus, Calendar, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/notifications")({
   component: NotificationsPage,
@@ -67,7 +68,7 @@ function ActorAvatarLink({
       className="relative flex-shrink-0 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#d4580a]"
     >
       <Avatar className="h-10 w-10">
-        <AvatarImage src={avatarUrl ?? undefined} />
+        <SmartAvatarImage src={avatarUrl ?? undefined} />
         <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>
           {fallback.charAt(0).toUpperCase()}
         </AvatarFallback>
@@ -182,7 +183,7 @@ function NotificationsPage() {
                     ) : (
                       <div className="relative flex-shrink-0">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={n.actor?.avatar_url ?? undefined} />
+                          <SmartAvatarImage src={n.actor?.avatar_url ?? undefined} />
                           <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>
                             {name.charAt(0).toUpperCase()}
                           </AvatarFallback>

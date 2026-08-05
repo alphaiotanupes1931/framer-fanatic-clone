@@ -18,6 +18,7 @@ import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
@@ -271,7 +272,7 @@ function OrgProfile() {
         <div className="relative -mt-8 inline-block shrink-0">
           <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
             {org.avatar_url && (
-              <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+              <Img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
           </div>
           {canManage && (
@@ -770,7 +771,7 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
 function OrgEventCardInternal({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null } }) {
   return (
     <a href={`/events/${e.id}`} className="block overflow-hidden rounded-2xl border border-neutral-200 bg-card transition hover:shadow-md">
-      {e.image_url && <img src={e.image_url} alt={e.title} className="h-40 w-full object-cover" />}
+      {e.image_url && <Img src={e.image_url} alt={e.title} className="h-40 w-full object-cover" />}
       <div className="space-y-1 p-4">
         <div className="text-xs font-medium text-[#d4580a]">
           {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
@@ -901,7 +902,7 @@ function MembersTab({ orgId }: { orgId: string }) {
       {rows.map((p) => (
         <div key={p.id} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3">
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-neutral-200">
-            {p.avatar_url && <img src={p.avatar_url} alt="" className="h-full w-full object-cover" />}
+            {p.avatar_url && <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />}
           </div>
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username || "Member"}</div>
@@ -1189,7 +1190,7 @@ function SupportTabImpl({ org, canManage }: { org: Org; canManage: boolean }) {
           ) : (
             <div key={t.id} className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white">
               {t.image_url && (
-                <img src={t.image_url} alt={t.name} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+                <Img src={t.image_url} alt={t.name} className="aspect-[16/9] w-full object-cover" loading="lazy" />
               )}
               <div className="flex flex-1 flex-col p-4">
                 <div className="flex items-start justify-between gap-2">
@@ -1287,7 +1288,7 @@ function TierForm({ orgId, initial, onCancel, onSaved }: {
       <div>
         {imageUrl ? (
           <div className="relative overflow-hidden rounded-xl border border-neutral-200">
-            <img src={imageUrl} alt="" className="aspect-[16/9] w-full object-cover" />
+            <Img src={imageUrl} alt="" className="aspect-[16/9] w-full object-cover" />
             <button onClick={() => setImageUrl("")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-red-600 shadow"><Trash2 className="h-3.5 w-3.5" /></button>
           </div>
         ) : (
@@ -1416,7 +1417,7 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
       <Section title="Logo">
         {org.avatar_url ? (
           <div className="flex items-center gap-4">
-            <img src={org.avatar_url} alt={`${org.name} logo`} className="h-24 w-24 rounded-xl border border-neutral-200 object-cover" />
+            <Img src={org.avatar_url} alt={`${org.name} logo`} className="h-24 w-24 rounded-xl border border-neutral-200 object-cover" />
             <a href={org.avatar_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]">
               <ExternalLink className="h-3.5 w-3.5" /> Download
             </a>
@@ -1433,7 +1434,7 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {items.map((it) => (
               <div key={it.id} className="group relative overflow-hidden rounded-xl border border-neutral-200">
-                <img src={it.media_url!} alt={it.title} className="aspect-square w-full object-cover" loading="lazy" />
+                <Img src={it.media_url!} alt={it.title} className="aspect-square w-full object-cover" loading="lazy" />
                 <div className="p-2 text-xs font-medium text-neutral-700">{it.title}</div>
                 {canManage && (
                   <button onClick={() => remove(it.id)} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-[#d4580a] shadow opacity-0 group-hover:opacity-100">
@@ -1692,7 +1693,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
                     const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                        {isVideo ? <video src={u} className="h-24 w-full object-cover" /> : <img src={u} alt="" className="h-24 w-full object-cover" />}
+                        {isVideo ? <video src={u} className="h-24 w-full object-cover" /> : <Img src={u} alt="" className="h-24 w-full object-cover" />}
                         <button type="button" onClick={() => setMediaUrls((prev) => prev.filter((_, idx) => idx !== i))}
                           className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove">
                           <X className="h-3 w-3" />
@@ -1733,7 +1734,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
                       const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                       return isVideo
                         ? <video src={u} controls className="h-56 w-full bg-black object-cover" />
-                        : <img src={u} alt={p.title} className="h-56 w-full object-cover" loading="lazy" decoding="async" />;
+                        : <Img src={u} alt={p.title} className="h-56 w-full object-cover" loading="lazy" decoding="async" />;
                     })()}
                     {media.length > 1 && (
                       <div className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">+{media.length - 1}</div>
@@ -1822,7 +1823,7 @@ function CommentsTab({ orgId, me, canManage }: { orgId: string; me: string | nul
           {comments.map((c) => (
             <div key={c.id} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3">
               <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
-                {c.profiles?.avatar_url && <img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                {c.profiles?.avatar_url && <Img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold">{c.profiles?.display_name ?? "User"}</div>

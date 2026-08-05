@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Eye, EyeOff } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
@@ -55,7 +56,7 @@ function ResetPasswordPage() {
       <Toaster richColors />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
+          <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">Set a new password</CardTitle>
           <CardDescription>
             {hasSession === false

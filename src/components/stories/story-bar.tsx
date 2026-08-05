@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Plus, X } from "lucide-react";
 import { EphemeralStory } from "@/lib/entities";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { CurrentUser } from "@/hooks/use-current-user";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 type Story = {
   id: string;
@@ -97,7 +98,7 @@ export function StoryBar({ currentUser }: { currentUser: CurrentUser | null }) {
             <div className="rounded-full bg-gradient-to-tr from-[#d4580a] via-orange-400 to-amber-300 p-[2px]">
               <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-card">
                 <Avatar className="h-full w-full">
-                  <AvatarImage src={mine.author_avatar ?? undefined} />
+                  <SmartAvatarImage src={mine.author_avatar ?? undefined} />
                   <AvatarFallback className="bg-[#d4580a]/10 text-lg font-bold text-[#d4580a]">
                     {mine.author_name?.charAt(0) ?? "?"}
                   </AvatarFallback>
@@ -118,7 +119,7 @@ export function StoryBar({ currentUser }: { currentUser: CurrentUser | null }) {
             <div className="rounded-full bg-gradient-to-tr from-[#d4580a] via-orange-400 to-amber-300 p-[2px]">
               <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-card">
                 <Avatar className="h-full w-full">
-                  <AvatarImage src={g.author_avatar ?? undefined} />
+                  <SmartAvatarImage src={g.author_avatar ?? undefined} />
                   <AvatarFallback className="bg-secondary text-lg font-semibold text-foreground">
                     {g.author_name?.charAt(0) ?? "?"}
                   </AvatarFallback>
@@ -153,7 +154,7 @@ export function StoryBar({ currentUser }: { currentUser: CurrentUser | null }) {
               onClick={() => setViewIndex((i) => Math.max(0, i - 1))}
               disabled={viewIndex === 0}
             >‹</button>
-            <img src={viewing.stories[viewIndex].media_url} alt="" className="max-h-full max-w-full object-contain" />
+            <Img src={viewing.stories[viewIndex].media_url} alt="" className="max-h-full max-w-full object-contain" />
             <button
               className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-1 text-white backdrop-blur-md disabled:opacity-30"
               onClick={() => setViewIndex((i) => Math.min(viewing.stories.length - 1, i + 1))}

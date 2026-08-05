@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { createOrgDonationCheckout } from "@/lib/stripe.functions";
 import { Heart, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/o/$slug/donate")({
   component: DonatePage,
@@ -133,7 +134,7 @@ function DonatePage() {
         ) : (
           <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-3">
-              {org.avatar_url && <img src={org.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover" />}
+              {org.avatar_url && <Img src={org.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover" />}
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-[#d4580a]">Donate to</div>
                 <div className="text-lg font-bold text-neutral-900">{org.name}</div>

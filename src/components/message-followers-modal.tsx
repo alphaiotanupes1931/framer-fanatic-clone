@@ -4,6 +4,7 @@ import { Users, X, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
+import { Img } from "@/components/shared/smart-img";
 
 type Follower = {
   id: string;
@@ -143,7 +144,7 @@ export function MessageFollowersModal({ open, onClose }: { open: boolean; onClos
                   <label key={f.id} className="flex cursor-pointer items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0 hover:bg-neutral-50">
                     <input type="checkbox" checked={!!selected[f.id]} onChange={() => toggle(f.id)} className="h-4 w-4 accent-[#d4580a]" />
                     <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
-                      {f.avatar_url ? <img src={f.avatar_url} alt="" className="h-full w-full object-cover" /> : initials(f.display_name || f.username)}
+                      {f.avatar_url ? <Img src={f.avatar_url} alt="" className="h-full w-full object-cover" /> : initials(f.display_name || f.username)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-neutral-900">{f.display_name || f.username}</div>

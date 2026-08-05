@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ArrowLeft, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
 import { slugify, subtypesFor, ORG_TYPE_LABEL } from "@/lib/categories";
 import { itemHintsFor } from "@/components/org/price-items-section";
+import { Img } from "@/components/shared/smart-img";
 
 type Neighborhood = { id: string; name: string };
 
@@ -202,7 +203,7 @@ export function OrgCreateDialog({
           >
             {previewUrl || form.avatar_url ? (
               <div className="relative">
-                <img
+                <Img
                   src={previewUrl || form.avatar_url}
                   alt="Logo preview"
                   className="h-28 w-28 rounded-2xl object-cover"

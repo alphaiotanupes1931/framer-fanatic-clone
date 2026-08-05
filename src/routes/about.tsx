@@ -10,6 +10,7 @@ import pbLogoDark from "@/assets/pb-logo-dark.png";
 import aboutFounders from "@/assets/about-founders.png.asset.json";
 import { assetUrl } from "@/lib/utils";
 import heroBaltimore from "@/assets/baltimore-hero-mobile.png.asset.json";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -48,7 +49,7 @@ function AboutNav() {
     <header className="sticky top-0 inset-x-0 z-50 px-5 md:px-10 py-4 bg-paper/85 backdrop-blur border-b border-ink/10">
       <div className="flex items-center justify-between text-ink">
         <Link to="/" className="flex items-center gap-2">
-          <img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="w-8 h-8" />
+          <Img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="w-8 h-8" />
           <span className="font-display text-base md:text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
         </Link>
         <nav className="hidden md:flex items-center gap-3 text-sm font-medium">
@@ -72,7 +73,7 @@ function AboutNav() {
       >
         <div className="flex items-center justify-between px-6 pt-6">
           <div className="flex items-center gap-2">
-            <img src={pbLogoDark} alt="" width={32} height={32} className="w-8 h-8" />
+            <Img src={pbLogoDark} alt="" width={32} height={32} className="w-8 h-8" />
             <span className="font-display text-base font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </div>
           <button onClick={() => setOpen(false)} aria-label="Close menu" className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-paper/40">

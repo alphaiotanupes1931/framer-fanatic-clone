@@ -6,6 +6,7 @@ import { SmartImage } from "@/components/smart-image";
 import { MapPin, Calendar, Download, Send, ArrowLeft, Share as ShareIcon } from "lucide-react";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/tickets/$ticketId")({
   component: TicketDetailPage,
@@ -107,7 +108,7 @@ function TicketDetailPage() {
           {/* QR */}
           <div className="flex flex-col items-center px-6 py-6">
             <div className="rounded-2xl bg-white p-4">
-              <img src={qr} alt="Ticket QR code" width={220} height={220} />
+              <Img src={qr} alt="Ticket QR code" width={220} height={220} />
             </div>
             <div className="mt-3 font-mono text-xs uppercase tracking-widest text-white/70">#{t.id.slice(0, 12)}</div>
             <div className="mt-1 text-[10px] uppercase tracking-wider text-white/40">Show this QR code at the door</div>

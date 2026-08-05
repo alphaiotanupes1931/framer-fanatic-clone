@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Play, X, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
+import { Img } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -59,7 +60,7 @@ function VideoDetail() {
       <div className="mx-auto flex max-w-[1800px] flex-col px-4 py-4 sm:px-6">
         <div className="mb-3 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="h-8 w-8 object-contain" />
+            <Img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="h-8 w-8 object-contain" />
             <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </Link>
           <Link to="/videos" className="rounded-full p-2 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Close">
@@ -82,7 +83,7 @@ function VideoDetail() {
                 {video.author?.username ? (
                   <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
                     {video.author.avatar_url ? (
-                      <img src={video.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+                      <Img src={video.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
                     ) : (
                       <div className="h-9 w-9 rounded-full bg-neutral-200" />
                     )}
@@ -148,7 +149,7 @@ function RelatedCard({ v }: { v: Video }) {
     <Link to="/videos/$id" params={{ id: v.id }} className="group flex gap-3">
       <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-200">
         {poster ? (
-          <img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : info.kind === "file" ? (
           <video src={`${v.video_url}#t=0.5`} preload="metadata" muted playsInline className="absolute inset-0 h-full w-full object-cover" />
         ) : (

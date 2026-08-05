@@ -3,11 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
+import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: boolean }) {
   const label = preview.type === "story" ? "Story" : preview.type === "event" ? "Event" : "Post";
@@ -15,7 +16,7 @@ function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: bool
     <div className={`overflow-hidden rounded-xl border ${mine ? "border-white/25 bg-white/10" : "border-border bg-background"}`}>
       {preview.image && (
         <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
-          <img src={preview.image} alt="" className="h-full w-full object-cover" loading="lazy" />
+          <Img src={preview.image} alt="" className="h-full w-full object-cover" loading="lazy" />
         </div>
       )}
       <div className="p-3">
@@ -512,7 +513,7 @@ function MessagesPage() {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Avatar className="h-10 w-10">
-                        {c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                        {c.other?.avatar_url && <SmartAvatarImage src={c.other.avatar_url} alt="" />}
                         <AvatarFallback className="bg-primary/10 text-primary">
                           {initials(c.other)}
                         </AvatarFallback>
@@ -520,7 +521,7 @@ function MessagesPage() {
                     </Link>
                   ) : (
                     <Avatar className="h-10 w-10">
-                      {!c.is_group && c.other?.avatar_url && <AvatarImage src={c.other.avatar_url} alt="" />}
+                      {!c.is_group && c.other?.avatar_url && <SmartAvatarImage src={c.other.avatar_url} alt="" />}
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
                       </AvatarFallback>
@@ -623,7 +624,7 @@ function MessagesPage() {
                   <Link to="/u/$username" params={{ username: active.other.username }}>
                     <Avatar className="h-9 w-9">
                       {active.other?.avatar_url && (
-                        <AvatarImage src={active.other.avatar_url} alt="" />
+                        <SmartAvatarImage src={active.other.avatar_url} alt="" />
                       )}
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {initials(active.other)}
@@ -633,7 +634,7 @@ function MessagesPage() {
                 ) : (
                   <Avatar className="h-9 w-9">
                     {!active.is_group && active.other?.avatar_url && (
-                      <AvatarImage src={active.other.avatar_url} alt="" />
+                      <SmartAvatarImage src={active.other.avatar_url} alt="" />
                     )}
                     <AvatarFallback className="bg-primary/10 text-primary">
                       {active.is_group ? <Users className="h-5 w-5" /> : initials(active.other)}
@@ -694,7 +695,7 @@ function MessagesPage() {
                             <Link to="/u/$username" params={{ username: active.other.username }}>
                               <Avatar className="h-7 w-7">
                                 {active.other?.avatar_url && (
-                                  <AvatarImage src={active.other.avatar_url} alt="" />
+                                  <SmartAvatarImage src={active.other.avatar_url} alt="" />
                                 )}
                                 <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
                                   {initials(active.other)}
@@ -704,7 +705,7 @@ function MessagesPage() {
                           ) : showAvatar && (
                             <Avatar className="h-7 w-7">
                               {active.other?.avatar_url && (
-                                <AvatarImage src={active.other.avatar_url} alt="" />
+                                <SmartAvatarImage src={active.other.avatar_url} alt="" />
                               )}
                               <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
                                 {initials(active.other)}
@@ -828,7 +829,7 @@ function MessagesPage() {
                     className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-muted"
                   >
                     <Avatar className="h-9 w-9">
-                      {p.avatar_url && <AvatarImage src={p.avatar_url} alt="" />}
+                      {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {initials(p)}
                       </AvatarFallback>

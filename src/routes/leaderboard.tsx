@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { FileText, MessageCircle, Heart, Gift } from "lucide-react";
+import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/leaderboard")({
   component: LeaderboardPage,
@@ -67,7 +68,7 @@ function LeaderboardPage() {
             <>
               <div className="w-10 text-lg font-bold text-neutral-400">#{i + 1}</div>
               <Avatar className="h-12 w-12">
-                {r.avatar_url && <AvatarImage src={r.avatar_url} />}
+                {r.avatar_url && <SmartAvatarImage src={r.avatar_url} />}
                 <AvatarFallback className="bg-orange-100 text-orange-700">{(r.display_name || r.username || "U")[0].toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
