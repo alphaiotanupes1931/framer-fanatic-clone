@@ -72,10 +72,23 @@ function FindCreatorPage() {
   const { loading: authLoading, signedIn } = useAuthState();
   const { isAdmin } = useUserRole();
   const [q, setQ] = useState("");
-  const [results, setResults] = useState<Creator[]>([]);
-  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>("All");
   const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
+
+  const { data, loading, setData } = useCachedFetch<Creator[]>(
+    `artists:${sort}:${q}`,
+    async () => {
+      const { data } = await supabase.rpc("public_artists", {
+        lim: 96,
+        search: q || undefined,
+        sort_by: sort,
+      });
+      return ((data as (Creator & { created_at: string })[]) ?? []) as Creator[];
+    },
+    { debounceMs: 200 },
+  );
+  const results: Creator[] = data ?? [];
+  const setResults = setData;
 
   async function handleAdminDelete(c: Creator) {
     const name = c.display_name || c.username || "this profile";
@@ -85,22 +98,6 @@ function FindCreatorPage() {
     setResults((prev) => prev.filter((x) => x.id !== c.id));
     toast.success("Profile deleted");
   }
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    const t = setTimeout(async () => {
-      const { data } = await supabase.rpc("public_artists", {
-        lim: 96,
-        search: q || undefined,
-        sort_by: sort,
-      });
-      if (cancelled) return;
-      setResults(((data as (Creator & { created_at: string })[]) ?? []) as Creator[]);
-      setLoading(false);
-    }, 200);
-    return () => { cancelled = true; clearTimeout(t); };
-  }, [q, sort]);
 
   const filtered = results.filter((c) => matchesCategory(c, category));
 
