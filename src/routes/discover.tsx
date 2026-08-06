@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, Palette, TrendingUp, Users, Building2, MapPin, BookOpen } from "lucide-react";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 type EventRow = { id: string; title: string; description: string | null; image_url: string | null; starts_at: string; location: string | null; category?: string | null };
 type Creator = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood?: string | null; role?: string | null };
@@ -223,8 +224,5 @@ function SectionHead({ icon: Icon, title, to }: { icon: typeof Palette; title: s
 
 export const Route = createFileRoute("/discover")({
   component: DiscoverPage,
-  head: () => ({ meta: [
-    { title: "Discover Baltimore - Planet Baltimore" },
-    { name: "description", content: "Find events, artists, communities, and stories across Baltimore." },
-  ] }),
+  head: () => pageHead({ path: "/discover", title: "Discover Baltimore | Planet Baltimore", description: "Find events, artists, community groups, businesses and stories from across Baltimore." }),
 });

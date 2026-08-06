@@ -12,6 +12,7 @@ import { createTicketCheckout } from "@/lib/stripe.functions";
 import { EventImage } from "@/components/event-image";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { compressImage } from "@/lib/image-compress";
+import { pageHead } from "@/lib/seo";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -22,12 +23,7 @@ type EventRow = {
 
 export const Route = createFileRoute("/events/")({
   component: EventsPage,
-  head: () => ({
-    meta: [
-      { title: "Events - Planet Baltimore" },
-      { name: "description", content: "What's happening next in Baltimore - concerts, openings, meetups and more." },
-    ],
-  }),
+  head: () => pageHead({ path: "/events", title: "Baltimore Events Calendar | Planet Baltimore", description: "Concerts, gallery openings, markets and meetups happening across Baltimore, updated every day." }),
 });
 
 function fmtDate(iso: string) {

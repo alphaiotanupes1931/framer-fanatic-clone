@@ -1,12 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "Terms of Service - Planet Baltimore" },
-      { name: "description", content: "The rules for using Planet Baltimore." },
-    ],
-  }),
+  head: () => pageHead({ path: "/terms", title: "Terms of Service | Planet Baltimore", description: "The rules for using Planet Baltimore." }),
   component: TermsPage,
 });
 

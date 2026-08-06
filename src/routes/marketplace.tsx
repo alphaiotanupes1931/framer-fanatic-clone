@@ -9,6 +9,7 @@ import { Plus, MapPin, Tag, Search } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 import { Img } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 type Listing = {
   id: string; seller_id: string; title: string; description: string | null;
@@ -22,7 +23,7 @@ const CONDITIONS = ["new", "like-new", "used", "for-parts"];
 
 export const Route = createFileRoute("/marketplace")({
   component: MarketplacePage,
-  head: () => ({ meta: [{ title: "Marketplace - Planet Baltimore" }] }),
+  head: () => pageHead({ path: "/marketplace", title: "Baltimore Creator Marketplace | Planet Baltimore", description: "Buy and sell art, gear and services directly from Baltimore creators and neighbors." }),
 });
 
 function MarketplacePage() {

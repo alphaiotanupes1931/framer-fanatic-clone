@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useUserRole } from "@/hooks/use-user-role";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 type Creator = {
   id: string;
@@ -264,10 +265,5 @@ function FindCreatorPage() {
 
 export const Route = createFileRoute("/artists")({
   component: FindCreatorPage,
-  head: () => ({
-    meta: [
-      { title: "Find a Creator - Planet Baltimore" },
-      { name: "description", content: "Search Baltimore artists, musicians, writers and makers on Planet Baltimore." },
-    ],
-  }),
+  head: () => pageHead({ path: "/artists", title: "Baltimore Artists and Creators | Planet Baltimore", description: "Browse Baltimore artists, musicians, writers, photographers and makers, and follow the ones you love." }),
 });

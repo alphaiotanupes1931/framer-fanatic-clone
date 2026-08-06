@@ -7,10 +7,11 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { FileText, MessageCircle, Heart, Gift } from "lucide-react";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/leaderboard")({
   component: LeaderboardPage,
-  head: () => ({ meta: [{ title: "Baltimore 100 - Planet Baltimore" }] }),
+  head: () => pageHead({ path: "/leaderboard", title: "Baltimore 100 | Planet Baltimore", description: "The 100 most active creators and residents on Planet Baltimore right now." }),
 });
 
 type Row = {

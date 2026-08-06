@@ -1,12 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/cookies")({
-  head: () => ({
-    meta: [
-      { title: "Cookie Policy - Planet Baltimore" },
-      { name: "description", content: "How Planet Baltimore uses cookies and local storage." },
-    ],
-  }),
+  head: () => pageHead({ path: "/cookies", title: "Cookie Policy | Planet Baltimore", description: "How Planet Baltimore uses cookies and local storage." }),
   component: CookiesPage,
 });
 
