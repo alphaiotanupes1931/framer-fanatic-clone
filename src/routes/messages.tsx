@@ -10,8 +10,17 @@ import { Link } from "@tanstack/react-router";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
+const SHARE_LABELS: Record<SharePreview["type"], string> = {
+  story: "Story",
+  event: "Event",
+  video: "Video",
+  post: "Post",
+  profile: "Profile",
+  organization: "Page",
+};
+
 function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: boolean }) {
-  const label = preview.type === "story" ? "Story" : preview.type === "event" ? "Event" : preview.type === "video" ? "Video" : "Post";
+  const label = SHARE_LABELS[preview.type] ?? "Post";
   const inner = (
     <div className={`overflow-hidden rounded-xl border ${mine ? "border-white/25 bg-white/10" : "border-border bg-background"}`}>
       {preview.image && (
@@ -30,6 +39,8 @@ function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: bool
   if (preview.type === "story") return <Link to="/stories/$storyId" params={{ storyId: preview.id }}>{inner}</Link>;
   if (preview.type === "event") return <Link to="/events/$eventId" params={{ eventId: preview.id }}>{inner}</Link>;
   if (preview.type === "video") return <Link to="/videos/$id" params={{ id: preview.id }}>{inner}</Link>;
+  if (preview.type === "profile") return <Link to="/u/$username" params={{ username: preview.id }}>{inner}</Link>;
+  if (preview.type === "organization") return <Link to="/o/$slug" params={{ slug: preview.id }}>{inner}</Link>;
   return <Link to="/posts/$postId" params={{ postId: preview.id }}>{inner}</Link>;
 }
 
