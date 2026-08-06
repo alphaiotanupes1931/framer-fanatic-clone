@@ -1740,6 +1740,39 @@ export type Database = {
           },
         ]
       }
+      stripe_event_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          event_id: string | null
+          event_type: string
+          id: string
+          message: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          event_id?: string | null
+          event_type: string
+          id?: string
+          message?: string | null
+          source?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          event_id?: string | null
+          event_type?: string
+          id?: string
+          message?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -2111,6 +2144,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_clear_stripe_logs: { Args: never; Returns: number }
       admin_delete_event: { Args: { _id: string }; Returns: undefined }
       admin_delete_organization: { Args: { _id: string }; Returns: undefined }
       admin_delete_profile: { Args: { _id: string }; Returns: undefined }
@@ -2131,6 +2165,19 @@ export type Database = {
           name: string
           slug: string
           type: string
+        }[]
+      }
+      admin_list_stripe_logs: {
+        Args: { _limit?: number; _status?: string }
+        Returns: {
+          created_at: string
+          details: Json
+          event_id: string
+          event_type: string
+          id: string
+          message: string
+          source: string
+          status: string
         }[]
       }
       admin_list_users: {

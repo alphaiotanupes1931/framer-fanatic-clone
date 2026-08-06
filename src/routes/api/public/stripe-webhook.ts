@@ -11,15 +11,32 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         const body = await request.text();
 
         let event: import("stripe").Stripe.Event;
+        const { logStripeEvent, logStripeError } = await import("@/lib/stripe-log.server");
         try {
           if (!whSecret) throw new Error("STRIPE_WEBHOOK_SECRET not configured");
           event = stripe.webhooks.constructEvent(body, sig, whSecret);
         } catch (err) {
           console.error("Stripe webhook signature verification failed", err);
+          await logStripeError("webhook", "signature.verification_failed", err, {
+            has_secret: !!whSecret,
+            has_signature: !!sig,
+          });
           return new Response("Invalid signature", { status: 400 });
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        const ack = async (note?: string) => {
+          await logStripeEvent({
+            source: "webhook",
+            eventType: event.type,
+            eventId: event.id,
+            status: "ok",
+            message: note ?? null,
+            details: { livemode: event.livemode, created: event.created },
+          });
+          return ack();
+        };
 
         try {
           if (event.type === "checkout.session.completed") {
@@ -56,7 +73,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   metadata: { org_id: orgId, amount_cents: amountCents, payment_intent: paymentIntentId },
                 });
               }
-              return new Response("ok");
+              return ack();
             }
             if (session.metadata?.kind === "artwork") {
               const artistId = session.metadata?.artist_id ?? null;
@@ -103,7 +120,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   metadata: { work_id: workId, amount_cents: amountCents, payment_intent: paymentIntentId },
                 });
               }
-              return new Response("ok");
+              return ack();
             }
             if (isDues) {
               const { data: dueRows } = await supabaseAdmin
@@ -135,7 +152,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   });
                 }
               }
-              return new Response("ok");
+              return ack();
             }
             const { data: updated } = await supabaseAdmin
               .from("tickets")
@@ -198,7 +215,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                 .from("organization_dues_payments")
                 .update({ status: "failed" })
                 .eq("stripe_checkout_session_id", session.id);
-              return new Response("ok");
+              return ack();
             }
             await supabaseAdmin
               .from("tickets")
@@ -221,10 +238,11 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
           }
         } catch (err) {
           console.error("Stripe webhook handler error", err);
+          await logStripeError("webhook", event.type, err, { event_id: event.id, stage: "handler" });
           return new Response("Handler error", { status: 500 });
         }
 
-        return new Response("ok");
+        return ack();
       },
     },
   },

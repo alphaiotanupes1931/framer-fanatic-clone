@@ -69,6 +69,8 @@ const ALLOWED_ADMIN_RPCS = new Set([
   "admin_soft_delete",
   "admin_restore_content",
   "admin_purge_content",
+  "admin_list_stripe_logs",
+  "admin_clear_stripe_logs",
 ]);
 
 export const adminRpc = createServerFn({ method: "POST" })
