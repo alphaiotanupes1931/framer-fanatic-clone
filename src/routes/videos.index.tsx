@@ -280,6 +280,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const poster = v.thumbnail_url || ytThumb;
   const isDirect = !yt && !vimeo && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
   return (
+    <>
     <Link to="/videos/$id" params={{ id: v.id }} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white block">
       <div className="relative aspect-video bg-neutral-900 overflow-hidden">
         {poster ? (
@@ -347,7 +348,8 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
         <div className="text-xs text-neutral-500">{new Date(v.created_at).toLocaleDateString()}</div>
         <p className="mt-2 line-clamp-2 text-sm text-neutral-700">{v.title}</p>
       </div>
-      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={shareUrl} title={v.title} />
     </Link>
+    <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={shareUrl} title={v.title} />
+    </>
   );
 }
