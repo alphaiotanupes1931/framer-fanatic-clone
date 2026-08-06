@@ -16,7 +16,7 @@ type Org = { id: string; name: string; slug: string; type: string; avatar_url: s
 type N = { id: string; name: string; region: string | null };
 type StoryRow = { id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string; user_id: string; read_minutes: number | null; format: string | null };
 
-const CATS = ["All", "Events", "Artists", "Communities", "Businesses", "Stories", "Neighborhoods"] as const;
+const CATS = ["All", "Events", "Artists", "Groups", "Businesses", "Stories", "Neighborhoods"] as const;
 type Cat = (typeof CATS)[number];
 
 // Deterministic shuffle that changes every 10 minutes so the discover
@@ -135,9 +135,9 @@ function DiscoverPage() {
           </section>
         )}
 
-        {show("Communities") && fGroups.length > 0 && (
+        {show("Groups") && fGroups.length > 0 && (
           <section>
-            <SectionHead icon={Users} title="Communities" to="/groups" />
+            <SectionHead icon={Users} title="Groups" to="/groups" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {fGroups.slice(0, 6).map((g) => <OrgRow key={g.id} o={g} />)}
             </div>

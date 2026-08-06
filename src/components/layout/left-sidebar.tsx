@@ -25,15 +25,15 @@ import { Img } from "@/components/shared/smart-img";
 type NavItem = { icon: typeof Home; label: string; to: string };
 
 const createItems: NavItem[] = [
+  { icon: PaletteIcon, label: "Artist Profile", to: "/create-artist" },
+  { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
+  { icon: BusinessIcon, label: "Business", to: "/create-business" },
+  { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
+  { icon: UsersIcon, label: "Groups", to: "/create-community" },
   { icon: FileText, label: "New Post", to: "/create-post" },
   { icon: PenLine, label: "New Story", to: "/create-story" },
-  { icon: PaletteIcon, label: "Artist Profile", to: "/create-artist" },
   { icon: HomeIcon, label: "Resident Profile", to: "/create-resident" },
   { icon: PlaneIcon, label: "Visitor Profile", to: "/create-visitor" },
-  { icon: BusinessIcon, label: "Business", to: "/create-business" },
-  { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: UsersIcon, label: "Groups", to: "/create-community" },
-  { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
 ];
 
 const navItems: NavItem[] = [
