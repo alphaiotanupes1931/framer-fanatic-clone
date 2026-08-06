@@ -207,25 +207,20 @@ function PublicProfilePage() {
 
   const toggleFollow = async () => {
     if (!me || !profile) { navigate({ to: "/auth" }); return; }
-    setWorking(true);
-    try {
-      if (isFollowing) {
-        const { error } = await supabase.from("follows").delete().eq("follower_id", me.id).eq("following_id", profile.id);
-        if (error) throw error;
-        setIsFollowing(false);
-        setStats((s) => ({ ...s, followers: Math.max(0, s.followers - 1) }));
-      } else {
-        const { error } = await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id });
-        if (error) throw error;
-        setIsFollowing(true);
-        setStats((s) => ({ ...s, followers: s.followers + 1 }));
-      }
-      await queryClient.invalidateQueries({ queryKey: ["follows", me.id] });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not update follow");
-    } finally {
-      setWorking(false);
+    // Optimistic: the button flips instantly and the request runs behind it.
+    const wasFollowing = isFollowing;
+    setIsFollowing(!wasFollowing);
+    setStats((s) => ({ ...s, followers: Math.max(0, s.followers + (wasFollowing ? -1 : 1)) }));
+    const { error } = wasFollowing
+      ? await supabase.from("follows").delete().eq("follower_id", me.id).eq("following_id", profile.id)
+      : await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id });
+    if (error) {
+      setIsFollowing(wasFollowing);
+      setStats((s) => ({ ...s, followers: Math.max(0, s.followers + (wasFollowing ? 1 : -1)) }));
+      toast.error(error.message || "Could not update follow");
+      return;
     }
+    void queryClient.invalidateQueries({ queryKey: ["follows", me.id] });
   };
 
   const startMessage = async () => {
