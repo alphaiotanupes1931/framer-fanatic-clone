@@ -80,7 +80,7 @@ function VideoDetail() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
             <div className="min-w-0">
-              <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
+              <VideoPlayer url={video.video_url} poster={video.thumbnail_url} video={video} />
               <div className="mt-4 flex items-start gap-3">
                 <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
               </div>
@@ -158,9 +158,15 @@ function VideoPlayer({ url, poster, video }: { url: string; poster: string | nul
 function RelatedCard({ v }: { v: Video }) {
   const info = parseEmbed(v.video_url || "");
   const poster = v.thumbnail_url || info.poster;
+  const orientation = useVideoOrientation({
+    url: info.kind === "file" ? v.video_url : null,
+    orientation: v.orientation,
+    aspectRatio: v.aspect_ratio ?? null,
+    probe: info.kind === "file",
+  });
   return (
     <Link to="/videos/$id" params={{ id: v.id }} className="group flex gap-3">
-      <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-200">
+      <div className={`relative shrink-0 overflow-hidden rounded-lg bg-neutral-200 ${orientationClass(orientation)} ${orientation === "portrait" ? "w-24" : "w-40"}`}>
         {poster ? (
           <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : info.kind === "file" ? (
