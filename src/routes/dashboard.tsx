@@ -63,7 +63,6 @@ function Dashboard() {
   const qc = useQueryClient();
   const { user: currentUser, loading: userLoading } = useCurrentUser();
   const [activeFilter, setActiveFilter] = useState<Filter>("On Planet");
-  const [filterLoading, setFilterLoading] = useState(false);
   const [checked, setChecked] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -241,7 +240,7 @@ function Dashboard() {
           {FILTERS.map((filter) => (
             <button
               key={filter}
-              onClick={() => { setActiveFilter(filter); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
+              onClick={() => setActiveFilter(filter)}
               className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
                 activeFilter === filter
                   ? "bg-[#d4580a] text-white"
@@ -265,7 +264,7 @@ function Dashboard() {
 
         {/* Feed */}
         <div className="space-y-5 pt-1">
-          {isLoading || filterLoading ? (
+          {isLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
             <div className="py-12 text-center sm:py-16 col-span-full">
