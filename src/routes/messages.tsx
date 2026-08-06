@@ -11,7 +11,7 @@ import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: boolean }) {
-  const label = preview.type === "story" ? "Story" : preview.type === "event" ? "Event" : "Post";
+  const label = preview.type === "story" ? "Story" : preview.type === "event" ? "Event" : preview.type === "video" ? "Video" : "Post";
   const inner = (
     <div className={`overflow-hidden rounded-xl border ${mine ? "border-white/25 bg-white/10" : "border-border bg-background"}`}>
       {preview.image && (
@@ -29,6 +29,7 @@ function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: bool
   );
   if (preview.type === "story") return <Link to="/stories/$storyId" params={{ storyId: preview.id }}>{inner}</Link>;
   if (preview.type === "event") return <Link to="/events/$eventId" params={{ eventId: preview.id }}>{inner}</Link>;
+  if (preview.type === "video") return <Link to="/videos/$id" params={{ id: preview.id }}>{inner}</Link>;
   return <Link to="/posts/$postId" params={{ postId: preview.id }}>{inner}</Link>;
 }
 
@@ -546,7 +547,7 @@ function MessagesPage() {
                           const raw = c.last_message_preview || "";
                           const shared = parseSharePreview(raw);
                           if (shared) {
-                            const label = shared.preview.type === "story" ? "story" : shared.preview.type === "event" ? "event" : "post";
+                            const label = shared.preview.type === "story" ? "story" : shared.preview.type === "event" ? "event" : shared.preview.type === "video" ? "video" : "post";
                             return `Shared a ${label}${shared.preview.title ? `: ${shared.preview.title}` : ""}`;
                           }
                           if (raw.startsWith("::share::")) {

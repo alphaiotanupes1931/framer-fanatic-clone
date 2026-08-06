@@ -1795,6 +1795,82 @@ export type Database = {
         }
         Relationships: []
       }
+      user_ui_prefs: {
+        Row: {
+          onboarding_dismissed: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          onboarding_dismissed?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          onboarding_dismissed?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      video_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_comments_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_likes: {
+        Row: {
+          created_at: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_likes_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_saves: {
         Row: {
           created_at: string
@@ -1827,6 +1903,7 @@ export type Database = {
       videos: {
         Row: {
           category: string | null
+          comments_muted: boolean
           created_at: string
           description: string | null
           featured: boolean
@@ -1838,6 +1915,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          comments_muted?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean
@@ -1849,6 +1927,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          comments_muted?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean

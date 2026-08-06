@@ -1,5 +1,5 @@
 export type SharePreview = {
-  type: "post" | "story" | "event";
+  type: "post" | "story" | "event" | "video";
   id: string;
   url: string;
   title?: string | null;

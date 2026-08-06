@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, X, Bookmark } from "lucide-react";
+import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
 import { Img } from "@/components/shared/smart-img";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -14,7 +16,7 @@ export const Route = createFileRoute("/videos/$id")({
 type Video = {
   id: string; user_id: string; title: string; description: string | null;
   video_url: string; thumbnail_url: string | null; featured: boolean;
-  created_at: string; category?: string | null;
+  created_at: string; category?: string | null; comments_muted?: boolean;
   author?: { display_name: string | null; username: string | null; avatar_url?: string | null };
 };
 
@@ -77,7 +79,6 @@ function VideoDetail() {
               <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
               <div className="mt-4 flex items-start gap-3">
                 <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
-                <SaveVideoButton videoId={video.id} />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
                 {video.author?.username ? (
@@ -104,6 +105,7 @@ function VideoDetail() {
                   {video.description}
                 </div>
               )}
+              <VideoActions video={video} onVideoChange={(v) => setVideo(v)} />
             </div>
             <aside className="min-w-0">
               <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-500">Up next</h2>
@@ -164,35 +166,215 @@ function RelatedCard({ v }: { v: Video }) {
   );
 }
 
-function SaveVideoButton({ videoId }: { videoId: string }) {
-  const [saved, setSaved] = useState(false);
+type Comment = {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  author?: { display_name: string | null; username: string | null; avatar_url: string | null };
+};
+
+const pill =
+  "inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 transition hover:border-[#d4580a] hover:text-[#d4580a]";
+
+function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (v: Video) => void }) {
   const [meId, setMeId] = useState<string | null>(null);
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
+  const [saved, setSaved] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [showComments, setShowComments] = useState(true);
+  const [draft, setDraft] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const muted = !!video.comments_muted;
+  const isOwner = !!meId && meId === video.user_id;
+  const url = typeof window !== "undefined" ? `${window.location.origin}/videos/${video.id}` : "";
+
+  const loadComments = async () => {
+    const { data } = await supabase
+      .from("video_comments")
+      .select("id,user_id,content,created_at")
+      .eq("video_id", video.id)
+      .order("created_at", { ascending: false });
+    const list = (data || []) as Comment[];
+    const ids = Array.from(new Set(list.map((c) => c.user_id)));
+    if (ids.length) {
+      const { data: profs } = await (supabase as any)
+        .from("profiles_public")
+        .select("id, display_name, username, avatar_url")
+        .in("id", ids);
+      const byId = new Map((profs || []).map((p: any) => [p.id, p]));
+      list.forEach((c) => { c.author = byId.get(c.user_id) as any; });
+    }
+    setComments(list);
+  };
+
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      setMeId(user.id);
-      const { data } = await supabase.from("video_saves").select("video_id").eq("video_id", videoId).eq("user_id", user.id).maybeSingle();
-      setSaved(!!data);
+      setMeId(user?.id ?? null);
+      const [likeRows, savedRow] = await Promise.all([
+        supabase.from("video_likes").select("user_id").eq("video_id", video.id),
+        user
+          ? supabase.from("video_saves").select("video_id").eq("video_id", video.id).eq("user_id", user.id).maybeSingle()
+          : Promise.resolve({ data: null } as any),
+      ]);
+      const rows = (likeRows.data || []) as Array<{ user_id: string }>;
+      setLikes(rows.length);
+      setLiked(!!user && rows.some((r) => r.user_id === user.id));
+      setSaved(!!savedRow?.data);
+      await loadComments();
     })();
-  }, [videoId]);
-  const toggle = async () => {
+  }, [video.id]);
+
+  const toggleLike = async () => {
+    if (!meId) { toast.error("Sign in to like"); return; }
+    const next = !liked;
+    setLiked(next); setLikes((n) => n + (next ? 1 : -1));
+    const { error } = next
+      ? await supabase.from("video_likes").insert({ video_id: video.id, user_id: meId })
+      : await supabase.from("video_likes").delete().eq("video_id", video.id).eq("user_id", meId);
+    if (error) { setLiked(!next); setLikes((n) => n + (next ? -1 : 1)); toast.error(error.message); }
+  };
+
+  const toggleSave = async () => {
     if (!meId) { toast.error("Sign in to save"); return; }
     const next = !saved; setSaved(next);
     const { error } = next
-      ? await supabase.from("video_saves").insert({ video_id: videoId, user_id: meId })
-      : await supabase.from("video_saves").delete().eq("video_id", videoId).eq("user_id", meId);
+      ? await supabase.from("video_saves").insert({ video_id: video.id, user_id: meId })
+      : await supabase.from("video_saves").delete().eq("video_id", video.id).eq("user_id", meId);
     if (error) { setSaved(!next); toast.error(error.message); return; }
     toast.success(next ? "Saved" : "Unsaved");
   };
+
+  const toggleMute = async () => {
+    const next = !muted;
+    const { error } = await supabase.from("videos").update({ comments_muted: next } as any).eq("id", video.id);
+    if (error) { toast.error(error.message); return; }
+    onVideoChange({ ...video, comments_muted: next });
+    toast.success(next ? "Comments muted" : "Comments turned back on");
+  };
+
+  const postComment = async () => {
+    if (!meId) { toast.error("Sign in to comment"); return; }
+    const content = draft.trim();
+    if (!content) return;
+    setPosting(true);
+    const { error } = await supabase.from("video_comments").insert({ video_id: video.id, user_id: meId, content });
+    setPosting(false);
+    if (error) { toast.error(error.message); return; }
+    setDraft("");
+    loadComments();
+  };
+
+  const removeComment = async (c: Comment) => {
+    const prev = comments;
+    setComments((list) => list.filter((x) => x.id !== c.id));
+    const { error } = await supabase.from("video_comments").delete().eq("id", c.id);
+    if (error) { setComments(prev); toast.error(error.message); }
+  };
+
   return (
-    <button
-      onClick={toggle}
-      aria-label={saved ? "Unsave" : "Save"}
-      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-300 text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"}`}
-    >
-      <Bookmark className={`h-4 w-4 ${saved ? "fill-[#d4580a]" : ""}`} />
-      {saved ? "Saved" : "Save"}
-    </button>
+    <div className="mt-5">
+      <div className="flex flex-wrap items-center gap-2 border-y border-neutral-200 py-3">
+        <button onClick={toggleLike} aria-label="Like" className={`${pill} ${liked ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : ""}`}>
+          <Heart className={`h-4 w-4 ${liked ? "fill-[#d4580a]" : ""}`} /> {likes}
+        </button>
+        <button onClick={() => setShowComments((s) => !s)} aria-label="Comments" className={pill}>
+          <MessageCircle className="h-4 w-4" /> {comments.length}
+        </button>
+        <button onClick={() => setShareOpen(true)} aria-label="Share in app" title="Share with people you follow" className={pill}>
+          <Send className="h-4 w-4" /> Share
+        </button>
+        <button
+          onClick={() => externalShare(url, video.title, video.description || undefined)}
+          aria-label="Share outside the app"
+          title="Share outside the app"
+          className={pill}
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
+        <button onClick={toggleSave} aria-label={saved ? "Unsave" : "Save"} className={`${pill} ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : ""}`}>
+          <Bookmark className={`h-4 w-4 ${saved ? "fill-[#d4580a]" : ""}`} /> {saved ? "Saved" : "Save"}
+        </button>
+        {isOwner && (
+          <button onClick={toggleMute} className={`${pill} ml-auto ${muted ? "border-[#d4580a] text-[#d4580a]" : ""}`}>
+            {muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+            {muted ? "Comments muted" : "Mute comments"}
+          </button>
+        )}
+      </div>
+
+      {showComments && (
+        <div className="mt-4 space-y-4">
+          {muted ? (
+            <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600">
+              The creator has turned off comments for this video.
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") postComment(); }}
+                placeholder="Add a comment…"
+                className="flex-1 rounded-full border border-neutral-300 px-4 py-2 text-sm focus:border-[#d4580a] focus:outline-none"
+              />
+              <button
+                onClick={postComment}
+                disabled={posting || !draft.trim()}
+                className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                Post
+              </button>
+            </div>
+          )}
+          {comments.length === 0 ? (
+            !muted && <div className="text-sm text-neutral-500">No comments yet.</div>
+          ) : (
+            <div className="space-y-3">
+              {comments.map((c) => (
+                <div key={c.id} className="flex gap-3">
+                  {c.author?.avatar_url ? (
+                    <Img src={c.author.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-neutral-200" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-semibold text-neutral-900">
+                      {c.author?.display_name || c.author?.username || "Anonymous"}
+                      <span className="ml-2 font-normal text-neutral-400">{new Date(c.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="text-sm text-neutral-800 whitespace-pre-wrap">{c.content}</div>
+                  </div>
+                  {(meId === c.user_id || isOwner) && (
+                    <button onClick={() => removeComment(c)} aria-label="Delete comment" className="text-neutral-400 hover:text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={url}
+        title={video.title}
+        preview={{
+          type: "video",
+          id: video.id,
+          url,
+          title: video.title,
+          excerpt: video.description,
+          image: video.thumbnail_url,
+          author: video.author?.display_name || video.author?.username,
+        }}
+      />
+    </div>
   );
 }

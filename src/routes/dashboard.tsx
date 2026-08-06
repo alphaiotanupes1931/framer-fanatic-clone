@@ -19,7 +19,7 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Planet Baltimore - Your feed" }] }),
 });
 
-const FILTERS = ["For You", "Following", "Nearby", "Discover"] as const;
+const FILTERS = ["On Planet", "Following", "Nearby", "Discover"] as const;
 type Filter = (typeof FILTERS)[number];
 
 type FeedItem =
@@ -62,7 +62,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { user: currentUser, loading: userLoading } = useCurrentUser();
-  const [activeFilter, setActiveFilter] = useState<Filter>("For You");
+  const [activeFilter, setActiveFilter] = useState<Filter>("On Planet");
   const [filterLoading, setFilterLoading] = useState(false);
   const [checked, setChecked] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
@@ -123,7 +123,7 @@ function Dashboard() {
     const followedIds = new Set(follows.map((f: any) => f.target_id));
     const filteredPosts = (posts as any[]).filter((p) => !p.is_deleted);
 
-    if (activeFilter === "For You") {
+    if (activeFilter === "On Planet") {
       // Reference site: stories lead the home feed, posts and events interleaved.
       // Order: story, story, post, story, post, event, story, post, ...
       const storyStream: FeedItem[] = (stories as any[])
@@ -264,7 +264,7 @@ function Dashboard() {
           ))}
         </div>
 
-        {activeFilter === "For You" && <OnboardingCard />}
+        {activeFilter === "On Planet" && <OnboardingCard />}
 
         {activeFilter === "Discover" && (
           <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent/5 p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">

@@ -5,7 +5,9 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
-import { Play, Search, Star, Plus, X, Upload, Bookmark } from "lucide-react";
+import { Play, Search, Star, Plus, X, Upload, Bookmark, Send, Share2 } from "lucide-react";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 import { useUserRole } from "@/hooks/use-user-role";
 
@@ -250,6 +252,8 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const { isAdmin } = useUserRole();
   const [saved, setSaved] = useState(false);
   const [meId, setMeId] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/videos/${v.id}` : `/videos/${v.id}`;
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -276,6 +280,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const poster = v.thumbnail_url || ytThumb;
   const isDirect = !yt && !vimeo && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
   return (
+    <>
     <Link to="/videos/$id" params={{ id: v.id }} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white block">
       <div className="relative aspect-video bg-neutral-900 overflow-hidden">
         {poster ? (
@@ -308,14 +313,35 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-full bg-white/30 p-4 backdrop-blur group-hover:bg-white/50"><Play className="h-6 w-6 fill-white text-white" /></div>
         </div>
-        <button
-          onClick={toggleSave}
-          aria-label={saved ? "Unsave" : "Save"}
-          title={saved ? "Unsave" : "Save"}
-          className={`absolute bottom-3 right-3 z-10 rounded-full p-2 shadow-md transition ${saved ? "bg-[#d4580a] text-white" : "bg-white/90 text-neutral-800 hover:bg-white"}`}
-        >
-          <Bookmark className={`h-4 w-4 ${saved ? "fill-white" : ""}`} />
-        </button>
+        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5">
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); }}
+            aria-label="Share in app"
+            title="Share with people you follow"
+            className="rounded-full bg-white/90 p-2 text-neutral-800 shadow-md transition hover:bg-white"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault(); e.stopPropagation();
+              externalShare(shareUrl, v.title, v.description || undefined);
+            }}
+            aria-label="Share outside the app"
+            title="Share outside the app"
+            className="rounded-full bg-white/90 p-2 text-neutral-800 shadow-md transition hover:bg-white"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={toggleSave}
+            aria-label={saved ? "Unsave" : "Save"}
+            title={saved ? "Unsave" : "Save"}
+            className={`rounded-full p-2 shadow-md transition ${saved ? "bg-[#d4580a] text-white" : "bg-white/90 text-neutral-800 hover:bg-white"}`}
+          >
+            <Bookmark className={`h-4 w-4 ${saved ? "fill-white" : ""}`} />
+          </button>
+        </div>
       </div>
       <div className="p-4">
         <div className="text-sm font-semibold">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
@@ -323,5 +349,13 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
         <p className="mt-2 line-clamp-2 text-sm text-neutral-700">{v.title}</p>
       </div>
     </Link>
+    <ShareToUsersDialog
+      open={shareOpen}
+      onClose={() => setShareOpen(false)}
+      url={shareUrl}
+      title={v.title}
+      preview={{ type: "video", id: v.id, url: shareUrl, title: v.title, excerpt: v.description, image: poster, author: v.author?.display_name || v.author?.username }}
+    />
+    </>
   );
 }

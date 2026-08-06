@@ -107,6 +107,7 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+  const [dayOpen, setDayOpen] = useState<{ date: Date; events: Ev[] } | null>(null);
   const monthLabel = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
   const firstDow = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay();
   const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
@@ -197,7 +198,13 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                     </button>
                   ))}
                   {dayEvents.length > 2 && (
-                    <div className="px-1 text-[10px] text-neutral-500">+{dayEvents.length - 2} more</div>
+                    <button
+                      type="button"
+                      onClick={() => setDayOpen({ date: c.date, events: dayEvents })}
+                      className="block w-full rounded px-1 py-0.5 text-left text-[10px] font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-[#d4580a]"
+                    >
+                      +{dayEvents.length - 2 >= 50 ? "50+" : dayEvents.length - 2} more
+                    </button>
                   )}
                 </div>
               </div>
@@ -227,7 +234,97 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
           </div>
         )}
       </div>
+      <DayEventsDialog data={dayOpen} onClose={() => setDayOpen(null)} />
     </section>
+  );
+}
+
+function DayEventsDialog({ data, onClose }: { data: { date: Date; events: Ev[] } | null; onClose: () => void }) {
+  const [q, setQ] = useState("");
+  const [type, setType] = useState("All Types");
+  useEffect(() => { setQ(""); setType("All Types"); }, [data?.date?.toDateString()]);
+  const all = data?.events ?? [];
+  const types = ["All Types", ...Array.from(new Set(all.map((e) => e.category).filter(Boolean) as string[]))];
+  const list = all.filter((e) => {
+    const matchesQ =
+      !q.trim() ||
+      (e.title || "").toLowerCase().includes(q.toLowerCase()) ||
+      (e.venue_name || e.location || "").toLowerCase().includes(q.toLowerCase());
+    const matchesType = type === "All Types" || e.category === type;
+    return matchesQ && matchesType;
+  });
+  const shown = list.length >= 50 ? "50+" : String(list.length);
+  return (
+    <Dialog open={!!data} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[85vh] max-w-lg flex-col overflow-hidden p-0">
+        {data && (
+          <>
+            <div className="space-y-3 border-b border-neutral-100 p-5 pb-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-[#d4580a]" />
+                <h2 className="text-lg font-bold text-neutral-900">
+                  {data.date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                </h2>
+                <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-bold text-neutral-600">{shown}</span>
+              </div>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search events on this day…"
+                className="w-full rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm focus:border-[#d4580a] focus:outline-none"
+              />
+              {types.length > 1 && (
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                  {types.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setType(t)}
+                      className={`whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-semibold transition ${
+                        type === t ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
+              {list.length === 0 ? (
+                <div className="py-10 text-center text-sm text-neutral-500">No events match your filters.</div>
+              ) : (
+                list.map((e) => {
+                  const d = e.starts_at ? new Date(e.starts_at) : null;
+                  const where = e.venue_name || e.location;
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      onClick={() => { onClose(); openEventPopup(e); }}
+                      className="flex w-full items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 text-left hover:border-[#d4580a]"
+                    >
+                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+                        {e.image_url && <EventImage src={e.image_url} alt={e.title} className="h-full w-full object-cover" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-neutral-900">{e.title}</div>
+                        <div className="mt-0.5 text-xs text-neutral-500">
+                          {d ? d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : ""}
+                          {where ? ` · ${where}` : ""}
+                        </div>
+                        {e.description && (
+                          <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{e.description}</p>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -419,13 +516,15 @@ function CalendarPage() {
           {/* Right column: For You + Upcoming */}
           <div className="space-y-8">
           <section>
-            <div className="mb-4 flex items-center gap-2">
-              <Star className="h-4 w-4 text-[#d4580a]" />
-              <h2 className="text-lg font-bold text-neutral-900">For You</h2>
-              <span className="rounded-full bg-[#d4580a]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#d4580a]">
-                Personalized
-              </span>
-              <div className="ml-2 flex items-center gap-1.5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-[#d4580a]" />
+                <h2 className="text-lg font-bold tracking-tight text-neutral-900">On Planet</h2>
+                <span className="grid h-6 min-w-[24px] place-items-center rounded-full bg-neutral-100 px-2 text-[11px] font-bold text-neutral-600">
+                  {forYou.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setForyouIdx((i) => Math.max(0, i - 1))}
                   className="grid h-7 w-7 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
@@ -650,14 +749,27 @@ function UpcomingRow({ event }: { event: Ev }) {
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-[#d4580a]/40 hover:shadow-sm">
       <div className="flex gap-4">
-        {d && (
+        {event.image_url ? (
+          <button
+            type="button"
+            onClick={() => openEventPopup(event)}
+            className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-neutral-100"
+          >
+            <EventImage src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
+            {d && (
+              <span className="absolute left-1 top-1 rounded-md bg-white/95 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#d4580a] shadow">
+                {d.toLocaleDateString(undefined, { month: "short" })} {d.getDate()}
+              </span>
+            )}
+          </button>
+        ) : d ? (
           <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-neutral-50 text-center">
             <div className="text-[10px] font-bold uppercase tracking-wider text-[#d4580a]">
               {d.toLocaleDateString(undefined, { month: "short" })}
             </div>
             <div className="text-2xl font-bold leading-none text-neutral-900">{d.getDate()}</div>
           </div>
-        )}
+        ) : null}
         <div className="min-w-0 flex-1">
           <button
             type="button"
@@ -677,6 +789,9 @@ function UpcomingRow({ event }: { event: Ev }) {
             <div className="mt-1 flex items-center gap-1 text-xs text-neutral-500">
               <MapPin className="h-3 w-3" /> {where}
             </div>
+          )}
+          {event.description && (
+            <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{event.description}</p>
           )}
         </div>
       </div>

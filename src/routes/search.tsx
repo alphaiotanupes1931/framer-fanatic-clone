@@ -84,7 +84,7 @@ function SearchPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search Baltimore..."
-            className="w-full rounded-2xl border-2 border-border bg-card py-4 pl-12 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-orange focus:outline-none"
+            className="w-full rounded-2xl border border-border bg-card py-4 pl-12 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-orange focus:outline-none"
           />
         </div>
 
