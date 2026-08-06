@@ -334,7 +334,16 @@ function Dashboard() {
                   </div>
                 );
               })();
-              return <div key={`${item.type}-${item.data.id}-${idx}`}>{inner}</div>;
+              // content-visibility lets the browser skip layout/paint for cards
+              // that are off-screen, the web equivalent of a recycling list.
+              return (
+                <div
+                  key={`${item.type}-${item.data.id}-${idx}`}
+                  style={idx > 3 ? { contentVisibility: "auto", containIntrinsicSize: "auto 520px" } : undefined}
+                >
+                  {inner}
+                </div>
+              );
             })}
             <div ref={sentinelRef} className="flex items-center justify-center py-6 text-sm text-muted-foreground">
               {hasMore ? (
