@@ -160,7 +160,7 @@ function EventsPage() {
   const { loading, signedIn } = useAuthState();
   // Cached so returning to Events paints the previous list instantly while
   // fresh data revalidates behind it.
-  const { data: cachedEvents, loading: dataLoading } = useCachedFetch<EventRow[]>(
+  const { data: cachedEvents, loading: dataLoading, refetch } = useCachedFetch<EventRow[]>(
     "events:upcoming",
     async () => {
       const { data } = await supabase
