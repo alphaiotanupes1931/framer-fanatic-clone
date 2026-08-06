@@ -6,13 +6,7 @@ import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
-
-type Person = {
-  id: string;
-  display_name: string | null;
-  username: string | null;
-  avatar_url: string | null;
-};
+import { getConnectionsSnapshot, loadConnections, type Person } from "@/lib/connections";
 
 function initials(name: string | null | undefined) {
   return (name || "U").trim()[0]?.toUpperCase() || "U";
@@ -32,7 +26,7 @@ export function ShareToUsersDialog({
   preview?: SharePreview;
 }) {
   const me = useCurrentProfile();
-  const [people, setPeople] = useState<Person[]>([]);
+  const [people, setPeople] = useState<Person[]>(() => getConnectionsSnapshot(me?.id)?.all ?? []);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [note, setNote] = useState("");
@@ -41,28 +35,17 @@ export function ShareToUsersDialog({
 
   useEffect(() => {
     if (!open || !me?.id) return;
-    setLoading(true);
-    (async () => {
-      // Followers + following as the default list of people you know.
-      const [flw, fwg] = await Promise.all([
-        supabase.from("follows").select("follower_id").eq("following_id", me.id),
-        supabase.from("follows").select("following_id").eq("follower_id", me.id),
-      ]);
-      const ids = Array.from(
-        new Set([
-          ...(flw.data ?? []).map((r: { follower_id: string }) => r.follower_id),
-          ...(fwg.data ?? []).map((r: { following_id: string }) => r.following_id),
-        ]),
-      ).filter((id) => id !== me.id);
-      if (ids.length === 0) {
-        setPeople([]);
-        setLoading(false);
-        return;
-      }
-      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-      setPeople(((profs as Person[]) ?? []).slice(0, 200));
+    // Paint from the shared cache immediately, then revalidate in the background.
+    const snap = getConnectionsSnapshot(me.id);
+    if (snap) setPeople(snap.all.slice(0, 200));
+    setLoading(!snap);
+    let cancelled = false;
+    void loadConnections(me.id).then((s) => {
+      if (cancelled) return;
+      setPeople(s.all.slice(0, 200));
       setLoading(false);
-    })();
+    });
+    return () => { cancelled = true; };
   }, [open, me?.id]);
 
   useEffect(() => {
