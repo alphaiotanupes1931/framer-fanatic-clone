@@ -20,21 +20,28 @@ type Entry = { v: unknown; t: number };
 
 const store = new Map<string, Entry>();
 
-function hydrate() {
-  if (typeof window === "undefined") return;
+let hydrated = false;
+/**
+ * Pulls the persisted cache into memory. Called from effects (never during
+ * render) so the first client render still matches the server HTML.
+ */
+export function ensureHydrated() {
+  if (hydrated || typeof window === "undefined") return;
+  hydrated = true;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const parsed = JSON.parse(raw) as Record<string, Entry>;
     const now = Date.now();
     for (const [k, e] of Object.entries(parsed)) {
-      if (e && typeof e.t === "number" && now - e.t < CACHE_TTL_MS) store.set(k, e);
+      if (e && typeof e.t === "number" && now - e.t < CACHE_TTL_MS && !store.has(k)) {
+        store.set(k, e);
+      }
     }
   } catch {
     // Corrupt or unavailable storage is never fatal: we just start cold.
   }
 }
-hydrate();
 
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 function schedulePersist() {
@@ -105,6 +112,7 @@ export function useCachedFetch<T>(
 
   useEffect(() => {
     let cancelled = false;
+    ensureHydrated();
     const cached = readCache<T>(key);
     if (cached !== undefined) {
       setDataState(cached);
