@@ -516,13 +516,15 @@ function CalendarPage() {
           {/* Right column: For You + Upcoming */}
           <div className="space-y-8">
           <section>
-            <div className="mb-4 flex items-center gap-2">
-              <Star className="h-4 w-4 text-[#d4580a]" />
-              <h2 className="text-lg font-bold text-neutral-900">For You</h2>
-              <span className="rounded-full bg-[#d4580a]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#d4580a]">
-                Personalized
-              </span>
-              <div className="ml-2 flex items-center gap-1.5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-[#d4580a]" />
+                <h2 className="text-lg font-bold tracking-tight text-neutral-900">On Planet</h2>
+                <span className="grid h-6 min-w-[24px] place-items-center rounded-full bg-neutral-100 px-2 text-[11px] font-bold text-neutral-600">
+                  {forYou.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setForyouIdx((i) => Math.max(0, i - 1))}
                   className="grid h-7 w-7 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
