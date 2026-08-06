@@ -26,11 +26,10 @@ function popPostAuthRedirect(): string | null {
 }
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: typeof search.redirect === "string" && search.redirect.startsWith("/") && !search.redirect.startsWith("//")
-      ? search.redirect
-      : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
+    typeof search.redirect === "string" && search.redirect.startsWith("/") && !search.redirect.startsWith("//")
+      ? { redirect: search.redirect }
+      : {},
   component: AuthPage,
   head: () => ({ meta: [{ title: "Sign in or create an account" }] }),
 });
