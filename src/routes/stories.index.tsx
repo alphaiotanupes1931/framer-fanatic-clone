@@ -251,7 +251,6 @@ function StoriesSignedIn() {
     if (tab === "Trending") {
       q = q.order("featured", { ascending: false, nullsFirst: false }).order("featured_at", { ascending: false, nullsFirst: false }).order("likes_count", { ascending: false });
     } else {
-      q = q.order("featured", { ascending: false, nullsFirst: false }).order("featured_at", { ascending: false, nullsFirst: false });
       switch (sort) {
         case "oldest": q = q.order("created_at", { ascending: true }); break;
         case "most_liked": q = q.order("likes_count", { ascending: false }); break;
