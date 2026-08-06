@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Users, Compass, MapPin, Loader2, Globe2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { prefetchImageUrls } from "@/components/smart-image";
 import { Post, Story, Event, Follow } from "@/lib/entities";
 
 export const Route = createFileRoute("/dashboard")({
@@ -209,6 +210,19 @@ function Dashboard() {
   const isEmpty = !isLoading && orderedFeedItems.length === 0;
   const visibleItems = orderedFeedItems.slice(0, visibleCount);
   const hasMore = visibleCount < orderedFeedItems.length;
+
+  // Warm the media for the next screenful while the user reads the current
+  // one, so scrolling never waits on a signing round trip or image bytes.
+  useEffect(() => {
+    const upcoming = orderedFeedItems.slice(visibleCount, visibleCount + 12);
+    const srcs: Array<string | null | undefined> = [];
+    for (const item of upcoming) {
+      const d: any = item.data;
+      if (Array.isArray(d?.media_urls)) srcs.push(...d.media_urls.slice(0, 2));
+      srcs.push(d?.image_url, d?.cover_image_url, d?.thumbnail_url, d?.avatar_url);
+    }
+    prefetchImageUrls(srcs.filter(Boolean));
+  }, [orderedFeedItems, visibleCount]);
 
   useEffect(() => {
     const el = sentinelRef.current;
