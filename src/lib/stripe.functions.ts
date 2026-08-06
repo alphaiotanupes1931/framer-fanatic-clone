@@ -2,6 +2,20 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+/**
+ * Payout columns on profiles are not readable by the `authenticated` role
+ * (privacy hardening), so they must be read with the service client.
+ */
+async function getPayoutAccount(profileId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("profiles")
+    .select("stripe_account_id, stripe_charges_enabled, display_name, username")
+    .eq("id", profileId)
+    .maybeSingle();
+  return data;
+}
+
 /** Create (or reuse) a Stripe Express connected account for the signed-in artist. */
 export const ensureConnectAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -54,11 +68,7 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
     const { getStripe } = await import("./stripe.server");
     const stripe = getStripe();
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("stripe_account_id")
-      .eq("id", userId)
-      .maybeSingle();
+    const profile = await getPayoutAccount(userId);
 
     if (!profile?.stripe_account_id) {
       throw new Error("No Stripe account on file. Click Connect Stripe first.");
@@ -82,11 +92,7 @@ export const refreshConnectStatus = createServerFn({ method: "POST" })
     const { getStripe } = await import("./stripe.server");
     const stripe = getStripe();
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("stripe_account_id")
-      .eq("id", userId)
-      .maybeSingle();
+    const profile = await getPayoutAccount(userId);
 
     if (!profile?.stripe_account_id) return { connected: false, chargesEnabled: false };
 
@@ -134,11 +140,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     }
 
     // Get artist's connected account
-    const { data: artist } = await supabase
-      .from("profiles")
-      .select("stripe_account_id, stripe_charges_enabled")
-      .eq("id", event.user_id)
-      .maybeSingle();
+    const artist = await getPayoutAccount(event.user_id);
 
     if (!artist?.stripe_account_id || !artist.stripe_charges_enabled) {
       throw new Error("This artist hasn't finished setting up payments yet.");
@@ -244,11 +246,7 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!org) throw new Error("Organization not found");
 
-    const { data: owner } = await supabase
-      .from("profiles")
-      .select("stripe_account_id, stripe_charges_enabled")
-      .eq("id", org.owner_id)
-      .maybeSingle();
+    const owner = await getPayoutAccount(org.owner_id);
     if (!owner?.stripe_account_id || !owner.stripe_charges_enabled) {
       throw new Error("This organization has not yet set up a payment method.");
     }
@@ -343,11 +341,7 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
     if (!priceCents || priceCents < 100) throw new Error("This work is not priced for sale.");
     if (meta.status && meta.status !== "available") throw new Error("This work is no longer available.");
 
-    const { data: owner } = await supabase
-      .from("profiles")
-      .select("stripe_account_id, stripe_charges_enabled, display_name, username")
-      .eq("id", work.user_id)
-      .maybeSingle();
+    const owner = await getPayoutAccount(work.user_id);
     if (!owner?.stripe_account_id || !owner.stripe_charges_enabled) {
       throw new Error("This artist has not set up a payment method yet.");
     }
@@ -478,11 +472,7 @@ export const createDuesCheckout = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!org) throw new Error("Organization not found");
 
-    const { data: owner } = await supabase
-      .from("profiles")
-      .select("stripe_account_id, stripe_charges_enabled")
-      .eq("id", org.owner_id)
-      .maybeSingle();
+    const owner = await getPayoutAccount(org.owner_id);
     if (!owner?.stripe_account_id || !owner.stripe_charges_enabled) {
       throw new Error("This association's payout account isn't ready yet. Please try again later.");
     }
