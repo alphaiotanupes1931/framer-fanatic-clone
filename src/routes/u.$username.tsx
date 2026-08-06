@@ -186,15 +186,6 @@ function PublicProfilePage() {
     return Array.from(new Set(parts));
   }, [profile]);
 
-  const share = async () => {
-    if (!profile) return;
-    const url = `${window.location.origin}/u/${profile.username}`;
-    try {
-      if (navigator.share) await navigator.share({ title: profile.display_name || profile.username || "", url });
-      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
-    } catch { /* cancelled */ }
-  };
-
   const toggleMute = () => {
     if (!profile) return;
     const next = !muted;
@@ -338,13 +329,20 @@ function PublicProfilePage() {
               </span>
             </>
           )}
-          <button
-            onClick={share}
-            aria-label="Share"
-            className="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 hover:text-[#d4580a]"
-          >
-            <Send className="h-4 w-4 -rotate-45" />
-          </button>
+          <ShareButtons
+            path={`/u/${profile.username}`}
+            title={profile.display_name || profile.username || ""}
+            size="sm"
+            buttonClassName="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 hover:text-[#d4580a]"
+            preview={{
+              type: "profile",
+              id: profile.username || "",
+              url: `/u/${profile.username}`,
+              title: profile.display_name || profile.username || "",
+              excerpt: profile.bio || null,
+              image: profile.avatar_url || null,
+            }}
+          />
           {!isSelf && (
             <button
               onClick={toggleFollow}
