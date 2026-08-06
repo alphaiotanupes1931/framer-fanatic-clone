@@ -20,6 +20,7 @@ import { useSidebar } from "./sidebar-context";
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
 import { Img } from "@/components/shared/smart-img";
+import { prefetchHandlers } from "@/lib/prefetch";
 
 // Route-path map: repo path -> this app's existing TanStack route.
 type NavItem = { icon: typeof Home; label: string; to: string };
@@ -147,7 +148,7 @@ export function LeftSidebar() {
               return wrap(
                 <Tooltip key={item.label}>
                   <TooltipTrigger asChild>
-                    <Link to={item.to} className={`relative flex w-full items-center justify-center rounded-lg py-2 transition-all ${active ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
+                    <Link to={item.to} {...prefetchHandlers(item.to)} className={`relative flex w-full items-center justify-center rounded-lg py-2 transition-all ${active ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
                       <Icon className="h-5 w-5" />
                       {badge > 0 && (
                         <span className="absolute right-1 top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ backgroundColor: "#d4580a" }}>
@@ -165,6 +166,7 @@ export function LeftSidebar() {
               <Link
                 key={item.label}
                 to={item.to}
+                {...prefetchHandlers(item.to)}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${active ? "bg-muted font-semibold text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
               >
                 <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-150 ${active ? "scale-110 text-foreground" : ""}`} />
