@@ -1480,15 +1480,9 @@ function StripeTab() {
           <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
             <div className="font-semibold">We couldn't start payout setup</div>
             <div className="mt-1 whitespace-pre-wrap break-words">{errorMsg}</div>
-            {errorMsg.includes("platform-profile") ? (
-              <div className="mt-2 text-xs">
-                The Planet Baltimore Stripe account owner needs to complete the platform profile at{" "}
-                <a href="https://dashboard.stripe.com/settings/connect/platform-profile" target="_blank" rel="noreferrer" className="font-semibold underline">
-                  dashboard.stripe.com/settings/connect/platform-profile
-                </a>{" "}
-                (accept responsibility for losses). After that, this button will work for everyone.
-              </div>
-            ) : null}
+            <div className="mt-2 text-xs">
+              Email <a href="mailto:help@planetbaltimore.com" className="font-semibold underline">help@planetbaltimore.com</a> if this keeps happening and we'll get you set up.
+            </div>
           </div>
         ) : null}
       </div>
