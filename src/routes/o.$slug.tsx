@@ -18,7 +18,8 @@ import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
@@ -153,6 +154,7 @@ function OrgProfile() {
     : ASSOC_TABS;
 
   const handleFileUpload = async (field: "avatar_url" | "banner_url", file: File) => {
+    file = await compressImage(file);
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
     setUploading(field);
@@ -164,7 +166,7 @@ function OrgProfile() {
       const path = `${uid}/org-${org.id}-${field}-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       const url = signed.signedUrl;
       const patch = { [field]: url } as Partial<Org>;
@@ -1243,6 +1245,7 @@ function TierForm({ orgId, initial, onCancel, onSaved }: {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const upload = async (file: File) => {
+    file = await compressImage(file);
     if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
     setUploading(true);
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -1460,9 +1463,9 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
                   <div className="mt-1 flex items-center gap-3 text-xs text-neutral-500">
                     <span>{new Date(r.created_at).toLocaleDateString()}</span>
                     {r.link_url && (
-                      <a href={r.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 font-semibold text-[#d4580a] hover:underline">
+                      <SmartFileLink href={r.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 font-semibold text-[#d4580a] hover:underline">
                         <ExternalLink className="h-3 w-3" /> Download / Open
-                      </a>
+                      </SmartFileLink>
                     )}
                   </div>
                 </div>
@@ -1543,6 +1546,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
   };
 
   const uploadFile = async (file: File) => {
+    file = await compressImage(file);
     const isVideo = file.type.startsWith("video/");
     const cap = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > cap) { toast.error(`${isVideo ? "Video" : "Image"} must be under ${cap / 1024 / 1024}MB`); return; }
@@ -1556,7 +1560,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
       const path = `${uid}/org-${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
       if (upErr) throw upErr;
-      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
       setMediaUrls((prev) => [...prev, signed.signedUrl]);
       toast.success("Uploaded", { id: tId });
@@ -1693,7 +1697,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
                     const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                        {isVideo ? <video src={u} className="h-24 w-full object-cover" /> : <Img src={u} alt="" className="h-24 w-full object-cover" />}
+                        {isVideo ? <SmartVideo src={u} className="h-24 w-full object-cover" /> : <Img src={u} alt="" className="h-24 w-full object-cover" />}
                         <button type="button" onClick={() => setMediaUrls((prev) => prev.filter((_, idx) => idx !== i))}
                           className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove">
                           <X className="h-3 w-3" />
@@ -1733,7 +1737,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
                       const u = media[0];
                       const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                       return isVideo
-                        ? <video src={u} controls className="h-56 w-full bg-black object-cover" />
+                        ? <SmartVideo src={u} controls className="h-56 w-full bg-black object-cover" />
                         : <Img src={u} alt={p.title} className="h-56 w-full object-cover" loading="lazy" decoding="async" />;
                     })()}
                     {media.length > 1 && (

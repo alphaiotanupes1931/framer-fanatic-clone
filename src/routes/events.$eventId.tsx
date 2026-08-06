@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
-import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -303,7 +303,7 @@ function EventVideo({ path }: { path: string }) {
       <h2 className="font-semibold text-foreground mb-2">Video</h2>
       <div className="overflow-hidden rounded-2xl border border-border bg-black">
         {url ? (
-          <video src={url} controls playsInline className="w-full aspect-video bg-black" />
+          <SmartVideo src={url} controls playsInline className="w-full aspect-video bg-black" />
         ) : (
           <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading…</div>
         )}

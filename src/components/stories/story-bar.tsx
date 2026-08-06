@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { CurrentUser } from "@/hooks/use-current-user";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 type Story = {
   id: string;
@@ -49,6 +50,7 @@ export function StoryBar({ currentUser }: { currentUser: CurrentUser | null }) {
   const others = groups.filter((g) => g.user_id !== currentUser?.id);
 
   const handleUpload = async (file: File) => {
+    file = await compressImage(file);
     if (!currentUser) { toast.error("Sign in first"); return; }
     setUploading(true);
     try {

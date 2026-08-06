@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/edit-story/$id")({
   component: EditStoryPage,
@@ -78,12 +79,13 @@ function EditStoryPage() {
   }, [id, navigate]);
 
   const upload = useCallback(async (file: File) => {
+    file = await compressImage(file);
     if (!me) throw new Error("Sign in required");
     const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("story-covers").upload(path, file, { upsert: false, contentType: file.type });
     if (error) throw error;
-    const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, STORED_URL_TTL);
     if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
     return signed.signedUrl;
   }, [me]);

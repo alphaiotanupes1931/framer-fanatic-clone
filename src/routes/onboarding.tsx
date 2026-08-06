@@ -18,6 +18,7 @@ import pbLogo from "@/assets/pb-logo.png";
 import { CREATOR_CATEGORIES } from "@/lib/categories";
 import { Textarea } from "@/components/ui/textarea";
 import { Img } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
@@ -80,11 +81,14 @@ function Onboarding() {
     setBusy(true);
     try {
       let avatar_url: string | null = null;
-      const ext = file.name.split(".").pop() || "jpg";
+      const compressed = await compressAvatar(file);
+      const ext = compressed.name.split(".").pop() || "jpg";
       const path = `${userId}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, compressed, { upsert: true, contentType: compressed.type });
       if (upErr) throw upErr;
-      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       avatar_url = signed?.signedUrl ?? null;
       const finalCategory = category === "Other" ? `Other: ${otherReason.trim()}` : category;
       const { error } = await supabase

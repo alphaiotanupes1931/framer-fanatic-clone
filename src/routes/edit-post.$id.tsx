@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ImagePlus, Loader2, Save, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/edit-post/$id")({
   component: EditPostPage,
@@ -86,6 +87,7 @@ function EditPostPage() {
   }, [id, navigate]);
 
   const uploadFile = async (file: File) => {
+    file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return null; }
     const kind: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
     const cap = kind === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
@@ -97,7 +99,7 @@ function EditPostPage() {
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
       toast.success("Uploaded", { id: tId });
       return signed.signedUrl;
@@ -224,7 +226,7 @@ function EditPostPage() {
                     const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                     return (
                       <div key={u + i} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                        {isVideo ? <video src={u} className="h-32 w-full object-cover" /> : <Img src={u} alt="" className="h-32 w-full object-cover" />}
+                        {isVideo ? <SmartVideo src={u} className="h-32 w-full object-cover" /> : <Img src={u} alt="" className="h-32 w-full object-cover" />}
                         <button type="button" onClick={() => setMediaUrls((p) => p.filter((_, idx) => idx !== i))}
                           className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove">
                           <X className="h-3.5 w-3.5" />

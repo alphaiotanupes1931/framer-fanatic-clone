@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-post")({
   component: CreatePostPage,
@@ -95,6 +96,7 @@ function CreatePostPage() {
   }, [excludeQuery, excluded]);
 
   const uploadTo = async (bucket: "post-media", file: File, kind: "image" | "video") => {
+    file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return null; }
     const cap = kind === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
     if (file.size > cap) { toast.error(`${kind === "image" ? "Image" : "Video"} must be under ${cap / 1024 / 1024}MB`); return null; }
@@ -106,7 +108,7 @@ function CreatePostPage() {
       const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
       // Bucket is private: create a long-lived signed URL so posts render everywhere.
-      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
       toast.success(`${kind === "image" ? "Image" : "Video"} uploaded`, { id: tId });
       return signed.signedUrl;
@@ -269,7 +271,7 @@ function CreatePostPage() {
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                         {isVideo ? (
-                          <video src={u} className="h-32 w-full object-cover" />
+                          <SmartVideo src={u} className="h-32 w-full object-cover" />
                         ) : (
                           <Img src={u} alt="" className="h-32 w-full object-cover" />
                         )}
@@ -313,7 +315,7 @@ function CreatePostPage() {
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                         {isVideo ? (
-                          <video src={u} className="h-32 w-full object-cover" />
+                          <SmartVideo src={u} className="h-32 w-full object-cover" />
                         ) : (
                           <Img src={u} alt="" className="h-32 w-full object-cover" />
                         )}

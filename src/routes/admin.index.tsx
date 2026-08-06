@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Trash2, Lock } from "lucide-react";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminPage,
@@ -366,6 +367,7 @@ function EditUserDialog({
   if (!user) return null;
 
   const handleUpload = async (file: File) => {
+    file = await compressImage(file);
     setUploading(true);
     const ext = file.name.split(".").pop() || "jpg";
     const path = `${user.id}/avatar-${Date.now()}.${ext}`;
@@ -376,7 +378,7 @@ function EditUserDialog({
     }
     const { data, error: signErr } = await supabase.storage
       .from("avatars")
-      .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      .createSignedUrl(path, STORED_URL_TTL);
     if (signErr || !data) {
       setUploading(false);
       return toast.error(signErr?.message || "Could not sign URL");

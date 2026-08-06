@@ -13,7 +13,8 @@ import { useUserRole } from "@/hooks/use-user-role";
 
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/videos/")({
   component: VideosPage,
@@ -101,6 +102,7 @@ function VideosSignedIn() {
   useEffect(() => { load(); }, []);
 
   const handleFileUpload = async (file: File) => {
+    file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return; }
     if (!file.type.startsWith("video/")) { toast.error("Please choose a video file"); return; }
     const cap = 100 * 1024 * 1024;
@@ -113,7 +115,7 @@ function VideosSignedIn() {
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
       setForm((f) => ({ ...f, video_url: signed.signedUrl }));
       toast.success("Video uploaded", { id: tId });
@@ -236,7 +238,7 @@ function VideosSignedIn() {
                 <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
               </label>
               {localPreview && (
-                <video src={localPreview} controls className="w-full rounded-lg border border-neutral-200 max-h-56 bg-black" />
+                <SmartVideo src={localPreview} controls className="w-full rounded-lg border border-neutral-200 max-h-56 bg-black" />
               )}
               <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim() || !form.category} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
@@ -286,7 +288,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
         {poster ? (
           <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
         ) : isDirect || url.startsWith("blob:") || url.startsWith("http") ? (
-          <video
+          <SmartVideo
             src={`${url}${url.includes("#") ? "" : "#t=0.5"}`}
             preload="metadata"
             muted

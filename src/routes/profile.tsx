@@ -27,7 +27,8 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { ExternalShareDialog } from "@/components/external-share-dialog";
 import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
-import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -232,6 +233,7 @@ function ProfilePage() {
   };
 
   const uploadBanner = async (file: File) => {
+    file = await compressImage(file);
     if (!profile) return;
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image is too large (max 10MB)");
@@ -246,7 +248,7 @@ function ProfilePage() {
     if (error) { setUploadingBanner(false); toast.error(error.message); return; }
     const { data, error: signErr } = await supabase.storage
       .from("avatars")
-      .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      .createSignedUrl(path, STORED_URL_TTL);
     if (signErr || !data) { setUploadingBanner(false); toast.error(signErr?.message || "Could not sign URL"); return; }
     const { error: updErr } = await supabase.from("profiles").update({ banner_url: data.signedUrl }).eq("id", profile.id);
     if (updErr) { setUploadingBanner(false); toast.error(updErr.message); return; }
@@ -254,6 +256,7 @@ function ProfilePage() {
   };
 
   const uploadAvatar = async (file: File) => {
+    file = await compressAvatar(file);
     if (!profile) return;
     if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
     setUploadingAvatar(true);
@@ -261,7 +264,7 @@ function ProfilePage() {
     const path = `${profile.id}/avatar-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || "image/jpeg", cacheControl: "3600" });
     if (error) { setUploadingAvatar(false); toast.error(error.message); return; }
-    const { data, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    const { data, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
     if (signErr || !data) { setUploadingAvatar(false); toast.error(signErr?.message || "Could not sign URL"); return; }
     const { error: updErr } = await supabase.from("profiles").update({ avatar_url: data.signedUrl }).eq("id", profile.id);
     if (updErr) { setUploadingAvatar(false); toast.error(updErr.message); return; }
@@ -590,7 +593,7 @@ function ProfilePage() {
                           >
                             {thumb ? (
                               isVideo ? (
-                                <video src={thumb} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                                <SmartVideo src={thumb} className="h-full w-full object-cover" muted playsInline preload="metadata" />
                               ) : (
                                 <Img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
                               )

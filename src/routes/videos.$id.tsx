@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 
@@ -132,7 +132,7 @@ function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
   }
   return (
     <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
-      <video
+      <SmartVideo
         src={url}
         controls
         autoPlay
@@ -153,7 +153,7 @@ function RelatedCard({ v }: { v: Video }) {
         {poster ? (
           <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : info.kind === "file" ? (
-          <video src={`${v.video_url}#t=0.5`} preload="metadata" muted playsInline className="absolute inset-0 h-full w-full object-cover" />
+          <SmartVideo src={`${v.video_url}#t=0.5`} preload="metadata" muted playsInline className="absolute inset-0 h-full w-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-neutral-500"><Play className="h-6 w-6" /></div>
         )}

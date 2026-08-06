@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Img } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 type Props = {
   value: string;
@@ -16,6 +17,7 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
   const [err, setErr] = useState<string | null>(null);
 
   async function handleFile(file: File) {
+    file = await compressImage(file);
     setErr(null);
     setBusy(true);
     try {
@@ -25,7 +27,7 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
       const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Failed to sign URL");
       onChange(signed.signedUrl);
     } catch (e: any) {

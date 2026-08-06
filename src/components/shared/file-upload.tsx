@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Upload, X } from "lucide-react";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 type Props = {
   value: string;
@@ -29,6 +30,7 @@ export function FileUpload({
   const [localName, setLocalName] = useState<string | undefined>(fileName);
 
   async function handleFile(file: File) {
+    file = await compressImage(file);
     setErr(null);
     if (file.size > maxSizeMB * 1024 * 1024) {
       setErr(`File is over ${maxSizeMB}MB`);
@@ -46,7 +48,7 @@ export function FileUpload({
       if (error) throw error;
       const { data: signed, error: sErr } = await supabase.storage
         .from(bucket)
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+        .createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Failed to sign URL");
       setLocalName(file.name);
       onChange(signed.signedUrl, file.name);

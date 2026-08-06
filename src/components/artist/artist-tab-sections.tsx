@@ -12,7 +12,7 @@ import type { LucideIcon } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { createArtworkCheckout } from "@/lib/stripe.functions";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
 
 export function ArtistPostsGrid({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="py-12 text-center text-muted-foreground">No posts yet.</div>;
@@ -32,7 +32,7 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
             </div>
           ) : videoUrl ? (
             <div className="aspect-square overflow-hidden rounded-xl bg-black">
-              <video src={videoUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+              <SmartVideo src={videoUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
             </div>
           ) : (
             <div className="aspect-square rounded-xl bg-neutral-100 p-4 text-sm text-neutral-700 flex items-center justify-center text-center">

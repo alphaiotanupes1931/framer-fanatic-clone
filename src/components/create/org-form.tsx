@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "org";
@@ -39,6 +40,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const uploadImage = async (field: "avatar_url" | "banner_url", file: File) => {
+    file = await compressImage(file);
     if (!me) return;
     const maxMb = field === "banner_url" ? 10 : 5;
     if (file.size > maxMb * 1024 * 1024) { toast.error(`Image must be under ${maxMb}MB`); return; }
@@ -49,7 +51,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       const path = `${me.id}/org-${field}-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       set(field, signed.signedUrl);
       toast.success(field === "banner_url" ? "Background uploaded" : "Logo uploaded");

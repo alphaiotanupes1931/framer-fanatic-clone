@@ -6,6 +6,7 @@ import { ArrowLeft, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
 import { slugify, subtypesFor, ORG_TYPE_LABEL } from "@/lib/categories";
 import { itemHintsFor } from "@/components/org/price-items-section";
 import { Img } from "@/components/shared/smart-img";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 type Neighborhood = { id: string; name: string };
 
@@ -63,6 +64,7 @@ export function OrgCreateDialog({
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const onPickImage = async (file: File) => {
+    file = await compressImage(file);
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) { toast.error("Sign in first"); return; }
@@ -75,7 +77,7 @@ export function OrgCreateDialog({
       const path = `${uid}/org-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       set("avatar_url", signed.signedUrl);
       toast.success("Logo uploaded");
@@ -87,6 +89,7 @@ export function OrgCreateDialog({
   };
 
   const onPickBanner = async (file: File) => {
+    file = await compressImage(file);
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) { toast.error("Sign in first"); return; }
@@ -99,7 +102,7 @@ export function OrgCreateDialog({
       const path = `${uid}/org-banner-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       set("banner_url", signed.signedUrl);
       toast.success("Background uploaded");

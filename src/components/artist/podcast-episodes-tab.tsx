@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, Upload, Loader2, Play, Trash2, Video as VideoIcon } from "lucide-react";
 import { toast } from "sonner";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { SmartAudio, SmartVideo } from "@/components/shared/smart-img";
 
 type Episode = {
   id: string;
@@ -44,6 +46,7 @@ export function PodcastEpisodesTab({ userId, isOwner }: { userId: string; isOwne
   useEffect(() => { load(); }, [userId]);
 
   const uploadFile = async (file: File, kind: "audio" | "video"): Promise<string | null> => {
+    file = await compressImage(file);
     if (file.size > MAX_MB * 1024 * 1024) {
       toast.error(`${kind} must be under ${MAX_MB}MB`);
       return null;
@@ -56,7 +59,7 @@ export function PodcastEpisodesTab({ userId, isOwner }: { userId: string; isOwne
       contentType: file.type,
     });
     if (error) { toast.error(error.message); return null; }
-    const { data: signed } = await supabase.storage.from("podcast-media").createSignedUrl(path, 60 * 60 * 24 * 365);
+    const { data: signed } = await supabase.storage.from("podcast-media").createSignedUrl(path, STORED_URL_TTL);
     return signed?.signedUrl ?? null;
   };
 
@@ -158,11 +161,11 @@ export function PodcastEpisodesTab({ userId, isOwner }: { userId: string; isOwne
                 )}
               </div>
               {ep.video_url ? (
-                <video src={ep.video_url} controls className="mt-3 w-full rounded-lg bg-black" />
+                <SmartVideo src={ep.video_url} controls className="mt-3 w-full rounded-lg bg-black" />
               ) : ep.audio_url ? (
-                <audio src={ep.audio_url} controls className="mt-3 w-full">
+                <SmartAudio src={ep.audio_url} controls className="mt-3 w-full">
                   <Play className="h-4 w-4" />
-                </audio>
+                </SmartAudio>
               ) : null}
             </div>
           ))}
