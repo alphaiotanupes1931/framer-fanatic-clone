@@ -143,24 +143,6 @@ const registry: Record<string, Prefetcher> = {
       return data ?? [];
     },
   },
-  "/stories-legacy": {
-    key: "stories:Discover:newest:All:All Formats:",
-    run: async () => {
-      const { data } = await supabase
-        .from("stories")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .range(0, 11);
-      const list = (data ?? []) as { user_id: string; author?: unknown }[];
-      const ids = Array.from(new Set(list.map((s) => s.user_id)));
-      if (ids.length) {
-        const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-        const byId = new Map(((profs as any[]) || []).map((p) => [p.id, p]));
-        list.forEach((s) => { s.author = byId.get(s.user_id); });
-      }
-      return list;
-    },
-  },
 };
 
 export function prefetchPath(path: string) {
