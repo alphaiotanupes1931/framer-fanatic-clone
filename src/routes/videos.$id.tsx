@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
@@ -8,6 +8,8 @@ import pbLogo from "@/assets/pb-logo.png";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { useVideoOrientation, orientationClass } from "@/hooks/use-video-orientation";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -18,6 +20,7 @@ type Video = {
   id: string; user_id: string; title: string; description: string | null;
   video_url: string; thumbnail_url: string | null; featured: boolean;
   created_at: string; category?: string | null; comments_muted?: boolean;
+  orientation?: string | null; aspect_ratio?: number | null;
   author?: { display_name: string | null; username: string | null; avatar_url?: string | null };
 };
 
@@ -122,8 +125,14 @@ function VideoDetail() {
   );
 }
 
-function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
+function VideoPlayer({ url, poster, video }: { url: string; poster: string | null; video: Video }) {
   const info = parseEmbed(url || "");
+  const orientation = useVideoOrientation({
+    url: info.kind === "file" ? url : null,
+    orientation: video.orientation,
+    aspectRatio: video.aspect_ratio ?? null,
+    probe: info.kind === "file",
+  });
   if (info.kind === "youtube" || info.kind === "vimeo") {
     return (
       <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
@@ -131,15 +140,16 @@ function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
       </div>
     );
   }
+  const portrait = orientation === "portrait";
   return (
-    <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
+    <div className={`relative mx-auto w-full overflow-hidden rounded-2xl bg-black ${orientationClass(orientation)} ${portrait ? "max-w-[420px]" : ""}`}>
       <SmartVideo
         src={url}
         controls
         autoPlay
         playsInline
         poster={poster || undefined}
-        className="absolute inset-0 h-full w-full bg-black object-cover"
+        className={`absolute inset-0 h-full w-full bg-black ${portrait ? "object-contain" : "object-cover"}`}
       />
     </div>
   );
