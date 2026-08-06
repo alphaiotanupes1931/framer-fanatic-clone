@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { AnchorHTMLAttributes, AudioHTMLAttributes, ImgHTMLAttributes, VideoHTMLAttributes } from "react";
 import { useSmartImageUrl } from "@/components/smart-image";
 import { AvatarImage } from "@/components/ui/avatar";
@@ -6,15 +7,20 @@ import { AvatarImage } from "@/components/ui/avatar";
  * Drop-in replacement for <img> that resolves Planet Baltimore storage URLs
  * into short-lived signed URLs at render time. Non-storage URLs pass through.
  */
-export function Img({ src, loading, decoding, ...rest }: ImgHTMLAttributes<HTMLImageElement>) {
+export function Img({ src, loading, decoding, className, ...rest }: ImgHTMLAttributes<HTMLImageElement>) {
   const resolved = useSmartImageUrl(typeof src === "string" ? src : undefined);
+  const [ready, setReady] = useState(false);
+  useEffect(() => { setReady(false); }, [resolved]);
   if (!src) return null;
   return (
     <img
       {...rest}
+      className={`${className ?? ""} transition-opacity duration-200 ${ready ? "opacity-100" : "opacity-0"}`}
       loading={loading ?? "eager"}
       decoding={decoding ?? "async"}
       src={resolved ?? undefined}
+      onLoad={(e) => { setReady(true); rest.onLoad?.(e); }}
+      ref={(el) => { if (el?.complete && el.naturalWidth > 0) setReady(true); }}
     />
   );
 }
