@@ -119,7 +119,7 @@ export function DuesTab({ orgId, ownerId, canManage, me }: { orgId: string; owne
             <div className="text-xs font-medium text-neutral-500">Payout status</div>
             <div className={`mt-1 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${ownerReady ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
               <ShieldCheck className="h-3.5 w-3.5" />
-              {ownerReady ? "Stripe connected" : "Stripe not ready"}
+              {ownerReady ? "Payouts connected" : "Payouts not ready"}
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@ export function DuesTab({ orgId, ownerId, canManage, me }: { orgId: string; owne
 
       {canManage && !ownerReady && (
         <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          Set up Stripe payment under Settings before members can pay dues. Payouts go straight to your bank.
+          Set up payouts under Settings before members can pay dues. Payouts go straight to your bank.
         </div>
       )}
 

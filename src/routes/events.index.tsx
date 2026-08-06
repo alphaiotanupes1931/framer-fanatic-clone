@@ -433,7 +433,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Stripe fees and the platform fee are added on top automatically, you net the
+                  Processing fees and the platform fee are added on top automatically, you net the
                   exact amount you enter.
                 </p>
               </div>

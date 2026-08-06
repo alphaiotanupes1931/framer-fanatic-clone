@@ -213,7 +213,7 @@ function DonatePage() {
                 : `Donate $${(finalCents / 100).toFixed(2)}${interval === "monthly" ? " / month" : interval === "yearly" ? " / year" : ""}`}
             </button>
             <p className="mt-2 text-center text-[11px] text-neutral-500">
-              Secure checkout powered by Stripe. 100% of your contribution goes to {org.name} minus standard processing fees.
+              Secure, encrypted checkout. 100% of your contribution goes to {org.name} minus standard processing fees.
               {interval !== "once" && " You can cancel a recurring donation at any time."}
             </p>
           </div>
