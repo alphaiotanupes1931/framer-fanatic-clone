@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -12,6 +12,7 @@ import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
+import { setMyProfileKind } from "@/lib/profile-kind";
 
 export const Route = createFileRoute("/create-artist")({
   component: CreateArtistPage,
@@ -28,7 +29,6 @@ const CATEGORIES = ["Music", "Visual Art", "Photography", "Film", "Writing", "De
 
 function CreateArtistPage() {
   const me = useCurrentProfile();
-  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -95,8 +95,9 @@ function CreateArtistPage() {
         banner_url: form.banner_url.trim() || null,
       }).eq("id", me.id);
       if (error) throw error;
-      toast.success("Artist profile saved");
-      navigate({ to: "/profile" });
+      await setMyProfileKind("artist");
+      toast.success("Artist profile created");
+      window.location.href = "/profile";
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     } finally {
