@@ -1,0 +1,1 @@
+UPDATE public.site_content SET value = '"#FFFFFF"' WHERE key IN ('features.heading.color','features.subtitle.color');
