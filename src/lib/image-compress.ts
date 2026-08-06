@@ -70,15 +70,36 @@ export async function compressImage(file: File, opts: CompressOptions = {}): Pro
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, 0, 0, tw, th);
 
+    // Preserve transparency: PNG/WebP sources with an alpha channel stay PNG,
+    // everything else re-encodes to JPEG.
+    const keepAlpha = /png|webp/i.test(file.type) && hasAlpha(ctx, tw, th);
+    const outType = keepAlpha ? "image/png" : "image/jpeg";
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/jpeg", quality),
+      canvas.toBlob(resolve, outType, quality),
     );
     if (!blob || blob.size >= file.size) return file;
 
     const base = file.name.replace(/\.[^.]+$/, "") || "image";
-    return new File([blob], `${base}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
+    const ext = keepAlpha ? "png" : "jpg";
+    return new File([blob], `${base}.${ext}`, { type: outType, lastModified: Date.now() });
   } catch {
     return file;
+  }
+}
+
+function hasAlpha(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  try {
+    // Sample a grid rather than every pixel — plenty accurate, far cheaper.
+    const step = Math.max(1, Math.floor(Math.min(w, h) / 32));
+    for (let y = 0; y < h; y += step) {
+      const row = ctx.getImageData(0, y, w, 1).data;
+      for (let x = 3; x < row.length; x += 4 * step) {
+        if (row[x] < 250) return true;
+      }
+    }
+    return false;
+  } catch {
+    return true;
   }
 }
 
