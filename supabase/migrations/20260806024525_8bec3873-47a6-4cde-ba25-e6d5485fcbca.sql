@@ -1,0 +1,1 @@
+UPDATE site_content SET value = '"#d47b5b"'::jsonb WHERE key IN ('creators.headline.line1.color', 'creators.headline.line2.color');
