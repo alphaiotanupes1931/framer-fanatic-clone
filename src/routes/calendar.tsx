@@ -107,6 +107,7 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+  const [dayOpen, setDayOpen] = useState<{ date: Date; events: Ev[] } | null>(null);
   const monthLabel = cursor.toLocaleString(undefined, { month: "long", year: "numeric" });
   const firstDow = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay();
   const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
