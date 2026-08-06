@@ -65,12 +65,12 @@ function DiscoverPage() {
       stories: ((st.data ?? []) as unknown) as StoryRow[],
     };
   });
-  const events = discover?.events ?? [];
-  const artists = discover?.artists ?? [];
-  const groups = discover?.groups ?? [];
-  const businesses = discover?.businesses ?? [];
-  const neighborhoods = discover?.neighborhoods ?? [];
-  const stories = discover?.stories ?? [];
+  const events: EventRow[] = discover?.events ?? [];
+  const artists: Creator[] = discover?.artists ?? [];
+  const groups: Org[] = discover?.groups ?? [];
+  const businesses: Org[] = discover?.businesses ?? [];
+  const neighborhoods: N[] = discover?.neighborhoods ?? [];
+  const stories: StoryRow[] = discover?.stories ?? [];
 
   const s = q.toLowerCase();
   const filterName = <T extends { name?: string; title?: string; display_name?: string | null; username?: string | null }>(x: T) => {
