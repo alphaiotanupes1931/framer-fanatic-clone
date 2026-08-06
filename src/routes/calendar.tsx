@@ -529,14 +529,14 @@ function CalendarPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => setForyouIdx((i) => Math.max(0, i - 1))}
+                  onClick={() => scrollForYou(-1)}
                   className="grid h-7 w-7 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
                   aria-label="Prev"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setForyouIdx((i) => Math.min(Math.max(0, forYou.length - 1), i + 1))}
+                  onClick={() => scrollForYou(1)}
                   className="grid h-7 w-7 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
                   aria-label="Next"
                 >
@@ -549,15 +549,13 @@ function CalendarPage() {
                 No personalized events yet.
               </div>
             ) : (
-              <div className="overflow-hidden">
-                <div
-                  className="flex gap-3 transition-transform duration-300"
-                  style={{ transform: `translateX(calc(-${foryouIdx} * (260px + 0.75rem)))` }}
-                >
-                  {forYou.map((e) => (
-                    <ForYouCard key={e.id} event={e} />
-                  ))}
-                </div>
+              <div
+                ref={forYouRef}
+                className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {forYou.map((e) => (
+                  <ForYouCard key={e.id} event={e} />
+                ))}
               </div>
             )}
           </section>
