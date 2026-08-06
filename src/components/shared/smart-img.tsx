@@ -6,10 +6,17 @@ import { AvatarImage } from "@/components/ui/avatar";
  * Drop-in replacement for <img> that resolves Planet Baltimore storage URLs
  * into short-lived signed URLs at render time. Non-storage URLs pass through.
  */
-export function Img({ src, ...rest }: ImgHTMLAttributes<HTMLImageElement>) {
+export function Img({ src, loading, decoding, ...rest }: ImgHTMLAttributes<HTMLImageElement>) {
   const resolved = useSmartImageUrl(typeof src === "string" ? src : undefined);
   if (!src) return null;
-  return <img {...rest} src={resolved ?? undefined} />;
+  return (
+    <img
+      {...rest}
+      loading={loading ?? "lazy"}
+      decoding={decoding ?? "async"}
+      src={resolved ?? undefined}
+    />
+  );
 }
 
 type AvatarImageProps = React.ComponentProps<typeof AvatarImage>;
