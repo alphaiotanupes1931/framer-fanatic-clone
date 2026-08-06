@@ -10,6 +10,7 @@ import { externalShare } from "@/lib/share-preview";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { readCache, writeCache } from "@/hooks/use-cached-fetch";
+import { useReaction } from "@/hooks/use-reaction";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -29,8 +30,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
   const cached = readCache<{ post: Post; author: Author | null; comments: Comment[] }>(cacheKey);
   const [post, setPost] = useState<Post | null>(cached?.post ?? null);
   const [author, setAuthor] = useState<Author | null>(cached?.author ?? null);
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { liked, saved, setLiked, setSaved } = useReaction(postId, meId ?? undefined);
   const [comments, setComments] = useState<Comment[]>(cached?.comments ?? []);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(!cached);
@@ -44,13 +44,6 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
       const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: [p.user_id] });
       const a = ((profs || [])[0] as Author) || null;
       setAuthor(a);
-      if (meId) {
-        const [{ data: l }, { data: s }] = await Promise.all([
-          supabase.from("post_likes").select("post_id").eq("post_id", postId).eq("user_id", meId).maybeSingle(),
-          supabase.from("post_saves").select("post_id").eq("post_id", postId).eq("user_id", meId).maybeSingle(),
-        ]);
-        setLiked(!!l); setSaved(!!s);
-      }
       const { data: cs } = await supabase.from("post_comments").select("*").eq("post_id", postId).order("created_at", { ascending: true });
       const list = (cs || []) as Comment[];
       const ids = Array.from(new Set(list.map((c) => c.user_id)));
