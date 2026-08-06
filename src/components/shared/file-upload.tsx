@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Upload, X } from "lucide-react";
+import { compressImage } from "@/lib/image-compress";
 
 type Props = {
   value: string;
@@ -29,6 +30,7 @@ export function FileUpload({
   const [localName, setLocalName] = useState<string | undefined>(fileName);
 
   async function handleFile(file: File) {
+    file = await compressImage(file);
     setErr(null);
     if (file.size > maxSizeMB * 1024 * 1024) {
       setErr(`File is over ${maxSizeMB}MB`);

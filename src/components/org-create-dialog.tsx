@@ -6,6 +6,7 @@ import { ArrowLeft, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
 import { slugify, subtypesFor, ORG_TYPE_LABEL } from "@/lib/categories";
 import { itemHintsFor } from "@/components/org/price-items-section";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 type Neighborhood = { id: string; name: string };
 
@@ -63,6 +64,7 @@ export function OrgCreateDialog({
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const onPickImage = async (file: File) => {
+    file = await compressImage(file);
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) { toast.error("Sign in first"); return; }
@@ -87,6 +89,7 @@ export function OrgCreateDialog({
   };
 
   const onPickBanner = async (file: File) => {
+    file = await compressImage(file);
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) { toast.error("Sign in first"); return; }

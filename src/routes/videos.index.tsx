@@ -14,6 +14,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/videos/")({
   component: VideosPage,
@@ -101,6 +102,7 @@ function VideosSignedIn() {
   useEffect(() => { load(); }, []);
 
   const handleFileUpload = async (file: File) => {
+    file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return; }
     if (!file.type.startsWith("video/")) { toast.error("Please choose a video file"); return; }
     const cap = 100 * 1024 * 1024;

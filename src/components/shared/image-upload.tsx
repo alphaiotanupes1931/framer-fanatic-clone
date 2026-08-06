@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 type Props = {
   value: string;
@@ -16,6 +17,7 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
   const [err, setErr] = useState<string | null>(null);
 
   async function handleFile(file: File) {
+    file = await compressImage(file);
     setErr(null);
     setBusy(true);
     try {

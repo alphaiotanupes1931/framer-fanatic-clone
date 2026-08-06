@@ -11,6 +11,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout } from "@/lib/stripe.functions";
 import { EventImage } from "@/components/event-image";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { compressImage } from "@/lib/image-compress";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -256,6 +257,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   }, [events, query, cat]);
 
   const onPickImage = async (file: File) => {
+    file = await compressImage(file);
     if (!me) return;
     setUploading(true);
     try {

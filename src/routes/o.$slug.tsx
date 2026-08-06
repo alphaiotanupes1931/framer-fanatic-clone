@@ -19,6 +19,7 @@ import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
@@ -153,6 +154,7 @@ function OrgProfile() {
     : ASSOC_TABS;
 
   const handleFileUpload = async (field: "avatar_url" | "banner_url", file: File) => {
+    file = await compressImage(file);
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
     setUploading(field);
@@ -1243,6 +1245,7 @@ function TierForm({ orgId, initial, onCancel, onSaved }: {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const upload = async (file: File) => {
+    file = await compressImage(file);
     if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
     setUploading(true);
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -1543,6 +1546,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
   };
 
   const uploadFile = async (file: File) => {
+    file = await compressImage(file);
     const isVideo = file.type.startsWith("video/");
     const cap = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > cap) { toast.error(`${isVideo ? "Video" : "Image"} must be under ${cap / 1024 / 1024}MB`); return; }

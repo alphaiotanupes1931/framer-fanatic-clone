@@ -11,6 +11,7 @@ import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { compressAvatar } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-artist")({
   component: CreateArtistPage,
@@ -43,6 +44,7 @@ function CreateArtistPage() {
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const uploadAvatar = async (file: File) => {
+    file = await compressAvatar(file);
     if (!me) { toast.error("Please sign in"); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
     setUploading(true);

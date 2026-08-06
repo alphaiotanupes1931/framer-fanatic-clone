@@ -28,6 +28,7 @@ import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { ExternalShareDialog } from "@/components/external-share-dialog";
 import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { compressAvatar, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -232,6 +233,7 @@ function ProfilePage() {
   };
 
   const uploadBanner = async (file: File) => {
+    file = await compressImage(file);
     if (!profile) return;
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image is too large (max 10MB)");
@@ -254,6 +256,7 @@ function ProfilePage() {
   };
 
   const uploadAvatar = async (file: File) => {
+    file = await compressAvatar(file);
     if (!profile) return;
     if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
     setUploadingAvatar(true);

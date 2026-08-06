@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-post")({
   component: CreatePostPage,
@@ -95,6 +96,7 @@ function CreatePostPage() {
   }, [excludeQuery, excluded]);
 
   const uploadTo = async (bucket: "post-media", file: File, kind: "image" | "video") => {
+    file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return null; }
     const cap = kind === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
     if (file.size > cap) { toast.error(`${kind === "image" ? "Image" : "Video"} must be under ${cap / 1024 / 1024}MB`); return null; }

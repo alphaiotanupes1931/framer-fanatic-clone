@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-story")({
   component: CreateStoryPage,
@@ -60,6 +61,7 @@ function CreateStoryPage() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const upload = useCallback(async (file: File) => {
+    file = await compressImage(file);
     if (!me) throw new Error("Sign in required");
     const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const path = `${me.id}/${crypto.randomUUID()}.${ext}`;

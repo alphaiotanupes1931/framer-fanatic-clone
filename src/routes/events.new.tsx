@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { useEventImageUrl } from "@/components/event-image";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
@@ -68,6 +69,7 @@ function NewEventPage() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const onPickImage = async (file: File) => {
+    file = await compressImage(file);
     if (!me) return;
     setUploading(true);
     try {
@@ -85,6 +87,7 @@ function NewEventPage() {
   };
 
   const onPickVideo = async (file: File) => {
+    file = await compressImage(file);
     if (!me) return;
     if (file.size > 200 * 1024 * 1024) {
       toast.error("Video must be under 200MB");

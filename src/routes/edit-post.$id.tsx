@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, ImagePlus, Loader2, Save, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/edit-post/$id")({
   component: EditPostPage,
@@ -86,6 +87,7 @@ function EditPostPage() {
   }, [id, navigate]);
 
   const uploadFile = async (file: File) => {
+    file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return null; }
     const kind: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
     const cap = kind === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;

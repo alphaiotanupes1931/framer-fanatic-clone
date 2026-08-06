@@ -5,6 +5,7 @@ import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { ArrowLeft, Upload } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/edit-profile")({
   head: () => ({ meta: [{ title: "Edit Profile - Planet Baltimore" }, { name: "robots", content: "noindex" }] }),
@@ -53,6 +54,7 @@ function EditProfilePage() {
   }, [me?.id]);
 
   const uploadImage = async (file: File, kind: "avatar" | "banner") => {
+    file = await compressImage(file);
     if (!me?.id) return;
     if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
     setUploading(kind);
