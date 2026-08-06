@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -12,6 +12,8 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { BaltimoreMap } from "@/components/baltimore-map";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 import { Img } from "@/components/shared/smart-img";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
+import { prefetchImageUrls } from "@/components/smart-image";
 
 function prettyLabel(v: string) {
   return v
@@ -47,33 +49,44 @@ export function OrgListPage({
   const { isArtist, isAdmin } = useUserRole();
   const canCreate = true;
   const subs = subtypesFor(type);
-  const [items, setItems] = useState<Org[]>([]);
   const [q, setQ] = useState("");
   const [sub, setSub] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<"newest" | "followed">("newest");
   const [view, setView] = useState<"list" | "map">("list");
 
-  const load = async () => {
-    setLoading(true);
-    let qb = supabase.from("organizations").select("*").eq("type", type);
-    qb = qb.order("created_at", { ascending: false });
-    if (sub) qb = qb.eq("subtype", sub);
-    const { data } = await qb;
-    let list = (data ?? []) as Org[];
-    if (q.trim()) {
-      const needle = q.toLowerCase();
-      list = list.filter((o) => o.name.toLowerCase().includes(needle) || (o.bio ?? "").toLowerCase().includes(needle) || (o.neighborhood ?? "").toLowerCase().includes(needle));
+  // One fetch per org type, cached across visits. Search, subtype and sort all
+  // filter that list in memory so typing and tab switching are instant.
+  const { data: all, loading, setData, refetch } = useCachedFetch<Org[]>(`orglist:${type}`, async () => {
+    const { data } = await supabase
+      .from("organizations")
+      .select("*")
+      .eq("type", type)
+      .order("created_at", { ascending: false });
+    const list = (data ?? []) as Org[];
+    prefetchImageUrls(list.slice(0, 12).flatMap((o) => [o.avatar_url, o.banner_url]));
+    return list;
+  });
+
+  const items = useMemo(() => {
+    let list = all ?? [];
+    if (sub) list = list.filter((o) => o.subtype === sub);
+    const needle = q.trim().toLowerCase();
+    if (needle) {
+      list = list.filter(
+        (o) =>
+          o.name.toLowerCase().includes(needle) ||
+          (o.bio ?? "").toLowerCase().includes(needle) ||
+          (o.neighborhood ?? "").toLowerCase().includes(needle),
+      );
     }
     // Prioritize orgs that have a picture (avatar or banner) so they surface first
-    list.sort((a, b) => {
+    return [...list].sort((a, b) => {
       const ap = (a.avatar_url ? 2 : 0) + (a.banner_url ? 1 : 0);
       const bp = (b.avatar_url ? 2 : 0) + (b.banner_url ? 1 : 0);
       return bp - ap;
     });
-    setItems(list); setLoading(false);
-  };
+  }, [all, sub, q, sort]);
 
   const handleDelete = async (e: React.MouseEvent, o: Org) => {
     e.preventDefault();
@@ -81,12 +94,9 @@ export function OrgListPage({
     if (!confirm(`Delete "${o.name}"? This can be restored from Admin Trash.`)) return;
     const { error } = await supabase.rpc("admin_delete_organization", { _id: o.id });
     if (error) { toast.error(error.message); return; }
-    setItems((prev) => prev.filter((x) => x.id !== o.id));
+    setData((prev) => (prev ?? []).filter((x) => x.id !== o.id));
     toast.success("Deleted");
   };
-
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sub, sort]);
-  useEffect(() => { const t = setTimeout(() => void load(), 200); return () => clearTimeout(t); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [q]);
 
   return (
     <AppLayout title={title} subtitle={subtitle}>
@@ -255,7 +265,7 @@ export function OrgListPage({
           </div>
         )}
       </div>
-      <OrgCreateDialog type={type} open={open} onClose={() => { setOpen(false); void load(); }} />
+      <OrgCreateDialog type={type} open={open} onClose={() => { setOpen(false); refetch(); }} />
     </AppLayout>
   );
 }

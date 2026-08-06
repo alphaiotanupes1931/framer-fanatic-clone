@@ -77,6 +77,28 @@ const registry: Record<string, Prefetcher> = {
       return data ?? [];
     },
   },
+  "/businesses": {
+    key: "orglist:business",
+    run: async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("*")
+        .eq("type", "business")
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  },
+  "/arts-orgs": {
+    key: "orglist:arts_org",
+    run: async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("*")
+        .eq("type", "arts_org")
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  },
   "/groups": {
     key: "orgs:group:newest",
     run: async () => {
