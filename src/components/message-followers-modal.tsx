@@ -29,16 +29,20 @@ export function MessageFollowersModal({ open, onClose }: { open: boolean; onClos
 
   useEffect(() => {
     if (!open || !me?.id) return;
-    setLoading(true);
-    (async () => {
-      const { data: rows } = await supabase.from("follows").select("follower_id").eq("following_id", me.id);
-      const ids = (rows ?? []).map((r: { follower_id: string }) => r.follower_id);
-      if (ids.length === 0) { setFollowers([]); setLoading(false); return; }
-      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-      setFollowers((profs as Follower[]) ?? []);
-      setSelected(Object.fromEntries((profs ?? []).map((p: Follower) => [p.id, true])));
+    const apply = (list: Follower[]) => {
+      setFollowers(list);
+      setSelected(Object.fromEntries(list.map((p) => [p.id, true])));
+    };
+    const snap = getConnectionsSnapshot(me.id);
+    if (snap) apply(snap.followers as Follower[]);
+    setLoading(!snap);
+    let cancelled = false;
+    void loadConnections(me.id).then((s) => {
+      if (cancelled) return;
+      apply(s.followers as Follower[]);
       setLoading(false);
-    })();
+    });
+    return () => { cancelled = true; };
   }, [open, me?.id]);
 
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
