@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, MapPin, MessageCircle, Trash2, Send, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { ShareButtons } from "@/components/shared/share-buttons";
 
 type Listing = {
   id: string; seller_id: string; title: string; description: string | null;
