@@ -27,7 +27,6 @@ const themeScript = `
   })();
 `;
 
-const SITE_ORIGIN = "https://planetbaltimore.com";
 
 function NotFoundComponent() {
   return (
