@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
@@ -31,15 +32,12 @@ const CATEGORIES = ["All", ...GROUP_SUBTYPES] as const;
 export function GroupsPage() {
   const { isArtist, isAdmin } = useUserRole();
   const canCreate = true;
-  const [items, setItems] = useState<Org[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<"newest" | "members">("newest");
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("All");
 
-  const load = async () => {
-    setLoading(true);
+  const { data, loading, refetch } = useCachedFetch<Org[]>(`orgs:group:${sort}`, async () => {
     let qb = supabase.from("organizations").select("*").eq("type", "group");
     if (sort === "members") qb = qb.order("member_count", { ascending: false, nullsFirst: false });
     else qb = qb.order("created_at", { ascending: false });
@@ -51,10 +49,10 @@ export function GroupsPage() {
       const bHas = b.avatar_url || b.banner_url ? 1 : 0;
       return bHas - aHas;
     });
-    setItems(rows);
-    setLoading(false);
-  };
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sort]);
+    return rows;
+  });
+  const items = useMemo(() => data ?? [], [data]);
+  const load = refetch;
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();

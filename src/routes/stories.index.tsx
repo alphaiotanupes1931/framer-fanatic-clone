@@ -14,6 +14,18 @@ import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
+import { readCache, writeCache, hasCache } from "@/hooks/use-cached-fetch";
+
+function storyCacheKey(o: { tab: string; sort: string; filter: string; storyFormat: string; search: string }) {
+  return `stories:${o.tab}:${o.sort}:${o.filter}:${o.storyFormat}:${o.search}`;
+}
+const INITIAL_STORY_KEY = storyCacheKey({
+  tab: "Discover",
+  sort: "newest",
+  filter: "All",
+  storyFormat: "All Formats",
+  search: "",
+});
 
 function StoryCover({ storyId, url }: { storyId: string; url: string | null }) {
   const [error, setError] = useState(false);
@@ -214,13 +226,13 @@ function AnonStories() {
 function StoriesSignedIn() {
   const me = useCurrentProfile();
   const { isAdmin } = useUserRole();
-  const [stories, setStories] = useState<Story[]>([]);
+  const [stories, setStories] = useState<Story[]>(() => readCache<Story[]>(INITIAL_STORY_KEY) ?? []);
   const [filter, setFilter] = useState("All");
   const [tab, setTab] = useState<(typeof TABS)[number]>("Discover");
   const [storyFormat, setStoryFormat] = useState<string>("All Formats");
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentsFor, setCommentsFor] = useState<Story | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !hasCache(INITIAL_STORY_KEY));
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [sort, setSort] = useState<SortKey>("newest");
@@ -277,10 +289,19 @@ function StoriesSignedIn() {
   };
 
   const load = async () => {
-    setLoading(true);
+    const key = storyCacheKey({ tab, sort, filter, storyFormat, search });
+    const cached = readCache<Story[]>(key);
+    if (cached) {
+      // Paint the previous result immediately, then refresh silently.
+      setStories(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     setHasMore(true);
     const { data } = await buildQuery(0, PAGE - 1);
     const list = await hydrateAuthors((data || []) as Story[]);
+    writeCache(key, list);
     setStories(list);
     setHasMore(list.length === PAGE);
     if (me && list.length) {

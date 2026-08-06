@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, CheckCircle2 } from "lucide-react";
@@ -19,42 +20,31 @@ type Org = {
 export function CommunityAssociationsPage() {
   const { isArtist, isAdmin } = useUserRole();
   const canCreate = true;
-  const [items, setItems] = useState<Org[]>([]);
   const [q, setQ] = useState("");
   const [subtype, setSubtype] = useState<string>("All");
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
+  // One cached fetch of every association; search and type filters run locally
+  // so switching filters or returning to this tab is instant.
+  const { data, loading, refetch } = useCachedFetch<Org[]>("orgs:community_assoc", async () => {
     const { data } = await supabase
       .from("organizations")
       .select("*")
       .eq("type", "community_assoc")
       .order("name", { ascending: true });
-    let list = (data ?? []) as Org[];
-    if (subtype !== "All") {
-      list = list.filter((o) => (o.subtype ?? "").toLowerCase() === subtype.toLowerCase());
-    }
-    if (q.trim()) {
-      const needle = q.toLowerCase();
-      list = list.filter(
-        (o) =>
-          o.name.toLowerCase().includes(needle) ||
-          (o.bio ?? "").toLowerCase().includes(needle) ||
-          (o.neighborhood ?? "").toLowerCase().includes(needle),
-      );
-    }
-    setItems(list);
-    setLoading(false);
-  };
-  useEffect(() => {
-    void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
-  useEffect(() => {
-    const t = setTimeout(() => void load(), 200);
-    return () => clearTimeout(t); /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [q, subtype]);
+    return (data ?? []) as Org[];
+  });
+  const all = data ?? [];
+  const needle = q.trim().toLowerCase();
+  const items = all.filter((o) => {
+    if (subtype !== "All" && (o.subtype ?? "").toLowerCase() !== subtype.toLowerCase()) return false;
+    if (!needle) return true;
+    return (
+      o.name.toLowerCase().includes(needle) ||
+      (o.bio ?? "").toLowerCase().includes(needle) ||
+      (o.neighborhood ?? "").toLowerCase().includes(needle)
+    );
+  });
 
   return (
     <AppLayout title="Community Associations" subtitle="Official community governance hubs for Baltimore neighborhoods.">
@@ -160,7 +150,7 @@ export function CommunityAssociationsPage() {
           </div>
         )}
       </div>
-      <OrgCreateDialog type="community_assoc" open={open} onClose={() => { setOpen(false); void load(); }} />
+      <OrgCreateDialog type="community_assoc" open={open} onClose={() => { setOpen(false); refetch(); }} />
     </AppLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -36,12 +37,6 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 function DiscoverPage() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<Cat>("All");
-  const [events, setEvents] = useState<EventRow[]>([]);
-  const [artists, setArtists] = useState<Creator[]>([]);
-  const [groups, setGroups] = useState<Org[]>([]);
-  const [businesses, setBusinesses] = useState<Org[]>([]);
-  const [neighborhoods, setNeighborhoods] = useState<N[]>([]);
-  const [stories, setStories] = useState<StoryRow[]>([]);
   const [seed, setSeed] = useState(() => Math.floor(Date.now() / (10 * 60 * 1000)));
 
   useEffect(() => {
@@ -51,10 +46,9 @@ function DiscoverPage() {
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const nowIso = new Date().toISOString();
-      const [evUp, evPast, ar, gr, bu, ne, st] = await Promise.all([
+  const { data: discover } = useCachedFetch("discover:all", async () => {
+    const nowIso = new Date().toISOString();
+    const [evUp, evPast, ar, gr, bu, ne, st] = await Promise.all([
         supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(40),
         supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(20),
         supabase.rpc("public_creators", { lim: 60 }),
@@ -62,17 +56,22 @@ function DiscoverPage() {
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(40),
         supabase.from("neighborhoods").select("id,name,region").order("name").limit(80),
         supabase.from("stories").select("id,title,excerpt,cover_url,created_at,user_id,read_minutes,format").eq("status", "published").order("created_at", { ascending: false }).limit(40),
-      ]);
-      const up = (evUp.data ?? []) as EventRow[];
-      const past = (evPast.data ?? []) as EventRow[];
-      setEvents([...up, ...past]);
-      setArtists(((ar.data ?? []) as unknown) as Creator[]);
-      setGroups(((gr.data ?? []) as unknown) as Org[]);
-      setBusinesses(((bu.data ?? []) as unknown) as Org[]);
-      setNeighborhoods(((ne.data ?? []) as unknown) as N[]);
-      setStories(((st.data ?? []) as unknown) as StoryRow[]);
-    })();
-  }, []);
+    ]);
+    return {
+      events: [...((evUp.data ?? []) as EventRow[]), ...((evPast.data ?? []) as EventRow[])],
+      artists: ((ar.data ?? []) as unknown) as Creator[],
+      groups: ((gr.data ?? []) as unknown) as Org[],
+      businesses: ((bu.data ?? []) as unknown) as Org[],
+      neighborhoods: ((ne.data ?? []) as unknown) as N[],
+      stories: ((st.data ?? []) as unknown) as StoryRow[],
+    };
+  });
+  const events: EventRow[] = discover?.events ?? [];
+  const artists: Creator[] = discover?.artists ?? [];
+  const groups: Org[] = discover?.groups ?? [];
+  const businesses: Org[] = discover?.businesses ?? [];
+  const neighborhoods: N[] = discover?.neighborhoods ?? [];
+  const stories: StoryRow[] = discover?.stories ?? [];
 
   const s = q.toLowerCase();
   const filterName = <T extends { name?: string; title?: string; display_name?: string | null; username?: string | null }>(x: T) => {

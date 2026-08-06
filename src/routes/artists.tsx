@@ -8,6 +8,7 @@ import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-prev
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
@@ -72,35 +73,32 @@ function FindCreatorPage() {
   const { loading: authLoading, signedIn } = useAuthState();
   const { isAdmin } = useUserRole();
   const [q, setQ] = useState("");
-  const [results, setResults] = useState<Creator[]>([]);
-  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>("All");
   const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
+
+  const { data, loading, setData } = useCachedFetch<Creator[]>(
+    `artists:${sort}:${q}`,
+    async () => {
+      const { data } = await supabase.rpc("public_artists", {
+        lim: 96,
+        search: q || undefined,
+        sort_by: sort,
+      });
+      return ((data as (Creator & { created_at: string })[]) ?? []) as Creator[];
+    },
+    { debounceMs: 200 },
+  );
+  const results: Creator[] = data ?? [];
+  const setResults = setData;
 
   async function handleAdminDelete(c: Creator) {
     const name = c.display_name || c.username || "this profile";
     if (!window.confirm(`Delete ${name}? This permanently removes their account.`)) return;
     const { error } = await supabase.rpc("admin_delete_profile", { _id: c.id });
     if (error) { toast.error(error.message); return; }
-    setResults((prev) => prev.filter((x) => x.id !== c.id));
+    setResults((prev: Creator[] | undefined) => (prev ?? []).filter((x) => x.id !== c.id));
     toast.success("Profile deleted");
   }
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    const t = setTimeout(async () => {
-      const { data } = await supabase.rpc("public_artists", {
-        lim: 96,
-        search: q || undefined,
-        sort_by: sort,
-      });
-      if (cancelled) return;
-      setResults(((data as (Creator & { created_at: string })[]) ?? []) as Creator[]);
-      setLoading(false);
-    }, 200);
-    return () => { cancelled = true; clearTimeout(t); };
-  }, [q, sort]);
 
   const filtered = results.filter((c) => matchesCategory(c, category));
 
