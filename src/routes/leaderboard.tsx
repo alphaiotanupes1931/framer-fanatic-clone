@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { FileText, MessageCircle, Heart, Gift } from "lucide-react";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 
 export const Route = createFileRoute("/leaderboard")({
   component: LeaderboardPage,
@@ -21,25 +22,46 @@ type Row = {
 
 function LeaderboardPage() {
   const auth = useAuthState();
-  const [rows, setRows] = useState<Row[]>([]);
-  useEffect(() => {
-    if (!auth.signedIn) return;
-    (async () => {
-    const { data: profs } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").limit(100);
-    const list = profs || [];
-    const results: Row[] = await Promise.all(list.map(async (p: any) => {
-      const { count: posts } = await supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", p.id);
-      const { data: postRows } = await supabase.from("posts").select("likes_count, comments_count").eq("user_id", p.id);
-      const { count: referrals } = await supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", p.id);
-      const likes = (postRows || []).reduce((a, r: any) => a + (r.likes_count || 0), 0);
-      const comments = (postRows || []).reduce((a, r: any) => a + (r.comments_count || 0), 0);
-      const points = (posts || 0) * 5 + comments * 2 + likes * 1 + (referrals || 0) * 5;
-      return { ...p, posts: posts || 0, comments, likes, points };
-    }));
-    results.sort((a, b) => b.points - a.points);
-    setRows(results.slice(0, 100));
-    })();
-  }, [auth.signedIn]);
+  // Previously this ran three queries per profile (300+ round trips). Now it
+  // pulls the raw rows once and aggregates in memory, and the result is cached
+  // so revisiting the tab is instant.
+  const { data: cachedRows } = useCachedFetch<Row[]>(
+    auth.signedIn ? "leaderboard:top100" : "leaderboard:anon",
+    async () => {
+      if (!auth.signedIn) return [];
+      const [{ data: profs }, { data: postRows }, { data: refRows }] = await Promise.all([
+        (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").limit(100),
+        supabase.from("posts").select("user_id, likes_count, comments_count").limit(5000),
+        supabase.from("profiles").select("referred_by").not("referred_by", "is", null).limit(5000),
+      ]);
+      const stats = new Map<string, { posts: number; likes: number; comments: number }>();
+      for (const r of (postRows || []) as any[]) {
+        const s = stats.get(r.user_id) || { posts: 0, likes: 0, comments: 0 };
+        s.posts += 1;
+        s.likes += r.likes_count || 0;
+        s.comments += r.comments_count || 0;
+        stats.set(r.user_id, s);
+      }
+      const refs = new Map<string, number>();
+      for (const r of (refRows || []) as any[]) {
+        if (r.referred_by) refs.set(r.referred_by, (refs.get(r.referred_by) || 0) + 1);
+      }
+      const results: Row[] = ((profs || []) as any[]).map((p) => {
+        const s = stats.get(p.id) || { posts: 0, likes: 0, comments: 0 };
+        const referrals = refs.get(p.id) || 0;
+        return {
+          ...p,
+          posts: s.posts,
+          comments: s.comments,
+          likes: s.likes,
+          points: s.posts * 5 + s.comments * 2 + s.likes + referrals * 5,
+        };
+      });
+      results.sort((a, b) => b.points - a.points);
+      return results.slice(0, 100);
+    },
+  );
+  const rows = cachedRows ?? [];
 
   if (auth.loading) return null;
   if (!auth.signedIn) {
