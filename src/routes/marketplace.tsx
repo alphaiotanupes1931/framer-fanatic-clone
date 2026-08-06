@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 
 type Listing = {
   id: string; seller_id: string; title: string; description: string | null;
@@ -28,19 +29,20 @@ export const Route = createFileRoute("/marketplace")({
 
 function MarketplacePage() {
   const me = useCurrentProfile();
-  const [items, setItems] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: cached, loading, setData, refetch } = useCachedFetch<Listing[]>(
+    "marketplace:active",
+    async () => {
+      const { data } = await supabase.from("marketplace_listings").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(120);
+      return (data || []) as Listing[];
+    },
+  );
+  const items = cached ?? [];
+  const setItems = (next: Listing[]) => setData(next);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
   const [open, setOpen] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
-    const { data } = await supabase.from("marketplace_listings").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(120);
-    setItems((data || []) as Listing[]);
-    setLoading(false);
-  };
-  useEffect(() => { void load(); }, []);
+  const load = () => refetch();
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
