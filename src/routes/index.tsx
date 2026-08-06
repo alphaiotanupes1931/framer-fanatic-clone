@@ -197,13 +197,13 @@ function Nav() {
 
 function Hero() {
   const { content } = useSiteContent();
-  const line1 = siteText(content, "hero.line1");
-  const line2 = siteText(content, "hero.line2");
+  const line1 = siteText(content, "hero.line1").replace(/\.$/, "");
+  const line2 = siteText(content, "hero.line2").replace(/\.$/, "");
   const subtitle = siteText(content, "hero.subtitle");
   const ctaLabel = siteText(content, "hero.cta");
   const heroText = siteText(content, "colors.heroText").trim() || "#FCFCFA";
-  const line1Color = siteColor(content, "hero.line1");
-  const line2Color = siteColor(content, "hero.line2");
+  const line1Color = siteColor(content, "hero.line1") || "#E0C4A0";
+  const line2Color = siteColor(content, "hero.line2") || "#E0C4A0";
   const subtitleColor = siteColor(content, "hero.subtitle");
   const ctaColor = siteColor(content, "hero.cta");
   return (
@@ -220,7 +220,7 @@ function Hero() {
       {/* Headline + sub + CTAs */}
       <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10" style={{ color: heroText }}>
         <div className="font-display font-medium text-[clamp(2rem,10vw,11rem)] leading-[0.95] md:leading-[0.88] tracking-[-0.03em] md:tracking-[-0.045em] break-words">
-          <AnimatedHeadline lines={[line1, line2]} colors={[line1Color || undefined, line2Color || undefined]} />
+          <AnimatedHeadline lines={[line1, line2]} colors={[line1Color, line2Color]} />
         </div>
 
         <motion.div
