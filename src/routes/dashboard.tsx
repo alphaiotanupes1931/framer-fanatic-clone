@@ -157,17 +157,10 @@ function Dashboard() {
           isNew: !followedIds.has(e.user_id),
         }));
 
-      // Weave: stories dominate. Every 3 stories drop a post; every 6 stories drop an event.
-      const merged: FeedItem[] = [];
-      let pi = 0, ei = 0;
-      storyStream.forEach((item, idx) => {
-        merged.push(item);
-        if ((idx + 1) % 3 === 0 && pi < postStream.length) merged.push(postStream[pi++]);
-        if ((idx + 1) % 3 === 0 && pi < postStream.length) merged.push(postStream[pi++]);
-        if ((idx + 1) % 6 === 0 && ei < eventStream.length) merged.push(eventStream[ei++]);
-      });
-      while (pi < postStream.length) merged.push(postStream[pi++]);
-      while (ei < eventStream.length) merged.push(eventStream[ei++]);
+      // Strict newest -> oldest across all content types.
+      const merged: FeedItem[] = [...storyStream, ...postStream, ...eventStream].sort(
+        (a, b) => +new Date(b.date) - +new Date(a.date),
+      );
       return merged.slice(0, 60);
     }
 
@@ -210,13 +203,10 @@ function Dashboard() {
     return shuffleSeed(all, dayOfYear).slice(0, 40);
   }, [activeFilter, posts, stories, events, follows, currentUser]);
 
-  const orderedFeedItems = useMemo(() => [...feedItems].sort((a, b) => {
-    const aPinned = a.type !== "event" && !!a.data.featured;
-    const bPinned = b.type !== "event" && !!b.data.featured;
-    if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
-    if (aPinned && bPinned) return +new Date(b.data.featured_at || b.date) - +new Date(a.data.featured_at || a.date);
-    return 0;
-  }), [feedItems]);
+  const orderedFeedItems = useMemo(
+    () => [...feedItems].sort((a, b) => +new Date(b.date) - +new Date(a.date)),
+    [feedItems],
+  );
   const isEmpty = !isLoading && orderedFeedItems.length === 0;
   const visibleItems = orderedFeedItems.slice(0, visibleCount);
   const hasMore = visibleCount < orderedFeedItems.length;
