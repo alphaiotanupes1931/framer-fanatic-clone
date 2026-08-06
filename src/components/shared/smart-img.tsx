@@ -12,7 +12,7 @@ export function Img({ src, loading, decoding, ...rest }: ImgHTMLAttributes<HTMLI
   return (
     <img
       {...rest}
-      loading={loading ?? "lazy"}
+      loading={loading ?? "eager"}
       decoding={decoding ?? "async"}
       src={resolved ?? undefined}
     />
