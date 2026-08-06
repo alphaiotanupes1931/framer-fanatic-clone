@@ -57,7 +57,6 @@ function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
-  const [working, setWorking] = useState(false);
   const [tab, setTab] = useState<ArtistTabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
@@ -342,7 +341,6 @@ function PublicProfilePage() {
           {!isSelf && (
             <button
               onClick={toggleFollow}
-              disabled={working}
               className={`inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold disabled:opacity-60 ${
                 isFollowing ? "bg-white text-neutral-700" : "bg-white text-neutral-800 hover:text-[#d4580a]"
               }`}
