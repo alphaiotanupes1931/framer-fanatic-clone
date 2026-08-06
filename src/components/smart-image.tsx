@@ -111,9 +111,9 @@ let flushScheduled = false;
 function scheduleFlush() {
   if (flushScheduled) return;
   flushScheduled = true;
-  // One tick of coalescing: every image mounted in the same render pass
-  // shares a single signing request per bucket.
-  setTimeout(flushQueues, 12);
+  // Coalesce within the current task only: every image mounted in the same
+  // render pass shares one signing request per bucket, with no added delay.
+  queueMicrotask(() => void flushQueues());
 }
 
 async function flushQueues() {
@@ -220,11 +220,15 @@ export function useSmartImageUrl(src: string | null | undefined, bucketHint?: st
   // flashing empty for a round trip.
   const [url, setUrl] = useState<string | null>(() => resolveSync(src, bucketHint));
   const lastSrc = useRef(src);
+  const lastUrl = useRef<string | null>(url);
 
   if (lastSrc.current !== src) {
     lastSrc.current = src;
     const immediate = resolveSync(src, bucketHint);
-    if (immediate !== url) setUrl(immediate);
+    // Only swap synchronously when we already have something to show, so the
+    // image never blinks back to an empty box while the next URL resolves.
+    if (immediate && immediate !== url) setUrl(immediate);
+    else if (!src) setUrl(null);
   }
 
   useEffect(() => {
@@ -246,6 +250,7 @@ export function useSmartImageUrl(src: string | null | undefined, bucketHint?: st
     };
   }, [src, bucketHint]);
 
+  if (url) lastUrl.current = url;
   return url;
 }
 
