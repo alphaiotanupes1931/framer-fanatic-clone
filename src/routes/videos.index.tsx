@@ -78,18 +78,16 @@ function AnonVideos() {
 
 function VideosSignedIn() {
   const me = useCurrentProfile();
-  const [vids, setVids] = useState<Video[]>([]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
   const UPLOAD_CATEGORIES = VIDEO_CATEGORIES.filter((c) => c !== "All");
   const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "" });
-  const [loaded, setLoaded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
 
-  const load = async () => {
+  const { data: vidsData, loading: vidsLoading, refetch: load } = useCachedFetch<Video[]>("videos:list", async () => {
     const { data } = await supabase.from("videos").select("*").order("created_at", { ascending: false }).limit(50);
     const list = (data || []) as Video[];
     const ids = Array.from(new Set(list.map((v) => v.user_id)));
@@ -98,10 +96,10 @@ function VideosSignedIn() {
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((v) => { v.author = byId.get(v.user_id) as any; });
     }
-    setVids(list);
-    setLoaded(true);
-  };
-  useEffect(() => { load(); }, []);
+    return list;
+  });
+  const vids: Video[] = vidsData ?? [];
+  const loaded = !vidsLoading;
 
   const handleFileUpload = async (file: File) => {
     file = await compressImage(file);
