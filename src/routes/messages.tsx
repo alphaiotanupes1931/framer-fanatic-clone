@@ -547,7 +547,7 @@ function MessagesPage() {
                           const raw = c.last_message_preview || "";
                           const shared = parseSharePreview(raw);
                           if (shared) {
-                            const label = shared.preview.type === "story" ? "story" : shared.preview.type === "event" ? "event" : "post";
+                            const label = shared.preview.type === "story" ? "story" : shared.preview.type === "event" ? "event" : shared.preview.type === "video" ? "video" : "post";
                             return `Shared a ${label}${shared.preview.title ? `: ${shared.preview.title}` : ""}`;
                           }
                           if (raw.startsWith("::share::")) {
