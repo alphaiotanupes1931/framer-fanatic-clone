@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
+import { prefetchImageUrls } from "@/components/smart-image";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -97,6 +98,8 @@ function VideosSignedIn() {
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((v) => { v.author = byId.get(v.user_id) as any; });
     }
+    // Warm poster frames so the grid paints without grey placeholders.
+    prefetchImageUrls(list.map((v) => v.thumbnail_url));
     return list;
   });
   const vids: Video[] = vidsData ?? [];

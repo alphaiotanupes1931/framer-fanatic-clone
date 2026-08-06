@@ -15,6 +15,7 @@ import { stripHtml } from "@/lib/text-utils";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
 import { readCache, writeCache, hasCache } from "@/hooks/use-cached-fetch";
+import { prefetchImageUrls } from "@/components/smart-image";
 
 function storyCacheKey(o: { tab: string; sort: string; filter: string; storyFormat: string; search: string }) {
   return `stories:${o.tab}:${o.sort}:${o.filter}:${o.storyFormat}:${o.search}`;
@@ -303,6 +304,7 @@ function StoriesSignedIn() {
     const list = await hydrateAuthors((data || []) as Story[]);
     writeCache(key, list);
     setStories(list);
+    prefetchImageUrls(list.map((s) => s.cover_url));
     setHasMore(list.length === PAGE);
     if (me && list.length) {
       const { data: likes } = await supabase
@@ -320,6 +322,7 @@ function StoriesSignedIn() {
     const from = stories.length;
     const { data } = await buildQuery(from, from + PAGE - 1);
     const list = await hydrateAuthors((data || []) as Story[]);
+    prefetchImageUrls(list.map((s) => s.cover_url));
     setStories((cur) => {
       const seen = new Set(cur.map((x) => x.id));
       const dedup = list.filter((x) => !seen.has(x.id));

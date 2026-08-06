@@ -8,6 +8,8 @@ import { timeAgo } from "@/lib/text-utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { prefetchImageUrls } from "@/components/smart-image";
+import { readCache, writeCache } from "@/hooks/use-cached-fetch";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -23,23 +25,25 @@ type Comment = { id: string; user_id: string; body: string; created_at: string; 
 
 export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meId?: string | null; onDeleted?: () => void }) {
   const navigate = useNavigate();
-  const [post, setPost] = useState<Post | null>(null);
-  const [author, setAuthor] = useState<Author | null>(null);
+  const cacheKey = `post:${postId}`;
+  const cached = readCache<{ post: Post; author: Author | null; comments: Comment[] }>(cacheKey);
+  const [post, setPost] = useState<Post | null>(cached?.post ?? null);
+  const [author, setAuthor] = useState<Author | null>(cached?.author ?? null);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>(cached?.comments ?? []);
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cached);
   const [shareOpen, setShareOpen] = useState(false);
   const [mediaIdx, setMediaIdx] = useState(0);
 
   const load = async () => {
-    setLoading(true);
     const { data: p } = await supabase.from("posts").select("*").eq("id", postId).maybeSingle();
     setPost(p as Post | null);
     if (p) {
       const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: [p.user_id] });
-      setAuthor(((profs || [])[0] as Author) || null);
+      const a = ((profs || [])[0] as Author) || null;
+      setAuthor(a);
       if (meId) {
         const [{ data: l }, { data: s }] = await Promise.all([
           supabase.from("post_likes").select("post_id").eq("post_id", postId).eq("user_id", meId).maybeSingle(),
@@ -56,6 +60,12 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
         list.forEach((c) => { c.author = by.get(c.user_id) || null; });
       }
       setComments(list);
+      writeCache(cacheKey, { post: p as Post, author: a, comments: list });
+      // Warm every frame of the carousel so arrow clicks never wait on a signed URL.
+      const media = (p as Post).media_urls?.length
+        ? (p as Post).media_urls!
+        : [(p as Post).image_url, (p as Post).video_url];
+      prefetchImageUrls(media.filter((u): u is string => !!u && !/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)));
     }
     setLoading(false);
   };
@@ -113,8 +123,17 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
   const send = async () => {
     if (!meId || !text.trim()) return;
     const body = text.trim(); setText("");
+    // Optimistic: the comment lands immediately, the round trip happens behind it.
+    const tempId = `tmp-${Date.now()}`;
+    setComments((prev) => [
+      ...prev,
+      { id: tempId, user_id: meId, body, created_at: new Date().toISOString(), author: { id: meId, display_name: "You", username: null, avatar_url: null } },
+    ]);
     const { error } = await supabase.from("post_comments").insert({ post_id: post.id, user_id: meId, body });
-    if (error) { toast.error(error.message); setText(body); return; }
+    if (error) {
+      setComments((prev) => prev.filter((c) => c.id !== tempId));
+      toast.error(error.message); setText(body); return;
+    }
     await load();
   };
   const remove = async () => {
