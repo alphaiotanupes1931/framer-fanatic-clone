@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { timeAgo } from "@/lib/text-utils";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -347,7 +348,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
       </div>
       <div className="p-4">
         <div className="text-sm font-semibold">{v.author?.display_name || v.author?.username || "Anonymous"}</div>
-        <div className="text-xs text-neutral-500">{new Date(v.created_at).toLocaleDateString()}</div>
+        <div className="text-xs text-neutral-500">{timeAgo(v.created_at)}</div>
         <p className="mt-2 line-clamp-2 text-sm text-neutral-700">{v.title}</p>
       </div>
     </Link>
