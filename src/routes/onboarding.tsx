@@ -81,9 +81,12 @@ function Onboarding() {
     setBusy(true);
     try {
       let avatar_url: string | null = null;
-      const ext = file.name.split(".").pop() || "jpg";
+      const compressed = await compressAvatar(file);
+      const ext = compressed.name.split(".").pop() || "jpg";
       const path = `${userId}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, compressed, { upsert: true, contentType: compressed.type });
       if (upErr) throw upErr;
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       avatar_url = signed?.signedUrl ?? null;
