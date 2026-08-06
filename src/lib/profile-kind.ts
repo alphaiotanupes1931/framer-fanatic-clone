@@ -7,10 +7,9 @@ export type ProfileKind = "artist" | "resident" | "visitor";
  * both locked down for direct writes, so this goes through a server function.
  */
 export async function setMyProfileKind(kind: ProfileKind): Promise<void> {
-  const rpc = supabase.rpc as unknown as (
-    name: string,
-    args: Record<string, unknown>,
-  ) => Promise<{ error: { message: string } | null }>;
-  const { error } = await rpc("set_my_profile_kind", { _kind: kind });
+  const client = supabase as unknown as {
+    rpc: (name: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+  };
+  const { error } = await client.rpc("set_my_profile_kind", { _kind: kind });
   if (error) throw new Error(error.message);
 }
