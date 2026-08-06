@@ -274,6 +274,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const [saved, setSaved] = useState(false);
   const [meId, setMeId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/videos/${v.id}` : `/videos/${v.id}`;
   useEffect(() => {
     (async () => {
@@ -300,10 +301,27 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const ytThumb = yt ? `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg` : null;
   const poster = v.thumbnail_url || ytThumb;
   const isDirect = !yt && !vimeo && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
+  const orientation = useVideoOrientation({
+    url: isDirect ? url : null,
+    orientation: v.orientation,
+    aspectRatio: v.aspect_ratio ?? null,
+    probe: isDirect,
+  });
+  const canDelete = isAdmin || (!!meId && meId === v.user_id);
+  const remove = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!window.confirm("Delete this video? This cannot be undone.")) return;
+    setDeleted(true);
+    const { error } = await supabase.from("videos").delete().eq("id", v.id);
+    if (error) { setDeleted(false); toast.error(error.message); return; }
+    toast.success("Video deleted");
+    onChanged?.();
+  };
+  if (deleted) return null;
   return (
     <>
     <Link to="/videos/$id" params={{ id: v.id }} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white block">
-      <div className="relative aspect-video bg-neutral-900 overflow-hidden">
+      <div className={`relative ${orientationClass(orientation)} bg-neutral-900 overflow-hidden`}>
         {poster ? (
           <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
         ) : isDirect || url.startsWith("blob:") || url.startsWith("http") ? (
@@ -316,6 +334,16 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
           />
         ) : null}
         {v.featured && <div className="absolute left-3 top-3 rounded-md bg-yellow-400 px-2 py-1 text-[10px] font-bold text-yellow-900">★ Featured</div>}
+        {canDelete && (
+          <button
+            onClick={remove}
+            aria-label="Delete video"
+            title="Delete video"
+            className="absolute left-3 bottom-3 z-10 rounded-full bg-white/90 p-2 text-red-600 shadow-md transition hover:bg-white"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
         {isAdmin && (
           <button
             onClick={async (e) => {
