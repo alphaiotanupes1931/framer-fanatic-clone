@@ -19,6 +19,7 @@ import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
+import { ShareButtons } from "@/components/shared/share-buttons";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/o/$slug")({
@@ -324,7 +325,7 @@ function OrgProfile() {
               id: org.slug,
               url: `/o/${org.slug}`,
               title: org.name,
-              excerpt: org.tagline || org.bio || null,
+              excerpt: org.bio || null,
               image: org.banner_url || org.avatar_url || null,
             }}
           />
