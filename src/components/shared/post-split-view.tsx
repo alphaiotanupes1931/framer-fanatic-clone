@@ -125,7 +125,10 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
     const body = text.trim(); setText("");
     // Optimistic: the comment lands immediately, the round trip happens behind it.
     const tempId = `tmp-${Date.now()}`;
-    setComments((prev) => [...prev, { id: tempId, user_id: meId, body, created_at: new Date().toISOString(), author }]);
+    setComments((prev) => [
+      ...prev,
+      { id: tempId, user_id: meId, body, created_at: new Date().toISOString(), author: { id: meId, display_name: "You", username: null, avatar_url: null } },
+    ]);
     const { error } = await supabase.from("post_comments").insert({ post_id: post.id, user_id: meId, body });
     if (error) {
       setComments((prev) => prev.filter((c) => c.id !== tempId));
