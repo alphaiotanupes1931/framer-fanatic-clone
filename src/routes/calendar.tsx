@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
@@ -338,7 +338,12 @@ function CalendarPage() {
   const [neighborhood, setNeighborhood] = useState<string>("");
   const [eventType, setEventType] = useState<string>("All Types");
   const [neighborhoods, setNeighborhoods] = useState<{ id: string; name: string }[]>([]);
-  const [foryouIdx, setForyouIdx] = useState(0);
+  const forYouRef = useRef<HTMLDivElement | null>(null);
+  const scrollForYou = (dir: number) => {
+    const el = forYouRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth - 40), behavior: "smooth" });
+  };
   const [upcomingView, setUpcomingView] = useState<"list" | "grid">("list");
   const [showMonthly, setShowMonthly] = useState(false);
 
@@ -529,14 +534,14 @@ function CalendarPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => setForyouIdx((i) => Math.max(0, i - 1))}
+                  onClick={() => scrollForYou(-1)}
                   className="grid h-7 w-7 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
                   aria-label="Prev"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setForyouIdx((i) => Math.min(Math.max(0, forYou.length - 1), i + 1))}
+                  onClick={() => scrollForYou(1)}
                   className="grid h-7 w-7 place-items-center rounded-full border border-neutral-200 text-neutral-500 hover:border-[#d4580a] hover:text-[#d4580a]"
                   aria-label="Next"
                 >
@@ -549,15 +554,13 @@ function CalendarPage() {
                 No personalized events yet.
               </div>
             ) : (
-              <div className="overflow-hidden">
-                <div
-                  className="flex gap-3 transition-transform duration-300"
-                  style={{ transform: `translateX(calc(-${foryouIdx} * (260px + 0.75rem)))` }}
-                >
-                  {forYou.map((e) => (
-                    <ForYouCard key={e.id} event={e} />
-                  ))}
-                </div>
+              <div
+                ref={forYouRef}
+                className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {forYou.map((e) => (
+                  <ForYouCard key={e.id} event={e} />
+                ))}
               </div>
             )}
           </section>
@@ -715,7 +718,7 @@ function ForYouCard({ event }: { event: Ev }) {
     <button
       type="button"
       onClick={() => openEventPopup(event)}
-      className="group block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left transition hover:border-[#d4580a]/40 hover:shadow-md"
+      className="group block w-[260px] shrink-0 snap-start overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left transition hover:border-[#d4580a]/40 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         {event.image_url ? (
