@@ -59,12 +59,12 @@ export function DuesTab({ orgId, ownerId, canManage, me }: { orgId: string; owne
       me
         ? supabase.from("organization_dues_payments").select("*").eq("org_id", orgId).eq("member_id", me).order("created_at", { ascending: false })
         : Promise.resolve({ data: [] as Payment[], error: null }),
-      supabase.from("profiles").select("stripe_charges_enabled").eq("id", ownerId).maybeSingle(),
+      (supabase as any).rpc("payouts_ready", { _user_id: ownerId }),
     ]);
     setTiers((tRes.data ?? []) as Tier[]);
     setPayments((pRes.data ?? []) as Payment[]);
     setMyPayments((myRes.data ?? []) as Payment[]);
-    setOwnerReady(!!ownerRes.data?.stripe_charges_enabled);
+    setOwnerReady(!!ownerRes.data);
     setLoading(false);
   };
 

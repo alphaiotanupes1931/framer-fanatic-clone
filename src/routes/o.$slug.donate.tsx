@@ -53,13 +53,9 @@ function DonatePage() {
         return;
       }
       setOrg({ id: o.id, name: o.name, avatar_url: o.avatar_url, slug: o.slug });
-      const { data: owner } = await supabase
-        .from("profiles")
-        .select("stripe_account_id, stripe_charges_enabled")
-        .eq("id", o.owner_id)
-        .maybeSingle();
+      const { data: ready } = await (supabase as any).rpc("payouts_ready", { _user_id: o.owner_id });
       if (cancelled) return;
-      setReady(!!(owner?.stripe_account_id && owner.stripe_charges_enabled));
+      setReady(!!ready);
       setLoading(false);
     })();
     return () => { cancelled = true; };

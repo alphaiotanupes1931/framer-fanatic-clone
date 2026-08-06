@@ -730,10 +730,10 @@ export function ArtistAvailableWorksTab({ userId, canEdit }: { userId: string; c
     setLoading(true);
     const [{ data: rows }, { data: owner }] = await Promise.all([
       supabase.from("profile_sections").select("*").eq("user_id", userId).eq("kind", "available_work").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("stripe_account_id, stripe_charges_enabled").eq("id", userId).maybeSingle(),
+      (supabase as any).rpc("payouts_ready", { _user_id: userId }),
     ]);
     setItems(rows ?? []);
-    setOwnerReady(!!(owner?.stripe_account_id && owner?.stripe_charges_enabled));
+    setOwnerReady(!!owner);
     setLoading(false);
   };
   useEffect(() => { void load(); }, [userId]);
