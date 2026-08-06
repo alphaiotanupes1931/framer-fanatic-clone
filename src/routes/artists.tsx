@@ -8,6 +8,7 @@ import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-prev
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
@@ -95,7 +96,7 @@ function FindCreatorPage() {
     if (!window.confirm(`Delete ${name}? This permanently removes their account.`)) return;
     const { error } = await supabase.rpc("admin_delete_profile", { _id: c.id });
     if (error) { toast.error(error.message); return; }
-    setResults((prev) => prev.filter((x) => x.id !== c.id));
+    setResults((prev: Creator[] | undefined) => (prev ?? []).filter((x) => x.id !== c.id));
     toast.success("Profile deleted");
   }
 
