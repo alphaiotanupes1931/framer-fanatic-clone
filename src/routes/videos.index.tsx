@@ -349,7 +349,13 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
         <p className="mt-2 line-clamp-2 text-sm text-neutral-700">{v.title}</p>
       </div>
     </Link>
-    <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={shareUrl} title={v.title} />
+    <ShareToUsersDialog
+      open={shareOpen}
+      onClose={() => setShareOpen(false)}
+      url={shareUrl}
+      title={v.title}
+      preview={{ type: "video", id: v.id, url: shareUrl, title: v.title, excerpt: v.description, image: poster, author: v.author?.display_name || v.author?.username }}
+    />
     </>
   );
 }
