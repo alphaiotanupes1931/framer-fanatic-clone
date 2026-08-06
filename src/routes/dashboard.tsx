@@ -137,7 +137,7 @@ function Dashboard() {
         }));
 
       const postStream: FeedItem[] = filteredPosts
-        .sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || +new Date(b.featured_at || b.created_at) - +new Date(a.featured_at || a.created_at))
+        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
         .slice(0, 25)
         .map((p) => ({
           type: "post" as const,
