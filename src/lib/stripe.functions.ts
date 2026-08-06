@@ -27,6 +27,10 @@ export const ensureConnectAccount = createServerFn({ method: "POST" })
         business_profile: {
           mcc: "7929", // Bands, orchestras, and miscellaneous entertainers
         },
+        settings: {
+          // Buyers' bank statements read "PLANETBALTIMORE", never the processor.
+          payments: { statement_descriptor: "PLANETBALTIMORE" },
+        },
       });
       accountId = account.id;
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

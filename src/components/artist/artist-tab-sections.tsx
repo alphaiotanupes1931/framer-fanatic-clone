@@ -806,7 +806,7 @@ export function ArtistAvailableWorksTab({ userId, canEdit }: { userId: string; c
     <div className="space-y-4">
       {canEdit && !ownerReady && (
         <div className="rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
-          Connect your Stripe account in <Link to="/settings" className="font-semibold underline">Settings</Link> so buyers can purchase your work directly.
+          Set up payouts in <Link to="/settings" className="font-semibold underline">Settings</Link> so buyers can purchase your work directly.
         </div>
       )}
 

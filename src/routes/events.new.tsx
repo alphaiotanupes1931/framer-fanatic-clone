@@ -270,7 +270,7 @@ function NewEventPage() {
           {form.ticketing === "paid" && (
             <Field label="Ticket Price (USD you net)" required>
               <input type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" value={form.price} onChange={(e) => set("price", e.target.value)} />
-              <p className="mt-1 text-[11px] text-neutral-500">Stripe fees and the platform fee are added on top automatically.</p>
+              <p className="mt-1 text-[11px] text-neutral-500">Processing fees and the platform fee are added on top automatically.</p>
             </Field>
           )}
 

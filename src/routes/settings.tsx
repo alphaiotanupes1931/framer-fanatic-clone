@@ -28,7 +28,7 @@ const SECTIONS = [
   { id: "appearance", label: "Appearance", sub: "Dark mode & theme", icon: Moon },
   { id: "notifications", label: "Notifications", sub: "In-app & email preferences", icon: Bell },
   { id: "privacy", label: "Privacy & Safety", sub: "Visibility and data", icon: Lock },
-  { id: "stripe", label: "Stripe Payments", sub: "Connect Stripe to sell tickets", icon: CreditCard },
+  { id: "stripe", label: "Payouts", sub: "Get paid for tickets and sales", icon: CreditCard },
   { id: "help", label: "Help & FAQ", sub: "Guides, answers, and support", icon: HelpCircle },
 ];
 
@@ -36,7 +36,7 @@ const FAQS = [
   { q: "How do I get started on Planet Baltimore?", a: "Sign up, complete your profile in Settings, pick your neighborhood, and follow the onboarding tour. You can replay the tour any time from this Help page." },
   { q: "What is the difference between an Artist, a Resident, and a Visitor?", a: "Artists can post, create events, sell tickets, and appear on the Baltimore 100. Residents and Visitors can browse, follow, and buy tickets. You can request an artist upgrade from your Profile." },
   { q: "How do I post or create an event?", a: "Go to the Dashboard and use the composer at the top to post. To create an event, open the Events tab and tap Create Event. Only artists can post and host events." },
-  { q: "How do I sell tickets?", a: "Open Settings, go to Stripe Payments, and connect your Stripe account. Once connected, you can set a ticket price on any event. Stripe fees and Baltimore city tax are added automatically." },
+  { q: "How do I sell tickets?", a: "Open Settings, go to Payouts, and set up your payout account. Once it is active, you can set a ticket price on any event. Processing fees and Baltimore city tax are added automatically." },
   { q: "Why can I not see certain neighborhoods or artists?", a: "Planet Baltimore is Baltimore only. Make sure your neighborhood is set in Settings to Account. Use the Neighborhoods tab to explore artists and events by area." },
   { q: "How do I switch between light and dark mode?", a: "Use the Sun or Moon button in the sidebar footer. Your preference is saved to this device." },
   { q: "I forgot my password.", a: "Sign out, go to the Auth page, and use the reset link. A reset email will be sent to the address on your account." },
@@ -400,7 +400,7 @@ function PrivacySafetySection() {
     { title: "Location and Baltimore verification",
       body: "We use your device location once, at sign-up and when you upgrade to Artist, to confirm you are inside Baltimore City. We do not track your live location, and your coordinates are never shown to other members." },
     { title: "Payments and tickets",
-      body: "Ticket payments are processed by Stripe. Planet Baltimore never sees your full card number. Artists receive payouts directly to their own Stripe-connected bank account." },
+      body: "Ticket payments are processed by a PCI-compliant payments partner. Planet Baltimore never sees your full card number. Artists receive payouts directly to their own linked bank account." },
     { title: "Your data",
       body: "You own your content. You can edit or delete any post, event, message, or photo from your profile at any time. To delete your full account and all associated data, email help@planetbaltimore.com and we will remove everything within 7 days." },
     { title: "Safety and reporting",
@@ -457,7 +457,7 @@ function StripeSection() {
       }});
       window.location.href = url;
     } catch (e) {
-      toast.error(sanitizeErrorMessage(e, "Could not start onboarding"));
+      toast.error(sanitizeErrorMessage(e, "Could not start payout setup"));
       setBusy(false);
     }
   };
@@ -465,8 +465,8 @@ function StripeSection() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-foreground">Stripe Payments</h2>
-        <p className="text-sm text-muted-foreground">Connect Stripe so you can sell tickets and get paid directly. Planet Baltimore never holds your money.</p>
+        <h2 className="text-lg font-bold text-foreground">Payouts</h2>
+        <p className="text-sm text-muted-foreground">Set up your payout account so you can sell tickets and get paid directly to your bank. Planet Baltimore never holds your money.</p>
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5">
@@ -490,7 +490,7 @@ function StripeSection() {
               )}
               <button onClick={onboard} disabled={busy}
                 className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
-                {busy ? "Opening Stripe…" : status?.chargesEnabled ? "Update Stripe account" : "Connect Stripe"} <ExternalLink className="h-3.5 w-3.5" />
+                {busy ? "Opening secure form…" : status?.chargesEnabled ? "Update payout details" : "Set up payouts"} <ExternalLink className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
@@ -498,13 +498,13 @@ function StripeSection() {
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground">
-        <h4 className="mb-3 text-base font-semibold">How to connect Stripe (3 minutes)</h4>
+        <h4 className="mb-3 text-base font-semibold">How to set up payouts (3 minutes)</h4>
         <ol className="list-decimal space-y-3 pl-5 text-muted-foreground">
-          <li><span className="font-semibold text-foreground">Tap "Connect Stripe"</span> above. A new tab opens to Stripe, the company that handles payments for us.</li>
-          <li><span className="font-semibold text-foreground">Enter your info.</span> Stripe will ask for your legal name, date of birth, address, and the last 4 of your SSN. This is required by US law for anyone receiving money online. We never see this information.</li>
-          <li><span className="font-semibold text-foreground">Add your bank account.</span> Choose the checking account where you want your money to land. Stripe sends payouts every 2 business days.</li>
-          <li><span className="font-semibold text-foreground">Come back to Planet Baltimore.</span> Stripe will send you back here automatically. The badge above turns green when you're ready to sell items on the platform.</li>
-          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add Stripe's fee and the platform fee on top, so the buyer pays the total and you keep the full price you set. The total fee is the lowest in the industry.</li>
+          <li><span className="font-semibold text-foreground">Tap "Set up payouts"</span> above. A secure form opens where you verify your identity.</li>
+          <li><span className="font-semibold text-foreground">Enter your info.</span> You'll be asked for your legal name, date of birth, address, and the last 4 of your SSN. This is required by US law for anyone receiving money online. We never see this information.</li>
+          <li><span className="font-semibold text-foreground">Add your bank account.</span> Choose the checking account where you want your money to land. Payouts arrive every 2 business days.</li>
+          <li><span className="font-semibold text-foreground">Come back to Planet Baltimore.</span> You'll be sent back here automatically. The badge above turns green when you're ready to sell items on the platform.</li>
+          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add the processing fee and the platform fee on top, so the buyer pays the total and you keep the full price you set. The total fee is the lowest in the industry.</li>
         </ol>
         <div className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
           Need help? Email <a href="mailto:help@planetbaltimore.com" className="font-semibold text-orange hover:underline">help@planetbaltimore.com</a> and we'll walk you through it over the phone.

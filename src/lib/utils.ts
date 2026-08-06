@@ -13,12 +13,26 @@ export function assetUrl(url: string): string {
   return url;
 }
 
-// Strip any accidental "Lovable" branding from error messages surfaced to users.
+// Strip any accidental "Lovable" branding from error messages surfaced to users,
+// and hide payment-processor internals (dashboard links, platform-profile setup
+// notices) that customers should never see.
 export function sanitizeErrorMessage(input: unknown, fallback = "Something went wrong"): string {
   const raw = input instanceof Error ? input.message : typeof input === "string" ? input : "";
   if (!raw) return fallback;
+  const lower = raw.toLowerCase();
+  if (
+    lower.includes("platform-profile") ||
+    lower.includes("responsibilities of managing losses") ||
+    lower.includes("connected accounts at")
+  ) {
+    return "Payouts are being finalized on our end. Please try again shortly or email help@planetbaltimore.com.";
+  }
   return raw
     .replace(/https?:\/\/[^\s]*lovable\.app[^\s]*/gi, "Planet Baltimore")
     .replace(/lovable\s+cloud/gi, "Planet Baltimore")
-    .replace(/lovable/gi, "Planet Baltimore");
+    .replace(/lovable/gi, "Planet Baltimore")
+    .replace(/https?:\/\/(dashboard|api)\.stripe\.com[^\s]*/gi, "")
+    .replace(/\bstripe\b/gi, "our payments partner")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }

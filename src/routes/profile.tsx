@@ -44,7 +44,7 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Stripe"] as const;
+const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Payouts"] as const;
 const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
@@ -69,7 +69,7 @@ const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "My Tickets": Ticket,
   "My Pages": Shield,
   "My Dashboard": BarChart3,
-  "Stripe": CreditCard,
+  "Payouts": CreditCard,
   "Studio": Palette,
   "Series": Layers,
   "Gallery": ImageIcon,
@@ -510,7 +510,7 @@ function ProfilePage() {
               profile ? <ArtistEventsTab userId={profile.id} /> : null
             ) : tab === "My Dashboard" ? (
               <MyDashboardTab isAdmin={isAdmin} isArtist={isArtist} />
-            ) : tab === "Stripe" ? (
+            ) : tab === "Payouts" ? (
               <StripeTab />
             ) : (["Studio","Series","Gallery","Talk","CV/Bio"].includes(tab)) ? (
               profile ? (
@@ -1446,8 +1446,8 @@ function StripeTab() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-foreground">Stripe Payments</h2>
-        <p className="text-sm text-muted-foreground">Connect Stripe so you can sell tickets and get paid directly. Planet Baltimore never holds your money.</p>
+        <h2 className="text-lg font-bold text-foreground">Payouts</h2>
+        <p className="text-sm text-muted-foreground">Set up your payout account so you can sell tickets and get paid directly to your bank. Planet Baltimore never holds your money.</p>
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5">
@@ -1471,36 +1471,30 @@ function StripeTab() {
               )}
               <button onClick={onboard} disabled={busy}
                 className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
-                {busy ? "Opening Stripe…" : status?.chargesEnabled ? "Update Stripe account" : "Connect Stripe"} <ExternalLink className="h-3.5 w-3.5" />
+                {busy ? "Opening secure form…" : status?.chargesEnabled ? "Update payout details" : "Set up payouts"} <ExternalLink className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
         </div>
         {errorMsg ? (
           <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
-            <div className="font-semibold">Stripe couldn't start onboarding</div>
+            <div className="font-semibold">We couldn't start payout setup</div>
             <div className="mt-1 whitespace-pre-wrap break-words">{errorMsg}</div>
-            {errorMsg.includes("platform-profile") ? (
-              <div className="mt-2 text-xs">
-                The Planet Baltimore Stripe account owner needs to complete the platform profile at{" "}
-                <a href="https://dashboard.stripe.com/settings/connect/platform-profile" target="_blank" rel="noreferrer" className="font-semibold underline">
-                  dashboard.stripe.com/settings/connect/platform-profile
-                </a>{" "}
-                (accept responsibility for losses). After that, this button will work for everyone.
-              </div>
-            ) : null}
+            <div className="mt-2 text-xs">
+              Email <a href="mailto:help@planetbaltimore.com" className="font-semibold underline">help@planetbaltimore.com</a> if this keeps happening and we'll get you set up.
+            </div>
           </div>
         ) : null}
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground">
-        <h4 className="mb-3 text-base font-semibold">How to connect Stripe (3 minutes)</h4>
+        <h4 className="mb-3 text-base font-semibold">How to set up payouts (3 minutes)</h4>
         <ol className="list-decimal space-y-3 pl-5 text-muted-foreground">
-          <li><span className="font-semibold text-foreground">Tap "Connect Stripe"</span> above. A new tab opens to Stripe, the company that handles payments for us.</li>
-          <li><span className="font-semibold text-foreground">Enter your info.</span> Stripe will ask for your legal name, date of birth, address, and the last 4 of your SSN. This is required by US law for anyone receiving money online. We never see this information.</li>
-          <li><span className="font-semibold text-foreground">Add your bank account.</span> Choose the checking account where you want your money to land. Stripe sends payouts every 2 business days.</li>
-          <li><span className="font-semibold text-foreground">Come back to Planet Baltimore.</span> Stripe will send you back here automatically. The badge above turns green when you're ready to sell items on the platform.</li>
-          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add Stripe's fee and the platform fee on top, so the buyer pays the total and you keep the full price you set. The total fee is the lowest in the industry.</li>
+          <li><span className="font-semibold text-foreground">Tap "Set up payouts"</span> above. A secure form opens where you verify your identity.</li>
+          <li><span className="font-semibold text-foreground">Enter your info.</span> You'll be asked for your legal name, date of birth, address, and the last 4 of your SSN. This is required by US law for anyone receiving money online. We never see this information.</li>
+          <li><span className="font-semibold text-foreground">Add your bank account.</span> Choose the checking account where you want your money to land. Payouts arrive every 2 business days.</li>
+          <li><span className="font-semibold text-foreground">Come back to Planet Baltimore.</span> You'll be sent back here automatically. The badge above turns green when you're ready to sell items on the platform.</li>
+          <li><span className="font-semibold text-foreground">Create an event and set a price.</span> Enter the amount you want to net. We add the processing fee and the platform fee on top, so the buyer pays the total and you keep the full price you set. The total fee is the lowest in the industry.</li>
         </ol>
         <div className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
           Need help? Email <a href="mailto:help@planetbaltimore.com" className="font-semibold text-orange hover:underline">help@planetbaltimore.com</a> and we'll walk you through it over the phone.
@@ -1508,7 +1502,7 @@ function StripeTab() {
       </div>
 
       <Link to="/settings" hash="stripe" className="block rounded-2xl border border-border bg-card p-4 text-sm font-semibold text-foreground hover:bg-accent">
-        Open full Stripe settings <ExternalLink className="ml-2 inline h-3.5 w-3.5 text-muted-foreground" />
+        Open full payout settings <ExternalLink className="ml-2 inline h-3.5 w-3.5 text-muted-foreground" />
       </Link>
     </div>
   );
@@ -1701,7 +1695,7 @@ function AttendingTab() {
 
 function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boolean }) {
   const links: Array<{ to: string; label: string; desc: string }> = [
-    { to: "/organizer-studio", label: "Organizer Studio", desc: "Manage events, tickets, payouts and Stripe." },
+    { to: "/organizer-studio", label: "Organizer Studio", desc: "Manage events, tickets and payouts." },
     { to: "/promoter-dashboard", label: "Promoter Dashboard", desc: "Track ticket sales and event performance." },
     { to: "/saved", label: "Saved", desc: "Everything you've bookmarked." },
   ];
