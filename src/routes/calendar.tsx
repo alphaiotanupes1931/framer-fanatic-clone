@@ -234,7 +234,97 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
           </div>
         )}
       </div>
+      <DayEventsDialog data={dayOpen} onClose={() => setDayOpen(null)} />
     </section>
+  );
+}
+
+function DayEventsDialog({ data, onClose }: { data: { date: Date; events: Ev[] } | null; onClose: () => void }) {
+  const [q, setQ] = useState("");
+  const [type, setType] = useState("All Types");
+  useEffect(() => { setQ(""); setType("All Types"); }, [data?.date?.toDateString()]);
+  const all = data?.events ?? [];
+  const types = ["All Types", ...Array.from(new Set(all.map((e) => e.category).filter(Boolean) as string[]))];
+  const list = all.filter((e) => {
+    const matchesQ =
+      !q.trim() ||
+      (e.title || "").toLowerCase().includes(q.toLowerCase()) ||
+      (e.venue_name || e.location || "").toLowerCase().includes(q.toLowerCase());
+    const matchesType = type === "All Types" || e.category === type;
+    return matchesQ && matchesType;
+  });
+  const shown = list.length >= 50 ? "50+" : String(list.length);
+  return (
+    <Dialog open={!!data} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[85vh] max-w-lg flex-col overflow-hidden p-0">
+        {data && (
+          <>
+            <div className="space-y-3 border-b border-neutral-100 p-5 pb-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-[#d4580a]" />
+                <h2 className="text-lg font-bold text-neutral-900">
+                  {data.date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                </h2>
+                <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-bold text-neutral-600">{shown}</span>
+              </div>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search events on this day…"
+                className="w-full rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm focus:border-[#d4580a] focus:outline-none"
+              />
+              {types.length > 1 && (
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                  {types.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setType(t)}
+                      className={`whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-semibold transition ${
+                        type === t ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
+              {list.length === 0 ? (
+                <div className="py-10 text-center text-sm text-neutral-500">No events match your filters.</div>
+              ) : (
+                list.map((e) => {
+                  const d = e.starts_at ? new Date(e.starts_at) : null;
+                  const where = e.venue_name || e.location;
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      onClick={() => { onClose(); openEventPopup(e); }}
+                      className="flex w-full items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 text-left hover:border-[#d4580a]"
+                    >
+                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+                        {e.image_url && <EventImage src={e.image_url} alt={e.title} className="h-full w-full object-cover" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-neutral-900">{e.title}</div>
+                        <div className="mt-0.5 text-xs text-neutral-500">
+                          {d ? d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : ""}
+                          {where ? ` · ${where}` : ""}
+                        </div>
+                        {e.description && (
+                          <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{e.description}</p>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
