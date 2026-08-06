@@ -52,6 +52,8 @@ function MobileDateStrip({
   onSelect: (d: Date | undefined) => void;
   eventDays: Date[];
 }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const days = Array.from({ length: 30 }, (_, i) => {
@@ -60,6 +62,7 @@ function MobileDateStrip({
     return d;
   });
   const eventSet = new Set(eventDays.map((d) => d.toDateString()));
+  if (!mounted) return <div className="h-[92px] rounded-2xl border border-neutral-200 bg-white shadow-sm" />;
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
       <div className="mb-2 flex items-center justify-between px-1 text-xs font-semibold text-neutral-500">
