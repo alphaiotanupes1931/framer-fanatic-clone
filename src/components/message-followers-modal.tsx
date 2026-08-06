@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
+import { getConnectionsSnapshot, loadConnections } from "@/lib/connections";
 
 type Follower = {
   id: string;
