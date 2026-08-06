@@ -271,17 +271,20 @@ export function SmartImage({
 }) {
   const url = useSmartImageUrl(src, bucket);
   const [failed, setFailed] = useState(false);
-  useEffect(() => { setFailed(false); }, [url]);
+  const [ready, setReady] = useState(false);
+  useEffect(() => { setFailed(false); setReady(false); }, [url]);
   if (!url || failed) return <>{fallback}</>;
   return (
     <img
       src={url}
       alt={alt}
-      className={className}
+      className={`${className ?? ""} transition-opacity duration-200 ${ready ? "opacity-100" : "opacity-0"}`}
       loading={loading}
       decoding="async"
       fetchPriority={fetchPriority}
+      onLoad={() => setReady(true)}
       onError={() => setFailed(true)}
+      ref={(el) => { if (el?.complete) setReady(true); }}
     />
   );
 }
