@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "framer-fanatic-clone"
+const SITE_NAME = "Planet Baltimore"
 const SENDER_DOMAIN = "notify.planetbaltimore.com"
 const ROOT_DOMAIN = "planetbaltimore.com"
 const FROM_DOMAIN = "planetbaltimore.com"
