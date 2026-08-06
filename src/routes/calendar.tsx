@@ -198,7 +198,13 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                     </button>
                   ))}
                   {dayEvents.length > 2 && (
-                    <div className="px-1 text-[10px] text-neutral-500">+{dayEvents.length - 2} more</div>
+                    <button
+                      type="button"
+                      onClick={() => setDayOpen({ date: c.date, events: dayEvents })}
+                      className="block w-full rounded px-1 py-0.5 text-left text-[10px] font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-[#d4580a]"
+                    >
+                      +{dayEvents.length - 2 >= 50 ? "50+" : dayEvents.length - 2} more
+                    </button>
                   )}
                 </div>
               </div>
