@@ -202,8 +202,8 @@ function Hero() {
   const subtitle = siteText(content, "hero.subtitle");
   const ctaLabel = siteText(content, "hero.cta");
   const heroText = siteText(content, "colors.heroText").trim() || "#FCFCFA";
-  const line1Color = siteColor(content, "hero.line1") || "#E0C4A0";
-  const line2Color = siteColor(content, "hero.line2") || "#E0C4A0";
+  const line1Color = siteColor(content, "hero.line1") || "#FFFFFF";
+  const line2Color = siteColor(content, "hero.line2") || "#FFFFFF";
   const subtitleColor = siteColor(content, "hero.subtitle");
   const ctaColor = siteColor(content, "hero.cta");
   return (
