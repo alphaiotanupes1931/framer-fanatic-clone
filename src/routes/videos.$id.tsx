@@ -365,6 +365,15 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
         onClose={() => setShareOpen(false)}
         url={url}
         title={video.title}
+        preview={{
+          type: "video",
+          id: video.id,
+          url,
+          title: video.title,
+          excerpt: video.description,
+          image: video.thumbnail_url,
+          author: video.author?.display_name || video.author?.username,
+        }}
       />
     </div>
   );
