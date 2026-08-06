@@ -28,7 +28,6 @@ const themeScript = `
 `;
 
 const SITE_ORIGIN = "https://planetbaltimore.com";
-const LOGO_URL = `${SITE_ORIGIN}/og-image.png`;
 
 function NotFoundComponent() {
   return (
