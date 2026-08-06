@@ -14,6 +14,18 @@ import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
+import { readCache, writeCache, hasCache } from "@/hooks/use-cached-fetch";
+
+function storyCacheKey(o: { tab: string; sort: string; filter: string; storyFormat: string; search: string }) {
+  return `stories:${o.tab}:${o.sort}:${o.filter}:${o.storyFormat}:${o.search}`;
+}
+const INITIAL_STORY_KEY = storyCacheKey({
+  tab: "Discover",
+  sort: "newest",
+  filter: "All",
+  storyFormat: "All Formats",
+  search: "",
+});
 
 function StoryCover({ storyId, url }: { storyId: string; url: string | null }) {
   const [error, setError] = useState(false);
