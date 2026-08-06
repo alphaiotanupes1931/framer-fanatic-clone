@@ -11,15 +11,32 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         const body = await request.text();
 
         let event: import("stripe").Stripe.Event;
+        const { logStripeEvent, logStripeError } = await import("@/lib/stripe-log.server");
         try {
           if (!whSecret) throw new Error("STRIPE_WEBHOOK_SECRET not configured");
           event = stripe.webhooks.constructEvent(body, sig, whSecret);
         } catch (err) {
           console.error("Stripe webhook signature verification failed", err);
+          await logStripeError("webhook", "signature.verification_failed", err, {
+            has_secret: !!whSecret,
+            has_signature: !!sig,
+          });
           return new Response("Invalid signature", { status: 400 });
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        const ack = async (note?: string) => {
+          await logStripeEvent({
+            source: "webhook",
+            eventType: event.type,
+            eventId: event.id,
+            status: "ok",
+            message: note ?? null,
+            details: { livemode: event.livemode, created: event.created },
+          });
+          return new Response("ok");
+        };
 
         try {
           if (event.type === "checkout.session.completed") {
