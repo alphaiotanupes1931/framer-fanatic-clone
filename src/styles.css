@@ -479,3 +479,10 @@ html.theme-mono {
   --ring: oklch(0.8 0 0);
   --orange: oklch(0.85 0 0);
 }
+
+/* Off-screen render skipping for long card grids: the browser skips layout and
+   paint for cards outside the viewport, which keeps long feeds smooth. */
+.lazy-grid > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
