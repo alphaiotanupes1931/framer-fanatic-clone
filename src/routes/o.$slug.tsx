@@ -164,7 +164,7 @@ function OrgProfile() {
       const path = `${uid}/org-${org.id}-${field}-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       const url = signed.signedUrl;
       const patch = { [field]: url } as Partial<Org>;
@@ -1556,7 +1556,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
       const path = `${uid}/org-${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
       if (upErr) throw upErr;
-      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
       setMediaUrls((prev) => [...prev, signed.signedUrl]);
       toast.success("Uploaded", { id: tId });

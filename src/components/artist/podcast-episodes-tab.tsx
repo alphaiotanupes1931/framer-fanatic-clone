@@ -56,7 +56,7 @@ export function PodcastEpisodesTab({ userId, isOwner }: { userId: string; isOwne
       contentType: file.type,
     });
     if (error) { toast.error(error.message); return null; }
-    const { data: signed } = await supabase.storage.from("podcast-media").createSignedUrl(path, 60 * 60 * 24 * 365);
+    const { data: signed } = await supabase.storage.from("podcast-media").createSignedUrl(path, STORED_URL_TTL);
     return signed?.signedUrl ?? null;
   };
 

@@ -46,7 +46,7 @@ export function FileUpload({
       if (error) throw error;
       const { data: signed, error: sErr } = await supabase.storage
         .from(bucket)
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+        .createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Failed to sign URL");
       setLocalName(file.name);
       onChange(signed.signedUrl, file.name);

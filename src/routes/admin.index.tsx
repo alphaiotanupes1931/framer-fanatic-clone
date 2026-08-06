@@ -376,7 +376,7 @@ function EditUserDialog({
     }
     const { data, error: signErr } = await supabase.storage
       .from("avatars")
-      .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      .createSignedUrl(path, STORED_URL_TTL);
     if (signErr || !data) {
       setUploading(false);
       return toast.error(signErr?.message || "Could not sign URL");

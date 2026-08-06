@@ -65,7 +65,7 @@ function CreateStoryPage() {
     const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("story-covers").upload(path, file, { upsert: false, contentType: file.type });
     if (error) throw error;
-    const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    const { data: signed, error: sErr } = await supabase.storage.from("story-covers").createSignedUrl(path, STORED_URL_TTL);
     if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
     return signed.signedUrl;
   }, [me]);

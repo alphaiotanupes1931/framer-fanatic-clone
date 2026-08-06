@@ -49,7 +49,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       const path = `${me.id}/org-${field}-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       set(field, signed.signedUrl);
       toast.success(field === "banner_url" ? "Background uploaded" : "Logo uploaded");

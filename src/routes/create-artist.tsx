@@ -51,7 +51,7 @@ function CreateArtistPage() {
       const path = `${me.id}/avatar-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || "image/jpeg", cacheControl: "3600" });
       if (error) throw error;
-      const { data, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      const { data, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !data) throw signErr || new Error("Could not sign URL");
       setForm((f) => ({ ...f, avatar_url: data.signedUrl }));
       toast.success("Photo uploaded");

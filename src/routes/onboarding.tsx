@@ -84,7 +84,7 @@ function Onboarding() {
       const path = `${userId}/avatar-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
       if (upErr) throw upErr;
-      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       avatar_url = signed?.signedUrl ?? null;
       const finalCategory = category === "Other" ? `Other: ${otherReason.trim()}` : category;
       const { error } = await supabase

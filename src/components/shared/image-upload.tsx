@@ -25,7 +25,7 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
       const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Failed to sign URL");
       onChange(signed.signedUrl);
     } catch (e: any) {

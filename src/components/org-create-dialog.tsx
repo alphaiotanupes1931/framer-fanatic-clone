@@ -75,7 +75,7 @@ export function OrgCreateDialog({
       const path = `${uid}/org-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       set("avatar_url", signed.signedUrl);
       toast.success("Logo uploaded");
@@ -99,7 +99,7 @@ export function OrgCreateDialog({
       const path = `${uid}/org-banner-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
       set("banner_url", signed.signedUrl);
       toast.success("Background uploaded");

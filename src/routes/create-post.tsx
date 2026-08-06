@@ -106,7 +106,7 @@ function CreatePostPage() {
       const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
       // Bucket is private: create a long-lived signed URL so posts render everywhere.
-      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
       toast.success(`${kind === "image" ? "Image" : "Video"} uploaded`, { id: tId });
       return signed.signedUrl;

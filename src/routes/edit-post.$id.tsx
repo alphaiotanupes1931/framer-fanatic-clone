@@ -97,7 +97,7 @@ function EditPostPage() {
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
-      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
       toast.success("Uploaded", { id: tId });
       return signed.signedUrl;
