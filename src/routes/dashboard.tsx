@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Users, Compass, MapPin, Loader2, Globe2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { prefetchImageUrls } from "@/components/smart-image";
 import { Post, Story, Event, Follow } from "@/lib/entities";
 
 export const Route = createFileRoute("/dashboard")({
@@ -63,7 +64,6 @@ function Dashboard() {
   const qc = useQueryClient();
   const { user: currentUser, loading: userLoading } = useCurrentUser();
   const [activeFilter, setActiveFilter] = useState<Filter>("On Planet");
-  const [filterLoading, setFilterLoading] = useState(false);
   const [checked, setChecked] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -211,6 +211,19 @@ function Dashboard() {
   const visibleItems = orderedFeedItems.slice(0, visibleCount);
   const hasMore = visibleCount < orderedFeedItems.length;
 
+  // Warm the media for the next screenful while the user reads the current
+  // one, so scrolling never waits on a signing round trip or image bytes.
+  useEffect(() => {
+    const upcoming = orderedFeedItems.slice(visibleCount, visibleCount + 12);
+    const srcs: Array<string | null | undefined> = [];
+    for (const item of upcoming) {
+      const d: any = item.data;
+      if (Array.isArray(d?.media_urls)) srcs.push(...d.media_urls.slice(0, 2));
+      srcs.push(d?.image_url, d?.cover_image_url, d?.thumbnail_url, d?.avatar_url);
+    }
+    prefetchImageUrls(srcs.filter(Boolean));
+  }, [orderedFeedItems, visibleCount]);
+
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMore) return;
@@ -241,7 +254,7 @@ function Dashboard() {
           {FILTERS.map((filter) => (
             <button
               key={filter}
-              onClick={() => { setActiveFilter(filter); setFilterLoading(true); setTimeout(() => setFilterLoading(false), 400); }}
+              onClick={() => setActiveFilter(filter)}
               className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
                 activeFilter === filter
                   ? "bg-[#d4580a] text-white"
@@ -265,7 +278,7 @@ function Dashboard() {
 
         {/* Feed */}
         <div className="space-y-5 pt-1">
-          {isLoading || filterLoading ? (
+          {isLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
             <div className="py-12 text-center sm:py-16 col-span-full">

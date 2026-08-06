@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CookieBanner } from "../components/cookie-banner";
 import { OnboardingTour } from "../components/onboarding-tour";
 import { Toaster } from "../components/ui/sonner";
+import { QueryPersistence } from "../components/query-persistence";
 
 const themeScript = `
   (function() {
@@ -149,6 +150,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <QueryPersistence />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <CookieBanner />
