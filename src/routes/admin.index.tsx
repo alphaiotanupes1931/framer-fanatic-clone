@@ -173,6 +173,25 @@ function AdminPage() {
         </div>
       </div>
 
+      <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+              <FileText className="h-4 w-4 text-orange" /> Payment logs
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Every payment webhook and payout account error, including activation and profile issues.
+            </p>
+          </div>
+          <Link
+            to="/admin/stripe-logs"
+            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
+          >
+            View logs
+          </Link>
+        </div>
+      </div>
+
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <div className="flex flex-1 items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2.5">
           <SearchIcon className="h-4 w-4 text-neutral-400" />
