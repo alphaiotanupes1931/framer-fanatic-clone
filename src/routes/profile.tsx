@@ -1429,7 +1429,13 @@ function StripeTab() {
     setBusy(true);
     setErrorMsg(null);
     try {
-      await ensureFn();
+      const account = await ensureFn();
+      if (!account.ok) {
+        setErrorMsg(account.message);
+        toast.error(account.message);
+        setBusy(false);
+        return;
+      }
       const { url } = await linkFn({ data: {
         returnUrl: `${window.location.origin}/settings?stripe=ok`,
         refreshUrl: `${window.location.origin}/settings?stripe=refresh`,

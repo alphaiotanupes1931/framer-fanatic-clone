@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 let _stripe: Stripe | null = null;
 
@@ -12,6 +13,20 @@ export function getStripe(): Stripe {
     httpClient: Stripe.createFetchHttpClient(),
   });
   return _stripe;
+}
+
+export async function getPayoutAccount(profileId: string) {
+  const { data } = await supabaseAdmin
+    .from("profiles")
+    .select("stripe_account_id, stripe_charges_enabled, display_name, username")
+    .eq("id", profileId)
+    .maybeSingle();
+  return data;
+}
+
+export function isConnectPlatformProfileError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  return message.includes("responsibilities of managing losses") || message.includes("connect/platform-profile");
 }
 
 // Planet Baltimore platform fee: flat 69¢ per paid ticket.
