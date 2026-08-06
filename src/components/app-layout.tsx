@@ -68,6 +68,8 @@ export function useCurrentProfile() {
     loadProfile().then((p) => {
       if (cancelled) return;
       if (!p && !profileCache) navigate({ to: "/auth" });
+      // Warm the people-you-know list so share sheets open with no spinner.
+      if (p?.id) warmConnections(p.id);
     });
     return () => {
       cancelled = true;
