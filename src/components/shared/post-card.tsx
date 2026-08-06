@@ -16,6 +16,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { useReaction } from "@/hooks/use-reaction";
 
 type Post = {
   id: string;
@@ -51,9 +52,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   onPinnedChange?: (id: string, pinned: boolean, pinnedAt: string | null) => void;
   reason?: string;
 }) {
-  const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes_count ?? 0);
-  const [saved, setSaved] = useState(false);
+  const { liked, saved, setLiked, setSaved } = useReaction(post.id, currentUserId);
   const [lightbox, setLightbox] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string }[]>([]);
@@ -100,21 +100,6 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const current = mediaList[mediaIdx];
   const prevMedia = () => setMediaIdx((i) => (i - 1 + mediaList.length) % mediaList.length);
   const nextMedia = () => setMediaIdx((i) => (i + 1) % mediaList.length);
-
-  useEffect(() => {
-    if (!currentUserId) return;
-    let cancelled = false;
-    (async () => {
-      const [likeRes, saveRes] = await Promise.all([
-        supabase.from("post_likes").select("post_id").eq("post_id", post.id).eq("user_id", currentUserId).maybeSingle(),
-        supabase.from("post_saves").select("post_id").eq("post_id", post.id).eq("user_id", currentUserId).maybeSingle(),
-      ]);
-      if (cancelled) return;
-      if (likeRes.data) setLiked(true);
-      if (saveRes.data) setSaved(true);
-    })();
-    return () => { cancelled = true; };
-  }, [currentUserId, post.id]);
 
   const toggleLike = async () => {
     if (!currentUserId) { toast.error("Sign in to like"); return; }
