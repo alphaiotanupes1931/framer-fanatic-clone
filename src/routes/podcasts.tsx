@@ -18,21 +18,16 @@ type Pod = {
 };
 
 function PodcastsPage() {
-  const [items, setItems] = useState<Pod[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const { data } = await (supabase as any)
-        .from("profiles_public")
-        .select("id, display_name, username, avatar_url, neighborhood, bio, category")
-        .ilike("category", "%podcast%")
-        .order("created_at", { ascending: false })
-        .limit(48);
-      setItems((data ?? []) as Pod[]);
-      setLoading(false);
-    })();
-  }, []);
+  const { data, loading } = useCachedFetch<Pod[]>("podcasts:list", async () => {
+    const { data } = await (supabase as any)
+      .from("profiles_public")
+      .select("id, display_name, username, avatar_url, neighborhood, bio, category")
+      .ilike("category", "%podcast%")
+      .order("created_at", { ascending: false })
+      .limit(48);
+    return (data ?? []) as Pod[];
+  });
+  const items = data ?? [];
 
   return (
     <AppLayout>
