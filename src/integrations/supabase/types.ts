@@ -2122,6 +2122,7 @@ export type Database = {
           website: string
         }[]
       }
+      payouts_ready: { Args: { _user_id: string }; Returns: boolean }
       public_artists: {
         Args: { lim?: number; search?: string; sort_by?: string }
         Returns: {
