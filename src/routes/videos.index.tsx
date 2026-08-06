@@ -16,10 +16,11 @@ const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/videos/")({
   component: VideosPage,
-  head: () => ({ meta: [{ title: "Videos - Planet Baltimore" }] }),
+  head: () => pageHead({ path: "/videos", title: "Baltimore Video Stories | Planet Baltimore", description: "Short films, performances and behind the scenes video from Baltimore creators." }),
 });
 
 type Video = {

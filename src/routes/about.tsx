@@ -11,17 +11,10 @@ import aboutFounders from "@/assets/about-founders.png.asset.json";
 import { assetUrl } from "@/lib/utils";
 import heroBaltimore from "@/assets/baltimore-hero-mobile.png.asset.json";
 import { Img } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About Planet Baltimore" },
-      { name: "description", content: "Planet Baltimore is a platform built so Baltimore artists, makers, and organizers have a home of their own." },
-      { property: "og:title", content: "About Planet Baltimore" },
-      { property: "og:description", content: "A platform for Baltimore artists, makers, and organizers." },
-      { property: "og:image", content: assetUrl(aboutFounders.url) },
-    ],
-  }),
+  head: () => pageHead({ path: "/about", title: "About Planet Baltimore", description: "Planet Baltimore is a platform built so Baltimore artists, makers, and organizers have a home of their own.", image: assetUrl(aboutFounders.url) }),
   component: AboutPage,
 });
 

@@ -8,6 +8,7 @@ import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { pageHead } from "@/lib/seo";
 
 function openEventPopup(ev: Ev) {
   window.dispatchEvent(new CustomEvent<Ev>("pb-open-event", { detail: ev }));
@@ -15,7 +16,7 @@ function openEventPopup(ev: Ev) {
 
 export const Route = createFileRoute("/calendar")({
   component: CalendarPage,
-  head: () => ({ meta: [{ title: "Calendar - Planet Baltimore" }] }),
+  head: () => pageHead({ path: "/calendar", title: "Baltimore Event Calendar by Date | Planet Baltimore", description: "See everything happening in Baltimore on a full monthly calendar you can plan around." }),
 });
 
 type Ev = {

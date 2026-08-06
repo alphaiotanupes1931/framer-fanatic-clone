@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
 import { HandHeart, Building2, Users, Clock } from "lucide-react";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/support")({
   component: SupportPage,
-  head: () => ({
-    meta: [
-      { title: "Support - Planet Baltimore" },
-      { name: "description", content: "Sponsor or donate to support Baltimore creators on Planet Baltimore." },
-    ],
-  }),
+  head: () => pageHead({ path: "/support", title: "Support Baltimore Creators | Planet Baltimore", description: "Sponsor or donate to support Baltimore artists, organizers and community groups." }),
 });
 
 function SupportPage() {

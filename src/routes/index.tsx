@@ -16,15 +16,34 @@ import { useSiteContent, siteText, siteColor } from "@/hooks/use-site-content";
 import { SiteColorInjector } from "@/components/site-color-injector";
 import { Img } from "@/components/shared/smart-img";
 import { useSmartImageUrl } from "@/components/smart-image";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
-      { title: "Planet Baltimore - Baltimore is extraordinary" },
-      { name: "description", content: "Where Baltimore creators and fans build something meaningful together." },
-    ],
+    ...pageHead({
+      path: "/",
+      title: "Planet Baltimore | Baltimore Events, Artists and Neighborhoods",
+      description: "Find Baltimore events, artists, small businesses and neighborhood news in one place, and support the people making the city.",
+    }),
     links: [
+      { rel: "canonical", href: "https://planetbaltimore.com/" },
       { rel: "preload", as: "image", href: heroMobileAsset.url, fetchPriority: "high" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Planet Baltimore",
+          url: "https://planetbaltimore.com",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://planetbaltimore.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
     ],
   }),
   component: Index,

@@ -27,8 +27,6 @@ const themeScript = `
   })();
 `;
 
-const SITE_ORIGIN = "https://planetbaltimore.com";
-const LOGO_URL = `${SITE_ORIGIN}/og-image.png`;
 
 function NotFoundComponent() {
   return (
@@ -97,13 +95,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Planet Baltimore - A platform for the people" },
-      { name: "description", content: "A platform for the people." },
-      { property: "og:title", content: "Planet Baltimore - A platform for the people" },
-      { property: "og:description", content: "A platform for the people." },
+      { title: "Planet Baltimore | Baltimore Events, Artists and Neighborhoods" },
+      { name: "description", content: "Find Baltimore events, artists, small businesses and neighborhood news in one place, and support the people making the city." },
+      { property: "og:title", content: "Planet Baltimore | Baltimore Events, Artists and Neighborhoods" },
+      { property: "og:description", content: "Find Baltimore events, artists, small businesses and neighborhood news in one place, and support the people making the city." },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: LOGO_URL },
-      { name: "twitter:image", content: LOGO_URL },
+      { property: "og:site_name", content: "Planet Baltimore" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [

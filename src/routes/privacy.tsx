@@ -1,12 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacy Policy - Planet Baltimore" },
-      { name: "description", content: "How Planet Baltimore collects, uses, and protects your information." },
-    ],
-  }),
+  head: () => pageHead({ path: "/privacy", title: "Privacy Policy | Planet Baltimore", description: "How Planet Baltimore collects, uses and protects your information." }),
   component: PrivacyPage,
 });
 

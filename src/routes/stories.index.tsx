@@ -13,6 +13,7 @@ import { Heart, MessageCircle, Clock, Plus, X, Send, Loader2, Trash2, Share2, Bo
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/text-utils";
 import { Img } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 function StoryCover({ storyId, url }: { storyId: string; url: string | null }) {
   const [error, setError] = useState(false);
@@ -34,7 +35,7 @@ function StoryCover({ storyId, url }: { storyId: string; url: string | null }) {
 
 export const Route = createFileRoute("/stories/")({
   component: StoriesPage,
-  head: () => ({ meta: [{ title: "Stories - Planet Baltimore" }] }),
+  head: () => pageHead({ path: "/stories", title: "Baltimore Stories and Essays | Planet Baltimore", description: "Blogs, essays and photo stories written by Baltimore residents, artists and organizers." }),
 });
 
 type Story = {

@@ -9,10 +9,11 @@ import { BaltimoreMap } from "@/components/baltimore-map";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { EventImage } from "@/components/event-image";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
-  head: () => ({ meta: [{ title: "Neighborhoods - Planet Baltimore" }] }),
+  head: () => pageHead({ path: "/neighborhoods", title: "Baltimore Neighborhoods Guide | Planet Baltimore", description: "Explore Baltimore neighborhood by neighborhood: the people, events and businesses in each one." }),
 });
 
 type N = { id: string; name: string; region: string };

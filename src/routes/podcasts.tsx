@@ -6,6 +6,7 @@ import { Mic, Plus, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { Img } from "@/components/shared/smart-img";
+import { pageHead } from "@/lib/seo";
 
 type Pod = {
   id: string;
@@ -104,8 +105,5 @@ function PodcastsPage() {
 
 export const Route = createFileRoute("/podcasts")({
   component: PodcastsPage,
-  head: () => ({ meta: [
-    { title: "Planet Baltimore Podcasts" },
-    { name: "description", content: "Real voices, real stories from Baltimore creators." },
-  ] }),
+  head: () => pageHead({ path: "/podcasts", title: "Planet Baltimore Podcasts | Planet Baltimore", description: "Real voices and real stories from Baltimore creators, in their own words." }),
 });
