@@ -220,7 +220,6 @@ export function useSmartImageUrl(src: string | null | undefined, bucketHint?: st
   // flashing empty for a round trip.
   const [url, setUrl] = useState<string | null>(() => resolveSync(src, bucketHint));
   const lastSrc = useRef(src);
-  const lastUrl = useRef<string | null>(url);
 
   if (lastSrc.current !== src) {
     lastSrc.current = src;
@@ -250,7 +249,6 @@ export function useSmartImageUrl(src: string | null | undefined, bucketHint?: st
     };
   }, [src, bucketHint]);
 
-  if (url) lastUrl.current = url;
   return url;
 }
 
