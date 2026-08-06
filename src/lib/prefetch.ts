@@ -99,17 +99,6 @@ const registry: Record<string, Prefetcher> = {
       return data ?? [];
     },
   },
-  "/_community-associations-legacy": {
-    key: "orgs:community_assoc",
-    run: async () => {
-      const { data } = await supabase
-        .from("organizations")
-        .select("*")
-        .eq("type", "community_assoc")
-        .order("name", { ascending: true });
-      return data ?? [];
-    },
-  },
   "/groups": {
     key: "orgs:group:newest",
     run: async () => {
