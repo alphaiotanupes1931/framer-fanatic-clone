@@ -196,6 +196,8 @@ const pill =
 
 function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (v: Video) => void }) {
   const [meId, setMeId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -206,6 +208,14 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
   const [shareOpen, setShareOpen] = useState(false);
   const muted = !!video.comments_muted;
   const isOwner = !!meId && meId === video.user_id;
+  const canDelete = isOwner || isAdmin;
+  const removeVideo = async () => {
+    if (!window.confirm("Delete this video? This cannot be undone.")) return;
+    const { error } = await supabase.from("videos").delete().eq("id", video.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Video deleted");
+    navigate({ to: "/videos" });
+  };
   const url = typeof window !== "undefined" ? `${window.location.origin}/videos/${video.id}` : "";
 
   const loadComments = async () => {
@@ -319,6 +329,14 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
           <button onClick={toggleMute} className={`${pill} ml-auto ${muted ? "border-[#d4580a] text-[#d4580a]" : ""}`}>
             {muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
             {muted ? "Comments muted" : "Mute comments"}
+          </button>
+        )}
+        {canDelete && (
+          <button
+            onClick={removeVideo}
+            className={`${pill} ${isOwner ? "" : "ml-auto"} border-red-300 text-red-600 hover:border-red-500 hover:text-red-700`}
+          >
+            <Trash2 className="h-4 w-4" /> Delete
           </button>
         )}
       </div>
