@@ -749,14 +749,27 @@ function UpcomingRow({ event }: { event: Ev }) {
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-[#d4580a]/40 hover:shadow-sm">
       <div className="flex gap-4">
-        {d && (
+        {event.image_url ? (
+          <button
+            type="button"
+            onClick={() => openEventPopup(event)}
+            className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-neutral-100"
+          >
+            <EventImage src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
+            {d && (
+              <span className="absolute left-1 top-1 rounded-md bg-white/95 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#d4580a] shadow">
+                {d.toLocaleDateString(undefined, { month: "short" })} {d.getDate()}
+              </span>
+            )}
+          </button>
+        ) : d ? (
           <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-neutral-50 text-center">
             <div className="text-[10px] font-bold uppercase tracking-wider text-[#d4580a]">
               {d.toLocaleDateString(undefined, { month: "short" })}
             </div>
             <div className="text-2xl font-bold leading-none text-neutral-900">{d.getDate()}</div>
           </div>
-        )}
+        ) : null}
         <div className="min-w-0 flex-1">
           <button
             type="button"
@@ -776,6 +789,9 @@ function UpcomingRow({ event }: { event: Ev }) {
             <div className="mt-1 flex items-center gap-1 text-xs text-neutral-500">
               <MapPin className="h-3 w-3" /> {where}
             </div>
+          )}
+          {event.description && (
+            <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{event.description}</p>
           )}
         </div>
       </div>
