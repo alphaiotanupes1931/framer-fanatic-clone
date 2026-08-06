@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, X, Bookmark } from "lucide-react";
+import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
 import { Img } from "@/components/shared/smart-img";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -14,7 +16,7 @@ export const Route = createFileRoute("/videos/$id")({
 type Video = {
   id: string; user_id: string; title: string; description: string | null;
   video_url: string; thumbnail_url: string | null; featured: boolean;
-  created_at: string; category?: string | null;
+  created_at: string; category?: string | null; comments_muted?: boolean;
   author?: { display_name: string | null; username: string | null; avatar_url?: string | null };
 };
 
