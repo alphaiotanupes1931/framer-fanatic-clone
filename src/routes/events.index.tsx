@@ -220,12 +220,7 @@ function EventsPage() {
     );
   }
 
-  return <SignedInEvents events={events} dataLoading={dataLoading} reload={() => {
-    setDataLoading(true);
-    supabase.from("events").select("*").gte("starts_at", new Date().toISOString())
-      .order("starts_at", { ascending: true }).limit(50)
-      .then(({ data }) => { setEvents((data as EventRow[] | null) ?? []); setDataLoading(false); });
-  }} />;
+  return <SignedInEvents events={events} dataLoading={dataLoading} reload={refetch} />;
 }
 
 function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; dataLoading: boolean; reload: () => void }) {
