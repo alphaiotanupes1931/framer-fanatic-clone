@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { setMyProfileKind } from "@/lib/profile-kind";
 
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
   const me = useCurrentProfile();
@@ -55,8 +56,9 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         banner_url: form.banner_url.trim() || null,
       }).eq("id", me.id);
       if (error) throw error;
+      await setMyProfileKind(kind);
       toast.success("Profile saved");
-      navigate({ to: "/profile" });
+      window.location.href = "/profile";
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     } finally {
