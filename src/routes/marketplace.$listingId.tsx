@@ -145,9 +145,14 @@ function ListingDetail() {
                   <MessageCircle className="h-4 w-4" /> Message seller
                 </button>
               )}
-              <button onClick={share} className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent">
-                <Send className="h-4 w-4 -rotate-45" /> Share
-              </button>
+              <ShareButtons
+                path={`/marketplace/${item.id}`}
+                title={item.title}
+                size="sm"
+                label
+                className="justify-center"
+                buttonClassName="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent"
+              />
               {isOwner && (
                 <>
                   <button onClick={markSold} className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent">
