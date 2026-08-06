@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSignedUrlCache } from "@/components/smart-image";
@@ -34,6 +34,12 @@ let profileRequest: Promise<Profile | null> | null = null;
 const profileSubscribers = new Set<(p: Profile | null) => void>();
 
 function publishProfile(p: Profile | null) {
+  // Keep the previous object identity when nothing actually changed. Every
+  // consumer keys effects off this value, so handing back a fresh object on
+  // each fetch would restart those effects (and their fetches) forever.
+  if (p && profileCache && JSON.stringify(p) === JSON.stringify(profileCache)) {
+    return;
+  }
   profileCache = p;
   for (const fn of profileSubscribers) fn(p);
 }
@@ -63,12 +69,17 @@ export function invalidateCurrentProfile() {
 export function useCurrentProfile() {
   const [profile, setProfile] = useState<Profile | null>(profileCache);
   const navigate = useNavigate();
+  // useNavigate() returns a new function on every render; keeping it in the
+  // dependency list re-ran this effect after each state update, which is what
+  // made profile/story pages refetch and flicker in a loop.
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
   useEffect(() => {
     profileSubscribers.add(setProfile);
     let cancelled = false;
     loadProfile().then((p) => {
       if (cancelled) return;
-      if (!p && !profileCache) navigate({ to: "/auth" });
+      if (!p && !profileCache) navigateRef.current({ to: "/auth" });
       // Warm the people-you-know list so share sheets open with no spinner.
       if (p?.id) warmConnections(p.id);
     });
@@ -76,7 +87,7 @@ export function useCurrentProfile() {
       cancelled = true;
       profileSubscribers.delete(setProfile);
     };
-  }, [navigate]);
+  }, []);
   return profile;
 }
 
