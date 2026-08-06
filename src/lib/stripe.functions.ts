@@ -36,6 +36,8 @@ export const ensureConnectAccount = createServerFn({ method: "POST" })
         });
       } catch (error) {
         console.error("Payout account creation failed", error);
+        const { logStripeError } = await import("./stripe-log.server");
+        await logStripeError("api", "connect.account.create", error, { user_id: userId });
         return {
           ok: false as const,
           reason: isConnectPlatformProfileError(error) ? "platform_activation_required" as const : "temporarily_unavailable" as const,
