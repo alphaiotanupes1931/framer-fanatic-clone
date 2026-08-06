@@ -213,14 +213,6 @@ function OrgProfile() {
     }
   };
 
-  const share = async () => {
-    const url = `${window.location.origin}/o/${org.slug}`;
-    try {
-      if (navigator.share) await navigator.share({ title: org.name, url });
-      else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
-    } catch { /* cancelled */ }
-  };
-
   return (
     <AppLayout title="" hero={false}>
       <button
@@ -322,13 +314,20 @@ function OrgProfile() {
               }));
             }}
           />
-          <button
-            onClick={share}
-            aria-label="Share"
-            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white p-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-          >
-            <Send className="h-4 w-4 -rotate-45" />
-          </button>
+          <ShareButtons
+            path={`/o/${org.slug}`}
+            title={org.name}
+            size="sm"
+            buttonClassName="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white p-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+            preview={{
+              type: "organization",
+              id: org.slug,
+              url: `/o/${org.slug}`,
+              title: org.name,
+              excerpt: org.tagline || org.bio || null,
+              image: org.banner_url || org.avatar_url || null,
+            }}
+          />
           <button
             onClick={toggleJoin}
             disabled={joining}
