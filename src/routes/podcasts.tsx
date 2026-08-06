@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Mic, Plus, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,7 @@ function PodcastsPage() {
       .limit(48);
     return (data ?? []) as Pod[];
   });
-  const items = data ?? [];
+  const items: Pod[] = data ?? [];
 
   return (
     <AppLayout>
