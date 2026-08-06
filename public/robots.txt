@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /messages
+Disallow: /notifications
+Disallow: /dashboard
+Disallow: /onboarding
+Disallow: /edit-profile
+Disallow: /organizer-studio
+Disallow: /promoter-dashboard
+Disallow: /ticket-sales-dashboard
+Disallow: /saved
+Disallow: /reset-password
+
+Sitemap: https://planetbaltimore.com/sitemap.xml
