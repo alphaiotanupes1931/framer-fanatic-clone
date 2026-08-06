@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { prefetchHandlers } from "@/lib/prefetch";
 import {
   Home, Search, Plus, User, Menu, MessageCircle, Compass, BookOpen,
   Users, Shield, Palette, Landmark, Building2, MapPin, Calendar, Ticket,
@@ -115,6 +116,7 @@ function renderPrimary(item: Primary, currentPath: string) {
             <Link
               key={item.label}
               to={item.to}
+              {...prefetchHandlers(item.to)}
               className={`relative flex min-h-[44px] w-full flex-col items-center justify-center rounded-lg px-2 py-1 transition-colors ${isActive ? "text-[#d4580a]" : "text-muted-foreground"}`}
             >
               <Icon className="h-5 w-5" />
