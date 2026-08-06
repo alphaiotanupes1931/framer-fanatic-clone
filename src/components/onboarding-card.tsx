@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, Palette, Users, PenLine, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "pb_onboarding_v3_dismissed";
 
@@ -12,12 +13,46 @@ const steps = [
 ] as const;
 
 export function OnboardingCard() {
-  const [dismissed, setDismissed] = useState(false);
+  // `undefined` = still resolving, so the card never flashes before we know.
+  const [dismissed, setDismissed] = useState<boolean | undefined>(undefined);
+  const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
-    setDismissed(typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) === "true");
+    let cancelled = false;
+    (async () => {
+      const local = typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) === "true";
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      setUserId(user?.id ?? null);
+      if (!user) { setDismissed(local); return; }
+      const { data } = await supabase
+        .from("user_ui_prefs")
+        .select("onboarding_dismissed")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      const remote = !!data?.onboarding_dismissed;
+      setDismissed(remote || local);
+      // Local dismissal from a previous session gets promoted to the account.
+      if (local && !remote) {
+        await supabase.from("user_ui_prefs").upsert(
+          { user_id: user.id, onboarding_dismissed: true, updated_at: new Date().toISOString() },
+          { onConflict: "user_id" },
+        );
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
-  if (dismissed) return null;
-  const dismiss = () => { localStorage.setItem(STORAGE_KEY, "true"); setDismissed(true); };
+  if (dismissed !== false) return null;
+  const dismiss = async () => {
+    localStorage.setItem(STORAGE_KEY, "true");
+    setDismissed(true);
+    if (userId) {
+      await supabase.from("user_ui_prefs").upsert(
+        { user_id: userId, onboarding_dismissed: true, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+    }
+  };
   return (
     <div className="relative rounded-xl border bg-white px-4 py-3.5 sm:px-[18px] sm:py-4" style={{ borderColor: "#d4580a" }}>
       <button onClick={dismiss} aria-label="Dismiss" className="absolute right-3 top-3 rounded-full p-1 text-slate-500 transition-colors hover:bg-slate-100">
