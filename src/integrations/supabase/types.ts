@@ -2046,36 +2046,42 @@ export type Database = {
       }
       videos: {
         Row: {
+          aspect_ratio: number | null
           category: string | null
           comments_muted: boolean
           created_at: string
           description: string | null
           featured: boolean
           id: string
+          orientation: string | null
           thumbnail_url: string | null
           title: string
           user_id: string
           video_url: string
         }
         Insert: {
+          aspect_ratio?: number | null
           category?: string | null
           comments_muted?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean
           id?: string
+          orientation?: string | null
           thumbnail_url?: string | null
           title: string
           user_id: string
           video_url: string
         }
         Update: {
+          aspect_ratio?: number | null
           category?: string | null
           comments_muted?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean
           id?: string
+          orientation?: string | null
           thumbnail_url?: string | null
           title?: string
           user_id?: string
