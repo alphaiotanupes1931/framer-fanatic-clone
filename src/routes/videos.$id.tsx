@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { timeAgo } from "@/lib/text-utils";
 import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
@@ -90,7 +91,7 @@ function VideoDetail() {
                     )}
                     <span>
                       <div>{video.author.display_name || video.author.username}</div>
-                      <div className="text-xs font-normal text-neutral-500">{new Date(video.created_at).toLocaleDateString()}</div>
+                      <div className="text-xs font-normal text-neutral-500">{timeAgo(video.created_at)}</div>
                     </span>
                   </Link>
                 ) : (
@@ -344,7 +345,7 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-semibold text-neutral-900">
                       {c.author?.display_name || c.author?.username || "Anonymous"}
-                      <span className="ml-2 font-normal text-neutral-400">{new Date(c.created_at).toLocaleDateString()}</span>
+                      <span className="ml-2 font-normal text-neutral-400">{timeAgo(c.created_at)}</span>
                     </div>
                     <div className="text-sm text-neutral-800 whitespace-pre-wrap">{c.content}</div>
                   </div>

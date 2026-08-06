@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Buckets whose contents are served via signed URLs (private buckets).
@@ -20,54 +20,232 @@ function parseStorageUrl(src: string): Parsed {
   return { bucket: m[1], path: decodeURIComponent(m[2]) };
 }
 
-const cache = new Map<string, { url: string; exp: number }>();
+/* ------------------------------------------------------------------ *
+ * Signed-URL cache
+ *
+ * Signing a private storage object costs a network round trip. Doing that
+ * per <img> on every render is why images used to "pop in" late. We keep a
+ * process-wide cache that is:
+ *   1. read synchronously (so a cached image renders on the very first paint)
+ *   2. persisted to localStorage (so it survives reloads and route changes)
+ *   3. batched (many images in one page = one signing request per bucket)
+ * ------------------------------------------------------------------ */
+
+const SIGN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+const CACHE_SAFETY_MS = 60 * 60 * 1000; // refresh an hour before real expiry
+const STORE_KEY = "pb_signed_url_cache_v1";
+
+type Entry = { url: string; exp: number };
+
+const cache = new Map<string, Entry>();
 
 function cacheKey(bucket: string, path: string) {
   return `${bucket}::${path}`;
 }
 
-async function resolveSrc(src: string, bucketHint?: string): Promise<string | null> {
+let hydrated = false;
+function hydrateCache() {
+  if (hydrated || typeof window === "undefined") return;
+  hydrated = true;
+  try {
+    const raw = window.localStorage.getItem(STORE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Record<string, Entry>;
+    const now = Date.now();
+    for (const [k, v] of Object.entries(parsed)) {
+      if (v && typeof v.url === "string" && v.exp > now) cache.set(k, v);
+    }
+  } catch {
+    /* corrupt cache is not worth crashing over */
+  }
+}
+
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+function persistCache() {
+  if (typeof window === "undefined") return;
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    try {
+      const now = Date.now();
+      const obj: Record<string, Entry> = {};
+      for (const [k, v] of cache) if (v.exp > now) obj[k] = v;
+      window.localStorage.setItem(STORE_KEY, JSON.stringify(obj));
+    } catch {
+      /* quota errors are non-fatal */
+    }
+  }, 500);
+}
+
+/** Wipe cached capability URLs, e.g. when the signed-in user changes. */
+export function clearSignedUrlCache() {
+  cache.clear();
+  try {
+    window.localStorage.removeItem(STORE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function readCache(bucket: string, path: string): string | null {
+  hydrateCache();
+  const hit = cache.get(cacheKey(bucket, path));
+  return hit && hit.exp > Date.now() ? hit.url : null;
+}
+
+function writeCache(bucket: string, path: string, url: string) {
+  cache.set(cacheKey(bucket, path), {
+    url,
+    exp: Date.now() + SIGN_TTL_SECONDS * 1000 - CACHE_SAFETY_MS,
+  });
+  persistCache();
+}
+
+/* --------------------------- batched signing --------------------------- */
+
+type Pending = { resolve: (url: string | null) => void };
+
+const queues = new Map<string, Map<string, Pending[]>>();
+let flushScheduled = false;
+
+function scheduleFlush() {
+  if (flushScheduled) return;
+  flushScheduled = true;
+  // One tick of coalescing: every image mounted in the same render pass
+  // shares a single signing request per bucket.
+  setTimeout(flushQueues, 12);
+}
+
+async function flushQueues() {
+  flushScheduled = false;
+  const snapshot = Array.from(queues.entries());
+  queues.clear();
+  await Promise.all(
+    snapshot.map(async ([bucket, byPath]) => {
+      const paths = Array.from(byPath.keys());
+      try {
+        const { data } = await supabase.storage.from(bucket).createSignedUrls(paths, SIGN_TTL_SECONDS);
+        const byResult = new Map<string, string>();
+        for (const row of data ?? []) {
+          const p = (row as { path?: string | null }).path;
+          const u = (row as { signedUrl?: string | null }).signedUrl;
+          if (p && u) byResult.set(p, u);
+        }
+        for (const [path, waiters] of byPath) {
+          const url = byResult.get(path) ?? null;
+          if (url) writeCache(bucket, path, url);
+          for (const w of waiters) w.resolve(url);
+        }
+      } catch {
+        for (const [, waiters] of byPath) for (const w of waiters) w.resolve(null);
+      }
+    }),
+  );
+}
+
+function signBatched(bucket: string, path: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    let byPath = queues.get(bucket);
+    if (!byPath) {
+      byPath = new Map();
+      queues.set(bucket, byPath);
+    }
+    const waiters = byPath.get(path);
+    if (waiters) waiters.push({ resolve });
+    else byPath.set(path, [{ resolve }]);
+    scheduleFlush();
+  });
+}
+
+/* ----------------------------- resolution ----------------------------- */
+
+type Target = { bucket: string; path: string } | { direct: string } | null;
+
+function targetFor(src: string | null | undefined, bucketHint?: string): Target {
   if (!src) return null;
   // Local, inline, or object URLs never need signing.
-  if (/^(data:|blob:|\/)/.test(src)) return src;
+  if (/^(data:|blob:|\/)/.test(src)) return { direct: src };
   // Bare storage path (e.g. "<uid>/<file>.jpg") — needs a bucket to sign.
   if (!src.startsWith("http")) {
     if (!bucketHint) return null;
-    const path = src.replace(/^\/+/, "");
-    const key = cacheKey(bucketHint, path);
-    const c = cache.get(key);
-    if (c && c.exp > Date.now()) return c.url;
-    const { data } = await supabase.storage.from(bucketHint).createSignedUrl(path, 60 * 60);
-    if (!data?.signedUrl) return null;
-    cache.set(key, { url: data.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
-    return data.signedUrl;
+    return { bucket: bucketHint, path: src.replace(/^\/+/, "") };
   }
-  // Supabase storage URL — re-sign if it points at a private bucket.
   const parsed = parseStorageUrl(src);
-  if (parsed && SIGNED_BUCKETS.has(parsed.bucket)) {
-    const key = cacheKey(parsed.bucket, parsed.path);
-    const c = cache.get(key);
-    if (c && c.exp > Date.now()) return c.url;
-    const { data } = await supabase.storage.from(parsed.bucket).createSignedUrl(parsed.path, 60 * 60);
-    if (data?.signedUrl) {
-      cache.set(key, { url: data.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
-      return data.signedUrl;
-    }
-    // Fall through to the original URL — it may still work if the bucket
-    // has since been made public.
-    return src;
+  if (parsed && SIGNED_BUCKETS.has(parsed.bucket)) return parsed;
+  return { direct: src };
+}
+
+/** Cache-only lookup. Returns a URL usable on the very first render, or null. */
+function resolveSync(src: string | null | undefined, bucketHint?: string): string | null {
+  const t = targetFor(src, bucketHint);
+  if (!t) return null;
+  if ("direct" in t) return t.direct;
+  return readCache(t.bucket, t.path);
+}
+
+async function resolveAsync(src: string, bucketHint?: string): Promise<string | null> {
+  const t = targetFor(src, bucketHint);
+  if (!t) return null;
+  if ("direct" in t) return t.direct;
+  const cached = readCache(t.bucket, t.path);
+  if (cached) return cached;
+  const signed = await signBatched(t.bucket, t.path);
+  // Fall back to the original URL — it may still work if the bucket has
+  // since been made public.
+  return signed ?? (src.startsWith("http") ? src : null);
+}
+
+/**
+ * Warm the cache for a list of image URLs before they render. Use this in a
+ * page loader so above-the-fold imagery is already signed by paint time.
+ */
+export function prefetchImageUrls(srcs: Array<string | null | undefined>, bucketHint?: string) {
+  for (const s of srcs) {
+    if (!s) continue;
+    const t = targetFor(s, bucketHint);
+    if (!t || "direct" in t) continue;
+    if (readCache(t.bucket, t.path)) continue;
+    void signBatched(t.bucket, t.path).then((url) => {
+      if (!url || typeof window === "undefined") return;
+      // Nudge the browser into fetching the bytes too, not just the URL.
+      const img = new window.Image();
+      img.decoding = "async";
+      img.src = url;
+    });
   }
-  return src;
 }
 
 export function useSmartImageUrl(src: string | null | undefined, bucketHint?: string): string | null {
-  const [url, setUrl] = useState<string | null>(null);
+  // Synchronous cache read means a warm image paints immediately instead of
+  // flashing empty for a round trip.
+  const [url, setUrl] = useState<string | null>(() => resolveSync(src, bucketHint));
+  const lastSrc = useRef(src);
+
+  if (lastSrc.current !== src) {
+    lastSrc.current = src;
+    const immediate = resolveSync(src, bucketHint);
+    if (immediate !== url) setUrl(immediate);
+  }
+
   useEffect(() => {
-    if (!src) { setUrl(null); return; }
+    if (!src) {
+      setUrl(null);
+      return;
+    }
+    const immediate = resolveSync(src, bucketHint);
+    if (immediate) {
+      setUrl(immediate);
+      return;
+    }
     let cancelled = false;
-    resolveSrc(src, bucketHint).then((r) => { if (!cancelled) setUrl(r); });
-    return () => { cancelled = true; };
+    resolveAsync(src, bucketHint).then((r) => {
+      if (!cancelled) setUrl(r);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [src, bucketHint]);
+
   return url;
 }
 
@@ -78,6 +256,7 @@ export function SmartImage({
   bucket,
   fallback = null,
   loading = "lazy",
+  fetchPriority,
 }: {
   src: string | null | undefined;
   alt: string;
@@ -85,6 +264,7 @@ export function SmartImage({
   bucket?: string;
   fallback?: React.ReactNode;
   loading?: "lazy" | "eager";
+  fetchPriority?: "high" | "low" | "auto";
 }) {
   const url = useSmartImageUrl(src, bucket);
   const [failed, setFailed] = useState(false);
@@ -97,6 +277,7 @@ export function SmartImage({
       className={className}
       loading={loading}
       decoding="async"
+      fetchPriority={fetchPriority}
       onError={() => setFailed(true)}
     />
   );

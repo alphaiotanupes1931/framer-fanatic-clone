@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { timeAgo } from "@/lib/text-utils";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -107,6 +108,7 @@ function MarketplacePage() {
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                     <span className="capitalize">{it.condition.replace("-", " ")}</span>
+                    <span>·</span><span>{timeAgo(it.created_at)}</span>
                     {it.neighborhood && <><span>·</span><span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {it.neighborhood}</span></>}
                   </div>
                 </div>

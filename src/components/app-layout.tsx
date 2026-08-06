@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { clearSignedUrlCache } from "@/components/smart-image";
 import { SidebarProvider, useSidebar } from "@/components/layout/sidebar-context";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { RightSidebar } from "@/components/layout/right-sidebar";
@@ -23,19 +24,69 @@ export type Profile = {
   stripe_charges_enabled: boolean;
 };
 
+// The signed-in profile is read by many components at once. Without a shared
+// cache every one of them fires its own session lookup + RPC on mount, which
+// is a large part of why profile pages felt slow. Cache the profile in module
+// scope and share a single in-flight request across all callers.
+let profileCache: Profile | null = null;
+let profileRequest: Promise<Profile | null> | null = null;
+const profileSubscribers = new Set<(p: Profile | null) => void>();
+
+function publishProfile(p: Profile | null) {
+  profileCache = p;
+  for (const fn of profileSubscribers) fn(p);
+}
+
+function loadProfile(): Promise<Profile | null> {
+  if (!profileRequest) {
+    profileRequest = (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return null;
+      const { data: rows } = await supabase.rpc("my_profile");
+      const p = (rows as unknown as Profile[] | null)?.[0] ?? null;
+      publishProfile(p);
+      return p;
+    })().finally(() => {
+      profileRequest = null;
+    });
+  }
+  return profileRequest;
+}
+
+/** Drop the cached profile so the next read refetches (after edits/sign-out). */
+export function invalidateCurrentProfile() {
+  profileCache = null;
+  profileRequest = null;
+}
+
 export function useCurrentProfile() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(profileCache);
   const navigate = useNavigate();
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) { navigate({ to: "/auth" }); return; }
-      const { data: rows } = await supabase.rpc("my_profile");
-      const p = (rows as unknown as Profile[] | null)?.[0];
-      if (p) setProfile(p as Profile);
-    })();
+    profileSubscribers.add(setProfile);
+    let cancelled = false;
+    loadProfile().then((p) => {
+      if (cancelled) return;
+      if (!p && !profileCache) navigate({ to: "/auth" });
+    });
+    return () => {
+      cancelled = true;
+      profileSubscribers.delete(setProfile);
+    };
   }, [navigate]);
   return profile;
+}
+
+if (typeof window !== "undefined") {
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED") {
+      invalidateCurrentProfile();
+      // Signed URLs are per-session capability links; don't leak them across users.
+      if (event !== "USER_UPDATED") clearSignedUrlCache();
+      publishProfile(null);
+      if (event !== "SIGNED_OUT") void loadProfile();
+    }
+  });
 }
 
 // Repo-styled shell: LeftSidebar (desktop), RightSidebar (xl+), TopMenuBar (mobile),
