@@ -2,26 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-/**
- * Payout columns on profiles are not readable by the `authenticated` role
- * (privacy hardening), so they must be read with the service client.
- */
-async function getPayoutAccount(profileId: string) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("profiles")
-    .select("stripe_account_id, stripe_charges_enabled, display_name, username")
-    .eq("id", profileId)
-    .maybeSingle();
-  return data;
-}
-
 /** Create (or reuse) a Stripe Express connected account for the signed-in artist. */
 export const ensureConnectAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId, claims } = context;
-    const { getStripe } = await import("./stripe.server");
+    const { getStripe, isConnectPlatformProfileError } = await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: profileRows } = await supabase.rpc("my_profile");
@@ -30,22 +16,32 @@ export const ensureConnectAccount = createServerFn({ method: "POST" })
     let accountId = profile?.stripe_account_id ?? null;
 
     if (!accountId) {
-      const account = await stripe.accounts.create({
-        type: "express",
-        country: "US",
-        email: profile?.email ?? (claims as { email?: string })?.email ?? undefined,
-        capabilities: {
-          card_payments: { requested: true },
-          transfers: { requested: true },
-        },
-        business_profile: {
-          mcc: "7929", // Bands, orchestras, and miscellaneous entertainers
-        },
-        settings: {
-          // Buyers' bank statements read "PLANETBALTIMORE", never the processor.
-          payments: { statement_descriptor: "PLANETBALTIMORE" },
-        },
-      });
+      let account;
+      try {
+        account = await stripe.accounts.create({
+          type: "express",
+          country: "US",
+          email: profile?.email ?? (claims as { email?: string })?.email ?? undefined,
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
+          },
+          business_profile: {
+            mcc: "7929", // Bands, orchestras, and miscellaneous entertainers
+          },
+          settings: {
+            // Buyers' bank statements read "PLANETBALTIMORE", never the processor.
+            payments: { statement_descriptor: "PLANETBALTIMORE" },
+          },
+        });
+      } catch (error) {
+        console.error("Payout account creation failed", error);
+        return {
+          ok: false as const,
+          reason: isConnectPlatformProfileError(error) ? "platform_activation_required" as const : "temporarily_unavailable" as const,
+          message: "Payout setup is temporarily unavailable while Planet Baltimore completes payment activation. Please try again later.",
+        };
+      }
       accountId = account.id;
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await supabaseAdmin
@@ -54,7 +50,7 @@ export const ensureConnectAccount = createServerFn({ method: "POST" })
         .eq("id", userId);
     }
 
-    return { accountId };
+    return { ok: true as const, accountId };
   });
 
 /** Generate a fresh onboarding URL for the artist's Stripe Express account. */
@@ -64,8 +60,8 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
     z.object({ returnUrl: z.string().url(), refreshUrl: z.string().url() }).parse(d),
   )
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    const { getStripe } = await import("./stripe.server");
+    const { userId } = context;
+    const { getStripe, getPayoutAccount } = await import("./stripe.server");
     const stripe = getStripe();
 
     const profile = await getPayoutAccount(userId);
@@ -88,8 +84,8 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
 export const refreshConnectStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { getStripe } = await import("./stripe.server");
+    const { userId } = context;
+    const { getStripe, getPayoutAccount } = await import("./stripe.server");
     const stripe = getStripe();
 
     const profile = await getPayoutAccount(userId);
@@ -124,7 +120,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: event, error: evErr } = await supabase

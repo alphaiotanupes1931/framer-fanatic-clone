@@ -438,6 +438,7 @@ function StripeSection() {
   const refreshFn = useServerFn(refreshConnectStatus);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ connected: boolean; chargesEnabled: boolean; status?: string } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile?.stripe_account_id) { setStatus({ connected: false, chargesEnabled: false }); return; }
@@ -449,15 +450,24 @@ function StripeSection() {
 
   const onboard = async () => {
     setBusy(true);
+    setErrorMsg(null);
     try {
-      await ensureFn();
+      const account = await ensureFn();
+      if (!account.ok) {
+        setErrorMsg(account.message);
+        toast.error(account.message);
+        setBusy(false);
+        return;
+      }
       const { url } = await linkFn({ data: {
         returnUrl: `${window.location.origin}/settings?stripe=ok`,
         refreshUrl: `${window.location.origin}/settings?stripe=refresh`,
       }});
       window.location.href = url;
     } catch (e) {
-      toast.error(sanitizeErrorMessage(e, "Could not start payout setup"));
+      const message = sanitizeErrorMessage(e, "Could not start payout setup");
+      setErrorMsg(message);
+      toast.error(message);
       setBusy(false);
     }
   };
@@ -495,6 +505,12 @@ function StripeSection() {
             </div>
           </div>
         </div>
+        {errorMsg ? (
+          <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="font-semibold">Payout setup is not available yet</div>
+            <div className="mt-1">{errorMsg}</div>
+          </div>
+        ) : null}
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground">
