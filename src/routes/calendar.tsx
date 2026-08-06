@@ -718,7 +718,7 @@ function ForYouCard({ event }: { event: Ev }) {
     <button
       type="button"
       onClick={() => openEventPopup(event)}
-      className="group block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left transition hover:border-[#d4580a]/40 hover:shadow-md"
+      className="group block w-[260px] shrink-0 snap-start overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left transition hover:border-[#d4580a]/40 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         {event.image_url ? (
