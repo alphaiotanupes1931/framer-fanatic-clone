@@ -20,6 +20,7 @@ import { DuesTab } from "@/components/org/dues-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
 import { ShareButtons } from "@/components/shared/share-buttons";
+import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/o/$slug")({
@@ -1461,7 +1462,7 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
                   <div className="font-semibold text-neutral-900">{r.title}</div>
                   {r.body && <div className="mt-0.5 text-sm text-neutral-600 line-clamp-2">{r.body}</div>}
                   <div className="mt-1 flex items-center gap-3 text-xs text-neutral-500">
-                    <span>{new Date(r.created_at).toLocaleDateString()}</span>
+                    <span>{timeAgo(r.created_at)}</span>
                     {r.link_url && (
                       <SmartFileLink href={r.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 font-semibold text-[#d4580a] hover:underline">
                         <ExternalLink className="h-3 w-3" /> Download / Open
@@ -1747,7 +1748,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
                 )}
                 <div className="p-4">
                   <div className="font-semibold">{p.title}</div>
-                  <div className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
+                  <div className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</div>
                   {p.body && (
                     styled ? (
                       <div className={`mt-3 rounded-xl p-4 text-center font-medium whitespace-pre-wrap ${sizeClass}`}
@@ -1831,7 +1832,7 @@ function CommentsTab({ orgId, me, canManage }: { orgId: string; me: string | nul
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold">{c.profiles?.display_name ?? "User"}</div>
-                <div className="text-[11px] text-muted-foreground">{new Date(c.created_at).toLocaleString()}</div>
+                <div className="text-[11px] text-muted-foreground">{timeAgo(c.created_at)}</div>
                 <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">{c.body}</p>
               </div>
               {(canManage || c.user_id === me) && (
