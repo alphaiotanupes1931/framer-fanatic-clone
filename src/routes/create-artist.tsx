@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -29,7 +29,6 @@ const CATEGORIES = ["Music", "Visual Art", "Photography", "Film", "Writing", "De
 
 function CreateArtistPage() {
   const me = useCurrentProfile();
-  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
