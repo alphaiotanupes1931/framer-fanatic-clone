@@ -23,7 +23,8 @@ export function QueryPersistence() {
       return;
     }
     const [unsubscribe] = persistQueryClient({
-      queryClient,
+      // Cast: nested @tanstack/query-core copies produce a nominal type clash.
+      queryClient: queryClient as never,
       persister,
       maxAge: 24 * 60 * 60 * 1000,
       dehydrateOptions: {
