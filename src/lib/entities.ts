@@ -77,8 +77,6 @@ export const Post = {
       .from("posts")
       .select("id, user_id, content, image_url, video_url, media_urls, music_url, post_type, bg_color, text_color, font_size, likes_count, comments_count, neighborhood, is_deleted, featured, featured_at, created_at")
       .eq("is_deleted", false)
-      .order("featured", { ascending: false, nullsFirst: false })
-      .order("featured_at", { ascending: false, nullsFirst: false })
       .order(column, { ascending })
       .limit(limit);
     if (error) throw error;
@@ -109,8 +107,6 @@ export const Story = {
     let q = supabase.from("stories").select("id, user_id, title, excerpt, cover_url, likes_count, comments_count, status, featured, featured_at, created_at");
     for (const [k, v] of Object.entries(where)) q = q.eq(k, v as never);
     const { data, error } = await q
-      .order("featured", { ascending: false, nullsFirst: false })
-      .order("featured_at", { ascending: false, nullsFirst: false })
       .order(column, { ascending })
       .limit(limit);
     if (error) throw error;
