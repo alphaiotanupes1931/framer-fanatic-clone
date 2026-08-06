@@ -5,7 +5,9 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
-import { Play, Search, Star, Plus, X, Upload, Bookmark } from "lucide-react";
+import { Play, Search, Star, Plus, X, Upload, Bookmark, Send, Share2 } from "lucide-react";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { externalShare } from "@/lib/share-preview";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 import { useUserRole } from "@/hooks/use-user-role";
 
@@ -250,6 +252,8 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const { isAdmin } = useUserRole();
   const [saved, setSaved] = useState(false);
   const [meId, setMeId] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/videos/${v.id}` : `/videos/${v.id}`;
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
