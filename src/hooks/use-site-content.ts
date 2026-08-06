@@ -47,6 +47,8 @@ export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
   // Hero-specific overrides. Leave heroBg empty to keep the photo/video background.
   "colors.heroBg": "",
   "colors.heroText": "#FCFCFA",
+  "hero.line1.color": "#E0C4A0",
+  "hero.line2.color": "#E0C4A0",
   // Section text color overrides (leave empty to inherit from ink/paper tokens).
   "colors.textOnBlue": "",
   "colors.textOnBlueDeep": "",
