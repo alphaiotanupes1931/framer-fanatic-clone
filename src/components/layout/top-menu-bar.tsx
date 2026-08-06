@@ -37,7 +37,7 @@ const utilItems: Item[] = [
 ];
 
 const createItems: Item[] = [
-  { icon: Palette, label: "Artist Profile", to: "/create-artist" },
+  { icon: Palette, label: "Artist Page", to: "/create-artist" },
   { icon: Landmark, label: "Arts Organization", to: "/create-arts-org" },
   { icon: Building2, label: "Business", to: "/create-business" },
   { icon: Shield, label: "Community Association", to: "/create-community-association" },

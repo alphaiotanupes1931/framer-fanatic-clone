@@ -26,7 +26,7 @@ import { prefetchHandlers } from "@/lib/prefetch";
 type NavItem = { icon: typeof Home; label: string; to: string };
 
 const createItems: NavItem[] = [
-  { icon: PaletteIcon, label: "Artist Profile", to: "/create-artist" },
+  { icon: PaletteIcon, label: "Artist Page", to: "/create-artist" },
   { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
   { icon: BusinessIcon, label: "Business", to: "/create-business" },
   { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },

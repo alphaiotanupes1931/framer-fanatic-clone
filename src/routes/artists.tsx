@@ -23,6 +23,8 @@ type Creator = {
   bio: string | null;
   in_baltimore: boolean;
   category?: string | null;
+  /** Set when this card is a standalone artist page (organizations row). */
+  page_slug?: string | null;
 };
 
 const CATEGORIES = [
@@ -79,12 +81,38 @@ function FindCreatorPage() {
   const { data, loading, setData } = useCachedFetch<Creator[]>(
     `artists:${sort}:${q}`,
     async () => {
-      const { data } = await supabase.rpc("public_artists", {
-        lim: 96,
-        search: q || undefined,
-        sort_by: sort,
-      });
-      return ((data as (Creator & { created_at: string })[]) ?? []) as Creator[];
+      const [profilesRes, pagesRes] = await Promise.all([
+        supabase.rpc("public_artists", { lim: 96, search: q || undefined, sort_by: sort }),
+        supabase
+          .from("organizations")
+          .select("id,name,slug,avatar_url,neighborhood,bio,subtype,created_at")
+          .eq("type", "artist")
+          .order("created_at", { ascending: false })
+          .limit(96),
+      ]);
+      const profileArtists = ((profilesRes.data as (Creator & { created_at: string })[]) ?? []) as Creator[];
+      const needle = q.trim().toLowerCase();
+      const pageArtists: Creator[] = ((pagesRes.data as {
+        id: string; name: string; slug: string; avatar_url: string | null;
+        neighborhood: string | null; bio: string | null; subtype: string | null;
+      }[]) ?? [])
+        .filter((o) =>
+          !needle ||
+          [o.name, o.neighborhood, o.bio].some((v) => (v ?? "").toLowerCase().includes(needle)),
+        )
+        .map((o) => ({
+          id: o.id,
+          display_name: o.name,
+          username: null,
+          avatar_url: o.avatar_url,
+          role: "artist",
+          neighborhood: o.neighborhood,
+          bio: o.bio,
+          in_baltimore: true,
+          category: o.subtype,
+          page_slug: o.slug,
+        }));
+      return [...pageArtists, ...profileArtists];
     },
     { debounceMs: 200 },
   );
@@ -148,7 +176,7 @@ function FindCreatorPage() {
             subtitle="Discover Baltimore's creative voices, visual art, music, photography & more."
             cta={
               <div className="flex flex-wrap items-center gap-2">
-                <Link to="/profile">
+                <Link to="/create-artist">
                   <button
                     type="button"
                     className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
@@ -208,14 +236,20 @@ function FindCreatorPage() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lazy-grid">
               {filtered.map((c) => (
                 <div key={c.id} className="relative">
-                  <Link
-                    to="/u/$username"
-                    params={{ username: c.username || c.id }}
-                    className="block text-left"
-                  >
-                    <Card c={c} />
-                  </Link>
-                  {isAdmin && (
+                  {c.page_slug ? (
+                    <Link to="/o/$slug" params={{ slug: c.page_slug }} className="block text-left">
+                      <Card c={c} />
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/u/$username"
+                      params={{ username: c.username || c.id }}
+                      className="block text-left"
+                    >
+                      <Card c={c} />
+                    </Link>
+                  )}
+                  {isAdmin && !c.page_slug && (
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAdminDelete(c); }}
