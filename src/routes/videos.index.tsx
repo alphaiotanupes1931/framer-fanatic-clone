@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
