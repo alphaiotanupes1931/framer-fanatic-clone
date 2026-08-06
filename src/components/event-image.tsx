@@ -14,7 +14,7 @@ export function EventImage({ src, alt, className }: { src: string | null | undef
   const [failed, setFailed] = useState(false);
   useEffect(() => { setFailed(false); }, [url]);
   if (!url || failed) return null;
-  return <img src={url} alt={alt} className={className} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+  return <img src={url} alt={alt} className={className} loading="eager" decoding="async" onError={() => setFailed(true)} />;
 }
 
 export { SUPABASE_HOST };

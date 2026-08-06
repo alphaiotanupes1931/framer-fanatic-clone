@@ -258,7 +258,7 @@ export function SmartImage({
   className,
   bucket,
   fallback = null,
-  loading = "lazy",
+  loading = "eager",
   fetchPriority,
 }: {
   src: string | null | undefined;
