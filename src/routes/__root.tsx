@@ -29,7 +29,7 @@ const themeScript = `
 `;
 
 const SITE_ORIGIN = "https://planetbaltimore.com";
-const LOGO_URL = `${SITE_ORIGIN}${pbLogo}`;
+const LOGO_URL = `${SITE_ORIGIN}/og-image.png`;
 
 function NotFoundComponent() {
   return (
@@ -108,8 +108,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
-      { rel: "icon", type: "image/png", href: pbLogo },
-      { rel: "apple-touch-icon", href: pbLogo },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
       {
         rel: "stylesheet",
         href: appCss,
