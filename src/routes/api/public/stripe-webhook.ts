@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             message: note ?? null,
             details: { livemode: event.livemode, created: event.created },
           });
-          return new Response("ok");
+          return ack();
         };
 
         try {
@@ -73,7 +73,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   metadata: { org_id: orgId, amount_cents: amountCents, payment_intent: paymentIntentId },
                 });
               }
-              return new Response("ok");
+              return ack();
             }
             if (session.metadata?.kind === "artwork") {
               const artistId = session.metadata?.artist_id ?? null;
@@ -120,7 +120,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   metadata: { work_id: workId, amount_cents: amountCents, payment_intent: paymentIntentId },
                 });
               }
-              return new Response("ok");
+              return ack();
             }
             if (isDues) {
               const { data: dueRows } = await supabaseAdmin
@@ -152,7 +152,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   });
                 }
               }
-              return new Response("ok");
+              return ack();
             }
             const { data: updated } = await supabaseAdmin
               .from("tickets")
@@ -215,7 +215,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                 .from("organization_dues_payments")
                 .update({ status: "failed" })
                 .eq("stripe_checkout_session_id", session.id);
-              return new Response("ok");
+              return ack();
             }
             await supabaseAdmin
               .from("tickets")
@@ -238,10 +238,11 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
           }
         } catch (err) {
           console.error("Stripe webhook handler error", err);
+          await logStripeError("webhook", event.type, err, { event_id: event.id, stage: "handler" });
           return new Response("Handler error", { status: 500 });
         }
 
-        return new Response("ok");
+        return ack();
       },
     },
   },
