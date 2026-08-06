@@ -13,6 +13,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { becomeArtist } from "@/lib/stripe.functions";
 import { Eye, EyeOff } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
+import { siteUrl } from "@/lib/utils";
 
 function popPostAuthRedirect(): string | null {
   if (typeof window === "undefined") return null;
@@ -83,7 +84,7 @@ function AuthPage() {
   const handleForgot = async () => {
     if (!email) return toast.error("Enter your email above first.");
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: siteUrl("/reset-password"),
     });
     if (error) return toast.error(error.message);
     toast.success("Password reset email sent. Check your inbox.");
@@ -103,7 +104,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: siteUrl("/"),
         data: {
           display_name: displayName || email.split("@")[0],
           role: finalRole,

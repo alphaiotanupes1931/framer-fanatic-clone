@@ -7,6 +7,21 @@ export function cn(...inputs: ClassValue[]) {
 
 // Hosted assets need an absolute project URL on external deployments.
 const ASSET_ORIGIN = "https://project--16fbc371-fc48-45be-a38e-cfde7916c8b6-dev.lovable.app";
+
+// Canonical public site. Auth links (password reset, email confirm) should land
+// on our own domain, not a builder/preview URL.
+const CANONICAL_SITE_URL = "https://www.planetbaltimore.com";
+
+export function siteUrl(path = "/"): string {
+  const suffix = path.startsWith("/") ? path : `/${path}`;
+  if (typeof window === "undefined") return `${CANONICAL_SITE_URL}${suffix}`;
+  const host = window.location.hostname;
+  const isLocal = host === "localhost" || host === "127.0.0.1" || host.endsWith(".local");
+  // Keep preview/dev flows on their own origin so testing still works.
+  if (isLocal || host.endsWith("lovable.app")) return `${window.location.origin}${suffix}`;
+  return `${CANONICAL_SITE_URL}${suffix}`;
+}
+
 export function assetUrl(url: string): string {
   if (!url) return url;
   if (url.startsWith("/__l5e/")) return `${ASSET_ORIGIN}${url}`;
