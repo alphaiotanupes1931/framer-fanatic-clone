@@ -37,15 +37,15 @@ const utilItems: Item[] = [
 ];
 
 const createItems: Item[] = [
+  { icon: Palette, label: "Artist Profile", to: "/create-artist" },
+  { icon: Landmark, label: "Arts Organization", to: "/create-arts-org" },
+  { icon: Building2, label: "Business", to: "/create-business" },
+  { icon: Shield, label: "Community Association", to: "/create-community-association" },
+  { icon: Users, label: "Groups", to: "/create-community" },
   { icon: FileText, label: "New Post", to: "/create-post" },
   { icon: PenLine, label: "New Story", to: "/create-story" },
-  { icon: Palette, label: "Artist Profile", to: "/create-artist" },
   { icon: Home, label: "Resident Profile", to: "/create-resident" },
   { icon: Plane, label: "Visitor Profile", to: "/create-visitor" },
-  { icon: Building2, label: "Business", to: "/create-business" },
-  { icon: Landmark, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: Users, label: "Groups", to: "/create-community" },
-  { icon: Shield, label: "Community Association", to: "/create-community-association" },
 ];
 
 export function TopMenuBar() {

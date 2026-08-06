@@ -25,15 +25,15 @@ import { Img } from "@/components/shared/smart-img";
 type NavItem = { icon: typeof Home; label: string; to: string };
 
 const createItems: NavItem[] = [
+  { icon: PaletteIcon, label: "Artist Profile", to: "/create-artist" },
+  { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
+  { icon: BusinessIcon, label: "Business", to: "/create-business" },
+  { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
+  { icon: UsersIcon, label: "Groups", to: "/create-community" },
   { icon: FileText, label: "New Post", to: "/create-post" },
   { icon: PenLine, label: "New Story", to: "/create-story" },
-  { icon: PaletteIcon, label: "Artist Profile", to: "/create-artist" },
   { icon: HomeIcon, label: "Resident Profile", to: "/create-resident" },
   { icon: PlaneIcon, label: "Visitor Profile", to: "/create-visitor" },
-  { icon: BusinessIcon, label: "Business", to: "/create-business" },
-  { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: UsersIcon, label: "Groups", to: "/create-community" },
-  { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
 ];
 
 const navItems: NavItem[] = [
@@ -133,9 +133,18 @@ export function LeftSidebar() {
             const active = isActive(item.to);
             const Icon = item.icon;
             const badge = item.label === "Notifications" ? unreadNotifications : item.label === "Messages" ? unreadMessages : 0;
+            const divided = item.label === "Home";
+            const wrap = (node: React.ReactNode) =>
+              divided ? (
+                <div key={item.label} className="my-1 border-y border-border py-1">
+                  {node}
+                </div>
+              ) : (
+                node
+              );
 
             if (collapsed) {
-              return (
+              return wrap(
                 <Tooltip key={item.label}>
                   <TooltipTrigger asChild>
                     <Link to={item.to} className={`relative flex w-full items-center justify-center rounded-lg py-2 transition-all ${active ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
@@ -148,11 +157,11 @@ export function LeftSidebar() {
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="right">{item.label}</TooltipContent>
-                </Tooltip>
+                </Tooltip>,
               );
             }
 
-            return (
+            return wrap(
               <Link
                 key={item.label}
                 to={item.to}
@@ -165,7 +174,7 @@ export function LeftSidebar() {
                     {badge > 99 ? "99+" : badge}
                   </span>
                 )}
-              </Link>
+              </Link>,
             );
           })}
         </nav>
