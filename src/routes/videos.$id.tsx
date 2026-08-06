@@ -79,7 +79,6 @@ function VideoDetail() {
               <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
               <div className="mt-4 flex items-start gap-3">
                 <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
-                <SaveVideoButton videoId={video.id} />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
                 {video.author?.username ? (
@@ -106,6 +105,7 @@ function VideoDetail() {
                   {video.description}
                 </div>
               )}
+              <VideoActions video={video} onVideoChange={(v) => setVideo(v)} />
             </div>
             <aside className="min-w-0">
               <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-500">Up next</h2>
