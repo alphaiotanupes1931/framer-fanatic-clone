@@ -435,7 +435,7 @@ function StoriesSignedIn() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2 xl:grid-cols-3 lazy-grid">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="overflow-hidden rounded-xl bg-card shadow-sm">
                 <div className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
@@ -468,7 +468,7 @@ function StoriesSignedIn() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2 xl:grid-cols-3 lazy-grid">
               {stories.map((s) => (
                 <StoryCard
                   key={s.id}

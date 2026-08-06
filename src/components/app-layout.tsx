@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSignedUrlCache } from "@/components/smart-image";
+import { warmConnections, invalidateConnections } from "@/lib/connections";
 import { SidebarProvider, useSidebar } from "@/components/layout/sidebar-context";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { RightSidebar } from "@/components/layout/right-sidebar";
@@ -68,6 +69,8 @@ export function useCurrentProfile() {
     loadProfile().then((p) => {
       if (cancelled) return;
       if (!p && !profileCache) navigate({ to: "/auth" });
+      // Warm the people-you-know list so share sheets open with no spinner.
+      if (p?.id) warmConnections(p.id);
     });
     return () => {
       cancelled = true;
@@ -81,6 +84,7 @@ if (typeof window !== "undefined") {
   supabase.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED") {
       invalidateCurrentProfile();
+      invalidateConnections();
       // Signed URLs are per-session capability links; don't leak them across users.
       if (event !== "USER_UPDATED") clearSignedUrlCache();
       publishProfile(null);

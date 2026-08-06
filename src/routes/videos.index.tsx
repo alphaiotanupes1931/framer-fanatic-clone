@@ -193,7 +193,7 @@ function VideosSignedIn() {
         {featured.length > 0 && (
           <section>
             <h2 className="mb-3 flex items-center gap-2 text-sm font-bold"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> Featured Videos</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2 lazy-grid">
               {featured.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
             </div>
           </section>
@@ -215,7 +215,7 @@ function VideosSignedIn() {
               }
             />
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lazy-grid">
               {rest.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
             </div>
           )}

@@ -4,8 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { Img } from "@/components/shared/smart-img";
-
-type Person = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
+import { getConnectionsSnapshot, loadConnections, type Person } from "@/lib/connections";
 
 export function ExternalShareDialog({
   open,
@@ -19,24 +18,16 @@ export function ExternalShareDialog({
   title?: string;
 }) {
   const me = useCurrentProfile();
-  const [people, setPeople] = useState<Person[]>([]);
+  const [people, setPeople] = useState<Person[]>(() => (getConnectionsSnapshot(me?.id)?.all ?? []).slice(0, 12));
   const [sendingTo, setSendingTo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !me?.id) return;
-    (async () => {
-      const [flw, fwg] = await Promise.all([
-        supabase.from("follows").select("follower_id").eq("following_id", me.id),
-        supabase.from("follows").select("following_id").eq("follower_id", me.id),
-      ]);
-      const ids = Array.from(new Set([
-        ...(flw.data ?? []).map((r: { follower_id: string }) => r.follower_id),
-        ...(fwg.data ?? []).map((r: { following_id: string }) => r.following_id),
-      ])).filter((id) => id !== me.id);
-      if (!ids.length) { setPeople([]); return; }
-      const { data } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-      setPeople(((data as Person[]) ?? []).slice(0, 12));
-    })();
+    const snap = getConnectionsSnapshot(me.id);
+    if (snap) setPeople(snap.all.slice(0, 12));
+    let cancelled = false;
+    void loadConnections(me.id).then((s) => { if (!cancelled) setPeople(s.all.slice(0, 12)); });
+    return () => { cancelled = true; };
   }, [open, me?.id]);
 
   if (!open) return null;
