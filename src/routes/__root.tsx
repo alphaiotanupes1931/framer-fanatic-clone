@@ -28,7 +28,7 @@ const themeScript = `
   })();
 `;
 
-const SITE_ORIGIN = "https://framer-fanatic-clone.lovable.app";
+const SITE_ORIGIN = "https://planetbaltimore.com";
 const LOGO_URL = `${SITE_ORIGIN}${pbLogo}`;
 
 function NotFoundComponent() {
