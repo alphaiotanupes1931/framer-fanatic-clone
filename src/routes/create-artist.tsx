@@ -11,7 +11,7 @@ import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
-import { compressAvatar } from "@/lib/image-compress";
+import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-artist")({
   component: CreateArtistPage,

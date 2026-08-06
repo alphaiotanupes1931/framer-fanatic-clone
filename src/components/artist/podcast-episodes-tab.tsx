@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, Upload, Loader2, Play, Trash2, Video as VideoIcon } from "lucide-react";
 import { toast } from "sonner";
-import { compressImage } from "@/lib/image-compress";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 type Episode = {
   id: string;

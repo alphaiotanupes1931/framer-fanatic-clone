@@ -18,6 +18,7 @@ import pbLogo from "@/assets/pb-logo.png";
 import { CREATOR_CATEGORIES } from "@/lib/categories";
 import { Textarea } from "@/components/ui/textarea";
 import { Img } from "@/components/shared/smart-img";
+import { STORED_URL_TTL } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,

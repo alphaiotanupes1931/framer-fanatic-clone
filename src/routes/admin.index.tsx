@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Trash2, Lock } from "lucide-react";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
-import { compressImage } from "@/lib/image-compress";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminPage,

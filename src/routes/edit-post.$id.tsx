@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, ImagePlus, Loader2, Save, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
-import { compressImage } from "@/lib/image-compress";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/edit-post/$id")({
   component: EditPostPage,

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
-import { compressImage } from "@/lib/image-compress";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-post")({
   component: CreatePostPage,

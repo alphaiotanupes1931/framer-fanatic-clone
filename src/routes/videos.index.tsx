@@ -14,7 +14,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
-import { compressImage } from "@/lib/image-compress";
+import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/videos/")({
   component: VideosPage,
