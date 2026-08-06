@@ -7,20 +7,75 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * every time. Keeping results here lets a revisited page paint its previous
  * data on the very first render while fresh data is revalidated silently in
  * the background, which is what makes native-feeling apps feel instant.
+ *
+ * The cache is also mirrored into localStorage so a hard refresh (or coming
+ * back later in the day) still paints from the last known result instead of a
+ * skeleton. Entries older than CACHE_TTL_MS are dropped on hydration.
  */
-const store = new Map<string, unknown>();
+const STORAGE_KEY = "pb:datacache:v1";
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // one day
+const MAX_PERSISTED_BYTES = 3_000_000;
+
+type Entry = { v: unknown; t: number };
+
+const store = new Map<string, Entry>();
+
+function hydrate() {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Record<string, Entry>;
+    const now = Date.now();
+    for (const [k, e] of Object.entries(parsed)) {
+      if (e && typeof e.t === "number" && now - e.t < CACHE_TTL_MS) store.set(k, e);
+    }
+  } catch {
+    // Corrupt or unavailable storage is never fatal: we just start cold.
+  }
+}
+hydrate();
+
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+function schedulePersist() {
+  if (typeof window === "undefined" || flushTimer) return;
+  flushTimer = setTimeout(() => {
+    flushTimer = null;
+    try {
+      const obj: Record<string, Entry> = {};
+      for (const [k, e] of store) obj[k] = e;
+      const json = JSON.stringify(obj);
+      if (json.length > MAX_PERSISTED_BYTES) {
+        // Keep only the freshest entries when the payload gets large.
+        const trimmed = [...store.entries()].sort((a, b) => b[1].t - a[1].t).slice(0, 12);
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(trimmed)));
+      } else {
+        window.localStorage.setItem(STORAGE_KEY, json);
+      }
+    } catch {
+      // Quota errors are ignored; the in-memory cache still works.
+    }
+  }, 300);
+}
 
 export function readCache<T>(key: string): T | undefined {
-  return store.has(key) ? (store.get(key) as T) : undefined;
+  const e = store.get(key);
+  return e ? (e.v as T) : undefined;
 }
 export function writeCache<T>(key: string, value: T) {
-  store.set(key, value);
+  store.set(key, { v: value, t: Date.now() });
+  schedulePersist();
 }
 export function hasCache(key: string) {
   return store.has(key);
 }
 export function clearDataCache() {
   store.clear();
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
 }
 
 type Updater<T> = T | ((prev: T | undefined) => T);
