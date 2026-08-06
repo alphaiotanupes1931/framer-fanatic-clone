@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { prefetchHandlers } from "@/lib/prefetch";
 import {
   Home, Search, Plus, User, Menu, MessageCircle, Compass, BookOpen,
   Users, Shield, Palette, Landmark, Building2, MapPin, Calendar, Ticket,
