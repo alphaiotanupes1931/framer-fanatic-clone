@@ -84,6 +84,7 @@ if (typeof window !== "undefined") {
       // Signed URLs are per-session capability links; don't leak them across users.
       if (event !== "USER_UPDATED") clearSignedUrlCache();
       publishProfile(null);
+      if (event !== "SIGNED_OUT") void loadProfile();
     }
   });
 }
