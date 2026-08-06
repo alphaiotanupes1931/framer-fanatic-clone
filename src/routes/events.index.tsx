@@ -13,6 +13,7 @@ import { EventImage } from "@/components/event-image";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { compressImage } from "@/lib/image-compress";
 import { pageHead } from "@/lib/seo";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -157,19 +158,19 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
 
 function EventsPage() {
   const { loading, signedIn } = useAuthState();
-  const [events, setEvents] = useState<EventRow[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
+  // Cached so returning to Events paints the previous list instantly while
+  // fresh data revalidates behind it.
+  const { data: cachedEvents, loading: dataLoading, refetch } = useCachedFetch<EventRow[]>(
+    "events:upcoming",
+    async () => {
       const { data } = await supabase
         .from("events").select("*")
         .gte("starts_at", new Date().toISOString())
         .order("starts_at", { ascending: true }).limit(24);
-      setEvents((data as EventRow[] | null) ?? []);
-      setDataLoading(false);
-    })();
-  }, []);
+      return (data as EventRow[] | null) ?? [];
+    },
+  );
+  const events = cachedEvents ?? [];
 
   if (loading) return null;
 
@@ -219,12 +220,7 @@ function EventsPage() {
     );
   }
 
-  return <SignedInEvents events={events} dataLoading={dataLoading} reload={() => {
-    setDataLoading(true);
-    supabase.from("events").select("*").gte("starts_at", new Date().toISOString())
-      .order("starts_at", { ascending: true }).limit(50)
-      .then(({ data }) => { setEvents((data as EventRow[] | null) ?? []); setDataLoading(false); });
-  }} />;
+  return <SignedInEvents events={events} dataLoading={dataLoading} reload={refetch} />;
 }
 
 function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; dataLoading: boolean; reload: () => void }) {

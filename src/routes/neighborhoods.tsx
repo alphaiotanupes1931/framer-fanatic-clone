@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { EventImage } from "@/components/event-image";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
+import { useCachedFetch } from "@/hooks/use-cached-fetch";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
@@ -51,7 +52,11 @@ type TabKey = "events" | "businesses" | "groups" | "artists" | "arts_orgs" | "as
 function NeighborhoodsPage() {
   const auth = useAuthState();
   const navigate = useNavigate();
-  const [list, setList] = useState<N[]>([]);
+  const { data: cachedList } = useCachedFetch<N[]>("neighborhoods:list", async () => {
+    const { data } = await supabase.from("neighborhoods").select("id, name, region").order("name");
+    return (data || []) as N[];
+  });
+  const list = cachedList ?? [];
   const [selected, setSelected] = useState<N | null>(null);
   const [artists, setArtists] = useState<ArtistRow[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
@@ -59,11 +64,6 @@ function NeighborhoodsPage() {
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<TabKey>("events");
   const [nq, setNq] = useState("");
-
-  useEffect(() => { (async () => {
-    const { data } = await supabase.from("neighborhoods").select("id, name, region").order("name");
-    setList((data || []) as N[]);
-  })(); }, []);
 
   useEffect(() => {
     if (!selected) return;

@@ -112,6 +112,37 @@ const registry: Record<string, Prefetcher> = {
       return list;
     },
   },
+  "/events": {
+    key: "events:upcoming",
+    run: async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("*")
+        .gte("starts_at", new Date().toISOString())
+        .order("starts_at", { ascending: true })
+        .limit(24);
+      return data ?? [];
+    },
+  },
+  "/marketplace": {
+    key: "marketplace:active",
+    run: async () => {
+      const { data } = await supabase
+        .from("marketplace_listings")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(120);
+      return data ?? [];
+    },
+  },
+  "/neighborhoods": {
+    key: "neighborhoods:list",
+    run: async () => {
+      const { data } = await supabase.from("neighborhoods").select("id, name, region").order("name");
+      return data ?? [];
+    },
+  },
 };
 
 export function prefetchPath(path: string) {
