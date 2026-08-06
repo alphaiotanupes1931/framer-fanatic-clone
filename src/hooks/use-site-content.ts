@@ -57,7 +57,8 @@ export const SITE_CONTENT_DEFAULTS: Record<string, string> = {
   "creators.card2.title.color": "#FFFFFF",
   "creators.card2.body.color": "#FFFFFF",
   "creators.card2.cta.color": "#FFFFFF",
-  // Section text color overrides (leave empty to inherit from ink/paper tokens).
+  "features.heading.color": "#FFFFFF",
+  "features.subtitle.color": "#FFFFFF",
   "colors.textOnBlue": "",
   "colors.textOnBlueDeep": "",
   "colors.textOnPaper": "",
