@@ -57,7 +57,7 @@ export function OrgListPage({
 
   // One fetch per org type, cached across visits. Search, subtype and sort all
   // filter that list in memory so typing and tab switching are instant.
-  const { data: all, loading, setData } = useCachedFetch<Org[]>(`orglist:${type}`, async () => {
+  const { data: all, loading, setData, refetch } = useCachedFetch<Org[]>(`orglist:${type}`, async () => {
     const { data } = await supabase
       .from("organizations")
       .select("*")
@@ -265,7 +265,7 @@ export function OrgListPage({
           </div>
         )}
       </div>
-      <OrgCreateDialog type={type} open={open} onClose={() => { setOpen(false); void load(); }} />
+      <OrgCreateDialog type={type} open={open} onClose={() => { setOpen(false); refetch(); }} />
     </AppLayout>
   );
 }
