@@ -14,7 +14,7 @@ import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => pageHead({ path: "/about", title: "About Planet Baltimore", description: "Planet Baltimore is a platform built so Baltimore artists, makers, and organizers have a home of their own." }),
+  head: () => pageHead({ path: "/about", title: "About Planet Baltimore", description: "Planet Baltimore is a platform built so Baltimore artists, makers, and organizers have a home of their own.", image: assetUrl(aboutFounders.url) }),
   component: AboutPage,
 });
 
