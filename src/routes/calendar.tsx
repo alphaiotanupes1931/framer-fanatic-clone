@@ -338,7 +338,12 @@ function CalendarPage() {
   const [neighborhood, setNeighborhood] = useState<string>("");
   const [eventType, setEventType] = useState<string>("All Types");
   const [neighborhoods, setNeighborhoods] = useState<{ id: string; name: string }[]>([]);
-  const [foryouIdx, setForyouIdx] = useState(0);
+  const forYouRef = useRef<HTMLDivElement | null>(null);
+  const scrollForYou = (dir: number) => {
+    const el = forYouRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth - 40), behavior: "smooth" });
+  };
   const [upcomingView, setUpcomingView] = useState<"list" | "grid">("list");
   const [showMonthly, setShowMonthly] = useState(false);
 
