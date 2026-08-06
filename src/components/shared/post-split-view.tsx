@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
-import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -155,7 +155,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
           {current.kind === "image" ? (
             <Img src={current.url} alt="" className="max-h-[85vh] w-full object-contain" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
           ) : (
-            <video key={current.url} src={current.url} controls playsInline preload="metadata" className="max-h-[85vh] w-full bg-black" />
+            <SmartVideo key={current.url} src={current.url} controls playsInline preload="metadata" className="max-h-[85vh] w-full bg-black" />
           )}
           {mediaList.length > 1 && (
             <>

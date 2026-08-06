@@ -27,7 +27,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { ExternalShareDialog } from "@/components/external-share-dialog";
 import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
-import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/profile")({
@@ -593,7 +593,7 @@ function ProfilePage() {
                           >
                             {thumb ? (
                               isVideo ? (
-                                <video src={thumb} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                                <SmartVideo src={thumb} className="h-full w-full object-cover" muted playsInline preload="metadata" />
                               ) : (
                                 <Img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
                               )

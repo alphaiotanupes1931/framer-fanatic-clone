@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
 import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
+import { SmartVideo } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/edit-event/$eventId")({
   component: EditEventPage,
@@ -309,7 +310,7 @@ function VideoField({
     return (
       <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-black">
         {url ? (
-          <video src={url} controls className="w-full aspect-video bg-black" />
+          <SmartVideo src={url} controls className="w-full aspect-video bg-black" />
         ) : (
           <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading preview…</div>
         )}

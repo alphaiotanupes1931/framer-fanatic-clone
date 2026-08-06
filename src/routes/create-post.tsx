@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-post")({
@@ -271,7 +271,7 @@ function CreatePostPage() {
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                         {isVideo ? (
-                          <video src={u} className="h-32 w-full object-cover" />
+                          <SmartVideo src={u} className="h-32 w-full object-cover" />
                         ) : (
                           <Img src={u} alt="" className="h-32 w-full object-cover" />
                         )}
@@ -315,7 +315,7 @@ function CreatePostPage() {
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                         {isVideo ? (
-                          <video src={u} className="h-32 w-full object-cover" />
+                          <SmartVideo src={u} className="h-32 w-full object-cover" />
                         ) : (
                           <Img src={u} alt="" className="h-32 w-full object-cover" />
                         )}

@@ -15,7 +15,7 @@ import { ReportDialog } from "@/components/report-dialog";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 
 type Post = {
   id: string;
@@ -267,7 +267,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               />
             </Link>
           ) : (
-            <video
+            <SmartVideo
               key={current.url}
               src={current.url}
               controls

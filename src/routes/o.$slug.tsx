@@ -18,7 +18,7 @@ import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/o/$slug")({
@@ -1697,7 +1697,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
                     const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                        {isVideo ? <video src={u} className="h-24 w-full object-cover" /> : <Img src={u} alt="" className="h-24 w-full object-cover" />}
+                        {isVideo ? <SmartVideo src={u} className="h-24 w-full object-cover" /> : <Img src={u} alt="" className="h-24 w-full object-cover" />}
                         <button type="button" onClick={() => setMediaUrls((prev) => prev.filter((_, idx) => idx !== i))}
                           className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove">
                           <X className="h-3 w-3" />
@@ -1737,7 +1737,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opp
                       const u = media[0];
                       const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                       return isVideo
-                        ? <video src={u} controls className="h-56 w-full bg-black object-cover" />
+                        ? <SmartVideo src={u} controls className="h-56 w-full bg-black object-cover" />
                         : <Img src={u} alt={p.title} className="h-56 w-full object-cover" loading="lazy" decoding="async" />;
                     })()}
                     {media.length > 1 && (
