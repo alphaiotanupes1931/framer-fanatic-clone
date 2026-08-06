@@ -15,6 +15,7 @@ import { stripHtml } from "@/lib/text-utils";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
 import { readCache, writeCache, hasCache } from "@/hooks/use-cached-fetch";
+import { prefetchImageUrls } from "@/components/smart-image";
 
 function storyCacheKey(o: { tab: string; sort: string; filter: string; storyFormat: string; search: string }) {
   return `stories:${o.tab}:${o.sort}:${o.filter}:${o.storyFormat}:${o.search}`;
