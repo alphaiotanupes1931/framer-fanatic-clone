@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -27,8 +27,13 @@ export const Route = createFileRoute("/create-artist")({
 
 const CATEGORIES = ["Music", "Visual Art", "Photography", "Film", "Writing", "Design", "Fashion", "Food", "Performance", "Other"];
 
+function slugify(s: string) {
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "artist";
+}
+
 function CreateArtistPage() {
   const me = useCurrentProfile();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -68,12 +73,7 @@ function CreateArtistPage() {
     if (me) {
       setForm((f) => ({
         ...f,
-        display_name: me.display_name || f.display_name,
-        neighborhood: me.neighborhood || f.neighborhood,
-        bio: me.bio || f.bio,
-        website: me.website || f.website,
-        avatar_url: me.avatar_url || f.avatar_url,
-        banner_url: (me as { banner_url?: string }).banner_url || f.banner_url,
+        neighborhood: f.neighborhood || me.neighborhood || "",
       }));
     }
   }, [me]);
@@ -82,22 +82,26 @@ function CreateArtistPage() {
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
-    if (!canSubmit) { toast.error("Display name is required"); return; }
+    if (!canSubmit) { toast.error("Artist name is required"); return; }
     setSaving(true);
     try {
-      const { error } = await supabase.from("profiles").update({
-        display_name: form.display_name.trim(),
-        category: form.category,
+      try { await setMyProfileKind("artist"); } catch { /* role switch is best effort */ }
+      const slug = `${slugify(form.display_name)}-${Math.random().toString(36).slice(2, 6)}`;
+      const { data, error } = await supabase.from("organizations").insert({
+        owner_id: me.id,
+        type: "artist",
+        subtype: form.category,
+        name: form.display_name.trim(),
+        slug,
         neighborhood: form.neighborhood.trim() || null,
         bio: form.bio.trim() || null,
         website: form.website.trim() || null,
         avatar_url: form.avatar_url.trim() || null,
         banner_url: form.banner_url.trim() || null,
-      }).eq("id", me.id);
+      }).select("slug").single();
       if (error) throw error;
-      await setMyProfileKind("artist");
-      toast.success("Artist profile created");
-      window.location.href = "/profile";
+      toast.success("Artist page created");
+      navigate({ to: "/o/$slug", params: { slug: data.slug } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     } finally {
@@ -108,10 +112,10 @@ function CreateArtistPage() {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
-        <HeroBanner title="Create Artist Profile" subtitle="Claim your spot on the Baltimore scene." />
+        <HeroBanner title="Create Artist Page" subtitle="Make as many artist pages as you like, one for each project or alias." />
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Display name<span className="text-orange"> *</span></Label>
+            <Label className="text-sm font-medium">Artist name<span className="text-orange"> *</span></Label>
             <Input value={form.display_name} onChange={(e) => set("display_name", e.target.value)} maxLength={80} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -139,7 +143,7 @@ function CreateArtistPage() {
             <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Profile photo</Label>
+            <Label className="text-sm font-medium">Page photo</Label>
             <div className="flex items-center gap-4">
               <div className="relative h-20 w-20 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
                 {form.avatar_url ? (
@@ -171,7 +175,7 @@ function CreateArtistPage() {
           <div className="flex justify-end">
             <Button onClick={submit} disabled={!canSubmit || saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Artist Profile
+              Create Artist Page
             </Button>
           </div>
         </div>
