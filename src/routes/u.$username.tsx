@@ -13,6 +13,7 @@ import { formatCategory } from "@/lib/format-category";
 import { PROFILE_TAGS } from "@/lib/categories";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
+import { ShareButtons } from "@/components/shared/share-buttons";
 import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
 import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
 import {
