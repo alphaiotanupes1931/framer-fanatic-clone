@@ -12,9 +12,9 @@ import { SmartVideo } from "@/components/shared/smart-img";
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
   head: () => ({ meta: [{ title: "Create Event - Planet Baltimore" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    org: typeof s.org === "string" ? s.org : undefined,
-    kind: s.kind === "exhibition" ? "exhibition" as const : undefined,
+  validateSearch: (s: Record<string, unknown>): { org?: string; kind?: "exhibition" } => ({
+    ...(typeof s.org === "string" ? { org: s.org } : {}),
+    ...(s.kind === "exhibition" ? { kind: "exhibition" as const } : {}),
   }),
 });
 
