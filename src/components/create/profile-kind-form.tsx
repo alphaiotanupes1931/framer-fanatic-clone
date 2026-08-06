@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ import { setMyProfileKind } from "@/lib/profile-kind";
 
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
   const me = useCurrentProfile();
-  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
