@@ -501,12 +501,12 @@ function OrgProfile() {
             <DocumentsTab orgId={org.id} canManage={canManage} me={me} label="Document" />
           )}
           {tab === "By Laws" && (
-            <TextDocTab
-              orgId={org.id} canManage={canManage} field="bylaws"
-              title="By Laws & Governing Documents"
-              emptyTitle="No bylaws posted yet."
-              emptyHint="Click Edit to add governing documents."
-              initialValue={org.bylaws ?? null}
+            <DocumentsTab
+              orgId={org.id} canManage={canManage} me={me}
+              label="By Laws"
+              docType="By Laws"
+              emptyTitle="No bylaws uploaded yet."
+              emptyHint="Upload your bylaws or governing documents as a PDF."
             />
           )}
           {tab === "Rules" && (
