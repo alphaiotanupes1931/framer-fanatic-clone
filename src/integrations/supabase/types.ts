@@ -539,25 +539,34 @@ export type Database = {
       }
       invites: {
         Row: {
+          click_count: number
+          clicked_at: string | null
           created_at: string
           email: string
           id: string
           invite_url: string | null
           invited_by: string | null
+          token: string | null
         }
         Insert: {
+          click_count?: number
+          clicked_at?: string | null
           created_at?: string
           email: string
           id?: string
           invite_url?: string | null
           invited_by?: string | null
+          token?: string | null
         }
         Update: {
+          click_count?: number
+          clicked_at?: string | null
           created_at?: string
           email?: string
           id?: string
           invite_url?: string | null
           invited_by?: string | null
+          token?: string | null
         }
         Relationships: []
       }
@@ -2651,6 +2660,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      record_invite_click: { Args: { _token: string }; Returns: string }
       resolve_referrer: { Args: { _username: string }; Returns: string }
       rsvp_free_event: { Args: { _event_id: string }; Returns: Json }
       search_all_users: {

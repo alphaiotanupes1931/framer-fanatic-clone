@@ -39,6 +39,21 @@ interface ReferralNetworkDialogProps {
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
+// Invite links always point at the public domain, never the preview host.
+const PUBLIC_SITE_URL = "https://planetbaltimore.com";
+
+const makeToken = () =>
+  (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    .replace(/-/g, "")
+    .slice(0, 24);
+
+const buildInviteUrl = (username?: string | null, token?: string) => {
+  const url = new URL("/invite", PUBLIC_SITE_URL);
+  if (username) url.searchParams.set("ref", username);
+  if (token) url.searchParams.set("iv", token);
+  return url.toString();
+};
+
 const TIERS = [
   {
     level: 1,
@@ -78,9 +93,7 @@ export function ReferralNetworkDialog({
   const messageRef = useRef<HTMLTextAreaElement>(null);
 
   const inviteUrl = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    const base = `${window.location.origin}/invite`;
-    return profile?.username ? `${base}?ref=${profile.username}` : base;
+    return buildInviteUrl(profile?.username);
   }, [profile?.username]);
 
   const defaultMessage = useMemo(() => {
@@ -141,7 +154,12 @@ export function ReferralNetworkDialog({
 
     let sent = 0;
     const failures: string[] = [];
+    const tokens = new Map<string, string>();
+    const sentEmails: string[] = [];
     for (const to of emails) {
+      const token = makeToken();
+      tokens.set(to, token);
+      const trackedUrl = buildInviteUrl(profile?.username, token);
       const res = await fetch("/lovable/email/transactional/send", {
         method: "POST",
         headers: {
@@ -155,12 +173,13 @@ export function ReferralNetworkDialog({
           templateData: {
             inviterName,
             personalMessage: message?.trim() || "",
-            inviteUrl,
+            inviteUrl: trackedUrl,
           },
         }),
       });
       if (res.ok) {
         sent += 1;
+        sentEmails.push(to);
       } else {
         const body = await res.json().catch(() => ({}));
         failures.push(`${to}: ${body.error || res.statusText}`);
@@ -168,10 +187,11 @@ export function ReferralNetworkDialog({
     }
 
     if (opts?.record && sent > 0) {
-      const rows = emails.map((e) => ({
+      const rows = sentEmails.map((e) => ({
         email: e,
         invited_by: session.user.id,
-        invite_url: inviteUrl,
+        invite_url: buildInviteUrl(profile?.username, tokens.get(e)),
+        token: tokens.get(e),
       }));
       const { error } = await supabase.from("invites").insert(rows);
       if (error && !error.message.includes("does not exist")) {
