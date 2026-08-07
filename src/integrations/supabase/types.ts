@@ -1217,12 +1217,14 @@ export type Database = {
           bg_color: string | null
           body: string | null
           created_at: string
+          deadline: string | null
           font_size: string | null
           id: string
           kind: string
           link_url: string | null
           media_url: string | null
           media_urls: Json
+          opportunity_type: string | null
           org_id: string
           text_color: string | null
           title: string
@@ -1234,12 +1236,14 @@ export type Database = {
           bg_color?: string | null
           body?: string | null
           created_at?: string
+          deadline?: string | null
           font_size?: string | null
           id?: string
           kind: string
           link_url?: string | null
           media_url?: string | null
           media_urls?: Json
+          opportunity_type?: string | null
           org_id: string
           text_color?: string | null
           title: string
@@ -1251,12 +1255,14 @@ export type Database = {
           bg_color?: string | null
           body?: string | null
           created_at?: string
+          deadline?: string | null
           font_size?: string | null
           id?: string
           kind?: string
           link_url?: string | null
           media_url?: string | null
           media_urls?: Json
+          opportunity_type?: string | null
           org_id?: string
           text_color?: string | null
           title?: string
