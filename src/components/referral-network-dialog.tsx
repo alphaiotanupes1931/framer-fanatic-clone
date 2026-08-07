@@ -316,6 +316,7 @@ export function ReferralNetworkDialog({
   };
 
   const handleSendInvite = async () => {
+    void 0;
     const emails = parsedEmails.length > 0 ? parsedEmails : extractEmails(email);
     if (emails.length === 0) {
       toast.error("Please enter at least one valid email");
