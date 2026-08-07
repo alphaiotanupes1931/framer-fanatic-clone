@@ -132,6 +132,7 @@ export function ReferralNetworkDialog({
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
+  const [resending, setResending] = useState<string | null>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
 
   const inviteUrl = useMemo(() => {
