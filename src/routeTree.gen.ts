@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TicketingRouteImport } from './routes/ticketing'
 import { Route as TicketSalesDashboardRouteImport } from './routes/ticket-sales-dashboard'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -83,6 +84,11 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TicketingRoute = TicketingRouteImport.update({
   id: '/ticketing',
   path: '/ticketing',
@@ -498,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -573,6 +580,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -649,6 +657,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -726,6 +735,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
+    | '/unsubscribe'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -801,6 +811,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
+    | '/unsubscribe'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -876,6 +887,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
+    | '/unsubscribe'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -952,6 +964,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
   TicketingRoute: typeof TicketingRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
@@ -983,6 +996,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ticketing': {
       id: '/ticketing'
       path: '/ticketing'
@@ -1564,6 +1584,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
   TicketingRoute: TicketingRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
@@ -1595,3 +1616,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
