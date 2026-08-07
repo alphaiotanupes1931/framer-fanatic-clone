@@ -171,10 +171,38 @@ function AuthPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
-          <CardTitle className="text-2xl">Welcome</CardTitle>
-          <CardDescription>Sign in or create a new account</CardDescription>
+          <CardTitle className="text-2xl">{awaitingConfirm ? "Confirm your email" : "Welcome"}</CardTitle>
+          <CardDescription>
+            {awaitingConfirm
+              ? `We sent a confirmation link to ${awaitingConfirm}. Click it to activate your account, then sign in.`
+              : "Sign in or create a new account"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
+          {awaitingConfirm ? (
+            <div className="space-y-4 text-center text-sm">
+              <p className="text-muted-foreground">
+                Didn't get it? Check your spam folder, or resend the link below.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  const { error } = await supabase.auth.resend({ type: "signup", email: awaitingConfirm });
+                  setLoading(false);
+                  if (error) return toast.error(error.message);
+                  toast.success("Confirmation email resent.");
+                }}
+              >
+                Resend confirmation email
+              </Button>
+              <button type="button" className="underline text-muted-foreground" onClick={() => setAwaitingConfirm(null)}>
+                Back to sign in
+              </button>
+            </div>
+          ) : (
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
