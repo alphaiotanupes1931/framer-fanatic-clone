@@ -28,6 +28,8 @@ import {
   Ticket,
   Shirt,
   Star,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,6 +132,7 @@ export function ReferralNetworkDialog({
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
+  const [resending, setResending] = useState<string | null>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
 
   const inviteUrl = useMemo(() => {
@@ -311,6 +314,31 @@ export function ReferralNetworkDialog({
     }
 
     return { sent, failures };
+  };
+
+  const handleDeleteInvite = async (invite: any) => {
+    setInvites((prev) => prev.filter((i) => i.id !== invite.id));
+    const { error } = await supabase.from("invites").delete().eq("id", invite.id);
+    if (error) {
+      toast.error("Could not delete invite");
+      loadStats();
+      return;
+    }
+    toast.success("Invite deleted");
+    loadStats();
+  };
+
+  const handleResendInvite = async (invite: any) => {
+    setResending(invite.id);
+    try {
+      const { sent, failures } = await deliverInvites([invite.email]);
+      if (sent > 0) toast.success(`Invite resent to ${invite.email}`);
+      else toast.error(failures[0] || "Could not resend invite");
+    } catch (err: any) {
+      toast.error(err.message || "Could not resend invite");
+    } finally {
+      setResending(null);
+    }
   };
 
   const handleSendInvite = async () => {
@@ -724,9 +752,36 @@ export function ReferralNetworkDialog({
                         </div>
                       </div>
                     </div>
-                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                      Pending
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        Pending
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        title="Resend invite"
+                        disabled={resending === invite.id}
+                        onClick={() => handleResendInvite(invite)}
+                      >
+                        {resending === invite.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        title="Delete invite"
+                        onClick={() => handleDeleteInvite(invite)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
