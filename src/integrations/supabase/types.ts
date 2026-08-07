@@ -539,6 +539,8 @@ export type Database = {
       }
       invites: {
         Row: {
+          accepted_at: string | null
+          accepted_user_id: string | null
           click_count: number
           clicked_at: string | null
           created_at: string
@@ -549,6 +551,8 @@ export type Database = {
           token: string | null
         }
         Insert: {
+          accepted_at?: string | null
+          accepted_user_id?: string | null
           click_count?: number
           clicked_at?: string | null
           created_at?: string
@@ -559,6 +563,8 @@ export type Database = {
           token?: string | null
         }
         Update: {
+          accepted_at?: string | null
+          accepted_user_id?: string | null
           click_count?: number
           clicked_at?: string | null
           created_at?: string
