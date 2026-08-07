@@ -46,6 +46,7 @@ function AuthPage() {
   const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"artist" | "resident" | "visitor">("resident");
+  const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -64,6 +65,20 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Signed in");
+    // Apply any role/category chosen at signup, once the confirmed session exists.
+    try {
+      const pending = localStorage.getItem("pb_pending_signup");
+      if (pending) {
+        const { role: pRole, category } = JSON.parse(pending) as { role?: string; category?: string | null };
+        if (pRole === "artist") { try { await becomeArtistFn(); } catch { /* can upgrade later */ } }
+        if (category) {
+          const { data: s } = await supabase.auth.getSession();
+          const id = s.session?.user.id;
+          if (id) await supabase.from("profiles").update({ category }).eq("id", id);
+        }
+        localStorage.removeItem("pb_pending_signup");
+      }
+    } catch { /* non-fatal */ }
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (uid) {
@@ -100,7 +115,7 @@ function AuthPage() {
     setLoading(true);
     let referredBy: string | null = null;
     try { referredBy = sessionStorage.getItem("pb_referred_by"); } catch { /* ignore */ }
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -114,6 +129,18 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    // With email confirmation on, there is no session until the user clicks the
+    // link in their inbox. Stash their choices and show a "check your email" state.
+    if (!signUpData.session) {
+      try {
+        localStorage.setItem("pb_pending_signup", JSON.stringify({ role: finalRole, category: profileCategory }));
+        localStorage.setItem("pb_new_signup", "1");
+      } catch { /* ignore */ }
+      try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); } catch { /* ignore */ }
+      setAwaitingConfirm(email);
+      toast.success("Check your email to confirm your account.");
+      return;
+    }
     toast.success(
       finalRole === "artist"
         ? "Account created. Welcome, Artist!"
@@ -144,10 +171,38 @@ function AuthPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
-          <CardTitle className="text-2xl">Welcome</CardTitle>
-          <CardDescription>Sign in or create a new account</CardDescription>
+          <CardTitle className="text-2xl">{awaitingConfirm ? "Confirm your email" : "Welcome"}</CardTitle>
+          <CardDescription>
+            {awaitingConfirm
+              ? `We sent a confirmation link to ${awaitingConfirm}. Click it to activate your account, then sign in.`
+              : "Sign in or create a new account"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
+          {awaitingConfirm ? (
+            <div className="space-y-4 text-center text-sm">
+              <p className="text-muted-foreground">
+                Didn't get it? Check your spam folder, or resend the link below.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  const { error } = await supabase.auth.resend({ type: "signup", email: awaitingConfirm });
+                  setLoading(false);
+                  if (error) return toast.error(error.message);
+                  toast.success("Confirmation email resent.");
+                }}
+              >
+                Resend confirmation email
+              </Button>
+              <button type="button" className="underline text-muted-foreground" onClick={() => setAwaitingConfirm(null)}>
+                Back to sign in
+              </button>
+            </div>
+          ) : (
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
@@ -251,6 +306,7 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+          )}
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             <Link to="/" className="hover:underline">Back to home</Link>
