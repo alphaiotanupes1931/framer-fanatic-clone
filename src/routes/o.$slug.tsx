@@ -803,7 +803,7 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
           href="/organizer-studio"
           className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
         >
-          <CalendarIcon className="h-4 w-4" /> Manage Tickets in Studio
+          <CalendarIcon className="h-4 w-4" /> Organize Your Studio
           <ExternalLink className="h-3.5 w-3.5 opacity-60" />
         </a>
       </div>
