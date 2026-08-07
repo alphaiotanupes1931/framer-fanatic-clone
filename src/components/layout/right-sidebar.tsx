@@ -29,24 +29,29 @@ function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title:
 export function RightSidebar() {
   const { rightCollapsed, setRightCollapsed } = useSidebar();
   const { data: stories = [] } = useQuery({
-    queryKey: ["sidebar-stories"],
-    queryFn: () => Story.filter({ status: "published" }, "-created_at", 5),
-    staleTime: 300000,
+    queryKey: ["sidebar-trending-stories"],
+    queryFn: () => Story.trending(5),
+    staleTime: 60000,
+    refetchInterval: 120000,
+    refetchOnWindowFocus: true,
   });
 
   const { data: artists = [] } = useQuery({
-    queryKey: ["sidebar-artists"],
+    queryKey: ["sidebar-top-artists"],
     queryFn: async () => {
-      const { data } = await supabase.rpc("public_creators", { lim: 5 });
-      return data ?? [];
+      const { data } = await supabase.rpc("top_creators", { lim: 8 });
+      return (data ?? []).slice(0, 5);
     },
-    staleTime: 300000,
+    staleTime: 60000,
+    refetchInterval: 120000,
+    refetchOnWindowFocus: true,
   });
 
   const { data: events = [] } = useQuery({
-    queryKey: ["sidebar-events"],
-    queryFn: () => Event.filter({ status: "upcoming" }, "date", 5),
-    staleTime: 300000,
+    queryKey: ["sidebar-upcoming-events"],
+    queryFn: () => Event.upcoming(5),
+    staleTime: 60000,
+    refetchInterval: 300000,
   });
 
   return (
