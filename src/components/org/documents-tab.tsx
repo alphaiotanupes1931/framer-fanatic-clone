@@ -18,21 +18,22 @@ type Doc = {
 
 const DOC_TYPES = ["Document", "Meeting Minutes", "Budget", "Map", "By Laws", "Agenda", "Newsletter", "Other"];
 
-export function DocumentsTab({ orgId, canManage, me, label = "Document" }: { orgId: string; canManage: boolean; me: string | null; label?: string }) {
+export function DocumentsTab({ orgId, canManage, me, label = "Document", docType, emptyTitle, emptyHint }: { orgId: string; canManage: boolean; me: string | null; label?: string; docType?: string; emptyTitle?: string; emptyHint?: string }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase
+    let q = supabase
       .from("organization_documents")
       .select("id, name, description, doc_type, file_url, file_name, created_at, uploaded_by")
-      .eq("org_id", orgId)
-      .order("created_at", { ascending: false });
+      .eq("org_id", orgId);
+    if (docType) q = q.eq("doc_type", docType);
+    const { data, error } = await q.order("created_at", { ascending: false });
     if (error) { toast.error("Could not load documents"); setLoading(false); return; }
     setDocs((data ?? []) as Doc[]);
     setLoading(false);
-  }, [orgId]);
+  }, [orgId, docType]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -63,8 +64,8 @@ export function DocumentsTab({ orgId, canManage, me, label = "Document" }: { org
       ) : docs.length === 0 ? (
         <div className="py-14 text-center">
           <FileText className="mx-auto mb-3 h-8 w-8 text-neutral-300" />
-          <p className="text-sm font-medium text-neutral-600">No documents yet.</p>
-          <p className="mt-1 text-xs text-neutral-500">Upload meeting minutes, budgets, maps, and more.</p>
+          <p className="text-sm font-medium text-neutral-600">{emptyTitle ?? "No documents yet."}</p>
+          <p className="mt-1 text-xs text-neutral-500">{emptyHint ?? "Upload meeting minutes, budgets, maps, and more."}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -96,17 +97,17 @@ export function DocumentsTab({ orgId, canManage, me, label = "Document" }: { org
         </div>
       )}
 
-      {open && <UploadDialog orgId={orgId} me={me} onClose={() => setOpen(false)} onDone={() => { setOpen(false); void load(); }} />}
+      {open && <UploadDialog orgId={orgId} me={me} fixedType={docType} label={label} onClose={() => setOpen(false)} onDone={() => { setOpen(false); void load(); }} />}
     </div>
   );
 }
 
-function UploadDialog({ orgId, me, onClose, onDone }: { orgId: string; me: string | null; onClose: () => void; onDone: () => void }) {
+function UploadDialog({ orgId, me, onClose, onDone, fixedType, label = "Document" }: { orgId: string; me: string | null; onClose: () => void; onDone: () => void; fixedType?: string; label?: string }) {
   const [url, setUrl] = useState("");
   const [fileName, setFileName] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [docType, setDocType] = useState("Document");
+  const [docType, setDocType] = useState(fixedType ?? "Document");
   const [saving, setSaving] = useState(false);
 
   async function save() {
@@ -128,7 +129,7 @@ function UploadDialog({ orgId, me, onClose, onDone }: { orgId: string; me: strin
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-          <h3 className="text-lg font-bold text-neutral-900">Upload Document</h3>
+          <h3 className="text-lg font-bold text-neutral-900">Upload {label}</h3>
           <button onClick={onClose} className="rounded-lg p-1 text-neutral-500 hover:bg-neutral-100"><X className="h-5 w-5" /></button>
         </div>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto p-5">
@@ -151,13 +152,15 @@ function UploadDialog({ orgId, me, onClose, onDone }: { orgId: string; me: strin
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Add context or notes..."
               className="w-full resize-none rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-[#d4580a]" />
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-neutral-700">Document Type</label>
-            <select value={docType} onChange={(e) => setDocType(e.target.value)}
-              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#d4580a]">
-              {DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
+          {!fixedType && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-neutral-700">Document Type</label>
+              <select value={docType} onChange={(e) => setDocType(e.target.value)}
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#d4580a]">
+                {DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          )}
         </div>
         <div className="flex gap-3 border-t border-neutral-200 p-4">
           <button onClick={onClose} className="flex-1 rounded-lg border border-neutral-300 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">Cancel</button>
