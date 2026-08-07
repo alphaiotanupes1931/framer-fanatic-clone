@@ -78,50 +78,92 @@ function VideoDetail() {
         ) : !video ? (
           <div className="text-sm text-neutral-500">Video not found.</div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
-            <div className="min-w-0">
-              <VideoPlayer url={video.video_url} poster={video.thumbnail_url} video={video} />
-              <div className="mt-4 flex items-start gap-3">
-                <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
-                {video.author?.username ? (
-                  <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
-                    {video.author.avatar_url ? (
-                      <Img src={video.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
-                    ) : (
-                      <div className="h-9 w-9 rounded-full bg-neutral-200" />
-                    )}
-                    <span>
-                      <div>{video.author.display_name || video.author.username}</div>
-                      <div className="text-xs font-normal text-neutral-500">{timeAgo(video.created_at)}</div>
-                    </span>
-                  </Link>
-                ) : (
-                  <span className="font-semibold">{video.author?.display_name || "Anonymous"}</span>
-                )}
-                {video.category && (
-                  <span className="ml-auto rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">{video.category}</span>
-                )}
-              </div>
-              {video.description && (
-                <div className="mt-4 rounded-xl bg-neutral-50 border border-neutral-200 p-4 text-sm leading-relaxed text-neutral-800 whitespace-pre-wrap">
-                  {video.description}
-                </div>
-              )}
-              <VideoActions video={video} onVideoChange={(v) => setVideo(v)} />
-            </div>
-            <aside className="min-w-0">
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-500">Up next</h2>
-              <div className="space-y-3">
-                {related.map((r) => <RelatedCard key={r.id} v={r} />)}
-                {related.length === 0 && <div className="text-sm text-neutral-500">No more videos yet.</div>}
-              </div>
-            </aside>
-          </div>
+          <VideoBody video={video} related={related} onVideoChange={(v) => setVideo(v)} />
         )}
       </div>
     </div>
+  );
+}
+
+function VideoBody({ video, related, onVideoChange }: { video: Video; related: Video[]; onVideoChange: (v: Video) => void }) {
+  const info = parseEmbed(video.video_url || "");
+  const isFile = info.kind === "file";
+  const orientation = useVideoOrientation({
+    url: isFile ? video.video_url : null,
+    orientation: video.orientation,
+    aspectRatio: video.aspect_ratio ?? null,
+    probe: isFile,
+  });
+  const portrait = isFile && orientation === "portrait";
+
+  const meta = <VideoMeta video={video} onVideoChange={onVideoChange} />;
+  const upNext = (
+    <aside className="min-w-0">
+      <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-500">Up next</h2>
+      <div className="space-y-3">
+        {related.map((r) => <RelatedCard key={r.id} v={r} />)}
+        {related.length === 0 && <div className="text-sm text-neutral-500">No more videos yet.</div>}
+      </div>
+    </aside>
+  );
+
+  if (portrait) {
+    // Shorts-style: tall player on the left, caption and details beside it.
+    return (
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid min-w-0 gap-6 md:grid-cols-[minmax(280px,420px)_minmax(0,1fr)] md:items-start">
+          <VideoPlayer url={video.video_url} poster={video.thumbnail_url} video={video} />
+          <div className="min-w-0 md:sticky md:top-4">{meta}</div>
+        </div>
+        {upNext}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
+      <div className="min-w-0">
+        <VideoPlayer url={video.video_url} poster={video.thumbnail_url} video={video} />
+        {meta}
+      </div>
+      {upNext}
+    </div>
+  );
+}
+
+function VideoMeta({ video, onVideoChange }: { video: Video; onVideoChange: (v: Video) => void }) {
+  return (
+    <>
+      <div className="mt-4 flex items-start gap-3 md:mt-0">
+        <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
+        {video.author?.username ? (
+          <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
+            {video.author.avatar_url ? (
+              <Img src={video.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-neutral-200" />
+            )}
+            <span>
+              <div>{video.author.display_name || video.author.username}</div>
+              <div className="text-xs font-normal text-neutral-500">{timeAgo(video.created_at)}</div>
+            </span>
+          </Link>
+        ) : (
+          <span className="font-semibold">{video.author?.display_name || "Anonymous"}</span>
+        )}
+        {video.category && (
+          <span className="ml-auto rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">{video.category}</span>
+        )}
+      </div>
+      {video.description && (
+        <div className="mt-4 rounded-xl bg-neutral-50 border border-neutral-200 p-4 text-sm leading-relaxed text-neutral-800 whitespace-pre-wrap">
+          {video.description}
+        </div>
+      )}
+      <VideoActions video={video} onVideoChange={onVideoChange} />
+    </>
   );
 }
 
