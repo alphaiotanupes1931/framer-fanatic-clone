@@ -488,16 +488,39 @@ function OrgProfile() {
           )}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
+          {tab === "Leaderboard" && <MembersTab orgId={org.id} />}
           {tab === "Invite" && <InviteTab orgName={org.name} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
-          {(tab === "Minutes" || tab === "By Laws" || tab === "Resources") && (
+          {(tab === "Minutes" || tab === "Resources") && (
             <DocumentsTab orgId={org.id} canManage={canManage} me={me} label="Document" />
           )}
-          {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
-          {(["Announcements","Threads","Gallery","Jobs","Leaderboard","Rules","Stories","Promotions","Reviews"]).includes(tab) && (
-            <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
+          {tab === "By Laws" && (
+            <TextDocTab
+              orgId={org.id} canManage={canManage} field="bylaws"
+              title="By Laws & Governing Documents"
+              emptyTitle="No bylaws posted yet."
+              emptyHint="Click Edit to add governing documents."
+              initialValue={org.bylaws ?? null}
+            />
           )}
+          {tab === "Rules" && (
+            <TextDocTab
+              orgId={org.id} canManage={canManage} field="rules"
+              title="Community Rules"
+              emptyTitle="No rules posted yet."
+              emptyHint="Click Edit to add community guidelines."
+              initialValue={org.rules ?? null}
+            />
+          )}
+          {tab === "Gallery" && <GalleryTab orgId={org.id} />}
+          {(tab === "Announcements" || tab === "Promotions") && (
+            <OrgPostList orgId={org.id} kind="update" canManage={canManage} />
+          )}
+          {tab === "Jobs" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
+          {tab === "Stories" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
+          {(tab === "Threads" || tab === "Reviews") && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
+          {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
           {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
         </div>
