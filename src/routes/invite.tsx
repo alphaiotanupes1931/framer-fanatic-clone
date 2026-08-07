@@ -29,7 +29,8 @@ function InvitePage() {
           sessionStorage.setItem("pb_referred_by_username", ref);
         } catch { /* ignore */ }
       }
-      navigate({ to: "/auth" });
+      // Referral visitors land on the homepage first, referral credit stays in session.
+      navigate({ to: "/" });
     })();
   }, [navigate]);
   return (
