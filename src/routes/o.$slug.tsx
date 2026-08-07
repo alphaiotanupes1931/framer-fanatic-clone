@@ -22,6 +22,7 @@ import { PollsTab } from "@/components/org/polls-tab";
 import { DocumentsTab } from "@/components/org/documents-tab";
 import { BoardTab } from "@/components/org/board-tab";
 import { ArtistsTab } from "@/components/org/artists-tab";
+import { OpportunitiesTab } from "@/components/org/opportunities-tab";
 import { TextDocTab } from "@/components/org/text-doc-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
@@ -459,7 +460,7 @@ function OrgProfile() {
           )}
           {tab === "Events" && <EventsTab orgId={org.id} canManage={canManage} />}
           {tab === "Exhibition" && <ExhibitionsTab orgId={org.id} canManage={canManage} />}
-          {tab === "Opportunities" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
+          {tab === "Opportunities" && <OpportunitiesTab orgId={org.id} canManage={canManage} />}
           {tab === "Press" && <PressTab org={org} canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
@@ -523,7 +524,7 @@ function OrgProfile() {
           {(tab === "Announcements" || tab === "Promotions") && (
             <OrgPostList orgId={org.id} kind="update" canManage={canManage} />
           )}
-          {tab === "Jobs" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
+          {tab === "Jobs" && <OpportunitiesTab orgId={org.id} canManage={canManage} />}
           {tab === "Stories" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
           {(tab === "Threads" || tab === "Reviews") && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
           {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
@@ -727,7 +728,7 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
           href="/organizer-studio"
           className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
         >
-          <CalendarIcon className="h-4 w-4" /> Organize Your Studio
+          <CalendarIcon className="h-4 w-4" /> Organizer Studio
           <ExternalLink className="h-3.5 w-3.5 opacity-60" />
         </a>
       </div>
@@ -803,7 +804,7 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
           href="/organizer-studio"
           className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
         >
-          <CalendarIcon className="h-4 w-4" /> Organize Your Studio
+          <CalendarIcon className="h-4 w-4" /> Organizer Studio
           <ExternalLink className="h-3.5 w-3.5 opacity-60" />
         </a>
       </div>
