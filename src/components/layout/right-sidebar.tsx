@@ -29,6 +29,7 @@ function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title:
 
 export function RightSidebar() {
   const { rightCollapsed, setRightCollapsed } = useSidebar();
+  const hydrated = useHydrated();
   const { data: stories = [] } = useQuery({
     queryKey: ["sidebar-trending-stories"],
     queryFn: () => Story.trending(5),
