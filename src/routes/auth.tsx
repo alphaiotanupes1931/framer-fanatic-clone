@@ -115,7 +115,7 @@ function AuthPage() {
     setLoading(true);
     let referredBy: string | null = null;
     try { referredBy = sessionStorage.getItem("pb_referred_by"); } catch { /* ignore */ }
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -129,6 +129,18 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    // With email confirmation on, there is no session until the user clicks the
+    // link in their inbox. Stash their choices and show a "check your email" state.
+    if (!signUpData.session) {
+      try {
+        localStorage.setItem("pb_pending_signup", JSON.stringify({ role: finalRole, category: profileCategory }));
+        localStorage.setItem("pb_new_signup", "1");
+      } catch { /* ignore */ }
+      try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); } catch { /* ignore */ }
+      setAwaitingConfirm(email);
+      toast.success("Check your email to confirm your account.");
+      return;
+    }
     toast.success(
       finalRole === "artist"
         ? "Account created. Welcome, Artist!"
