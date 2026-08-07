@@ -1,0 +1,2 @@
+UPDATE public.profiles SET role = 'artist', updated_at = now() WHERE id = 'bb5bddd8-91e0-4674-bb15-217af6c7def1';
+INSERT INTO public.user_roles (user_id, role) VALUES ('bb5bddd8-91e0-4674-bb15-217af6c7def1', 'artist') ON CONFLICT (user_id, role) DO NOTHING;
