@@ -47,6 +47,14 @@ function AuthPage() {
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"artist" | "resident" | "visitor">("resident");
   const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
+  const [referrerName, setReferrerName] = useState<string | null>(null);
+
+  // Read after mount so server and client markup match.
+  useEffect(() => {
+    try {
+      setReferrerName(sessionStorage.getItem("pb_referred_by_username"));
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -183,6 +191,16 @@ function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {referrerName && !awaitingConfirm && (
+            <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-center">
+              <p className="text-sm font-semibold text-foreground">
+                You were invited by @{referrerName}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Your invite is confirmed. Create your account and they get referral credit.
+              </p>
+            </div>
+          )}
           {awaitingConfirm ? (
             <div className="space-y-4 text-center text-sm">
               <p className="text-muted-foreground">
