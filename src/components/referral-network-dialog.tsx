@@ -315,8 +315,32 @@ export function ReferralNetworkDialog({
     return { sent, failures };
   };
 
+  const handleDeleteInvite = async (invite: any) => {
+    setInvites((prev) => prev.filter((i) => i.id !== invite.id));
+    const { error } = await supabase.from("invites").delete().eq("id", invite.id);
+    if (error) {
+      toast.error("Could not delete invite");
+      loadStats();
+      return;
+    }
+    toast.success("Invite deleted");
+    loadStats();
+  };
+
+  const handleResendInvite = async (invite: any) => {
+    setResending(invite.id);
+    try {
+      const { sent, failures } = await deliverInvites([invite.email]);
+      if (sent > 0) toast.success(`Invite resent to ${invite.email}`);
+      else toast.error(failures[0] || "Could not resend invite");
+    } catch (err: any) {
+      toast.error(err.message || "Could not resend invite");
+    } finally {
+      setResending(null);
+    }
+  };
+
   const handleSendInvite = async () => {
-    void 0;
     const emails = parsedEmails.length > 0 ? parsedEmails : extractEmails(email);
     if (emails.length === 0) {
       toast.error("Please enter at least one valid email");
