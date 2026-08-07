@@ -1857,6 +1857,42 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_rewards: {
+        Row: {
+          contact_note: string | null
+          created_at: string
+          id: string
+          points_spent: number
+          reward_key: string
+          reward_name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_note?: string | null
+          created_at?: string
+          id?: string
+          points_spent?: number
+          reward_key: string
+          reward_name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_note?: string | null
+          created_at?: string
+          id?: string
+          points_spent?: number
+          reward_key?: string
+          reward_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string
