@@ -23,6 +23,11 @@ import {
   Crown,
   Send,
   X,
+  Upload,
+  Sparkles,
+  Ticket,
+  Shirt,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,6 +80,37 @@ const TIERS = [
   },
 ];
 
+const REWARDS = [
+  {
+    key: "shoutout",
+    name: "Community shoutout",
+    cost: 15,
+    blurb: "Featured on the Planet Baltimore homepage for a week.",
+    icon: Sparkles,
+  },
+  {
+    key: "event-ticket",
+    name: "Free event ticket",
+    cost: 40,
+    blurb: "One free ticket to any Planet Baltimore partner event.",
+    icon: Ticket,
+  },
+  {
+    key: "merch",
+    name: "Planet Baltimore merch",
+    cost: 75,
+    blurb: "Limited edition tee shipped to your door.",
+    icon: Shirt,
+  },
+  {
+    key: "founding-member",
+    name: "Founding member badge",
+    cost: 150,
+    blurb: "Permanent badge on your profile plus early access to new features.",
+    icon: Star,
+  },
+];
+
 export function ReferralNetworkDialog({
   open,
   onClose,
@@ -87,6 +123,10 @@ export function ReferralNetworkDialog({
   const [sending, setSending] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
+  const [parsedEmails, setParsedEmails] = useState<string[]>([]);
+  const [claims, setClaims] = useState<Array<{ reward_key: string; status: string; points_spent: number }>>([]);
+  const [claiming, setClaiming] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
@@ -132,6 +172,77 @@ export function ReferralNetworkDialog({
     setInvites(inviteRows);
     setStats({ total: inviteRows.length, joined, points: joined * 5 });
     setLoadingInvites(false);
+    const { data: claimRows } = await supabase
+      .from("referral_rewards")
+      .select("reward_key, status, points_spent")
+      .eq("user_id", user.id);
+    setClaims(claimRows ?? []);
+  };
+
+  const spentPoints = useMemo(
+    () => claims.reduce((sum, c) => sum + (c.points_spent ?? 0), 0),
+    [claims],
+  );
+  const availablePoints = Math.max(0, stats.points - spentPoints);
+
+  const extractEmails = (raw: string) =>
+    Array.from(new Set((raw.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
+
+  const handleParse = () => {
+    const found = extractEmails(email);
+    if (found.length === 0) {
+      toast.error("No valid emails found");
+      return;
+    }
+    setParsedEmails(found);
+    toast.success(`Found ${found.length} email${found.length === 1 ? "" : "s"}`);
+  };
+
+  const handleFile = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large (max 5MB)");
+      return;
+    }
+    const content = await file.text();
+    const found = extractEmails(`${email}\n${content}`);
+    if (found.length === 0) {
+      toast.error("No emails found in that file");
+      return;
+    }
+    setEmail((prev) => (prev ? `${prev}\n${content}` : content));
+    setParsedEmails(found);
+    toast.success(`Found ${found.length} email${found.length === 1 ? "" : "s"}`);
+  };
+
+  const handleClaim = async (reward: (typeof REWARDS)[number]) => {
+    if (availablePoints < reward.cost) {
+      toast.error(`You need ${reward.cost - availablePoints} more points for this gift`);
+      return;
+    }
+    const note = window.prompt(
+      "Where should we reach you about this gift? (email, phone, or shipping address)",
+      "",
+    );
+    if (note === null) return;
+    setClaiming(reward.key);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in first");
+      const { error } = await supabase.from("referral_rewards").insert({
+        user_id: user.id,
+        reward_key: reward.key,
+        reward_name: reward.name,
+        points_spent: reward.cost,
+        contact_note: note.trim() || null,
+      });
+      if (error) throw error;
+      toast.success(`${reward.name} claimed. We'll be in touch soon.`);
+      await loadStats();
+    } catch (err: any) {
+      toast.error(err.message || "Could not claim this gift");
+    } finally {
+      setClaiming(null);
+    }
   };
 
   const handleCopy = async () => {
@@ -203,7 +314,7 @@ export function ReferralNetworkDialog({
   };
 
   const handleSendInvite = async () => {
-    const emails = Array.from(new Set((email.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
+    const emails = parsedEmails.length > 0 ? parsedEmails : extractEmails(email);
     if (emails.length === 0) {
       toast.error("Please enter at least one valid email");
       return;
@@ -214,6 +325,7 @@ export function ReferralNetworkDialog({
       if (sent > 0) {
         toast.success(`Invite email sent to ${sent} ${sent === 1 ? "person" : "people"}`);
         setEmail("");
+        setParsedEmails([]);
         loadStats();
       }
       if (failures.length > 0) {
@@ -250,6 +362,7 @@ export function ReferralNetworkDialog({
   const handleClose = () => {
     setTab("link");
     setEmail("");
+    setParsedEmails([]);
     setMessage(defaultMessage);
     setCopied(false);
     onClose();
