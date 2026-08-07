@@ -692,14 +692,14 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
 }
 
 function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; canManage: boolean }) {
-  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
+  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url: string | null };
   const [events, setEvents] = useState<OrgEvent[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id,title,starts_at,venue_name,image_url")
+        .select("id,title,starts_at,venue_name,image_url,video_url")
         .eq("organization_id", _orgId)
         .eq("is_exhibition", false)
         .order("starts_at", { ascending: false })
@@ -763,19 +763,19 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
   );
 }
 
-function OrgEventCard({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null } }) {
+function OrgEventCard({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url?: string | null } }) {
   return <OrgEventCardInternal e={e} />;
 }
 
 function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canManage: boolean }) {
-  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
+  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url: string | null };
   const [events, setEvents] = useState<OrgEvent[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id,title,starts_at,venue_name,image_url")
+        .select("id,title,starts_at,venue_name,image_url,video_url")
         .eq("organization_id", orgId)
         .eq("is_exhibition", true)
         .order("starts_at", { ascending: false })
@@ -839,10 +839,20 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
   );
 }
 
-function OrgEventCardInternal({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null } }) {
+function OrgEventCardInternal({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url?: string | null } }) {
   return (
     <a href={`/events/${e.id}`} className="block overflow-hidden rounded-2xl border border-neutral-200 bg-card transition hover:shadow-md">
-      {e.image_url && <Img src={e.image_url} alt={e.title} className="h-40 w-full object-cover" />}
+      {e.image_url ? (
+        <Img src={e.image_url} alt={e.title} bucket="event-images" className="h-40 w-full object-cover" loading="lazy" />
+      ) : e.video_url ? (
+        <SmartVideo
+          src={e.video_url}
+          className="h-40 w-full object-cover"
+          muted
+          playsInline
+          preload="metadata"
+        />
+      ) : null}
       <div className="space-y-1 p-4">
         <div className="text-xs font-medium text-[#d4580a]">
           {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}

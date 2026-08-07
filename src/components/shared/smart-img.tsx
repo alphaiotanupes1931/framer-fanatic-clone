@@ -7,11 +7,19 @@ import { AvatarImage } from "@/components/ui/avatar";
  * Drop-in replacement for <img> that resolves Planet Baltimore storage URLs
  * into short-lived signed URLs at render time. Non-storage URLs pass through.
  */
-export function Img({ src, loading, decoding, className, ...rest }: ImgHTMLAttributes<HTMLImageElement>) {
-  const resolved = useSmartImageUrl(typeof src === "string" ? src : undefined);
+export function Img({
+  src,
+  loading,
+  decoding,
+  className,
+  bucket,
+  ...rest
+}: ImgHTMLAttributes<HTMLImageElement> & { bucket?: string }) {
+  const resolved = useSmartImageUrl(typeof src === "string" ? src : undefined, bucket);
   const [ready, setReady] = useState(false);
-  useEffect(() => { setReady(false); }, [resolved]);
-  if (!src) return null;
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setReady(false); setFailed(false); }, [resolved]);
+  if (!src || failed) return null;
   return (
     <img
       {...rest}
@@ -20,6 +28,7 @@ export function Img({ src, loading, decoding, className, ...rest }: ImgHTMLAttri
       decoding={decoding ?? "async"}
       src={resolved ?? undefined}
       onLoad={(e) => { setReady(true); rest.onLoad?.(e); }}
+      onError={(e) => { setFailed(true); rest.onError?.(e); }}
       ref={(el) => { if (el?.complete && el.naturalWidth > 0) setReady(true); }}
     />
   );
