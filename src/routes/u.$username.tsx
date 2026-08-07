@@ -537,7 +537,9 @@ function PublicProfilePage() {
               onClick={deletePage}
               className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
             >
-              <Trash2 className="h-4 w-4" /> Delete Page {isAdmin && !isSelf && <span className="text-[10px] opacity-60">(Admin)</span>}
+              <Trash2 className="h-4 w-4" />
+              {isSelf && !isAdmin ? "Remove Artist Page" : "Delete Page"}
+              {isAdmin && !isSelf && <span className="text-[10px] opacity-60">(Admin)</span>}
             </button>
           )}
           {me && !isSelf && (
