@@ -19,6 +19,7 @@ import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
 import { PollsTab } from "@/components/org/polls-tab";
 import { DocumentsTab } from "@/components/org/documents-tab";
+import { BoardTab } from "@/components/org/board-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
@@ -493,7 +494,8 @@ function OrgProfile() {
           {(tab === "Minutes" || tab === "By Laws" || tab === "Resources") && (
             <DocumentsTab orgId={org.id} canManage={canManage} me={me} label="Document" />
           )}
-          {(["Announcements","Threads","Gallery","Jobs","Leaderboard","Rules","Board","Stories","Promotions","Reviews"]).includes(tab) && (
+          {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
+          {(["Announcements","Threads","Gallery","Jobs","Leaderboard","Rules","Stories","Promotions","Reviews"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
