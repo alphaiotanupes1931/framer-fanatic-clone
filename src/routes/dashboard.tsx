@@ -93,7 +93,7 @@ function Dashboard() {
 
   const { data: events = [], isLoading: loadingEvents } = useQuery({
     queryKey: ["home-events"],
-    queryFn: () => Event.filter({ status: "upcoming" }, "date", 15),
+    queryFn: () => Event.upcoming(15),
     staleTime: 120000,
   });
 
