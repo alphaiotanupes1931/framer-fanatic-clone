@@ -133,6 +133,8 @@ export function ReferralNetworkDialog({
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
   const [resending, setResending] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const messageRef = useRef<HTMLTextAreaElement>(null);
 
   const inviteUrl = useMemo(() => {
@@ -162,7 +164,7 @@ export function ReferralNetworkDialog({
     const [invitesRes, joinedRes] = await Promise.all([
       supabase
         .from("invites")
-        .select("id, email, created_at")
+        .select("id, email, created_at, clicked_at, accepted_at")
         .eq("invited_by", user.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -318,6 +320,7 @@ export function ReferralNetworkDialog({
 
   const handleDeleteInvite = async (invite: any) => {
     setInvites((prev) => prev.filter((i) => i.id !== invite.id));
+    setSelected((prev) => prev.filter((id) => id !== invite.id));
     const { error } = await supabase.from("invites").delete().eq("id", invite.id);
     if (error) {
       toast.error("Could not delete invite");
