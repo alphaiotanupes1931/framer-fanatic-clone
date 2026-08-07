@@ -117,7 +117,7 @@ export function RightSidebar() {
           </SuggestionSection>
         )}
 
-        {events.length > 0 && (
+        {hydrated && events.length > 0 && (
           <SuggestionSection title="Upcoming Events" icon={Calendar} seeAllLink="/events">
             {events.map((e: any) => (
               <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100">
