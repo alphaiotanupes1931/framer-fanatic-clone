@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
@@ -8,6 +8,8 @@ import pbLogo from "@/assets/pb-logo.png";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { useVideoOrientation, orientationClass } from "@/hooks/use-video-orientation";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -18,6 +20,7 @@ type Video = {
   id: string; user_id: string; title: string; description: string | null;
   video_url: string; thumbnail_url: string | null; featured: boolean;
   created_at: string; category?: string | null; comments_muted?: boolean;
+  orientation?: string | null; aspect_ratio?: number | null;
   author?: { display_name: string | null; username: string | null; avatar_url?: string | null };
 };
 
@@ -77,7 +80,7 @@ function VideoDetail() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_426px]">
             <div className="min-w-0">
-              <VideoPlayer url={video.video_url} poster={video.thumbnail_url} />
+              <VideoPlayer url={video.video_url} poster={video.thumbnail_url} video={video} />
               <div className="mt-4 flex items-start gap-3">
                 <h1 className="flex-1 text-xl font-bold sm:text-2xl">{video.title}</h1>
               </div>
@@ -122,8 +125,14 @@ function VideoDetail() {
   );
 }
 
-function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
+function VideoPlayer({ url, poster, video }: { url: string; poster: string | null; video: Video }) {
   const info = parseEmbed(url || "");
+  const orientation = useVideoOrientation({
+    url: info.kind === "file" ? url : null,
+    orientation: video.orientation,
+    aspectRatio: video.aspect_ratio ?? null,
+    probe: info.kind === "file",
+  });
   if (info.kind === "youtube" || info.kind === "vimeo") {
     return (
       <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
@@ -131,15 +140,16 @@ function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
       </div>
     );
   }
+  const portrait = orientation === "portrait";
   return (
-    <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
+    <div className={`relative mx-auto w-full overflow-hidden rounded-2xl bg-black ${orientationClass(orientation)} ${portrait ? "max-w-[420px]" : ""}`}>
       <SmartVideo
         src={url}
         controls
         autoPlay
         playsInline
         poster={poster || undefined}
-        className="absolute inset-0 h-full w-full bg-black object-cover"
+        className={`absolute inset-0 h-full w-full bg-black ${portrait ? "object-contain" : "object-cover"}`}
       />
     </div>
   );
@@ -148,9 +158,15 @@ function VideoPlayer({ url, poster }: { url: string; poster: string | null }) {
 function RelatedCard({ v }: { v: Video }) {
   const info = parseEmbed(v.video_url || "");
   const poster = v.thumbnail_url || info.poster;
+  const orientation = useVideoOrientation({
+    url: info.kind === "file" ? v.video_url : null,
+    orientation: v.orientation,
+    aspectRatio: v.aspect_ratio ?? null,
+    probe: info.kind === "file",
+  });
   return (
     <Link to="/videos/$id" params={{ id: v.id }} className="group flex gap-3">
-      <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-200">
+      <div className={`relative shrink-0 overflow-hidden rounded-lg bg-neutral-200 ${orientationClass(orientation)} ${orientation === "portrait" ? "w-24" : "w-40"}`}>
         {poster ? (
           <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : info.kind === "file" ? (
@@ -180,6 +196,8 @@ const pill =
 
 function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (v: Video) => void }) {
   const [meId, setMeId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -190,6 +208,14 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
   const [shareOpen, setShareOpen] = useState(false);
   const muted = !!video.comments_muted;
   const isOwner = !!meId && meId === video.user_id;
+  const canDelete = isOwner || isAdmin;
+  const removeVideo = async () => {
+    if (!window.confirm("Delete this video? This cannot be undone.")) return;
+    const { error } = await supabase.from("videos").delete().eq("id", video.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Video deleted");
+    navigate({ to: "/videos" });
+  };
   const url = typeof window !== "undefined" ? `${window.location.origin}/videos/${video.id}` : "";
 
   const loadComments = async () => {
@@ -303,6 +329,14 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
           <button onClick={toggleMute} className={`${pill} ml-auto ${muted ? "border-[#d4580a] text-[#d4580a]" : ""}`}>
             {muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
             {muted ? "Comments muted" : "Mute comments"}
+          </button>
+        )}
+        {canDelete && (
+          <button
+            onClick={removeVideo}
+            className={`${pill} ${isOwner ? "" : "ml-auto"} border-red-300 text-red-600 hover:border-red-500 hover:text-red-700`}
+          >
+            <Trash2 className="h-4 w-4" /> Delete
           </button>
         )}
       </div>

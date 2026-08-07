@@ -8,7 +8,9 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
-import { Play, Search, Star, Plus, X, Upload, Bookmark, Send, Share2 } from "lucide-react";
+import { Play, Search, Star, Plus, X, Upload, Bookmark, Send, Share2, Trash2 } from "lucide-react";
+import { useVideoOrientation, orientationClass } from "@/hooks/use-video-orientation";
+import { probeVideo } from "@/lib/video-orientation";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
@@ -29,6 +31,8 @@ type Video = {
   id: string; user_id: string; title: string; description: string | null;
   video_url: string; thumbnail_url: string | null; featured: boolean; created_at: string;
   category?: string | null;
+  orientation?: string | null;
+  aspect_ratio?: number | null;
   author?: { display_name: string | null; username: string | null };
 };
 
@@ -85,7 +89,7 @@ function VideosSignedIn() {
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
   const UPLOAD_CATEGORIES = VIDEO_CATEGORIES.filter((c) => c !== "All");
-  const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "" });
+  const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "", orientation: "" as string, aspect_ratio: null as number | null });
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
 
@@ -115,13 +119,19 @@ function VideosSignedIn() {
     setUploading(true);
     const tId = toast.loading("Uploading video...");
     try {
+      const dims = await probeVideo(file);
       const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("post-media").upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
       const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
-      setForm((f) => ({ ...f, video_url: signed.signedUrl }));
+      setForm((f) => ({
+        ...f,
+        video_url: signed.signedUrl,
+        orientation: dims?.orientation || "",
+        aspect_ratio: dims ? Number((dims.width / dims.height).toFixed(4)) : null,
+      }));
       toast.success("Video uploaded", { id: tId });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed", { id: tId });
@@ -150,9 +160,10 @@ function VideosSignedIn() {
     const { error } = await supabase.from("videos").insert({
       user_id: me.id, title: form.title.trim(), description: form.description.trim() || null,
       video_url: form.video_url.trim(), thumbnail_url: null, category: form.category,
+      orientation: form.orientation || null, aspect_ratio: form.aspect_ratio,
     } as any);
     if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", description: "", video_url: "", category: "" });
+    setOpen(false); setForm({ title: "", description: "", video_url: "", category: "", orientation: "", aspect_ratio: null });
     setLocalPreview(null);
     toast.success("Video added"); load();
   };
@@ -242,7 +253,11 @@ function VideosSignedIn() {
                 <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
               </label>
               {localPreview && (
-                <SmartVideo src={localPreview} controls className="w-full rounded-lg border border-neutral-200 max-h-56 bg-black" />
+                <SmartVideo
+                  src={localPreview}
+                  controls
+                  className={`mx-auto rounded-lg border border-neutral-200 bg-black ${form.orientation === "portrait" ? "h-72 w-auto" : "w-full max-h-56"}`}
+                />
               )}
               <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
               <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim() || !form.category} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
@@ -259,6 +274,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const [saved, setSaved] = useState(false);
   const [meId, setMeId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/videos/${v.id}` : `/videos/${v.id}`;
   useEffect(() => {
     (async () => {
@@ -285,10 +301,27 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const ytThumb = yt ? `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg` : null;
   const poster = v.thumbnail_url || ytThumb;
   const isDirect = !yt && !vimeo && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
+  const orientation = useVideoOrientation({
+    url: isDirect ? url : null,
+    orientation: v.orientation,
+    aspectRatio: v.aspect_ratio ?? null,
+    probe: isDirect,
+  });
+  const canDelete = isAdmin || (!!meId && meId === v.user_id);
+  const remove = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!window.confirm("Delete this video? This cannot be undone.")) return;
+    setDeleted(true);
+    const { error } = await supabase.from("videos").delete().eq("id", v.id);
+    if (error) { setDeleted(false); toast.error(error.message); return; }
+    toast.success("Video deleted");
+    onChanged?.();
+  };
+  if (deleted) return null;
   return (
     <>
     <Link to="/videos/$id" params={{ id: v.id }} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white block">
-      <div className="relative aspect-video bg-neutral-900 overflow-hidden">
+      <div className={`relative ${orientationClass(orientation)} bg-neutral-900 overflow-hidden`}>
         {poster ? (
           <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
         ) : isDirect || url.startsWith("blob:") || url.startsWith("http") ? (
@@ -301,6 +334,16 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
           />
         ) : null}
         {v.featured && <div className="absolute left-3 top-3 rounded-md bg-yellow-400 px-2 py-1 text-[10px] font-bold text-yellow-900">★ Featured</div>}
+        {canDelete && (
+          <button
+            onClick={remove}
+            aria-label="Delete video"
+            title="Delete video"
+            className="absolute left-3 bottom-3 z-10 rounded-full bg-white/90 p-2 text-red-600 shadow-md transition hover:bg-white"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
         {isAdmin && (
           <button
             onClick={async (e) => {
