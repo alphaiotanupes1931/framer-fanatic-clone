@@ -341,6 +341,7 @@ export function ReferralNetworkDialog({
   };
 
   const handleSendTest = async () => {
+    void 0;
     const match = testEmail.match(EMAIL_RE);
     if (!match) {
       toast.error("Enter a valid email to test");
