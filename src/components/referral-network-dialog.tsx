@@ -757,9 +757,37 @@ export function ReferralNetworkDialog({
 
           {/* Recent invites */}
           <div className="mt-4">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Recent invites
-            </h3>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Recent invites
+              </h3>
+              {invites.length > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="text-[11px] font-medium text-primary hover:underline"
+                >
+                  {allSelected ? "Clear selection" : "Select all"}
+                </button>
+              )}
+            </div>
+            {selected.length > 0 && (
+              <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+                <span className="text-xs font-medium text-foreground">
+                  {selected.length} selected
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button type="button" size="sm" variant="outline" className="h-7 gap-1 text-xs" disabled={bulkBusy} onClick={handleBulkResend}>
+                    {bulkBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                    Resend
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" className="h-7 gap-1 text-xs text-destructive hover:text-destructive" disabled={bulkBusy} onClick={handleBulkDelete}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )}
             {loadingInvites ? (
               <div className="flex items-center justify-center py-4 text-xs text-muted-foreground">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading...
@@ -776,12 +804,19 @@ export function ReferralNetworkDialog({
               </div>
             ) : (
               <div className="space-y-2">
-                {invites.slice(0, 5).map((invite) => (
+                {visibleInvites.map((invite: any) => (
                   <div
                     key={invite.id}
                     className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
                   >
                     <div className="flex min-w-0 items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="h-3.5 w-3.5 shrink-0 accent-[hsl(var(--primary))]"
+                        checked={selected.includes(invite.id)}
+                        onChange={() => toggleSelect(invite.id)}
+                        aria-label={`Select ${invite.email}`}
+                      />
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
                         <Mail className="h-3.5 w-3.5 text-primary" />
                       </div>
@@ -795,8 +830,16 @@ export function ReferralNetworkDialog({
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        Pending
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          invite.accepted_at
+                            ? "bg-emerald-100 text-emerald-700"
+                            : invite.clicked_at
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {invite.accepted_at ? "Joined" : invite.clicked_at ? "Opened link" : "Sent"}
                       </span>
                       <Button
                         type="button"
