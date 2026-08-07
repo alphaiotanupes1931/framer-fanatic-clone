@@ -63,6 +63,8 @@ function PublicProfilePage() {
   const [contentLoading, setContentLoading] = useState(true);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isFounder, setIsFounder] = useState(false);
+  const [founderSaving, setFounderSaving] = useState(false);
   const [muted, setMuted] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showHoodPicker, setShowHoodPicker] = useState(false);
@@ -174,6 +176,28 @@ function PublicProfilePage() {
 
   const isSelf = useMemo(() => me && profile && me.id === profile.id, [me, profile]);
   const canManage = !!isSelf || isAdmin;
+
+  // Founding Member flag is admin-only: the RPC returns false for everyone else.
+  useEffect(() => {
+    if (!profile || !isAdmin) { setIsFounder(false); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("is_founder_visible", { _user_id: profile.id });
+      if (!cancelled) setIsFounder(!!data);
+    })();
+    return () => { cancelled = true; };
+  }, [profile, isAdmin]);
+
+  const toggleFounder = async () => {
+    if (!profile) return;
+    setFounderSaving(true);
+    const next = !isFounder;
+    const { error } = await supabase.rpc("admin_set_founder", { _user_id: profile.id, _is_founder: next });
+    setFounderSaving(false);
+    if (error) { toast.error(error.message); return; }
+    setIsFounder(next);
+    toast.success(next ? "Founding Member badge granted" : "Founding Member badge removed");
+  };
   const hashtags = useMemo(() => {
     if (!profile) return [] as string[];
     const fromBio = Array.from(new Set((profile.bio || "").match(/#[A-Za-z0-9_]+/g) || []));
@@ -306,9 +330,21 @@ function PublicProfilePage() {
           <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">
             {profile.display_name || profile.username}
           </h1>
-          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
-            <Star className="h-3 w-3" /> Grant Founding
-          </span>
+          {isAdmin && isFounder && (
+            <span title="Visible to admins only" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+              <Star className="h-3 w-3" /> Founding Member
+            </span>
+          )}
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={toggleFounder}
+              disabled={founderSaving}
+              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 disabled:opacity-60"
+            >
+              <Star className="h-3 w-3" /> {isFounder ? "Remove Founding" : "Grant Founding"}
+            </button>
+          )}
         </div>
         {/* Category + actions moved below the name */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
