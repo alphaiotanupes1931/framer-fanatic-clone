@@ -692,14 +692,14 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
 }
 
 function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; canManage: boolean }) {
-  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
+  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url: string | null };
   const [events, setEvents] = useState<OrgEvent[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id,title,starts_at,venue_name,image_url")
+        .select("id,title,starts_at,venue_name,image_url,video_url")
         .eq("organization_id", _orgId)
         .eq("is_exhibition", false)
         .order("starts_at", { ascending: false })
@@ -763,19 +763,19 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
   );
 }
 
-function OrgEventCard({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null } }) {
+function OrgEventCard({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url?: string | null } }) {
   return <OrgEventCardInternal e={e} />;
 }
 
 function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canManage: boolean }) {
-  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
+  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url: string | null };
   const [events, setEvents] = useState<OrgEvent[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id,title,starts_at,venue_name,image_url")
+        .select("id,title,starts_at,venue_name,image_url,video_url")
         .eq("organization_id", orgId)
         .eq("is_exhibition", true)
         .order("starts_at", { ascending: false })
