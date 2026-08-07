@@ -727,7 +727,7 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
           href="/organizer-studio"
           className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
         >
-          <CalendarIcon className="h-4 w-4" /> Manage Tickets in Studio
+          <CalendarIcon className="h-4 w-4" /> Organize Your Studio
           <ExternalLink className="h-3.5 w-3.5 opacity-60" />
         </a>
       </div>
@@ -797,13 +797,13 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
           href={`/events/new?org=${encodeURIComponent(orgId)}&kind=exhibition`}
           className="inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-[#d4580a] hover:text-[#d4580a]"
         >
-          <Plus className="h-4 w-4" /> Create Exhibition
+          <Plus className="h-4 w-4" /> Create Event
         </a>
         <a
           href="/organizer-studio"
           className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
         >
-          <CalendarIcon className="h-4 w-4" /> Manage Tickets in Studio
+          <CalendarIcon className="h-4 w-4" /> Organize Your Studio
           <ExternalLink className="h-3.5 w-3.5 opacity-60" />
         </a>
       </div>
@@ -812,7 +812,7 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
         <div className="py-8 text-center text-sm text-neutral-500">Loading exhibitions…</div>
       ) : events.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-neutral-200 bg-card py-12 text-center text-sm text-neutral-500">
-          No exhibitions yet. Click Create Exhibition to add the first one.
+          No exhibitions yet. Click Create Event to add the first one.
         </div>
       ) : (
         <div className="space-y-8">

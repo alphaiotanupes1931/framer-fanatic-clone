@@ -8,6 +8,7 @@ import { EventImage } from "@/components/event-image";
 import { useSidebar } from "@/components/layout/sidebar-context";
 import type { ReactNode, ComponentType } from "react";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
   return (
@@ -28,6 +29,7 @@ function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title:
 
 export function RightSidebar() {
   const { rightCollapsed, setRightCollapsed } = useSidebar();
+  const hydrated = useHydrated();
   const { data: stories = [] } = useQuery({
     queryKey: ["sidebar-trending-stories"],
     queryFn: () => Story.trending(5),
@@ -66,7 +68,7 @@ export function RightSidebar() {
       </button>
       <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[280px] overflow-y-auto border-l border-slate-200 bg-white transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
       <div className="space-y-4 px-5 pb-6 pt-12">
-        {stories.length > 0 && (
+        {hydrated && stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any, i: number) => (
               <Link
@@ -91,7 +93,7 @@ export function RightSidebar() {
           </SuggestionSection>
         )}
 
-        {artists.length > 0 && (
+        {hydrated && artists.length > 0 && (
           <SuggestionSection title="Artists to Follow" icon={Palette} seeAllLink="/artists">
             {artists.map((a: any) => (
               <Link
@@ -115,7 +117,7 @@ export function RightSidebar() {
           </SuggestionSection>
         )}
 
-        {events.length > 0 && (
+        {hydrated && events.length > 0 && (
           <SuggestionSection title="Upcoming Events" icon={Calendar} seeAllLink="/events">
             {events.map((e: any) => (
               <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100">
