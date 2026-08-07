@@ -159,16 +159,25 @@ function signBatched(bucket: string, path: string): Promise<string | null> {
 
 /* ----------------------------- resolution ----------------------------- */
 
-type Target = { bucket: string; path: string } | { direct: string } | null;
+type Target =
+  | { bucket: string; path: string }
+  | { candidates: string[]; path: string }
+  | { direct: string }
+  | null;
+
+// Order matters: most media stored as a bare path lives in one of these.
+const CANDIDATE_BUCKETS = ["event-images", "post-media", "story-covers", "avatars", "podcast-media"];
 
 function targetFor(src: string | null | undefined, bucketHint?: string): Target {
   if (!src) return null;
   // Local, inline, or object URLs never need signing.
   if (/^(data:|blob:|\/)/.test(src)) return { direct: src };
-  // Bare storage path (e.g. "<uid>/<file>.jpg") — needs a bucket to sign.
+  // Bare storage path (e.g. "<uid>/<file>.jpg").
   if (!src.startsWith("http")) {
-    if (!bucketHint) return null;
-    return { bucket: bucketHint, path: src.replace(/^\/+/, "") };
+    const path = src.replace(/^\/+/, "");
+    if (bucketHint) return { bucket: bucketHint, path };
+    // No hint: try every private bucket and use whichever one has the object.
+    return { candidates: CANDIDATE_BUCKETS, path };
   }
   const parsed = parseStorageUrl(src);
   if (parsed && SIGNED_BUCKETS.has(parsed.bucket)) return parsed;
@@ -180,6 +189,13 @@ function resolveSync(src: string | null | undefined, bucketHint?: string): strin
   const t = targetFor(src, bucketHint);
   if (!t) return null;
   if ("direct" in t) return t.direct;
+  if ("candidates" in t) {
+    for (const b of t.candidates) {
+      const hit = readCache(b, t.path);
+      if (hit) return hit;
+    }
+    return null;
+  }
   return readCache(t.bucket, t.path);
 }
 
@@ -187,12 +203,33 @@ async function resolveAsync(src: string, bucketHint?: string): Promise<string | 
   const t = targetFor(src, bucketHint);
   if (!t) return null;
   if ("direct" in t) return t.direct;
+  if ("candidates" in t) {
+    for (const b of t.candidates) {
+      const cached = readCache(b, t.path);
+      if (cached) return cached;
+    }
+    for (const b of t.candidates) {
+      const signed = await signBatched(b, t.path);
+      if (signed && (await urlResolves(signed))) return signed;
+    }
+    return null;
+  }
   const cached = readCache(t.bucket, t.path);
   if (cached) return cached;
   const signed = await signBatched(t.bucket, t.path);
   // Fall back to the original URL — it may still work if the bucket has
   // since been made public.
   return signed ?? (src.startsWith("http") ? src : null);
+}
+
+/** Signed URLs are minted even for missing objects, so verify before using. */
+async function urlResolves(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, { method: "HEAD" });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -204,8 +241,8 @@ export function prefetchImageUrls(srcs: Array<string | null | undefined>, bucket
     if (!s) continue;
     const t = targetFor(s, bucketHint);
     if (!t || "direct" in t) continue;
-    if (readCache(t.bucket, t.path)) continue;
-    void signBatched(t.bucket, t.path).then((url) => {
+    if (resolveSync(s, bucketHint)) continue;
+    void resolveAsync(s, bucketHint).then((url) => {
       if (!url || typeof window === "undefined") return;
       // Nudge the browser into fetching the bytes too, not just the URL.
       const img = new window.Image();
