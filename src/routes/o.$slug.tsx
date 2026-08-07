@@ -21,6 +21,7 @@ import { DuesTab } from "@/components/org/dues-tab";
 import { PollsTab } from "@/components/org/polls-tab";
 import { DocumentsTab } from "@/components/org/documents-tab";
 import { BoardTab } from "@/components/org/board-tab";
+import { ArtistsTab } from "@/components/org/artists-tab";
 import { TextDocTab } from "@/components/org/text-doc-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
@@ -462,7 +463,7 @@ function OrgProfile() {
           {tab === "Press" && <PressTab org={org} canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
-          {tab === "Artists" && <MembersTab orgId={org.id} />}
+          {tab === "Artists" && <ArtistsTab orgId={org.id} canManage={canManage} />}
           {tab === "Support" && <SupportTab org={org} canManage={canManage} />}
           {tab === "Menu" && (
             <div className="space-y-10">

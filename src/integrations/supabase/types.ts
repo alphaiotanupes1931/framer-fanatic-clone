@@ -755,6 +755,53 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_artists: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          photo_url: string | null
+          portfolio_url: string | null
+          sort_order: number
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          photo_url?: string | null
+          portfolio_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          photo_url?: string | null
+          portfolio_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_artists_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_board_members: {
         Row: {
           bio: string | null
