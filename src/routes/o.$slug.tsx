@@ -812,7 +812,7 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
         <div className="py-8 text-center text-sm text-neutral-500">Loading exhibitions…</div>
       ) : events.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-neutral-200 bg-card py-12 text-center text-sm text-neutral-500">
-          No exhibitions yet. Click Create Exhibition to add the first one.
+          No exhibitions yet. Click Create Event to add the first one.
         </div>
       ) : (
         <div className="space-y-8">
