@@ -539,22 +539,50 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
 
 function InviteTab({ orgName }: { orgName: string }) {
   const [open, setOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  const onCsv = async (file: File) => {
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const emails = Array.from(
+        new Set((text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/g) ?? []).map((e) => e.toLowerCase())),
+      );
+      if (!emails.length) { toast.error("No email addresses found in that file."); return; }
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id ?? null;
+      if (!uid) { toast.error("Please sign in to send invites."); return; }
+      const { error } = await supabase
+        .from("invites")
+        .insert(emails.map((email) => ({ email, invited_by: uid })));
+      if (error) { toast.error("Could not import that list. Please try again."); return; }
+      toast.success(`Imported ${emails.length} contact${emails.length === 1 ? "" : "s"} to invite.`);
+    } finally {
+      setImporting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   return (
     <div className="mx-auto max-w-2xl space-y-6 py-6">
-      <div className="rounded-2xl border border-border bg-neutral-50 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <UserPlus className="h-7 w-7 text-primary" />
-        </div>
-        <h2 className="text-xl font-bold text-neutral-900">Invite friends to {orgName}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Grow the community. Upload a contact list or paste emails, we handle the rest.
-        </p>
-      </div>
       <button
         onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-200 px-6 py-4 text-base font-semibold text-neutral-800 transition hover:bg-neutral-300"
+        title={`Invite friends to ${orgName}`}
+        className="w-full rounded-2xl bg-neutral-500 px-6 py-4 text-center text-base font-semibold text-white transition hover:bg-neutral-600"
       >
-        <UserPlus className="h-5 w-5" /> Invite Friends
+        Invite Friends to Join
+      </button>
+      <input
+        ref={fileRef} type="file" accept=".csv,text/csv,text/plain" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) void onCsv(f); }}
+      />
+      <button
+        onClick={() => fileRef.current?.click()}
+        disabled={importing}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border px-6 py-4 text-sm font-medium text-neutral-700 transition hover:bg-muted disabled:opacity-60"
+      >
+        <Upload className="h-4 w-4" /> {importing ? "Importing..." : "Import Followers from CSV"}
       </button>
       <InviteFriendsDialog open={open} onClose={() => setOpen(false)} />
     </div>
