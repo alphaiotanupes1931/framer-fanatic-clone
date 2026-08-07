@@ -70,6 +70,8 @@ export function ReferralNetworkDialog({
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
@@ -131,6 +133,55 @@ export function ReferralNetworkDialog({
     }
   };
 
+  const deliverInvites = async (emails: string[], opts?: { record?: boolean }) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) throw new Error("Please sign in first");
+    const inviterName =
+      profile?.display_name || profile?.username || "A friend";
+
+    let sent = 0;
+    const failures: string[] = [];
+    for (const to of emails) {
+      const res = await fetch("/lovable/email/transactional/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          templateName: "referral-invite",
+          recipientEmail: to,
+          idempotencyKey: `referral-${session.user.id}-${to}-${Date.now()}`,
+          templateData: {
+            inviterName,
+            personalMessage: message?.trim() || "",
+            inviteUrl,
+          },
+        }),
+      });
+      if (res.ok) {
+        sent += 1;
+      } else {
+        const body = await res.json().catch(() => ({}));
+        failures.push(`${to}: ${body.error || res.statusText}`);
+      }
+    }
+
+    if (opts?.record && sent > 0) {
+      const rows = emails.map((e) => ({
+        email: e,
+        invited_by: session.user.id,
+        invite_url: inviteUrl,
+      }));
+      const { error } = await supabase.from("invites").insert(rows);
+      if (error && !error.message.includes("does not exist")) {
+        console.error("invite log failed", error);
+      }
+    }
+
+    return { sent, failures };
+  };
+
   const handleSendInvite = async () => {
     const emails = Array.from(new Set((email.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
     if (emails.length === 0) {
@@ -139,21 +190,40 @@ export function ReferralNetworkDialog({
     }
     setSending(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const rows = emails.map((e) => ({
-        email: e,
-        invited_by: user?.id ?? null,
-        invite_url: inviteUrl,
-      }));
-      const { error } = await supabase.from("invites").insert(rows);
-      if (error && !error.message.includes("does not exist")) throw error;
-      toast.success(`Invited ${emails.length} friend${emails.length === 1 ? "" : "s"}`);
-      setEmail("");
-      loadStats();
+      const { sent, failures } = await deliverInvites(emails, { record: true });
+      if (sent > 0) {
+        toast.success(`Invite email sent to ${sent} ${sent === 1 ? "person" : "people"}`);
+        setEmail("");
+        loadStats();
+      }
+      if (failures.length > 0) {
+        toast.error(`Could not send: ${failures[0]}`);
+      }
     } catch (err: any) {
       toast.error(err.message || "Could not send invite");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleSendTest = async () => {
+    const match = testEmail.match(EMAIL_RE);
+    if (!match) {
+      toast.error("Enter a valid email to test");
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const { sent, failures } = await deliverInvites([match[0].toLowerCase()]);
+      if (sent > 0) {
+        toast.success(`Test email sent to ${match[0]}. Check the inbox (and spam).`);
+      } else {
+        toast.error(failures[0] || "Test email failed to send");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Test email failed to send");
+    } finally {
+      setSendingTest(false);
     }
   };
 
@@ -335,6 +405,38 @@ export function ReferralNetworkDialog({
                   )}
                   {sending ? "Sending..." : "Send Invite"}
                 </Button>
+
+                <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3">
+                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
+                    Send a test email
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      type="email"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleSendTest}
+                      disabled={sendingTest || !testEmail.trim()}
+                      className="shrink-0 gap-1.5 border-primary text-primary hover:bg-primary/10"
+                    >
+                      {sendingTest ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Send className="h-3.5 w-3.5" />
+                      )}
+                      Test
+                    </Button>
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Sends the real invite email to one address without logging it as an invite.
+                  </p>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

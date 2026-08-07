@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TicketingRouteImport } from './routes/ticketing'
 import { Route as TicketSalesDashboardRouteImport } from './routes/ticket-sales-dashboard'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -66,6 +67,7 @@ import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
 import { Route as EventsNewRouteImport } from './routes/events.new'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as EditStoryIdRouteImport } from './routes/edit-story.$id'
 import { Route as EditPostIdRouteImport } from './routes/edit-post.$id'
 import { Route as EditEventEventIdRouteImport } from './routes/edit-event.$eventId'
@@ -74,11 +76,19 @@ import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug.donate'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TicketingRoute = TicketingRouteImport.update({
   id: '/ticketing',
   path: '/ticketing',
@@ -365,6 +375,11 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
   path: '/events/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditStoryIdRoute = EditStoryIdRouteImport.update({
   id: '/edit-story/$id',
   path: '/edit-story/$id',
@@ -405,11 +420,28 @@ const OSlugDonateRoute = OSlugDonateRouteImport.update({
   path: '/donate',
   getParentRoute: () => OSlugRoute,
 } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -472,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -479,6 +512,7 @@ export interface FileRoutesByFullPath {
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
@@ -493,10 +527,13 @@ export interface FileRoutesByFullPath {
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -543,6 +580,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -550,6 +588,7 @@ export interface FileRoutesByTo {
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
@@ -564,10 +603,13 @@ export interface FileRoutesByTo {
   '/stories': typeof StoriesIndexRoute
   '/videos': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -615,6 +657,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -622,6 +665,7 @@ export interface FileRoutesById {
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
@@ -636,10 +680,13 @@ export interface FileRoutesById {
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -688,6 +735,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
+    | '/unsubscribe'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -695,6 +743,7 @@ export interface FileRouteTypes {
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
+    | '/email/unsubscribe'
     | '/events/$eventId'
     | '/events/new'
     | '/marketplace/$listingId'
@@ -709,10 +758,13 @@ export interface FileRouteTypes {
     | '/stories/'
     | '/videos/'
     | '/api/public/stripe-webhook'
+    | '/lovable/email/suppression'
     | '/o/$slug/donate'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -759,6 +811,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
+    | '/unsubscribe'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -766,6 +819,7 @@ export interface FileRouteTypes {
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
+    | '/email/unsubscribe'
     | '/events/$eventId'
     | '/events/new'
     | '/marketplace/$listingId'
@@ -780,10 +834,13 @@ export interface FileRouteTypes {
     | '/stories'
     | '/videos'
     | '/api/public/stripe-webhook'
+    | '/lovable/email/suppression'
     | '/o/$slug/donate'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -830,6 +887,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/ticket-sales-dashboard'
     | '/ticketing'
+    | '/unsubscribe'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -837,6 +895,7 @@ export interface FileRouteTypes {
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
+    | '/email/unsubscribe'
     | '/events/$eventId'
     | '/events/new'
     | '/marketplace/$listingId'
@@ -851,10 +910,13 @@ export interface FileRouteTypes {
     | '/stories/'
     | '/videos/'
     | '/api/public/stripe-webhook'
+    | '/lovable/email/suppression'
     | '/o/$slug/donate'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -902,6 +964,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
   TicketingRoute: typeof TicketingRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
@@ -909,6 +972,7 @@ export interface RootRouteChildren {
   EditEventEventIdRoute: typeof EditEventEventIdRoute
   EditPostIdRoute: typeof EditPostIdRoute
   EditStoryIdRoute: typeof EditStoryIdRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
   OSlugRoute: typeof OSlugRouteWithChildren
@@ -922,13 +986,23 @@ export interface RootRouteChildren {
   StoriesIndexRoute: typeof StoriesIndexRoute
   VideosIndexRoute: typeof VideosIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ticketing': {
       id: '/ticketing'
       path: '/ticketing'
@@ -1328,6 +1402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/edit-story/$id': {
       id: '/edit-story/$id'
       path: '/edit-story/$id'
@@ -1384,11 +1465,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OSlugDonateRouteImport
       parentRoute: typeof OSlugRoute
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
       fullPath: '/api/public/stripe-webhook'
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
@@ -1482,6 +1584,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
   TicketingRoute: TicketingRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
@@ -1489,6 +1592,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditEventEventIdRoute: EditEventEventIdRoute,
   EditPostIdRoute: EditPostIdRoute,
   EditStoryIdRoute: EditStoryIdRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
   OSlugRoute: OSlugRouteWithChildren,
@@ -1502,9 +1606,12 @@ const rootRouteChildren: RootRouteChildren = {
   StoriesIndexRoute: StoriesIndexRoute,
   VideosIndexRoute: VideosIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
