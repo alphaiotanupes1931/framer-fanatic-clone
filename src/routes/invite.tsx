@@ -19,6 +19,7 @@ function InvitePage() {
           const { data } = await supabase.rpc("record_invite_click", { _token: inviteToken });
           if (data) sessionStorage.setItem("pb_referred_by", data as unknown as string);
           sessionStorage.setItem("pb_invite_token", inviteToken);
+          sessionStorage.setItem("pb_invited", "1");
         } catch { /* ignore */ }
       }
       if (ref) {
