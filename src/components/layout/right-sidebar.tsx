@@ -8,6 +8,7 @@ import { EventImage } from "@/components/event-image";
 import { useSidebar } from "@/components/layout/sidebar-context";
 import type { ReactNode, ComponentType } from "react";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
   return (
