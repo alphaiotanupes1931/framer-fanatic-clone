@@ -778,6 +778,50 @@ export type Database = {
           },
         ]
       }
+      organization_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          doc_type: string
+          file_name: string | null
+          file_url: string
+          id: string
+          name: string
+          org_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_name?: string | null
+          file_url: string
+          id?: string
+          name: string
+          org_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_name?: string | null
+          file_url?: string
+          id?: string
+          name?: string
+          org_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_dues_payments: {
         Row: {
           amount_cents: number
