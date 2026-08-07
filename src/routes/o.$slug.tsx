@@ -20,6 +20,8 @@ import { DuesTab } from "@/components/org/dues-tab";
 import { PollsTab } from "@/components/org/polls-tab";
 import { DocumentsTab } from "@/components/org/documents-tab";
 import { BoardTab } from "@/components/org/board-tab";
+import { TextDocTab } from "@/components/org/text-doc-tab";
+import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
@@ -38,6 +40,8 @@ type Org = {
   phone: string | null; email: string | null; address: string | null;
   neighborhood: string | null; avatar_url: string | null; banner_url: string | null;
   hours: Record<string, { open: string; close: string } | null> | null;
+  bylaws?: string | null;
+  rules?: string | null;
 };
 
 type OrgPost = {
