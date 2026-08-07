@@ -797,7 +797,7 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
           href={`/events/new?org=${encodeURIComponent(orgId)}&kind=exhibition`}
           className="inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-[#d4580a] hover:text-[#d4580a]"
         >
-          <Plus className="h-4 w-4" /> Create Exhibition
+          <Plus className="h-4 w-4" /> Create Event
         </a>
         <a
           href="/organizer-studio"
