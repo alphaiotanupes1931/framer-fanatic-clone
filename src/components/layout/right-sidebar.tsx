@@ -93,7 +93,7 @@ export function RightSidebar() {
           </SuggestionSection>
         )}
 
-        {artists.length > 0 && (
+        {hydrated && artists.length > 0 && (
           <SuggestionSection title="Artists to Follow" icon={Palette} seeAllLink="/artists">
             {artists.map((a: any) => (
               <Link
