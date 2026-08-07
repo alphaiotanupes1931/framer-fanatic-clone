@@ -448,6 +448,9 @@ export function ReferralNetworkDialog({
               <TabsTrigger value="email" className="flex-1 gap-1.5 text-xs sm:text-sm">
                 <Mail className="h-3.5 w-3.5" /> Email
               </TabsTrigger>
+              <TabsTrigger value="gifts" className="flex-1 gap-1.5 text-xs sm:text-sm">
+                <Gift className="h-3.5 w-3.5" /> Gifts
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="link" className="mt-3 space-y-3">
@@ -502,18 +505,63 @@ export function ReferralNetworkDialog({
               <div className="space-y-3">
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    Email address
+                    Email addresses
                   </label>
-                  <Input
+                  <Textarea
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="friend@example.com"
-                    type="email"
+                    onChange={(e) => { setEmail(e.target.value); setParsedEmails([]); }}
+                    placeholder="Paste a whole list here: friend@example.com, another@example.com..."
+                    rows={4}
                   />
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    You can add multiple emails separated by commas.
+                    Paste any list, commas, spaces, or new lines all work. We pull out the valid emails for you.
                   </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="flex w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border p-4 text-center transition hover:border-primary hover:bg-muted/40"
+                >
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-xs font-semibold text-foreground">Upload a CSV or text file</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Contacts exported from Gmail, Outlook, or a spreadsheet
+                  </span>
+                </button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".csv,.txt,text/csv,text/plain"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void handleFile(f);
+                    if (fileRef.current) fileRef.current.value = "";
+                  }}
+                />
+
+                {parsedEmails.length > 0 ? (
+                  <div className="rounded-lg border border-border bg-muted/30 p-3">
+                    <div className="mb-1 text-xs font-semibold text-foreground">
+                      {parsedEmails.length} recipient{parsedEmails.length === 1 ? "" : "s"} ready
+                    </div>
+                    <div className="max-h-24 overflow-y-auto text-[11px] text-muted-foreground">
+                      {parsedEmails.join(", ")}
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleParse}
+                    disabled={!email.trim()}
+                    className="w-full gap-2 border-primary text-primary hover:bg-primary/10"
+                  >
+                    <Mail className="h-4 w-4" /> Parse emails
+                  </Button>
+                )}
+
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">
                     Personal message (optional)
@@ -536,7 +584,11 @@ export function ReferralNetworkDialog({
                   ) : (
                     <Send className="h-4 w-4" />
                   )}
-                  {sending ? "Sending..." : "Send Invite"}
+                  {sending
+                    ? "Sending..."
+                    : parsedEmails.length > 1
+                      ? `Send ${parsedEmails.length} invites`
+                      : "Send Invite"}
                 </Button>
 
                 <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3">
@@ -571,6 +623,65 @@ export function ReferralNetworkDialog({
                   </p>
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="gifts" className="mt-3 space-y-3">
+              <div className="rounded-lg border border-border bg-muted/20 p-3 text-center">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Points available to spend
+                </div>
+                <div className="text-2xl font-bold text-primary">{availablePoints}</div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Earned {stats.points}, spent {spentPoints}. Every friend who joins adds 5 points.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {REWARDS.map((reward) => {
+                  const claim = claims.find((c) => c.reward_key === reward.key);
+                  const Icon = reward.icon;
+                  const locked = !claim && availablePoints < reward.cost;
+                  return (
+                    <div
+                      key={reward.key}
+                      className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                        <Icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-semibold text-foreground sm:text-sm">
+                          {reward.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">{reward.blurb}</div>
+                      </div>
+                      {claim ? (
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-semibold capitalize text-primary">
+                          {claim.status}
+                        </span>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant={locked ? "outline" : "default"}
+                          disabled={locked || claiming === reward.key}
+                          onClick={() => void handleClaim(reward)}
+                          className="shrink-0 gap-1.5 text-xs"
+                        >
+                          {claiming === reward.key ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Gift className="h-3.5 w-3.5" />
+                          )}
+                          {locked ? `${reward.cost} pts` : "Claim"}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Once you claim a gift, our team reaches out using the contact details you provide.
+              </p>
             </TabsContent>
           </Tabs>
 
