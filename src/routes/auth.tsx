@@ -47,6 +47,16 @@ function AuthPage() {
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"artist" | "resident" | "visitor">("resident");
   const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
+  const [referrerName, setReferrerName] = useState<string | null>(null);
+  const [invited, setInvited] = useState(false);
+
+  // Read after mount so server and client markup match.
+  useEffect(() => {
+    try {
+      setReferrerName(sessionStorage.getItem("pb_referred_by_username"));
+      setInvited(sessionStorage.getItem("pb_invited") === "1" || !!sessionStorage.getItem("pb_referred_by"));
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -140,7 +150,7 @@ function AuthPage() {
         localStorage.setItem("pb_pending_signup", JSON.stringify({ role: finalRole, category: profileCategory }));
         localStorage.setItem("pb_new_signup", "1");
       } catch { /* ignore */ }
-      try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); } catch { /* ignore */ }
+      try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); sessionStorage.removeItem("pb_invited"); } catch { /* ignore */ }
       setAwaitingConfirm(email);
       toast.success("Check your email to confirm your account.");
       return;
@@ -165,7 +175,7 @@ function AuthPage() {
     }
     // Flag this session as a fresh signup so the onboarding tour auto-runs once.
     try { localStorage.setItem("pb_new_signup", "1"); } catch { /* ignore */ }
-    try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); } catch { /* ignore */ }
+    try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); sessionStorage.removeItem("pb_invited"); } catch { /* ignore */ }
     navigate({ to: "/onboarding" });
   };
 
@@ -183,6 +193,16 @@ function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {(referrerName || invited) && !awaitingConfirm && (
+            <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {referrerName ? `You were invited by @${referrerName}` : "Your invite is confirmed"}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Create your account below and whoever invited you gets their referral credit.
+              </p>
+            </div>
+          )}
           {awaitingConfirm ? (
             <div className="space-y-4 text-center text-sm">
               <p className="text-muted-foreground">

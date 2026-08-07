@@ -23,6 +23,11 @@ import {
   Crown,
   Send,
   X,
+  Upload,
+  Sparkles,
+  Ticket,
+  Shirt,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,6 +80,37 @@ const TIERS = [
   },
 ];
 
+const REWARDS = [
+  {
+    key: "shoutout",
+    name: "Community shoutout",
+    cost: 15,
+    blurb: "Featured on the Planet Baltimore homepage for a week.",
+    icon: Sparkles,
+  },
+  {
+    key: "event-ticket",
+    name: "Free event ticket",
+    cost: 40,
+    blurb: "One free ticket to any Planet Baltimore partner event.",
+    icon: Ticket,
+  },
+  {
+    key: "merch",
+    name: "Planet Baltimore merch",
+    cost: 75,
+    blurb: "Limited edition tee shipped to your door.",
+    icon: Shirt,
+  },
+  {
+    key: "founding-member",
+    name: "Founding member badge",
+    cost: 150,
+    blurb: "Permanent badge on your profile plus early access to new features.",
+    icon: Star,
+  },
+];
+
 export function ReferralNetworkDialog({
   open,
   onClose,
@@ -87,6 +123,10 @@ export function ReferralNetworkDialog({
   const [sending, setSending] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
+  const [parsedEmails, setParsedEmails] = useState<string[]>([]);
+  const [claims, setClaims] = useState<Array<{ reward_key: string; status: string; points_spent: number }>>([]);
+  const [claiming, setClaiming] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
@@ -132,6 +172,77 @@ export function ReferralNetworkDialog({
     setInvites(inviteRows);
     setStats({ total: inviteRows.length, joined, points: joined * 5 });
     setLoadingInvites(false);
+    const { data: claimRows } = await supabase
+      .from("referral_rewards")
+      .select("reward_key, status, points_spent")
+      .eq("user_id", user.id);
+    setClaims(claimRows ?? []);
+  };
+
+  const spentPoints = useMemo(
+    () => claims.reduce((sum, c) => sum + (c.points_spent ?? 0), 0),
+    [claims],
+  );
+  const availablePoints = Math.max(0, stats.points - spentPoints);
+
+  const extractEmails = (raw: string) =>
+    Array.from(new Set((raw.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
+
+  const handleParse = () => {
+    const found = extractEmails(email);
+    if (found.length === 0) {
+      toast.error("No valid emails found");
+      return;
+    }
+    setParsedEmails(found);
+    toast.success(`Found ${found.length} email${found.length === 1 ? "" : "s"}`);
+  };
+
+  const handleFile = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large (max 5MB)");
+      return;
+    }
+    const content = await file.text();
+    const found = extractEmails(`${email}\n${content}`);
+    if (found.length === 0) {
+      toast.error("No emails found in that file");
+      return;
+    }
+    setEmail((prev) => (prev ? `${prev}\n${content}` : content));
+    setParsedEmails(found);
+    toast.success(`Found ${found.length} email${found.length === 1 ? "" : "s"}`);
+  };
+
+  const handleClaim = async (reward: (typeof REWARDS)[number]) => {
+    if (availablePoints < reward.cost) {
+      toast.error(`You need ${reward.cost - availablePoints} more points for this gift`);
+      return;
+    }
+    const note = window.prompt(
+      "Where should we reach you about this gift? (email, phone, or shipping address)",
+      "",
+    );
+    if (note === null) return;
+    setClaiming(reward.key);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in first");
+      const { error } = await supabase.from("referral_rewards").insert({
+        user_id: user.id,
+        reward_key: reward.key,
+        reward_name: reward.name,
+        points_spent: reward.cost,
+        contact_note: note.trim() || null,
+      });
+      if (error) throw error;
+      toast.success(`${reward.name} claimed. We'll be in touch soon.`);
+      await loadStats();
+    } catch (err: any) {
+      toast.error(err.message || "Could not claim this gift");
+    } finally {
+      setClaiming(null);
+    }
   };
 
   const handleCopy = async () => {
@@ -203,7 +314,7 @@ export function ReferralNetworkDialog({
   };
 
   const handleSendInvite = async () => {
-    const emails = Array.from(new Set((email.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
+    const emails = parsedEmails.length > 0 ? parsedEmails : extractEmails(email);
     if (emails.length === 0) {
       toast.error("Please enter at least one valid email");
       return;
@@ -214,6 +325,7 @@ export function ReferralNetworkDialog({
       if (sent > 0) {
         toast.success(`Invite email sent to ${sent} ${sent === 1 ? "person" : "people"}`);
         setEmail("");
+        setParsedEmails([]);
         loadStats();
       }
       if (failures.length > 0) {
@@ -250,6 +362,7 @@ export function ReferralNetworkDialog({
   const handleClose = () => {
     setTab("link");
     setEmail("");
+    setParsedEmails([]);
     setMessage(defaultMessage);
     setCopied(false);
     onClose();
@@ -335,6 +448,9 @@ export function ReferralNetworkDialog({
               <TabsTrigger value="email" className="flex-1 gap-1.5 text-xs sm:text-sm">
                 <Mail className="h-3.5 w-3.5" /> Email
               </TabsTrigger>
+              <TabsTrigger value="gifts" className="flex-1 gap-1.5 text-xs sm:text-sm">
+                <Gift className="h-3.5 w-3.5" /> Gifts
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="link" className="mt-3 space-y-3">
@@ -389,18 +505,63 @@ export function ReferralNetworkDialog({
               <div className="space-y-3">
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    Email address
+                    Email addresses
                   </label>
-                  <Input
+                  <Textarea
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="friend@example.com"
-                    type="email"
+                    onChange={(e) => { setEmail(e.target.value); setParsedEmails([]); }}
+                    placeholder="Paste a whole list here: friend@example.com, another@example.com..."
+                    rows={4}
                   />
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    You can add multiple emails separated by commas.
+                    Paste any list, commas, spaces, or new lines all work. We pull out the valid emails for you.
                   </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="flex w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border p-4 text-center transition hover:border-primary hover:bg-muted/40"
+                >
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-xs font-semibold text-foreground">Upload a CSV or text file</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Contacts exported from Gmail, Outlook, or a spreadsheet
+                  </span>
+                </button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".csv,.txt,text/csv,text/plain"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void handleFile(f);
+                    if (fileRef.current) fileRef.current.value = "";
+                  }}
+                />
+
+                {parsedEmails.length > 0 ? (
+                  <div className="rounded-lg border border-border bg-muted/30 p-3">
+                    <div className="mb-1 text-xs font-semibold text-foreground">
+                      {parsedEmails.length} recipient{parsedEmails.length === 1 ? "" : "s"} ready
+                    </div>
+                    <div className="max-h-24 overflow-y-auto text-[11px] text-muted-foreground">
+                      {parsedEmails.join(", ")}
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleParse}
+                    disabled={!email.trim()}
+                    className="w-full gap-2 border-primary text-primary hover:bg-primary/10"
+                  >
+                    <Mail className="h-4 w-4" /> Parse emails
+                  </Button>
+                )}
+
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">
                     Personal message (optional)
@@ -423,7 +584,11 @@ export function ReferralNetworkDialog({
                   ) : (
                     <Send className="h-4 w-4" />
                   )}
-                  {sending ? "Sending..." : "Send Invite"}
+                  {sending
+                    ? "Sending..."
+                    : parsedEmails.length > 1
+                      ? `Send ${parsedEmails.length} invites`
+                      : "Send Invite"}
                 </Button>
 
                 <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3">
@@ -458,6 +623,65 @@ export function ReferralNetworkDialog({
                   </p>
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="gifts" className="mt-3 space-y-3">
+              <div className="rounded-lg border border-border bg-muted/20 p-3 text-center">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Points available to spend
+                </div>
+                <div className="text-2xl font-bold text-primary">{availablePoints}</div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Earned {stats.points}, spent {spentPoints}. Every friend who joins adds 5 points.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {REWARDS.map((reward) => {
+                  const claim = claims.find((c) => c.reward_key === reward.key);
+                  const Icon = reward.icon;
+                  const locked = !claim && availablePoints < reward.cost;
+                  return (
+                    <div
+                      key={reward.key}
+                      className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                        <Icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-semibold text-foreground sm:text-sm">
+                          {reward.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">{reward.blurb}</div>
+                      </div>
+                      {claim ? (
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-semibold capitalize text-primary">
+                          {claim.status}
+                        </span>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant={locked ? "outline" : "default"}
+                          disabled={locked || claiming === reward.key}
+                          onClick={() => void handleClaim(reward)}
+                          className="shrink-0 gap-1.5 text-xs"
+                        >
+                          {claiming === reward.key ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Gift className="h-3.5 w-3.5" />
+                          )}
+                          {locked ? `${reward.cost} pts` : "Claim"}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Once you claim a gift, our team reaches out using the contact details you provide.
+              </p>
             </TabsContent>
           </Tabs>
 
