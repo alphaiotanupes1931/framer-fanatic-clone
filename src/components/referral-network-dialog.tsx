@@ -344,6 +344,45 @@ export function ReferralNetworkDialog({
     }
   };
 
+  const visibleInvites = useMemo(() => invites.slice(0, 20), [invites]);
+  const allSelected = visibleInvites.length > 0 && selected.length === visibleInvites.length;
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const toggleSelectAll = () =>
+    setSelected(allSelected ? [] : visibleInvites.map((i: any) => i.id));
+
+  const handleBulkResend = async () => {
+    const rows = invites.filter((i: any) => selected.includes(i.id));
+    if (rows.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const { sent, failures } = await deliverInvites(rows.map((r: any) => r.email));
+      if (sent > 0) toast.success(`Resent ${sent} invite${sent === 1 ? "" : "s"}`);
+      if (failures.length > 0) toast.error(`Could not resend: ${failures[0]}`);
+      setSelected([]);
+    } catch (err: any) {
+      toast.error(err.message || "Could not resend invites");
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.length === 0) return;
+    if (!window.confirm(`Delete ${selected.length} invite${selected.length === 1 ? "" : "s"}?`)) return;
+    const ids = [...selected];
+    setBulkBusy(true);
+    setInvites((prev) => prev.filter((i: any) => !ids.includes(i.id)));
+    setSelected([]);
+    const { error } = await supabase.from("invites").delete().in("id", ids);
+    if (error) toast.error("Could not delete some invites");
+    else toast.success(`Deleted ${ids.length} invite${ids.length === 1 ? "" : "s"}`);
+    setBulkBusy(false);
+    loadStats();
+  };
+
   const handleSendInvite = async () => {
     const emails = parsedEmails.length > 0 ? parsedEmails : extractEmails(email);
     if (emails.length === 0) {
