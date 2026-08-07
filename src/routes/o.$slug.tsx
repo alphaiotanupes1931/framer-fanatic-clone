@@ -12,6 +12,7 @@ import {
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
   ChevronLeft, ChevronRight, Heart, DollarSign,
   Loader2, ImagePlus, Video as VideoIcon, Type as TypeIcon, X,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
@@ -20,6 +21,8 @@ import { DuesTab } from "@/components/org/dues-tab";
 import { PollsTab } from "@/components/org/polls-tab";
 import { DocumentsTab } from "@/components/org/documents-tab";
 import { BoardTab } from "@/components/org/board-tab";
+import { TextDocTab } from "@/components/org/text-doc-tab";
+import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
@@ -38,6 +41,8 @@ type Org = {
   phone: string | null; email: string | null; address: string | null;
   neighborhood: string | null; avatar_url: string | null; banner_url: string | null;
   hours: Record<string, { open: string; close: string } | null> | null;
+  bylaws?: string | null;
+  rules?: string | null;
 };
 
 type OrgPost = {
@@ -488,16 +493,39 @@ function OrgProfile() {
           )}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
+          {tab === "Leaderboard" && <MembersTab orgId={org.id} />}
           {tab === "Invite" && <InviteTab orgName={org.name} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
-          {(tab === "Minutes" || tab === "By Laws" || tab === "Resources") && (
+          {(tab === "Minutes" || tab === "Resources") && (
             <DocumentsTab orgId={org.id} canManage={canManage} me={me} label="Document" />
           )}
-          {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
-          {(["Announcements","Threads","Gallery","Jobs","Leaderboard","Rules","Stories","Promotions","Reviews"]).includes(tab) && (
-            <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
+          {tab === "By Laws" && (
+            <TextDocTab
+              orgId={org.id} canManage={canManage} field="bylaws"
+              title="By Laws & Governing Documents"
+              emptyTitle="No bylaws posted yet."
+              emptyHint="Click Edit to add governing documents."
+              initialValue={org.bylaws ?? null}
+            />
           )}
+          {tab === "Rules" && (
+            <TextDocTab
+              orgId={org.id} canManage={canManage} field="rules"
+              title="Community Rules"
+              emptyTitle="No rules posted yet."
+              emptyHint="Click Edit to add community guidelines."
+              initialValue={org.rules ?? null}
+            />
+          )}
+          {tab === "Gallery" && <GalleryTab orgId={org.id} />}
+          {(tab === "Announcements" || tab === "Promotions") && (
+            <OrgPostList orgId={org.id} kind="update" canManage={canManage} />
+          )}
+          {tab === "Jobs" && <OrgPostList orgId={org.id} kind="opportunity" canManage={canManage} />}
+          {tab === "Stories" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
+          {(tab === "Threads" || tab === "Reviews") && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
+          {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
           {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
         </div>
@@ -512,22 +540,50 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
 
 function InviteTab({ orgName }: { orgName: string }) {
   const [open, setOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  const onCsv = async (file: File) => {
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const emails = Array.from(
+        new Set((text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/g) ?? []).map((e) => e.toLowerCase())),
+      );
+      if (!emails.length) { toast.error("No email addresses found in that file."); return; }
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id ?? null;
+      if (!uid) { toast.error("Please sign in to send invites."); return; }
+      const { error } = await supabase
+        .from("invites")
+        .insert(emails.map((email) => ({ email, invited_by: uid })));
+      if (error) { toast.error("Could not import that list. Please try again."); return; }
+      toast.success(`Imported ${emails.length} contact${emails.length === 1 ? "" : "s"} to invite.`);
+    } finally {
+      setImporting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   return (
     <div className="mx-auto max-w-2xl space-y-6 py-6">
-      <div className="rounded-2xl border border-border bg-neutral-50 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <UserPlus className="h-7 w-7 text-primary" />
-        </div>
-        <h2 className="text-xl font-bold text-neutral-900">Invite friends to {orgName}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Grow the community. Upload a contact list or paste emails, we handle the rest.
-        </p>
-      </div>
       <button
         onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-200 px-6 py-4 text-base font-semibold text-neutral-800 transition hover:bg-neutral-300"
+        title={`Invite friends to ${orgName}`}
+        className="w-full rounded-2xl bg-neutral-500 px-6 py-4 text-center text-base font-semibold text-white transition hover:bg-neutral-600"
       >
-        <UserPlus className="h-5 w-5" /> Invite Friends
+        Invite Friends to Join
+      </button>
+      <input
+        ref={fileRef} type="file" accept=".csv,text/csv,text/plain" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) void onCsv(f); }}
+      />
+      <button
+        onClick={() => fileRef.current?.click()}
+        disabled={importing}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border px-6 py-4 text-sm font-medium text-neutral-700 transition hover:bg-muted disabled:opacity-60"
+      >
+        <Upload className="h-4 w-4" /> {importing ? "Importing..." : "Import Followers from CSV"}
       </button>
       <InviteFriendsDialog open={open} onClose={() => setOpen(false)} />
     </div>
