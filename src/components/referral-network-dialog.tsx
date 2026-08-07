@@ -133,6 +133,8 @@ export function ReferralNetworkDialog({
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
   const [resending, setResending] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const messageRef = useRef<HTMLTextAreaElement>(null);
 
   const inviteUrl = useMemo(() => {
@@ -162,7 +164,7 @@ export function ReferralNetworkDialog({
     const [invitesRes, joinedRes] = await Promise.all([
       supabase
         .from("invites")
-        .select("id, email, created_at")
+        .select("id, email, created_at, clicked_at, accepted_at")
         .eq("invited_by", user.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -318,6 +320,7 @@ export function ReferralNetworkDialog({
 
   const handleDeleteInvite = async (invite: any) => {
     setInvites((prev) => prev.filter((i) => i.id !== invite.id));
+    setSelected((prev) => prev.filter((id) => id !== invite.id));
     const { error } = await supabase.from("invites").delete().eq("id", invite.id);
     if (error) {
       toast.error("Could not delete invite");
@@ -339,6 +342,45 @@ export function ReferralNetworkDialog({
     } finally {
       setResending(null);
     }
+  };
+
+  const visibleInvites = useMemo(() => invites.slice(0, 20), [invites]);
+  const allSelected = visibleInvites.length > 0 && selected.length === visibleInvites.length;
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const toggleSelectAll = () =>
+    setSelected(allSelected ? [] : visibleInvites.map((i: any) => i.id));
+
+  const handleBulkResend = async () => {
+    const rows = invites.filter((i: any) => selected.includes(i.id));
+    if (rows.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const { sent, failures } = await deliverInvites(rows.map((r: any) => r.email));
+      if (sent > 0) toast.success(`Resent ${sent} invite${sent === 1 ? "" : "s"}`);
+      if (failures.length > 0) toast.error(`Could not resend: ${failures[0]}`);
+      setSelected([]);
+    } catch (err: any) {
+      toast.error(err.message || "Could not resend invites");
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.length === 0) return;
+    if (!window.confirm(`Delete ${selected.length} invite${selected.length === 1 ? "" : "s"}?`)) return;
+    const ids = [...selected];
+    setBulkBusy(true);
+    setInvites((prev) => prev.filter((i: any) => !ids.includes(i.id)));
+    setSelected([]);
+    const { error } = await supabase.from("invites").delete().in("id", ids);
+    if (error) toast.error("Could not delete some invites");
+    else toast.success(`Deleted ${ids.length} invite${ids.length === 1 ? "" : "s"}`);
+    setBulkBusy(false);
+    loadStats();
   };
 
   const handleSendInvite = async () => {
@@ -715,9 +757,37 @@ export function ReferralNetworkDialog({
 
           {/* Recent invites */}
           <div className="mt-4">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Recent invites
-            </h3>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Recent invites
+              </h3>
+              {invites.length > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="text-[11px] font-medium text-primary hover:underline"
+                >
+                  {allSelected ? "Clear selection" : "Select all"}
+                </button>
+              )}
+            </div>
+            {selected.length > 0 && (
+              <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+                <span className="text-xs font-medium text-foreground">
+                  {selected.length} selected
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button type="button" size="sm" variant="outline" className="h-7 gap-1 text-xs" disabled={bulkBusy} onClick={handleBulkResend}>
+                    {bulkBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                    Resend
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" className="h-7 gap-1 text-xs text-destructive hover:text-destructive" disabled={bulkBusy} onClick={handleBulkDelete}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )}
             {loadingInvites ? (
               <div className="flex items-center justify-center py-4 text-xs text-muted-foreground">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading...
@@ -734,12 +804,19 @@ export function ReferralNetworkDialog({
               </div>
             ) : (
               <div className="space-y-2">
-                {invites.slice(0, 5).map((invite) => (
+                {visibleInvites.map((invite: any) => (
                   <div
                     key={invite.id}
                     className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
                   >
                     <div className="flex min-w-0 items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="h-3.5 w-3.5 shrink-0 accent-[hsl(var(--primary))]"
+                        checked={selected.includes(invite.id)}
+                        onChange={() => toggleSelect(invite.id)}
+                        aria-label={`Select ${invite.email}`}
+                      />
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
                         <Mail className="h-3.5 w-3.5 text-primary" />
                       </div>
@@ -753,8 +830,16 @@ export function ReferralNetworkDialog({
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        Pending
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          invite.accepted_at
+                            ? "bg-emerald-100 text-emerald-700"
+                            : invite.clicked_at
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {invite.accepted_at ? "Joined" : invite.clicked_at ? "Opened link" : "Sent"}
                       </span>
                       <Button
                         type="button"
