@@ -150,7 +150,7 @@ function AuthPage() {
         localStorage.setItem("pb_pending_signup", JSON.stringify({ role: finalRole, category: profileCategory }));
         localStorage.setItem("pb_new_signup", "1");
       } catch { /* ignore */ }
-      try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); } catch { /* ignore */ }
+      try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); sessionStorage.removeItem("pb_invited"); } catch { /* ignore */ }
       setAwaitingConfirm(email);
       toast.success("Check your email to confirm your account.");
       return;
@@ -175,7 +175,7 @@ function AuthPage() {
     }
     // Flag this session as a fresh signup so the onboarding tour auto-runs once.
     try { localStorage.setItem("pb_new_signup", "1"); } catch { /* ignore */ }
-    try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); } catch { /* ignore */ }
+    try { sessionStorage.removeItem("pb_referred_by"); sessionStorage.removeItem("pb_referred_by_username"); sessionStorage.removeItem("pb_invited"); } catch { /* ignore */ }
     navigate({ to: "/onboarding" });
   };
 
