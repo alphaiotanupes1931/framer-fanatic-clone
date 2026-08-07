@@ -2579,6 +2579,10 @@ export type Database = {
         Args: { _banned: boolean; _user_id: string }
         Returns: undefined
       }
+      admin_set_founder: {
+        Args: { _is_founder: boolean; _user_id: string }
+        Returns: undefined
+      }
       admin_set_showcase_hidden: {
         Args: { _hidden: boolean; _user_id: string }
         Returns: undefined
@@ -2643,6 +2647,7 @@ export type Database = {
         Args: { _conv: string; _uid: string }
         Returns: boolean
       }
+      is_founder_visible: { Args: { _user_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
