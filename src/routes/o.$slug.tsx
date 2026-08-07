@@ -12,6 +12,7 @@ import {
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
   ChevronLeft, ChevronRight, Heart, DollarSign,
   Loader2, ImagePlus, Video as VideoIcon, Type as TypeIcon, X,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MessageAllButton } from "@/components/message-all-button";
