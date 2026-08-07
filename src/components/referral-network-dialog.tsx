@@ -28,6 +28,8 @@ import {
   Ticket,
   Shirt,
   Star,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
