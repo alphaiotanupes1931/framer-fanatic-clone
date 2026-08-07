@@ -29,6 +29,7 @@ import {
   ArtistAvailableWorksTab,
 } from "@/components/artist/artist-tab-sections";
 import { Img } from "@/components/shared/smart-img";
+import { setMyProfileKind } from "@/lib/profile-kind";
 
 type PublicProfile = {
   id: string;
