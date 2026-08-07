@@ -839,10 +839,20 @@ function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canMa
   );
 }
 
-function OrgEventCardInternal({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null } }) {
+function OrgEventCardInternal({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url?: string | null } }) {
   return (
     <a href={`/events/${e.id}`} className="block overflow-hidden rounded-2xl border border-neutral-200 bg-card transition hover:shadow-md">
-      {e.image_url && <Img src={e.image_url} alt={e.title} className="h-40 w-full object-cover" />}
+      {e.image_url ? (
+        <Img src={e.image_url} alt={e.title} bucket="event-images" className="h-40 w-full object-cover" loading="lazy" />
+      ) : e.video_url ? (
+        <SmartVideo
+          src={e.video_url}
+          className="h-40 w-full object-cover"
+          muted
+          playsInline
+          preload="metadata"
+        />
+      ) : null}
       <div className="space-y-1 p-4">
         <div className="text-xs font-medium text-[#d4580a]">
           {new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
