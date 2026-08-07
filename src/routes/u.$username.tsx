@@ -176,6 +176,28 @@ function PublicProfilePage() {
 
   const isSelf = useMemo(() => me && profile && me.id === profile.id, [me, profile]);
   const canManage = !!isSelf || isAdmin;
+
+  // Founding Member flag is admin-only: the RPC returns false for everyone else.
+  useEffect(() => {
+    if (!profile || !isAdmin) { setIsFounder(false); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("is_founder_visible", { _user_id: profile.id });
+      if (!cancelled) setIsFounder(!!data);
+    })();
+    return () => { cancelled = true; };
+  }, [profile, isAdmin]);
+
+  const toggleFounder = async () => {
+    if (!profile) return;
+    setFounderSaving(true);
+    const next = !isFounder;
+    const { error } = await supabase.rpc("admin_set_founder", { _user_id: profile.id, _is_founder: next });
+    setFounderSaving(false);
+    if (error) { toast.error(error.message); return; }
+    setIsFounder(next);
+    toast.success(next ? "Founding Member badge granted" : "Founding Member badge removed");
+  };
   const hashtags = useMemo(() => {
     if (!profile) return [] as string[];
     const fromBio = Array.from(new Set((profile.bio || "").match(/#[A-Za-z0-9_]+/g) || []));
