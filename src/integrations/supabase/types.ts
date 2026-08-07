@@ -1387,6 +1387,7 @@ export type Database = {
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
+          bylaws: string | null
           created_at: string
           email: string | null
           hours: Json | null
@@ -1396,6 +1397,7 @@ export type Database = {
           neighborhood: string | null
           owner_id: string
           phone: string | null
+          rules: string | null
           slug: string
           subtype: string | null
           tagline: string | null
@@ -1408,6 +1410,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          bylaws?: string | null
           created_at?: string
           email?: string | null
           hours?: Json | null
@@ -1417,6 +1420,7 @@ export type Database = {
           neighborhood?: string | null
           owner_id: string
           phone?: string | null
+          rules?: string | null
           slug: string
           subtype?: string | null
           tagline?: string | null
@@ -1429,6 +1433,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          bylaws?: string | null
           created_at?: string
           email?: string | null
           hours?: Json | null
@@ -1438,6 +1443,7 @@ export type Database = {
           neighborhood?: string | null
           owner_id?: string
           phone?: string | null
+          rules?: string | null
           slug?: string
           subtype?: string | null
           tagline?: string | null
