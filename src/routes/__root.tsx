@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CookieBanner } from "../components/cookie-banner";
 import { OnboardingTour } from "../components/onboarding-tour";
+import { OnboardingGuard } from "../components/onboarding-guard";
 import { Toaster } from "../components/ui/sonner";
 import { QueryPersistence } from "../components/query-persistence";
 
@@ -151,6 +152,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <QueryPersistence />
+      <OnboardingGuard />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <CookieBanner />
