@@ -29,6 +29,7 @@ import {
   ArtistAvailableWorksTab,
 } from "@/components/artist/artist-tab-sections";
 import { Img } from "@/components/shared/smart-img";
+import { setMyProfileKind } from "@/lib/profile-kind";
 
 type PublicProfile = {
   id: string;
@@ -221,10 +222,23 @@ function PublicProfilePage() {
 
   const deletePage = async () => {
     if (!profile) return;
-    if (!confirm("Delete this artist page? This removes their profile.")) return;
+    // Owners never delete their account here. Removing your own artist page just
+    // switches your profile type back to Resident, keeping posts, followers and login.
+    if (isSelf && !isAdmin) {
+      if (!confirm("Remove your artist page? Your account, posts and followers stay. Your profile switches back to a Resident profile.")) return;
+      try {
+        await setMyProfileKind("resident");
+      } catch (e) {
+        return toast.error((e as Error).message || "Could not remove artist page");
+      }
+      toast.success("Artist page removed. Your profile is now a Resident profile.");
+      navigate({ to: "/profile" });
+      return;
+    }
+    if (!confirm("Permanently delete this entire profile and all of its content? This cannot be undone.")) return;
     const { error } = await supabase.rpc("admin_delete_profile", { _id: profile.id });
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
+    toast.success("Profile deleted");
     navigate({ to: "/artists" });
   };
 
@@ -523,7 +537,9 @@ function PublicProfilePage() {
               onClick={deletePage}
               className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
             >
-              <Trash2 className="h-4 w-4" /> Delete Page {isAdmin && !isSelf && <span className="text-[10px] opacity-60">(Admin)</span>}
+              <Trash2 className="h-4 w-4" />
+              {isSelf && !isAdmin ? "Remove Artist Page" : "Delete Page"}
+              {isAdmin && !isSelf && <span className="text-[10px] opacity-60">(Admin)</span>}
             </button>
           )}
           {me && !isSelf && (
