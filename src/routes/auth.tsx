@@ -306,6 +306,7 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+          )}
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             <Link to="/" className="hover:underline">Back to home</Link>
