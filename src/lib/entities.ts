@@ -112,6 +112,28 @@ export const Story = {
     if (error) throw error;
     return attachAuthors(data ?? []);
   },
+  // Ranked by real engagement (likes + comments) with a recency boost so the
+  // list moves as people interact.
+  async trending(limit = 5) {
+    const { data, error } = await supabase
+      .from("stories")
+      .select("id, user_id, title, excerpt, cover_url, likes_count, comments_count, status, created_at")
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .limit(60);
+    if (error) throw error;
+    const now = Date.now();
+    const scored = (data ?? []).map((s) => {
+      const likes = s.likes_count ?? 0;
+      const comments = s.comments_count ?? 0;
+      const ageDays = Math.max(0, (now - new Date(s.created_at).getTime()) / 86400000);
+      const recency = 1 / Math.pow(ageDays + 2, 0.4);
+      const engagement = likes + comments * 3;
+      return { ...s, trend_score: (engagement + 1) * recency };
+    });
+    scored.sort((a, b) => b.trend_score - a.trend_score);
+    return attachAuthors(scored.slice(0, limit));
+  },
 };
 
 export const Event = {
@@ -124,6 +146,20 @@ export const Event = {
     const { data, error } = await q.order(column, { ascending }).limit(limit);
     if (error) throw error;
     // Add `date` alias for repo templates
+    const rows = (data ?? []).map((r) => ({ ...r, date: r.starts_at }));
+    return attachAuthors(rows, "organizer");
+  },
+  // Only events that have not started yet, soonest first.
+  async upcoming(limit = 5) {
+    const { data, error } = await supabase
+      .from("events")
+      .select("id, user_id, title, image_url, starts_at, venue_name, neighborhood, is_published, status, created_at")
+      .eq("is_published", true)
+      .neq("status", "cancelled")
+      .gte("starts_at", new Date().toISOString())
+      .order("starts_at", { ascending: true })
+      .limit(limit);
+    if (error) throw error;
     const rows = (data ?? []).map((r) => ({ ...r, date: r.starts_at }));
     return attachAuthors(rows, "organizer");
   },
