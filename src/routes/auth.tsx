@@ -49,12 +49,16 @@ function AuthPage() {
   const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        const dest = redirect || popPostAuthRedirect();
-        if (dest) { window.location.replace(dest); return; }
-        navigate({ to: "/dashboard" });
-      }
+    supabase.auth.getSession().then(async ({ data }) => {
+      const uid = data.session?.user.id;
+      if (!uid) return;
+      // Confirmation links can land here on a different device, so trust the
+      // server-side flag rather than anything saved locally at signup.
+      const { data: p } = await supabase.from("profiles").select("onboarded").eq("id", uid).maybeSingle();
+      if (p && !p.onboarded) { navigate({ to: "/onboarding" }); return; }
+      const dest = redirect || popPostAuthRedirect();
+      if (dest) { window.location.replace(dest); return; }
+      navigate({ to: "/dashboard" });
     });
   }, [navigate, redirect]);
 
