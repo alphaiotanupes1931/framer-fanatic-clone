@@ -955,6 +955,109 @@ export type Database = {
           },
         ]
       }
+      organization_poll_options: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          poll_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          poll_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          poll_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "organization_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_poll_votes: {
+        Row: {
+          created_at: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "organization_poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "organization_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_polls: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_closed: boolean
+          org_id: string
+          question: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_closed?: boolean
+          org_id: string
+          question: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_closed?: boolean
+          org_id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_polls_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_posts: {
         Row: {
           author_id: string
