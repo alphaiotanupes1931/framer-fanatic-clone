@@ -153,6 +153,8 @@ function VideosSignedIn() {
     );
   const featured = filtered.filter((v) => v.featured);
   const rest = filtered.filter((v) => !v.featured);
+  const portraitRest = rest.filter((v) => v.orientation === "portrait");
+  const landscapeRest = rest.filter((v) => v.orientation !== "portrait");
 
   const submit = async () => {
     if (!me || !form.title.trim() || !form.video_url.trim()) return;
@@ -211,10 +213,14 @@ function VideosSignedIn() {
         )}
 
         <section>
-          <h2 className="mb-3 text-sm font-bold">All Videos</h2>
           {!loaded ? (
-            <CardGridSkeleton count={6} />
+            <>
+              <h2 className="mb-3 text-sm font-bold">Landscape</h2>
+              <CardGridSkeleton count={6} />
+            </>
           ) : rest.length === 0 ? (
+            <>
+            <h2 className="mb-3 text-sm font-bold">All Videos</h2>
             <EmptyState
               icon={Play}
               title="No videos yet"
@@ -225,9 +231,25 @@ function VideosSignedIn() {
                 </button>
               }
             />
+            </>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lazy-grid">
-              {rest.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
+            <div className="space-y-8">
+              {landscapeRest.length > 0 && (
+                <div>
+                  <h2 className="mb-3 text-sm font-bold">Landscape</h2>
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lazy-grid">
+                    {landscapeRest.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
+                  </div>
+                </div>
+              )}
+              {portraitRest.length > 0 && (
+                <div>
+                  <h2 className="mb-3 text-sm font-bold">Portrait</h2>
+                  <div className="grid gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 lazy-grid">
+                    {portraitRest.map((v) => <VideoCard key={v.id} v={v} onChanged={load} />)}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>

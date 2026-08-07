@@ -108,12 +108,17 @@ function VideoBody({ video, related, onVideoChange }: { video: Video; related: V
   );
 
   if (portrait) {
-    // Shorts-style: tall player on the left, caption and details beside it.
+    // Shorts-style: tall player with a narrower, compact column of details and
+    // comments underneath, matched to the player's width.
     return (
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="grid min-w-0 gap-6 md:grid-cols-[minmax(280px,420px)_minmax(0,1fr)] md:items-start">
-          <VideoPlayer url={video.video_url} poster={video.thumbnail_url} video={video} />
-          <div className="min-w-0 md:sticky md:top-4">{meta}</div>
+        <div className="min-w-0">
+          <div className="mx-auto w-full max-w-[420px]">
+            <VideoPlayer url={video.video_url} poster={video.thumbnail_url} video={video} />
+            <div className="text-[13px] [&_h1]:text-lg [&_h1]:sm:text-lg [&_input]:text-[13px] [&_button]:text-[13px]">
+              {meta}
+            </div>
+          </div>
         </div>
         {upNext}
       </div>
