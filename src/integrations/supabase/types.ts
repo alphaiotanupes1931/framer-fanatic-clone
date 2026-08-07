@@ -1217,6 +1217,79 @@ export type Database = {
           },
         ]
       }
+      organization_vote_ballots: {
+        Row: {
+          choice: string
+          created_at: string
+          user_id: string
+          vote_id: string
+        }
+        Insert: {
+          choice: string
+          created_at?: string
+          user_id: string
+          vote_id: string
+        }
+        Update: {
+          choice?: string
+          created_at?: string
+          user_id?: string
+          vote_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_vote_ballots_vote_id_fkey"
+            columns: ["vote_id"]
+            isOneToOne: false
+            referencedRelation: "organization_votes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_votes: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_at: string
+          id: string
+          org_id: string
+          starts_at: string
+          title: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          org_id: string
+          starts_at?: string
+          title: string
+          vote_type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          org_id?: string
+          starts_at?: string
+          title?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_votes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
