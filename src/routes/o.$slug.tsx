@@ -18,6 +18,7 @@ import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
 import { PollsTab } from "@/components/org/polls-tab";
+import { VotingTab } from "@/components/org/voting-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
 import { ShareButtons } from "@/components/shared/share-buttons";
@@ -487,7 +488,8 @@ function OrgProfile() {
           {tab === "Members" && <MembersTab orgId={org.id} />}
           {tab === "Invite" && <InviteTab orgName={org.name} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
-          {(["Announcements","Threads","Gallery","Resources","Jobs","Leaderboard","Rules","Voting","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
+          {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
+          {(["Announcements","Threads","Gallery","Resources","Jobs","Leaderboard","Rules","Minutes","Board","By Laws","Stories","Promotions","Reviews"]).includes(tab) && (
             <div className="py-14 text-center text-sm text-neutral-500">{tab} is empty.</div>
           )}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
