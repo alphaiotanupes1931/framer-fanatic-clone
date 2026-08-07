@@ -330,9 +330,21 @@ function PublicProfilePage() {
           <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">
             {profile.display_name || profile.username}
           </h1>
-          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
-            <Star className="h-3 w-3" /> Grant Founding
-          </span>
+          {isAdmin && isFounder && (
+            <span title="Visible to admins only" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+              <Star className="h-3 w-3" /> Founding Member
+            </span>
+          )}
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={toggleFounder}
+              disabled={founderSaving}
+              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 disabled:opacity-60"
+            >
+              <Star className="h-3 w-3" /> {isFounder ? "Remove Founding" : "Grant Founding"}
+            </button>
+          )}
         </div>
         {/* Category + actions moved below the name */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
