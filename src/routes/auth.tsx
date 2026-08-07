@@ -46,6 +46,7 @@ function AuthPage() {
   const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"artist" | "resident" | "visitor">("resident");
+  const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -64,6 +65,20 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Signed in");
+    // Apply any role/category chosen at signup, once the confirmed session exists.
+    try {
+      const pending = localStorage.getItem("pb_pending_signup");
+      if (pending) {
+        const { role: pRole, category } = JSON.parse(pending) as { role?: string; category?: string | null };
+        if (pRole === "artist") { try { await becomeArtistFn(); } catch { /* can upgrade later */ } }
+        if (category) {
+          const { data: s } = await supabase.auth.getSession();
+          const id = s.session?.user.id;
+          if (id) await supabase.from("profiles").update({ category }).eq("id", id);
+        }
+        localStorage.removeItem("pb_pending_signup");
+      }
+    } catch { /* non-fatal */ }
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (uid) {
