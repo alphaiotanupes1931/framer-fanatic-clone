@@ -237,8 +237,8 @@ function Hero() {
       />
 
       {/* Headline + sub + CTAs */}
-      <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10" style={{ color: heroText }}>
-        <div className="font-display font-medium text-[clamp(2rem,10vw,11rem)] leading-[0.95] md:leading-[0.88] tracking-[-0.03em] md:tracking-[-0.045em] break-words">
+      <div className="absolute bottom-10 md:bottom-16 left-0 right-0 px-5 md:px-10">
+        <div className="font-display font-medium text-[clamp(2rem,10vw,11rem)] leading-[0.95] md:leading-[0.88] tracking-[-0.03em] md:tracking-[-0.045em] break-words" style={{ color: heroText }}>
           <AnimatedHeadline lines={[line1, line2]} colors={[line1Color, line2Color]} />
         </div>
 
@@ -248,7 +248,7 @@ function Hero() {
           transition={{ duration: 0.7, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mt-5 md:mt-7 flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-10"
         >
-          <p className="max-w-md text-sm md:text-base text-paper/80 leading-relaxed" style={subtitleColor ? { color: subtitleColor } : undefined}>
+          <p className="max-w-md text-sm md:text-base leading-relaxed" style={subtitleColor ? { color: subtitleColor } : { color: "rgba(252,252,250,0.8)" }}>
             {subtitle}
           </p>
 
@@ -256,7 +256,7 @@ function Hero() {
             <Magnetic>
               <Link
                 to="/auth"
-                className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-6 pr-2 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors"
+                className="group inline-flex items-center gap-2 rounded-full bg-paper pl-6 pr-2 py-2 text-sm font-medium hover:bg-ink hover:text-paper transition-colors text-ink"
               >
                 <span style={ctaColor ? { color: ctaColor } : undefined}>{ctaLabel}</span>
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper group-hover:bg-paper group-hover:text-ink transition-colors">
@@ -277,7 +277,7 @@ function Hero() {
         >
           <Link
             to="/auth"
-            className="group inline-flex items-center gap-2 rounded-full bg-paper text-ink pl-5 pr-1.5 py-1.5 text-sm font-medium"
+            className="group inline-flex items-center gap-2 rounded-full bg-paper pl-5 pr-1.5 py-1.5 text-sm font-medium text-ink"
           >
             <span style={ctaColor ? { color: ctaColor } : undefined}>{ctaLabel}</span>
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-paper">
