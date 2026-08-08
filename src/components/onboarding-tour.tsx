@@ -137,6 +137,16 @@ export function OnboardingTour() {
         localStorage.setItem(STORAGE_KEY, "1");
         try { localStorage.removeItem(SIGNUP_FLAG); } catch { /* ignore */ }
         setRun(false);
+        // Persist the dismissal to the account so the directions stay closed
+        // on every other device the person signs in from.
+        void (async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+          await supabase.from("user_ui_prefs").upsert(
+            { user_id: user.id, onboarding_dismissed: true, updated_at: new Date().toISOString() },
+            { onConflict: "user_id" },
+          );
+        })();
       }
     }
   };
