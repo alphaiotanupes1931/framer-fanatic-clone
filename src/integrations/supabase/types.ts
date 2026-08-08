@@ -659,6 +659,100 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_artists: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          photo_url: string | null
+          portfolio_url: string | null
+          sort_order: number
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          photo_url?: string | null
+          portfolio_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          photo_url?: string | null
+          portfolio_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_artists_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_board_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          org_id: string
+          photo_url: string | null
+          sort_order: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          org_id: string
+          photo_url?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          photo_url?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_board_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_comments: {
         Row: {
           body: string
@@ -684,6 +778,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "organization_comments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          doc_type: string
+          file_name: string | null
+          file_url: string
+          id: string
+          name: string
+          org_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_name?: string | null
+          file_url: string
+          id?: string
+          name: string
+          org_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_name?: string | null
+          file_url?: string
+          id?: string
+          name?: string
+          org_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_documents_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -868,6 +1006,109 @@ export type Database = {
           },
         ]
       }
+      organization_poll_options: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          poll_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          poll_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          poll_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "organization_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_poll_votes: {
+        Row: {
+          created_at: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "organization_poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "organization_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_polls: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_closed: boolean
+          org_id: string
+          question: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_closed?: boolean
+          org_id: string
+          question: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_closed?: boolean
+          org_id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_polls_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_posts: {
         Row: {
           author_id: string
@@ -1021,6 +1262,79 @@ export type Database = {
           {
             foreignKeyName: "organization_support_tiers_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_vote_ballots: {
+        Row: {
+          choice: string
+          created_at: string
+          user_id: string
+          vote_id: string
+        }
+        Insert: {
+          choice: string
+          created_at?: string
+          user_id: string
+          vote_id: string
+        }
+        Update: {
+          choice?: string
+          created_at?: string
+          user_id?: string
+          vote_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_vote_ballots_vote_id_fkey"
+            columns: ["vote_id"]
+            isOneToOne: false
+            referencedRelation: "organization_votes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_votes: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_at: string
+          id: string
+          org_id: string
+          starts_at: string
+          title: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          org_id: string
+          starts_at?: string
+          title: string
+          vote_type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          org_id?: string
+          starts_at?: string
+          title?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_votes_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
