@@ -452,25 +452,34 @@ export type Database = {
       }
       invites: {
         Row: {
+          click_count: number
+          clicked_at: string | null
           created_at: string
           email: string
           id: string
           invite_url: string | null
           invited_by: string | null
+          token: string | null
         }
         Insert: {
+          click_count?: number
+          clicked_at?: string | null
           created_at?: string
           email: string
           id?: string
           invite_url?: string | null
           invited_by?: string | null
+          token?: string | null
         }
         Update: {
+          click_count?: number
+          clicked_at?: string | null
           created_at?: string
           email?: string
           id?: string
           invite_url?: string | null
           invited_by?: string | null
+          token?: string | null
         }
         Relationships: []
       }
@@ -1347,6 +1356,7 @@ export type Database = {
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
+          bylaws: string | null
           created_at: string
           email: string | null
           hours: Json | null
@@ -1356,6 +1366,7 @@ export type Database = {
           neighborhood: string | null
           owner_id: string
           phone: string | null
+          rules: string | null
           slug: string
           subtype: string | null
           tagline: string | null
@@ -1368,6 +1379,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          bylaws?: string | null
           created_at?: string
           email?: string | null
           hours?: Json | null
@@ -1377,6 +1389,7 @@ export type Database = {
           neighborhood?: string | null
           owner_id: string
           phone?: string | null
+          rules?: string | null
           slug: string
           subtype?: string | null
           tagline?: string | null
@@ -1389,6 +1402,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          bylaws?: string | null
           created_at?: string
           email?: string | null
           hours?: Json | null
@@ -1398,6 +1412,7 @@ export type Database = {
           neighborhood?: string | null
           owner_id?: string
           phone?: string | null
+          rules?: string | null
           slug?: string
           subtype?: string | null
           tagline?: string | null
@@ -1802,6 +1817,42 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_rewards: {
+        Row: {
+          contact_note: string | null
+          created_at: string
+          id: string
+          points_spent: number
+          reward_key: string
+          reward_name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_note?: string | null
+          created_at?: string
+          id?: string
+          points_spent?: number
+          reward_key: string
+          reward_name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_note?: string | null
+          created_at?: string
+          id?: string
+          points_spent?: number
+          reward_key?: string
+          reward_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string
@@ -1966,6 +2017,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stripe_event_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          event_id: string | null
+          event_type: string
+          id: string
+          message: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          event_id?: string | null
+          event_type: string
+          id?: string
+          message?: string | null
+          source?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          event_id?: string | null
+          event_type?: string
+          id?: string
+          message?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: []
       }
       ticket_types: {
         Row: {
@@ -2314,6 +2398,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_clear_stripe_logs: { Args: never; Returns: number }
       admin_delete_event: { Args: { _id: string }; Returns: undefined }
       admin_delete_organization: { Args: { _id: string }; Returns: undefined }
       admin_delete_profile: { Args: { _id: string }; Returns: undefined }
@@ -2336,6 +2421,19 @@ export type Database = {
           type: string
         }[]
       }
+      admin_list_stripe_logs: {
+        Args: { _limit?: number; _status?: string }
+        Returns: {
+          created_at: string
+          details: Json
+          event_id: string
+          event_type: string
+          id: string
+          message: string
+          source: string
+          status: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
@@ -2356,6 +2454,10 @@ export type Database = {
       }
       admin_set_banned: {
         Args: { _banned: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_set_founder: {
+        Args: { _is_founder: boolean; _user_id: string }
         Returns: undefined
       }
       admin_set_showcase_hidden: {
@@ -2413,6 +2515,7 @@ export type Database = {
         Args: { _conv: string; _uid: string }
         Returns: boolean
       }
+      is_founder_visible: { Args: { _user_id: string }; Returns: boolean }
       my_profile: {
         Args: never
         Returns: {
@@ -2502,6 +2605,7 @@ export type Database = {
           title: string
         }[]
       }
+      record_invite_click: { Args: { _token: string }; Returns: string }
       resolve_referrer: { Args: { _username: string }; Returns: string }
       rsvp_free_event: { Args: { _event_id: string }; Returns: Json }
       search_all_users: {
