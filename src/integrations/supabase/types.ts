@@ -1361,6 +1361,7 @@ export type Database = {
           email: string | null
           hours: Json | null
           id: string
+          is_public: boolean
           mission: string | null
           name: string
           neighborhood: string | null
@@ -1384,6 +1385,7 @@ export type Database = {
           email?: string | null
           hours?: Json | null
           id?: string
+          is_public?: boolean
           mission?: string | null
           name: string
           neighborhood?: string | null
@@ -1407,6 +1409,7 @@ export type Database = {
           email?: string | null
           hours?: Json | null
           id?: string
+          is_public?: boolean
           mission?: string | null
           name?: string
           neighborhood?: string | null

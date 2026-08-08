@@ -85,7 +85,8 @@ function CreateArtistPage() {
     if (!canSubmit) { toast.error("Artist name is required"); return; }
     setSaving(true);
     try {
-      try { await setMyProfileKind("artist"); } catch { /* role switch is best effort */ }
+      // Artist pages are standalone organization pages. They must NOT change
+      // the owner's personal (resident/visitor) profile in any way.
       const slug = `${slugify(form.display_name)}-${Math.random().toString(36).slice(2, 6)}`;
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,

@@ -13,9 +13,17 @@ import { setMyProfileKind } from "@/lib/profile-kind";
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
   const me = useCurrentProfile();
   const [saving, setSaving] = useState(false);
+  const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase.from("neighborhoods").select("id,name").order("name");
+      setNeighborhoods((data ?? []) as Array<{ id: string; name: string }>);
+    })();
+  }, []);
   const [form, setForm] = useState({
     display_name: "",
     neighborhood: "",
+    city: "",
     bio: "",
     website: "",
     avatar_url: "",
@@ -29,6 +37,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         ...f,
         display_name: me.display_name || f.display_name,
         neighborhood: me.neighborhood || f.neighborhood,
+        city: (me as { city?: string }).city || f.city,
         bio: me.bio || f.bio,
         website: me.website || f.website,
         avatar_url: me.avatar_url || f.avatar_url,
@@ -37,17 +46,23 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
     }
   }, [me]);
 
-  const canSubmit = form.display_name.trim().length > 1;
+  const isVisitor = kind === "visitor";
+  const canSubmit =
+    form.display_name.trim().length > 1 &&
+    (isVisitor ? form.city.trim().length > 1 : form.neighborhood.trim().length > 1);
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
-    if (!canSubmit) { toast.error("Display name is required"); return; }
+    if (form.display_name.trim().length < 2) { toast.error("Display name is required"); return; }
+    if (isVisitor && form.city.trim().length < 2) { toast.error("City is required"); return; }
+    if (!isVisitor && form.neighborhood.trim().length < 2) { toast.error("Neighborhood is required"); return; }
     setSaving(true);
     try {
       const { error } = await supabase.from("profiles").update({
         display_name: form.display_name.trim(),
         category: kind === "resident" ? "Resident" : "Visitor",
         neighborhood: form.neighborhood.trim() || null,
+        city: form.city.trim() || null,
         bio: form.bio.trim() || null,
         website: form.website.trim() || null,
         avatar_url: form.avatar_url.trim() || null,
@@ -70,10 +85,26 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         <Label className="text-sm font-medium">Display name<span className="text-orange"> *</span></Label>
         <Input value={form.display_name} onChange={(e) => set("display_name", e.target.value)} maxLength={80} />
       </div>
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Neighborhood</Label>
-        <Input value={form.neighborhood} onChange={(e) => set("neighborhood", e.target.value)} maxLength={80} placeholder={kind === "visitor" ? "Where are you visiting from?" : ""} />
-      </div>
+      {isVisitor ? (
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">City<span className="text-orange"> *</span></Label>
+          <Input value={form.city} onChange={(e) => set("city", e.target.value)} maxLength={80} placeholder="Where are you visiting from?" />
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Neighborhood<span className="text-orange"> *</span></Label>
+          <select
+            value={form.neighborhood}
+            onChange={(e) => set("neighborhood", e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">Select neighborhood...</option>
+            {neighborhoods.map((n) => (
+              <option key={n.id} value={n.name}>{n.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Bio</Label>
         <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={1000} />

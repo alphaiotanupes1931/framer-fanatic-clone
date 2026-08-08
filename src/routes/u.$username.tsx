@@ -300,8 +300,10 @@ function PublicProfilePage() {
   // Auto-switch to Artist Page when the profile has the artist role or a
   // recognised artist category, so podcaster/videographer/etc layouts
   // render for everyone (not only when ?view=artist is in the URL).
-  const hasArtistCategory = isArtistProfile(profile.category, profile.role);
-  const isArtistView = forceArtist || hasArtistRole || hasArtistCategory;
+  // Personal profile pages (resident/visitor) are fully separate from artist
+  // pages. Only an explicit ?view=artist renders the artist layout, so the two
+  // never bleed into each other.
+  const isArtistView = forceArtist;
   const tabs = isArtistView
     ? tabsForArtist(profile.category, profile.role)
     : tabsForProfile(profile.category, profile.role);
