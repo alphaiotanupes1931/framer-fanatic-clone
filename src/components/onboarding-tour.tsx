@@ -3,6 +3,7 @@ import { Joyride, EVENTS, STATUS, type EventData, type Step } from "react-joyrid
 import { Send } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "pb_onboarding_tour_v1";
 const SIGNUP_FLAG = "pb_new_signup";
@@ -97,6 +98,7 @@ export function OnboardingTour() {
     // via the help button in the bottom corner.
     const justSignedUp = localStorage.getItem(SIGNUP_FLAG) === "1";
     const alreadySeen = localStorage.getItem(STORAGE_KEY) === "1";
+    let cancelled = false;
     if (justSignedUp && !alreadySeen) {
       const t = setTimeout(() => {
         setSteps(buildVisibleSteps());
@@ -107,6 +109,17 @@ export function OnboardingTour() {
     // Existing users who never logged in before this change: silently mark
     // the tour as seen so it never auto-pops again.
     if (!alreadySeen) localStorage.setItem(STORAGE_KEY, "1");
+    // The dismissal is also stored on the account so a new device or a
+    // cleared browser never brings the directions back.
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled || !user) return;
+      await supabase.from("user_ui_prefs").upsert(
+        { user_id: user.id, onboarding_dismissed: true, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

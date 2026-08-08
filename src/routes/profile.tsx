@@ -44,7 +44,7 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-const FULL_PROFILE_TABS = ["Posts","Feed","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Payouts"] as const;
+const FULL_PROFILE_TABS = ["Posts","About","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Payouts"] as const;
 const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
@@ -61,7 +61,7 @@ function sortPosts(rows: any[]) {
 }
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
-  "Feed": Rss,
+  "About": Rss,
   "My Writings": BookOpen,
   "Saved": Bookmark,
   "Attending": Calendar,
@@ -368,6 +368,17 @@ function ProfilePage() {
               <Link to="/create-story" aria-label="Write a story" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
               <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
               <Link to="/edit-profile" aria-label="Edit profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
+              {profile?.username && (
+                <Link
+                  to="/u/$username"
+                  params={{ username: profile.username }}
+                  aria-label="Public view"
+                  title="Public view"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-xs font-semibold hover:bg-secondary sm:py-2.5"
+                >
+                  <ExternalLink className="h-4 w-4" /> Public View
+                </Link>
+              )}
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <button type="button" onClick={() => setInviteOpen(true)} aria-label="Invite friends" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
               <button type="button" onClick={() => setReferralOpen(true)} aria-label="Referral network" className="relative rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5">
@@ -546,37 +557,16 @@ function ProfilePage() {
                   canEdit={true}
                 />
               ) : null
+            ) : tab === "About" ? (
+              <AboutTab profile={profile} />
             ) : (
-              (tab === "Posts" || tab === "Feed") ? (
+              (tab === "Posts") ? (
                 myPosts.length === 0 ? (
                   <div className="py-12 text-center text-muted-foreground">
                     No posts yet. Share something with the community!
                   </div>
                 ) : (
-                  tab === "Feed" ? (
-                    <div className="space-y-4">
-                      {myPosts.map((p) => (
-                        <div key={p.id} className="relative">
-                          {p.is_pinned && (
-                            <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                              <Pin className="h-3.5 w-3.5" /> Pinned post
-                            </div>
-                          )}
-                          <PostCard post={p} currentUserId={profile?.id} onDelete={handleDeleteMyPost} />
-                          <div className="absolute right-3 top-3 z-10 flex gap-1">
-                            <button
-                            type="button"
-                            onClick={() => handleTogglePin(p.id, !p.is_pinned)}
-                            className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white"
-                            title={p.is_pinned ? "Unpin" : "Pin to top"}
-                          >
-                            {p.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
-                          </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
+                  (
                     <div className="grid grid-cols-3 gap-2">
                       {myPosts.map((p, idx) => {
                         const media: string[] = (p.media_urls && p.media_urls.length)
@@ -617,11 +607,16 @@ function ProfilePage() {
                                 </div>
                               </div>
                             )}
-                            {p.is_pinned && (
-                              <div className="absolute left-1.5 top-1.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary-foreground">
-                                Pinned
-                              </div>
-                            )}
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              title={p.is_pinned ? "Unpin" : "Pin to top"}
+                              onClick={(e) => { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); }}
+                              onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); } }}
+                              className="absolute left-1.5 top-1.5 rounded-full bg-white/90 p-1 text-foreground shadow hover:bg-white"
+                            >
+                              {p.is_pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                            </span>
                           </button>
                         );
                       })}
@@ -1722,6 +1717,39 @@ function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boo
           <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
         </Link>
       ))}
+    </div>
+  );
+}
+function AboutTab({ profile }: { profile: any }) {
+  const rows: Array<{ label: string; value: string | null }> = [
+    { label: "Name", value: profile?.display_name || null },
+    { label: "Username", value: profile?.username ? `@${profile.username}` : null },
+    { label: "Neighborhood", value: profile?.neighborhood || null },
+    { label: "City", value: profile?.city || null },
+    { label: "Email", value: profile?.email || null },
+    { label: "Website", value: profile?.website || null },
+  ].filter((r) => !!r.value);
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-border bg-card p-5">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">About</h3>
+        <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">
+          {profile?.bio || "No bio yet. Add one from Edit Profile."}
+        </p>
+      </div>
+      {rows.length > 0 && (
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Details</h3>
+          <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+            {rows.map((r) => (
+              <div key={r.label}>
+                <dt className="text-xs text-muted-foreground">{r.label}</dt>
+                <dd className="break-all text-sm font-medium text-foreground">{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
     </div>
   );
 }

@@ -24,6 +24,7 @@ const navItems: Item[] = [
   { icon: Calendar, label: "Community Calendar", to: "/calendar" },
   { icon: Compass, label: "Discover", to: "/search" },
   { icon: Ticket, label: "Events", to: "/events" },
+  { icon: Ticket, label: "Festivals", to: "/festivals" },
   { icon: Home, label: "Home", to: "/dashboard" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
   { icon: BookOpen, label: "Stories", to: "/stories" },

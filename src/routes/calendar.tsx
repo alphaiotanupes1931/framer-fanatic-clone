@@ -183,13 +183,17 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                   c.inMonth ? "text-neutral-900" : "bg-neutral-50 text-neutral-400"
                 }`}
               >
-                <div
-                  className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                <button
+                  type="button"
+                  disabled={dayEvents.length === 0}
+                  onClick={() => setDayOpen({ date: c.date, events: dayEvents })}
+                  title={dayEvents.length ? `${dayEvents.length} event${dayEvents.length > 1 ? "s" : ""}` : undefined}
+                  className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs transition ${
                     isToday(c.date) ? "border border-neutral-900" : ""
-                  }`}
+                  } ${dayEvents.length ? "font-semibold text-[#d4580a] hover:bg-[#d4580a]/10" : "cursor-default"}`}
                 >
                   {c.day}
-                </div>
+                </button>
                 <div className="mt-1 space-y-0.5">
                   {dayEvents.slice(0, 2).map((e) => (
                     <button
