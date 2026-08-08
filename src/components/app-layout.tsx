@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSignedUrlCache } from "@/components/smart-image";
@@ -33,6 +33,31 @@ let profileCache: Profile | null = null;
 let profileRequest: Promise<Profile | null> | null = null;
 const profileSubscribers = new Set<(p: Profile | null) => void>();
 
+// The signed-in profile drives the sidebar, avatar and every "is this mine?"
+// check. Persisting it means a hard refresh paints the signed-in chrome right
+// away instead of flashing the logged-out version for a moment.
+const PROFILE_STORAGE_KEY = "pb:profile:v1";
+
+function readStoredProfile(): Profile | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(PROFILE_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Profile) : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeProfile(p: Profile | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (p) window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(p));
+    else window.localStorage.removeItem(PROFILE_STORAGE_KEY);
+  } catch {
+    // Storage being unavailable is never fatal.
+  }
+}
+
 function publishProfile(p: Profile | null) {
   // Keep the previous object identity when nothing actually changed. Every
   // consumer keys effects off this value, so handing back a fresh object on
@@ -41,6 +66,7 @@ function publishProfile(p: Profile | null) {
     return;
   }
   profileCache = p;
+  storeProfile(p);
   for (const fn of profileSubscribers) fn(p);
 }
 
@@ -69,6 +95,16 @@ export function invalidateCurrentProfile() {
 export function useCurrentProfile() {
   const [profile, setProfile] = useState<Profile | null>(profileCache);
   const navigate = useNavigate();
+  // Seed from the persisted copy before the first paint so the signed-in UI
+  // doesn't flash its logged-out state on a fresh page load.
+  useLayoutEffect(() => {
+    if (profileCache) return;
+    const stored = readStoredProfile();
+    if (stored) {
+      profileCache = stored;
+      setProfile(stored);
+    }
+  }, []);
   // useNavigate() returns a new function on every render; keeping it in the
   // dependency list re-ran this effect after each state update, which is what
   // made profile/story pages refetch and flicker in a loop.
