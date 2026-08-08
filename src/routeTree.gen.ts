@@ -33,6 +33,7 @@ import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as GroupsRouteImport } from './routes/groups'
+import { Route as FestivalsRouteImport } from './routes/festivals'
 import { Route as EditProfileRouteImport } from './routes/edit-profile'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -202,6 +203,11 @@ const InviteRoute = InviteRouteImport.update({
 const GroupsRoute = GroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FestivalsRoute = FestivalsRouteImport.update({
+  id: '/festivals',
+  path: '/festivals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditProfileRoute = EditProfileRouteImport.update({
@@ -481,6 +487,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
+  '/festivals': typeof FestivalsRoute
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -557,6 +564,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
+  '/festivals': typeof FestivalsRoute
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -634,6 +642,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
+  '/festivals': typeof FestivalsRoute
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -712,6 +721,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/discover'
     | '/edit-profile'
+    | '/festivals'
     | '/groups'
     | '/invite'
     | '/leaderboard'
@@ -788,6 +798,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/discover'
     | '/edit-profile'
+    | '/festivals'
     | '/groups'
     | '/invite'
     | '/leaderboard'
@@ -864,6 +875,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/discover'
     | '/edit-profile'
+    | '/festivals'
     | '/groups'
     | '/invite'
     | '/leaderboard'
@@ -941,6 +953,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
   EditProfileRoute: typeof EditProfileRoute
+  FestivalsRoute: typeof FestivalsRoute
   GroupsRoute: typeof GroupsRoute
   InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -1162,6 +1175,13 @@ declare module '@tanstack/react-router' {
       path: '/groups'
       fullPath: '/groups'
       preLoaderRoute: typeof GroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/festivals': {
+      id: '/festivals'
+      path: '/festivals'
+      fullPath: '/festivals'
+      preLoaderRoute: typeof FestivalsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/edit-profile': {
@@ -1561,6 +1581,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
   EditProfileRoute: EditProfileRoute,
+  FestivalsRoute: FestivalsRoute,
   GroupsRoute: GroupsRoute,
   InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,
@@ -1616,13 +1637,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

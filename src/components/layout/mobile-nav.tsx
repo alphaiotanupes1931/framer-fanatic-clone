@@ -32,6 +32,7 @@ const moreItems: Primary[] = [
   { icon: Compass, label: "Discover", to: "/search" },
   { icon: BookOpen, label: "Stories", to: "/stories" },
   { icon: Ticket, label: "Events", to: "/events" },
+  { icon: Ticket, label: "Festivals", to: "/festivals" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: Bookmark, label: "Saved", to: "/saved" },

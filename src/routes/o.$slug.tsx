@@ -22,6 +22,7 @@ import { PollsTab } from "@/components/org/polls-tab";
 import { DocumentsTab } from "@/components/org/documents-tab";
 import { BoardTab } from "@/components/org/board-tab";
 import { ArtistsTab } from "@/components/org/artists-tab";
+import { EventImage } from "@/components/event-image";
 import { OpportunitiesTab } from "@/components/org/opportunities-tab";
 import { TextDocTab } from "@/components/org/text-doc-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
@@ -101,6 +102,7 @@ function OrgProfile() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
+  const [artistCount, setArtistCount] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
@@ -144,6 +146,16 @@ function OrgProfile() {
     setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
     setTab("Posts");
   }, [org]);
+  useEffect(() => {
+    if (!org) return;
+    (async () => {
+      const { count } = await supabase
+        .from("organization_artists")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", org.id);
+      setArtistCount(count ?? 0);
+    })();
+  }, [org]);
 
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
 
@@ -157,7 +169,9 @@ function OrgProfile() {
   const isRestaurant = isBusiness && /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(subLower);
   const isService = isBusiness && !isRestaurant;
   const TABS: readonly string[] = isArtsOrg
-    ? ARTS_ORG_TABS
+    ? // The Artists roster only makes sense once the org has artists, so it
+      // stays hidden for visitors until someone is added.
+      ARTS_ORG_TABS.filter((t) => t !== "Artists" || canManage || artistCount > 0)
     : isRestaurant
     ? RESTAURANT_TABS
     : isService
@@ -843,7 +857,7 @@ function OrgEventCardInternal({ e }: { e: { id: string; title: string; starts_at
   return (
     <a href={`/events/${e.id}`} className="block overflow-hidden rounded-2xl border border-neutral-200 bg-card transition hover:shadow-md">
       {e.image_url ? (
-        <Img src={e.image_url} alt={e.title} bucket="event-images" className="h-40 w-full object-cover" loading="lazy" />
+        <EventImage src={e.image_url} alt={e.title} className="h-40 w-full object-cover" />
       ) : e.video_url ? (
         <SmartVideo
           src={e.video_url}

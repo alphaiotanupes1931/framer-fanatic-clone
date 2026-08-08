@@ -35,6 +35,8 @@ function NewEventPage() {
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
+  const [isOnline, setIsOnline] = useState(false);
+  const [venueBook, setVenueBook] = useState<Array<{ venue_name: string; address: string | null; neighborhood: string | null }>>([]);
 
   const [form, setForm] = useState({
     image_url: "",
@@ -56,6 +58,28 @@ function NewEventPage() {
     (async () => {
       const { data } = await supabase.from("neighborhoods").select("id,name").order("name");
       setNeighborhoods((data ?? []) as Neighborhood[]);
+    })();
+  }, []);
+
+  // Venue book: previously used venues so organizers can auto-fill the
+  // venue name, address and neighborhood in one pick.
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("venue_name,address,neighborhood")
+        .not("venue_name", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(300);
+      const seen = new Set<string>();
+      const list: Array<{ venue_name: string; address: string | null; neighborhood: string | null }> = [];
+      for (const r of (data ?? []) as Array<{ venue_name: string | null; address: string | null; neighborhood: string | null }>) {
+        const name = (r.venue_name ?? "").trim();
+        if (!name || seen.has(name.toLowerCase())) continue;
+        seen.add(name.toLowerCase());
+        list.push({ venue_name: name, address: r.address, neighborhood: r.neighborhood });
+      }
+      setVenueBook(list);
     })();
   }, []);
 
@@ -109,11 +133,33 @@ function NewEventPage() {
     }
   };
 
-  const canSubmit = form.title.trim().length > 0 && (startMode === "now" || form.starts_at.length > 0);
+  const canSubmit =
+    form.title.trim().length > 0 &&
+    (startMode === "now" || form.starts_at.length > 0) &&
+    (isOnline || form.neighborhood.trim().length > 0);
+
+  const pickVenue = (name: string) => {
+    set("venue_name", name);
+    const hit = venueBook.find((v) => v.venue_name.toLowerCase() === name.trim().toLowerCase());
+    if (!hit) return;
+    setForm((f) => ({
+      ...f,
+      venue_name: hit.venue_name,
+      address: hit.address ?? f.address,
+      neighborhood: f.neighborhood || (hit.neighborhood ?? ""),
+    }));
+  };
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
-    if (!canSubmit) { toast.error("Title and start date are required"); return; }
+    if (!canSubmit) {
+      toast.error(
+        !isOnline && !form.neighborhood.trim()
+          ? "Neighborhood is required (or mark the event as online)"
+          : "Title and start date are required",
+      );
+      return;
+    }
 
     setSaving(true);
     try {
@@ -132,10 +178,10 @@ function NewEventPage() {
         video_url: form.video_url || null,
         starts_at: starts,
         ends_at: ends,
-        venue_name: form.venue_name.trim() || null,
-        address: form.address.trim() || null,
-        location: form.venue_name.trim() || form.address.trim() || null,
-        neighborhood: form.neighborhood || null,
+        venue_name: isOnline ? null : form.venue_name.trim() || null,
+        address: isOnline ? null : form.address.trim() || null,
+        location: isOnline ? "Online" : form.venue_name.trim() || form.address.trim() || null,
+        neighborhood: isOnline ? "Online" : form.neighborhood || null,
         category: form.category || null,
         price_cents: priceCents,
         capacity,
@@ -239,20 +285,66 @@ function NewEventPage() {
             </Field>
           </div>
 
-          <Field label="Venue Name" optional>
-            <input className={inputCls} placeholder="Where is it happening?" value={form.venue_name} onChange={(e) => set("venue_name", e.target.value)} maxLength={140} />
+          <Field label="Neighborhood" required={!isOnline}>
+            <div className="flex gap-2">
+              <select
+                className={`${inputCls} flex-1`}
+                value={form.neighborhood}
+                disabled={isOnline}
+                onChange={(e) => set("neighborhood", e.target.value)}
+              >
+                <option value="">Select neighborhood...</option>
+                {neighborhoods.map((n) => <option key={n.id} value={n.name}>{n.name}</option>)}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOnline((v) => {
+                    const next = !v;
+                    if (next) setForm((f) => ({ ...f, neighborhood: "", venue_name: "", address: "" }));
+                    return next;
+                  });
+                }}
+                aria-pressed={isOnline}
+                className={`shrink-0 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${isOnline ? "bg-[#d4580a] text-white" : "border border-neutral-200 bg-white text-neutral-700 hover:border-[#d4580a]/50"}`}
+              >
+                Online
+              </button>
+            </div>
+            {isOnline && <p className="mt-1 text-[11px] text-neutral-500">This is an online event, so venue and address are not needed.</p>}
           </Field>
 
-          <Field label="Address" optional>
-            <input className={inputCls} placeholder="Full address" value={form.address} onChange={(e) => set("address", e.target.value)} maxLength={240} />
-          </Field>
+          {!isOnline && (
+            <>
+              <Field label="Venue Name" optional>
+                <input
+                  className={inputCls}
+                  list="pb-venue-book"
+                  placeholder="Where is it happening?"
+                  value={form.venue_name}
+                  onChange={(e) => pickVenue(e.target.value)}
+                  maxLength={140}
+                />
+                <datalist id="pb-venue-book">
+                  {venueBook.map((v) => <option key={v.venue_name} value={v.venue_name} />)}
+                </datalist>
+              </Field>
 
-          <Field label="Neighborhood" optional>
-            <select className={inputCls} value={form.neighborhood} onChange={(e) => set("neighborhood", e.target.value)}>
-              <option value="">Select neighborhood...</option>
-              {neighborhoods.map((n) => <option key={n.id} value={n.name}>{n.name}</option>)}
-            </select>
-          </Field>
+              <Field label="Address" optional>
+                <input
+                  className={inputCls}
+                  list="pb-address-book"
+                  placeholder="Full address"
+                  value={form.address}
+                  onChange={(e) => set("address", e.target.value)}
+                  maxLength={240}
+                />
+                <datalist id="pb-address-book">
+                  {venueBook.filter((v) => v.address).map((v) => <option key={v.venue_name} value={v.address as string} />)}
+                </datalist>
+              </Field>
+            </>
+          )}
 
           <Field label="Category" required>
             <select className={inputCls} value={form.category} onChange={(e) => set("category", e.target.value)}>

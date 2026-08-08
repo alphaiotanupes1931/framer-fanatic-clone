@@ -46,6 +46,7 @@ const navItems: NavItem[] = [
   { icon: Shield, label: "Community Associations", to: "/community-associations" },
   { icon: Compass, label: "Discover", to: "/discover" },
   { icon: Ticket, label: "Events", to: "/events" },
+  { icon: Ticket, label: "Festivals", to: "/festivals" },
   { icon: Users, label: "Groups", to: "/groups" },
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },

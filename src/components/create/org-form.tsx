@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
@@ -24,6 +24,10 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
   const [uploading, setUploading] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
+  // Arts organizations are public-facing listings, so they need enough detail
+  // to be useful in the directory.
+  const strict = type === "arts_org";
   const [form, setForm] = useState({
     name: "",
     tagline: "",
@@ -38,6 +42,13 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     mission: "",
   });
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("neighborhoods").select("id,name").order("name");
+      setNeighborhoods((data ?? []) as Array<{ id: string; name: string }>);
+    })();
+  }, []);
 
   const uploadImage = async (field: "avatar_url" | "banner_url", file: File) => {
     file = await compressImage(file);
@@ -62,11 +73,21 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     }
   };
 
-  const canSubmit = form.name.trim().length > 1;
+  const canSubmit = strict
+    ? form.name.trim().length > 1 &&
+      form.tagline.trim().length > 1 &&
+      form.bio.trim().length > 9 &&
+      form.mission.trim().length > 9 &&
+      form.neighborhood.trim().length > 0 &&
+      /.+@.+\..+/.test(form.email.trim())
+    : form.name.trim().length > 1;
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
-    if (!canSubmit) { toast.error("Name is required"); return; }
+    if (!canSubmit) {
+      toast.error(strict ? "Please fill in every required field" : "Name is required");
+      return;
+    }
     setSaving(true);
     try {
       const baseSlug = slugify(form.name);
@@ -109,26 +130,35 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       <Field label="Name" required>
         <Input value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={120} placeholder={`Your ${kindLabel.toLowerCase()} name`} />
       </Field>
-      <Field label="Tagline">
+      <Field label="Tagline" required={strict}>
         <Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} maxLength={160} placeholder="One line describing what you do" />
       </Field>
-      <Field label="About">
+      <Field label="About" required={strict}>
         <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={2000} />
       </Field>
       {(type === "arts_org" || type === "community_assoc" || type === "group") && (
-        <Field label="Mission">
+        <Field label="Mission" required={strict}>
           <Textarea value={form.mission} onChange={(e) => set("mission", e.target.value)} rows={3} maxLength={2000} />
         </Field>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Neighborhood">
-          <Input value={form.neighborhood} onChange={(e) => set("neighborhood", e.target.value)} maxLength={80} />
+        <Field label="Neighborhood" required={strict}>
+          <select
+            value={form.neighborhood}
+            onChange={(e) => set("neighborhood", e.target.value)}
+            className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30"
+          >
+            <option value="">Select neighborhood...</option>
+            {neighborhoods.map((n) => <option key={n.id} value={n.name}>{n.name}</option>)}
+          </select>
         </Field>
+        <Field label="Email" required={strict}>
+          <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} maxLength={200} placeholder="contact@yourorg.org" />
+        </Field>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Website">
           <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
-        </Field>
-        <Field label="Email">
-          <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} maxLength={200} />
         </Field>
         <Field label="Phone">
           <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} maxLength={40} />
