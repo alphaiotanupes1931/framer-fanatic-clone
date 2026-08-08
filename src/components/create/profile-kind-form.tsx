@@ -13,6 +13,13 @@ import { setMyProfileKind } from "@/lib/profile-kind";
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
   const me = useCurrentProfile();
   const [saving, setSaving] = useState(false);
+  const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase.from("neighborhoods").select("id,name").order("name");
+      setNeighborhoods((data ?? []) as Array<{ id: string; name: string }>);
+    })();
+  }, []);
   const [form, setForm] = useState({
     display_name: "",
     neighborhood: "",
@@ -86,7 +93,16 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
       ) : (
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Neighborhood<span className="text-orange"> *</span></Label>
-          <NeighborhoodSelect value={form.neighborhood} onChange={(v) => set("neighborhood", v)} />
+          <select
+            value={form.neighborhood}
+            onChange={(e) => set("neighborhood", e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">Select neighborhood...</option>
+            {neighborhoods.map((n) => (
+              <option key={n.id} value={n.name}>{n.name}</option>
+            ))}
+          </select>
         </div>
       )}
       <div className="space-y-1.5">
