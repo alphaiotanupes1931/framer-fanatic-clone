@@ -74,7 +74,14 @@ function loadProfile(): Promise<Profile | null> {
   if (!profileRequest) {
     profileRequest = (async () => {
       const { data } = await supabase.auth.getSession();
-      if (!data.session) return null;
+      if (!data.session) {
+        // No session: drop any optimistically restored profile so guards and
+        // the sidebar reflect the real signed-out state.
+        profileCache = null;
+        storeProfile(null);
+        for (const fn of profileSubscribers) fn(null);
+        return null;
+      }
       const { data: rows } = await supabase.rpc("my_profile");
       const p = (rows as unknown as Profile[] | null)?.[0] ?? null;
       publishProfile(p);
