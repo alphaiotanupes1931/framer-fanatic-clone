@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /**
  * Process-wide, in-memory cache for page data.
@@ -87,6 +87,11 @@ export function clearDataCache() {
 
 type Updater<T> = T | ((prev: T | undefined) => T);
 
+// Reading the persisted cache in a layout effect lets a revisited page paint
+// its cached data in the same frame, before the browser shows the skeleton.
+// On the server there is no DOM, so fall back to a normal effect.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 export function useCachedFetch<T>(
   key: string,
   fetcher: () => Promise<T>,
@@ -100,6 +105,20 @@ export function useCachedFetch<T>(
   fetcherRef.current = fetcher;
   const keyRef = useRef(key);
   keyRef.current = key;
+  // Lets the fetch effect know whether anything is already on screen, so a key
+  // change (filter/search) never blanks the page back to a skeleton.
+  const dataRef = useRef<T | undefined>(data);
+  dataRef.current = data;
+
+  // Paint cached data before the first paint instead of one frame later.
+  useIsomorphicLayoutEffect(() => {
+    ensureHydrated();
+    const cached = readCache<T>(key);
+    if (cached !== undefined) {
+      setDataState(cached);
+      setLoading(false);
+    }
+  }, [key]);
 
   const setData = useCallback((updater: Updater<T>) => {
     setDataState((prev) => {
@@ -118,7 +137,8 @@ export function useCachedFetch<T>(
       setDataState(cached);
       setLoading(false);
     } else {
-      setLoading(true);
+      // Keep showing whatever is already rendered while the new key loads.
+      setLoading(dataRef.current === undefined);
     }
     const run = async () => {
       try {
