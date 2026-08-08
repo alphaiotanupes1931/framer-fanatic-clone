@@ -243,93 +243,6 @@ export type Database = {
         }
         Relationships: []
       }
-      email_send_log: {
-        Row: {
-          created_at: string
-          error_message: string | null
-          id: string
-          message_id: string | null
-          metadata: Json | null
-          recipient_email: string
-          status: string
-          template_name: string
-        }
-        Insert: {
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          message_id?: string | null
-          metadata?: Json | null
-          recipient_email: string
-          status: string
-          template_name: string
-        }
-        Update: {
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          message_id?: string | null
-          metadata?: Json | null
-          recipient_email?: string
-          status?: string
-          template_name?: string
-        }
-        Relationships: []
-      }
-      email_send_state: {
-        Row: {
-          auth_email_ttl_minutes: number
-          batch_size: number
-          id: number
-          retry_after_until: string | null
-          send_delay_ms: number
-          transactional_email_ttl_minutes: number
-          updated_at: string
-        }
-        Insert: {
-          auth_email_ttl_minutes?: number
-          batch_size?: number
-          id?: number
-          retry_after_until?: string | null
-          send_delay_ms?: number
-          transactional_email_ttl_minutes?: number
-          updated_at?: string
-        }
-        Update: {
-          auth_email_ttl_minutes?: number
-          batch_size?: number
-          id?: number
-          retry_after_until?: string | null
-          send_delay_ms?: number
-          transactional_email_ttl_minutes?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      email_unsubscribe_tokens: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          token: string
-          used_at: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          token: string
-          used_at?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          token?: string
-          used_at?: string | null
-        }
-        Relationships: []
-      }
       ephemeral_stories: {
         Row: {
           caption: string | null
@@ -539,8 +452,6 @@ export type Database = {
       }
       invites: {
         Row: {
-          accepted_at: string | null
-          accepted_user_id: string | null
           click_count: number
           clicked_at: string | null
           created_at: string
@@ -551,8 +462,6 @@ export type Database = {
           token: string | null
         }
         Insert: {
-          accepted_at?: string | null
-          accepted_user_id?: string | null
           click_count?: number
           clicked_at?: string | null
           created_at?: string
@@ -563,8 +472,6 @@ export type Database = {
           token?: string | null
         }
         Update: {
-          accepted_at?: string | null
-          accepted_user_id?: string | null
           click_count?: number
           clicked_at?: string | null
           created_at?: string
@@ -1217,14 +1124,12 @@ export type Database = {
           bg_color: string | null
           body: string | null
           created_at: string
-          deadline: string | null
           font_size: string | null
           id: string
           kind: string
           link_url: string | null
           media_url: string | null
           media_urls: Json
-          opportunity_type: string | null
           org_id: string
           text_color: string | null
           title: string
@@ -1236,14 +1141,12 @@ export type Database = {
           bg_color?: string | null
           body?: string | null
           created_at?: string
-          deadline?: string | null
           font_size?: string | null
           id?: string
           kind: string
           link_url?: string | null
           media_url?: string | null
           media_urls?: Json
-          opportunity_type?: string | null
           org_id: string
           text_color?: string | null
           title: string
@@ -1255,14 +1158,12 @@ export type Database = {
           bg_color?: string | null
           body?: string | null
           created_at?: string
-          deadline?: string | null
           font_size?: string | null
           id?: string
           kind?: string
           link_url?: string | null
           media_url?: string | null
           media_urls?: Json
-          opportunity_type?: string | null
           org_id?: string
           text_color?: string | null
           title?: string
@@ -2150,30 +2051,6 @@ export type Database = {
         }
         Relationships: []
       }
-      suppressed_emails: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          metadata: Json | null
-          reason: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          metadata?: Json | null
-          reason: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          metadata?: Json | null
-          reason?: string
-        }
-        Relationships: []
-      }
       ticket_types: {
         Row: {
           category: string
@@ -2423,42 +2300,36 @@ export type Database = {
       }
       videos: {
         Row: {
-          aspect_ratio: number | null
           category: string | null
           comments_muted: boolean
           created_at: string
           description: string | null
           featured: boolean
           id: string
-          orientation: string | null
           thumbnail_url: string | null
           title: string
           user_id: string
           video_url: string
         }
         Insert: {
-          aspect_ratio?: number | null
           category?: string | null
           comments_muted?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean
           id?: string
-          orientation?: string | null
           thumbnail_url?: string | null
           title: string
           user_id: string
           video_url: string
         }
         Update: {
-          aspect_ratio?: number | null
           category?: string | null
           comments_muted?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean
           id?: string
-          orientation?: string | null
           thumbnail_url?: string | null
           title?: string
           user_id?: string
@@ -2609,15 +2480,6 @@ export type Database = {
         Returns: undefined
       }
       admin_upsert_site_content: { Args: { _rows: Json }; Returns: number }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
-      }
       event_buyer_contacts: {
         Args: { _event_id: string }
         Returns: {
@@ -2654,15 +2516,6 @@ export type Database = {
         Returns: boolean
       }
       is_founder_visible: { Args: { _user_id: string }; Returns: boolean }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       my_profile: {
         Args: never
         Returns: {
@@ -2752,14 +2605,6 @@ export type Database = {
           title: string
         }[]
       }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
-      }
       record_invite_click: { Args: { _token: string }; Returns: string }
       resolve_referrer: { Args: { _username: string }; Returns: string }
       rsvp_free_event: { Args: { _event_id: string }; Returns: Json }
@@ -2785,7 +2630,6 @@ export type Database = {
           username: string
         }[]
       }
-      set_my_profile_kind: { Args: { _kind: string }; Returns: string }
       slugify_username: { Args: { s: string }; Returns: string }
       titlecase_name: { Args: { s: string }; Returns: string }
       top_creators: {
