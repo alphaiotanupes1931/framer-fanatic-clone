@@ -1516,11 +1516,22 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
     (async () => {
       const { data } = await supabase
         .from("organizations")
-        .select("id, name, slug, type, subtype, avatar_url")
+        .select("id, name, slug, type, subtype, avatar_url, is_public")
         .eq("owner_id", profile.id);
       setOrgs(data ?? []);
     })();
   }, [profile?.id]);
+
+  const toggleVisibility = async (orgId: string, next: boolean) => {
+    setOrgs((prev) => prev.map((o) => (o.id === orgId ? { ...o, is_public: next } : o)));
+    const { error } = await supabase.from("organizations").update({ is_public: next }).eq("id", orgId);
+    if (error) {
+      setOrgs((prev) => prev.map((o) => (o.id === orgId ? { ...o, is_public: !next } : o)));
+      toast.error(sanitizeErrorMessage(error.message));
+      return;
+    }
+    toast.success(next ? "Page is now public" : "Page is now private");
+  };
 
   const username = profile?.username;
   const pages = [
@@ -1568,23 +1579,35 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {orgs.map((o) => (
-              <a
+              <div
                 key={o.id}
-                href={`/o/${o.slug}`}
-                className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
+                className="rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
               >
-                <Avatar className="h-12 w-12">
-                  <SmartAvatarImage src={o.avatar_url ?? undefined} />
-                  <AvatarFallback>{o.name?.[0] ?? "?"}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold text-neutral-900">{o.name}</div>
-                  <div className="truncate text-xs uppercase tracking-wider text-neutral-500">
-                    {[o.type, o.subtype].filter(Boolean).join(" · ")}
+                <a href={`/o/${o.slug}`} className="group flex items-center gap-4">
+                  <Avatar className="h-12 w-12">
+                    <SmartAvatarImage src={o.avatar_url ?? undefined} />
+                    <AvatarFallback>{o.name?.[0] ?? "?"}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold text-neutral-900">{o.name}</div>
+                    <div className="truncate text-xs uppercase tracking-wider text-neutral-500">
+                      {[o.type, o.subtype].filter(Boolean).join(" · ")}
+                    </div>
                   </div>
+                  <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
+                </a>
+                <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
+                  <div className="flex items-center gap-2 text-xs text-neutral-500">
+                    {o.is_public === false ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
+                    <span>{o.is_public === false ? "Private (only you can see it)" : "Public"}</span>
+                  </div>
+                  <Switch
+                    checked={o.is_public !== false}
+                    onCheckedChange={(v) => void toggleVisibility(o.id, v)}
+                    aria-label="Toggle page visibility"
+                  />
                 </div>
-                <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
-              </a>
+              </div>
             ))}
           </div>
         )}
