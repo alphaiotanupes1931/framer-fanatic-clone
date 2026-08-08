@@ -5,7 +5,8 @@ import { SmartImage } from "@/components/smart-image";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, Gift, ChevronLeft, ChevronRight, X as XIcon, Play } from "lucide-react";
+import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, Gift, ChevronLeft, ChevronRight, X as XIcon, Play, Lock as LockIcon, Globe as GlobeIcon } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -1598,12 +1599,12 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
                 </a>
                 <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
                   <div className="flex items-center gap-2 text-xs text-neutral-500">
-                    {o.is_public === false ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
+                    {o.is_public === false ? <LockIcon className="h-3.5 w-3.5" /> : <GlobeIcon className="h-3.5 w-3.5" />}
                     <span>{o.is_public === false ? "Private (only you can see it)" : "Public"}</span>
                   </div>
                   <Switch
                     checked={o.is_public !== false}
-                    onCheckedChange={(v) => void toggleVisibility(o.id, v)}
+                    onCheckedChange={(v: boolean) => void toggleVisibility(o.id, v)}
                     aria-label="Toggle page visibility"
                   />
                 </div>
