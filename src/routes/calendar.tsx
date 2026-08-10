@@ -649,7 +649,7 @@ function EventPopup() {
   const where = ev?.venue_name || ev?.location;
   return (
     <Dialog open={!!ev} onOpenChange={(o) => !o && setEv(null)}>
-      <DialogContent className="max-w-lg overflow-hidden p-0">
+      <DialogContent hideClose className="max-w-lg overflow-hidden p-0">
         {ev && (
           <div>
             {count > 1 && (
