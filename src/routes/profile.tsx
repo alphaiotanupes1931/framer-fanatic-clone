@@ -137,7 +137,7 @@ function ProfilePage() {
   useEffect(() => {
     if (!TABS.includes(tab)) setTab(TABS[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isArtist]);
+  }, [isArtist, publicPreview]);
 
   useEffect(() => {
     if (!profile) return;
