@@ -227,7 +227,8 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: org } = await supabase
