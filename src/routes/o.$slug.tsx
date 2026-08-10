@@ -564,6 +564,26 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
   return AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose });
 }
 
+// Tabs unique to artist pages. Anything already rendered by the shared tab
+// switcher above is skipped here so it never renders twice.
+const SHARED_TABS = new Set([
+  "About", "Posts", "Events", "Exhibitions", "Exhibition", "Opportunities", "Press",
+  "Updates", "Artists", "Support", "Menu", "Feed", "Services", "Calendar", "Members",
+  "Leaderboard", "Invite", "Polls", "Voting", "Minutes", "Resources", "By Laws", "Rules",
+  "Gallery", "Announcements", "Promotions", "Jobs", "Stories", "Threads", "Reviews",
+  "Board", "Comments", "Dues",
+]);
+
+function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; canManage: boolean; me: string | null }) {
+  if (SHARED_TABS.has(tab)) return null;
+  if (tab === "Talk") return <CommentsTab orgId={org.id} me={me} canManage={canManage} />;
+  if (tab === "Portfolio") return <GalleryTab orgId={org.id} />;
+  if (tab === "Shop" || tab === "Print Shop")
+    return <PriceItemsSection orgId={org.id} subtype={org.subtype} canManage={canManage} title={tab} />;
+  const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  return <OrgPostList orgId={org.id} kind={kind} canManage={canManage} />;
+}
+
 function InviteTab({ orgName }: { orgName: string }) {
   const [open, setOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
