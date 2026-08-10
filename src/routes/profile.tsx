@@ -455,7 +455,14 @@ function ProfilePage() {
             {profile?.email && (
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                 <Mail className="h-3.5 w-3.5" />
-                <span className="break-all">{profile.email}</span>
+                {showEmail ? (
+                  <>
+                    <span className="break-all">{profile.email}</span>
+                    <button onClick={() => setShowEmail(false)} className="ml-1 text-xs font-semibold text-[#d4580a] hover:underline">Hide</button>
+                  </>
+                ) : (
+                  <button onClick={() => setShowEmail(true)} className="text-xs font-semibold text-[#d4580a] hover:underline">Show email</button>
+                )}
               </div>
             )}
             <div className="relative mt-1">
@@ -607,7 +614,7 @@ function ProfilePage() {
                 />
               ) : null
             ) : tab === "About" ? (
-              <AboutTab profile={profile} />
+              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={showEmail} />
             ) : (
               (tab === "Posts") ? (
                 myPosts.length === 0 ? (
