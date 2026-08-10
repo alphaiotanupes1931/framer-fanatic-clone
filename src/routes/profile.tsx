@@ -108,6 +108,7 @@ function ProfilePage() {
   void category; void isArtist;
   const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
   const [tab, setTab] = useState<Tab>("Posts");
+  const [showEmail, setShowEmail] = useState(false);
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
