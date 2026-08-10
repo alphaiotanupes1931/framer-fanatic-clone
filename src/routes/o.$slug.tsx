@@ -1834,55 +1834,81 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
       {items.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">No {kind ?? "post"} entries yet.</div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {items.map((p) => {
             const media = (p.media_urls && p.media_urls.length ? p.media_urls : [p.video_url, p.media_url].filter(Boolean) as string[]);
-            const styled = !!(p.bg_color);
-            const sizeClass = FONT_SIZE_CLASS[p.font_size || "md"];
+            const first = media[0];
+            const isVideo = !!first && /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(first);
             return (
-              <div key={p.id} className="group relative overflow-hidden rounded-2xl border border-border bg-card">
-                {media.length > 0 && (
-                  <div className="relative">
-                    {(() => {
-                      const u = media[0];
-                      const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
-                      return isVideo
-                        ? <SmartVideo src={u} controls className="h-56 w-full bg-black object-cover" />
-                        : <Img src={u} alt={p.title} className="h-56 w-full object-cover" loading="lazy" decoding="async" />;
-                    })()}
-                    {media.length > 1 && (
-                      <div className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">+{media.length - 1}</div>
-                    )}
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setActive(p)}
+                className="group relative aspect-square overflow-hidden rounded-md bg-neutral-100"
+              >
+                {first ? (
+                  isVideo
+                    ? <SmartVideo src={first} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" />
+                    : <Img src={first} alt={p.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                ) : (
+                  <div
+                    className="flex h-full w-full items-center justify-center p-3 text-center text-[12px] font-medium leading-tight"
+                    style={p.bg_color ? { background: p.bg_color, color: p.text_color || "#fff" } : undefined}
+                  >
+                    <span className="line-clamp-6">{p.body || p.title}</span>
                   </div>
                 )}
-                <div className="p-4">
-                  <div className="font-semibold">{p.title}</div>
-                  <div className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</div>
-                  {p.body && (
-                    styled ? (
-                      <div className={`mt-3 rounded-xl p-4 text-center font-medium whitespace-pre-wrap ${sizeClass}`}
-                        style={{ background: p.bg_color || undefined, color: p.text_color || "#fff" }}>
-                        {p.body}
-                      </div>
-                    ) : (
-                      <p className={`mt-2 whitespace-pre-wrap text-neutral-700 ${sizeClass}`}>{p.body}</p>
-                    )
-                  )}
-                  {p.link_url && (
-                    <a href={p.link_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
-                      Open <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                </div>
-                {canManage && (
-                  <button onClick={() => remove(p.id)} className="absolute right-2 top-2 rounded-full bg-card/90 p-1.5 opacity-0 group-hover:opacity-100">
-                    <Trash2 className="h-3.5 w-3.5 text-red-600" />
-                  </button>
+                {media.length > 1 && (
+                  <div className="absolute right-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">1/{media.length}</div>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>
+      )}
+      {active && (
+        <Dialog open onOpenChange={(o) => { if (!o) setActive(null); }}>
+          <DialogContent className="max-w-3xl p-0 overflow-hidden">
+            {(() => {
+              const p = active;
+              const media = (p.media_urls && p.media_urls.length ? p.media_urls : [p.video_url, p.media_url].filter(Boolean) as string[]);
+              const sizeClass = FONT_SIZE_CLASS[p.font_size || "md"];
+              return (
+                <div className="grid md:grid-cols-[minmax(0,1.2fr)_minmax(280px,360px)]">
+                  {media.length > 0 && (
+                    <div className="flex items-center justify-center bg-black">
+                      {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(media[0])
+                        ? <SmartVideo src={media[0]} controls playsInline className="max-h-[75vh] w-full bg-black" />
+                        : <Img src={media[0]} alt={p.title} className="max-h-[75vh] w-full object-contain" />}
+                    </div>
+                  )}
+                  <div className="min-w-0 space-y-2 p-5">
+                    <div className="text-base font-semibold">{p.title}</div>
+                    <div className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</div>
+                    {p.body && (
+                      p.bg_color && media.length === 0 ? (
+                        <div className={`rounded-xl p-4 text-center font-medium whitespace-pre-wrap ${sizeClass}`}
+                          style={{ background: p.bg_color, color: p.text_color || "#fff" }}>{p.body}</div>
+                      ) : (
+                        <p className={`whitespace-pre-wrap break-words text-neutral-700 ${sizeClass}`}>{p.body}</p>
+                      )
+                    )}
+                    {p.link_url && (
+                      <a href={p.link_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
+                        Open <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                    {canManage && (
+                      <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
