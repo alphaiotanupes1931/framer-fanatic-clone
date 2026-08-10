@@ -49,7 +49,7 @@ function AnonVideos() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("videos")
-        .select("id, user_id, title, description, video_url, thumbnail_url, featured, created_at")
+        .select("id, user_id, title, description, video_url, thumbnail_url, featured, created_at, orientation, aspect_ratio")
         .order("created_at", { ascending: false }).limit(24);
       setList((data || []) as Video[]); setLoading(false);
     })();
