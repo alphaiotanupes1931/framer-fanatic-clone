@@ -151,8 +151,10 @@ function VideosSignedIn() {
         ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         : new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
-  const featured = filtered.filter((v) => v.featured);
-  const rest = filtered.filter((v) => !v.featured);
+  // Only landscape videos can be featured; a portrait video that was featured
+  // before this rule existed falls back into the portrait grid.
+  const featured = filtered.filter((v) => v.featured && v.orientation !== "portrait");
+  const rest = filtered.filter((v) => !(v.featured && v.orientation !== "portrait"));
   const portraitRest = rest.filter((v) => v.orientation === "portrait");
   const landscapeRest = rest.filter((v) => v.orientation !== "portrait");
 
@@ -366,7 +368,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
             <Trash2 className="h-4 w-4" />
           </button>
         )}
-        {isAdmin && (
+        {isAdmin && orientation !== "portrait" && (
           <button
             onClick={async (e) => {
               e.preventDefault(); e.stopPropagation();

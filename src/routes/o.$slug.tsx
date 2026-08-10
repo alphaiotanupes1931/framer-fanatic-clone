@@ -15,6 +15,7 @@ import {
   Upload,
 } from "lucide-react";
 import { toast } from "sonner";
+import { tabsForArtist, type ArtistTab } from "@/lib/artist-tabs";
 import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
@@ -60,8 +61,8 @@ type Comment = { id: string; user_id: string; body: string; created_at: string; 
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
-  "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
-  "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments",
+  "Posts", "Events", "Members", "Threads",
+  "Polls", "Gallery", "Jobs", "Leaderboard", "Rules", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
   "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About", "Dues",
@@ -73,7 +74,7 @@ const SERVICE_TABS = [
   "Feed", "Services", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const ARTS_ORG_TABS = [
-  "Posts", "Events", "Artists", "Exhibition", "Support", "Opportunities", "Press", "Updates", "Invite", "About", "Comments",
+  "Posts", "Events", "Artists", "Exhibitions", "Support", "Opportunities", "Press", "Invite", "About", "Comments",
 ] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
@@ -83,7 +84,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
-  Artists: Users, Support: Heart, Exhibition: ImageIcon, Dues: DollarSign,
+  Artists: Users, Support: Heart, Exhibition: ImageIcon, Exhibitions: ImageIcon, Dues: DollarSign,
 };
 type Tab = string;
 
@@ -163,12 +164,20 @@ function OrgProfile() {
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
   const isGroup = org.type === "group";
-  const isArtsOrg = org.type === "arts_org" || org.type === "artist";
+  const isArtist = org.type === "artist";
+  const isArtsOrg = org.type === "arts_org" || isArtist;
   const isBusiness = !isAssoc && !isGroup && !isArtsOrg;
   const subLower = (org.subtype ?? "").toLowerCase();
   const isRestaurant = isBusiness && /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(subLower);
   const isService = isBusiness && !isRestaurant;
-  const TABS: readonly string[] = isArtsOrg
+  // Artist pages are standalone: their tab set comes from the artist category
+  // and every tab reads only this page's own content.
+  const artistTabs: ArtistTab[] = isArtist ? tabsForArtist(org.subtype, "artist") : [];
+  const artistIcons: Record<string, React.ComponentType<{ className?: string }>> = {};
+  for (const t of artistTabs) artistIcons[t.label] = t.Icon;
+  const TABS: readonly string[] = isArtist
+    ? artistTabs.map((t) => t.label)
+    : isArtsOrg
     ? // The Artists roster only makes sense once the org has artists, so it
       // stays hidden for visitors until someone is added.
       ARTS_ORG_TABS.filter((t) => t !== "Artists" || canManage || artistCount > 0)
@@ -449,7 +458,7 @@ function OrgProfile() {
         <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
           {TABS.map((t) => {
             const active = tab === t;
-            const Icon = TAB_ICONS[t];
+            const Icon = artistIcons[t] ?? TAB_ICONS[t];
             return (
               <button
                 key={t}
@@ -473,7 +482,7 @@ function OrgProfile() {
             : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />
           )}
           {tab === "Events" && <EventsTab orgId={org.id} canManage={canManage} />}
-          {tab === "Exhibition" && <ExhibitionsTab orgId={org.id} canManage={canManage} />}
+          {(tab === "Exhibitions" || tab === "Exhibition") && <ExhibitionsTab orgId={org.id} canManage={canManage} />}
           {tab === "Opportunities" && <OpportunitiesTab orgId={org.id} canManage={canManage} />}
           {tab === "Press" && <PressTab org={org} canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
@@ -544,6 +553,7 @@ function OrgProfile() {
           {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
           {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
+          {isArtist && <ArtistTabContent tab={tab} org={org} canManage={canManage} me={me} />}
         </div>
       </div>
     </AppLayout>
@@ -552,6 +562,26 @@ function OrgProfile() {
 
 function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org: Org; canManage: boolean; onChange: (o: Org) => void; initialEdit?: boolean; onEditClose?: () => void }) {
   return AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose });
+}
+
+// Tabs unique to artist pages. Anything already rendered by the shared tab
+// switcher above is skipped here so it never renders twice.
+const SHARED_TABS = new Set([
+  "About", "Posts", "Events", "Exhibitions", "Exhibition", "Opportunities", "Press",
+  "Updates", "Artists", "Support", "Menu", "Feed", "Services", "Calendar", "Members",
+  "Leaderboard", "Invite", "Polls", "Voting", "Minutes", "Resources", "By Laws", "Rules",
+  "Gallery", "Announcements", "Promotions", "Jobs", "Stories", "Threads", "Reviews",
+  "Board", "Comments", "Dues",
+]);
+
+function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; canManage: boolean; me: string | null }) {
+  if (SHARED_TABS.has(tab)) return null;
+  if (tab === "Talk") return <CommentsTab orgId={org.id} me={me} canManage={canManage} />;
+  if (tab === "Portfolio") return <GalleryTab orgId={org.id} />;
+  if (tab === "Shop" || tab === "Print Shop")
+    return <PriceItemsSection orgId={org.id} subtype={org.subtype} canManage={canManage} title={tab} />;
+  const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  return <OrgPostList orgId={org.id} kind={kind} canManage={canManage} />;
 }
 
 function InviteTab({ orgName }: { orgName: string }) {
@@ -1425,7 +1455,7 @@ function TierForm({ orgId, initial, onCancel, onSaved }: {
   );
 }
 
-function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: string | null; canManage: boolean }) {
   return <OrgPostListImpl orgId={orgId} kind={kind} canManage={canManage} />;
 }
 
@@ -1605,7 +1635,7 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
   );
 }
 
-function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: string | null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   type Mode = "text" | "photo" | "video";

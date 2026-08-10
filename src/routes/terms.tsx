@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AppLayout } from "@/components/app-layout";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/terms")({
@@ -8,7 +9,8 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground px-5 md:px-10 py-12 md:py-16">
+    <AppLayout hero={false}>
+    <main className="text-foreground">
       <div className="mx-auto max-w-3xl">
         <Link to="/dashboard" className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground">← Back to dashboard</Link>
         <h1 className="mt-6 text-3xl md:text-5xl font-bold tracking-tight">Terms of Service</h1>
@@ -28,5 +30,6 @@ function TermsPage() {
         </div>
       </div>
     </main>
+    </AppLayout>
   );
 }

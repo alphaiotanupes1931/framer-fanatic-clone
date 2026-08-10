@@ -141,30 +141,6 @@ export function BaltimoreMap({
           attribution='&copy; OpenStreetMap'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        {showNeighborhoods && neighborhoods.map((n) => (
-          <CircleMarker
-            key={`n-${n.id}`}
-            center={[n.latitude, n.longitude]}
-            radius={5}
-            pathOptions={{
-              color: "#1e3a5f",
-              fillColor: "#3b82f6",
-              fillOpacity: 0.7,
-              weight: 1.5,
-            }}
-            eventHandlers={{ click: () => onSelectNeighborhood?.(n) }}
-          >
-            <Tooltip direction="top" offset={[0, -4]} opacity={1}>
-              <span className="text-xs font-semibold">{n.name}</span>
-            </Tooltip>
-            <Popup>
-              <div className="space-y-1 min-w-[160px]">
-                <div className="font-semibold">{n.name}</div>
-                {n.region && <div className="text-xs text-neutral-500">{n.region}</div>}
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
         {eventGroups.map((g) => (
           (() => {
           const key = `${g.latitude.toFixed(4)}|${g.longitude.toFixed(4)}`;
@@ -194,6 +170,32 @@ export function BaltimoreMap({
           </CircleMarker>
           );
           })()
+        ))}
+        {/* Neighborhood dots are drawn last so they always sit on top of the
+            event dots and stay clickable even where the two overlap. */}
+        {showNeighborhoods && neighborhoods.map((n) => (
+          <CircleMarker
+            key={`n-${n.id}`}
+            center={[n.latitude, n.longitude]}
+            radius={6}
+            pathOptions={{
+              color: "#1e3a5f",
+              fillColor: "#3b82f6",
+              fillOpacity: 0.9,
+              weight: 2,
+            }}
+            eventHandlers={{ click: () => onSelectNeighborhood?.(n) }}
+          >
+            <Tooltip direction="top" offset={[0, -4]} opacity={1}>
+              <span className="text-xs font-semibold">{n.name}</span>
+            </Tooltip>
+            <Popup>
+              <div className="space-y-1 min-w-[160px]">
+                <div className="font-semibold">{n.name}</div>
+                {n.region && <div className="text-xs text-neutral-500">{n.region}</div>}
+              </div>
+            </Popup>
+          </CircleMarker>
         ))}
         {events.length === 0 && null}
       </MapContainer>

@@ -373,6 +373,7 @@ function ProfilePage() {
                 <Link
                   to="/u/$username"
                   params={{ username: profile.username }}
+                  search={{ view: "resident" }}
                   aria-label="Public view"
                   title="Public view"
                   className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-xs font-semibold hover:bg-secondary sm:py-2.5"

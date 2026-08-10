@@ -10,8 +10,12 @@ import { EventImage } from "@/components/event-image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { pageHead } from "@/lib/seo";
 
-function openEventPopup(ev: Ev) {
-  window.dispatchEvent(new CustomEvent<Ev>("pb-open-event", { detail: ev }));
+type EventPopupDetail = { list: Ev[]; index: number };
+
+function openEventPopup(ev: Ev, list?: Ev[]) {
+  const all = list && list.length ? list : [ev];
+  const index = Math.max(0, all.findIndex((e) => e.id === ev.id));
+  window.dispatchEvent(new CustomEvent<EventPopupDetail>("pb-open-event", { detail: { list: all, index } }));
 }
 
 export const Route = createFileRoute("/calendar")({
@@ -199,7 +203,7 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                     <button
                       key={e.id}
                       type="button"
-                      onClick={() => openEventPopup(e)}
+                      onClick={() => openEventPopup(e, dayEvents)}
                       className="block w-full truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-left text-[10px] font-medium text-[#d4580a] hover:bg-[#d4580a]/20"
                     >
                       {e.title}
@@ -308,7 +312,7 @@ function DayEventsDialog({ data, onClose }: { data: { date: Date; events: Ev[] }
                     <button
                       key={e.id}
                       type="button"
-                      onClick={() => { onClose(); openEventPopup(e); }}
+                      onClick={() => { onClose(); openEventPopup(e, list); }}
                       className="flex w-full items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 text-left hover:border-[#d4580a]"
                     >
                       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
@@ -630,12 +634,17 @@ function CalendarPage() {
 }
 
 function EventPopup() {
-  const [ev, setEv] = useState<Ev | null>(null);
+  const [state, setState] = useState<EventPopupDetail | null>(null);
   useEffect(() => {
-    const onOpen = (e: Event) => setEv((e as CustomEvent<Ev>).detail);
+    const onOpen = (e: Event) => setState((e as CustomEvent<EventPopupDetail>).detail);
     window.addEventListener("pb-open-event", onOpen as EventListener);
     return () => window.removeEventListener("pb-open-event", onOpen as EventListener);
   }, []);
+  const setEv = (v: null) => setState(v);
+  const ev = state ? state.list[state.index] ?? null : null;
+  const count = state?.list.length ?? 0;
+  const step = (delta: number) =>
+    setState((s) => (s ? { ...s, index: (s.index + delta + s.list.length) % s.list.length } : s));
   const d = ev?.starts_at ? new Date(ev.starts_at) : null;
   const where = ev?.venue_name || ev?.location;
   return (
@@ -643,6 +652,29 @@ function EventPopup() {
       <DialogContent className="max-w-lg overflow-hidden p-0">
         {ev && (
           <div>
+            {count > 1 && (
+              <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-2">
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  aria-label="Previous event"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="text-xs font-semibold text-neutral-500">
+                  Event {(state?.index ?? 0) + 1} of {count}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  aria-label="Next event"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
             {ev.image_url && (
               <div className="aspect-[16/9] w-full overflow-hidden bg-neutral-100">
                 <EventImage src={ev.image_url} alt={ev.title} className="h-full w-full object-cover" />
