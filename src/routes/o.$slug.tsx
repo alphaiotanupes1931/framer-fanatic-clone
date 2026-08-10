@@ -172,7 +172,9 @@ function OrgProfile() {
   const isService = isBusiness && !isRestaurant;
   // Artist pages are standalone: their tab set comes from the artist category
   // and every tab reads only this page's own content.
-  const artistTabs = isArtist ? tabsForArtist(org.subtype, "artist") : [];
+  const artistTabs: ArtistTab[] = isArtist ? tabsForArtist(org.subtype, "artist") : [];
+  const artistIcons: Record<string, React.ComponentType<{ className?: string }>> = {};
+  for (const t of artistTabs) artistIcons[t.label] = t.Icon;
   const TABS: readonly string[] = isArtist
     ? artistTabs.map((t) => t.label)
     : isArtsOrg
