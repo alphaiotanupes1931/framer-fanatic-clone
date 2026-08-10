@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
 import { Play, Search, Star, Plus, X, Upload, Bookmark, Send, Share2, Trash2 } from "lucide-react";
@@ -39,47 +39,9 @@ type Video = {
 function VideosPage() {
   const auth = useAuthState();
   if (auth.loading) return null;
-  if (!auth.signedIn) return <AnonVideos />;
+  // Videos are a signed-in feature: no public/logged-out version of this page.
+  if (!auth.signedIn) return <Navigate to="/auth" replace />;
   return <VideosSignedIn />;
-}
-
-function AnonVideos() {
-  const [list, setList] = useState<Video[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from("videos")
-        .select("id, user_id, title, description, video_url, thumbnail_url, featured, created_at, orientation, aspect_ratio")
-        .order("created_at", { ascending: false }).limit(24);
-      setList((data || []) as Video[]); setLoading(false);
-    })();
-  }, []);
-  return (
-    <PublicShell title="Videos" subtitle="Watch what Baltimore creators are shipping right now." signedIn={false}>
-      {loading ? <div className="text-paper/60 text-sm">Loading…</div> :
-        <PreviewGrid
-          items={list}
-          unlockedCount={1}
-          signedIn={false}
-          thing="video"
-          render={(v) => (
-            <div className="rounded-2xl overflow-hidden border border-paper/10 bg-paper/5 h-full">
-              <div className="aspect-video bg-paper/10 relative overflow-hidden">
-                {(v as Video).thumbnail_url
-                  ? <Img src={(v as Video).thumbnail_url!} alt={(v as Video).title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                  : <div className="w-full h-full flex items-center justify-center text-paper/30"><Play className="w-10 h-10" /></div>}
-              </div>
-              <div className="p-4">
-                <div className="font-semibold line-clamp-2">{(v as Video).title}</div>
-                {(v as Video).description && <p className="text-xs text-paper/60 mt-1 line-clamp-2">{(v as Video).description}</p>}
-              </div>
-            </div>
-          )}
-          emptyLabel="No videos yet."
-        />
-      }
-    </PublicShell>
-  );
 }
 
 function VideosSignedIn() {
