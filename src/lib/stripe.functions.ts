@@ -122,7 +122,8 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: event, error: evErr } = await supabase
@@ -153,19 +154,11 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/profile?tab=My%20Tickets&purchase=success`,
       cancel_url: `${data.returnOrigin}/events?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: breakdown.buyerTotalCents,
-            product_data: {
-              name: `Ticket: ${event.title}`,
-              images: event.image_url ? [event.image_url] : undefined,
-            },
-          },
-        },
-      ],
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: checkoutLineItems(breakdown, {
+        name: `Ticket: ${event.title}`,
+        images: event.image_url ? [event.image_url] : undefined,
+      }),
       payment_intent_data: {
         application_fee_amount: applicationFee,
         transfer_data: { destination: artist.stripe_account_id },
@@ -234,7 +227,8 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: org } = await supabase
@@ -274,7 +268,9 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/o/${org.slug}?donation=success`,
       cancel_url: `${data.returnOrigin}/o/${org.slug}/donate?cancelled=1`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: recurring
+        ? [
         {
           quantity: 1,
           price_data: {
@@ -289,7 +285,11 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
               : {}),
           },
         },
-      ],
+          ]
+        : checkoutLineItems(breakdown, {
+            name: productName,
+            description: data.note?.trim() ? data.note.trim().slice(0, 200) : undefined,
+          }),
       ...(recurring
         ? {
             subscription_data: {
@@ -322,7 +322,8 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: work } = await supabase
@@ -353,20 +354,12 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/u/${artistHandle}?purchase=success`,
       cancel_url: `${data.returnOrigin}/u/${artistHandle}?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: breakdown.buyerTotalCents,
-            product_data: {
-              name: work.title || "Original artwork",
-              description: details || undefined,
-              images: work.media_url ? [work.media_url] : undefined,
-            },
-          },
-        },
-      ],
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: checkoutLineItems(breakdown, {
+        name: work.title || "Original artwork",
+        description: details || undefined,
+        images: work.media_url ? [work.media_url] : undefined,
+      }),
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
         transfer_data: { destination: owner.stripe_account_id },
@@ -452,7 +445,8 @@ export const createDuesCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: tier, error: tErr } = await supabase
@@ -482,19 +476,11 @@ export const createDuesCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/o/${org.slug}?dues=success`,
       cancel_url: `${data.returnOrigin}/o/${org.slug}?dues=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: breakdown.buyerTotalCents,
-            product_data: {
-              name: `${org.name} Dues: ${tier.name}`,
-              description: `Dues payment (${tier.interval.replace("_", " ")})`,
-            },
-          },
-        },
-      ],
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: checkoutLineItems(breakdown, {
+        name: `${org.name} Dues: ${tier.name}`,
+        description: `Dues payment (${tier.interval.replace("_", " ")})`,
+      }),
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
         transfer_data: { destination: owner.stripe_account_id },
