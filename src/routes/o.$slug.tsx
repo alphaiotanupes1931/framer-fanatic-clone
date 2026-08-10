@@ -29,6 +29,7 @@ import { TextDocTab } from "@/components/org/text-doc-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { timeAgo } from "@/lib/text-utils";
