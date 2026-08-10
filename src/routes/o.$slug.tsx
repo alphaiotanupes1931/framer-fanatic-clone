@@ -458,7 +458,7 @@ function OrgProfile() {
         <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
           {TABS.map((t) => {
             const active = tab === t;
-            const Icon = TAB_ICONS[t];
+            const Icon = artistIcons[t] ?? TAB_ICONS[t];
             return (
               <button
                 key={t}
@@ -553,6 +553,7 @@ function OrgProfile() {
           {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
           {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
           {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
+          {isArtist && <ArtistTabContent tab={tab} org={org} canManage={canManage} me={me} />}
         </div>
       </div>
     </AppLayout>
