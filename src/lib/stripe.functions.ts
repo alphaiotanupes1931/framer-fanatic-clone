@@ -122,7 +122,8 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: event, error: evErr } = await supabase
@@ -153,19 +154,11 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/profile?tab=My%20Tickets&purchase=success`,
       cancel_url: `${data.returnOrigin}/events?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: breakdown.buyerTotalCents,
-            product_data: {
-              name: `Ticket: ${event.title}`,
-              images: event.image_url ? [event.image_url] : undefined,
-            },
-          },
-        },
-      ],
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: checkoutLineItems(breakdown, {
+        name: `Ticket: ${event.title}`,
+        images: event.image_url ? [event.image_url] : undefined,
+      }),
       payment_intent_data: {
         application_fee_amount: applicationFee,
         transfer_data: { destination: artist.stripe_account_id },
