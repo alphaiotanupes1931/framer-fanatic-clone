@@ -1594,41 +1594,8 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
     toast.success(next ? "Page is now public" : "Page is now private");
   };
 
-  const username = profile?.username;
-  const pages = [
-    username && {
-      key: "artist",
-      title: "Artist Page",
-      subtitle: "Public artist profile, Studio, Series, Gallery, CV/Bio",
-      href: `/u/${username}?view=artist`,
-      color: "bg-[#d4580a]",
-    },
-  ].filter(Boolean) as Array<{ key: string; title: string; subtitle: string; href: string; color: string }>;
-
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">Personal Pages</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {pages.map((p) => (
-            <a
-              key={p.key}
-              href={p.href}
-              className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
-            >
-              <span className={`grid h-12 w-12 place-items-center rounded-full text-white ${p.color}`}>
-                <Shield className="h-5 w-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold text-neutral-900">{p.title}</div>
-                <div className="truncate text-xs text-neutral-500">{p.subtitle}</div>
-              </div>
-              <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
-            </a>
-          ))}
-        </div>
-      </div>
-
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
           Organizations & Community Pages ({orgs.length})
