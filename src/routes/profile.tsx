@@ -454,7 +454,7 @@ function ProfilePage() {
                 <LinkIcon className="h-3.5 w-3.5" />{profile.website.replace(/https?:\/\//, "")}
               </a>
             )}
-            {profile?.email && (
+            {profile?.email && !publicPreview && (
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                 <Mail className="h-3.5 w-3.5" />
                 {showEmail ? (
@@ -616,7 +616,7 @@ function ProfilePage() {
                 />
               ) : null
             ) : tab === "About" ? (
-              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={showEmail} />
+              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={showEmail && !publicPreview} />
             ) : (
               (tab === "Posts") ? (
                 myPosts.length === 0 ? (

@@ -217,6 +217,16 @@ async function resolveAsync(src: string, bucketHint?: string): Promise<string | 
   const cached = readCache(t.bucket, t.path);
   if (cached) return cached;
   const signed = await signBatched(t.bucket, t.path);
+  if (signed && (await urlResolves(signed))) return signed;
+  // The hinted bucket didn't have the object (older uploads landed in a
+  // different bucket). Try the rest before giving up.
+  for (const b of CANDIDATE_BUCKETS) {
+    if (b === t.bucket) continue;
+    const cachedAlt = readCache(b, t.path);
+    if (cachedAlt) return cachedAlt;
+    const alt = await signBatched(b, t.path);
+    if (alt && (await urlResolves(alt))) return alt;
+  }
   // Fall back to the original URL — it may still work if the bucket has
   // since been made public.
   return signed ?? (src.startsWith("http") ? src : null);
