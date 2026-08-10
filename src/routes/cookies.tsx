@@ -28,5 +28,6 @@ function CookiesPage() {
         </div>
       </div>
     </main>
+    </AppLayout>
   );
 }

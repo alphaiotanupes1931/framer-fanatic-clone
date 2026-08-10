@@ -30,5 +30,6 @@ function PrivacyPage() {
         </div>
       </div>
     </main>
+    </AppLayout>
   );
 }

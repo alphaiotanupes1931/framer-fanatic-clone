@@ -30,5 +30,6 @@ function TermsPage() {
         </div>
       </div>
     </main>
+    </AppLayout>
   );
 }
