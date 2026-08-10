@@ -88,6 +88,7 @@ function VideosSignedIn() {
   const [open, setOpen] = useState(false);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
+  const [shape, setShape] = useState<"all" | "landscape" | "portrait">("all");
   const UPLOAD_CATEGORIES = VIDEO_CATEGORIES.filter((c) => c !== "All");
   const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "", orientation: "" as string, aspect_ratio: null as number | null });
   const [uploading, setUploading] = useState(false);
