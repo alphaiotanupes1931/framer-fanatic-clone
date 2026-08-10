@@ -60,8 +60,8 @@ type Comment = { id: string; user_id: string; body: string; created_at: string; 
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
-  "Posts", "Announcements", "Events", "Calendar", "Members", "Threads",
-  "Polls", "Gallery", "Resources", "Jobs", "Leaderboard", "Rules", "Invite", "Comments",
+  "Posts", "Events", "Members", "Threads",
+  "Polls", "Gallery", "Jobs", "Leaderboard", "Rules", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
   "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About", "Dues",
@@ -73,7 +73,7 @@ const SERVICE_TABS = [
   "Feed", "Services", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const ARTS_ORG_TABS = [
-  "Posts", "Events", "Artists", "Exhibition", "Support", "Opportunities", "Press", "Updates", "Invite", "About", "Comments",
+  "Posts", "Events", "Artists", "Exhibitions", "Support", "Opportunities", "Press", "Invite", "About", "Comments",
 ] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
@@ -83,7 +83,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
-  Artists: Users, Support: Heart, Exhibition: ImageIcon, Dues: DollarSign,
+  Artists: Users, Support: Heart, Exhibition: ImageIcon, Exhibitions: ImageIcon, Dues: DollarSign,
 };
 type Tab = string;
 

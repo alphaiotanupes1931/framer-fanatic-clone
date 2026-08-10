@@ -366,7 +366,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
             <Trash2 className="h-4 w-4" />
           </button>
         )}
-        {isAdmin && (
+        {isAdmin && orientation !== "portrait" && (
           <button
             onClick={async (e) => {
               e.preventDefault(); e.stopPropagation();
