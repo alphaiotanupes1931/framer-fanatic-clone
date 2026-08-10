@@ -549,7 +549,7 @@ function ProfilePage() {
                 <button key={t} onClick={() => setTab(t)}
                   className={`inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition ${tab===t ? "border-[#d4580a] text-[#d4580a]" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
                   {Icon && <Icon className="h-4 w-4" />}
-                  {t}
+                  {displayTabLabel(t, publicPreview)}
                 </button>
               );
             })}
