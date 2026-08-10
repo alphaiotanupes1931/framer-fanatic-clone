@@ -438,7 +438,8 @@ export const createDuesCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: tier, error: tErr } = await supabase
@@ -468,19 +469,11 @@ export const createDuesCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/o/${org.slug}?dues=success`,
       cancel_url: `${data.returnOrigin}/o/${org.slug}?dues=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: breakdown.buyerTotalCents,
-            product_data: {
-              name: `${org.name} Dues: ${tier.name}`,
-              description: `Dues payment (${tier.interval.replace("_", " ")})`,
-            },
-          },
-        },
-      ],
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: checkoutLineItems(breakdown, {
+        name: `${org.name} Dues: ${tier.name}`,
+        description: `Dues payment (${tier.interval.replace("_", " ")})`,
+      }),
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
         transfer_data: { destination: owner.stripe_account_id },
