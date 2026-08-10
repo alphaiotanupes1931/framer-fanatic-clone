@@ -203,7 +203,7 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                     <button
                       key={e.id}
                       type="button"
-                      onClick={() => openEventPopup(e)}
+                      onClick={() => openEventPopup(e, dayEvents)}
                       className="block w-full truncate rounded bg-[#d4580a]/10 px-1 py-0.5 text-left text-[10px] font-medium text-[#d4580a] hover:bg-[#d4580a]/20"
                     >
                       {e.title}
@@ -312,7 +312,7 @@ function DayEventsDialog({ data, onClose }: { data: { date: Date; events: Ev[] }
                     <button
                       key={e.id}
                       type="button"
-                      onClick={() => { onClose(); openEventPopup(e); }}
+                      onClick={() => { onClose(); openEventPopup(e, list); }}
                       className="flex w-full items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 text-left hover:border-[#d4580a]"
                     >
                       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
