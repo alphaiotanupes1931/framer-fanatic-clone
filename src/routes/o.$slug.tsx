@@ -178,9 +178,9 @@ function OrgProfile() {
   const TABS: readonly string[] = isArtist
     ? artistTabs.map((t) => t.label)
     : isArtsOrg
-    ? // The Artists roster only makes sense once the org has artists, so it
-      // stays hidden for visitors until someone is added.
-      ARTS_ORG_TABS.filter((t) => t !== "Artists" || canManage || artistCount > 0)
+    ? // The Artists roster is always visible; it shows an empty state until
+      // the org adds someone.
+      ARTS_ORG_TABS
     : isRestaurant
     ? RESTAURANT_TABS
     : isService
