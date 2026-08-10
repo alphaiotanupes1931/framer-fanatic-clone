@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentProfile } from "@/components/app-layout";
+import { useCurrentProfile, AppLayout } from "@/components/app-layout";
 import { toast } from "sonner";
 import { ArrowLeft, Upload } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
