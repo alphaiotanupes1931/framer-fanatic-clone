@@ -665,16 +665,18 @@ function ProfilePage() {
                                 </div>
                               </div>
                             )}
-                            <span
-                              role="button"
-                              tabIndex={0}
-                              title={p.is_pinned ? "Unpin" : "Pin to top"}
-                              onClick={(e) => { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); }}
-                              onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); } }}
-                              className="absolute left-1.5 top-1.5 rounded-full bg-white/90 p-1 text-foreground shadow hover:bg-white"
-                            >
-                              {p.is_pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
-                            </span>
+                            {!publicPreview && (
+                              <span
+                                role="button"
+                                tabIndex={0}
+                                title={p.is_pinned ? "Unpin" : "Pin to top"}
+                                onClick={(e) => { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); }}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); } }}
+                                className="absolute left-1.5 top-1.5 rounded-full bg-white/90 p-1 text-foreground shadow hover:bg-white"
+                              >
+                                {p.is_pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                              </span>
+                            )}
                           </button>
                         );
                       })}
