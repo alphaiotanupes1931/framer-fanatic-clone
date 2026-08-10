@@ -1,0 +1,2 @@
+ALTER TABLE public.organization_posts DROP CONSTRAINT IF EXISTS organization_posts_kind_check;
+ALTER TABLE public.organization_posts ADD CONSTRAINT organization_posts_kind_check CHECK (kind ~ '^[a-z0-9_]{2,40}$');
