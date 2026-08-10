@@ -486,7 +486,7 @@ function MessagesPage() {
       <div className="grid h-[calc(100vh-12rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[340px_1fr]">
         {/* Conversation list */}
         <div
-          className={`${showList ? "flex" : "hidden"} flex-col border-r border-border md:flex`}
+          className={`${showList ? "flex" : "hidden"} min-w-0 flex-col border-r border-border md:flex`}
         >
           <div className="border-b border-border p-4">
             <h2 className="mb-3 text-2xl font-bold text-foreground">Messages</h2>
@@ -604,7 +604,7 @@ function MessagesPage() {
         </div>
 
         {/* Conversation pane */}
-        <div className={`${showList ? "hidden md:flex" : "flex"} min-h-0 flex-col`}>
+        <div className={`${showList ? "hidden md:flex" : "flex"} min-h-0 min-w-0 flex-col`}>
           {!active ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
               <div className="rounded-full bg-muted p-4">
@@ -740,7 +740,7 @@ function MessagesPage() {
                         const shared = parseSharePreview(m.content);
                         return (
                           <div
-                            className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${
+                            className={`min-w-0 max-w-[75%] overflow-hidden break-words rounded-2xl px-4 py-2 text-sm leading-relaxed ${
                               mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                             }`}
                           >
