@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { FileUpload } from "@/components/shared/file-upload";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, Gift, ChevronLeft, ChevronRight, X as XIcon, Play, Lock as LockIcon, Globe as GlobeIcon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -108,6 +109,7 @@ function ProfilePage() {
   void category; void isArtist;
   const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
   const [tab, setTab] = useState<Tab>("Posts");
+  const [showEmail, setShowEmail] = useState(false);
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
@@ -455,7 +457,14 @@ function ProfilePage() {
             {profile?.email && (
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                 <Mail className="h-3.5 w-3.5" />
-                <span className="break-all">{profile.email}</span>
+                {showEmail ? (
+                  <>
+                    <span className="break-all">{profile.email}</span>
+                    <button onClick={() => setShowEmail(false)} className="ml-1 text-xs font-semibold text-[#d4580a] hover:underline">Hide</button>
+                  </>
+                ) : (
+                  <button onClick={() => setShowEmail(true)} className="text-xs font-semibold text-[#d4580a] hover:underline">Show email</button>
+                )}
               </div>
             )}
             <div className="relative mt-1">
@@ -607,7 +616,7 @@ function ProfilePage() {
                 />
               ) : null
             ) : tab === "About" ? (
-              <AboutTab profile={profile} />
+              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={showEmail} />
             ) : (
               (tab === "Posts") ? (
                 myPosts.length === 0 ? (
@@ -1793,23 +1802,136 @@ function MyDashboardTab({ isAdmin, isArtist }: { isAdmin: boolean; isArtist: boo
     </div>
   );
 }
-function AboutTab({ profile }: { profile: any }) {
+function AboutTab({ profile, canEdit, showEmail }: { profile: any; canEdit: boolean; showEmail: boolean }) {
+  const userId: string | undefined = profile?.id;
+  const [longAbout, setLongAbout] = useState("");
+  const [draft, setDraft] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [aboutRowId, setAboutRowId] = useState<string | null>(null);
+  const [cv, setCv] = useState<{ id: string; url: string; name: string } | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profile_sections")
+        .select("id,kind,body,media_url,title")
+        .eq("user_id", userId)
+        .in("kind", ["about_long", "cv"]);
+      const a = (data ?? []).find((r: any) => r.kind === "about_long");
+      const c = (data ?? []).find((r: any) => r.kind === "cv");
+      if (a) { setAboutRowId(a.id as string); setLongAbout((a.body as string) ?? ""); setDraft((a.body as string) ?? ""); }
+      if (c?.media_url) setCv({ id: c.id as string, url: c.media_url as string, name: (c.title as string) || "CV" });
+      setLoaded(true);
+    })();
+  }, [userId]);
+
+  const saveAbout = async () => {
+    if (!userId) return;
+    setSaving(true);
+    try {
+      if (aboutRowId) {
+        const { error } = await supabase.from("profile_sections").update({ body: draft }).eq("id", aboutRowId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("profile_sections")
+          .insert({ user_id: userId, kind: "about_long", body: draft, order_index: 0 })
+          .select("id")
+          .single();
+        if (error) throw error;
+        setAboutRowId(data.id as string);
+      }
+      setLongAbout(draft);
+      setEditing(false);
+      toast.success("About saved");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveCv = async (url: string, name?: string) => {
+    if (!userId) return;
+    if (!url) {
+      if (cv) await supabase.from("profile_sections").delete().eq("id", cv.id);
+      setCv(null);
+      return;
+    }
+    if (cv) {
+      const { error } = await supabase.from("profile_sections").update({ media_url: url, title: name ?? "CV" }).eq("id", cv.id);
+      if (error) { toast.error(error.message); return; }
+      setCv({ ...cv, url, name: name ?? "CV" });
+    } else {
+      const { data, error } = await supabase
+        .from("profile_sections")
+        .insert({ user_id: userId, kind: "cv", media_url: url, title: name ?? "CV", order_index: 0 })
+        .select("id")
+        .single();
+      if (error) { toast.error(error.message); return; }
+      setCv({ id: data.id as string, url, name: name ?? "CV" });
+    }
+    toast.success("CV saved");
+  };
+
   const rows: Array<{ label: string; value: string | null }> = [
     { label: "Name", value: profile?.display_name || null },
     { label: "Username", value: profile?.username ? `@${profile.username}` : null },
     { label: "Neighborhood", value: profile?.neighborhood || null },
     { label: "City", value: profile?.city || null },
-    { label: "Email", value: profile?.email || null },
+    { label: "Email", value: showEmail ? profile?.email || null : null },
     { label: "Website", value: profile?.website || null },
   ].filter((r) => !!r.value);
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-card p-5">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">About</h3>
-        <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">
-          {profile?.bio || "No bio yet. Add one from Edit Profile."}
-        </p>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">About</h3>
+          {canEdit && loaded && !editing && (
+            <button onClick={() => { setDraft(longAbout); setEditing(true); }} className="text-xs font-semibold text-[#d4580a] hover:underline">
+              {longAbout ? "Edit" : "Add about"}
+            </button>
+          )}
+        </div>
+        {editing ? (
+          <div className="mt-3 space-y-2">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={12}
+              placeholder="Write your full story here. This can be much longer than your short bio."
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none"
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setEditing(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
+              <button onClick={saveAbout} disabled={saving} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">
+            {longAbout || (canEdit ? "Nothing here yet. Add a longer about section." : "No about yet.")}
+          </p>
+        )}
       </div>
+
+      {(canEdit || cv) && (
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-muted-foreground">CV / Resume</h3>
+          {canEdit ? (
+            <FileUpload value={cv?.url ?? ""} fileName={cv?.name} onChange={(url, name) => void saveCv(url, name)} label="Upload your CV (PDF, DOC, etc.)" />
+          ) : (
+            <a href={cv!.url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-[#d4580a] hover:underline">
+              {cv!.name || "View CV"}
+            </a>
+          )}
+        </div>
+      )}
+
       {rows.length > 0 && (
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Details</h3>
