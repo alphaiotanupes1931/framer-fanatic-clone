@@ -22,17 +22,17 @@ const SHARE_LABELS: Record<SharePreview["type"], string> = {
 function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: boolean }) {
   const label = SHARE_LABELS[preview.type] ?? "Post";
   const inner = (
-    <div className={`overflow-hidden rounded-xl ${mine ? "bg-white/10" : "bg-background ring-1 ring-black/5"}`}>
+    <div className={`overflow-hidden rounded-xl ${mine ? "bg-muted/50 ring-1 ring-black/5" : "bg-background ring-1 ring-black/5"}`}>
       {preview.image && (
         <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
           <Img src={preview.image} alt="" className="h-full w-full object-cover" loading="lazy" />
         </div>
       )}
       <div className="px-3 py-2.5">
-        <div className={`text-[10px] font-bold uppercase tracking-wide ${mine ? "text-white/70" : "text-[#d4580a]"}`}>{label}</div>
-        {preview.title && <div className={`mt-0.5 line-clamp-2 text-sm font-semibold ${mine ? "text-white" : "text-foreground"}`}>{preview.title}</div>}
-        {preview.excerpt && <div className={`mt-1 line-clamp-2 text-xs ${mine ? "text-white/80" : "text-muted-foreground"}`}>{preview.excerpt}</div>}
-        {preview.author && <div className={`mt-1.5 text-[11px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>by {preview.author}</div>}
+        <div className={`text-[10px] font-bold uppercase tracking-wide ${mine ? "text-muted-foreground" : "text-[#d4580a]"}`}>{label}</div>
+        {preview.title && <div className="mt-0.5 line-clamp-2 text-sm font-semibold text-foreground">{preview.title}</div>}
+        {preview.excerpt && <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">{preview.excerpt}</div>}
+        {preview.author && <div className="mt-1.5 text-[11px] text-muted-foreground">by {preview.author}</div>}
       </div>
     </div>
   );
@@ -740,8 +740,8 @@ function MessagesPage() {
                         const shared = parseSharePreview(m.content);
                         return (
                           <div
-                            className={`min-w-0 max-w-[75%] overflow-hidden break-words rounded-2xl px-4 py-2 text-sm leading-relaxed ${
-                              mine ? "bg-transparent text-primary" : "bg-transparent text-foreground"
+                            className={`min-w-0 max-w-[75%] overflow-hidden break-words rounded-2xl px-4 py-2 text-sm leading-relaxed text-foreground ${
+                              mine ? "bg-transparent" : "bg-transparent"
                             }`}
                           >
                             {shared ? (
@@ -752,7 +752,7 @@ function MessagesPage() {
                             ) : (
                               <div className="whitespace-pre-wrap break-words">{m.content}</div>
                             )}
-                            <div className={`mt-0.5 text-[10px] ${mine ? "text-primary/70" : "text-muted-foreground"}`}>
+                            <div className={`mt-0.5 text-[10px] text-muted-foreground`}>
                               {formatWhen(m.created_at)}
                             </div>
                           </div>
