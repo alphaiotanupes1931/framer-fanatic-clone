@@ -68,10 +68,10 @@ const COMMUNITY_ASSOC_TABS = [
   "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
-  "Feed", "Menu", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+  "Posts", "Menu", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const SERVICE_TABS = [
-  "Feed", "Services", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+  "Posts", "Services", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const ARTS_ORG_TABS = [
   "Posts", "Events", "Artists", "Exhibitions", "Support", "Opportunities", "Press", "Invite", "About", "Comments",
@@ -94,7 +94,7 @@ function OrgProfile() {
   const { isAdmin } = useUserRole();
   const [me, setMe] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
-  const [tab, setTab] = useState<Tab>("Feed");
+  const [tab, setTab] = useState<Tab>("Posts");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
