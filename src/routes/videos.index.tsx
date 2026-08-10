@@ -156,8 +156,8 @@ function VideosSignedIn() {
   // before this rule existed falls back into the portrait grid.
   const featured = filtered.filter((v) => v.featured && v.orientation !== "portrait");
   const rest = filtered.filter((v) => !(v.featured && v.orientation !== "portrait"));
-  const portraitRest = rest.filter((v) => v.orientation === "portrait");
-  const landscapeRest = rest.filter((v) => v.orientation !== "portrait");
+  const portraitRest = shape === "landscape" ? [] : rest.filter((v) => v.orientation === "portrait");
+  const landscapeRest = shape === "portrait" ? [] : rest.filter((v) => v.orientation !== "portrait");
 
   const submit = async () => {
     if (!me || !form.title.trim() || !form.video_url.trim()) return;
