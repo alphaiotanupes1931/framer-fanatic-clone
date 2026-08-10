@@ -108,9 +108,6 @@ export function BaltimoreMap({
 
   const { MapContainer, TileLayer, CircleMarker, Tooltip, Popup } = Lib;
 
-  // Slightly offset event markers when they share exact coords with a neighborhood
-  // so the neighborhood dot stays clickable underneath.
-  const nCoordKeys = new Set(neighborhoods.map((n) => `${n.latitude.toFixed(4)}|${n.longitude.toFixed(4)}`));
 
   const groups = new Map<string, EventPin[]>();
   for (const e of events) {
