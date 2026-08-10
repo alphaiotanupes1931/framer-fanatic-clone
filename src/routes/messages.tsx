@@ -740,8 +740,8 @@ function MessagesPage() {
                         const shared = parseSharePreview(m.content);
                         return (
                           <div
-                            className={`min-w-0 max-w-[75%] overflow-hidden break-words rounded-2xl px-4 py-2 text-sm leading-relaxed ${
-                              mine ? "bg-transparent text-primary" : "bg-transparent text-foreground"
+                            className={`min-w-0 max-w-[75%] overflow-hidden break-words rounded-2xl px-4 py-2 text-sm leading-relaxed text-foreground ${
+                              mine ? "bg-transparent" : "bg-transparent"
                             }`}
                           >
                             {shared ? (
@@ -752,7 +752,7 @@ function MessagesPage() {
                             ) : (
                               <div className="whitespace-pre-wrap break-words">{m.content}</div>
                             )}
-                            <div className={`mt-0.5 text-[10px] ${mine ? "text-primary/70" : "text-muted-foreground"}`}>
+                            <div className={`mt-0.5 text-[10px] text-muted-foreground`}>
                               {formatWhen(m.created_at)}
                             </div>
                           </div>
