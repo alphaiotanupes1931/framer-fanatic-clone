@@ -60,3 +60,58 @@ export function priceBreakdown(artistNetCents: number) {
     buyerTotalCents: buyerTotal,
   };
 }
+
+/** White, minimal Checkout look (no peach brand background). */
+export const CHECKOUT_BRANDING = {
+  background_color: "#FFFFFF",
+  border_style: "rounded",
+} as const;
+
+type Breakdown = ReturnType<typeof priceBreakdown>;
+
+/**
+ * Split a charge into visible line items so the buyer sees exactly how the
+ * base price becomes the total: base + Planet Baltimore service fee +
+ * card processing fee. Amounts always sum to buyerTotalCents.
+ */
+export function checkoutLineItems(
+  breakdown: Breakdown,
+  base: { name: string; description?: string | undefined; images?: string[] | undefined },
+) {
+  return [
+    {
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: breakdown.artistNetCents,
+        product_data: {
+          name: base.name,
+          ...(base.description ? { description: base.description } : {}),
+          ...(base.images ? { images: base.images } : {}),
+        },
+      },
+    },
+    {
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: breakdown.platformFeeCents,
+        product_data: {
+          name: "Planet Baltimore service fee",
+          description: "Flat fee that keeps Planet Baltimore running.",
+        },
+      },
+    },
+    {
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: breakdown.stripeFeeCents,
+        product_data: {
+          name: "Card processing fee",
+          description: "Payment processing (2.9% + 30 cents).",
+        },
+      },
+    },
+  ];
+}
