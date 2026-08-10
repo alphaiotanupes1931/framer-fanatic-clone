@@ -455,6 +455,12 @@ function ProfilePage() {
               </div>
             )}
             <div className="relative mt-1">
+              {publicPreview ? (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span>{primaryHood || ""}</span>
+                </div>
+              ) : (
               <button
                 onClick={() => setShowNeighborhoodPicker((v) => !v)}
                 className="flex items-center gap-1 text-sm text-muted-foreground hover:text-[#d4580a] transition-colors"
@@ -463,6 +469,7 @@ function ProfilePage() {
                 <span>{primaryHood || "Add neighborhood"}</span>
                 <ChevronDown className="h-3 w-3" />
               </button>
+              )}
               {showNeighborhoodPicker && (
                 <div className="absolute top-7 left-0 z-30 bg-card border border-border rounded-xl shadow-xl w-56 max-h-60 overflow-y-auto">
                   {neighborhoods.map((n) => (
