@@ -253,8 +253,29 @@ function VideosSignedIn() {
                   className={`mx-auto rounded-lg border border-neutral-200 bg-black ${form.orientation === "portrait" ? "h-72 w-auto" : "w-full max-h-56"}`}
                 />
               )}
+              <div>
+                <div className="mb-1.5 text-xs font-semibold text-neutral-700">
+                  Video format {form.orientation ? "(auto-detected, change if wrong)" : "(required)"}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["portrait", "landscape"] as const).map((o) => (
+                    <button
+                      key={o}
+                      type="button"
+                      onClick={() => setForm({ ...form, orientation: o })}
+                      className={`rounded-lg border px-3 py-2 text-sm font-semibold capitalize ${
+                        form.orientation === o
+                          ? "border-orange-600 bg-orange-50 text-orange-700"
+                          : "border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                      }`}
+                    >
+                      {o}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-              <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim() || !form.category} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
+              <button onClick={submit} disabled={uploading || !form.title.trim() || !form.video_url.trim() || !form.category || !form.orientation} className="w-full rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50">Add</button>
             </div>
           </div>
         </div>
