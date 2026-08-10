@@ -145,7 +145,7 @@ function CreatePostPage() {
       });
       if (error) throw error;
       toast.success("Posted");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/profile" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not post");
     } finally {
