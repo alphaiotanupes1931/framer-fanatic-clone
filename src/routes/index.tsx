@@ -1046,7 +1046,6 @@ function Footer() {
     ]},
     { h: "Community", l: [
       { label: "Stories", to: "/stories" },
-      { label: "Videos", to: "/videos" },
       { label: "Leaderboard", to: "/leaderboard" },
       { label: "Associations", to: "/community-associations" },
     ]},
