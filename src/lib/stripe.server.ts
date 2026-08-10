@@ -97,8 +97,8 @@ export function checkoutLineItems(
         currency: "usd",
         unit_amount: breakdown.platformFeeCents,
         product_data: {
-          name: "Planet Baltimore service fee",
-          description: "Flat fee that keeps Planet Baltimore running.",
+          name: "Platform fee",
+          description: "Flat fee that keeps this platform running.",
         },
       },
     },
