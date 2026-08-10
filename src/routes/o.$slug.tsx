@@ -63,7 +63,7 @@ type Comment = { id: string; user_id: string; body: string; created_at: string; 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
   "Posts", "Events", "Members", "Threads",
-  "Polls", "Gallery", "Jobs", "Leaderboard", "Rules", "Invite",
+  "Polls", "Jobs", "Leaderboard", "Rules", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
   "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About", "Dues",
