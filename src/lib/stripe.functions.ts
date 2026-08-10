@@ -267,7 +267,9 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/o/${org.slug}?donation=success`,
       cancel_url: `${data.returnOrigin}/o/${org.slug}/donate?cancelled=1`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: recurring
+        ? [
         {
           quantity: 1,
           price_data: {
@@ -282,7 +284,11 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
               : {}),
           },
         },
-      ],
+          ]
+        : checkoutLineItems(breakdown, {
+            name: productName,
+            description: data.note?.trim() ? data.note.trim().slice(0, 200) : undefined,
+          }),
       ...(recurring
         ? {
             subscription_data: {
