@@ -616,7 +616,7 @@ function ProfilePage() {
                 />
               ) : null
             ) : tab === "About" ? (
-              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={showEmail} />
+              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={showEmail && !publicPreview} />
             ) : (
               (tab === "Posts") ? (
                 myPosts.length === 0 ? (
