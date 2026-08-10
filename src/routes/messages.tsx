@@ -741,7 +741,7 @@ function MessagesPage() {
                         return (
                           <div
                             className={`min-w-0 max-w-[75%] overflow-hidden break-words rounded-2xl px-4 py-2 text-sm leading-relaxed ${
-                              mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                              mine ? "bg-transparent text-primary" : "bg-transparent text-foreground"
                             }`}
                           >
                             {shared ? (
