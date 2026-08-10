@@ -1625,6 +1625,7 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
 function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: string | null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<OrgPost | null>(null);
   type Mode = "text" | "photo" | "video";
   const [mode, setMode] = useState<Mode>("text");
   const [form, setForm] = useState({ title: "", body: "", link_url: "" });
