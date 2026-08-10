@@ -752,7 +752,7 @@ function MessagesPage() {
                             ) : (
                               <div className="whitespace-pre-wrap break-words">{m.content}</div>
                             )}
-                            <div className={`mt-0.5 text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                            <div className={`mt-0.5 text-[10px] ${mine ? "text-primary/70" : "text-muted-foreground"}`}>
                               {formatWhen(m.created_at)}
                             </div>
                           </div>
