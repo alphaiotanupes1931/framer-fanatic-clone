@@ -33,6 +33,10 @@ import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compr
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
+  // ?preview=public renders this same page the way other people see it.
+  validateSearch: (search: Record<string, unknown>) => ({
+    preview: search.preview === "public" ? ("public" as const) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "My Profile | Planet Baltimore" },
@@ -46,6 +50,8 @@ export const Route = createFileRoute("/profile")({
 });
 
 const FULL_PROFILE_TABS = ["Posts","About","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Payouts"] as const;
+/** Tabs other people can see when they visit your profile. */
+const PUBLIC_PROFILE_TABS = ["Posts","About","My Writings"] as const;
 const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
@@ -84,6 +90,9 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
+  const { preview } = Route.useSearch();
+  // Public preview: same profile, rendered without any owner-only controls.
+  const publicPreview = preview === "public";
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
   const category = (profile as { category?: string | null } | null)?.category ?? null;
   const role = (profile as { role?: string | null } | null)?.role ?? null;
@@ -92,7 +101,7 @@ function ProfilePage() {
   const isArtist = roleIsArtist && !isResident && role?.toLowerCase() === "artist";
   const categoryTabs: Array<{ label: string; kind: string }> = [];
   void category; void isArtist;
-  const TABS: readonly string[] = FULL_PROFILE_TABS;
+  const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
@@ -128,7 +137,7 @@ function ProfilePage() {
   useEffect(() => {
     if (!TABS.includes(tab)) setTab(TABS[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isArtist]);
+  }, [isArtist, publicPreview]);
 
   useEffect(() => {
     if (!profile) return;
@@ -296,6 +305,21 @@ function ProfilePage() {
         </div>
       )}
       {profile && (
+      <>
+      {publicPreview && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d4580a]/30 bg-[#d4580a]/10 px-4 py-3">
+          <div className="text-sm font-semibold text-[#d4580a]">
+            Public preview: this is how other people see your profile.
+          </div>
+          <Link
+            to="/profile"
+            search={{ preview: undefined }}
+            className="rounded-full bg-[#d4580a] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#b3480a]"
+          >
+            Exit preview
+          </Link>
+        </div>
+      )}
       <div className="rounded-2xl border border-border bg-card overflow-hidden sm:rounded-3xl">
         <div
           className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
@@ -320,6 +344,8 @@ function ProfilePage() {
               </div>
             </div>
           )}
+          {!publicPreview && (
+          <>
           <button
             type="button"
             onClick={() => bannerInputRef.current?.click()}
@@ -339,6 +365,8 @@ function ProfilePage() {
               e.target.value = "";
             }}
           />
+          </>
+          )}
         </div>
 
         <div className="relative px-4 pb-6 sm:px-6">
@@ -348,6 +376,8 @@ function ProfilePage() {
                 {profile?.avatar_url && <SmartAvatarImage src={profile.avatar_url} />}
                 <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
               </Avatar>
+              {!publicPreview && (
+              <>
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
@@ -364,23 +394,28 @@ function ProfilePage() {
                 className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAvatar(f); e.target.value = ""; }}
               />
+              </>
+              )}
             </div>
+            {publicPreview ? (
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="rounded-full bg-[#d4580a] px-4 py-2 text-xs font-semibold text-white">Follow</span>
+                <span className="rounded-full bg-secondary px-4 py-2 text-xs font-semibold">Message</span>
+              </div>
+            ) : (
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <Link to="/create-story" aria-label="Write a story" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
               <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
               <Link to="/edit-profile" aria-label="Edit profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
-              {profile?.username && (
-                <Link
-                  to="/u/$username"
-                  params={{ username: profile.username }}
-                  search={{ view: "resident" }}
-                  aria-label="Public view"
-                  title="Public view"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-xs font-semibold hover:bg-secondary sm:py-2.5"
-                >
-                  <ExternalLink className="h-4 w-4" /> Public View
-                </Link>
-              )}
+              <Link
+                to="/profile"
+                search={{ preview: "public" as const }}
+                aria-label="Public view"
+                title="See how others view your profile"
+                className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-xs font-semibold hover:bg-secondary sm:py-2.5"
+              >
+                <ExternalLink className="h-4 w-4" /> Public View
+              </Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <button type="button" onClick={() => setInviteOpen(true)} aria-label="Invite friends" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
               <button type="button" onClick={() => setReferralOpen(true)} aria-label="Referral network" className="relative rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5">
@@ -392,6 +427,7 @@ function ProfilePage() {
                 )}
               </button>
             </div>
+            )}
           </div>
 
           <div className="mt-4">
@@ -419,6 +455,12 @@ function ProfilePage() {
               </div>
             )}
             <div className="relative mt-1">
+              {publicPreview ? (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span>{primaryHood || ""}</span>
+                </div>
+              ) : (
               <button
                 onClick={() => setShowNeighborhoodPicker((v) => !v)}
                 className="flex items-center gap-1 text-sm text-muted-foreground hover:text-[#d4580a] transition-colors"
@@ -427,6 +469,7 @@ function ProfilePage() {
                 <span>{primaryHood || "Add neighborhood"}</span>
                 <ChevronDown className="h-3 w-3" />
               </button>
+              )}
               {showNeighborhoodPicker && (
                 <div className="absolute top-7 left-0 z-30 bg-card border border-border rounded-xl shadow-xl w-56 max-h-60 overflow-y-auto">
                   {neighborhoods.map((n) => (
@@ -634,6 +677,7 @@ function ProfilePage() {
           </div>
         </div>
       </div>
+      </>
       )}
       <MessageFollowersModal open={msgOpen} onClose={() => setMsgOpen(false)} />
       <ShareToUsersDialog
