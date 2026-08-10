@@ -365,6 +365,8 @@ function ProfilePage() {
               e.target.value = "";
             }}
           />
+          </>
+          )}
         </div>
 
         <div className="relative px-4 pb-6 sm:px-6">
@@ -374,6 +376,8 @@ function ProfilePage() {
                 {profile?.avatar_url && <SmartAvatarImage src={profile.avatar_url} />}
                 <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
               </Avatar>
+              {!publicPreview && (
+              <>
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
@@ -390,23 +394,28 @@ function ProfilePage() {
                 className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAvatar(f); e.target.value = ""; }}
               />
+              </>
+              )}
             </div>
+            {publicPreview ? (
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="rounded-full bg-[#d4580a] px-4 py-2 text-xs font-semibold text-white">Follow</span>
+                <span className="rounded-full bg-secondary px-4 py-2 text-xs font-semibold">Message</span>
+              </div>
+            ) : (
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <Link to="/create-story" aria-label="Write a story" className="rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5"><BookOpen className="h-4 w-4" /></Link>
               <Link to="/create-post" aria-label="Create post" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d4580a]/10 text-lg font-semibold leading-none text-[#d4580a] hover:bg-[#d4580a]/20 sm:h-9 sm:w-9">+</Link>
               <Link to="/edit-profile" aria-label="Edit profile" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><Pencil className="h-4 w-4" /></Link>
-              {profile?.username && (
-                <Link
-                  to="/u/$username"
-                  params={{ username: profile.username }}
-                  search={{ view: "resident" }}
-                  aria-label="Public view"
-                  title="Public view"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-xs font-semibold hover:bg-secondary sm:py-2.5"
-                >
-                  <ExternalLink className="h-4 w-4" /> Public View
-                </Link>
-              )}
+              <Link
+                to="/profile"
+                search={{ preview: "public" as const }}
+                aria-label="Public view"
+                title="See how others view your profile"
+                className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-xs font-semibold hover:bg-secondary sm:py-2.5"
+              >
+                <ExternalLink className="h-4 w-4" /> Public View
+              </Link>
               <button type="button" onClick={() => setMsgOpen(true)} aria-label="Message followers" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><MessageCircle className="h-4 w-4" /></button>
               <button type="button" onClick={() => setInviteOpen(true)} aria-label="Invite friends" className="rounded-full bg-secondary p-2 hover:bg-secondary sm:p-2.5"><UserPlus className="h-4 w-4" /></button>
               <button type="button" onClick={() => setReferralOpen(true)} aria-label="Referral network" className="relative rounded-full bg-[#d4580a]/10 p-2 text-[#d4580a] hover:bg-[#d4580a]/20 sm:p-2.5">
@@ -418,6 +427,7 @@ function ProfilePage() {
                 )}
               </button>
             </div>
+            )}
           </div>
 
           <div className="mt-4">
