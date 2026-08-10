@@ -1,0 +1,1 @@
+UPDATE public.videos SET orientation = 'portrait', featured = false WHERE id = '9e23fa07-26bf-4f08-ab18-efeba2fcfb1a';
