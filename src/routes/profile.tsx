@@ -315,7 +315,6 @@ function ProfilePage() {
           </div>
           <Link
             to="/profile"
-            search={{ preview: undefined }}
             className="rounded-full bg-[#d4580a] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#b3480a]"
           >
             Exit preview
