@@ -90,6 +90,9 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
+  const { preview } = Route.useSearch();
+  // Public preview: same profile, rendered without any owner-only controls.
+  const publicPreview = preview === "public";
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
   const category = (profile as { category?: string | null } | null)?.category ?? null;
   const role = (profile as { role?: string | null } | null)?.role ?? null;
@@ -98,7 +101,7 @@ function ProfilePage() {
   const isArtist = roleIsArtist && !isResident && role?.toLowerCase() === "artist";
   const categoryTabs: Array<{ label: string; kind: string }> = [];
   void category; void isArtist;
-  const TABS: readonly string[] = FULL_PROFILE_TABS;
+  const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
   const [tab, setTab] = useState<Tab>("Posts");
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
