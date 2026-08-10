@@ -315,7 +315,8 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown } = await import("./stripe.server");
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
     const stripe = getStripe();
 
     const { data: work } = await supabase
@@ -346,20 +347,12 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
       success_url: `${data.returnOrigin}/u/${artistHandle}?purchase=success`,
       cancel_url: `${data.returnOrigin}/u/${artistHandle}?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: breakdown.buyerTotalCents,
-            product_data: {
-              name: work.title || "Original artwork",
-              description: details || undefined,
-              images: work.media_url ? [work.media_url] : undefined,
-            },
-          },
-        },
-      ],
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: checkoutLineItems(breakdown, {
+        name: work.title || "Original artwork",
+        description: details || undefined,
+        images: work.media_url ? [work.media_url] : undefined,
+      }),
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
         transfer_data: { destination: owner.stripe_account_id },
