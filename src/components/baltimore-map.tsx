@@ -143,15 +143,17 @@ export function BaltimoreMap({
         />
         {eventGroups.map((g) => (
           (() => {
-          const key = `${g.latitude.toFixed(4)}|${g.longitude.toFixed(4)}`;
-          const overlapsNeighborhood = nCoordKeys.has(key);
-          const lat = overlapsNeighborhood ? g.latitude + 0.0009 : g.latitude;
-          const lng = overlapsNeighborhood ? g.longitude + 0.0009 : g.longitude;
+          // Event dots keep their true position. The neighborhood dot is drawn
+          // on top of them (smaller, later in the DOM), so both stay clickable:
+          // the neighborhood centre, and the event ring around it.
+          const lat = g.latitude;
+          const lng = g.longitude;
+          void nCoordKeys;
           return (
           <CircleMarker
             key={g.key}
             center={[lat, lng]}
-            radius={g.list.length > 1 ? 12 : 10}
+            radius={g.list.length > 1 ? 15 : 13}
             pathOptions={{
               color: "var(--map-accent)",
               fillColor: "var(--map-accent)",
