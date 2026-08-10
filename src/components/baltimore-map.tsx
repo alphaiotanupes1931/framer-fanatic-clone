@@ -108,9 +108,6 @@ export function BaltimoreMap({
 
   const { MapContainer, TileLayer, CircleMarker, Tooltip, Popup } = Lib;
 
-  // Slightly offset event markers when they share exact coords with a neighborhood
-  // so the neighborhood dot stays clickable underneath.
-  const nCoordKeys = new Set(neighborhoods.map((n) => `${n.latitude.toFixed(4)}|${n.longitude.toFixed(4)}`));
 
   const groups = new Map<string, EventPin[]>();
   for (const e of events) {
@@ -141,40 +138,8 @@ export function BaltimoreMap({
           attribution='&copy; OpenStreetMap'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        {eventGroups.map((g) => (
-          (() => {
-          // Event dots keep their true position. The neighborhood dot is drawn
-          // on top of them (smaller, later in the DOM), so both stay clickable:
-          // the neighborhood centre, and the event ring around it.
-          const lat = g.latitude;
-          const lng = g.longitude;
-          void nCoordKeys;
-          return (
-          <CircleMarker
-            key={g.key}
-            center={[lat, lng]}
-            radius={g.list.length > 1 ? 15 : 13}
-            pathOptions={{
-              color: "var(--map-accent)",
-              fillColor: "var(--map-accent)",
-              fillOpacity: 0.85,
-              weight: 2,
-            }}
-          >
-            <Tooltip direction="top" offset={[0, -6]} opacity={1}>
-              <span className="text-xs font-semibold">
-                {g.list.length > 1 ? `${g.list.length} events here` : g.list[0].title}
-              </span>
-            </Tooltip>
-            <Popup maxWidth={320} minWidth={280} className="event-map-popup" autoPan autoPanPadding={[16, 16]}>
-              <EventPopup list={g.list} onSelectNeighborhood={onSelectNeighborhood} />
-            </Popup>
-          </CircleMarker>
-          );
-          })()
-        ))}
-        {/* Neighborhood dots are drawn last so they always sit on top of the
-            event dots and stay clickable even where the two overlap. */}
+        {/* Neighborhood dots are drawn first; event markers are rendered after
+            them so the green event dots sit on top of the blue neighborhood dots. */}
         {showNeighborhoods && neighborhoods.map((n) => (
           <CircleMarker
             key={`n-${n.id}`}
@@ -198,6 +163,34 @@ export function BaltimoreMap({
               </div>
             </Popup>
           </CircleMarker>
+        ))}
+        {eventGroups.map((g) => (
+          (() => {
+          const lat = g.latitude;
+          const lng = g.longitude;
+          return (
+          <CircleMarker
+            key={g.key}
+            center={[lat, lng]}
+            radius={g.list.length > 1 ? 15 : 13}
+            pathOptions={{
+              color: "var(--map-accent)",
+              fillColor: "var(--map-accent)",
+              fillOpacity: 0.85,
+              weight: 2,
+            }}
+          >
+            <Tooltip direction="top" offset={[0, -6]} opacity={1}>
+              <span className="text-xs font-semibold">
+                {g.list.length > 1 ? `${g.list.length} events here` : g.list[0].title}
+              </span>
+            </Tooltip>
+            <Popup maxWidth={320} minWidth={280} className="event-map-popup" autoPan autoPanPadding={[16, 16]}>
+              <EventPopup list={g.list} onSelectNeighborhood={onSelectNeighborhood} />
+            </Popup>
+          </CircleMarker>
+          );
+          })()
         ))}
         {events.length === 0 && null}
       </MapContainer>
