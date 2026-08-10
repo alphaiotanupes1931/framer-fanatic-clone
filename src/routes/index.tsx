@@ -588,7 +588,7 @@ function CreatorsFans() {
                     : "border border-paper/30 text-paper hover:bg-paper hover:text-ink")
                 }
               >
-                <span style={c.cc ? { color: c.cc } : undefined}>{c.cta}</span>
+                <span>{c.cta}</span>
                 <span className={"inline-flex items-center justify-center w-7 h-7 rounded-full " + (c.primary ? "bg-ink text-paper" : "bg-paper/10 text-paper group-hover:bg-ink group-hover:text-paper")}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </span>
