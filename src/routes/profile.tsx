@@ -51,7 +51,8 @@ export const Route = createFileRoute("/profile")({
 
 const FULL_PROFILE_TABS = ["Posts","About","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Payouts"] as const;
 /** Tabs other people can see when they visit your profile. */
-const PUBLIC_PROFILE_TABS = ["Posts","About","My Writings"] as const;
+// Public preview keeps every tab the owner has, minus purely private money tabs.
+const PUBLIC_PROFILE_TABS = ["Posts","About","My Writings","Saved","Attending","Organized","My Tickets","My Pages","My Dashboard","Payouts"] as const;
 const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 
