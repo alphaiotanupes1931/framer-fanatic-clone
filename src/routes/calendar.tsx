@@ -10,8 +10,12 @@ import { EventImage } from "@/components/event-image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { pageHead } from "@/lib/seo";
 
-function openEventPopup(ev: Ev) {
-  window.dispatchEvent(new CustomEvent<Ev>("pb-open-event", { detail: ev }));
+type EventPopupDetail = { list: Ev[]; index: number };
+
+function openEventPopup(ev: Ev, list?: Ev[]) {
+  const all = list && list.length ? list : [ev];
+  const index = Math.max(0, all.findIndex((e) => e.id === ev.id));
+  window.dispatchEvent(new CustomEvent<EventPopupDetail>("pb-open-event", { detail: { list: all, index } }));
 }
 
 export const Route = createFileRoute("/calendar")({
