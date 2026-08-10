@@ -305,6 +305,21 @@ function ProfilePage() {
         </div>
       )}
       {profile && (
+      <>
+      {publicPreview && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d4580a]/30 bg-[#d4580a]/10 px-4 py-3">
+          <div className="text-sm font-semibold text-[#d4580a]">
+            Public preview: this is how other people see your profile.
+          </div>
+          <Link
+            to="/profile"
+            search={{ preview: undefined }}
+            className="rounded-full bg-[#d4580a] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#b3480a]"
+          >
+            Exit preview
+          </Link>
+        </div>
+      )}
       <div className="rounded-2xl border border-border bg-card overflow-hidden sm:rounded-3xl">
         <div
           className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
@@ -329,6 +344,8 @@ function ProfilePage() {
               </div>
             </div>
           )}
+          {!publicPreview && (
+          <>
           <button
             type="button"
             onClick={() => bannerInputRef.current?.click()}
