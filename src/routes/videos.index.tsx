@@ -124,10 +124,11 @@ function VideosSignedIn() {
   const submit = async () => {
     if (!me || !form.title.trim() || !form.video_url.trim()) return;
     if (!form.category) { toast.error("Please select a category"); return; }
+    if (!form.orientation) { toast.error("Please select portrait or landscape"); return; }
     const { error } = await supabase.from("videos").insert({
       user_id: me.id, title: form.title.trim(), description: form.description.trim() || null,
       video_url: form.video_url.trim(), thumbnail_url: null, category: form.category,
-      orientation: form.orientation || null, aspect_ratio: form.aspect_ratio,
+      orientation: form.orientation, aspect_ratio: form.aspect_ratio,
     } as any);
     if (error) { toast.error(error.message); return; }
     setOpen(false); setForm({ title: "", description: "", video_url: "", category: "", orientation: "", aspect_ratio: null });
