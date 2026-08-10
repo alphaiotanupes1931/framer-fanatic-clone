@@ -34,9 +34,10 @@ import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compr
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
   // ?preview=public renders this same page the way other people see it.
-  validateSearch: (search: Record<string, unknown>) => ({
-    preview: search.preview === "public" ? ("public" as const) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>) => {
+    if (search.preview === "public") return { preview: "public" as const };
+    return {};
+  },
   head: () => ({
     meta: [
       { title: "My Profile | Planet Baltimore" },
