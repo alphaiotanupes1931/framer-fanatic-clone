@@ -1834,7 +1834,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
       {items.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">No {kind ?? "post"} entries yet.</div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((p) => {
             const media = (p.media_urls && p.media_urls.length ? p.media_urls : [p.video_url, p.media_url].filter(Boolean) as string[]);
             const styled = !!(p.bg_color);
