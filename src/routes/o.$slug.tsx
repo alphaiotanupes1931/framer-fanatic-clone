@@ -163,12 +163,18 @@ function OrgProfile() {
   const canManage = isOwner || isAdmin;
   const isAssoc = org.type === "community_assoc";
   const isGroup = org.type === "group";
-  const isArtsOrg = org.type === "arts_org" || org.type === "artist";
+  const isArtist = org.type === "artist";
+  const isArtsOrg = org.type === "arts_org" || isArtist;
   const isBusiness = !isAssoc && !isGroup && !isArtsOrg;
   const subLower = (org.subtype ?? "").toLowerCase();
   const isRestaurant = isBusiness && /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(subLower);
   const isService = isBusiness && !isRestaurant;
-  const TABS: readonly string[] = isArtsOrg
+  // Artist pages are standalone: their tab set comes from the artist category
+  // and every tab reads only this page's own content.
+  const artistTabs = isArtist ? tabsForArtist(org.subtype, "artist") : [];
+  const TABS: readonly string[] = isArtist
+    ? artistTabs.map((t) => t.label)
+    : isArtsOrg
     ? // The Artists roster only makes sense once the org has artists, so it
       // stays hidden for visitors until someone is added.
       ARTS_ORG_TABS.filter((t) => t !== "Artists" || canManage || artistCount > 0)
@@ -1425,7 +1431,7 @@ function TierForm({ orgId, initial, onCancel, onSaved }: {
   );
 }
 
-function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+function OrgPostList({ orgId, kind, canManage }: { orgId: string; kind: string | null; canManage: boolean }) {
   return <OrgPostListImpl orgId={orgId} kind={kind} canManage={canManage} />;
 }
 
@@ -1605,7 +1611,7 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
   );
 }
 
-function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: "opportunity"|"press"|"update"|null; canManage: boolean }) {
+function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: string | null; canManage: boolean }) {
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   type Mode = "text" | "photo" | "video";
