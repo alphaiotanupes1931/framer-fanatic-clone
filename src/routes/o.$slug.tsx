@@ -103,8 +103,6 @@ function OrgProfile() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
-  const [artistCount, setArtistCount] = useState(0);
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
   }, []);
@@ -147,17 +145,6 @@ function OrgProfile() {
     setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
     setTab("Posts");
   }, [org]);
-  useEffect(() => {
-    if (!org) return;
-    (async () => {
-      const { count } = await supabase
-        .from("organization_artists")
-        .select("id", { count: "exact", head: true })
-        .eq("org_id", org.id);
-      setArtistCount(count ?? 0);
-    })();
-  }, [org]);
-
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
 
   const isOwner = !!me && me === org.owner_id;
