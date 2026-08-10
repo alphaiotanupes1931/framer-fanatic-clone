@@ -88,6 +88,7 @@ function VideosSignedIn() {
   const [open, setOpen] = useState(false);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
+  const [shape, setShape] = useState<"all" | "landscape" | "portrait">("all");
   const UPLOAD_CATEGORIES = VIDEO_CATEGORIES.filter((c) => c !== "All");
   const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "", orientation: "" as string, aspect_ratio: null as number | null });
   const [uploading, setUploading] = useState(false);
@@ -155,8 +156,8 @@ function VideosSignedIn() {
   // before this rule existed falls back into the portrait grid.
   const featured = filtered.filter((v) => v.featured && v.orientation !== "portrait");
   const rest = filtered.filter((v) => !(v.featured && v.orientation !== "portrait"));
-  const portraitRest = rest.filter((v) => v.orientation === "portrait");
-  const landscapeRest = rest.filter((v) => v.orientation !== "portrait");
+  const portraitRest = shape === "landscape" ? [] : rest.filter((v) => v.orientation === "portrait");
+  const landscapeRest = shape === "portrait" ? [] : rest.filter((v) => v.orientation !== "portrait");
 
   const submit = async () => {
     if (!me || !form.title.trim() || !form.video_url.trim()) return;
@@ -205,7 +206,14 @@ function VideosSignedIn() {
           ))}
         </div>
 
-        {featured.length > 0 && (
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {([["all", "All Videos"], ["landscape", "Landscape"], ["portrait", "Portrait"]] as const).map(([key, label]) => (
+            <button key={key} onClick={() => setShape(key)}
+              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition ${shape===key ? "bg-neutral-900 text-white" : "border border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400"}`}>{label}</button>
+          ))}
+        </div>
+
+        {shape !== "portrait" && featured.length > 0 && (
           <section>
             <h2 className="mb-3 flex items-center gap-2 text-sm font-bold"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> Featured Videos</h2>
             <div className="grid gap-5 sm:grid-cols-2 lazy-grid">
@@ -220,7 +228,7 @@ function VideosSignedIn() {
               <h2 className="mb-3 text-sm font-bold">Landscape</h2>
               <CardGridSkeleton count={6} />
             </>
-          ) : rest.length === 0 ? (
+          ) : landscapeRest.length + portraitRest.length === 0 ? (
             <>
             <h2 className="mb-3 text-sm font-bold">All Videos</h2>
             <EmptyState
