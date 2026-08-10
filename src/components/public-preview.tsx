@@ -39,7 +39,6 @@ export function PublicShell({
             <Link to="/events" className="hover:text-paper">Events</Link>
             <Link to="/artists" className="hover:text-paper">Creators</Link>
             <Link to="/stories" className="hover:text-paper">Stories</Link>
-            <Link to="/videos" className="hover:text-paper">Videos</Link>
           </nav>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {signedIn ? (
