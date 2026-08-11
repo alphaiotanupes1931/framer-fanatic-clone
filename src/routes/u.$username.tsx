@@ -594,9 +594,9 @@ function PublicProfilePage() {
             <ArtistCVTab userId={profile.id} profile={profile} canEdit={canEdit} />
           ) : tab === "invite" ? (
             <ArtistInviteTab profile={profile} />
-          ) : tab === "events" ? (
+          ) : tab === "events" || tab === "exhibitions" ? (
             events.length === 0 ? (
-              <EmptyTab icon={Calendar} label="No events yet." />
+              <EmptyTab icon={Calendar} label={tab === "exhibitions" ? "No exhibitions yet." : "No events yet."} />
             ) : (
               <ArtistEventsGrouped events={events as never} />
             )
