@@ -25,7 +25,7 @@ export const Route = createFileRoute("/create-artist")({
   }),
 });
 
-const CATEGORIES = ["Music", "Visual Art", "Photography", "Film", "Writing", "Design", "Fashion", "Food", "Performance", "Other"];
+const CATEGORIES = ["Music", "DJ", "Podcast", "Visual Art", "Photography", "Video", "Literary", "Fashion", "Mixed Media", "Performance", "Other"];
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "artist";
