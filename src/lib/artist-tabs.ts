@@ -1,10 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  List, Disc3, Music2, Mic, Ticket, FileText, BookOpen, Calendar, MessageCircle,
+  List, Disc3, Music2, Mic, Ticket, FileText, Calendar, MessageCircle,
   UserPlus2, Layers, Image as ImageIcon, Flame, Headphones, Mail, Shirt,
   ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark, LayoutDashboard,
 } from "lucide-react";
-import { DollarSign, Scissors, HelpCircle, Star, Palette, Hammer, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
+import { DollarSign, Scissors, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
 
 export type ArtistTabKey =
   | "posts" | "album" | "singles" | "shows" | "epk" | "book" | "events" | "talk" | "cv" | "invite"
