@@ -186,7 +186,7 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   const r = norm(role);
   const hay = `${c} ${r}`;
   if (/podcast/.test(hay)) return PODCAST;
-  if (/videograph|film/.test(hay)) return VIDEO;
+  if (/videograph|filmmak|film\b|\bvideo\b/.test(hay)) return VIDEO;
   if (/\bdj\b/.test(hay)) return DJ;
   if (/music|musician|producer/.test(hay)) return MUSIC;
   if (/fashion/.test(hay)) return FASHION;
@@ -203,10 +203,10 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
 
 export function isArtistProfile(category?: string | null, role?: string | null): boolean {
   const hay = `${norm(category)} ${norm(role)}`;
-  if (/resident|visitor/.test(hay) && !/artist|music|dj|producer|podcast|fashion|photograph|videograph|film|visual art|muralist|painter|sculpt|illustrat|designer|writer|poet|dancer|performance|mixed media|literary/.test(hay)) {
+  if (/resident|visitor/.test(hay) && !/artist|music|dj|producer|podcast|fashion|photograph|videograph|film|video|visual art|muralist|painter|sculpt|illustrat|designer|writer|poet|dancer|performance|mixed media|literary/.test(hay)) {
     return false;
   }
-  return /artist|music|musician|dj|producer|podcast|fashion|mixed media|performance|photograph|videograph|film|visual art|literary|poet|writer|dancer|muralist|painter|sculpt|illustrat|designer|creative/.test(hay);
+  return /artist|music|musician|dj|producer|podcast|fashion|mixed media|performance|photograph|videograph|film|video|visual art|literary|poet|writer|dancer|muralist|painter|sculpt|illustrat|designer|creative/.test(hay);
 }
 
 export function tabsForProfile(category?: string | null, role?: string | null): ArtistTab[] {
@@ -225,7 +225,7 @@ export function bannerLabelForArtist(category?: string | null, role?: string | n
   if (/mixed media/.test(hay)) return "Mixed Media";
   if (/performance|dancer/.test(hay)) return "Performance";
   if (/photograph/.test(hay)) return "Photography";
-  if (/videograph|film/.test(hay)) return "Video";
+  if (/videograph|filmmak|film\b|\bvideo\b/.test(hay)) return "Video";
   if (/visual art|muralist/.test(hay)) return "Visual Art";
   if (/literary|poet|writer/.test(hay)) return "Literary";
   if (/resident/.test(hay)) return "Resident";

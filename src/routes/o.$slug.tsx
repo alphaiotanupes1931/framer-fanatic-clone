@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -565,6 +565,15 @@ const SHARED_TABS = new Set([
 function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; canManage: boolean; me: string | null }) {
   if (SHARED_TABS.has(tab)) return null;
   if (tab === "Talk") return <CommentsTab orgId={org.id} me={me} canManage={canManage} />;
+  if (tab === "CV/Bio" || tab === "Bio/CV")
+    return <ArtsOrgAboutTab org={org} canManage={canManage} onChange={() => {}} />;
+  if (tab === "Saved")
+    return (
+      <div className="py-14 text-center text-sm text-muted-foreground">
+        Saved items live on your personal profile.{" "}
+        <Link to="/saved" className="font-semibold text-primary hover:underline">Open saved</Link>
+      </div>
+    );
   if (tab === "Portfolio") return <GalleryTab orgId={org.id} />;
   if (tab === "Shop" || tab === "Print Shop")
     return <PriceItemsSection orgId={org.id} subtype={org.subtype} canManage={canManage} title={tab} />;
