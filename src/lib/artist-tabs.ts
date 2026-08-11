@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   List, Disc3, Music2, Mic, Ticket, FileText, BookOpen, Calendar, MessageCircle,
   UserPlus2, Layers, Image as ImageIcon, Flame, Headphones, Mail, Shirt,
-  ShoppingBag, Package, Users, Film, Camera, Radio,
+  ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark, LayoutDashboard,
 } from "lucide-react";
 import { DollarSign, Scissors, HelpCircle, Star, Palette, Hammer, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
 
@@ -14,138 +14,144 @@ export type ArtistTabKey =
   | "videos" | "shop" | "reviews"
   | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support"
   | "materials" | "installations" | "commissions" | "press"
-  | "repertoire" | "writing" | "appearances" | "newsletter" | "books";
+  | "repertoire" | "writing" | "appearances" | "newsletter" | "books"
+  | "exhibitions" | "dashboard" | "mixes" | "tracks";
 
 export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
 
 const MUSIC: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
-  { key: "listen", label: "Listen", Icon: Headphones },
   { key: "album", label: "Album", Icon: Disc3 },
   { key: "singles", label: "Singles", Icon: Music2 },
-  { key: "epk", label: "EPK", Icon: FileText },
-  { key: "book", label: "Book", Icon: BookOpen },
   { key: "videos", label: "Videos", Icon: Film },
+  { key: "epk", label: "EPK", Icon: FileText },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
-  { key: "reviews", label: "Reviews", Icon: MessageCircle },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "invite", label: "Invite", Icon: UserPlus2 },
+];
+
+const DJ: ArtistTab[] = [
+  { key: "posts", label: "Posts", Icon: List },
+  { key: "mixes", label: "Mixes", Icon: Headphones },
+  { key: "tracks", label: "Tracks", Icon: Music2 },
+  { key: "videos", label: "Videos", Icon: Film },
+  { key: "epk", label: "EPK", Icon: FileText },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "saved", label: "Saved", Icon: Bookmark },
+  { key: "events", label: "Events", Icon: Calendar },
+  { key: "talk", label: "Talk", Icon: MessageCircle },
+  { key: "contact", label: "Contact", Icon: Mail },
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const VIDEO: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
-  { key: "filmography", label: "Filmography", Icon: Film },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "reel", label: "Reel", Icon: Radio },
   { key: "watch", label: "Watch", Icon: Camera },
-  { key: "screenings", label: "Screenings", Icon: Ticket },
   { key: "awards", label: "Awards", Icon: Flame },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "events", label: "Events", Icon: Calendar },
   { key: "support", label: "Support", Icon: UserPlus2 },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const PODCAST: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "episodes", label: "Episodes", Icon: Mic },
   { key: "guests", label: "Guests", Icon: Users },
+  { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { key: "sponsors", label: "Sponsors", Icon: DollarSign },
   { key: "clips", label: "Clips", Icon: Scissors },
-  { key: "qa", label: "Q&A", Icon: HelpCircle },
-  { key: "bonus", label: "Bonus", Icon: Star },
-  { key: "shop", label: "Shop", Icon: ShoppingBag },
-  { key: "reviews", label: "Reviews", Icon: MessageCircle },
+  { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const STUDIO: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "cv", label: "Bio/CV", Icon: FileText },
+  { key: "gallery", label: "Portfolio", Icon: ImageIcon },
+  { key: "exhibitions", label: "Exhibitions", Icon: Building2 },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
-  { key: "studio", label: "Studio", Icon: Flame },
-  { key: "series", label: "Series", Icon: Layers },
+  { key: "contact", label: "Contact", Icon: Mail },
+  { key: "press", label: "Press", Icon: Newspaper },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
-  { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const PHOTO: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "gallery", label: "Portfolio", Icon: ImageIcon },
-  { key: "shop", label: "Print Shop", Icon: ShoppingBag },
-  { key: "book", label: "Bookings", Icon: BookOpen },
-  { key: "awards", label: "Recognition", Icon: Flame },
-  { key: "writing", label: "Field Notes", Icon: PenTool },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const MIXED: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
-  { key: "materials", label: "Materials", Icon: Palette },
-  { key: "installations", label: "Installations", Icon: Building2 },
-  { key: "commissions", label: "Commissions", Icon: Hammer },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "gallery", label: "Portfolio", Icon: ImageIcon },
+  { key: "exhibitions", label: "Exhibitions", Icon: Building2 },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "press", label: "Press", Icon: Newspaper },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const PERFORMANCE: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "repertoire", label: "Repertoire", Icon: Layers },
   { key: "reel", label: "Reel", Icon: Radio },
   { key: "shows", label: "Shows", Icon: MapPin },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
-  { key: "reviews", label: "Reviews", Icon: MessageCircle },
-  { key: "book", label: "Book", Icon: BookOpen },
+  { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const LITERARY: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
-  { key: "books", label: "Books", Icon: BookOpen },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "writing", label: "Writing", Icon: PenTool },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
-  { key: "support", label: "Support", Icon: UserPlus2 },
-  { key: "appearances", label: "Appearances", Icon: MapPin },
   { key: "newsletter", label: "Newsletter", Icon: Mail },
   { key: "press", label: "Press", Icon: Newspaper },
+  { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
+  { key: "contact", label: "Contact", Icon: Mail },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
 const FASHION: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
+  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "fashion_line", label: "Fashion Line", Icon: Layers },
   { key: "lookbook", label: "Lookbook", Icon: Shirt },
   { key: "drops", label: "Drops", Icon: Package },
   { key: "collabs", label: "Collabs", Icon: Users },
-  { key: "shop", label: "Shop", Icon: ShoppingBag },
+  { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
   { key: "contact", label: "Contact", Icon: Mail },
-  { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
 ];
 
@@ -181,7 +187,8 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   const hay = `${c} ${r}`;
   if (/podcast/.test(hay)) return PODCAST;
   if (/videograph|film/.test(hay)) return VIDEO;
-  if (/music|musician|dj|producer/.test(hay)) return MUSIC;
+  if (/\bdj\b/.test(hay)) return DJ;
+  if (/music|musician|producer/.test(hay)) return MUSIC;
   if (/fashion/.test(hay)) return FASHION;
   if (/literary|poet|writer/.test(hay)) return LITERARY;
   if (/performance|dancer/.test(hay)) return PERFORMANCE;
