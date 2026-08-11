@@ -186,7 +186,7 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
   const r = norm(role);
   const hay = `${c} ${r}`;
   if (/podcast/.test(hay)) return PODCAST;
-  if (/videograph|film/.test(hay)) return VIDEO;
+  if (/videograph|filmmak|film\b|\bvideo\b/.test(hay)) return VIDEO;
   if (/\bdj\b/.test(hay)) return DJ;
   if (/music|musician|producer/.test(hay)) return MUSIC;
   if (/fashion/.test(hay)) return FASHION;
@@ -225,7 +225,7 @@ export function bannerLabelForArtist(category?: string | null, role?: string | n
   if (/mixed media/.test(hay)) return "Mixed Media";
   if (/performance|dancer/.test(hay)) return "Performance";
   if (/photograph/.test(hay)) return "Photography";
-  if (/videograph|film/.test(hay)) return "Video";
+  if (/videograph|filmmak|film\b|\bvideo\b/.test(hay)) return "Video";
   if (/visual art|muralist/.test(hay)) return "Visual Art";
   if (/literary|poet|writer/.test(hay)) return "Literary";
   if (/resident/.test(hay)) return "Resident";
