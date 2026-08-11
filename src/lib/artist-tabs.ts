@@ -203,10 +203,10 @@ export function tabsForArtist(category?: string | null, role?: string | null): A
 
 export function isArtistProfile(category?: string | null, role?: string | null): boolean {
   const hay = `${norm(category)} ${norm(role)}`;
-  if (/resident|visitor/.test(hay) && !/artist|music|dj|producer|podcast|fashion|photograph|videograph|film|visual art|muralist|painter|sculpt|illustrat|designer|writer|poet|dancer|performance|mixed media|literary/.test(hay)) {
+  if (/resident|visitor/.test(hay) && !/artist|music|dj|producer|podcast|fashion|photograph|videograph|film|video|visual art|muralist|painter|sculpt|illustrat|designer|writer|poet|dancer|performance|mixed media|literary/.test(hay)) {
     return false;
   }
-  return /artist|music|musician|dj|producer|podcast|fashion|mixed media|performance|photograph|videograph|film|visual art|literary|poet|writer|dancer|muralist|painter|sculpt|illustrat|designer|creative/.test(hay);
+  return /artist|music|musician|dj|producer|podcast|fashion|mixed media|performance|photograph|videograph|film|video|visual art|literary|poet|writer|dancer|muralist|painter|sculpt|illustrat|designer|creative/.test(hay);
 }
 
 export function tabsForProfile(category?: string | null, role?: string | null): ArtistTab[] {
