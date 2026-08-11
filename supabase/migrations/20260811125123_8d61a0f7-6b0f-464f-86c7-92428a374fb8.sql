@@ -1,0 +1,2 @@
+ALTER TABLE public.organizations DROP CONSTRAINT organizations_type_check;
+ALTER TABLE public.organizations ADD CONSTRAINT organizations_type_check CHECK (type = ANY (ARRAY['arts_org'::text,'business'::text,'community_assoc'::text,'group'::text,'artist'::text]));
