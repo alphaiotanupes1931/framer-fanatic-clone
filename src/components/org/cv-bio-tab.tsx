@@ -26,12 +26,14 @@ const DJ_SECTIONS: SectionDef[] = [
 ];
 
 const MUSIC_SECTIONS: SectionDef[] = [
-  S("releases", "Discography & Releases", "Album, EP or single", Disc3),
-  S("exhibitions", "Notable Performances & Festivals", "Show, venue or festival", Music2),
+  S("education", "Education & Training", "School, program or teacher", GraduationCap),
+  S("ensembles", "Ensembles & Bands", "Band, ensemble or project", Users),
+  S("exhibitions", "Touring & Performances", "Tour, venue or festival", Calendar),
+  S("recording", "Recording & Session Credits", "Record, artist or studio", Disc3),
   S("collabs", "Collaborations & Features", "Collaborator or feature", Users),
-  S("awards", "Awards & Recognition", "Award, grant or honor", Trophy),
-  S("press", "Press & Features", "Publication or feature", Newspaper),
-  S("education", "Training & Education", "School, program or mentorship", GraduationCap),
+  S("awards", "Awards & Nominations", "Award, grant or nomination", Trophy),
+  S("press", "Press & Reviews", "Publication or review", Newspaper),
+  S("residencies", "Residencies & Fellowships", "Residency or fellowship", Radio),
 ];
 
 const VISUAL_SECTIONS: SectionDef[] = [
@@ -77,15 +79,15 @@ const FASHION_SECTIONS: SectionDef[] = [
   S("education", "Education & Training", "School or program", GraduationCap),
 ];
 
-function sectionsFor(category?: string | null): { title: string; Icon: LucideIcon; sections: SectionDef[] } {
+function sectionsFor(category?: string | null): { title: string; bioLabel: string; Icon: LucideIcon; sections: SectionDef[] } {
   const hay = (category ?? "").toLowerCase();
-  if (/\bdj\b/.test(hay)) return { title: "Bio & CV", Icon: Headphones, sections: DJ_SECTIONS };
-  if (/podcast/.test(hay)) return { title: "Bio & CV", Icon: Mic, sections: PODCAST_SECTIONS };
-  if (/videograph|filmmak|film|video/.test(hay)) return { title: "Bio & CV", Icon: Film, sections: VIDEO_SECTIONS };
-  if (/music|producer/.test(hay)) return { title: "Bio & CV", Icon: Music2, sections: MUSIC_SECTIONS };
-  if (/fashion/.test(hay)) return { title: "Bio & CV", Icon: Shirt, sections: FASHION_SECTIONS };
-  if (/literary|poet|writer/.test(hay)) return { title: "Bio & CV", Icon: PenTool, sections: LITERARY_SECTIONS };
-  return { title: "Bio & CV", Icon: ImageIcon, sections: VISUAL_SECTIONS };
+  if (/\bdj\b/.test(hay)) return { title: "DJ Bio & CV", bioLabel: "Artist Bio", Icon: Headphones, sections: DJ_SECTIONS };
+  if (/podcast/.test(hay)) return { title: "Podcaster CV / Bio", bioLabel: "Artist Statement", Icon: Mic, sections: PODCAST_SECTIONS };
+  if (/videograph|filmmak|film|video/.test(hay)) return { title: "Video Artist CV / Bio", bioLabel: "Artist Statement", Icon: Film, sections: VIDEO_SECTIONS };
+  if (/music|producer/.test(hay)) return { title: "Musician CV / Bio", bioLabel: "Artist Statement", Icon: Music2, sections: MUSIC_SECTIONS };
+  if (/fashion/.test(hay)) return { title: "Fashion CV / Bio", bioLabel: "Artist Statement", Icon: Shirt, sections: FASHION_SECTIONS };
+  if (/literary|poet|writer/.test(hay)) return { title: "Writer CV / Bio", bioLabel: "Artist Statement", Icon: PenTool, sections: LITERARY_SECTIONS };
+  return { title: "Artist CV / Bio", bioLabel: "Artist Statement", Icon: ImageIcon, sections: VISUAL_SECTIONS };
 }
 
 /** Legacy shape stored flat keys; keep reading them so nothing is lost. */
@@ -176,7 +178,7 @@ export function CvBioTab({
       {header}
 
       <section className="rounded-2xl border border-border bg-card p-5">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Artist Bio</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{preset.bioLabel}</h3>
         {edit ? (
           <textarea
             value={value.statement}
@@ -188,7 +190,7 @@ export function CvBioTab({
         ) : value.statement.trim() ? (
           <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{value.statement}</p>
         ) : (
-          <p className="mt-3 text-sm italic text-muted-foreground">No bio yet.</p>
+          <p className="mt-3 text-sm italic text-muted-foreground">{preset.bioLabel === "Artist Bio" ? "No bio yet." : "No statement yet."}</p>
         )}
       </section>
 
