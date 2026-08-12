@@ -1400,6 +1400,7 @@ export type Database = {
           bio: string | null
           bylaws: string | null
           created_at: string
+          cv: Json
           email: string | null
           hours: Json | null
           id: string
@@ -1424,6 +1425,7 @@ export type Database = {
           bio?: string | null
           bylaws?: string | null
           created_at?: string
+          cv?: Json
           email?: string | null
           hours?: Json | null
           id?: string
@@ -1448,6 +1450,7 @@ export type Database = {
           bio?: string | null
           bylaws?: string | null
           created_at?: string
+          cv?: Json
           email?: string | null
           hours?: Json | null
           id?: string
