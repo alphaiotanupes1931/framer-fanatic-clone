@@ -26,6 +26,8 @@ import { ArtistsTab } from "@/components/org/artists-tab";
 import { EventImage } from "@/components/event-image";
 import { OpportunitiesTab } from "@/components/org/opportunities-tab";
 import { TextDocTab } from "@/components/org/text-doc-tab";
+import { CvBioTab } from "@/components/org/cv-bio-tab";
+import { ContactTab } from "@/components/org/contact-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
