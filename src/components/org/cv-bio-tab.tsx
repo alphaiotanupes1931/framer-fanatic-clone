@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   Plus, Trash2, Pencil, Save, X, ChevronUp, ChevronDown, Headphones,
   Disc3, Calendar, Radio, Users, Trophy, Newspaper, GraduationCap,
-  Music2, Building2, ImageIcon, Film, Mic, PenTool, Shirt, Briefcase, DollarSign, Sparkles, ShoppingBag, type LucideIcon,
+  Music2, Building2, ImageIcon, Film, Mic, PenTool, Shirt, Briefcase, DollarSign, Sparkles, ShoppingBag, BookOpen, type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,11 +66,14 @@ const PODCAST_SECTIONS: SectionDef[] = [
 ];
 
 const LITERARY_SECTIONS: SectionDef[] = [
-  S("publications", "Publications", "Book, essay or poem", PenTool),
+  S("education", "Education & Training", "School, program or workshop", GraduationCap),
+  S("publications", "Publications", "Book, essay or poem", BookOpen),
+  S("experience", "Editorial & Teaching Positions", "Role, publication or school", Briefcase),
   S("exhibitions", "Readings & Appearances", "Reading, venue or festival", Calendar),
-  S("awards", "Awards & Fellowships", "Award, grant or fellowship", Trophy),
-  S("press", "Press & Features", "Publication or feature", Newspaper),
-  S("education", "Education & Training", "School, program or residency", GraduationCap),
+  S("awards", "Awards & Honors", "Award, grant or honor", Trophy),
+  S("residencies", "Residencies & Fellowships", "Residency or fellowship", Radio),
+  S("press", "Press & Reviews", "Publication or review", Newspaper),
+  S("commissions", "Commissions & Freelance", "Client or commission", PenTool),
 ];
 
 const FASHION_SECTIONS: SectionDef[] = [
@@ -90,7 +93,7 @@ function sectionsFor(category?: string | null): { title: string; bioLabel: strin
   if (/videograph|filmmak|film|video/.test(hay)) return { title: "Video Artist CV / Bio", bioLabel: "Artist Statement", Icon: Film, sections: VIDEO_SECTIONS };
   if (/music|producer/.test(hay)) return { title: "Musician CV / Bio", bioLabel: "Artist Statement", Icon: Music2, sections: MUSIC_SECTIONS };
   if (/fashion/.test(hay)) return { title: "Designer CV / Bio", bioLabel: "Designer Statement", Icon: Shirt, sections: FASHION_SECTIONS };
-  if (/literary|poet|writer/.test(hay)) return { title: "Writer CV / Bio", bioLabel: "Artist Statement", Icon: PenTool, sections: LITERARY_SECTIONS };
+  if (/literary|poet|writer/.test(hay)) return { title: "Writer CV / Bio", bioLabel: "Author Statement", Icon: PenTool, sections: LITERARY_SECTIONS };
   return { title: "Artist CV / Bio", bioLabel: "Artist Statement", Icon: ImageIcon, sections: VISUAL_SECTIONS };
 }
 
