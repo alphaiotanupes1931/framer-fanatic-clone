@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bookmark, ImageIcon, Heart, MessageCircle, BookOpen, Ticket, Calendar as CalendarIcon, MapPin, Video as VideoIcon, Play } from "lucide-react";
+import { Bookmark, ImageIcon, Heart, MessageCircle, BookOpen, Ticket, Calendar as CalendarIcon, MapPin, Video as VideoIcon, Play, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useEventImageUrl } from "@/components/event-image";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
@@ -185,6 +185,9 @@ function SavedPage() {
   return (
     <AppLayout>
       <div className="mx-auto max-w-4xl space-y-6">
+        <Link to="/profile" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to profile
+        </Link>
         <HeroBanner title="Saved" subtitle="Posts you've bookmarked across Planet Baltimore." />
         <div className="flex gap-1 border-b border-border">
           {tabs.map((t) => {
