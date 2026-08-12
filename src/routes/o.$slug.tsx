@@ -536,9 +536,9 @@ function OrgProfile() {
           )}
           {tab === "Jobs" && <OpportunitiesTab orgId={org.id} canManage={canManage} />}
           {tab === "Stories" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
-          {(tab === "Threads" || tab === "Reviews") && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
+          {(tab === "Threads" || tab === "Reviews") && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder={tab === "Reviews" ? "Leave a review…" : "Start a thread…"} />}
           {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
-          {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
+          {tab === "Comments" && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Leave a comment…" />}
           {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
           {isArtist && <ArtistTabContent tab={tab} org={org} canManage={canManage} me={me} />}
         </div>
@@ -563,7 +563,7 @@ const SHARED_TABS = new Set([
 
 function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; canManage: boolean; me: string | null }) {
   if (SHARED_TABS.has(tab)) return null;
-  if (tab === "Talk") return <CommentsTab orgId={org.id} me={me} canManage={canManage} />;
+  if (tab === "Talk") return <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Say something to this artist…" />;
   if (tab === "CV/Bio" || tab === "Bio/CV")
     return <ArtsOrgAboutTab org={org} canManage={canManage} onChange={() => {}} />;
   if (tab === "Saved")
@@ -1919,75 +1919,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
             })()}
           </DialogContent>
         </Dialog>
-      )}
-    </div>
-  );
-}
-
-function CommentsTab({ orgId, me, canManage }: { orgId: string; me: string | null; canManage: boolean }) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [body, setBody] = useState("");
-
-  const load = async () => {
-    const { data } = await supabase.from("organization_comments").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
-    const list = (data ?? []) as Comment[];
-    const ids = Array.from(new Set(list.map((c) => c.user_id)));
-    if (ids.length) {
-      const { data: profs } = await (supabase as any).from("profiles_public").select("id, display_name, avatar_url").in("id", ids);
-      const by = new Map(((profs ?? []) as Array<{ id: string; display_name: string | null; avatar_url: string | null }>).map((p) => [p.id, p]));
-      list.forEach((c) => { c.profiles = by.get(c.user_id) ?? null; });
-    }
-    setComments(list);
-  };
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId]);
-
-  const post = async () => {
-    if (!me) return toast.error("Sign in to comment");
-    if (!body.trim()) return;
-    const { error } = await supabase.from("organization_comments").insert({ org_id: orgId, user_id: me, body: body.trim() });
-    if (error) return toast.error(error.message);
-    setBody(""); void load();
-  };
-
-  const remove = async (id: string) => {
-    const { error } = await supabase.from("organization_comments").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    void load();
-  };
-
-  return (
-    <div className="space-y-4">
-      {me ? (
-        <div className="flex gap-2">
-          <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Leave a comment…"
-            className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-sm focus:border-orange-400 focus:outline-none" />
-          <button onClick={post} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">Post</button>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-border bg-neutral-50 p-3 text-sm text-muted-foreground">Sign in to leave a comment.</div>
-      )}
-      {comments.length === 0 ? (
-        <div className="py-10 text-center text-muted-foreground">No comments yet.</div>
-      ) : (
-        <div className="space-y-2">
-          {comments.map((c) => (
-            <div key={c.id} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3">
-              <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
-                {c.profiles?.avatar_url && <Img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">{c.profiles?.display_name ?? "User"}</div>
-                <div className="text-[11px] text-muted-foreground">{timeAgo(c.created_at)}</div>
-                <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">{c.body}</p>
-              </div>
-              {(canManage || c.user_id === me) && (
-                <button onClick={() => remove(c.id)} className="rounded-full p-1.5 text-neutral-400 hover:text-red-600">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
       )}
     </div>
   );
