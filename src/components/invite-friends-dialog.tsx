@@ -14,6 +14,21 @@ interface InviteFriendsDialogProps {
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
+// Invite links always point at the public domain, never the preview host.
+const PUBLIC_SITE_URL = "https://planetbaltimore.com";
+
+const makeToken = () =>
+  (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    .replace(/-/g, "")
+    .slice(0, 24);
+
+const buildInviteUrl = (username?: string | null, token?: string) => {
+  const url = new URL("/invite", PUBLIC_SITE_URL);
+  if (username) url.searchParams.set("ref", username);
+  if (token) url.searchParams.set("iv", token);
+  return url.toString();
+};
+
 export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsDialogProps) {
   const [text, setText] = useState("");
   const [parsed, setParsed] = useState<string[]>([]);
@@ -21,7 +36,7 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
   const [sent, setSent] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const url = inviteUrl || (typeof window !== "undefined" ? window.location.origin : "");
+  const url = inviteUrl || PUBLIC_SITE_URL;
 
   const handleFile = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -47,16 +62,56 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
     if (parsed.length === 0) return;
     setSending(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const rows = parsed.map((email) => ({
-        email,
-        invited_by: user?.id ?? null,
-        invite_url: url,
-      }));
-      const { error } = await supabase.from("invites").insert(rows);
-      if (error && !error.message.includes("does not exist")) throw error;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Please sign in first");
+
+      const { data: rows } = await supabase.rpc("my_profile");
+      const profile = (rows as unknown as Array<Record<string, any>> | null)?.[0];
+      const inviterName = profile?.display_name || profile?.username || "A friend";
+
+      let sentCount = 0;
+      const failures: string[] = [];
+      const logRows: Array<Record<string, unknown>> = [];
+
+      for (const to of parsed) {
+        const token = makeToken();
+        const trackedUrl = inviteUrl || buildInviteUrl(profile?.username, token);
+        const res = await fetch("/lovable/email/transactional/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            templateName: "referral-invite",
+            recipientEmail: to,
+            idempotencyKey: `invite-${session.user.id}-${to}-${Date.now()}`,
+            templateData: { inviterName, personalMessage: "", inviteUrl: trackedUrl },
+          }),
+        });
+        if (res.ok) {
+          sentCount += 1;
+          logRows.push({ email: to, invited_by: session.user.id, invite_url: trackedUrl, token });
+        } else {
+          const body = await res.json().catch(() => ({}));
+          failures.push(`${to}: ${body.error || res.statusText}`);
+        }
+      }
+
+      if (logRows.length > 0) {
+        const { error } = await supabase.from("invites").insert(logRows as any);
+        if (error && !error.message.includes("does not exist")) console.error("invite log failed", error);
+      }
+
+      if (sentCount === 0) {
+        toast.error(failures[0] || "Could not send invites");
+        return;
+      }
       setSent(true);
-      toast.success(`Invited ${parsed.length} friend${parsed.length === 1 ? "" : "s"}`);
+      toast.success(
+        `Invite${sentCount === 1 ? "" : "s"} sent to ${sentCount} ${sentCount === 1 ? "person" : "people"}` +
+          (failures.length ? `, ${failures.length} failed` : ""),
+      );
       setTimeout(() => {
         handleClose();
       }, 1200);
