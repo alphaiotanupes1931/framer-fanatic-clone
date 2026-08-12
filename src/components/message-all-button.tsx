@@ -24,11 +24,16 @@ export function MessageAllButton({
   audienceLabel,
   loadCandidates,
   defaultGroupName,
+  initialMessage,
+  triggerClassName,
 }: {
   label?: string;
   audienceLabel: string;
   loadCandidates: () => Promise<MessageAllCandidate[]>;
   defaultGroupName?: string;
+  /** Optional first message posted into the new group (used to share polls and votes). */
+  initialMessage?: string;
+  triggerClassName?: string;
 }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
@@ -110,6 +115,13 @@ export function MessageAllButton({
       ];
       const { error: mErr } = await supabase.from("conversation_members").insert(rows);
       if (mErr) throw mErr;
+      if (initialMessage?.trim()) {
+        await supabase.from("messages").insert({
+          conversation_id: conv.id,
+          sender_id: me.id,
+          content: initialMessage.trim(),
+        });
+      }
       toast.success(`Group chat created with ${selectedList.length + 1} members`);
       window.localStorage.setItem("pb_open_conversation", conv.id);
       setOpen(false);
@@ -127,7 +139,7 @@ export function MessageAllButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+        className={triggerClassName ?? "inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"}
       >
         <MessageSquarePlus className="h-4 w-4" /> {label}
       </button>

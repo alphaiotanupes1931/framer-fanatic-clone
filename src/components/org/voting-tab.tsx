@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Clock, Plus, Trash2, X, Check } from "lucide-react";
+import { MessageAllButton } from "@/components/message-all-button";
+import { loadOrgAudience, tabDeepLink } from "@/lib/org-audience";
 
 const VOTE_TYPES = {
   yes_no: { label: "Yes / No", choices: ["Yes", "No"] },
@@ -143,13 +145,23 @@ export function VotingTab({ orgId, canManage, me }: { orgId: string; canManage: 
                     <p className="mt-1 text-xs text-neutral-500">{fmt(v.starts_at)} – {fmt(v.ends_at)}</p>
                   </div>
                   {owns && (
-                    <button
-                      onClick={() => void remove(v.id)}
-                      aria-label="Delete voting item"
-                      className="shrink-0 rounded-full p-2 text-neutral-500 transition hover:bg-red-50 hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <MessageAllButton
+                        label="Share"
+                        audienceLabel="this page"
+                        defaultGroupName={`Vote: ${v.title.slice(0, 40)}`}
+                        initialMessage={`New vote: ${v.title}\n${tabDeepLink("Voting")}`}
+                        loadCandidates={() => loadOrgAudience(orgId)}
+                        triggerClassName="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 px-3 py-1.5 text-xs font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+                      />
+                      <button
+                        onClick={() => void remove(v.id)}
+                        aria-label="Delete voting item"
+                        className="rounded-full p-2 text-neutral-500 transition hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
 

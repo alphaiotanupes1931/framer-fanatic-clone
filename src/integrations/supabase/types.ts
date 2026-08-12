@@ -762,26 +762,61 @@ export type Database = {
           },
         ]
       }
+      organization_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "organization_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_comments: {
         Row: {
           body: string
           created_at: string
           id: string
+          is_muted: boolean
+          media_urls: Json
           org_id: string
+          parent_id: string | null
           user_id: string
         }
         Insert: {
           body: string
           created_at?: string
           id?: string
+          is_muted?: boolean
+          media_urls?: Json
           org_id: string
+          parent_id?: string | null
           user_id: string
         }
         Update: {
           body?: string
           created_at?: string
           id?: string
+          is_muted?: boolean
+          media_urls?: Json
           org_id?: string
+          parent_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -790,6 +825,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "organization_comments"
             referencedColumns: ["id"]
           },
         ]
@@ -1358,6 +1400,7 @@ export type Database = {
           bio: string | null
           bylaws: string | null
           created_at: string
+          cv: Json
           email: string | null
           hours: Json | null
           id: string
@@ -1382,6 +1425,7 @@ export type Database = {
           bio?: string | null
           bylaws?: string | null
           created_at?: string
+          cv?: Json
           email?: string | null
           hours?: Json | null
           id?: string
@@ -1406,6 +1450,7 @@ export type Database = {
           bio?: string | null
           bylaws?: string | null
           created_at?: string
+          cv?: Json
           email?: string | null
           hours?: Json | null
           id?: string

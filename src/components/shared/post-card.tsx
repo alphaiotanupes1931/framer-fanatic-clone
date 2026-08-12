@@ -17,6 +17,7 @@ import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { useReaction } from "@/hooks/use-reaction";
+import { FollowButton } from "@/components/shared/follow-button";
 
 type Post = {
   id: string;
@@ -201,6 +202,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
             {post.neighborhood_name || post.neighborhood || "Baltimore"} · {timeAgo(post.created_at)}
           </div>
         </div>
+        <FollowButton userId={post.user_id} currentUserId={currentUserId} compact className="mr-1 shrink-0" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground">

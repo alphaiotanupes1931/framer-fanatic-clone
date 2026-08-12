@@ -26,8 +26,11 @@ import { ArtistsTab } from "@/components/org/artists-tab";
 import { EventImage } from "@/components/event-image";
 import { OpportunitiesTab } from "@/components/org/opportunities-tab";
 import { TextDocTab } from "@/components/org/text-doc-tab";
+import { CvBioTab } from "@/components/org/cv-bio-tab";
+import { ContactTab } from "@/components/org/contact-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
+import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
@@ -57,8 +60,6 @@ type OrgPost = {
   bg_color?: string | null; text_color?: string | null; font_size?: string | null;
   created_at: string;
 };
-
-type Comment = { id: string; user_id: string; body: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
@@ -144,7 +145,12 @@ function OrgProfile() {
   useEffect(() => {
     if (!org) return;
     setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
-    setTab("Posts");
+    // Deep links like /o/slug?tab=Polls open straight on that tab so shared
+    // polls and votes land where people expect.
+    const wanted = typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("tab")
+      : null;
+    setTab(wanted || "Posts");
   }, [org]);
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
 
@@ -537,9 +543,9 @@ function OrgProfile() {
           )}
           {tab === "Jobs" && <OpportunitiesTab orgId={org.id} canManage={canManage} />}
           {tab === "Stories" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
-          {(tab === "Threads" || tab === "Reviews") && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
+          {(tab === "Threads" || tab === "Reviews") && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder={tab === "Reviews" ? "Leave a review…" : "Start a thread…"} />}
           {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
-          {tab === "Comments" && <CommentsTab orgId={org.id} me={me} canManage={canManage} />}
+          {tab === "Comments" && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Leave a comment…" />}
           {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
           {isArtist && <ArtistTabContent tab={tab} org={org} canManage={canManage} me={me} />}
         </div>
@@ -564,9 +570,20 @@ const SHARED_TABS = new Set([
 
 function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; canManage: boolean; me: string | null }) {
   if (SHARED_TABS.has(tab)) return null;
-  if (tab === "Talk") return <CommentsTab orgId={org.id} me={me} canManage={canManage} />;
+  if (tab === "Talk") return <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Say something to this artist…" />;
   if (tab === "CV/Bio" || tab === "Bio/CV")
-    return <ArtsOrgAboutTab org={org} canManage={canManage} onChange={() => {}} />;
+    return <CvBioTab orgId={org.id} cv={(org as unknown as { cv?: unknown }).cv} canManage={canManage} />;
+  if (tab === "Contact")
+    return (
+      <ContactTab
+        ownerId={org.owner_id}
+        name={org.name}
+        email={org.email}
+        phone={org.phone}
+        website={org.website}
+        address={org.address}
+      />
+    );
   if (tab === "Saved")
     return (
       <div className="py-14 text-center text-sm text-muted-foreground">
@@ -1884,8 +1901,27 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
               const p = active;
               const media = (p.media_urls && p.media_urls.length ? p.media_urls : [p.video_url, p.media_url].filter(Boolean) as string[]);
               const sizeClass = FONT_SIZE_CLASS[p.font_size || "md"];
+              const idx = items.findIndex((it) => it.id === p.id);
+              const goPrev = () => { if (idx > 0) setActive(items[idx - 1]); };
+              const goNext = () => { if (idx > -1 && idx < items.length - 1) setActive(items[idx + 1]); };
               return (
-                <div className="grid md:grid-cols-[minmax(0,1.2fr)_minmax(280px,360px)]">
+                <div className="relative grid md:grid-cols-[minmax(0,1.2fr)_minmax(280px,360px)]">
+                  {idx > 0 && (
+                    <button
+                      type="button" onClick={goPrev} aria-label="Previous post"
+                      className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                  )}
+                  {idx > -1 && idx < items.length - 1 && (
+                    <button
+                      type="button" onClick={goNext} aria-label="Next post"
+                      className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  )}
                   {media.length > 0 && (
                     <div className="flex items-center justify-center bg-black">
                       {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(media[0])
@@ -1920,75 +1956,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
             })()}
           </DialogContent>
         </Dialog>
-      )}
-    </div>
-  );
-}
-
-function CommentsTab({ orgId, me, canManage }: { orgId: string; me: string | null; canManage: boolean }) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [body, setBody] = useState("");
-
-  const load = async () => {
-    const { data } = await supabase.from("organization_comments").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
-    const list = (data ?? []) as Comment[];
-    const ids = Array.from(new Set(list.map((c) => c.user_id)));
-    if (ids.length) {
-      const { data: profs } = await (supabase as any).from("profiles_public").select("id, display_name, avatar_url").in("id", ids);
-      const by = new Map(((profs ?? []) as Array<{ id: string; display_name: string | null; avatar_url: string | null }>).map((p) => [p.id, p]));
-      list.forEach((c) => { c.profiles = by.get(c.user_id) ?? null; });
-    }
-    setComments(list);
-  };
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId]);
-
-  const post = async () => {
-    if (!me) return toast.error("Sign in to comment");
-    if (!body.trim()) return;
-    const { error } = await supabase.from("organization_comments").insert({ org_id: orgId, user_id: me, body: body.trim() });
-    if (error) return toast.error(error.message);
-    setBody(""); void load();
-  };
-
-  const remove = async (id: string) => {
-    const { error } = await supabase.from("organization_comments").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    void load();
-  };
-
-  return (
-    <div className="space-y-4">
-      {me ? (
-        <div className="flex gap-2">
-          <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Leave a comment…"
-            className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-sm focus:border-orange-400 focus:outline-none" />
-          <button onClick={post} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">Post</button>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-border bg-neutral-50 p-3 text-sm text-muted-foreground">Sign in to leave a comment.</div>
-      )}
-      {comments.length === 0 ? (
-        <div className="py-10 text-center text-muted-foreground">No comments yet.</div>
-      ) : (
-        <div className="space-y-2">
-          {comments.map((c) => (
-            <div key={c.id} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3">
-              <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
-                {c.profiles?.avatar_url && <Img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">{c.profiles?.display_name ?? "User"}</div>
-                <div className="text-[11px] text-muted-foreground">{timeAgo(c.created_at)}</div>
-                <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">{c.body}</p>
-              </div>
-              {(canManage || c.user_id === me) && (
-                <button onClick={() => remove(c.id)} className="rounded-full p-1.5 text-neutral-400 hover:text-red-600">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
       )}
     </div>
   );
