@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   Plus, Trash2, Pencil, Save, X, ChevronUp, ChevronDown, Headphones,
   Disc3, Calendar, Radio, Users, Trophy, Newspaper, GraduationCap,
-  Music2, Building2, ImageIcon, Film, Mic, PenTool, Shirt, Layers, Briefcase, DollarSign, Sparkles, ShoppingBag, type LucideIcon,
+  Music2, Building2, ImageIcon, Film, Mic, PenTool, Shirt, Briefcase, DollarSign, Sparkles, ShoppingBag, type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
