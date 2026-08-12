@@ -143,7 +143,12 @@ function OrgProfile() {
   useEffect(() => {
     if (!org) return;
     setMuted(localStorage.getItem(`pb_muted_org_${org.id}`) === "1");
-    setTab("Posts");
+    // Deep links like /o/slug?tab=Polls open straight on that tab so shared
+    // polls and votes land where people expect.
+    const wanted = typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("tab")
+      : null;
+    setTab(wanted || "Posts");
   }, [org]);
   if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
 
