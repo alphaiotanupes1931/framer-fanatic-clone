@@ -10,6 +10,8 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useVideoOrientation, orientationClass } from "@/hooks/use-video-orientation";
 import { useUserRole } from "@/hooks/use-user-role";
+import { FollowButton } from "@/components/shared/follow-button";
+import { useCurrentProfile } from "@/components/app-layout";
 
 export const Route = createFileRoute("/videos/$id")({
   component: VideoDetail,
@@ -137,6 +139,7 @@ function VideoBody({ video, related, onVideoChange }: { video: Video; related: V
 }
 
 function VideoMeta({ video, onVideoChange }: { video: Video; onVideoChange: (v: Video) => void }) {
+  const me = useCurrentProfile();
   return (
     <>
       <div className="mt-4 flex items-start gap-3 md:mt-0">
@@ -158,6 +161,7 @@ function VideoMeta({ video, onVideoChange }: { video: Video; onVideoChange: (v: 
         ) : (
           <span className="font-semibold">{video.author?.display_name || "Anonymous"}</span>
         )}
+        <FollowButton userId={video.user_id} currentUserId={me?.id} />
         {video.category && (
           <span className="ml-auto rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">{video.category}</span>
         )}
