@@ -570,7 +570,18 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
   if (SHARED_TABS.has(tab)) return null;
   if (tab === "Talk") return <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Say something to this artist…" />;
   if (tab === "CV/Bio" || tab === "Bio/CV")
-    return <ArtsOrgAboutTab org={org} canManage={canManage} onChange={() => {}} />;
+    return <CvBioTab orgId={org.id} cv={(org as unknown as { cv?: unknown }).cv} canManage={canManage} />;
+  if (tab === "Contact")
+    return (
+      <ContactTab
+        ownerId={org.owner_id}
+        name={org.name}
+        email={org.email}
+        phone={org.phone}
+        website={org.website}
+        address={org.address}
+      />
+    );
   if (tab === "Saved")
     return (
       <div className="py-14 text-center text-sm text-muted-foreground">
