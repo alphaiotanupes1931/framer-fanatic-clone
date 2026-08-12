@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BarChart3, Plus, Trash2, X, Check, Lock, Unlock } from "lucide-react";
 import { timeAgo } from "@/lib/text-utils";
+import { MessageAllButton } from "@/components/message-all-button";
+import { loadOrgAudience, tabDeepLink } from "@/lib/org-audience";
 
 type Poll = {
   id: string;
@@ -132,6 +134,14 @@ export function PollsTab({ orgId, canManage, me }: { orgId: string; canManage: b
                   <h3 className="min-w-0 text-base font-bold text-neutral-900">{p.question}</h3>
                   {owns && (
                     <div className="flex shrink-0 items-center gap-1">
+                      <MessageAllButton
+                        label="Share"
+                        audienceLabel="this page"
+                        defaultGroupName={`Poll: ${p.question.slice(0, 40)}`}
+                        initialMessage={`New poll: ${p.question}\n${tabDeepLink("Polls")}`}
+                        loadCandidates={() => loadOrgAudience(orgId)}
+                        triggerClassName="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 px-3 py-1.5 text-xs font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
+                      />
                       <button
                         onClick={() => void toggleClosed(p)}
                         aria-label={p.is_closed ? "Reopen poll" : "Close poll"}
