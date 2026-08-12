@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, Heart, MessageCircle, Clock, Trash2, Send, Pencil } from "lucide-react";
+import { ArrowLeft, ArrowRight, Heart, MessageCircle, Clock, Trash2, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import DOMPurify from "isomorphic-dompurify";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
@@ -39,6 +39,19 @@ function StoryDetail() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
+  const [siblings, setSiblings] = useState<{ id: string; title: string }[]>([]);
+
+  // Reading list so people can click straight through to the next story.
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("stories")
+        .select("id, title")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      setSiblings(((data || []) as { id: string; title: string }[]));
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -135,6 +148,9 @@ function StoryDetail() {
   const excerptText = story.excerpt ? story.excerpt.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() : "";
 
   const dateLabel = new Date(story.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const idx = siblings.findIndex((s) => s.id === story.id);
+  const prevStory = idx > 0 ? siblings[idx - 1] : null;
+  const nextStory = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
 
   return (
     <AppLayout title="" hero={false}>
@@ -267,6 +283,37 @@ function StoryDetail() {
         </div>
         </div>
       </article>
+
+      {(prevStory || nextStory) && (
+        <nav className="mx-auto mt-6 grid max-w-4xl gap-3 sm:grid-cols-2">
+          {prevStory ? (
+            <Link
+              to="/stories/$storyId"
+              params={{ storyId: prevStory.id }}
+              className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-[#d4580a]"
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-[#d4580a]" />
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Previous story</div>
+                <div className="truncate text-sm font-semibold text-foreground">{prevStory.title}</div>
+              </div>
+            </Link>
+          ) : <span className="hidden sm:block" />}
+          {nextStory && (
+            <Link
+              to="/stories/$storyId"
+              params={{ storyId: nextStory.id }}
+              className="group flex items-center justify-end gap-3 rounded-2xl border border-border bg-card p-4 text-right transition hover:border-[#d4580a]"
+            >
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Next story</div>
+                <div className="truncate text-sm font-semibold text-foreground">{nextStory.title}</div>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-[#d4580a]" />
+            </Link>
+          )}
+        </nav>
+      )}
       <ShareToUsersDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
