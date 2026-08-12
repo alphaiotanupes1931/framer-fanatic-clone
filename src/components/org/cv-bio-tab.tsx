@@ -37,11 +37,14 @@ const MUSIC_SECTIONS: SectionDef[] = [
 ];
 
 const VISUAL_SECTIONS: SectionDef[] = [
-  S("education", "Education & Training", "School, program or residency", GraduationCap),
-  S("exhibitions", "Selected Exhibitions", "Show, venue or gallery", ImageIcon),
-  S("collections", "Representation & Collections", "Gallery, label or collection", Building2),
-  S("awards", "Awards & Grants", "Award, grant or honor", Trophy),
-  S("press", "Press & Features", "Publication or feature", Newspaper),
+  S("education", "Education", "School or program", GraduationCap),
+  S("exhibitions", "Solo Exhibitions", "Venue and location", ImageIcon),
+  S("groupexhibitions", "Group Exhibitions", "Venue and location", Users),
+  S("awards", "Awards & Grants", "Award, grant or funder", Trophy),
+  S("residencies", "Residencies", "Residency and location", BookOpen),
+  S("publications", "Publications", "Book, catalog or essay", BookOpen),
+  S("press", "Press", "Publication or feature", Newspaper),
+  S("collections", "Collections", "Collection or collector", Building2),
 ];
 
 const VIDEO_SECTIONS: SectionDef[] = [
@@ -94,7 +97,7 @@ function sectionsFor(category?: string | null): { title: string; bioLabel: strin
   if (/music|producer/.test(hay)) return { title: "Musician CV / Bio", bioLabel: "Artist Statement", Icon: Music2, sections: MUSIC_SECTIONS };
   if (/fashion/.test(hay)) return { title: "Designer CV / Bio", bioLabel: "Designer Statement", Icon: Shirt, sections: FASHION_SECTIONS };
   if (/literary|poet|writer/.test(hay)) return { title: "Writer CV / Bio", bioLabel: "Author Statement", Icon: PenTool, sections: LITERARY_SECTIONS };
-  return { title: "Artist CV / Bio", bioLabel: "Artist Statement", Icon: ImageIcon, sections: VISUAL_SECTIONS };
+  return { title: "Curriculum Vitae", bioLabel: "Artist Statement", Icon: ImageIcon, sections: VISUAL_SECTIONS };
 }
 
 /** Legacy shape stored flat keys; keep reading them so nothing is lost. */
