@@ -368,18 +368,19 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
         </div>
       )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+      <button
+        onClick={onUnsave}
+        aria-label="Remove from saved"
+        title="Remove from saved"
+        className="absolute right-2 top-2 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-foreground shadow transition hover:bg-white"
+      >
+        <Bookmark className="h-4 w-4 fill-current" />
+      </button>
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-2.5 pb-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <div className="flex items-center gap-3 text-[11px] font-semibold text-white">
           <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {post.likes_count ?? 0}</span>
           <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {post.comments_count ?? 0}</span>
         </div>
-        <button
-          onClick={onUnsave}
-          aria-label="Remove from saved"
-          className="pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-foreground transition hover:bg-white"
-        >
-          <Bookmark className="h-3.5 w-3.5 fill-current" />
-        </button>
       </div>
       {post.author?.username && (
         <Link
