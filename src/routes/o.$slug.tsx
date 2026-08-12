@@ -28,6 +28,7 @@ import { OpportunitiesTab } from "@/components/org/opportunities-tab";
 import { TextDocTab } from "@/components/org/text-doc-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
 import { VotingTab } from "@/components/org/voting-tab";
+import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
@@ -57,8 +58,6 @@ type OrgPost = {
   bg_color?: string | null; text_color?: string | null; font_size?: string | null;
   created_at: string;
 };
-
-type Comment = { id: string; user_id: string; body: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
