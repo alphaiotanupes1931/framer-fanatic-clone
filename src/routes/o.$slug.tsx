@@ -572,7 +572,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
   if (SHARED_TABS.has(tab)) return null;
   if (tab === "Talk") return <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Say something to this artist…" />;
   if (tab === "CV/Bio" || tab === "Bio/CV")
-    return <CvBioTab orgId={org.id} cv={(org as unknown as { cv?: unknown }).cv} canManage={canManage} />;
+    return <CvBioTab orgId={org.id} cv={(org as unknown as { cv?: unknown }).cv} canManage={canManage} category={org.subtype} />;
   if (tab === "Contact")
     return (
       <ContactTab
