@@ -36,8 +36,6 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
   const [sent, setSent] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const url = inviteUrl || PUBLIC_SITE_URL;
-
   const handleFile = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File too large (max 5MB)");
