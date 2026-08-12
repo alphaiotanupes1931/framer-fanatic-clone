@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   Plus, Trash2, Pencil, Save, X, ChevronUp, ChevronDown, Headphones,
   Disc3, Calendar, Radio, Users, Trophy, Newspaper, GraduationCap,
-  Music2, Building2, ImageIcon, Film, Mic, PenTool, Shirt, Layers, type LucideIcon,
+  Music2, Building2, ImageIcon, Film, Mic, PenTool, Shirt, Layers, Briefcase, DollarSign, type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,12 +54,15 @@ const VIDEO_SECTIONS: SectionDef[] = [
 ];
 
 const PODCAST_SECTIONS: SectionDef[] = [
-  S("shows", "Shows & Series", "Show or series", Mic),
-  S("guests", "Notable Guests", "Guest name", Users),
-  S("collabs", "Networks & Partnerships", "Network or partner", Radio),
-  S("awards", "Awards & Recognition", "Award or honor", Trophy),
+  S("education", "Education & Background", "School, program or background", GraduationCap),
+  S("production", "Production & Media Roles", "Role, company or project", Briefcase),
+  S("shows", "Prior Shows & Networks", "Show or network", Mic),
+  S("guests", "Guest Appearances & Credits", "Show or credit", Headphones),
+  S("exhibitions", "Live Shows & Tour", "Live show, venue or tour", Calendar),
+  S("collabs", "Notable Interviews & Collaborations", "Guest or collaborator", Users),
+  S("awards", "Awards & Honors", "Award or honor", Trophy),
   S("press", "Press & Features", "Publication or feature", Newspaper),
-  S("education", "Training & Education", "School or program", GraduationCap),
+  S("sponsors", "Sponsored Series & Commissions", "Sponsor or commission", DollarSign),
 ];
 
 const LITERARY_SECTIONS: SectionDef[] = [
@@ -82,7 +85,7 @@ const FASHION_SECTIONS: SectionDef[] = [
 function sectionsFor(category?: string | null): { title: string; bioLabel: string; Icon: LucideIcon; sections: SectionDef[] } {
   const hay = (category ?? "").toLowerCase();
   if (/\bdj\b/.test(hay)) return { title: "DJ Bio & CV", bioLabel: "Artist Bio", Icon: Headphones, sections: DJ_SECTIONS };
-  if (/podcast/.test(hay)) return { title: "Podcaster CV / Bio", bioLabel: "Artist Statement", Icon: Mic, sections: PODCAST_SECTIONS };
+  if (/podcast/.test(hay)) return { title: "Podcaster CV / Bio", bioLabel: "Host Statement", Icon: Mic, sections: PODCAST_SECTIONS };
   if (/videograph|filmmak|film|video/.test(hay)) return { title: "Video Artist CV / Bio", bioLabel: "Artist Statement", Icon: Film, sections: VIDEO_SECTIONS };
   if (/music|producer/.test(hay)) return { title: "Musician CV / Bio", bioLabel: "Artist Statement", Icon: Music2, sections: MUSIC_SECTIONS };
   if (/fashion/.test(hay)) return { title: "Fashion CV / Bio", bioLabel: "Artist Statement", Icon: Shirt, sections: FASHION_SECTIONS };
