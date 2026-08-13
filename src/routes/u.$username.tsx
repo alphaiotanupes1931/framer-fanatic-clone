@@ -16,6 +16,7 @@ import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
 import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
+import { ProfileSectionTab } from "@/components/profile-sections";
 import {
   ArtistPostsGrid,
   ArtistGalleryTab,
