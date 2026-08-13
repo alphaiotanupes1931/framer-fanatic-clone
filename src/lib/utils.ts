@@ -17,8 +17,9 @@ export function siteUrl(path = "/"): string {
   if (typeof window === "undefined") return `${CANONICAL_SITE_URL}${suffix}`;
   const host = window.location.hostname;
   const isLocal = host === "localhost" || host === "127.0.0.1" || host.endsWith(".local");
-  // Keep preview/dev flows on their own origin so testing still works.
-  if (isLocal || host.endsWith("lovable.app")) return `${window.location.origin}${suffix}`;
+  // Only local development stays on its own origin; every shared/public link
+  // must use the canonical domain.
+  if (isLocal) return `${window.location.origin}${suffix}`;
   return `${CANONICAL_SITE_URL}${suffix}`;
 }
 
