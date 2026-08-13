@@ -1657,7 +1657,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const [active, setActive] = useState<OrgPost | null>(null);
   type Mode = "text" | "photo" | "video";
   const [mode, setMode] = useState<Mode>("text");
-  const [form, setForm] = useState({ title: "", body: "", link_url: "" });
+  const [form, setForm] = useState({ title: "", body: "" });
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [bg, setBg] = useState<{ bg: string; fg: string }>({ bg: "", fg: "#0F172A" });
@@ -1678,7 +1678,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const FONT_SIZE_CLASS: Record<string, string> = { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-2xl" };
 
   const resetForm = () => {
-    setForm({ title: "", body: "", link_url: "" });
+    setForm({ title: "", body: "" });
     setMediaUrls([]);
     setBg({ bg: "", fg: "#0F172A" });
     setFontSize("md");
@@ -1732,7 +1732,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     const payload: Record<string, unknown> = {
       org_id: orgId, author_id: uid, kind: kind ?? "update", title: form.title.trim(),
       body: form.body.trim() || null,
-      link_url: form.link_url.trim() || null,
       media_url: firstImage,
       video_url: firstVideo,
       media_urls: mediaUrls,
@@ -1943,9 +1942,9 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                       )
                     )}
                     {p.link_url && (
-                      <a href={p.link_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
-                        Open <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <SmartFileLink href={p.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
+                        Download attachment
+                      </SmartFileLink>
                     )}
                     {canManage && (
                       <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">
