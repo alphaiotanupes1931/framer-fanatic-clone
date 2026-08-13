@@ -159,11 +159,6 @@ export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: 
               {active.body && (
                 <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{stripHtml(active.body)}</div>
               )}
-              {active.link_url && (
-                <a href={active.link_url} target="_blank" rel="noreferrer" className="inline-block text-sm font-semibold text-primary hover:underline">
-                  Read more
-                </a>
-              )}
             </div>
           </div>
         </div>
