@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { UserPlus, Upload, Mail, Loader2, Check, Copy, Share2, Link2, Send } from "lucide-react";
+import { UserPlus, Upload, Loader2, Check, Copy, Share2, Link2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { externalShare } from "@/lib/share-preview";
