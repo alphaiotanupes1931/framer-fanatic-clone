@@ -75,9 +75,6 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               }
               return ack();
             }
-            if (session.metadata?.kind === "artwork") {
-              // handled below
-            }
             if (session.metadata?.kind === "product") {
               const sellerId = session.metadata?.seller_id ?? null;
               const buyerId = session.metadata?.buyer_id ?? null;
