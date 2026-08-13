@@ -96,7 +96,6 @@ export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: 
         <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
           <input className={inputCls} placeholder="Story title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
           <textarea className={inputCls} rows={8} placeholder="Tell the story…" value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} />
-          <input className={inputCls} placeholder="Link (optional)" value={form.link_url} onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))} />
           <ImageUpload value={form.media_url} onChange={(url) => setForm((f) => ({ ...f, media_url: url }))} label="Upload cover image" />
           <div className="flex gap-2">
             <button onClick={publish} disabled={saving} className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50">
