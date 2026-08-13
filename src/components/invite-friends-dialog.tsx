@@ -39,22 +39,18 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
   const [sending, setSending] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [sent, setSent] = useState(false);
-  const [shareUrl, setShareUrl] = useState(inviteUrl || buildInviteUrl());
+  const [shareUrl, setShareUrl] = useState(buildInviteUrl());
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    if (inviteUrl) {
-      setShareUrl(inviteUrl);
-      return;
-    }
     (async () => {
       const { data: rows } = await supabase.rpc("my_profile");
       const profile = (rows as unknown as Array<Record<string, any>> | null)?.[0];
       setShareUrl(buildInviteUrl(profile?.username));
     })();
-  }, [open, inviteUrl]);
+  }, [open]);
 
   const copyLink = async () => {
     try {
