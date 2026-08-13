@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,7 +83,7 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
   const priced = (e.price_cents ?? 0) > 0;
   const [shareOpen, setShareOpen] = useState(false);
   const [saved, setSaved] = useState(false);
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/events/${e.id}` : `/events/${e.id}`;
+  const shareUrl = siteUrl(`/events/${e.id}`);
   const me = useCurrentProfile();
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -267,7 +268,7 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
     toast.success("Video deleted");
     navigate({ to: "/videos" });
   };
-  const url = typeof window !== "undefined" ? `${window.location.origin}/videos/${video.id}` : "";
+  const url = typeof window !== "undefined" ? siteUrl(`/videos/${video.id}`) : "";
 
   const loadComments = async () => {
     const { data } = await supabase

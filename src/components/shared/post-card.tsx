@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
@@ -117,7 +118,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   };
 
   const share = () => setShareOpen(true);
-  const postUrl = typeof window !== "undefined" ? `${window.location.origin}/posts/${post.id}` : `/posts/${post.id}`;
+  const postUrl = siteUrl(`/posts/${post.id}`);
   const sendExternal = () => void externalShare(postUrl, post.content?.slice(0, 80) || "A post on Planet Baltimore");
 
   const toggleSave = async () => {

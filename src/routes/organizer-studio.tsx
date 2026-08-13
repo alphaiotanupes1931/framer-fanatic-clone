@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -1015,7 +1016,7 @@ function PromotersTab({ eventId }: { eventId: string }) {
   };
 
   const copyLink = (code: string) => {
-    const url = `${window.location.origin}/events/${eventId}?ref=${code}`;
+    const url = siteUrl(`/events/${eventId}?ref=${code}`);
     navigator.clipboard.writeText(url);
     toast.success("Referral link copied");
   };

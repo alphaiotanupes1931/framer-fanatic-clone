@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
@@ -39,7 +40,7 @@ function TicketDetailPage() {
   }, [ticketId]);
 
   const shareExternal = () => {
-    const url = t?.events?.id ? `${window.location.origin}/events/${t.events.id}` : window.location.href;
+    const url = t?.events?.id ? siteUrl(`/events/${t.events.id}`) : window.location.href;
     void externalShare(url, t?.events?.title || "Event", undefined);
   };
 
@@ -146,12 +147,12 @@ function TicketDetailPage() {
         <ShareToUsersDialog
           open={shareOpen}
           onClose={() => setShareOpen(false)}
-          url={`${window.location.origin}/events/${t.events.id}`}
+          url={siteUrl(`/events/${t.events.id}`)}
           title={t.events.title}
           preview={{
             type: "event",
             id: t.events.id,
-            url: `${window.location.origin}/events/${t.events.id}`,
+            url: siteUrl(`/events/${t.events.id}`),
             title: t.events.title,
             excerpt: t.events.venue_name || t.events.location || null,
             image: t.events.image_url,
