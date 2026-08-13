@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { UserPlus, Upload, Mail, Loader2, Check, Copy, Share2, Link2 } from "lucide-react";
+import { UserPlus, Upload, Mail, Loader2, Check, Copy, Share2, Link2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { externalShare } from "@/lib/share-preview";
@@ -157,7 +157,7 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="w-full max-w-xl sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" /> Invite Friends
@@ -176,6 +176,9 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
               <Button onClick={copyLink} variant="outline" size="sm" className="shrink-0 gap-1.5">
                 {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy"}
+              </Button>
+              <Button onClick={() => void externalShare(shareUrl, "Join me on Planet Baltimore")} size="sm" className="shrink-0 gap-1.5">
+                <Send className="h-3.5 w-3.5" /> Send Invite
               </Button>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
