@@ -1655,9 +1655,11 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const [items, setItems] = useState<OrgPost[]>([]);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<OrgPost | null>(null);
+  const [mediaIdx, setMediaIdx] = useState(0);
+  useEffect(() => { setMediaIdx(0); }, [active?.id]);
   type Mode = "text" | "photo" | "video";
   const [mode, setMode] = useState<Mode>("text");
-  const [form, setForm] = useState({ title: "", body: "", link_url: "" });
+  const [form, setForm] = useState({ title: "", body: "" });
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [bg, setBg] = useState<{ bg: string; fg: string }>({ bg: "", fg: "#0F172A" });
@@ -1678,7 +1680,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const FONT_SIZE_CLASS: Record<string, string> = { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-2xl" };
 
   const resetForm = () => {
-    setForm({ title: "", body: "", link_url: "" });
+    setForm({ title: "", body: "" });
     setMediaUrls([]);
     setBg({ bg: "", fg: "#0F172A" });
     setFontSize("md");
@@ -1732,7 +1734,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     const payload: Record<string, unknown> = {
       org_id: orgId, author_id: uid, kind: kind ?? "update", title: form.title.trim(),
       body: form.body.trim() || null,
-      link_url: form.link_url.trim() || null,
       media_url: firstImage,
       video_url: firstVideo,
       media_urls: mediaUrls,
@@ -1924,13 +1925,33 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                       <ChevronRight className="h-5 w-5" />
                     </button>
                   )}
-                  {media.length > 0 && (
-                    <div className="flex items-center justify-center bg-black">
-                      {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(media[0])
-                        ? <SmartVideo src={media[0]} controls playsInline className="max-h-[75vh] w-full bg-black" />
-                        : <Img src={media[0]} alt={p.title} className="max-h-[75vh] w-full object-contain" />}
-                    </div>
-                  )}
+                  {media.length > 0 && (() => {
+                    const cur = media[Math.min(mediaIdx, media.length - 1)]!;
+                    return (
+                      <div className="relative flex items-center justify-center bg-black">
+                        {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(cur)
+                          ? <SmartVideo src={cur} controls playsInline className="max-h-[75vh] w-full bg-black" />
+                          : <Img src={cur} alt={p.title} className="max-h-[75vh] w-full object-contain" />}
+                        {media.length > 1 && (
+                          <>
+                            <button type="button" aria-label="Previous media" disabled={mediaIdx === 0}
+                              onClick={() => setMediaIdx((i) => Math.max(0, i - 1))}
+                              className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/85 p-2 text-neutral-900 disabled:opacity-30">
+                              <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <button type="button" aria-label="Next media" disabled={mediaIdx >= media.length - 1}
+                              onClick={() => setMediaIdx((i) => Math.min(media.length - 1, i + 1))}
+                              className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/85 p-2 text-neutral-900 disabled:opacity-30">
+                              <ChevronRight className="h-4 w-4" />
+                            </button>
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">
+                              {Math.min(mediaIdx, media.length - 1) + 1} / {media.length}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
                   <div className="min-w-0 space-y-2 p-5">
                     <div className="text-base font-semibold">{p.title}</div>
                     <div className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</div>
@@ -1943,9 +1964,9 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                       )
                     )}
                     {p.link_url && (
-                      <a href={p.link_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
-                        Open <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <SmartFileLink href={p.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
+                        Download attachment
+                      </SmartFileLink>
                     )}
                     {canManage && (
                       <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">

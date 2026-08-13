@@ -96,7 +96,6 @@ export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: 
         <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
           <input className={inputCls} placeholder="Story title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
           <textarea className={inputCls} rows={8} placeholder="Tell the story…" value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} />
-          <input className={inputCls} placeholder="Link (optional)" value={form.link_url} onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))} />
           <ImageUpload value={form.media_url} onChange={(url) => setForm((f) => ({ ...f, media_url: url }))} label="Upload cover image" />
           <div className="flex gap-2">
             <button onClick={publish} disabled={saving} className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50">
@@ -159,11 +158,6 @@ export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: 
               </div>
               {active.body && (
                 <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{stripHtml(active.body)}</div>
-              )}
-              {active.link_url && (
-                <a href={active.link_url} target="_blank" rel="noreferrer" className="inline-block text-sm font-semibold text-primary hover:underline">
-                  Read more
-                </a>
               )}
             </div>
           </div>

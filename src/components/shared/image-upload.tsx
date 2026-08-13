@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 type Props = {
@@ -9,9 +9,11 @@ type Props = {
   label?: string;
   bucket?: string;
   className?: string;
+  /** File types the picker allows. Defaults to images only. */
+  accept?: string;
 };
 
-export function ImageUpload({ value, onChange, label = "Upload photo", bucket = "post-media", className }: Props) {
+export function ImageUpload({ value, onChange, label = "Upload photo", bucket = "post-media", className, accept = "image/*" }: Props) {
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
       <input
         ref={ref}
         type="file"
-        accept="image/*"
+        accept={accept}
         className="hidden"
         onChange={(e) => {
           const f = e.target.files?.[0];
@@ -51,7 +53,9 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
       />
       {value ? (
         <div className="relative overflow-hidden rounded-lg border border-border">
-          <Img src={value} alt="" className="w-full max-h-56 object-cover" />
+          {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(value)
+            ? <SmartVideo src={value} controls playsInline className="max-h-56 w-full bg-black object-contain" />
+            : <Img src={value} alt="" className="w-full max-h-56 object-cover" />}
           <div className="absolute inset-x-0 bottom-0 flex justify-between gap-2 bg-black/50 p-2">
             <button type="button" onClick={() => ref.current?.click()} disabled={busy}
               className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-neutral-900">
