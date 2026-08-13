@@ -17,7 +17,7 @@ interface InviteFriendsDialogProps {
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
 // Invite links always point at the public domain, never the preview host.
-const PUBLIC_SITE_URL = "https://planetbaltimore.com";
+const PUBLIC_SITE_URL = "https://www.planetbaltimore.com";
 
 const makeToken = () =>
   (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`)
