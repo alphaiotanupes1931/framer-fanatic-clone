@@ -153,8 +153,11 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
   const handleClose = () => {
     setText("");
     setParsed([]);
+    setMessage("");
+    setTestEmail("");
     setSent(false);
     setSending(false);
+    setSendingTest(false);
     onClose();
   };
 
