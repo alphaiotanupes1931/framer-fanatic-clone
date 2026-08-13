@@ -1356,6 +1356,56 @@ export type Database = {
           },
         ]
       }
+      organization_products: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          inventory: number | null
+          is_active: boolean
+          name: string
+          org_id: string
+          price_cents: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          inventory?: number | null
+          is_active?: boolean
+          name: string
+          org_id: string
+          price_cents?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          inventory?: number | null
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          price_cents?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_products_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_support_tiers: {
         Row: {
           created_at: string
@@ -1769,6 +1819,75 @@ export type Database = {
           visibility?: string
         }
         Relationships: []
+      }
+      product_orders: {
+        Row: {
+          buyer_id: string | null
+          buyer_total_cents: number
+          created_at: string
+          id: string
+          org_id: string
+          platform_fee_cents: number
+          product_id: string
+          quantity: number
+          seller_id: string
+          seller_net_cents: number
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_fee_cents: number
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          buyer_total_cents?: number
+          created_at?: string
+          id?: string
+          org_id: string
+          platform_fee_cents?: number
+          product_id: string
+          quantity?: number
+          seller_id: string
+          seller_net_cents?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_fee_cents?: number
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string | null
+          buyer_total_cents?: number
+          created_at?: string
+          id?: string
+          org_id?: string
+          platform_fee_cents?: number
+          product_id?: string
+          quantity?: number
+          seller_id?: string
+          seller_net_cents?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_fee_cents?: number
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_orders_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "organization_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_sections: {
         Row: {
