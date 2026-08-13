@@ -304,7 +304,11 @@ function PublicProfilePage() {
   // Personal profile pages (resident/visitor) are fully separate from artist
   // pages. Only an explicit ?view=artist renders the artist layout, so the two
   // never bleed into each other.
-  const isArtistView = forceArtist;
+  // Only render the Artist Page layout when the profile really is an artist.
+  // A stray ?view=artist carried over from another page must never turn a
+  // resident or visitor profile into an artist page.
+  const isArtistView =
+    forceArtist && (hasArtistRole || isArtistProfile(profile.category, profile.role));
   const tabs = isArtistView
     ? tabsForArtist(profile.category, profile.role)
     : tabsForProfile(profile.category, profile.role);
