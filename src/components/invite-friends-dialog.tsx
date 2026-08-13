@@ -157,7 +157,7 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="w-full max-w-xl sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" /> Invite Friends
