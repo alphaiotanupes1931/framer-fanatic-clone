@@ -31,7 +31,7 @@ const buildInviteUrl = (username?: string | null, token?: string) => {
   return url.toString();
 };
 
-export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsDialogProps) {
+export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps) {
   const [text, setText] = useState("");
   const [parsed, setParsed] = useState<string[]>([]);
   const [message, setMessage] = useState("");
@@ -103,7 +103,7 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
       for (const to of emails) {
         const token = makeToken();
         tokens.set(to, token);
-        const trackedUrl = inviteUrl || buildInviteUrl(profile?.username, token);
+        const trackedUrl = buildInviteUrl(profile?.username, token);
         const res = await fetch("/lovable/email/transactional/send", {
           method: "POST",
           headers: {
