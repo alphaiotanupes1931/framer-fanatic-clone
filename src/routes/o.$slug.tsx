@@ -542,7 +542,7 @@ function OrgProfile() {
             <OrgPostList orgId={org.id} kind="update" canManage={canManage} />
           )}
           {tab === "Jobs" && <OpportunitiesTab orgId={org.id} canManage={canManage} />}
-          {tab === "Stories" && <OrgPostList orgId={org.id} kind="press" canManage={canManage} />}
+          {tab === "Stories" && <OrgStoriesTab orgId={org.id} canManage={canManage} />}
           {(tab === "Threads" || tab === "Reviews") && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder={tab === "Reviews" ? "Leave a review…" : "Start a thread…"} />}
           {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
           {tab === "Comments" && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Leave a comment…" />}
@@ -593,7 +593,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
     );
   if (tab === "Portfolio") return <GalleryTab orgId={org.id} />;
   if (tab === "Shop" || tab === "Print Shop")
-    return <PriceItemsSection orgId={org.id} subtype={org.subtype} canManage={canManage} title={tab} />;
+    return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
   const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
   return <OrgPostList orgId={org.id} kind={kind} canManage={canManage} />;
 }
