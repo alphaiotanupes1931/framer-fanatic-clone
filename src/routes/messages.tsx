@@ -695,15 +695,17 @@ function MessagesPage() {
                   </div>
                 </div>
               )}
-              <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-4 sm:p-5">
+              <div ref={scrollRef} className="flex-1 space-y-1.5 overflow-y-auto px-4 py-5 sm:px-6">
                 {(msgSearch.trim() ? msgs.filter((m) => m.content.toLowerCase().includes(msgSearch.trim().toLowerCase())) : msgs).map((m, i, arr) => {
                   const mine = m.sender_id === me?.id;
                   const prev = arr[i - 1];
-                  const showAvatar = !mine && (!prev || prev.sender_id !== m.sender_id);
+                  const next = arr[i + 1];
+                  const showAvatar = !mine && (!next || next.sender_id !== m.sender_id);
+                  const showTime = !next || next.sender_id !== m.sender_id;
                   return (
                     <div
                       key={m.id}
-                      className={`group/msg flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
+                      className={`group/msg flex items-end gap-2 ${mine ? "justify-end" : "justify-start"} ${showTime ? "mb-3" : ""}`}
                     >
                       {!mine && (
                         <div className="w-7 shrink-0">
@@ -744,8 +746,8 @@ function MessagesPage() {
                         const shared = parseSharePreview(m.content);
                         return (
                           <div
-                            className={`min-w-0 max-w-[75%] overflow-hidden break-words rounded-2xl px-4 py-2 text-sm leading-relaxed text-foreground ${
-                              mine ? "bg-transparent" : "bg-transparent"
+                            className={`min-w-0 max-w-[68%] overflow-hidden break-words rounded-3xl px-4 py-2.5 text-sm leading-relaxed text-foreground ${
+                              mine ? "bg-muted/70" : "border border-border bg-transparent"
                             }`}
                           >
                             {shared ? (
@@ -756,9 +758,11 @@ function MessagesPage() {
                             ) : (
                               <div className="whitespace-pre-wrap break-words">{m.content}</div>
                             )}
-                            <div className={`mt-0.5 text-[10px] text-muted-foreground`}>
-                              {formatWhen(m.created_at)}
-                            </div>
+                            {showTime && (
+                              <div className="mt-1 text-[10px] text-muted-foreground">
+                                {formatWhen(m.created_at)}
+                              </div>
+                            )}
                           </div>
                         );
                       })()}
@@ -776,7 +780,7 @@ function MessagesPage() {
                   );
                 })}
               </div>
-              <div className="border-t border-border p-3 sm:p-4">
+              <div className="border-t border-border px-4 py-3 sm:px-6 sm:py-4">
                 <div className="flex items-end gap-2">
                   <textarea
                     value={draft}
@@ -789,7 +793,7 @@ function MessagesPage() {
                     }}
                     rows={1}
                     placeholder="Type a message"
-                    className="max-h-32 flex-1 resize-none rounded-2xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                    className="max-h-32 flex-1 resize-none rounded-full border border-border bg-transparent px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                   <button
                     onClick={send}
