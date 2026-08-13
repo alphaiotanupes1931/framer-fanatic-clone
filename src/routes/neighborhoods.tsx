@@ -140,21 +140,21 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div
-            className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-0 sm:p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4"
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex max-h-[85vh] w-full max-w-none flex-col overflow-hidden rounded-b-2xl bg-background text-foreground shadow-xl sm:rounded-2xl"
+              className="flex max-h-[70vh] w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-5 sm:py-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-muted sm:h-12 sm:w-12">
-                  <MapPin className="h-4 w-4 text-muted-foreground sm:h-5 sm:w-5" />
+              <div className="flex items-center gap-2.5 border-b border-border px-3.5 py-3">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-muted">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[17px] font-bold leading-tight text-foreground sm:text-lg">{selected.name}</div>
+                  <div className="truncate text-[15px] font-bold leading-tight text-foreground">{selected.name}</div>
                   {selected.region && (
-                    <span className="mt-1.5 inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                    <span className="mt-1 inline-flex items-center rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
                       {selected.region}
                     </span>
                   )}
