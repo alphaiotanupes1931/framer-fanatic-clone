@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { tabsForArtist, type ArtistTab } from "@/lib/artist-tabs";
+import { StoreTab } from "@/components/org/store-tab";
+import { OrgStoriesTab } from "@/components/org/org-stories-tab";
 import { MessageAllButton } from "@/components/message-all-button";
 import { PriceItemsSection } from "@/components/org/price-items-section";
 import { DuesTab } from "@/components/org/dues-tab";
