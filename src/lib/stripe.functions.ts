@@ -377,6 +377,95 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
     return { url: session.url };
   });
 
+/** Create a Stripe Checkout Session for buying a product from a page's store. */
+export const createProductCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      productId: z.string().uuid(),
+      quantity: z.number().int().min(1).max(20).default(1),
+      returnOrigin: z.string().url(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+      await import("./stripe.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const stripe = getStripe();
+
+    const { data: product } = await supabaseAdmin
+      .from("organization_products")
+      .select("id, org_id, name, description, price_cents, image_url, inventory, is_active")
+      .eq("id", data.productId)
+      .maybeSingle();
+    if (!product || !product.is_active) throw new Error("This product is no longer available.");
+    if (product.inventory != null && product.inventory < data.quantity) {
+      throw new Error("Not enough stock left for this product.");
+    }
+    if (!product.price_cents || product.price_cents < 100) {
+      throw new Error("This product is not priced for sale.");
+    }
+
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id, owner_id, name, slug")
+      .eq("id", product.org_id)
+      .maybeSingle();
+    if (!org) throw new Error("Page not found");
+
+    const owner = await getPayoutAccount(org.owner_id);
+    if (!owner?.stripe_account_id || !owner.stripe_charges_enabled) {
+      throw new Error("This page has not set up a payment method yet.");
+    }
+
+    const net = product.price_cents * data.quantity;
+    const breakdown = priceBreakdown(net);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      success_url: `${data.returnOrigin}/o/${org.slug}?purchase=success`,
+      cancel_url: `${data.returnOrigin}/o/${org.slug}?purchase=cancelled`,
+      customer_email: (context.claims as { email?: string } | null)?.email,
+      branding_settings: CHECKOUT_BRANDING,
+      shipping_address_collection: { allowed_countries: ["US"] },
+      line_items: checkoutLineItems(breakdown, {
+        name: data.quantity > 1 ? `${product.name} x${data.quantity}` : product.name,
+        description: product.description ?? undefined,
+        images: product.image_url ? [product.image_url] : undefined,
+      }),
+      payment_intent_data: {
+        application_fee_amount: breakdown.platformFeeCents,
+        transfer_data: { destination: owner.stripe_account_id },
+      },
+      metadata: {
+        kind: "product",
+        product_id: product.id,
+        org_id: org.id,
+        seller_id: org.owner_id,
+        buyer_id: userId,
+        quantity: String(data.quantity),
+        amount_cents: String(net),
+      },
+    });
+
+    await supabaseAdmin.from("product_orders").insert({
+      product_id: product.id,
+      org_id: org.id,
+      seller_id: org.owner_id,
+      buyer_id: userId,
+      quantity: data.quantity,
+      buyer_total_cents: breakdown.buyerTotalCents,
+      seller_net_cents: breakdown.artistNetCents,
+      platform_fee_cents: breakdown.platformFeeCents,
+      stripe_fee_cents: breakdown.stripeFeeCents,
+      status: "pending",
+      stripe_checkout_session_id: session.id,
+    } as never);
+
+    return { url: session.url };
+  });
+
 /** Upgrade the signed-in user to artist. Open to anyone; no location check. */
 export const becomeArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

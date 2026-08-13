@@ -69,6 +69,7 @@ const PODCAST: ArtistTab[] = [
   { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { key: "sponsors", label: "Sponsors", Icon: DollarSign },
   { key: "clips", label: "Clips", Icon: Scissors },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "contact", label: "Contact", Icon: Mail },
@@ -148,6 +149,7 @@ const FASHION: ArtistTab[] = [
   { key: "lookbook", label: "Lookbook", Icon: Shirt },
   { key: "drops", label: "Drops", Icon: Package },
   { key: "collabs", label: "Collabs", Icon: Users },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "talk", label: "Talk", Icon: MessageCircle },
@@ -158,6 +160,7 @@ const FASHION: ArtistTab[] = [
 const DEFAULT_TABS: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
   { key: "gallery", label: "Gallery", Icon: ImageIcon },
+  { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "invite", label: "Invite", Icon: UserPlus2 },
