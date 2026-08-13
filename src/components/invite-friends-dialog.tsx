@@ -86,8 +86,8 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
     toast.success(`Found ${matches.length} email${matches.length === 1 ? "" : "s"}`);
   };
 
-  const sendInvites = async () => {
-    if (parsed.length === 0) return;
+  const sendInvites = async (emails: string[], opts?: { record?: boolean }) => {
+    if (emails.length === 0) return { sent: 0, failures: ["No emails to send"] };
     setSending(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -100,9 +100,12 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
       let sentCount = 0;
       const failures: string[] = [];
       const logRows: Array<Record<string, unknown>> = [];
+      const tokens = new Map<string, string>();
+      const sentEmails: string[] = [];
 
-      for (const to of parsed) {
+      for (const to of emails) {
         const token = makeToken();
+        tokens.set(to, token);
         const trackedUrl = inviteUrl || buildInviteUrl(profile?.username, token);
         const res = await fetch("/lovable/email/transactional/send", {
           method: "POST",
@@ -114,11 +117,12 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
             templateName: "referral-invite",
             recipientEmail: to,
             idempotencyKey: `invite-${session.user.id}-${to}-${Date.now()}`,
-            templateData: { inviterName, personalMessage: "", inviteUrl: trackedUrl },
+            templateData: { inviterName, personalMessage: message?.trim() || "", inviteUrl: trackedUrl },
           }),
         });
         if (res.ok) {
           sentCount += 1;
+          sentEmails.push(to);
           logRows.push({ email: to, invited_by: session.user.id, invite_url: trackedUrl, token });
         } else {
           const body = await res.json().catch(() => ({}));
@@ -126,27 +130,52 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
         }
       }
 
-      if (logRows.length > 0) {
+      if (opts?.record && logRows.length > 0) {
         const { error } = await supabase.from("invites").insert(logRows as any);
         if (error && !error.message.includes("does not exist")) console.error("invite log failed", error);
       }
 
-      if (sentCount === 0) {
-        toast.error(failures[0] || "Could not send invites");
-        return;
-      }
-      setSent(true);
-      toast.success(
-        `Invite${sentCount === 1 ? "" : "s"} sent to ${sentCount} ${sentCount === 1 ? "person" : "people"}` +
-          (failures.length ? `, ${failures.length} failed` : ""),
-      );
-      setTimeout(() => {
-        handleClose();
-      }, 1200);
+      return { sent: sentCount, failures };
     } catch (err: any) {
-      toast.error(err.message || "Could not send invites");
+      return { sent: 0, failures: [err.message || "Could not send invites"] };
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleSendInvite = async () => {
+    const emails = parsed.length > 0 ? parsed : Array.from(new Set((text.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
+    if (emails.length === 0) {
+      toast.error("Please enter at least one valid email");
+      return;
+    }
+    setParsed(emails);
+    const { sent, failures } = await sendInvites(emails, { record: true });
+    if (sent > 0) {
+      setSent(true);
+      toast.success(`Invite${sent === 1 ? "" : "s"} sent to ${sent} ${sent === 1 ? "person" : "people"}${failures.length ? `, ${failures.length} failed` : ""}`);
+      setTimeout(() => handleClose(), 1200);
+    } else {
+      toast.error(failures[0] || "Could not send invites");
+    }
+  };
+
+  const handleSendTest = async () => {
+    const match = testEmail.match(EMAIL_RE);
+    if (!match) {
+      toast.error("Enter a valid email to test");
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const { sent, failures } = await sendInvites([match[0].toLowerCase()]);
+      if (sent > 0) {
+        toast.success(`Test email sent to ${match[0]}. Check the inbox (and spam).`);
+      } else {
+        toast.error(failures[0] || "Test email failed to send");
+      }
+    } finally {
+      setSendingTest(false);
     }
   };
 
