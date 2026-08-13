@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Clock, Heart, MessageCircle, Bookmark, Trash2, Send, Star, MoreHorizontal, Pencil } from "lucide-react";
@@ -45,7 +46,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
   const [featuring, setFeaturing] = useState(false);
   const isOwner = !!currentUserId && !!story.user_id && currentUserId === story.user_id;
   const canDelete = isOwner || isAdmin;
-  const storyUrl = typeof window !== "undefined" ? `${window.location.origin}/stories/${story.id}` : `/stories/${story.id}`;
+  const storyUrl = siteUrl(`/stories/${story.id}`);
 
   const toggleFeatured = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();

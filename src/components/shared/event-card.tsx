@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { Calendar, MapPin, Clock, Bookmark, Send, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +51,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   const [deleting, setDeleting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const eventUrl = typeof window !== "undefined" ? `${window.location.origin}/events/${event.id}` : `/events/${event.id}`;
+  const eventUrl = siteUrl(`/events/${event.id}`);
 
   useEffect(() => {
     if (compact || !me?.id) return;

@@ -23,7 +23,7 @@ import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
 import { PostSplitView } from "@/components/shared/post-split-view";
-import { sanitizeErrorMessage } from "@/lib/utils";
+import { sanitizeErrorMessage, siteUrl } from "@/lib/utils";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";

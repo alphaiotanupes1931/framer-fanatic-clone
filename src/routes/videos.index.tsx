@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
@@ -291,7 +292,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   const [meId, setMeId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [deleted, setDeleted] = useState(false);
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/videos/${v.id}` : `/videos/${v.id}`;
+  const shareUrl = siteUrl(`/videos/${v.id}`);
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();

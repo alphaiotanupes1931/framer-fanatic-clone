@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,7 +139,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
     if (onDeleted) onDeleted(); else navigate({ to: "/dashboard" });
   };
   const shareExternal = () => {
-    const url = typeof window !== "undefined" ? `${window.location.origin}/posts/${post.id}` : `/posts/${post.id}`;
+    const url = siteUrl(`/posts/${post.id}`);
     void externalShare(url, post.content?.slice(0, 80) || "A post on Planet Baltimore");
   };
 
@@ -284,12 +285,12 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
       <ShareToUsersDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
-        url={typeof window !== "undefined" ? `${window.location.origin}/posts/${post.id}` : `/posts/${post.id}`}
+        url={siteUrl(`/posts/${post.id}`)}
         title={post.content?.slice(0, 80) || "Post"}
         preview={{
           type: "post",
           id: post.id,
-          url: typeof window !== "undefined" ? `${window.location.origin}/posts/${post.id}` : `/posts/${post.id}`,
+          url: siteUrl(`/posts/${post.id}`),
           title: post.content?.slice(0, 80) || null,
           excerpt: post.content?.slice(0, 200) || null,
           image: mediaList.find((m) => m.kind === "image")?.url || null,

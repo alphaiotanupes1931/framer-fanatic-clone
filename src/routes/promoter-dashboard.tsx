@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -43,13 +44,13 @@ function PromoterDashboardPage() {
 
   const share = (eventId: string) => {
     if (typeof window === "undefined") return;
-    const url = `${window.location.origin}/events/${eventId}?ref=${me?.username ?? me?.id ?? ""}`;
+    const url = siteUrl(`/events/${eventId}?ref=${me?.username ?? me?.id ?? ""}`);
     navigator.clipboard.writeText(url).then(() => toast.success("Share link copied"));
   };
 
   const webShare = async (r: Row) => {
     if (typeof window === "undefined") return;
-    const url = `${window.location.origin}/events/${r.id}?ref=${me?.username ?? me?.id ?? ""}`;
+    const url = siteUrl(`/events/${r.id}?ref=${me?.username ?? me?.id ?? ""}`);
     if (navigator.share) {
       try { await navigator.share({ title: r.title, url }); return; } catch { /* cancelled */ }
     }
