@@ -31,7 +31,7 @@ const buildInviteUrl = (username?: string | null, token?: string) => {
   return url.toString();
 };
 
-export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsDialogProps) {
+export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps) {
   const [text, setText] = useState("");
   const [parsed, setParsed] = useState<string[]>([]);
   const [message, setMessage] = useState("");
@@ -39,22 +39,18 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
   const [sending, setSending] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [sent, setSent] = useState(false);
-  const [shareUrl, setShareUrl] = useState(inviteUrl || buildInviteUrl());
+  const [shareUrl, setShareUrl] = useState(buildInviteUrl());
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    if (inviteUrl) {
-      setShareUrl(inviteUrl);
-      return;
-    }
     (async () => {
       const { data: rows } = await supabase.rpc("my_profile");
       const profile = (rows as unknown as Array<Record<string, any>> | null)?.[0];
       setShareUrl(buildInviteUrl(profile?.username));
     })();
-  }, [open, inviteUrl]);
+  }, [open]);
 
   const copyLink = async () => {
     try {
@@ -107,7 +103,7 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
       for (const to of emails) {
         const token = makeToken();
         tokens.set(to, token);
-        const trackedUrl = inviteUrl || buildInviteUrl(profile?.username, token);
+        const trackedUrl = buildInviteUrl(profile?.username, token);
         const res = await fetch("/lovable/email/transactional/send", {
           method: "POST",
           headers: {
