@@ -76,6 +76,58 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               return ack();
             }
             if (session.metadata?.kind === "artwork") {
+              // handled below
+            }
+            if (session.metadata?.kind === "product") {
+              const sellerId = session.metadata?.seller_id ?? null;
+              const buyerId = session.metadata?.buyer_id ?? null;
+              const productId = session.metadata?.product_id ?? null;
+              const orgId = session.metadata?.org_id ?? null;
+              const quantity = Number(session.metadata?.quantity ?? "1") || 1;
+              const amountCents = Number(session.metadata?.amount_cents ?? "0") || 0;
+              await supabaseAdmin
+                .from("product_orders")
+                .update({ status: "paid", stripe_payment_intent_id: paymentIntentId })
+                .eq("stripe_checkout_session_id", session.id);
+              if (productId) {
+                const { data: prod } = await supabaseAdmin
+                  .from("organization_products")
+                  .select("inventory")
+                  .eq("id", productId)
+                  .maybeSingle();
+                if (prod && prod.inventory != null) {
+                  const left = Math.max(0, prod.inventory - quantity);
+                  await supabaseAdmin
+                    .from("organization_products")
+                    .update({ inventory: left, is_active: left > 0 })
+                    .eq("id", productId);
+                }
+              }
+              if (sellerId) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: sellerId,
+                  actor_id: buyerId,
+                  type: "product_sold",
+                  target_type: "organization",
+                  target_id: orgId,
+                  message: `You sold a product for $${(amountCents / 100).toFixed(2)}.`,
+                  metadata: { product_id: productId, quantity, amount_cents: amountCents, payment_intent: paymentIntentId },
+                });
+              }
+              if (buyerId) {
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: buyerId,
+                  actor_id: null,
+                  type: "product_purchased",
+                  target_type: "organization",
+                  target_id: orgId,
+                  message: "Purchase confirmed. The seller will be in touch about delivery.",
+                  metadata: { product_id: productId, quantity, amount_cents: amountCents, payment_intent: paymentIntentId },
+                });
+              }
+              return ack();
+            }
+            if (session.metadata?.kind === "artwork") {
               const artistId = session.metadata?.artist_id ?? null;
               const buyerId = session.metadata?.buyer_id ?? null;
               const workId = session.metadata?.work_id ?? null;
