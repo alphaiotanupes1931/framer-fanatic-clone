@@ -33,7 +33,10 @@ const buildInviteUrl = (username?: string | null, token?: string) => {
 export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsDialogProps) {
   const [text, setText] = useState("");
   const [parsed, setParsed] = useState<string[]>([]);
+  const [message, setMessage] = useState("");
+  const [testEmail, setTestEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
   const [sent, setSent] = useState(false);
   const [shareUrl, setShareUrl] = useState(inviteUrl || buildInviteUrl());
   const [copied, setCopied] = useState(false);
