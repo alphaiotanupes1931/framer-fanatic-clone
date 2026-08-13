@@ -177,6 +177,9 @@ export function InviteFriendsDialog({ open, onClose, inviteUrl }: InviteFriendsD
                 {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
+              <Button onClick={() => void externalShare(shareUrl, "Join me on Planet Baltimore")} size="sm" className="shrink-0 gap-1.5">
+                <Send className="h-3.5 w-3.5" /> Send Invite
+              </Button>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <button
