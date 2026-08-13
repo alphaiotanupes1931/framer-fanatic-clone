@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/utils";
 import { useState } from "react";
 import { Send, Share2 } from "lucide-react";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
@@ -29,8 +30,7 @@ export function ShareButtons({
   buttonClassName?: string;
 }) {
   const [openInApp, setOpenInApp] = useState(false);
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const url = `${origin}${path}`;
+  const url = siteUrl(path);
   const icon = size === "sm" ? "h-4 w-4" : "h-5 w-5";
   const btn =
     buttonClassName ??
