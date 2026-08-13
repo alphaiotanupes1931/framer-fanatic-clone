@@ -96,7 +96,12 @@ export function ProfileSectionTab({
             placeholder="Title" className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
           <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })}
             placeholder="Description" rows={3} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
-          <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Upload photo or video" />
+          <ImageUpload
+            value={form.media_url}
+            onChange={(url) => setForm({ ...form, media_url: url })}
+            label="Upload photo or video"
+            accept="image/*,video/*"
+          />
           <div className="flex justify-end gap-2">
             <button onClick={() => setOpen(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
             <button onClick={add} className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white">Save</button>
