@@ -483,24 +483,34 @@ function MessagesPage() {
       <div className="mb-6">
         <HeroBanner title="Messages" subtitle="Direct conversations with people and organizations across Baltimore." />
       </div>
-      <div className="grid h-[calc(100vh-12rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[340px_1fr]">
+      <div className="grid h-[calc(100vh-12rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[360px_1fr]">
         {/* Conversation list */}
         <div
           className={`${showList ? "flex" : "hidden"} min-w-0 flex-col border-r border-border md:flex`}
         >
-          <div className="border-b border-border p-4">
-            <h2 className="mb-3 text-2xl font-bold text-foreground">Messages</h2>
+          <div className="space-y-3 px-4 pb-3 pt-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="truncate text-base font-semibold text-foreground">Inbox</h2>
+              <button
+                onClick={openNew}
+                className="rounded-full p-2 text-foreground transition hover:bg-muted"
+                aria-label="New message"
+                title="New message"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search conversations"
-                className="w-full rounded-full border border-border bg-muted py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                className="w-full rounded-full border border-transparent bg-muted/60 py-2.5 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-border focus:outline-none"
               />
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 space-y-0.5 overflow-y-auto px-2 pb-2">
             {filteredConvs.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-muted-foreground">
                 <MessageSquare className="h-8 w-8" />
@@ -510,13 +520,13 @@ function MessagesPage() {
               filteredConvs.map((c) => (
                 <div
                   key={c.id}
-                  className={`group relative flex w-full items-center border-b border-border transition hover:bg-muted ${
-                    active?.id === c.id ? "bg-muted" : ""
+                  className={`group relative flex w-full items-center rounded-xl transition hover:bg-muted/60 ${
+                    active?.id === c.id ? "bg-muted/70" : ""
                   }`}
                 >
                 <button
                   onClick={() => setActive(c)}
-                  className="flex flex-1 items-center gap-3 px-4 py-3 text-left"
+                  className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 text-left"
                 >
                   {!c.is_group && c.other?.username ? (
                     <Link
@@ -524,7 +534,7 @@ function MessagesPage() {
                       params={{ username: c.other.username }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <Avatar className="h-10 w-10">
+                      <Avatar className="h-12 w-12">
                         {c.other?.avatar_url && <SmartAvatarImage src={c.other.avatar_url} alt="" />}
                         <AvatarFallback className="bg-primary/10 text-primary">
                           {initials(c.other)}
@@ -532,14 +542,14 @@ function MessagesPage() {
                       </Avatar>
                     </Link>
                   ) : (
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-12 w-12">
                       {!c.is_group && c.other?.avatar_url && <SmartAvatarImage src={c.other.avatar_url} alt="" />}
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
                       </AvatarFallback>
                     </Avatar>
                   )}
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate text-sm font-semibold text-foreground">
                         {c.is_group ? (c.title || "Group chat") : (c.other?.display_name || c.other?.username || "Unknown")}
@@ -587,18 +597,12 @@ function MessagesPage() {
               ))
             )}
           </div>
-          <div className="space-y-2 border-t border-border p-3">
-            <button
-              onClick={openNew}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              <Plus className="h-4 w-4" /> New message
-            </button>
+          <div className="border-t border-border p-3">
             <button
               onClick={() => setBroadcastOpen(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted"
+              className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
-              <Users className="h-4 w-4" /> Message all followers
+              <Users className="h-3.5 w-3.5" /> Message all followers
             </button>
           </div>
         </div>
