@@ -607,7 +607,12 @@ function PublicProfilePage() {
           ) : tab === "shop" ? (
             <ArtistAvailableWorksTab userId={profile.id} canEdit={canEdit} />
           ) : (
-            <EmptyTab icon={Layers} label="Nothing here yet." />
+            <ProfileSectionTab
+              userId={profile.id}
+              kind={tab}
+              label={tabs.find((t) => t.key === tab)?.label ?? "Items"}
+              canEdit={!!canEdit}
+            />
           )}
         </div>
       </div>
