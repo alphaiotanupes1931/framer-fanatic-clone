@@ -64,8 +64,8 @@ function AuthPage() {
       if (!uid) return;
       // Confirmation links can land here on a different device, so trust the
       // server-side flag rather than anything saved locally at signup.
-      const { data: p } = await supabase.from("profiles").select("onboarded").eq("id", uid).maybeSingle();
-      if (p && !p.onboarded) { navigate({ to: "/onboarding" }); return; }
+      const { data: p } = await supabase.from("profiles").select(ONBOARDING_FIELDS).eq("id", uid).maybeSingle();
+      if (profileNeedsOnboarding(p as any)) { navigate({ to: "/onboarding" }); return; }
       const dest = redirect || popPostAuthRedirect();
       if (dest) { window.location.replace(dest); return; }
       navigate({ to: "/dashboard" });
@@ -96,13 +96,14 @@ function AuthPage() {
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (uid) {
-      const { data: p } = await supabase.from("profiles").select("onboarded, must_reset_password").eq("id", uid).maybeSingle();
+      const { data: p } = await supabase.from("profiles").select(`${ONBOARDING_FIELDS}, must_reset_password`).eq("id", uid).maybeSingle();
       if (p?.must_reset_password) {
         return navigate({ to: "/reset-password" });
       }
-       const dest = redirect || popPostAuthRedirect();
-      if (dest && p?.onboarded) { window.location.replace(dest); return; }
-      navigate({ to: p?.onboarded ? "/dashboard" : "/onboarding" });
+      const needsOnboarding = profileNeedsOnboarding(p as any);
+      const dest = redirect || popPostAuthRedirect();
+      if (dest && !needsOnboarding) { window.location.replace(dest); return; }
+      navigate({ to: needsOnboarding ? "/onboarding" : "/dashboard" });
     } else {
        const dest = redirect || popPostAuthRedirect();
       if (dest) { window.location.replace(dest); return; }

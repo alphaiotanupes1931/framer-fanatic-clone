@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
 
 // Paths that must stay reachable even before onboarding is finished.
 const EXEMPT = ["/onboarding", "/auth", "/reset-password", "/admin", "/lovable", "/email"];
@@ -29,12 +30,12 @@ export function OnboardingGuard() {
         if (!uid) return;
         const { data: p } = await supabase
           .from("profiles")
-          .select("onboarded")
+          .select(ONBOARDING_FIELDS)
           .eq("id", uid)
           .maybeSingle();
-        if (p && !p.onboarded) {
+        if (p && profileNeedsOnboarding(p as any)) {
           navigate({ to: "/onboarding" });
-        } else if (p?.onboarded) {
+        } else if (p) {
           done.current = true;
         }
       } catch {
