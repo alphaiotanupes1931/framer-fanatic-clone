@@ -140,11 +140,11 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6"
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex max-h-[70vh] w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-xl"
+              className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-2.5 border-b border-border px-3.5 py-3">
