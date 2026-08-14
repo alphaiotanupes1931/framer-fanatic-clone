@@ -330,7 +330,7 @@ function NeighborhoodsPage() {
 
 function EmptyRow({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+    <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
       {label}
     </div>
   );
