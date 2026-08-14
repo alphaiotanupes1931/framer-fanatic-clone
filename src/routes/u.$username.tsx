@@ -369,18 +369,6 @@ function PublicProfilePage() {
         </div>
         {/* Category + actions moved below the name */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          {categoryLabel && (
-            <>
-              {isArtistView && (
-                <span className="inline-flex items-center rounded-full bg-[#d4580a] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                  Artist Page
-                </span>
-              )}
-              <span className="inline-flex items-center rounded-full bg-neutral-900 px-3 py-1 text-xs font-semibold text-white">
-                {categoryLabel}
-              </span>
-            </>
-          )}
           <ShareButtons
             path={`/u/${profile.username}`}
             title={profile.display_name || profile.username || ""}
