@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
-  Send, Star, Trash2, Volume2, VolumeX, Grid3x3, Layers,
-  Image as ImageIcon, Calendar, FileText, ChevronDown,
+  Send, Star, Trash2, Volume2, VolumeX, Grid3x3,
+  Calendar, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -22,8 +22,6 @@ import {
   PersonAttendingTab,
   PersonPagesTab,
 } from "@/components/profile/person-tabs";
-import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
-import { ProfileSectionTab } from "@/components/profile-sections";
 import {
   ArtistPostsGrid,
   ArtistEventsGrouped,
