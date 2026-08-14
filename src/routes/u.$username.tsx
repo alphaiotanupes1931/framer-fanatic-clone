@@ -326,12 +326,18 @@ function PublicProfilePage() {
             ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
             : { backgroundColor: "#e7e5e0" }
         }
-      />
+      >
+        {categoryLabel && (
+          <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur sm:text-xs">
+            {categoryLabel}
+          </span>
+        )}
+      </div>
 
       {/* Avatar overlapping banner */}
       <div className="relative px-1 sm:px-2">
-        <div className="relative -mt-8 inline-block">
-          <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+        <div className="relative -mt-10 inline-block sm:-mt-12">
+          <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-white bg-neutral-200 shadow-sm sm:h-24 sm:w-24">
             {profile.avatar_url && (
               <Img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
@@ -363,18 +369,6 @@ function PublicProfilePage() {
         </div>
         {/* Category + actions moved below the name */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          {categoryLabel && (
-            <>
-              {isArtistView && (
-                <span className="inline-flex items-center rounded-full bg-[#d4580a] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                  Artist Page
-                </span>
-              )}
-              <span className="inline-flex items-center rounded-full bg-neutral-900 px-3 py-1 text-xs font-semibold text-white">
-                {categoryLabel}
-              </span>
-            </>
-          )}
           <ShareButtons
             path={`/u/${profile.username}`}
             title={profile.display_name || profile.username || ""}
@@ -403,13 +397,9 @@ function PublicProfilePage() {
         {profile.bio && (
           <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{profile.bio}</p>
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
-          <button type="button" onClick={() => setFollowList("followers")} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]">
-            <UserPlus className="h-4 w-4" /> {stats.followers} followers
-          </button>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
           {(profile.neighborhood || isOwner) && (
             <>
-              <span className="text-neutral-300">·</span>
               {isOwner ? (
                 <div className="relative">
                   <button
@@ -453,6 +443,22 @@ function PublicProfilePage() {
               </a>
             </>
           )}
+        </div>
+
+        {/* Stats */}
+        <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs sm:flex sm:gap-10 sm:text-left sm:text-sm">
+          <div>
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.posts}</div>
+            <div className="text-neutral-500">Posts</div>
+          </div>
+          <button type="button" onClick={() => setFollowList("followers")} className="hover:text-[#d4580a]">
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.followers}</div>
+            <div className="text-neutral-500">Followers</div>
+          </button>
+          <button type="button" onClick={() => setFollowList("following")} className="hover:text-[#d4580a]">
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.following}</div>
+            <div className="text-neutral-500">Following</div>
+          </button>
         </div>
 
         {hashtags.length > 0 && (
@@ -555,15 +561,15 @@ function PublicProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
+        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200">
           {tabs.map(({ key, label, Icon }) => {
             const active = tab === key;
             return (
               <button
                 key={key}
                 onClick={() => setTab(key)}
-                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition ${
-                  active ? "bg-[#d4580a] text-white shadow-sm" : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition ${
+                  active ? "border-[#d4580a] text-[#d4580a]" : "border-transparent text-neutral-500 hover:text-neutral-800"
                 }`}
               >
                 <Icon className="h-4 w-4" /> {label}
