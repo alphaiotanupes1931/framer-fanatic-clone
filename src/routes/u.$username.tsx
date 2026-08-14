@@ -172,7 +172,14 @@ function PublicProfilePage() {
           author_username: publicProfile.username,
         };
         void storiesRes;
-        setPosts((postsRes.data || []).map((p) => ({ ...p, ...authorMeta })));
+        const orderedPosts = [...(postsRes.data || [])].sort((a: any, b: any) => {
+          const ap = a.is_pinned ? 1 : 0;
+          const bp = b.is_pinned ? 1 : 0;
+          if (ap !== bp) return bp - ap;
+          if (a.is_pinned && b.is_pinned) return (a.pin_order ?? 0) - (b.pin_order ?? 0);
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+        setPosts(orderedPosts.map((p: any) => ({ ...p, ...authorMeta })));
         setEvents(eventsRes.data || []);
         setContentLoading(false);
       }
