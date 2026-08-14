@@ -47,7 +47,16 @@ type PublicProfile = {
 
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfilePage,
-  head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
+  head: () => ({
+    meta: [
+      { title: "Community Profile | Planet Baltimore" },
+      { name: "description", content: "View this community member's public profile, posts, events, and activity on Planet Baltimore." },
+      { property: "og:title", content: "Community Profile | Planet Baltimore" },
+      { property: "og:description", content: "View this community member's public profile and activity on Planet Baltimore." },
+      { property: "og:type", content: "profile" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
 function PublicProfilePage() {
