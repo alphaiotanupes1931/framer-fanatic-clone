@@ -1,0 +1,1 @@
+UPDATE public.profiles SET onboarded = true WHERE onboarded = false AND (neighborhood IS NOT NULL OR category IS NOT NULL OR avatar_url IS NOT NULL OR bio IS NOT NULL);
