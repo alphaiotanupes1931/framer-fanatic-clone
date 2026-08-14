@@ -140,21 +140,21 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-4"
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-2xl"
+              className="flex h-[96vh] w-[96vw] max-w-[1440px] flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-6">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-center gap-3 border-b border-border px-5 py-4 sm:px-8 sm:py-5">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-muted">
+                  <MapPin className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-base font-bold leading-tight text-foreground sm:text-lg">{selected.name}</div>
+                  <div className="truncate text-lg font-bold leading-tight text-foreground sm:text-xl">{selected.name}</div>
                   {selected.region && (
-                    <span className="mt-1 inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                    <span className="mt-1 inline-flex items-center rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
                       {selected.region}
                     </span>
                   )}
@@ -162,9 +162,9 @@ function NeighborhoodsPage() {
                 <button
                   onClick={() => setSelected(null)}
                   aria-label="Close"
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-6 w-6" />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto">
