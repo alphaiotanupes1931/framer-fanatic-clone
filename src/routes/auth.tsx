@@ -96,7 +96,11 @@ function AuthPage() {
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (uid) {
-      const { data: p } = await supabase.from("profiles").select(`${ONBOARDING_FIELDS}, must_reset_password`).eq("id", uid).maybeSingle();
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("onboarded, neighborhood, category, avatar_url, bio, display_name, must_reset_password")
+        .eq("id", uid)
+        .maybeSingle();
       if (p?.must_reset_password) {
         return navigate({ to: "/reset-password" });
       }
