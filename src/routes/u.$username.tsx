@@ -561,15 +561,15 @@ function PublicProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
+        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200">
           {tabs.map(({ key, label, Icon }) => {
             const active = tab === key;
             return (
               <button
                 key={key}
                 onClick={() => setTab(key)}
-                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition ${
-                  active ? "bg-[#d4580a] text-white shadow-sm" : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition ${
+                  active ? "border-[#d4580a] text-[#d4580a]" : "border-transparent text-neutral-500 hover:text-neutral-800"
                 }`}
               >
                 <Icon className="h-4 w-4" /> {label}
