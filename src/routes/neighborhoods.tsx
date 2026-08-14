@@ -140,14 +140,15 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:p-4 lg:p-6"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-6"
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background text-foreground shadow-2xl sm:h-[85vh] sm:w-[92vw] sm:max-w-2xl sm:rounded-2xl lg:max-w-4xl xl:max-w-5xl"
+              className="flex max-h-[88vh] w-full flex-col overflow-hidden rounded-t-3xl bg-background text-foreground shadow-2xl sm:max-h-[82vh] sm:w-full sm:max-w-lg sm:rounded-2xl lg:max-w-3xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-6 sm:py-5 lg:px-8">
+              <div className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-border sm:hidden" />
+              <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 sm:px-6 sm:py-4">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted sm:h-12 sm:w-12">
                   <MapPin className="h-5 w-5 text-muted-foreground sm:h-6 sm:w-6" />
                 </div>
