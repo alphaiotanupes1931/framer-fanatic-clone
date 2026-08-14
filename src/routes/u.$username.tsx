@@ -23,10 +23,9 @@ import {
   PersonPagesTab,
 } from "@/components/profile/person-tabs";
 import {
-  ArtistPostsGrid,
   ArtistEventsGrouped,
 } from "@/components/artist/artist-tab-sections";
-import { Img } from "@/components/shared/smart-img";
+import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid } from "lucide-react";
 
@@ -145,7 +144,7 @@ function PublicProfilePage() {
         const [{ count: followers }, { count: following }, { count: posts }] = await Promise.all([
           supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
           supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
-          supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id),
+          supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id).eq("is_deleted", false),
         ]);
         setStats({ followers: followers || 0, following: following || 0, posts: posts || 0 });
         if (me && me.id !== publicProfile.id) {
@@ -162,7 +161,7 @@ function PublicProfilePage() {
         // Load their content
         setContentLoading(true);
         const [postsRes, storiesRes, eventsRes] = await Promise.all([
-          supabase.from("posts").select("*").eq("user_id", publicProfile.id).order("created_at", { ascending: false }).limit(30),
+          supabase.from("posts").select("*").eq("user_id", publicProfile.id).eq("is_deleted", false).order("created_at", { ascending: false }).limit(50),
           supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("created_at", { ascending: false }).limit(30),
           supabase.from("events").select("*").eq("user_id", publicProfile.id).is("organization_id", null).order("starts_at", { ascending: false }).limit(30),
         ]);
@@ -585,7 +584,7 @@ function PublicProfilePage() {
             posts.length === 0 ? (
               <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
             ) : (
-              <ArtistPostsGrid posts={posts} />
+              <CanonicalPostsGrid posts={posts} />
             )
           ) : tab === "about" ? (
             <PersonAboutTab profile={profile} />
@@ -616,6 +615,56 @@ function PublicProfilePage() {
         />
       )}
     </AppLayout>
+  );
+}
+
+function CanonicalPostsGrid({ posts }: { posts: any[] }) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {posts.map((post) => {
+        const media = Array.isArray(post.media_urls) && post.media_urls.length
+          ? post.media_urls
+          : [post.image_url, post.video_url].filter(Boolean);
+        const thumbnail = media[0] as string | undefined;
+        const isVideo = !!thumbnail && /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(thumbnail);
+
+        return (
+          <Link
+            key={post.id}
+            to="/posts/$postId"
+            params={{ postId: post.id }}
+            className="group relative aspect-square overflow-hidden rounded-md bg-neutral-100"
+          >
+            {thumbnail ? (
+              isVideo ? (
+                <SmartVideo src={thumbnail} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+              ) : (
+                <Img src={thumbnail} alt="" className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]" loading="lazy" />
+              )
+            ) : (
+              <div
+                className="flex h-full w-full items-center justify-center p-3 text-center text-[11px] font-medium leading-tight text-foreground"
+                style={post.bg_color ? { background: post.bg_color, color: post.text_color || "#fff" } : undefined}
+              >
+                <span className="line-clamp-6">{post.content || "Post"}</span>
+              </div>
+            )}
+            {media.length > 1 && (
+              <span className="absolute right-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                1/{media.length}
+              </span>
+            )}
+            {isVideo && (
+              <span className="absolute inset-0 grid place-items-center">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white">
+                  <span className="ml-0.5 text-xs">▶</span>
+                </span>
+              </span>
+            )}
+          </Link>
+        );
+      })}
+    </div>
   );
 }
 
