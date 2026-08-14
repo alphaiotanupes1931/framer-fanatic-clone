@@ -147,14 +147,14 @@ function NeighborhoodsPage() {
               className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-2.5 border-b border-border px-3.5 py-3">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-muted">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-6">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[15px] font-bold leading-tight text-foreground">{selected.name}</div>
+                  <div className="truncate text-base font-bold leading-tight text-foreground sm:text-lg">{selected.name}</div>
                   {selected.region && (
-                    <span className="mt-1 inline-flex items-center rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
+                    <span className="mt-1 inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
                       {selected.region}
                     </span>
                   )}
@@ -162,9 +162,9 @@ function NeighborhoodsPage() {
                 <button
                   onClick={() => setSelected(null)}
                   aria-label="Close"
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto">
