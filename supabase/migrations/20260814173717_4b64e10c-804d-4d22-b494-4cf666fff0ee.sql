@@ -1,0 +1,3 @@
+UPDATE public.posts SET user_id = 'd0baf11e-7023-4190-8547-7a04fc085a04' WHERE user_id = '7cbe9710-f771-4db5-af57-4050d08f154a' AND created_at < '2026-06-29 16:48:40.740563+00';
+UPDATE public.stories SET user_id = 'd0baf11e-7023-4190-8547-7a04fc085a04' WHERE user_id = '7cbe9710-f771-4db5-af57-4050d08f154a' AND created_at < '2026-06-29 16:48:40.740563+00';
+UPDATE public.events SET user_id = 'd0baf11e-7023-4190-8547-7a04fc085a04' WHERE user_id = '7cbe9710-f771-4db5-af57-4050d08f154a' AND created_at < '2026-06-29 16:48:40.740563+00';
