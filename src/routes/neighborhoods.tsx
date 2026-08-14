@@ -140,22 +140,22 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-6"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-2 pb-[calc(4.25rem+env(safe-area-inset-bottom))] pt-12 sm:items-center sm:p-6"
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex max-h-[88vh] w-full flex-col overflow-hidden rounded-t-3xl bg-background text-foreground shadow-2xl sm:max-h-[82vh] sm:w-full sm:max-w-lg sm:rounded-2xl lg:max-w-3xl"
+              className="flex max-h-[72dvh] w-full flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-2xl sm:max-h-[82vh] sm:max-w-lg lg:max-w-3xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-border sm:hidden" />
-              <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 sm:px-6 sm:py-4">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted sm:h-12 sm:w-12">
-                  <MapPin className="h-5 w-5 text-muted-foreground sm:h-6 sm:w-6" />
+              <div className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-border sm:hidden" />
+              <div className="grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 border-b border-border px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-4">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-muted sm:h-12 sm:w-12">
+                  <MapPin className="h-4.5 w-4.5 text-muted-foreground sm:h-6 sm:w-6" />
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                   <div className="truncate text-base font-bold leading-tight text-foreground sm:text-xl">{selected.name}</div>
                   {selected.region && (
-                    <span className="mt-1 inline-flex max-w-full items-center truncate rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground sm:px-2.5 sm:py-1 sm:text-xs">
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground sm:mt-1 sm:inline-flex sm:rounded-md sm:bg-secondary sm:px-2.5 sm:py-1 sm:font-medium sm:text-secondary-foreground">
                       {selected.region}
                     </span>
                   )}
@@ -189,7 +189,7 @@ function NeighborhoodsPage() {
                 tab === "associations" ? associations : [];
               return (
                 <div className="bg-card">
-                  <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-border bg-card px-3 py-2 sm:flex-wrap sm:px-5 sm:py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                   <div className="sticky top-0 z-10 grid grid-cols-3 gap-1 border-b border-border bg-card p-2 sm:flex sm:flex-wrap sm:px-5 sm:py-3">
                     {tabs.map((t) => {
                       const active = tab === t.key;
                       const Icon = t.Icon;
@@ -197,19 +197,19 @@ function NeighborhoodsPage() {
                         <button
                           key={t.key}
                           onClick={() => setTab(t.key)}
-                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium transition sm:px-3.5 sm:text-sm ${
+                           className={`flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-lg px-1.5 py-2 text-[11px] font-medium transition sm:shrink-0 sm:gap-1.5 sm:rounded-full sm:px-3.5 sm:text-sm ${
                             active
                               ? "bg-orange/10 text-orange"
                               : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                           }`}
                         >
-                          <Icon className="h-3.5 w-3.5" />
-                          <span>{t.label}</span>
+                           <Icon className="h-3.5 w-3.5 shrink-0" />
+                           <span className="truncate">{t.label}</span>
                         </button>
                       );
                     })}
                   </div>
-                  <div className="p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5">
+                   <div className="p-3 sm:p-5">
                     {loading ? (
                       <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
                     ) : tab === "events" ? (
@@ -330,7 +330,7 @@ function NeighborhoodsPage() {
 
 function EmptyRow({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+    <div className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm leading-relaxed text-muted-foreground sm:py-8">
       {label}
     </div>
   );
