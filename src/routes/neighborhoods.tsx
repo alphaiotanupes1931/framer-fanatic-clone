@@ -188,8 +188,8 @@ function NeighborhoodsPage() {
                 tab === "arts_orgs" ? artsOrgs :
                 tab === "associations" ? associations : [];
               return (
-                <div className="min-h-full bg-card">
-                  <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto bg-card p-2.5 sm:flex-wrap sm:p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="bg-card">
+                  <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-border bg-card px-3 py-2 sm:flex-wrap sm:px-5 sm:py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {tabs.map((t) => {
                       const active = tab === t.key;
                       const Icon = t.Icon;
@@ -197,7 +197,7 @@ function NeighborhoodsPage() {
                         <button
                           key={t.key}
                           onClick={() => setTab(t.key)}
-                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-[13px] font-medium transition sm:text-sm ${
+                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium transition sm:px-3.5 sm:text-sm ${
                             active
                               ? "bg-orange/10 text-orange"
                               : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -209,7 +209,7 @@ function NeighborhoodsPage() {
                       );
                     })}
                   </div>
-                  <div className="border-t border-border p-2.5 sm:p-4 lg:p-6">
+                  <div className="p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5">
                     {loading ? (
                       <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
                     ) : tab === "events" ? (
