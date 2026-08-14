@@ -61,17 +61,7 @@ function displayTabLabel(t: string, isPublicPreview: boolean) {
   return isPublicPreview ? t.replace(/^My /, "") : t;
 }
 
-function sortPosts(rows: any[]) {
-  return [...rows].sort((a, b) => {
-    const ap = a.is_pinned ? 1 : 0;
-    const bp = b.is_pinned ? 1 : 0;
-    if (ap !== bp) return bp - ap;
-    if (a.is_pinned && b.is_pinned) {
-      return (a.pin_order ?? 0) - (b.pin_order ?? 0);
-    }
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
-}
+import { sortPosts } from "@/lib/sort-posts";
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
   "About": Rss,
