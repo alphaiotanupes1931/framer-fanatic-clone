@@ -140,21 +140,21 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-4"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:p-4 lg:p-6"
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex h-[85vh] w-[90vw] max-w-5xl flex-col overflow-hidden rounded-2xl bg-background text-foreground shadow-2xl"
+              className="flex h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background text-foreground shadow-2xl sm:h-[85vh] sm:w-[92vw] sm:max-w-2xl sm:rounded-2xl lg:max-w-4xl xl:max-w-5xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 border-b border-border px-5 py-4 sm:px-8 sm:py-5">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-muted">
-                  <MapPin className="h-6 w-6 text-muted-foreground" />
+              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-6 sm:py-5 lg:px-8">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted sm:h-12 sm:w-12">
+                  <MapPin className="h-5 w-5 text-muted-foreground sm:h-6 sm:w-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-lg font-bold leading-tight text-foreground sm:text-xl">{selected.name}</div>
+                  <div className="truncate text-base font-bold leading-tight text-foreground sm:text-xl">{selected.name}</div>
                   {selected.region && (
-                    <span className="mt-1 inline-flex items-center rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                    <span className="mt-1 inline-flex max-w-full items-center truncate rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground sm:px-2.5 sm:py-1 sm:text-xs">
                       {selected.region}
                     </span>
                   )}
@@ -162,12 +162,12 @@ function NeighborhoodsPage() {
                 <button
                   onClick={() => setSelected(null)}
                   aria-label="Close"
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground sm:h-10 sm:w-10"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto overscroll-contain">
             {(() => {
               const businesses = orgs.filter((o) => o.type === "business");
               const groups = orgs.filter((o) => o.type === "group");
@@ -187,8 +187,8 @@ function NeighborhoodsPage() {
                 tab === "arts_orgs" ? artsOrgs :
                 tab === "associations" ? associations : [];
               return (
-                <div className="bg-card">
-                  <div className="flex gap-1 overflow-x-auto p-3 sm:p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="min-h-full bg-card">
+                  <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto bg-card p-2.5 sm:flex-wrap sm:p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {tabs.map((t) => {
                       const active = tab === t.key;
                       const Icon = t.Icon;
@@ -208,14 +208,14 @@ function NeighborhoodsPage() {
                       );
                     })}
                   </div>
-                  <div className="border-t border-border p-3 sm:p-4">
+                  <div className="border-t border-border p-2.5 sm:p-4 lg:p-6">
                     {loading ? (
                       <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
                     ) : tab === "events" ? (
                       events.length === 0 ? (
                         <EmptyRow label={`No upcoming events in ${selected.name} yet.`} />
                       ) : (
-                        <ul className="space-y-1">
+                        <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                           {events.map((ev) => (
                             <li key={ev.id}>
                               <Link to="/events/$eventId" params={{ eventId: ev.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
@@ -241,7 +241,7 @@ function NeighborhoodsPage() {
                       artists.length === 0 ? (
                         <EmptyRow label={`No artists listed in ${selected.name} yet.`} />
                       ) : (
-                        <ul className="space-y-1">
+                        <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                           {artists.map((a) => (
                             <li key={a.id}>
                               <Link to="/u/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
@@ -261,7 +261,7 @@ function NeighborhoodsPage() {
                     ) : activeOrgs.length === 0 ? (
                       <EmptyRow label={`Nothing in ${selected.name} yet.`} />
                     ) : (
-                      <ul className="space-y-1">
+                      <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                         {activeOrgs.map((o) => (
                           <li key={o.id}>
                             <Link to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
