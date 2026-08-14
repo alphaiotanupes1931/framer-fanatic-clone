@@ -326,12 +326,18 @@ function PublicProfilePage() {
             ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
             : { backgroundColor: "#e7e5e0" }
         }
-      />
+      >
+        {categoryLabel && (
+          <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur sm:text-xs">
+            {categoryLabel}
+          </span>
+        )}
+      </div>
 
       {/* Avatar overlapping banner */}
       <div className="relative px-1 sm:px-2">
-        <div className="relative -mt-8 inline-block">
-          <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+        <div className="relative -mt-10 inline-block sm:-mt-12">
+          <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-white bg-neutral-200 shadow-sm sm:h-24 sm:w-24">
             {profile.avatar_url && (
               <Img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
