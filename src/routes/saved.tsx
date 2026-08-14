@@ -19,6 +19,8 @@ type SavedPost = {
   user_id: string;
   content: string;
   image_url: string | null;
+  bg_color?: string | null;
+  text_color?: string | null;
   likes_count: number | null;
   comments_count: number | null;
   created_at: string;
@@ -86,7 +88,7 @@ function SavedPage() {
     const ids = Array.from(savedAt.keys());
     if (!ids.length) { setPosts([]); return; }
     const { data: ps } = await supabase.from("posts")
-      .select("id, user_id, content, image_url, likes_count, comments_count, created_at").in("id", ids);
+      .select("id, user_id, content, image_url, bg_color, text_color, likes_count, comments_count, created_at").in("id", ids);
     const list = (ps || []) as SavedPost[];
     list.forEach((p) => { p.saved_at = savedAt.get(p.id) as string; });
     const authorIds = Array.from(new Set(list.map((p) => p.user_id)));
@@ -348,12 +350,15 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
       ) : (
-        <div className="flex h-full w-full flex-col justify-between bg-gradient-to-br from-orange/10 via-background to-muted p-3">
-          <div className="flex items-center gap-2 text-muted-foreground">
+        <div
+          className={`flex h-full w-full flex-col justify-between p-3 ${post.bg_color ? "" : "bg-gradient-to-br from-orange/10 via-background to-muted"}`}
+          style={post.bg_color ? { background: post.bg_color, color: post.text_color || "#fff" } : undefined}
+        >
+          <div className={`flex items-center gap-2 ${post.bg_color ? "opacity-80" : "text-muted-foreground"}`}>
             <ImageIcon className="h-3.5 w-3.5" />
             <span className="text-[10px] uppercase tracking-wider">Text post</span>
           </div>
-          <p className="line-clamp-6 text-[12.5px] leading-snug text-foreground">{post.content}</p>
+          <p className={`line-clamp-6 text-[12.5px] leading-snug ${post.bg_color ? "" : "text-foreground"}`}>{post.content}</p>
           <div className="flex items-center gap-2">
             <Avatar className="h-5 w-5">
               {post.author?.avatar_url && <SmartAvatarImage src={post.author.avatar_url} />}
