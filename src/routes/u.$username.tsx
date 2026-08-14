@@ -317,9 +317,10 @@ function PublicProfilePage() {
         <ArrowLeft className="h-5 w-5" />
       </button>
 
-      {/* Banner (no overlays) */}
+      {/* Canonical person profile, matching the signed-in profile layout. */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-card sm:rounded-3xl">
       <div
-        className="relative h-44 overflow-hidden rounded-2xl sm:h-60"
+        className="relative h-36 overflow-hidden bg-neutral-200 sm:h-56"
         style={
           profile.banner_url
             ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
@@ -333,10 +334,11 @@ function PublicProfilePage() {
         )}
       </div>
 
-      {/* Avatar overlapping banner */}
-      <div className="relative px-1 sm:px-2">
-        <div className="relative -mt-10 inline-block sm:-mt-12">
-          <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-white bg-neutral-200 shadow-sm sm:h-24 sm:w-24">
+      <div className="px-4 pb-6 sm:px-6">
+      {/* Avatar uses the same placement as the account owner's profile. */}
+      <div className="relative mt-4">
+        <div className="relative inline-block">
+          <div className="h-20 w-20 overflow-hidden rounded-full bg-neutral-200 ring-4 ring-background sm:h-24 sm:w-24">
             {profile.avatar_url && (
               <Img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
@@ -345,7 +347,7 @@ function PublicProfilePage() {
       </div>
 
       {/* Name + meta */}
-      <div className="mt-3 px-1 sm:px-2">
+      <div className="mt-3">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">
             {profile.display_name || profile.username}
@@ -604,6 +606,8 @@ function PublicProfilePage() {
             <PersonPagesTab userId={profile.id} isSelf={!!isSelf} />
           )}
         </div>
+      </div>
+      </div>
       </div>
 
       {followList && (
