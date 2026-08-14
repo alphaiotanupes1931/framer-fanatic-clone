@@ -30,6 +30,19 @@ import {
 } from "@/components/artist/artist-tab-sections";
 import { Img } from "@/components/shared/smart-img";
 import { setMyProfileKind } from "@/lib/profile-kind";
+import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid } from "lucide-react";
+
+// A person has one canonical public profile with the same tabs everywhere.
+type PersonTabKey = "posts" | "about" | "writings" | "saved" | "attending" | "organized" | "pages";
+const PERSON_TABS: Array<{ key: PersonTabKey; label: string; Icon: React.ComponentType<{ className?: string }> }> = [
+  { key: "posts", label: "Posts", Icon: Grid2x2 },
+  { key: "about", label: "About", Icon: Info },
+  { key: "writings", label: "Writings", Icon: BookOpen },
+  { key: "saved", label: "Saved", Icon: Bookmark },
+  { key: "attending", label: "Attending", Icon: CalendarCheck },
+  { key: "organized", label: "Organized", Icon: Calendar },
+  { key: "pages", label: "Pages", Icon: LayoutGrid },
+];
 
 type PublicProfile = {
   id: string;
