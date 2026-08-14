@@ -14,6 +14,7 @@ import { becomeArtist } from "@/lib/stripe.functions";
 import { Eye, EyeOff } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
+import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
 
 function popPostAuthRedirect(): string | null {
   if (typeof window === "undefined") return null;
