@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Eye, EyeOff } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Img } from "@/components/shared/smart-img";
+import { profileNeedsOnboarding } from "@/lib/onboarding";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
@@ -44,7 +45,19 @@ function ResetPasswordPage() {
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (uid) {
-      await supabase.from("profiles").update({ must_reset_password: false }).eq("id", uid);
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("onboarded, neighborhood, category, avatar_url, bio, display_name")
+        .eq("id", uid)
+        .maybeSingle();
+      // Existing members shouldn't be pushed back through onboarding after a reset.
+      const alreadySetUp = !!prof && !prof.onboarded && !profileNeedsOnboarding(prof as any);
+      await supabase
+        .from("profiles")
+        .update(alreadySetUp
+          ? { must_reset_password: false, onboarded: true }
+          : { must_reset_password: false })
+        .eq("id", uid);
     }
     setLoading(false);
     toast.success("Password updated");
