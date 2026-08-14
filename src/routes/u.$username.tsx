@@ -14,7 +14,7 @@ import { PROFILE_TAGS } from "@/lib/categories";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
-import { tabsForArtist, tabsForProfile, isArtistProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
+import { tabsForProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
 import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import {
@@ -47,7 +47,16 @@ type PublicProfile = {
 
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfilePage,
-  head: () => ({ meta: [{ title: "Profile - Planet Baltimore" }] }),
+  head: () => ({
+    meta: [
+      { title: "Community Profile | Planet Baltimore" },
+      { name: "description", content: "View this community member's public profile, posts, events, and activity on Planet Baltimore." },
+      { property: "og:title", content: "Community Profile | Planet Baltimore" },
+      { property: "og:description", content: "View this community member's public profile and activity on Planet Baltimore." },
+      { property: "og:type", content: "profile" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
 function PublicProfilePage() {
@@ -70,11 +79,7 @@ function PublicProfilePage() {
   const [muted, setMuted] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showHoodPicker, setShowHoodPicker] = useState(false);
-  const [hasArtistRole, setHasArtistRole] = useState(false);
   const [showTypePicker, setShowTypePicker] = useState(false);
-  const forceResident = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "resident";
-  const forceArtist = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "artist";
-  void forceResident;
 
   const isOwner = !!me && !!profile && me.id === profile.id;
 
@@ -127,15 +132,6 @@ function PublicProfilePage() {
       setProfile(publicProfile || null);
       if (publicProfile) {
         setMuted(window.localStorage.getItem(`pb_mute_user_${publicProfile.id}`) === "1");
-        // Detect artist role from user_roles so artist pages render as such
-        // even when profile.role is stored as "resident".
-        const { data: artistRoleRow } = await supabase
-          .from("user_roles")
-          .select("user_id")
-          .eq("user_id", publicProfile.id)
-          .eq("role", "artist")
-          .maybeSingle();
-        if (!cancelled) setHasArtistRole(!!artistRoleRow);
         const [{ count: followers }, { count: following }, { count: posts }] = await Promise.all([
           supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
           supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
@@ -296,22 +292,10 @@ function PublicProfilePage() {
   }
 
   const categoryLabel = bannerLabelForArtist(profile.category, profile.role) || formatCategory(profile.category, profile.role);
-  // Every normal profile link opens the complete Resident Page. Artist Page
-  // remains an explicit secondary page reached with ?view=artist.
-  // Auto-switch to Artist Page when the profile has the artist role or a
-  // recognised artist category, so podcaster/videographer/etc layouts
-  // render for everyone (not only when ?view=artist is in the URL).
-  // Personal profile pages (resident/visitor) are fully separate from artist
-  // pages. Only an explicit ?view=artist renders the artist layout, so the two
-  // never bleed into each other.
-  // Only render the Artist Page layout when the profile really is an artist.
-  // A stray ?view=artist carried over from another page must never turn a
-  // resident or visitor profile into an artist page.
-  const isArtistView =
-    forceArtist && (hasArtistRole || isArtistProfile(profile.category, profile.role));
-  const tabs = isArtistView
-    ? tabsForArtist(profile.category, profile.role)
-    : tabsForProfile(profile.category, profile.role);
+  // A person has one canonical public profile. Standalone artist and
+  // organization pages live at /o/$slug and are never selected by URL search.
+  const isArtistView = false;
+  const tabs = tabsForProfile(profile.category, profile.role);
   const canEdit = !!isSelf;
 
   return (
