@@ -397,13 +397,9 @@ function PublicProfilePage() {
         {profile.bio && (
           <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{profile.bio}</p>
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
-          <button type="button" onClick={() => setFollowList("followers")} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]">
-            <UserPlus className="h-4 w-4" /> {stats.followers} followers
-          </button>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
           {(profile.neighborhood || isOwner) && (
             <>
-              <span className="text-neutral-300">·</span>
               {isOwner ? (
                 <div className="relative">
                   <button
@@ -447,6 +443,22 @@ function PublicProfilePage() {
               </a>
             </>
           )}
+        </div>
+
+        {/* Stats */}
+        <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs sm:flex sm:gap-10 sm:text-left sm:text-sm">
+          <div>
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.posts}</div>
+            <div className="text-neutral-500">Posts</div>
+          </div>
+          <button type="button" onClick={() => setFollowList("followers")} className="hover:text-[#d4580a]">
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.followers}</div>
+            <div className="text-neutral-500">Followers</div>
+          </button>
+          <button type="button" onClick={() => setFollowList("following")} className="hover:text-[#d4580a]">
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.following}</div>
+            <div className="text-neutral-500">Following</div>
+          </button>
         </div>
 
         {hashtags.length > 0 && (
