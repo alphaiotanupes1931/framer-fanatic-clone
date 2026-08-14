@@ -188,7 +188,7 @@ function NeighborhoodsPage() {
                 tab === "associations" ? associations : [];
               return (
                 <div className="bg-card">
-                  <div className="flex gap-1 overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex gap-1 overflow-x-auto p-3 sm:p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {tabs.map((t) => {
                       const active = tab === t.key;
                       const Icon = t.Icon;
@@ -196,7 +196,7 @@ function NeighborhoodsPage() {
                         <button
                           key={t.key}
                           onClick={() => setTab(t.key)}
-                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-[13px] font-medium transition sm:text-sm ${
+                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-[13px] font-medium transition sm:text-sm ${
                             active
                               ? "bg-orange/10 text-orange"
                               : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -208,7 +208,7 @@ function NeighborhoodsPage() {
                       );
                     })}
                   </div>
-                  <div className="border-t border-border p-2 sm:p-3">
+                  <div className="border-t border-border p-3 sm:p-4">
                     {loading ? (
                       <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
                     ) : tab === "events" ? (
