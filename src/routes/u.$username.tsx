@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
-  Send, Star, Trash2, Volume2, VolumeX, Grid3x3, Layers,
-  Image as ImageIcon, Calendar, FileText, ChevronDown,
+  Send, Star, Trash2, Volume2, VolumeX, Grid3x3,
+  Calendar, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -14,23 +14,33 @@ import { PROFILE_TAGS } from "@/lib/categories";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
-import { tabsForProfile, bannerLabelForArtist, type ArtistTabKey } from "@/lib/artist-tabs";
-import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
-import { ProfileSectionTab } from "@/components/profile-sections";
+import { bannerLabelForArtist } from "@/lib/artist-tabs";
+import {
+  PersonAboutTab,
+  PersonWritingsTab,
+  PersonSavedTab,
+  PersonAttendingTab,
+  PersonPagesTab,
+} from "@/components/profile/person-tabs";
 import {
   ArtistPostsGrid,
-  ArtistGalleryTab,
-  ArtistSeriesTab,
-  ArtistBookCollaborateTab,
-  ArtistCVTab,
-  ArtistInviteTab,
   ArtistEventsGrouped,
-  ArtistStudioTab,
-  ArtistTalkTab,
-  ArtistAvailableWorksTab,
 } from "@/components/artist/artist-tab-sections";
 import { Img } from "@/components/shared/smart-img";
 import { setMyProfileKind } from "@/lib/profile-kind";
+import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid } from "lucide-react";
+
+// A person has one canonical public profile with the same tabs everywhere.
+type PersonTabKey = "posts" | "about" | "writings" | "saved" | "attending" | "organized" | "pages";
+const PERSON_TABS: Array<{ key: PersonTabKey; label: string; Icon: React.ComponentType<{ className?: string }> }> = [
+  { key: "posts", label: "Posts", Icon: Grid2x2 },
+  { key: "about", label: "About", Icon: Info },
+  { key: "writings", label: "Writings", Icon: BookOpen },
+  { key: "saved", label: "Saved", Icon: Bookmark },
+  { key: "attending", label: "Attending", Icon: CalendarCheck },
+  { key: "organized", label: "Organized", Icon: Calendar },
+  { key: "pages", label: "Pages", Icon: LayoutGrid },
+];
 
 type PublicProfile = {
   id: string;
@@ -68,7 +78,7 @@ function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
-  const [tab, setTab] = useState<ArtistTabKey>("posts");
+  const [tab, setTab] = useState<PersonTabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
@@ -295,7 +305,7 @@ function PublicProfilePage() {
   // A person has one canonical public profile. Standalone artist and
   // organization pages live at /o/$slug and are never selected by URL search.
   const isArtistView = false;
-  const tabs = tabsForProfile(profile.category, profile.role);
+  const tabs = PERSON_TABS;
   const canEdit = !!isSelf;
 
   return (
@@ -571,37 +581,22 @@ function PublicProfilePage() {
             ) : (
               <ArtistPostsGrid posts={posts} />
             )
-          ) : tab === "studio" ? (
-            <ArtistStudioTab posts={posts} />
-          ) : tab === "series" ? (
-            <ArtistSeriesTab userId={profile.id} canEdit={canEdit} />
-          ) : tab === "talk" ? (
-            <ArtistTalkTab profile={profile} />
-          ) : tab === "contact" ? (
-            <ArtistBookCollaborateTab profile={profile} />
-          ) : tab === "cv" ? (
-            <ArtistCVTab userId={profile.id} profile={profile} canEdit={canEdit} />
-          ) : tab === "invite" ? (
-            <ArtistInviteTab profile={profile} />
-          ) : tab === "events" || tab === "exhibitions" ? (
+          ) : tab === "about" ? (
+            <PersonAboutTab profile={profile} />
+          ) : tab === "writings" ? (
+            <PersonWritingsTab userId={profile.id} isSelf={!!isSelf} />
+          ) : tab === "saved" ? (
+            <PersonSavedTab isSelf={!!isSelf} />
+          ) : tab === "attending" ? (
+            <PersonAttendingTab userId={profile.id} isSelf={!!isSelf} />
+          ) : tab === "organized" ? (
             events.length === 0 ? (
-              <EmptyTab icon={Calendar} label={tab === "exhibitions" ? "No exhibitions yet." : "No events yet."} />
+              <EmptyTab icon={Calendar} label="No events yet." />
             ) : (
               <ArtistEventsGrouped events={events as never} />
             )
-          ) : tab === "episodes" ? (
-            <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
-          ) : tab === "gallery" ? (
-            <ArtistGalleryTab userId={profile.id} canEdit={canEdit} />
-          ) : tab === "shop" ? (
-            <ArtistAvailableWorksTab userId={profile.id} canEdit={canEdit} />
           ) : (
-            <ProfileSectionTab
-              userId={profile.id}
-              kind={tab}
-              label={tabs.find((t) => t.key === tab)?.label ?? "Items"}
-              canEdit={!!canEdit}
-            />
+            <PersonPagesTab userId={profile.id} isSelf={!!isSelf} />
           )}
         </div>
       </div>
