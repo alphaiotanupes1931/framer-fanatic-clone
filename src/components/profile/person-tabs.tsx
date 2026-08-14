@@ -1,0 +1,218 @@
+import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Bookmark, ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { SmartImage } from "@/components/smart-image";
+
+/** Long-form About for any person's public profile (read-only). */
+export function PersonAboutTab({ profile }: { profile: any }) {
+  const userId: string | undefined = profile?.id;
+  const [longAbout, setLongAbout] = useState("");
+  const [cv, setCv] = useState<{ url: string; name: string } | null>(null);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profile_sections")
+        .select("id,kind,body,media_url,title")
+        .eq("user_id", userId)
+        .in("kind", ["about_long", "cv"]);
+      if (cancelled) return;
+      const a = (data ?? []).find((r: any) => r.kind === "about_long");
+      const c = (data ?? []).find((r: any) => r.kind === "cv");
+      setLongAbout((a?.body as string) ?? "");
+      if (c?.media_url) setCv({ url: c.media_url as string, name: (c.title as string) || "CV" });
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  const rows: Array<{ label: string; value: string | null }> = [
+    { label: "Name", value: profile?.display_name || null },
+    { label: "Username", value: profile?.username ? `@${profile.username}` : null },
+    { label: "Neighborhood", value: profile?.neighborhood || null },
+    { label: "Website", value: profile?.website || null },
+  ].filter((r) => !!r.value);
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-border bg-card p-5">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">About</h3>
+        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+          {longAbout || profile?.bio || "Nothing here yet."}
+        </p>
+      </div>
+      {rows.length > 0 && (
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Details</h3>
+          <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+            {rows.map((r) => (
+              <div key={r.label} className="flex gap-2 text-sm">
+                <dt className="w-28 shrink-0 text-muted-foreground">{r.label}</dt>
+                <dd className="min-w-0 break-words font-medium">{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+      {cv && (
+        <a href={cv.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted">
+          <ExternalLink className="h-4 w-4" /> {cv.name}
+        </a>
+      )}
+    </div>
+  );
+}
+
+/** Published stories written by this person. */
+export function PersonWritingsTab({ userId, isSelf }: { userId: string; isSelf: boolean }) {
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      let q = supabase
+        .from("stories")
+        .select("id,title,excerpt,cover_url,created_at,status")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (!isSelf) q = q.eq("status", "published");
+      const { data } = await q;
+      if (cancelled) return;
+      setRows(data ?? []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [userId, isSelf]);
+
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading writings…</div>;
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
+        No writings yet.
+        {isSelf && (
+          <div>
+            <Link to="/create-story" className="mt-3 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Write a story</Link>
+          </div>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-3">
+      {rows.map((s) => (
+        <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex items-stretch overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md">
+          {s.cover_url && <SmartImage src={s.cover_url} alt={s.title} bucket="story-covers" className="h-24 w-40 shrink-0 object-cover sm:h-28 sm:w-56" />}
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-3 sm:p-4">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              {new Date(s.created_at).toLocaleDateString()}
+            </div>
+            <div className="line-clamp-1 font-bold leading-tight">{s.title}</div>
+            {s.excerpt && <p className="line-clamp-2 text-sm text-muted-foreground">{s.excerpt}</p>}
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+export function PersonSavedTab({ isSelf }: { isSelf: boolean }) {
+  if (!isSelf) {
+    return <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">Saved items are private.</div>;
+  }
+  return (
+    <div className="rounded-2xl border border-dashed border-border py-12 text-center">
+      <Bookmark className="mx-auto h-8 w-8 text-muted-foreground" />
+      <div className="mt-3 text-sm text-muted-foreground">All of your saved posts, stories and events live here.</div>
+      <Link to="/saved" className="mt-4 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Open Saved</Link>
+    </div>
+  );
+}
+
+/** Upcoming events this person holds a paid ticket for (visible to them only). */
+export function PersonAttendingTab({ userId, isSelf }: { userId: string; isSelf: boolean }) {
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!isSelf) { setLoading(false); return; }
+      const { data } = await supabase
+        .from("tickets")
+        .select("id,event_id,events(title,starts_at,location,venue_name,image_url)")
+        .eq("buyer_id", userId)
+        .eq("status", "paid");
+      if (cancelled) return;
+      setRows(data ?? []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [userId, isSelf]);
+
+  if (!isSelf) return <div className="py-12 text-center text-sm text-muted-foreground">Event attendance is private.</div>;
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
+  const now = Date.now();
+  const upcoming = rows
+    .filter((r) => r.events && new Date(r.events.starts_at).getTime() >= now)
+    .sort((a, b) => +new Date(a.events.starts_at) - +new Date(b.events.starts_at));
+  if (upcoming.length === 0) return <div className="py-12 text-center text-muted-foreground">No upcoming events yet.</div>;
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {upcoming.map((r) => (
+        <Link key={r.id} to="/events/$eventId" params={{ eventId: r.event_id }} className="block overflow-hidden rounded-2xl border border-border transition hover:shadow-md">
+          {r.events?.image_url && <SmartImage src={r.events.image_url} alt={r.events.title} bucket="event-images" className="h-40 w-full object-cover" />}
+          <div className="space-y-1.5 p-4">
+            <div className="text-xs text-muted-foreground">
+              {new Date(r.events.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+            </div>
+            <div className="line-clamp-2 font-bold leading-tight">{r.events?.title}</div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/** Public organization / artist pages this person owns. */
+export function PersonPagesTab({ userId, isSelf }: { userId: string; isSelf: boolean }) {
+  const [orgs, setOrgs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      let q = supabase
+        .from("organizations")
+        .select("id, name, slug, type, subtype, avatar_url, is_public")
+        .eq("owner_id", userId);
+      if (!isSelf) q = q.neq("is_public", false);
+      const { data } = await q;
+      if (cancelled) return;
+      setOrgs(data ?? []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [userId, isSelf]);
+
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
+  if (orgs.length === 0) return <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">No pages yet.</div>;
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {orgs.map((o) => (
+        <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 hover:border-[#d4580a] hover:shadow-sm">
+          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
+            {o.avatar_url && <SmartImage src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-semibold">{o.name}</div>
+            <div className="truncate text-xs uppercase tracking-wider text-muted-foreground">
+              {[o.type, o.subtype].filter(Boolean).join(" · ")}
+            </div>
+          </div>
+          <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
+        </Link>
+      ))}
+    </div>
+  );
+}
