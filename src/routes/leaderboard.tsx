@@ -107,7 +107,7 @@ function LeaderboardPage() {
           );
           const className = "flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white px-5 py-4 transition hover:border-orange-300 hover:shadow-sm";
           return r.username ? (
-            <Link key={r.id} to="/u/$username" params={{ username: r.username }} search={{ view: "resident" }} className={className}>{content}</Link>
+            <Link key={r.id} to="/u/$username" params={{ username: r.username }} className={className}>{content}</Link>
           ) : (
             <div key={r.id} className={className}>{content}</div>
           );
