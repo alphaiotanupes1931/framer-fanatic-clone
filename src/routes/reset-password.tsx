@@ -44,7 +44,15 @@ function ResetPasswordPage() {
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (uid) {
-      await supabase.from("profiles").update({ must_reset_password: false }).eq("id", uid);
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("onboarded, neighborhood, category, avatar_url, bio, display_name")
+        .eq("id", uid)
+        .maybeSingle();
+      const patch: Record<string, unknown> = { must_reset_password: false };
+      // Existing members shouldn't be pushed back through onboarding after a reset.
+      if (prof && !prof.onboarded && !profileNeedsOnboarding(prof as any)) patch.onboarded = true;
+      await supabase.from("profiles").update(patch).eq("id", uid);
     }
     setLoading(false);
     toast.success("Password updated");
