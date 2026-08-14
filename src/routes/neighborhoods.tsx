@@ -140,14 +140,15 @@ function NeighborhoodsPage() {
 
         {selected && (
           <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:p-4 lg:p-6"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-6"
             onClick={() => setSelected(null)}
           >
             <div
-              className="flex h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background text-foreground shadow-2xl sm:h-[85vh] sm:w-[92vw] sm:max-w-2xl sm:rounded-2xl lg:max-w-4xl xl:max-w-5xl"
+              className="flex max-h-[88vh] w-full flex-col overflow-hidden rounded-t-3xl bg-background text-foreground shadow-2xl sm:max-h-[82vh] sm:w-full sm:max-w-lg sm:rounded-2xl lg:max-w-3xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-6 sm:py-5 lg:px-8">
+              <div className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-border sm:hidden" />
+              <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 sm:px-6 sm:py-4">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted sm:h-12 sm:w-12">
                   <MapPin className="h-5 w-5 text-muted-foreground sm:h-6 sm:w-6" />
                 </div>
@@ -187,8 +188,8 @@ function NeighborhoodsPage() {
                 tab === "arts_orgs" ? artsOrgs :
                 tab === "associations" ? associations : [];
               return (
-                <div className="min-h-full bg-card">
-                  <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto bg-card p-2.5 sm:flex-wrap sm:p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="bg-card">
+                  <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-border bg-card px-3 py-2 sm:flex-wrap sm:px-5 sm:py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {tabs.map((t) => {
                       const active = tab === t.key;
                       const Icon = t.Icon;
@@ -196,7 +197,7 @@ function NeighborhoodsPage() {
                         <button
                           key={t.key}
                           onClick={() => setTab(t.key)}
-                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-[13px] font-medium transition sm:text-sm ${
+                          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium transition sm:px-3.5 sm:text-sm ${
                             active
                               ? "bg-orange/10 text-orange"
                               : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -208,7 +209,7 @@ function NeighborhoodsPage() {
                       );
                     })}
                   </div>
-                  <div className="border-t border-border p-2.5 sm:p-4 lg:p-6">
+                  <div className="p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5">
                     {loading ? (
                       <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
                     ) : tab === "events" ? (
@@ -329,7 +330,7 @@ function NeighborhoodsPage() {
 
 function EmptyRow({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+    <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
       {label}
     </div>
   );
