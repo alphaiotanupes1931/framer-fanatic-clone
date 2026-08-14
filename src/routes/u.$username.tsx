@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
+import { sortPosts } from "@/lib/sort-posts";
 import { PROFILE_TAGS } from "@/lib/categories";
 import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
@@ -172,13 +173,7 @@ function PublicProfilePage() {
           author_username: publicProfile.username,
         };
         void storiesRes;
-        const orderedPosts = [...(postsRes.data || [])].sort((a: any, b: any) => {
-          const ap = a.is_pinned ? 1 : 0;
-          const bp = b.is_pinned ? 1 : 0;
-          if (ap !== bp) return bp - ap;
-          if (a.is_pinned && b.is_pinned) return (a.pin_order ?? 0) - (b.pin_order ?? 0);
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        });
+        const orderedPosts = sortPosts((postsRes.data || []) as any[]);
         setPosts(orderedPosts.map((p: any) => ({ ...p, ...authorMeta })));
         setEvents(eventsRes.data || []);
         setContentLoading(false);
