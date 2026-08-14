@@ -67,7 +67,7 @@ function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
-  const [tab, setTab] = useState<ArtistTabKey>("posts");
+  const [tab, setTab] = useState<PersonTabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
@@ -294,7 +294,7 @@ function PublicProfilePage() {
   // A person has one canonical public profile. Standalone artist and
   // organization pages live at /o/$slug and are never selected by URL search.
   const isArtistView = false;
-  const tabs = tabsForProfile(profile.category, profile.role);
+  const tabs = PERSON_TABS;
   const canEdit = !!isSelf;
 
   return (
@@ -570,37 +570,22 @@ function PublicProfilePage() {
             ) : (
               <ArtistPostsGrid posts={posts} />
             )
-          ) : tab === "studio" ? (
-            <ArtistStudioTab posts={posts} />
-          ) : tab === "series" ? (
-            <ArtistSeriesTab userId={profile.id} canEdit={canEdit} />
-          ) : tab === "talk" ? (
-            <ArtistTalkTab profile={profile} />
-          ) : tab === "contact" ? (
-            <ArtistBookCollaborateTab profile={profile} />
-          ) : tab === "cv" ? (
-            <ArtistCVTab userId={profile.id} profile={profile} canEdit={canEdit} />
-          ) : tab === "invite" ? (
-            <ArtistInviteTab profile={profile} />
-          ) : tab === "events" || tab === "exhibitions" ? (
+          ) : tab === "about" ? (
+            <PersonAboutTab profile={profile} />
+          ) : tab === "writings" ? (
+            <PersonWritingsTab userId={profile.id} isSelf={!!isSelf} />
+          ) : tab === "saved" ? (
+            <PersonSavedTab isSelf={!!isSelf} />
+          ) : tab === "attending" ? (
+            <PersonAttendingTab userId={profile.id} isSelf={!!isSelf} />
+          ) : tab === "organized" ? (
             events.length === 0 ? (
-              <EmptyTab icon={Calendar} label={tab === "exhibitions" ? "No exhibitions yet." : "No events yet."} />
+              <EmptyTab icon={Calendar} label="No events yet." />
             ) : (
               <ArtistEventsGrouped events={events as never} />
             )
-          ) : tab === "episodes" ? (
-            <PodcastEpisodesTab userId={profile.id} isOwner={!!isSelf} />
-          ) : tab === "gallery" ? (
-            <ArtistGalleryTab userId={profile.id} canEdit={canEdit} />
-          ) : tab === "shop" ? (
-            <ArtistAvailableWorksTab userId={profile.id} canEdit={canEdit} />
           ) : (
-            <ProfileSectionTab
-              userId={profile.id}
-              kind={tab}
-              label={tabs.find((t) => t.key === tab)?.label ?? "Items"}
-              canEdit={!!canEdit}
-            />
+            <PersonPagesTab userId={profile.id} isSelf={!!isSelf} />
           )}
         </div>
       </div>
