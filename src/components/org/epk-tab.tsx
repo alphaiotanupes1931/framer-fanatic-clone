@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Globe, Mail, MapPin, Phone, Pencil, Plus, Trash2, Upload, FileText, ExternalLink } from "lucide-react";
+import { Globe, Mail, MapPin, Phone, Pencil, Plus, Trash2, FileText, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
@@ -193,7 +193,6 @@ export function EpkTab({
 
       <Section
         title="Press Photos"
-        action={canManage ? <ActionBtn onClick={() => document.getElementById("epk-photo-input")?.click()}><Upload className="h-3.5 w-3.5" /> Upload</ActionBtn> : undefined}
       >
         {canManage && (
           <div className="mb-4">
