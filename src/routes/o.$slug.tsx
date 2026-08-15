@@ -623,6 +623,8 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
     );
   if (tab === "Shop" || tab === "Print Shop")
     return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
+  if (tab === "Writing" || tab === "Books" || tab === "Poems" || tab === "Publications" || tab === "Essays")
+    return <OrgStoriesTab orgId={org.id} canManage={canManage} title={tab} />;
   const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
   return <OrgPostList orgId={org.id} kind={kind} canManage={canManage} />;
 }
