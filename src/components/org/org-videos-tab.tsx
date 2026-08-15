@@ -135,8 +135,6 @@ export function OrgVideosTab({
           {editId && !file && (
             <p className="text-xs text-muted-foreground">Leave empty to keep the current video.</p>
           )}
-          <button type="button" hidden aria-hidden="true">
-          </button>
           <div className="flex justify-end gap-2">
             <button onClick={reset} className="rounded-full px-4 py-2 text-sm">Cancel</button>
             <button
