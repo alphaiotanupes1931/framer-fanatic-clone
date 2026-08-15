@@ -152,7 +152,20 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
           <button type="button" onClick={() => setShareOpen(true)} className="inline-flex items-center gap-1 hover:text-neutral-800"><Send className="h-4 w-4 -rotate-45" /> Share</button>
         </div>
       </div>
-      <ShareToUsersDialog open={shareOpen} onClose={() => setShareOpen(false)} url={shareUrl} title={e.title} />
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={shareUrl}
+        title={e.title}
+        preview={{
+          type: "event",
+          id: e.id,
+          url: shareUrl,
+          title: e.title,
+          excerpt: [fmtDateLong(e.starts_at), e.location].filter(Boolean).join(" - "),
+          image: e.image_url ?? null,
+        }}
+      />
     </div>
   );
 }
