@@ -21,12 +21,13 @@ function readMinutes(body: string | null) {
 }
 
 /** Stories on a page, presented with the same reading layout as the Stories page. */
-export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: boolean }) {
+export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }: { orgId: string; canManage: boolean; title?: string }) {
   const [items, setItems] = useState<OrgStory[]>([]);
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
   const [active, setActive] = useState<OrgStory | null>(null);
   const [form, setForm] = useState({ title: "", body: "", media_url: "", link_url: "" });
+  const singular = tabTitle === "Stories" ? "story" : tabTitle.replace(/s$/, "").toLowerCase();
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -61,12 +62,12 @@ export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: 
     if (error) return toast.error(error.message);
     setForm({ title: "", body: "", media_url: "", link_url: "" });
     setComposing(false);
-    toast.success("Story published");
+    toast.success("Published");
     void load();
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this story?")) return;
+    if (!confirm("Delete this piece?")) return;
     const { error } = await supabase.from("organization_posts").delete().eq("id", id);
     if (error) return toast.error(error.message);
     setItems((xs) => xs.filter((x) => x.id !== id));
@@ -80,28 +81,54 @@ export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: 
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-lg font-bold text-foreground">
-          <BookOpen className="h-5 w-5 text-primary" /> Stories
+          <BookOpen className="h-5 w-5 text-primary" /> {tabTitle}
         </h3>
         {canManage && !composing && (
           <button
             onClick={() => setComposing(true)}
             className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
           >
-            <Plus className="h-3.5 w-3.5" /> Write a story
+            <Plus className="h-3.5 w-3.5" /> Write a {singular}
           </button>
         )}
       </div>
 
       {composing && (
-        <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
-          <input className={inputCls} placeholder="Story title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-          <textarea className={inputCls} rows={8} placeholder="Tell the story…" value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))} />
-          <ImageUpload value={form.media_url} onChange={(url) => setForm((f) => ({ ...f, media_url: url }))} label="Upload cover image" />
-          <div className="flex gap-2">
-            <button onClick={publish} disabled={saving} className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50">
-              {saving ? "Publishing…" : "Publish story"}
+        <div className="mx-auto w-full max-w-3xl space-y-6 rounded-2xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <button onClick={() => setComposing(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">← Back</button>
+            <button onClick={publish} disabled={saving} className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50">
+              {saving ? "Publishing…" : "Publish"}
             </button>
-            <button onClick={() => setComposing(false)} className="rounded-full border border-border px-4 py-2 text-xs font-semibold text-foreground">Cancel</button>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Cover image</p>
+            <ImageUpload value={form.media_url} onChange={(url) => setForm((f) => ({ ...f, media_url: url }))} label="Click to add cover image" />
+          </div>
+
+          <input
+            className="w-full border-none bg-transparent text-3xl font-bold text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+            placeholder={`${singular.charAt(0).toUpperCase() + singular.slice(1)} title…`}
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+          />
+          <input
+            className="w-full border-none bg-transparent text-base text-muted-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+            placeholder="Add a link (optional)…"
+            value={form.link_url}
+            onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))}
+          />
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Content</p>
+            <textarea
+              className={`${inputCls} min-h-[320px] leading-relaxed`}
+              rows={14}
+              placeholder="Start writing…"
+              value={form.body}
+              onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
+            />
           </div>
         </div>
       )}
@@ -110,7 +137,7 @@ export function OrgStoriesTab({ orgId, canManage }: { orgId: string; canManage: 
         <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/30 py-12 text-center text-sm text-muted-foreground">
-          {canManage ? "No stories yet. Write your first one." : "No stories yet."}
+          {canManage ? `No ${tabTitle.toLowerCase()} yet. Write your first one.` : `No ${tabTitle.toLowerCase()} yet.`}
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
