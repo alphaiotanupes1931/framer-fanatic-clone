@@ -625,6 +625,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
       />
     );
   if (tab === "Shop" || tab === "Print Shop" || tab === "Drops")
+    // handled below
     return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
   if (tab === "Writing" || tab === "Books" || tab === "Poems" || tab === "Publications" || tab === "Essays")
     return <OrgStoriesTab orgId={org.id} canManage={canManage} title={tab} />;
