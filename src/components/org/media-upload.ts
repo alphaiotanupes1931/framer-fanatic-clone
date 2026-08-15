@@ -8,8 +8,12 @@ export async function uploadMediaFile(file: File, orgId: string, kind: "audio" |
   if (file.size > MAX_MEDIA_MB * 1024 * 1024) {
     throw new Error(`File must be under ${MAX_MEDIA_MB}MB`);
   }
+  // Storage rules require the first folder to be the signed-in user's id.
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) throw new Error("Please sign in again to upload files.");
   const ext = file.name.split(".").pop() || (kind === "audio" ? "mp3" : "mp4");
-  const path = `${orgId}/${kind}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const path = `${uid}/${orgId}/${kind}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await supabase.storage.from("podcast-media").upload(path, file, {
     cacheControl: "3600",
     upsert: false,
