@@ -625,8 +625,9 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
       />
     );
   if (tab === "Shop" || tab === "Print Shop" || tab === "Drops")
-    // handled below
     return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
+  if (tab === "Episodes" || tab === "Listen" || tab === "Bonus")
+    return <PodcastEpisodesTab userId={org.owner_id} isOwner={canManage} />;
   if (tab === "Writing" || tab === "Books" || tab === "Poems" || tab === "Publications" || tab === "Essays")
     return <OrgStoriesTab orgId={org.id} canManage={canManage} title={tab} />;
   const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
