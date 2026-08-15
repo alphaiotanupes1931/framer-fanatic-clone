@@ -222,7 +222,7 @@ export function PodcastEpisodesTab({ userId, isOwner }: { userId: string; isOwne
                 {videoEps.map((ep) => (
                   <article key={ep.id} className="overflow-hidden rounded-2xl border border-border bg-card">
                     {playing === ep.id ? (
-                      <SmartVideo src={ep.video_url!} controls autoPlay className="aspect-video w-full bg-black" />
+                      <SmartVideo src={ep.video_url!} controls autoPlay className="aspect-video w-full bg-white" />
                     ) : (
                       <button onClick={() => setPlaying(ep.id)} className="relative block aspect-video w-full bg-muted">
                         {ep.cover_url

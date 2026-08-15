@@ -261,7 +261,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               controls
               playsInline
               preload="metadata"
-              className="w-full max-h-[70vh] bg-black"
+              className="w-full max-h-[70vh] bg-white"
             />
           )}
           {mediaList.length > 1 && (
@@ -359,12 +359,12 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           role="dialog"
           aria-modal="true"
           onClick={() => setLightbox(false)}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-white p-4"
         >
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
-            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+            className="absolute right-4 top-4 rounded-full bg-neutral-900/10 p-2 text-neutral-900 hover:bg-neutral-900/20"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
