@@ -339,10 +339,13 @@ export function MusicTab({
           {singles.map((t) => (
             <div key={t.id} className="rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center gap-3">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
                   {t.cover_url
                     ? <Img src={t.cover_url} alt={t.title} className="h-full w-full object-cover" />
                     : <div className="grid h-full w-full place-items-center"><Music2 className="h-5 w-5 text-muted-foreground" /></div>}
+                  <div className="absolute inset-0 grid place-items-center bg-black/10">
+                    <PlayButton id={t.id} src={t.audio_url} />
+                  </div>
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-semibold">{t.title}</div>
@@ -354,7 +357,6 @@ export function MusicTab({
                   </button>
                 )}
               </div>
-              <SmartAudio src={t.audio_url} controls preload="none" className="mt-3 w-full" />
             </div>
           ))}
         </div>
@@ -364,10 +366,12 @@ export function MusicTab({
 }
 
 function TrackRow({ track, canManage, onDelete }: { track: Track; canManage: boolean; onDelete: () => void }) {
+  const player = usePlayer();
+  const active = player.id === track.id && player.status === "playing";
   return (
-    <div className="rounded-xl border border-border bg-background p-3">
+    <div className={`rounded-xl border p-3 ${active ? "border-primary bg-primary/5" : "border-border bg-background"}`}>
       <div className="flex items-center gap-3">
-        <span className="w-6 shrink-0 text-xs text-muted-foreground">{track.track_number}</span>
+        <PlayButton id={track.id} src={track.audio_url} size="sm" />
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{track.title}</span>
         <span className="shrink-0 text-xs text-muted-foreground">{formatDuration(track.duration_seconds)}</span>
         {canManage && (
@@ -376,7 +380,6 @@ function TrackRow({ track, canManage, onDelete }: { track: Track; canManage: boo
           </button>
         )}
       </div>
-      <SmartAudio src={track.audio_url} controls preload="none" className="mt-2 w-full" />
     </div>
   );
 }
