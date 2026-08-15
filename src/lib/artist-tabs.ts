@@ -15,7 +15,7 @@ export type ArtistTabKey =
   | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support"
   | "materials" | "installations" | "commissions" | "press"
   | "repertoire" | "writing" | "appearances" | "newsletter" | "books"
-  | "exhibitions" | "dashboard" | "mixes" | "tracks";
+  | "exhibitions" | "mixes" | "tracks";
 
 export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
 
