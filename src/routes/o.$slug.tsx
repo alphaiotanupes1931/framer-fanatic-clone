@@ -594,6 +594,26 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
       </div>
     );
   if (tab === "Portfolio") return <GalleryTab orgId={org.id} canManage={canManage} />;
+  if (tab === "Album" || tab === "Albums" || tab === "Music" || tab === "Discography")
+    return <MusicTab orgId={org.id} canManage={canManage} mode="album" />;
+  if (tab === "Singles" || tab === "Tracks" || tab === "Beats" || tab === "Mixes" || tab === "Sets")
+    return <MusicTab orgId={org.id} canManage={canManage} mode="single" label={tab} />;
+  if (tab === "Videos" || tab === "Reels" || tab === "Films" || tab === "Work")
+    return <OrgVideosTab orgId={org.id} canManage={canManage} title={tab} />;
+  if (tab === "EPK")
+    return (
+      <EpkTab
+        orgId={org.id}
+        canManage={canManage}
+        me={me}
+        name={org.name}
+        bio={org.bio}
+        email={org.email}
+        phone={org.phone}
+        website={org.website}
+        address={org.address}
+      />
+    );
   if (tab === "Shop" || tab === "Print Shop")
     return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
   const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
