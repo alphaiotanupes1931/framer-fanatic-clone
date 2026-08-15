@@ -34,6 +34,7 @@ import { GalleryTab } from "@/components/org/gallery-tab";
 import { MusicTab } from "@/components/org/music-tab";
 import { OrgVideosTab } from "@/components/org/org-videos-tab";
 import { EpkTab } from "@/components/org/epk-tab";
+import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
