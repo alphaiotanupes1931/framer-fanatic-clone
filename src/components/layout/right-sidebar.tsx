@@ -12,18 +12,18 @@ import { useHydrated } from "@/hooks/use-hydrated";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
   return (
-    <div className="mb-6">
-      <div className="mb-3 flex items-center justify-between">
+    <section className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
         <div className="flex items-center gap-2">
-          <Icon className="h-5 w-5 text-slate-800" />
-          <h3 className="text-sm font-extrabold uppercase tracking-normal text-slate-800">{title}</h3>
+          <Icon className="h-4 w-4 text-slate-700" />
+          <h3 className="text-base font-semibold tracking-tight text-slate-900">{title}</h3>
         </div>
         {seeAllLink && (
-          <Link to={seeAllLink} className="text-xs font-bold" style={{ color: "#d4580a" }}>See all</Link>
+          <Link to={seeAllLink} className="text-xs font-semibold" style={{ color: "#d4580a" }}>See all</Link>
         )}
       </div>
-      <div className="space-y-3">{children}</div>
-    </div>
+      <div className="divide-y divide-slate-100 px-4">{children}</div>
+    </section>
   );
 }
 
@@ -66,8 +66,8 @@ export function RightSidebar() {
       >
         {rightCollapsed ? <ChevronLeft className="h-4 w-4 text-slate-600" /> : <ChevronRight className="h-4 w-4 text-slate-600" />}
       </button>
-      <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[280px] overflow-y-auto border-l border-slate-200 bg-white transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
-      <div className="space-y-4 px-5 pb-6 pt-12">
+      <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[280px] overflow-y-auto border-l border-slate-200 bg-slate-50 transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
+      <div className="px-4 pb-6 pt-12">
         {hydrated && stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any, i: number) => (
@@ -75,9 +75,9 @@ export function RightSidebar() {
                 key={s.id}
                 to="/stories/$storyId"
                 params={{ storyId: s.id }}
-                className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100"
+                className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-slate-50"
               >
-                <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
                   {s.cover_url ? (
                     <Img src={s.cover_url} alt="" className="h-full w-full object-cover" loading={i < 2 ? "eager" : "lazy"} />
                   ) : (
@@ -85,8 +85,8 @@ export function RightSidebar() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1 space-y-0.5">
-                  <p className="truncate text-sm font-extrabold leading-tight text-slate-800 transition-colors group-hover:text-[#d4580a]">{s.title}</p>
-                  <p className="truncate text-xs leading-tight text-slate-500">by {s.author_name}</p>
+                  <p className="truncate text-sm font-bold leading-snug text-slate-900 transition-colors group-hover:text-[#d4580a]">{s.title}</p>
+                  <p className="truncate text-xs leading-snug text-slate-500">by {s.author_name}</p>
                 </div>
               </Link>
             ))}
@@ -100,17 +100,17 @@ export function RightSidebar() {
                 key={a.id}
                 to="/u/$username"
                 params={{ username: a.username || a.id }}
-                className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100"
+                className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-slate-50"
               >
                 <div className="flex-shrink-0">
-                  <Avatar className="h-11 w-11 rounded-lg">
-                    <SmartAvatarImage src={a.avatar_url} className="rounded-lg object-cover" />
-                    <AvatarFallback className="rounded-lg bg-slate-100 text-sm font-bold text-slate-600">{a.display_name?.charAt(0)}</AvatarFallback>
+                  <Avatar className="h-10 w-10 rounded-full">
+                    <SmartAvatarImage src={a.avatar_url} className="rounded-full object-cover" />
+                    <AvatarFallback className="rounded-full bg-slate-100 text-sm font-bold text-slate-600">{a.display_name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-extrabold text-slate-800 transition-colors group-hover:text-[#d4580a]">{a.display_name || a.username}</p>
-                  <p className="truncate text-xs capitalize text-slate-500">{(a.category || a.role || "Artist").replace("_", " ")}</p>
+                  <p className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-[#d4580a]">{a.display_name || a.username}</p>
+                  <p className="truncate text-xs capitalize leading-snug text-slate-500">{(a.category || a.role || "Artist").replace("_", " ")}</p>
                 </div>
               </Link>
             ))}
@@ -120,17 +120,17 @@ export function RightSidebar() {
         {hydrated && events.length > 0 && (
           <SuggestionSection title="Upcoming Events" icon={Calendar} seeAllLink="/events">
             {events.map((e: any) => (
-              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group flex items-center gap-3 rounded-md transition-all duration-150 hover:bg-slate-50 active:bg-slate-100">
-                <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
+              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-slate-50">
+                <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
                   {e.image_url ? (
-                    <EventImage src={e.image_url} alt={e.title} className="h-full w-full rounded-lg object-cover" />
+                    <EventImage src={e.image_url} alt={e.title} className="h-full w-full rounded-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-sm font-bold text-slate-500">{e.title?.charAt(0)}</div>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-extrabold text-slate-800 transition-colors group-hover:text-[#d4580a]">{e.title}</p>
-                  <p className="truncate text-xs text-slate-500">
+                  <p className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-[#d4580a]">{e.title}</p>
+                  <p className="truncate text-xs leading-snug text-slate-500">
                     {e.starts_at ? new Date(e.starts_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""}
                     {e.venue_name ? ` · ${e.venue_name}` : ""}
                   </p>
@@ -140,14 +140,14 @@ export function RightSidebar() {
           </SuggestionSection>
         )}
 
-        <div className="border-t border-slate-200 pt-4">
-          <Link to="/discover" className="group flex items-center gap-2 rounded-md p-0.5 text-sm font-semibold transition-all duration-150" style={{ color: "#d4580a" }}>
+        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <Link to="/discover" className="group flex items-center gap-2 text-sm font-semibold transition-all duration-150" style={{ color: "#d4580a" }}>
             Explore more of Baltimore
             <ArrowRight className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
           </Link>
         </div>
 
-        <p className="text-xs text-slate-400">© 2026 Planet Baltimore</p>
+        <p className="mt-4 text-xs text-slate-400">© 2026 Planet Baltimore</p>
       </div>
       </aside>
     </>
