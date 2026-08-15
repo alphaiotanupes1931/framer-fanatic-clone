@@ -1453,6 +1453,53 @@ export type Database = {
           },
         ]
       }
+      organization_releases: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kind: string
+          org_id: string
+          release_date: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: string
+          org_id: string
+          release_date?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: string
+          org_id?: string
+          release_date?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_releases_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_support_tiers: {
         Row: {
           created_at: string
@@ -1497,6 +1544,104 @@ export type Database = {
           {
             foreignKeyName: "organization_support_tiers_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_tracks: {
+        Row: {
+          audio_url: string
+          cover_url: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          org_id: string
+          release_id: string | null
+          title: string
+          track_number: number
+          updated_at: string
+        }
+        Insert: {
+          audio_url: string
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          org_id: string
+          release_id?: string | null
+          title: string
+          track_number?: number
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          org_id?: string
+          release_id?: string | null
+          title?: string
+          track_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_tracks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_tracks_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "organization_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_videos: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          org_id: string
+          sort_order: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_videos_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
