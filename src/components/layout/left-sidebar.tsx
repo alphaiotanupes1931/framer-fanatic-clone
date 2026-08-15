@@ -155,14 +155,14 @@ export function LeftSidebar() {
               </DropdownMenu>
             </SidebarCardCollapsed>
           ) : (
-            <SidebarCard title="Create" icon={Sparkles} action={
+            <div className="mb-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 px-2 text-xs font-semibold" style={{ color: "#d4580a" }}>
-                    <Plus className="mr-1 h-3.5 w-3.5" /> New
+                  <Button className="w-full justify-center rounded-xl text-sm font-semibold text-white hover:opacity-90" style={{ backgroundColor: "#d4580a" }}>
+                    <Plus className="mr-1.5 h-4 w-4" /> Create
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="z-[1001] w-56">
+                <DropdownMenuContent align="start" className="z-[1001] w-56">
                   <DropdownMenuLabel>Create</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {createItems.map(({ icon: Icon, label, to }) => (
@@ -175,24 +175,7 @@ export function LeftSidebar() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            }>
-              <div className="grid grid-cols-3 gap-2">
-                {createItems.slice(0, 6).map(({ icon: Icon, label, to }) => (
-                  <Tooltip key={to}>
-                    <TooltipTrigger asChild>
-                      <Link
-                        to={to}
-                        className="flex flex-col items-center justify-center gap-1 rounded-lg border border-slate-100 bg-slate-50 p-2 transition-colors hover:border-slate-200 hover:bg-slate-100"
-                      >
-                        <Icon className="h-4 w-4 text-slate-600" />
-                        <span className="max-w-full truncate text-[10px] font-medium text-slate-600">{label.split(" ")[0]}</span>
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>{label}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            </SidebarCard>
+            </div>
           )}
 
           {collapsed ? (
