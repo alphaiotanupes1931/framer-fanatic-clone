@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   List, Disc3, Music2, Mic, Ticket, FileText, Calendar, MessageCircle,
   UserPlus2, Layers, Image as ImageIcon, Headphones, Mail, Shirt,
-  ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark, LayoutDashboard,
+  ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark,
 } from "lucide-react";
 import { DollarSign, Scissors, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
 
@@ -15,7 +15,7 @@ export type ArtistTabKey =
   | "filmography" | "reel" | "watch" | "screenings" | "awards" | "support"
   | "materials" | "installations" | "commissions" | "press"
   | "repertoire" | "writing" | "appearances" | "newsletter" | "books"
-  | "exhibitions" | "dashboard" | "mixes" | "tracks";
+  | "exhibitions" | "mixes" | "tracks";
 
 export type ArtistTab = { key: ArtistTabKey; label: string; Icon: LucideIcon };
 
@@ -65,7 +65,6 @@ const PODCAST: ArtistTab[] = [
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "episodes", label: "Episodes", Icon: Mic },
   { key: "guests", label: "Guests", Icon: Users },
-  { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { key: "sponsors", label: "Sponsors", Icon: DollarSign },
   { key: "clips", label: "Clips", Icon: Scissors },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
