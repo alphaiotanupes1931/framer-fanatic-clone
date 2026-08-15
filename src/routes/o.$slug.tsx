@@ -601,7 +601,10 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
     return <MusicTab orgId={org.id} canManage={canManage} mode="album" />;
   if (tab === "Singles" || tab === "Tracks" || tab === "Beats" || tab === "Mixes" || tab === "Sets")
     return <MusicTab orgId={org.id} canManage={canManage} mode="single" label={tab} />;
-  if (tab === "Videos" || tab === "Reel" || tab === "Reels" || tab === "Films" || tab === "Work")
+  if (
+    tab === "Videos" || tab === "Reel" || tab === "Reels" || tab === "Films" || tab === "Work" ||
+    tab === "Watch" || tab === "Clips" || tab === "Filmography" || tab === "Screenings"
+  )
     return <OrgVideosTab orgId={org.id} canManage={canManage} title={tab} />;
   if (tab === "EPK")
     return (
