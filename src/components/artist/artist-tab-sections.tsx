@@ -54,64 +54,165 @@ export function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit:
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", media_url: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewIdx, setViewIdx] = useState<number | null>(null);
+  const [form, setForm] = useState({ title: "", medium: "", dimensions: "", body: "", media_url: "" });
+  const resetForm = () => setForm({ title: "", medium: "", dimensions: "", body: "", media_url: "" });
+
   const load = async () => {
     setLoading(true);
     const { data } = await supabase.from("profile_sections").select("*")
       .eq("user_id", userId).eq("kind", "gallery")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: true });
     setItems(data ?? []);
     setLoading(false);
   };
   useEffect(() => { void load(); }, [userId]);
-  const add = async () => {
-    if (!form.media_url.trim()) { toast.error("Add an image URL"); return; }
-    const { error } = await supabase.from("profile_sections").insert({
-      user_id: userId, kind: "gallery", title: form.title.trim() || null, media_url: form.media_url.trim(), order_index: items.length,
-    });
+
+  const save = async () => {
+    if (!form.media_url.trim()) { toast.error("Upload an image of the work"); return; }
+    const payload = {
+      user_id: userId,
+      kind: "gallery",
+      title: form.title.trim() || null,
+      subtitle: form.medium.trim() || null,
+      year: form.dimensions.trim() || null,
+      body: form.body.trim() || null,
+      media_url: form.media_url.trim(),
+      order_index: items.length,
+    };
+    const { error } = editingId
+      ? await supabase.from("profile_sections").update(payload).eq("id", editingId)
+      : await supabase.from("profile_sections").insert(payload);
     if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", media_url: "" }); void load();
+    setOpen(false); setEditingId(null); resetForm(); void load();
   };
-  const remove = async (id: string) => { await supabase.from("profile_sections").delete().eq("id", id); void load(); };
-  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading gallery...</div>;
+
+  const startEdit = (it: any) => {
+    setForm({
+      title: it.title ?? "", medium: it.subtitle ?? "", dimensions: it.year ?? "",
+      body: it.body ?? "", media_url: it.media_url ?? "",
+    });
+    setEditingId(it.id); setOpen(true);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this work?")) return;
+    await supabase.from("profile_sections").delete().eq("id", id);
+    setViewIdx(null);
+    void load();
+  };
+
+  const lot = (i: number) => `LOT ${String(i + 1).padStart(2, "0")}`;
+  const active = viewIdx !== null ? items[viewIdx] : null;
+
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading portfolio...</div>;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {canEdit && (
         <div className="flex justify-end">
-          <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">
-            + Add artwork
+          <button
+            onClick={() => { setOpen((v) => !v); setEditingId(null); resetForm(); }}
+            className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]"
+          >
+            {open ? "Close" : "+ Add Work"}
           </button>
         </div>
       )}
-      {open && (
-        <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
-          <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-          <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Upload artwork photo" />
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setOpen(false)} className="rounded-full px-4 py-2 text-sm">Cancel</button>
-            <button onClick={add} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Save</button>
+
+      {canEdit && open && (
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="grid gap-4 md:grid-cols-[200px_minmax(0,1fr)]">
+            <ImageUpload value={form.media_url} onChange={(url) => setForm({ ...form, media_url: url })} label="Work image" />
+            <div className="space-y-3">
+              <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title, year (e.g. Nuclear Family, 2025)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <input value={form.medium} onChange={(e) => setForm({ ...form, medium: e.target.value })} placeholder="Medium (e.g. Acrylic on canvas)" className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+                <input value={form.dimensions} onChange={(e) => setForm({ ...form, dimensions: e.target.value })} placeholder="Dimensions (e.g. 72 x 66 inches)" className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              </div>
+              <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} rows={4} placeholder="Description / statement (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              <div className="flex justify-end gap-2">
+                <button onClick={() => { setOpen(false); setEditingId(null); resetForm(); }} className="rounded-full px-4 py-2 text-sm">Cancel</button>
+                <button onClick={save} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">{editingId ? "Update" : "Save"}</button>
+              </div>
+            </div>
           </div>
         </div>
       )}
+
       {items.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">No artwork yet.</div>
+        <div className="rounded-2xl border border-dashed border-border py-16 text-center text-sm text-muted-foreground">No work in the portfolio yet.</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {items.map((it) => (
-            <div key={it.id} className="group relative overflow-hidden rounded-lg bg-muted">
-              {it.media_url && <Img src={it.media_url} alt={it.title ?? ""} className="w-full h-auto object-cover" loading="lazy" />}
-              {it.title && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                  <div className="text-sm font-semibold text-white">{it.title}</div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((it, i) => (
+            <div key={it.id} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
+              <div className="px-5 pt-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{lot(i)}</div>
+              <button type="button" onClick={() => setViewIdx(i)} className="flex flex-1 items-center justify-center px-5 py-5">
+                {it.media_url && (
+                  <Img src={it.media_url} alt={it.title ?? ""} loading="lazy" className="max-h-[340px] w-full object-contain transition duration-300 group-hover:scale-[1.02]" />
+                )}
+              </button>
+              <div className="border-t border-border px-5 py-4">
+                <div className="flex items-start justify-between gap-2">
+                  <button type="button" onClick={() => setViewIdx(i)} className="min-w-0 text-left">
+                    <div className="truncate font-serif text-lg italic leading-snug text-foreground">{it.title || "Untitled"}</div>
+                  </button>
+                  {canEdit && (
+                    <div className="flex shrink-0 items-center gap-2">
+                      <button onClick={() => startEdit(it)} aria-label="Edit work" className="text-muted-foreground hover:text-foreground">
+                        <Wrench className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => remove(it.id)} aria-label="Delete work" className="text-muted-foreground hover:text-red-600">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-              {canEdit && (
-                <button onClick={() => remove(it.id)} className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 opacity-0 group-hover:opacity-100">
-                  <span className="text-red-600 text-xs font-bold">x</span>
-                </button>
-              )}
+                {it.subtitle && <div className="mt-1 text-sm text-muted-foreground">{it.subtitle}</div>}
+                {it.year && <div className="text-sm text-muted-foreground">{it.year}</div>}
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {active && viewIdx !== null && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-3 sm:p-6" onClick={() => setViewIdx(null)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative grid max-h-[94vh] w-full max-w-6xl grid-cols-1 overflow-hidden rounded-2xl bg-background shadow-2xl md:grid-cols-[minmax(0,1.4fr)_minmax(300px,420px)]"
+          >
+            <div className="flex items-center justify-center bg-background p-4">
+              {active.media_url && <Img src={active.media_url} alt={active.title ?? ""} className="max-h-[88vh] w-full object-contain" />}
+            </div>
+            <div className="max-h-[88vh] overflow-y-auto border-t border-border p-6 md:border-l md:border-t-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{lot(viewIdx)}</div>
+                <button onClick={() => setViewIdx(null)} aria-label="Close" className="rounded-full border border-border px-2 py-1 text-xs font-semibold">Close</button>
+              </div>
+              <h3 className="mt-3 font-serif text-3xl italic leading-tight">{active.title || "Untitled"}</h3>
+              {active.subtitle && <div className="mt-3 text-base text-muted-foreground">{active.subtitle}</div>}
+              {active.year && <div className="text-base text-muted-foreground">{active.year}</div>}
+              {active.body && <p className="mt-5 whitespace-pre-wrap text-base leading-relaxed text-foreground/90">{active.body}</p>}
+              {canEdit && (
+                <div className="mt-6 flex gap-2">
+                  <button onClick={() => { startEdit(active); setViewIdx(null); }} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Edit</button>
+                  <button onClick={() => remove(active.id)} className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-600">Delete</button>
+                </div>
+              )}
+            </div>
+            {viewIdx > 0 && (
+              <button onClick={() => setViewIdx(viewIdx - 1)} aria-label="Previous work" className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 shadow hover:bg-background">
+                <ChevronDown className="h-5 w-5 rotate-90" />
+              </button>
+            )}
+            {viewIdx < items.length - 1 && (
+              <button onClick={() => setViewIdx(viewIdx + 1)} aria-label="Next work" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 shadow hover:bg-background md:right-[calc(300px+0.75rem)]">
+                <ChevronDown className="h-5 w-5 -rotate-90" />
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
