@@ -8,7 +8,7 @@ import { Heart, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 
-export const Route = createFileRoute("/o/$slug/donate")({
+export const Route = createFileRoute("/o/$slug_/donate")({
   component: DonatePage,
   head: () => ({
     meta: [
