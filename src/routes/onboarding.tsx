@@ -28,7 +28,7 @@ export const Route = createFileRoute("/onboarding")({
 
 function Onboarding() {
   const navigate = useNavigate();
-  const { preview } = Route.useSearch();
+  const { preview: previewMode } = Route.useSearch();
   const [userId, setUserId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -65,7 +65,7 @@ function Onboarding() {
   };
 
   const finish = async () => {
-    if (preview) {
+    if (previewMode) {
       toast.success("Preview only, nothing was saved.");
       navigate({ to: "/admin" });
       return;
@@ -106,7 +106,7 @@ function Onboarding() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
       <Toaster richColors />
-      {preview && (
+      {previewMode && (
         <div className="fixed inset-x-0 top-0 z-50 bg-neutral-900 px-4 py-2 text-center text-xs font-semibold text-white">
           Admin preview, nothing you enter here is saved.
         </div>
@@ -172,12 +172,12 @@ function Onboarding() {
           <div className="flex flex-col gap-2">
             <Button
               onClick={() => finish()}
-              disabled={busy || (!preview && (!file || !neighborhood))}
+              disabled={busy || (!previewMode && (!file || !neighborhood))}
               className="w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               {busy ? "Saving…" : "Continue"}
             </Button>
-            {!preview && (!file || !neighborhood) && (
+            {!previewMode && (!file || !neighborhood) && (
               <p className="text-center text-xs text-neutral-500">
                 {!file ? "Add a profile photo to continue." : "Choose your neighborhood to continue."}
               </p>
