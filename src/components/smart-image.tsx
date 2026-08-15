@@ -199,6 +199,10 @@ function resolveSync(src: string | null | undefined, bucketHint?: string): strin
   return readCache(t.bucket, t.path);
 }
 
+export async function resolveMediaUrl(src: string, bucketHint?: string): Promise<string | null> {
+  return resolveAsync(src, bucketHint);
+}
+
 async function resolveAsync(src: string, bucketHint?: string): Promise<string | null> {
   const t = targetFor(src, bucketHint);
   if (!t) return null;
