@@ -52,7 +52,6 @@ const VIDEO: ArtistTab[] = [
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "reel", label: "Reel", Icon: Radio },
   { key: "watch", label: "Watch", Icon: Camera },
-  { key: "awards", label: "Awards", Icon: Flame },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "support", label: "Support", Icon: UserPlus2 },
