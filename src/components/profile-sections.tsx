@@ -121,7 +121,7 @@ export function ProfileSectionTab({
                 {it.media_url && (
                   <div className="aspect-video bg-neutral-100">
                     {isVideoUrl(it.media_url)
-                      ? <SmartVideo src={it.media_url} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" />
+                      ? <SmartVideo src={it.media_url} muted playsInline preload="metadata" className="h-full w-full bg-white object-cover" />
                       : <Img src={it.media_url} alt={it.title ?? ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
                 )}
@@ -161,9 +161,9 @@ export function ProfileSectionTab({
                     </button>
                   )}
                   {it.media_url && (
-                    <div className="flex items-center justify-center bg-black">
+                    <div className="flex items-center justify-center bg-white">
                       {isVideoUrl(it.media_url)
-                        ? <SmartVideo src={it.media_url} controls playsInline className="max-h-[75vh] w-full bg-black" />
+                        ? <SmartVideo src={it.media_url} controls playsInline className="max-h-[75vh] w-full bg-white" />
                         : <Img src={it.media_url} alt={it.title ?? ""} className="max-h-[75vh] w-full object-contain" />}
                     </div>
                   )}
