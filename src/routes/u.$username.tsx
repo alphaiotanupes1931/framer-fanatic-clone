@@ -6,7 +6,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Send, Star, Trash2, Volume2, VolumeX, Grid3x3,
-  Calendar, ChevronDown,
+  Calendar, ChevronDown, ChevronLeft, ChevronRight, X as XIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -27,6 +27,7 @@ import {
   ArtistEventsGrouped,
 } from "@/components/artist/artist-tab-sections";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { PostSplitView } from "@/components/shared/post-split-view";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid } from "lucide-react";
 
@@ -80,6 +81,7 @@ function PublicProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [tab, setTab] = useState<PersonTabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
+  const [postViewerIdx, setPostViewerIdx] = useState<number | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
@@ -588,7 +590,7 @@ function PublicProfilePage() {
             posts.length === 0 ? (
               <EmptyTab icon={Grid3x3} label={`${profile.display_name || profile.username} hasn't posted yet.`} />
             ) : (
-              <CanonicalPostsGrid posts={posts} />
+              <CanonicalPostsGrid posts={posts} onOpen={(i) => setPostViewerIdx(i)} />
             )
           ) : tab === "about" ? (
             <PersonAboutTab profile={profile} />
@@ -620,14 +622,75 @@ function PublicProfilePage() {
           mode={followList}
         />
       )}
+
+      {postViewerIdx !== null && posts[postViewerIdx] && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setPostViewerIdx(null)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-2 sm:p-6"
+          style={{ overscrollBehavior: "contain" }}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setPostViewerIdx(null); }}
+            aria-label="Close"
+            className="absolute right-3 top-3 z-20 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
+          >
+            <XIcon className="h-5 w-5" />
+          </button>
+          {posts.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPostViewerIdx((i) => (i === null ? null : (i - 1 + posts.length) % posts.length)); }}
+                aria-label="Previous post"
+                className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:left-4"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPostViewerIdx((i) => (i === null ? null : (i + 1) % posts.length)); }}
+                aria-label="Next post"
+                className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:right-4"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-6xl overflow-hidden rounded-2xl bg-background shadow-2xl"
+          >
+            <div className="max-h-[92vh] overflow-y-auto">
+              <PostSplitView
+                key={posts[postViewerIdx].id}
+                postId={posts[postViewerIdx].id}
+                meId={me?.id}
+                onDeleted={() => {
+                  const id = posts[postViewerIdx!].id;
+                  setPosts((prev) => prev.filter((p) => p.id !== id));
+                  setPostViewerIdx(null);
+                }}
+              />
+            </div>
+          </div>
+          {posts.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white">
+              {postViewerIdx + 1} / {posts.length}
+            </div>
+          )}
+        </div>
+      )}
     </AppLayout>
   );
 }
 
-function CanonicalPostsGrid({ posts }: { posts: any[] }) {
+function CanonicalPostsGrid({ posts, onOpen }: { posts: any[]; onOpen: (index: number) => void }) {
   return (
     <div className="grid grid-cols-3 gap-2">
-      {posts.map((post) => {
+      {posts.map((post, index) => {
         const media = Array.isArray(post.media_urls) && post.media_urls.length
           ? post.media_urls
           : [post.image_url, post.video_url].filter(Boolean);
@@ -635,11 +698,11 @@ function CanonicalPostsGrid({ posts }: { posts: any[] }) {
         const isVideo = !!thumbnail && /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(thumbnail);
 
         return (
-          <Link
+          <button
             key={post.id}
-            to="/posts/$postId"
-            params={{ postId: post.id }}
-            className="group relative aspect-square overflow-hidden rounded-md bg-neutral-100"
+            type="button"
+            onClick={() => onOpen(index)}
+            className="group relative aspect-square overflow-hidden rounded-md bg-neutral-100 text-left"
           >
             {thumbnail ? (
               isVideo ? (
@@ -667,7 +730,7 @@ function CanonicalPostsGrid({ posts }: { posts: any[] }) {
                 </span>
               </span>
             )}
-          </Link>
+          </button>
         );
       })}
     </div>
