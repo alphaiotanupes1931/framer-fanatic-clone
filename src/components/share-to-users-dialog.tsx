@@ -163,6 +163,31 @@ export function ShareToUsersDialog({
         </div>
 
         <div className="space-y-3 overflow-y-auto px-5 py-4">
+          {preview && (
+            <div className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3">
+              {preview.image ? (
+                <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md bg-neutral-100">
+                  <Img src={preview.image} alt={preview.title || "Preview"} className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-md bg-[#d4580a]/10 text-[#d4580a]">
+                  <Send className="h-6 w-6 -rotate-45" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                {preview.title && (
+                  <div className="truncate text-sm font-semibold text-neutral-900">{preview.title}</div>
+                )}
+                {preview.excerpt && (
+                  <div className="mt-0.5 line-clamp-2 text-xs text-neutral-500">{preview.excerpt}</div>
+                )}
+                {preview.author && (
+                  <div className="mt-0.5 truncate text-xs text-[#d4580a]">{preview.author}</div>
+                )}
+              </div>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={copyLink}
@@ -170,6 +195,7 @@ export function ShareToUsersDialog({
           >
             <LinkIcon className="h-4 w-4" /> Copy link
           </button>
+
 
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
