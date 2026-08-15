@@ -76,7 +76,7 @@ import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
-import { Route as OSlugDonateRouteImport } from './routes/o.$slug.donate'
+import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -422,9 +422,9 @@ const AdminContentRoute = AdminContentRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const OSlugDonateRoute = OSlugDonateRouteImport.update({
-  id: '/donate',
-  path: '/donate',
-  getParentRoute: () => OSlugRoute,
+  id: '/o/$slug_/donate',
+  path: '/o/$slug/donate',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
@@ -523,7 +523,7 @@ export interface FileRoutesByFullPath {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
-  '/o/$slug': typeof OSlugRouteWithChildren
+  '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
@@ -600,7 +600,7 @@ export interface FileRoutesByTo {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
-  '/o/$slug': typeof OSlugRouteWithChildren
+  '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
@@ -678,7 +678,7 @@ export interface FileRoutesById {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
-  '/o/$slug': typeof OSlugRouteWithChildren
+  '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
@@ -690,7 +690,7 @@ export interface FileRoutesById {
   '/videos/': typeof VideosIndexRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/o/$slug/donate': typeof OSlugDonateRoute
+  '/o/$slug_/donate': typeof OSlugDonateRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -923,7 +923,7 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/api/public/stripe-webhook'
     | '/lovable/email/suppression'
-    | '/o/$slug/donate'
+    | '/o/$slug_/donate'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -988,7 +988,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
-  OSlugRoute: typeof OSlugRouteWithChildren
+  OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
   TicketsTicketIdRoute: typeof TicketsTicketIdRoute
@@ -1000,6 +1000,7 @@ export interface RootRouteChildren {
   VideosIndexRoute: typeof VideosIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  OSlugDonateRoute: typeof OSlugDonateRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1478,12 +1479,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/o/$slug/donate': {
-      id: '/o/$slug/donate'
-      path: '/donate'
+    '/o/$slug_/donate': {
+      id: '/o/$slug_/donate'
+      path: '/o/$slug/donate'
       fullPath: '/o/$slug/donate'
       preLoaderRoute: typeof OSlugDonateRouteImport
-      parentRoute: typeof OSlugRoute
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -1549,16 +1550,6 @@ const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
   MarketplaceRouteChildren,
 )
 
-interface OSlugRouteChildren {
-  OSlugDonateRoute: typeof OSlugDonateRoute
-}
-
-const OSlugRouteChildren: OSlugRouteChildren = {
-  OSlugDonateRoute: OSlugDonateRoute,
-}
-
-const OSlugRouteWithChildren = OSlugRoute._addFileChildren(OSlugRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1616,7 +1607,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
-  OSlugRoute: OSlugRouteWithChildren,
+  OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,
   TicketsTicketIdRoute: TicketsTicketIdRoute,
@@ -1628,6 +1619,7 @@ const rootRouteChildren: RootRouteChildren = {
   VideosIndexRoute: VideosIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  OSlugDonateRoute: OSlugDonateRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
