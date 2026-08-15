@@ -35,6 +35,7 @@ import { MusicTab } from "@/components/org/music-tab";
 import { OrgVideosTab } from "@/components/org/org-videos-tab";
 import { EpkTab } from "@/components/org/epk-tab";
 import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
+import { GuestsTab } from "@/components/org/guests-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
@@ -628,6 +629,8 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
     return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
   if (tab === "Episodes" || tab === "Listen" || tab === "Bonus")
     return <PodcastEpisodesTab userId={org.owner_id} isOwner={canManage} />;
+  if (tab === "Guests")
+    return <GuestsTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} />;
   if (tab === "Writing" || tab === "Books" || tab === "Poems" || tab === "Publications" || tab === "Essays")
     return <OrgStoriesTab orgId={org.id} canManage={canManage} title={tab} />;
   const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
