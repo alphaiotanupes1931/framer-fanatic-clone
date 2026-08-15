@@ -1503,6 +1503,53 @@ export type Database = {
           },
         ]
       }
+      organization_sponsors: {
+        Row: {
+          blurb: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          org_id: string
+          sort_order: number
+          tier: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          blurb?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          org_id: string
+          sort_order?: number
+          tier?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          blurb?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          org_id?: string
+          sort_order?: number
+          tier?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_sponsors_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_support_tiers: {
         Row: {
           created_at: string
