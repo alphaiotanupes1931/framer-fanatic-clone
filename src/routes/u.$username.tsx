@@ -81,6 +81,7 @@ function PublicProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [tab, setTab] = useState<PersonTabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
+  const [postViewerIdx, setPostViewerIdx] = useState<number | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
   const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
