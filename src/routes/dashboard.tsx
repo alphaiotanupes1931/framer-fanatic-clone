@@ -277,7 +277,7 @@ function Dashboard() {
         )}
 
         {/* Feed */}
-        <div className="mx-auto w-full max-w-3xl space-y-5 pt-1">
+        <div className="mx-auto w-full max-w-4xl space-y-5 pt-1">
           {isLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
