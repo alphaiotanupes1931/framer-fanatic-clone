@@ -118,7 +118,6 @@ const PERFORMANCE: ArtistTab[] = [
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "repertoire", label: "Repertoire", Icon: Layers },
   { key: "reel", label: "Reel", Icon: Radio },
-  { key: "shows", label: "Shows", Icon: MapPin },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
