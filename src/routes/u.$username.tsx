@@ -6,7 +6,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
   Send, Star, Trash2, Volume2, VolumeX, Grid3x3,
-  Calendar, ChevronDown,
+  Calendar, ChevronDown, ChevronLeft, ChevronRight, X as XIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
@@ -27,6 +27,7 @@ import {
   ArtistEventsGrouped,
 } from "@/components/artist/artist-tab-sections";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { PostSplitView } from "@/components/shared/post-split-view";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid } from "lucide-react";
 
