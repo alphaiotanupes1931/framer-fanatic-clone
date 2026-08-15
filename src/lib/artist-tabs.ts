@@ -131,7 +131,7 @@ const LITERARY: ArtistTab[] = [
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "writing", label: "Writing", Icon: PenTool },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
-  { key: "newsletter", label: "Newsletter", Icon: Mail },
+  
   { key: "press", label: "Press", Icon: Newspaper },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
