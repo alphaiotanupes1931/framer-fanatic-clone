@@ -183,6 +183,18 @@ export function MusicTab({
 
   return (
     <div className="space-y-6">
+      <input
+        ref={addRef}
+        type="file"
+        accept="audio/*,.mp3,.m4a,.wav,.aiff,.flac"
+        multiple
+        hidden
+        onChange={(e) => {
+          const picked = Array.from(e.target.files ?? []);
+          e.target.value = "";
+          if (addingTo) void addTracks(addingTo, picked);
+        }}
+      />
       {canManage && (
         <div className="flex justify-end">
           <button
