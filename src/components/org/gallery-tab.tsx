@@ -18,7 +18,6 @@ const emptyForm = { title: "", medium: "", dimensions: "", description: "", medi
 
 export function GalleryTab({ orgId, canManage = false }: { orgId: string; canManage?: boolean }) {
   const [works, setWorks] = useState<Work[]>([]);
-  const [curated, setCurated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [idx, setIdx] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -34,41 +33,17 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
       .order("order_index", { ascending: true })
       .order("created_at", { ascending: true });
 
-    if (art && art.length) {
-      setCurated(true);
-      setWorks(
-        art.map((a) => ({
-          id: a.id as string,
-          url: a.media_url as string,
-          title: (a.title as string) ?? null,
-          medium: (a.medium as string) ?? null,
-          dimensions: (a.dimensions as string) ?? null,
-          description: (a.description as string) ?? null,
-        })),
-      );
-      setLoading(false);
-      return;
-    }
-
-    setCurated(false);
-    const { data } = await supabase
-      .from("organization_posts")
-      .select("title, body, media_url, media_urls, created_at")
-      .eq("org_id", orgId)
-      .order("created_at", { ascending: false })
-      .limit(120);
-    const out: Work[] = [];
-    const seen = new Set<string>();
-    for (const row of (data ?? []) as { title: string | null; body: string | null; media_url: string | null; media_urls: unknown }[]) {
-      const many = Array.isArray(row.media_urls) ? (row.media_urls as string[]) : [];
-      const all = [...many, row.media_url].filter((u): u is string => typeof u === "string" && !!u);
-      for (const u of all) {
-        if (seen.has(u) || /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u)) continue;
-        seen.add(u);
-        out.push({ id: null, url: u, title: row.title ?? null, medium: null, dimensions: null, description: row.body ?? null });
-      }
-    }
-    setWorks(out);
+    // Portfolio is curated only: posts never appear here.
+    setWorks(
+      (art ?? []).map((a) => ({
+        id: a.id as string,
+        url: a.media_url as string,
+        title: (a.title as string) ?? null,
+        medium: (a.medium as string) ?? null,
+        dimensions: (a.dimensions as string) ?? null,
+        description: (a.description as string) ?? null,
+      })),
+    );
     setLoading(false);
   };
 
@@ -83,7 +58,7 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
       dimensions: form.dimensions.trim() || null,
       description: form.description.trim() || null,
       media_url: form.media_url.trim(),
-      order_index: curated ? works.length : 0,
+      order_index: works.length,
     };
     const { error } = editingId
       ? await supabase.from("organization_artworks").update(payload).eq("id", editingId)
