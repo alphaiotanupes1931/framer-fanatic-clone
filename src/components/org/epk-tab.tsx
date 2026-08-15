@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Globe, Mail, MapPin, Phone, Pencil, Plus, Trash2, FileText, ExternalLink } from "lucide-react";
+import { Globe, Mail, MapPin, Phone, Pencil, Plus, Trash2, FileText, ExternalLink, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
@@ -18,6 +18,7 @@ type Doc = {
 const LOGO = "Press Logo";
 const PHOTO = "Press Photo";
 const RELEASE = "Press Release";
+const EPK = "EPK Document";
 
 function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -66,7 +67,7 @@ export function EpkTab({
       .from("organization_documents")
       .select("id, name, description, doc_type, file_url, file_name, created_at")
       .eq("org_id", orgId)
-      .in("doc_type", [LOGO, PHOTO, RELEASE])
+      .in("doc_type", [LOGO, PHOTO, RELEASE, EPK])
       .order("created_at", { ascending: false });
     setDocs((data ?? []) as Doc[]);
   }, [orgId]);
@@ -76,6 +77,7 @@ export function EpkTab({
   const logo = docs.find((d) => d.doc_type === LOGO);
   const photos = docs.filter((d) => d.doc_type === PHOTO);
   const releases = docs.filter((d) => d.doc_type === RELEASE);
+  const epks = docs.filter((d) => d.doc_type === EPK);
 
   async function addDoc(row: { doc_type: string; name: string; description?: string | null; file_url: string; file_name?: string | null }) {
     if (!me) { toast.error("Sign in to upload"); return; }
