@@ -145,7 +145,6 @@ const FASHION: ArtistTab[] = [
   { key: "fashion_line", label: "Fashion Line", Icon: Layers },
   { key: "lookbook", label: "Lookbook", Icon: Shirt },
   { key: "drops", label: "Drops", Icon: Package },
-  { key: "collabs", label: "Collabs", Icon: Users },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
