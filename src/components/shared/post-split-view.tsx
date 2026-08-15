@@ -164,11 +164,11 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
         </div>
       )}
       {hasMedia && (
-        <div className="relative flex items-center justify-center bg-black">
+        <div className="relative flex items-center justify-center bg-white">
           {current.kind === "image" ? (
             <Img src={current.url} alt="" className="max-h-[85vh] w-full object-contain" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
           ) : (
-            <SmartVideo key={current.url} src={current.url} controls playsInline preload="metadata" className="max-h-[85vh] w-full bg-black" />
+            <SmartVideo key={current.url} src={current.url} controls playsInline preload="metadata" className="max-h-[85vh] w-full bg-white" />
           )}
           {mediaList.length > 1 && (
             <>

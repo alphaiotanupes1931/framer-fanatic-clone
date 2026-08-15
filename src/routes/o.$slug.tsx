@@ -1917,7 +1917,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
               >
                 {first ? (
                   isVideo
-                    ? <SmartVideo src={first} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" />
+                    ? <SmartVideo src={first} muted playsInline preload="metadata" className="h-full w-full bg-white object-cover" />
                     : <Img src={first} alt={p.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <div
@@ -1971,9 +1971,9 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                   {media.length > 0 && (() => {
                     const cur = media[Math.min(mediaIdx, media.length - 1)]!;
                     return (
-                      <div className="relative flex items-center justify-center bg-black">
+                      <div className="relative flex items-center justify-center bg-white">
                         {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(cur)
-                          ? <SmartVideo src={cur} controls playsInline className="max-h-[88vh] w-full bg-black" />
+                          ? <SmartVideo src={cur} controls playsInline className="max-h-[88vh] w-full bg-white" />
                           : <Img src={cur} alt={p.title} className="max-h-[88vh] w-full object-contain" />}
                         {media.length > 1 && (
                           <>

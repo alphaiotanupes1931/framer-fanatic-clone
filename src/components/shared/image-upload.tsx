@@ -54,7 +54,7 @@ export function ImageUpload({ value, onChange, label = "Upload photo", bucket = 
       {value ? (
         <div className="relative overflow-hidden rounded-lg border border-border">
           {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(value)
-            ? <SmartVideo src={value} controls playsInline className="max-h-56 w-full bg-black object-contain" />
+            ? <SmartVideo src={value} controls playsInline className="max-h-56 w-full bg-white object-contain" />
             : <Img src={value} alt="" className="w-full max-h-56 object-cover" />}
           <div className="absolute inset-x-0 bottom-0 flex justify-between gap-2 bg-black/50 p-2">
             <button type="button" onClick={() => ref.current?.click()} disabled={busy}

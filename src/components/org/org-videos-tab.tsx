@@ -158,7 +158,7 @@ export function OrgVideosTab({
         <div className="grid gap-5 sm:grid-cols-2">
           {videos.map((v) => (
             <div key={v.id} className="overflow-hidden rounded-2xl border border-border bg-card">
-              <SmartVideo src={v.video_url} controls playsInline preload="metadata" className="aspect-video w-full bg-black object-contain" />
+              <SmartVideo src={v.video_url} controls playsInline preload="metadata" className="aspect-video w-full bg-white object-contain" />
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <div className="truncate font-semibold">{v.title}</div>

@@ -409,16 +409,16 @@ function VideoPicker({
   const url = useEventImageUrl(value || null);
   if (value) {
     return (
-      <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-black">
+      <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white">
         {url ? (
-          <SmartVideo src={url} controls className="w-full aspect-video bg-black" />
+          <SmartVideo src={url} controls className="w-full aspect-video bg-white" />
         ) : (
           <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading preview…</div>
         )}
         <button
           type="button"
           onClick={onClear}
-          className="absolute top-2 right-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-black"
+          className="absolute top-2 right-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-white"
           aria-label="Remove video"
         >
           <X className="w-4 h-4" />

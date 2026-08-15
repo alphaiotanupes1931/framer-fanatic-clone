@@ -187,21 +187,21 @@ function VideoPlayer({ url, poster, video }: { url: string; poster: string | nul
   });
   if (info.kind === "youtube" || info.kind === "vimeo") {
     return (
-      <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black">
+      <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-white">
         <iframe src={info.embed} className="absolute inset-0 h-full w-full" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen title="Video player" />
       </div>
     );
   }
   const portrait = orientation === "portrait";
   return (
-    <div className={`relative mx-auto w-full overflow-hidden rounded-2xl bg-black ${orientationClass(orientation)} ${portrait ? "max-w-[420px]" : ""}`}>
+    <div className={`relative mx-auto w-full overflow-hidden rounded-2xl bg-white ${orientationClass(orientation)} ${portrait ? "max-w-[420px]" : ""}`}>
       <SmartVideo
         src={url}
         controls
         autoPlay
         playsInline
         poster={poster || undefined}
-        className={`absolute inset-0 h-full w-full bg-black ${portrait ? "object-contain" : "object-cover"}`}
+        className={`absolute inset-0 h-full w-full bg-white ${portrait ? "object-contain" : "object-cover"}`}
       />
     </div>
   );

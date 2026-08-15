@@ -286,7 +286,7 @@ export function DiscussionTab({
                   <div className={`mt-2 grid gap-2 ${c.media_urls.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                     {c.media_urls.map((u) => (
                       isVideoUrl(u)
-                        ? <SmartVideo key={u} src={u} controls playsInline className="max-h-[60vh] w-full rounded-xl bg-black" />
+                        ? <SmartVideo key={u} src={u} controls playsInline className="max-h-[60vh] w-full rounded-xl bg-white" />
                         : <Img key={u} src={u} alt="" loading="lazy" className="max-h-[60vh] w-full rounded-xl object-cover" />
                     ))}
                   </div>

@@ -413,7 +413,7 @@ function VideoTile({ video, onUnsave }: { video: SavedVideo; onUnsave: () => voi
   return (
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md">
       <Link to="/videos/$id" params={{ id: video.id }} className="block">
-        <div className="relative aspect-video w-full bg-neutral-900">
+        <div className="relative aspect-video w-full bg-white">
           {poster ? (
             <Img src={poster} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
           ) : (

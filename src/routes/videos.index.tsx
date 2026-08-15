@@ -252,7 +252,7 @@ function VideosSignedIn() {
                 <SmartVideo
                   src={localPreview}
                   controls
-                  className={`mx-auto rounded-lg border border-neutral-200 bg-black ${form.orientation === "portrait" ? "h-72 w-auto" : "w-full max-h-56"}`}
+                  className={`mx-auto rounded-lg border border-neutral-200 bg-white ${form.orientation === "portrait" ? "h-72 w-auto" : "w-full max-h-56"}`}
                 />
               )}
               <div>
@@ -338,7 +338,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
   return (
     <>
     <Link to="/videos/$id" params={{ id: v.id }} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white block">
-      <div className={`relative ${orientationClass(orientation)} bg-neutral-900 overflow-hidden`}>
+      <div className={`relative ${orientationClass(orientation)} bg-white overflow-hidden`}>
         {poster ? (
           <Img src={poster} alt={v.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
         ) : isDirect || url.startsWith("blob:") || url.startsWith("http") ? (

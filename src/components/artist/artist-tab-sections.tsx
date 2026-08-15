@@ -31,7 +31,7 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
               <Img src={img} alt={p.content ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
           ) : videoUrl ? (
-            <div className="aspect-square overflow-hidden rounded-xl bg-black">
+            <div className="aspect-square overflow-hidden rounded-xl bg-white">
               <SmartVideo src={videoUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
             </div>
           ) : (
