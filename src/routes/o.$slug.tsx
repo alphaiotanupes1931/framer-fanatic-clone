@@ -596,7 +596,8 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
         <Link to="/saved" className="font-semibold text-primary hover:underline">Open saved</Link>
       </div>
     );
-  if (tab === "Portfolio") return <GalleryTab orgId={org.id} canManage={canManage} />;
+  if (tab === "Portfolio" || tab === "Fashion Line" || tab === "Lookbook" || tab === "Collections")
+    return <GalleryTab orgId={org.id} canManage={canManage} />;
   if (tab === "Album" || tab === "Albums" || tab === "Music" || tab === "Discography")
     return <MusicTab orgId={org.id} canManage={canManage} mode="album" />;
   if (tab === "Singles" || tab === "Tracks" || tab === "Beats" || tab === "Mixes" || tab === "Sets")
