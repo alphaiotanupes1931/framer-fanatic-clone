@@ -1899,7 +1899,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
       )}
       {active && (
         <Dialog open onOpenChange={(o) => { if (!o) setActive(null); }}>
-          <DialogContent className="max-w-3xl p-0 overflow-hidden">
+          <DialogContent className="w-[96vw] max-w-6xl p-0 overflow-hidden sm:w-[92vw]">
             {(() => {
               const p = active;
               const media = (p.media_urls && p.media_urls.length ? p.media_urls : [p.video_url, p.media_url].filter(Boolean) as string[]);
@@ -1908,7 +1908,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
               const goPrev = () => { if (idx > 0) setActive(items[idx - 1]); };
               const goNext = () => { if (idx > -1 && idx < items.length - 1) setActive(items[idx + 1]); };
               return (
-                <div className="relative grid md:grid-cols-[minmax(0,1.2fr)_minmax(280px,360px)]">
+                <div className="relative grid md:grid-cols-[minmax(0,1.6fr)_minmax(320px,420px)]">
                   {idx > 0 && (
                     <button
                       type="button" onClick={goPrev} aria-label="Previous post"
@@ -1930,8 +1930,8 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     return (
                       <div className="relative flex items-center justify-center bg-black">
                         {/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(cur)
-                          ? <SmartVideo src={cur} controls playsInline className="max-h-[75vh] w-full bg-black" />
-                          : <Img src={cur} alt={p.title} className="max-h-[75vh] w-full object-contain" />}
+                          ? <SmartVideo src={cur} controls playsInline className="max-h-[88vh] w-full bg-black" />
+                          : <Img src={cur} alt={p.title} className="max-h-[88vh] w-full object-contain" />}
                         {media.length > 1 && (
                           <>
                             <button type="button" aria-label="Previous media" disabled={mediaIdx === 0}
