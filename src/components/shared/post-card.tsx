@@ -170,15 +170,15 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const initial = authorName.slice(0, 1).toUpperCase();
 
   return (
-    <article className="overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
+    <article className="flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
       {reason && (
-        <div className="px-5 pt-3">
+        <div className="order-1 px-5 pt-3">
           <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
             <TrendingUp className="h-3 w-3" /> {reason}
           </span>
         </div>
       )}
-      <header className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+      <header className="order-4 mx-4 mb-1 mt-1 flex items-center gap-3 rounded-2xl bg-muted/40 px-4 py-3 sm:mx-6">
         <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="shrink-0">
           <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
             {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
@@ -237,7 +237,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </DropdownMenu>
       </header>
       {current && (
-        <div className="relative mt-3 w-full">
+        <div className="relative order-2 mt-3 w-full overflow-hidden rounded-2xl px-0">
           {current.kind === "image" ? (
             <Link
               to="/posts/$postId"
@@ -296,7 +296,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           <Link
             to="/posts/$postId"
             params={{ postId: post.id }}
-            className={`mx-4 my-3 block rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
+            className={`order-3 mx-4 my-3 block rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
               post.font_size === "sm" ? "text-base" :
               post.font_size === "lg" ? "text-3xl" :
               post.font_size === "xl" ? "text-5xl" :
@@ -310,21 +310,21 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           <Link
             to="/posts/$postId"
             params={{ postId: post.id }}
-            className="block px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-4 sm:text-[17px]"
+            className="order-3 block px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-4 sm:text-[17px]"
           >
             {post.content}
           </Link>
         )
       )}
       {post.tag && (
-        <div className="px-4 pb-2 sm:px-6">
+        <div className="order-3 px-4 pb-2 sm:px-6">
           <span className="inline-flex items-center rounded-full bg-[#d4580a]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#d4580a]">
             #{post.tag}
           </span>
         </div>
       )}
       {post.music_url && (
-        <div className="px-4 pb-3 sm:px-6">
+        <div className="order-3 px-4 pb-3 sm:px-6">
           <a
             href={post.music_url}
             target="_blank"
@@ -335,7 +335,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           </a>
         </div>
       )}
-      <footer className="flex items-center gap-5 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-6 sm:py-4">
+      <footer className="order-5 flex items-center gap-5 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-6 sm:py-4">
         <button onClick={toggleLike} className={`flex items-center gap-2 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
           <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>

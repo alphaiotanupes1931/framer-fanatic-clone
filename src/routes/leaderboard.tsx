@@ -58,7 +58,12 @@ function LeaderboardPage() {
         };
       });
       results.sort((a, b) => b.points - a.points);
-      return results.slice(0, 100);
+      const top = results.slice(0, 100);
+      // Displayed alphabetically by name.
+      top.sort((a, b) =>
+        (a.display_name || a.username || "").localeCompare(b.display_name || b.username || "", undefined, { sensitivity: "base" }),
+      );
+      return top;
     },
   );
   const rows = cachedRows ?? [];
@@ -89,7 +94,7 @@ function LeaderboardPage() {
         {rows.map((r, i) => {
           const content = (
             <>
-              <div className="w-10 text-lg font-bold text-neutral-400">#{i + 1}</div>
+              <div className="w-10 text-lg font-bold text-neutral-400">{i + 1}</div>
               <Avatar className="h-12 w-12">
                 {r.avatar_url && <SmartAvatarImage src={r.avatar_url} />}
                 <AvatarFallback className="bg-orange-100 text-orange-700">{(r.display_name || r.username || "U")[0].toUpperCase()}</AvatarFallback>
