@@ -36,6 +36,7 @@ import { OrgVideosTab } from "@/components/org/org-videos-tab";
 import { EpkTab } from "@/components/org/epk-tab";
 import { PodcastEpisodesTab } from "@/components/artist/podcast-episodes-tab";
 import { GuestsTab } from "@/components/org/guests-tab";
+import { SponsorsTab } from "@/components/org/sponsors-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
@@ -631,6 +632,15 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
     return <PodcastEpisodesTab userId={org.owner_id} isOwner={canManage} />;
   if (tab === "Guests")
     return <GuestsTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} />;
+  if (tab === "Sponsors" || tab === "Media Kit" || tab === "Partners")
+    return (
+      <SponsorsTab
+        orgId={org.id}
+        ownerId={org.owner_id}
+        canManage={canManage}
+        label={/podcast/i.test(org.subtype ?? "") ? "Podcast" : "Page"}
+      />
+    );
   if (tab === "Writing" || tab === "Books" || tab === "Poems" || tab === "Publications" || tab === "Essays")
     return <OrgStoriesTab orgId={org.id} canManage={canManage} title={tab} />;
   const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
