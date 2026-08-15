@@ -18,7 +18,6 @@ const emptyForm = { title: "", medium: "", dimensions: "", description: "", medi
 
 export function GalleryTab({ orgId, canManage = false }: { orgId: string; canManage?: boolean }) {
   const [works, setWorks] = useState<Work[]>([]);
-  const [curated, setCurated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [idx, setIdx] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -59,7 +58,7 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
       dimensions: form.dimensions.trim() || null,
       description: form.description.trim() || null,
       media_url: form.media_url.trim(),
-      order_index: curated ? works.length : 0,
+      order_index: works.length,
     };
     const { error } = editingId
       ? await supabase.from("organization_artworks").update(payload).eq("id", editingId)
