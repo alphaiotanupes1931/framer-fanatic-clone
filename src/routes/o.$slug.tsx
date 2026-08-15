@@ -539,7 +539,7 @@ function OrgProfile() {
               initialValue={org.rules ?? null}
             />
           )}
-          {tab === "Gallery" && <GalleryTab orgId={org.id} />}
+          {tab === "Gallery" && <GalleryTab orgId={org.id} canManage={canManage} />}
           {(tab === "Announcements" || tab === "Promotions") && (
             <OrgPostList orgId={org.id} kind="update" canManage={canManage} />
           )}
@@ -593,7 +593,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
         <Link to="/saved" className="font-semibold text-primary hover:underline">Open saved</Link>
       </div>
     );
-  if (tab === "Portfolio") return <GalleryTab orgId={org.id} />;
+  if (tab === "Portfolio") return <GalleryTab orgId={org.id} canManage={canManage} />;
   if (tab === "Shop" || tab === "Print Shop")
     return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
   const kind = tab.toLowerCase().replace(/[^a-z0-9]+/g, "_");
