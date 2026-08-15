@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   List, Disc3, Music2, Mic, Ticket, FileText, Calendar, MessageCircle,
   UserPlus2, Layers, Image as ImageIcon, Headphones, Mail, Shirt,
-  ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark, LayoutDashboard,
+  ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark,
 } from "lucide-react";
 import { DollarSign, Scissors, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
 
