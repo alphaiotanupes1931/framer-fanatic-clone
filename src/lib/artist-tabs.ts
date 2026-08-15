@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   List, Disc3, Music2, Mic, Ticket, FileText, Calendar, MessageCircle,
-  UserPlus2, Layers, Image as ImageIcon, Flame, Headphones, Mail, Shirt,
+  UserPlus2, Layers, Image as ImageIcon, Headphones, Mail, Shirt,
   ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark, LayoutDashboard,
 } from "lucide-react";
 import { DollarSign, Scissors, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
@@ -52,7 +52,6 @@ const VIDEO: ArtistTab[] = [
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "reel", label: "Reel", Icon: Radio },
   { key: "watch", label: "Watch", Icon: Camera },
-  { key: "awards", label: "Awards", Icon: Flame },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "events", label: "Events", Icon: Calendar },
   { key: "support", label: "Support", Icon: UserPlus2 },
