@@ -3,7 +3,7 @@ import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
-import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, Trash2 } from "lucide-react";
+import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
@@ -256,6 +256,9 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
   const [comments, setComments] = useState<Comment[]>([]);
   const [showComments, setShowComments] = useState(true);
   const [draft, setDraft] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ title: "", description: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
   const [posting, setPosting] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const muted = !!video.comments_muted;
@@ -354,6 +357,24 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
     if (error) { setComments(prev); toast.error(error.message); }
   };
 
+  const startEdit = () => {
+    setEditForm({ title: video.title ?? "", description: video.description ?? "" });
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    const title = editForm.title.trim();
+    if (!title) { toast.error("Add a title"); return; }
+    setSavingEdit(true);
+    const description = editForm.description.trim() || null;
+    const { error } = await supabase.from("videos").update({ title, description } as any).eq("id", video.id);
+    setSavingEdit(false);
+    if (error) { toast.error(error.message); return; }
+    onVideoChange({ ...video, title, description });
+    setEditing(false);
+    toast.success("Video updated");
+  };
+
   return (
     <div className="mt-5">
       <div className="flex flex-wrap items-center gap-2 border-y border-neutral-200 py-3">
@@ -378,6 +399,11 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
           <Bookmark className={`h-4 w-4 ${saved ? "fill-[#d4580a]" : ""}`} /> {saved ? "Saved" : "Save"}
         </button>
         {isOwner && (
+          <button onClick={startEdit} className={pill}>
+            <Pencil className="h-4 w-4" /> Edit
+          </button>
+        )}
+        {isOwner && (
           <button onClick={toggleMute} className={`${pill} ml-auto ${muted ? "border-[#d4580a] text-[#d4580a]" : ""}`}>
             {muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
             {muted ? "Comments muted" : "Mute comments"}
@@ -392,6 +418,28 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
           </button>
         )}
       </div>
+
+      {editing && isOwner && (
+        <div className="mt-4 space-y-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+          <input
+            value={editForm.title}
+            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+            placeholder="Video title"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          />
+          <textarea
+            value={editForm.description}
+            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+            rows={3}
+            placeholder="Description"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          />
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setEditing(false)} className="rounded-full px-4 py-2 text-sm font-semibold">Cancel</button>
+            <button onClick={saveEdit} disabled={savingEdit} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Save changes</button>
+          </div>
+        </div>
+      )}
 
       {showComments && (
         <div className="mt-4 space-y-4">

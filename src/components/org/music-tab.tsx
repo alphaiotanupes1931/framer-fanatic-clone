@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Disc3, Loader2, Music2, Plus, Trash2, Upload } from "lucide-react";
+import { Disc3, Loader2, Music2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Img } from "@/components/shared/smart-img";
@@ -49,6 +49,7 @@ export function MusicTab({
   const fileRef = useRef<HTMLInputElement>(null);
   const addRef = useRef<HTMLInputElement>(null);
   const [addingTo, setAddingTo] = useState<string | null>(null);
+  const [edit, setEdit] = useState<{ type: "release" | "track"; id: string } | null>(null);
   const singular = label ?? (mode === "album" ? "Release" : "Single");
 
   const load = async () => {
@@ -67,7 +68,61 @@ export function MusicTab({
 
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId]);
 
-  const reset = () => { setForm(emptyRelease); setFiles([]); setOpen(false); };
+  const reset = () => { setForm(emptyRelease); setFiles([]); setOpen(false); setEdit(null); };
+
+  const startEditRelease = (r: Release) => {
+    setEdit({ type: "release", id: r.id });
+    setForm({
+      kind: r.kind ?? "album",
+      title: r.title ?? "",
+      description: r.description ?? "",
+      cover_url: r.cover_url ?? "",
+      release_date: r.release_date ?? "",
+    });
+    setFiles([]);
+    setOpen(true);
+  };
+
+  const startEditTrack = (t: Track) => {
+    setEdit({ type: "track", id: t.id });
+    setForm({ ...emptyRelease, title: t.title ?? "", cover_url: t.cover_url ?? "" });
+    setFiles([]);
+    setOpen(true);
+  };
+
+  const saveEdit = async () => {
+    if (!edit) return;
+    if (!form.title.trim()) { toast.error("Add a title"); return; }
+    setBusy(true);
+    try {
+      if (edit.type === "release") {
+        const { error } = await supabase.from("organization_releases").update({
+          kind: form.kind,
+          title: form.title.trim(),
+          description: form.description.trim() || null,
+          cover_url: form.cover_url.trim() || null,
+          release_date: form.release_date || null,
+        }).eq("id", edit.id);
+        if (error) throw error;
+      } else {
+        const patch: Record<string, unknown> = {
+          title: form.title.trim(),
+          cover_url: form.cover_url.trim() || null,
+        };
+        if (files[0]) {
+          patch.audio_url = await uploadMediaFile(files[0], orgId, "audio");
+          patch.duration_seconds = await readDuration(files[0]);
+        }
+        const { error } = await supabase.from("organization_tracks").update(patch as never).eq("id", edit.id);
+        if (error) throw error;
+      }
+      toast.success("Saved");
+      reset();
+      void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save");
+    } finally { setBusy(false); }
+  };
 
   const saveRelease = async () => {
     if (!form.title.trim()) { toast.error("Add a title"); return; }
@@ -272,11 +327,11 @@ export function MusicTab({
               <div className="flex justify-end gap-2">
                 <button onClick={reset} className="rounded-full px-4 py-2 text-sm">Cancel</button>
                 <button
-                  onClick={mode === "album" ? saveRelease : saveSingle}
+                  onClick={edit ? saveEdit : mode === "album" ? saveRelease : saveSingle}
                   disabled={busy}
                   className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
                 >
-                  {busy && <Loader2 className="h-4 w-4 animate-spin" />} Publish
+                  {busy && <Loader2 className="h-4 w-4 animate-spin" />} {edit ? "Save changes" : "Publish"}
                 </button>
               </div>
             </div>
@@ -315,15 +370,20 @@ export function MusicTab({
                           {r.description && <p className="mt-1 text-sm text-muted-foreground">{r.description}</p>}
                         </div>
                         {canManage && (
-                          <button onClick={() => removeRelease(r.id)} aria-label="Delete release" className="text-muted-foreground hover:text-red-600">
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <button onClick={() => startEditRelease(r)} aria-label="Edit release" className="text-muted-foreground hover:text-foreground">
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button onClick={() => removeRelease(r.id)} aria-label="Delete release" className="text-muted-foreground hover:text-red-600">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         )}
                       </div>
                       <div className="mt-4 space-y-3">
                         {list.length === 0 && <p className="text-sm text-muted-foreground">No tracks on this release yet.</p>}
                         {list.map((t) => (
-                          <TrackRow key={t.id} track={t} canManage={canManage} onDelete={() => removeTrack(t.id)} />
+                          <TrackRow key={t.id} track={t} canManage={canManage} onDelete={() => removeTrack(t.id)} onEdit={() => startEditTrack(t)} />
                         ))}
                         {canManage && (
                           <button
@@ -364,9 +424,14 @@ export function MusicTab({
                   <div className="text-xs text-muted-foreground">{formatDuration(t.duration_seconds)}</div>
                 </div>
                 {canManage && (
-                  <button onClick={() => removeTrack(t.id)} aria-label="Delete track" className="text-muted-foreground hover:text-red-600">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button onClick={() => startEditTrack(t)} aria-label="Edit track" className="text-muted-foreground hover:text-foreground">
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => removeTrack(t.id)} aria-label="Delete track" className="text-muted-foreground hover:text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -377,7 +442,7 @@ export function MusicTab({
   );
 }
 
-function TrackRow({ track, canManage, onDelete }: { track: Track; canManage: boolean; onDelete: () => void }) {
+function TrackRow({ track, canManage, onDelete, onEdit }: { track: Track; canManage: boolean; onDelete: () => void; onEdit?: () => void }) {
   const player = usePlayer();
   const active = player.id === track.id && player.status === "playing";
   return (
@@ -387,9 +452,16 @@ function TrackRow({ track, canManage, onDelete }: { track: Track; canManage: boo
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{track.title}</span>
         <span className="shrink-0 text-xs text-muted-foreground">{formatDuration(track.duration_seconds)}</span>
         {canManage && (
-          <button onClick={onDelete} aria-label="Delete track" className="text-muted-foreground hover:text-red-600">
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            {onEdit && (
+              <button onClick={onEdit} aria-label="Edit track" className="text-muted-foreground hover:text-foreground">
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            )}
+            <button onClick={onDelete} aria-label="Delete track" className="text-muted-foreground hover:text-red-600">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
         )}
       </div>
     </div>

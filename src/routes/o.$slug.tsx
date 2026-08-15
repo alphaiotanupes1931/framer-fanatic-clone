@@ -1662,6 +1662,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
   const isDrops = kind === "drops";
   const [availability, setAvailability] = useState<"available_now" | "pre_order">("available_now");
+  const [editId, setEditId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const BG_COLORS = [
@@ -1684,6 +1685,20 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     setFontSize("md");
     setMode("text");
     setAvailability("available_now");
+    setEditId(null);
+  };
+
+  const startEdit = (p: OrgPost) => {
+    const media = (p.media_urls && p.media_urls.length ? p.media_urls : [p.video_url, p.media_url].filter(Boolean) as string[]);
+    setEditId(p.id);
+    setForm({ title: p.title ?? "", body: p.body ?? "" });
+    setMediaUrls(media);
+    setBg({ bg: p.bg_color ?? "", fg: p.text_color ?? "#0F172A" });
+    setFontSize((p.font_size as "sm" | "md" | "lg" | "xl") || "md");
+    setAvailability(p.availability === "pre_order" ? "pre_order" : "available_now");
+    setMode(media.length ? (/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(media[0]!) ? "video" : "photo") : "text");
+    setActive(null);
+    setOpen(true);
   };
 
   const uploadFile = async (file: File) => {
@@ -1741,7 +1756,13 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
       font_size: fontSize,
     };
     if (isDrops) payload.availability = availability;
-    const { error } = await supabase.from("organization_posts").insert(payload as never);
+    let error;
+    if (editId) {
+      delete payload.org_id; delete payload.author_id; delete payload.kind;
+      ({ error } = await supabase.from("organization_posts").update(payload as never).eq("id", editId));
+    } else {
+      ({ error } = await supabase.from("organization_posts").insert(payload as never));
+    }
     if (error) return toast.error(error.message);
     setOpen(false); resetForm();
     void load();
@@ -1759,7 +1780,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
       {canManage && (
         <div className="flex justify-end">
           <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-            <Plus className="h-4 w-4" /> New {kind ?? "post"}
+            <Plus className="h-4 w-4" /> {open ? "Close" : `New ${kind ?? "post"}`}
           </button>
         </div>
       )}
@@ -1875,7 +1896,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
 
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => { setOpen(false); resetForm(); }} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700">Cancel</button>
-            <button onClick={add} disabled={uploading} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Post</button>
+            <button onClick={add} disabled={uploading} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{editId ? "Save changes" : "Post"}</button>
           </div>
         </div>
       )}
@@ -1996,9 +2017,14 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                       </SmartFileLink>
                     )}
                     {canManage && (
-                      <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">
-                        <Trash2 className="h-3.5 w-3.5" /> Delete
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
+                          <Pencil className="h-3.5 w-3.5" /> Edit
+                        </button>
+                        <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">
+                          <Trash2 className="h-3.5 w-3.5" /> Delete
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
