@@ -15,29 +15,29 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Camera, Upload } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
-import { CREATOR_CATEGORIES } from "@/lib/categories";
-import { Textarea } from "@/components/ui/textarea";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/onboarding")({
+  validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
+    search['preview'] === "1" || search['preview'] === true ? { preview: true } : {},
   component: Onboarding,
   head: () => ({ meta: [{ title: "Welcome - set up your profile" }] }),
 });
 
 function Onboarding() {
   const navigate = useNavigate();
+  const { preview: previewMode } = Route.useSearch();
   const [userId, setUserId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
   const [neighborhood, setNeighborhood] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
-  const [otherReason, setOtherReason] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (previewMode) return;
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
         navigate({ to: "/auth" });
@@ -45,7 +45,7 @@ function Onboarding() {
         setUserId(data.session.user.id);
       }
     });
-  }, [navigate]);
+  }, [navigate, previewMode]);
 
   useEffect(() => {
     supabase
@@ -65,18 +65,17 @@ function Onboarding() {
   };
 
   const finish = async () => {
+    if (previewMode) {
+      toast.success("Preview only, nothing was saved.");
+      navigate({ to: "/admin" });
+      return;
+    }
     if (!userId) return;
     if (!file) {
       return toast.error("Please add a profile photo to continue.");
     }
     if (!neighborhood) {
       return toast.error("Please choose your neighborhood.");
-    }
-    if (!category) {
-      return toast.error("Please choose what best describes you.");
-    }
-    if (category === "Other" && !otherReason.trim()) {
-      return toast.error("Please tell us a bit about what you do.");
     }
     setBusy(true);
     try {
@@ -90,10 +89,9 @@ function Onboarding() {
       if (upErr) throw upErr;
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
       avatar_url = signed?.signedUrl ?? null;
-      const finalCategory = category === "Other" ? `Other: ${otherReason.trim()}` : category;
       const { error } = await supabase
         .from("profiles")
-        .update({ avatar_url, neighborhood, category: finalCategory, onboarded: true })
+        .update({ avatar_url, neighborhood, onboarded: true })
         .eq("id", userId);
       if (error) throw error;
       navigate({ to: "/dashboard" });
@@ -108,6 +106,11 @@ function Onboarding() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
       <Toaster richColors />
+      {previewMode && (
+        <div className="fixed inset-x-0 top-0 z-50 bg-neutral-900 px-4 py-2 text-center text-xs font-semibold text-white">
+          Admin preview, nothing you enter here is saved.
+        </div>
+      )}
       <Card className="w-full max-w-md border-orange-200">
         <CardHeader className="text-center">
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
@@ -166,50 +169,17 @@ function Onboarding() {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="category">What best describes you? <span className="text-orange-600">*</span></Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Choose a category" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                {CREATOR_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-neutral-500">This shapes your public profile (Gallery, Episodes, Tracks…).</p>
-            {category === "Other" && (
-              <div className="space-y-1 pt-2">
-                <Label htmlFor="otherReason" className="text-sm">Tell us what you do <span className="text-orange-600">*</span></Label>
-                <Textarea
-                  id="otherReason"
-                  placeholder="e.g. Baker, urban farmer, community organizer..."
-                  value={otherReason}
-                  onChange={(e) => setOtherReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            )}
-          </div>
           <div className="flex flex-col gap-2">
             <Button
               onClick={() => finish()}
-              disabled={busy || !file || !neighborhood || !category || (category === "Other" && !otherReason.trim())}
+              disabled={busy || (!previewMode && (!file || !neighborhood))}
               className="w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               {busy ? "Saving…" : "Continue"}
             </Button>
-            {(!file || !neighborhood || !category || (category === "Other" && !otherReason.trim())) && (
+            {!previewMode && (!file || !neighborhood) && (
               <p className="text-center text-xs text-neutral-500">
-                {!file
-                  ? "Add a profile photo to continue."
-                  : !neighborhood
-                  ? "Choose your neighborhood to continue."
-                  : !category
-                  ? "Choose what best describes you to continue."
-                  : "Tell us what you do to continue."}
+                {!file ? "Add a profile photo to continue." : "Choose your neighborhood to continue."}
               </p>
             )}
           </div>
