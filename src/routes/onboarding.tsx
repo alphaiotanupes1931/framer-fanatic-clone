@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -34,6 +35,8 @@ function Onboarding() {
   const [busy, setBusy] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
   const [neighborhood, setNeighborhood] = useState<string>("");
+  const [isVisitor, setIsVisitor] = useState(false);
+  const [homeCity, setHomeCity] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -42,7 +45,25 @@ function Onboarding() {
       if (!data.session) {
         navigate({ to: "/auth" });
       } else {
-        setUserId(data.session.user.id);
+        const uid = data.session.user.id;
+        setUserId(uid);
+        let visitor = false;
+        try {
+          const pending = localStorage.getItem("pb_pending_signup");
+          if (pending) {
+            const parsed = JSON.parse(pending) as { role?: string; category?: string | null };
+            if (parsed.role === "visitor" || parsed.category === "Visitor") visitor = true;
+          }
+        } catch { /* ignore */ }
+        void supabase
+          .from("profiles")
+          .select("category")
+          .eq("id", uid)
+          .maybeSingle()
+          .then(({ data: p }) => {
+            setIsVisitor(visitor || (p?.category ?? "") === "Visitor");
+          });
+        if (visitor) setIsVisitor(true);
       }
     });
   }, [navigate, previewMode]);
@@ -74,7 +95,11 @@ function Onboarding() {
     if (!file) {
       return toast.error("Please add a profile photo to continue.");
     }
-    if (!neighborhood) {
+    if (isVisitor) {
+      if (homeCity.trim().length < 2) {
+        return toast.error("Please tell us where you are visiting from.");
+      }
+    } else if (!neighborhood) {
       return toast.error("Please choose your neighborhood.");
     }
     setBusy(true);
@@ -91,7 +116,11 @@ function Onboarding() {
       avatar_url = signed?.signedUrl ?? null;
       const { error } = await supabase
         .from("profiles")
-        .update({ avatar_url, neighborhood, onboarded: true })
+        .update(
+          isVisitor
+            ? { avatar_url, city: homeCity.trim(), category: "Visitor", onboarded: true }
+            : { avatar_url, neighborhood, onboarded: true },
+        )
         .eq("id", userId);
       if (error) throw error;
       navigate({ to: "/dashboard" });
@@ -154,32 +183,50 @@ function Onboarding() {
               <p className="text-xs text-neutral-500">A photo is required to continue.</p>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="neighborhood">Your Baltimore neighborhood <span className="text-orange-600">*</span></Label>
-            <Select value={neighborhood} onValueChange={setNeighborhood}>
-              <SelectTrigger id="neighborhood">
-                <SelectValue placeholder="Select your neighborhood" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                {neighborhoods.map((n) => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {isVisitor ? (
+            <div className="space-y-2">
+              <Label htmlFor="homeCity">Where are you visiting from? <span className="text-orange-600">*</span></Label>
+              <Input
+                id="homeCity"
+                value={homeCity}
+                onChange={(e) => setHomeCity(e.target.value)}
+                placeholder="City, county, state (e.g. Silver Spring, Montgomery County, MD)"
+                maxLength={120}
+              />
+              <p className="text-xs text-neutral-500">This shows on your visitor profile.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="neighborhood">Your Baltimore neighborhood <span className="text-orange-600">*</span></Label>
+              <Select value={neighborhood} onValueChange={setNeighborhood}>
+                <SelectTrigger id="neighborhood">
+                  <SelectValue placeholder="Select your neighborhood" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {neighborhoods.map((n) => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex flex-col gap-2">
             <Button
               onClick={() => finish()}
-              disabled={busy || (!previewMode && (!file || !neighborhood))}
+              disabled={busy || (!previewMode && (!file || (isVisitor ? homeCity.trim().length < 2 : !neighborhood)))}
               className="w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               {busy ? "Saving…" : "Continue"}
             </Button>
-            {!previewMode && (!file || !neighborhood) && (
+            {!previewMode && (!file || (isVisitor ? homeCity.trim().length < 2 : !neighborhood)) && (
               <p className="text-center text-xs text-neutral-500">
-                {!file ? "Add a profile photo to continue." : "Choose your neighborhood to continue."}
+                {!file
+                  ? "Add a profile photo to continue."
+                  : isVisitor
+                  ? "Tell us where you are visiting from to continue."
+                  : "Choose your neighborhood to continue."}
               </p>
             )}
           </div>
