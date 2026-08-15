@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Globe, Mail, MapPin, Phone, Pencil, Plus, Trash2, FileText, ExternalLink } from "lucide-react";
+import { Globe, Mail, MapPin, Phone, Pencil, Plus, Trash2, FileText, ExternalLink, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
@@ -18,6 +18,7 @@ type Doc = {
 const LOGO = "Press Logo";
 const PHOTO = "Press Photo";
 const RELEASE = "Press Release";
+const EPK = "EPK Document";
 
 function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -66,7 +67,7 @@ export function EpkTab({
       .from("organization_documents")
       .select("id, name, description, doc_type, file_url, file_name, created_at")
       .eq("org_id", orgId)
-      .in("doc_type", [LOGO, PHOTO, RELEASE])
+      .in("doc_type", [LOGO, PHOTO, RELEASE, EPK])
       .order("created_at", { ascending: false });
     setDocs((data ?? []) as Doc[]);
   }, [orgId]);
@@ -76,6 +77,7 @@ export function EpkTab({
   const logo = docs.find((d) => d.doc_type === LOGO);
   const photos = docs.filter((d) => d.doc_type === PHOTO);
   const releases = docs.filter((d) => d.doc_type === RELEASE);
+  const epks = docs.filter((d) => d.doc_type === EPK);
 
   async function addDoc(row: { doc_type: string; name: string; description?: string | null; file_url: string; file_name?: string | null }) {
     if (!me) { toast.error("Sign in to upload"); return; }
@@ -159,6 +161,43 @@ export function EpkTab({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">No press bio added yet.</p>
+        )}
+      </Section>
+
+      <Section title="Full EPK">
+        {canManage && (
+          <div className="mb-4">
+            <FileUpload
+              value=""
+              onChange={(u, n) => { if (u) void addDoc({ doc_type: EPK, name: n || "EPK", file_url: u, file_name: n ?? null }); }}
+              label="Upload EPK (PDF / document)"
+              maxSizeMB={50}
+            />
+          </div>
+        )}
+        {epks.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No EPK uploaded yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {epks.map((d) => (
+              <div key={d.id} className="flex items-center gap-3 rounded-xl border border-border bg-background p-4">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#d4580a]/10">
+                  <FileText className="h-5 w-5 text-[#d4580a]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-foreground">{d.file_name ?? d.name}</p>
+                  <a href={d.file_url} target="_blank" rel="noreferrer" className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:underline">
+                    <Download className="h-3 w-3" /> Download EPK
+                  </a>
+                </div>
+                {canManage && (
+                  <button onClick={() => void removeDoc(d.id)} className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-600" aria-label="Delete EPK">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </Section>
 
