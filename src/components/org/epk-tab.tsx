@@ -164,6 +164,43 @@ export function EpkTab({
         )}
       </Section>
 
+      <Section title="Full EPK">
+        {canManage && (
+          <div className="mb-4">
+            <FileUpload
+              value=""
+              onChange={(u, n) => { if (u) void addDoc({ doc_type: EPK, name: n || "EPK", file_url: u, file_name: n ?? null }); }}
+              label="Upload EPK (PDF / document)"
+              maxSizeMB={50}
+            />
+          </div>
+        )}
+        {epks.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No EPK uploaded yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {epks.map((d) => (
+              <div key={d.id} className="flex items-center gap-3 rounded-xl border border-border bg-background p-4">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#d4580a]/10">
+                  <FileText className="h-5 w-5 text-[#d4580a]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-foreground">{d.file_name ?? d.name}</p>
+                  <a href={d.file_url} target="_blank" rel="noreferrer" className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:underline">
+                    <Download className="h-3 w-3" /> Download EPK
+                  </a>
+                </div>
+                {canManage && (
+                  <button onClick={() => void removeDoc(d.id)} className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-600" aria-label="Delete EPK">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
       <Section title="Logo">
         {logo ? (
           <div className="flex items-center gap-4">
