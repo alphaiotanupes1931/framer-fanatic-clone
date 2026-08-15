@@ -282,10 +282,15 @@ export function MusicTab({
               return (
                 <div key={r.id} className="overflow-hidden rounded-2xl border border-border bg-card">
                   <div className="flex flex-col gap-4 p-5 sm:flex-row">
-                    <div className="h-40 w-40 shrink-0 overflow-hidden rounded-xl bg-muted">
+                    <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-xl bg-muted">
                       {r.cover_url
                         ? <Img src={r.cover_url} alt={r.title} className="h-full w-full object-cover" />
                         : <div className="grid h-full w-full place-items-center"><Disc3 className="h-8 w-8 text-muted-foreground" /></div>}
+                      {list[0] && (
+                        <div className="absolute inset-0 grid place-items-center bg-black/10">
+                          <PlayButton id={list[0].id} src={list[0].audio_url} size="lg" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-3">
@@ -308,6 +313,17 @@ export function MusicTab({
                         {list.map((t) => (
                           <TrackRow key={t.id} track={t} canManage={canManage} onDelete={() => removeTrack(t.id)} />
                         ))}
+                        {canManage && (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => { setAddingTo(r.id); addRef.current?.click(); }}
+                            className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted disabled:opacity-60"
+                          >
+                            {busy && addingTo === r.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                            Add tracks
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
