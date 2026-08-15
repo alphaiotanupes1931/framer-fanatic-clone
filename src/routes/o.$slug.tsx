@@ -603,7 +603,8 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
     return <MusicTab orgId={org.id} canManage={canManage} mode="single" label={tab} />;
   if (
     tab === "Videos" || tab === "Reel" || tab === "Reels" || tab === "Films" || tab === "Work" ||
-    tab === "Watch" || tab === "Clips" || tab === "Filmography" || tab === "Screenings"
+    tab === "Watch" || tab === "Clips" || tab === "Filmography" || tab === "Screenings" ||
+    tab === "Repertoire"
   )
     return <OrgVideosTab orgId={org.id} canManage={canManage} title={tab} />;
   if (tab === "EPK")
