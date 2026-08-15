@@ -63,6 +63,7 @@ type OrgPost = {
   title: string; body: string | null; link_url: string | null; media_url: string | null;
   video_url?: string | null; media_urls?: string[] | null;
   bg_color?: string | null; text_color?: string | null; font_size?: string | null;
+  availability?: string | null;
   created_at: string;
 };
 
@@ -1659,6 +1660,8 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const [uploading, setUploading] = useState(false);
   const [bg, setBg] = useState<{ bg: string; fg: string }>({ bg: "", fg: "#0F172A" });
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
+  const isDrops = kind === "drops";
+  const [availability, setAvailability] = useState<"available_now" | "pre_order">("available_now");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const BG_COLORS = [
@@ -1680,6 +1683,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     setBg({ bg: "", fg: "#0F172A" });
     setFontSize("md");
     setMode("text");
+    setAvailability("available_now");
   };
 
   const uploadFile = async (file: File) => {
@@ -1736,6 +1740,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
       text_color: mode === "text" && bg.bg ? bg.fg : null,
       font_size: fontSize,
     };
+    if (isDrops) payload.availability = availability;
     const { error } = await supabase.from("organization_posts").insert(payload as never);
     if (error) return toast.error(error.message);
     setOpen(false); resetForm();
@@ -1778,6 +1783,23 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
           </div>
 
           <input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} placeholder="Title" className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm" />
+
+          {isDrops && (
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600">Availability</div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {([
+                  { id: "available_now", label: "Available now" },
+                  { id: "pre_order", label: "Pre-order" },
+                ] as const).map((o) => (
+                  <button key={o.id} type="button" onClick={() => setAvailability(o.id)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${availability === o.id ? "border-[#d4580a] bg-[#d4580a] text-white" : "border-neutral-200 bg-white text-neutral-700 hover:border-orange-300"}`}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {mode === "text" ? (
             <div className="space-y-3">
@@ -1887,6 +1909,11 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                 {media.length > 1 && (
                   <div className="absolute right-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">1/{media.length}</div>
                 )}
+                {p.availability && (
+                  <div className={`absolute bottom-1.5 left-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white ${p.availability === "pre_order" ? "bg-neutral-900/80" : "bg-emerald-600/90"}`}>
+                    {p.availability === "pre_order" ? "Pre-order" : "Available now"}
+                  </div>
+                )}
               </button>
             );
           })}
@@ -1949,6 +1976,11 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                   })()}
                   <div className="min-w-0 space-y-2 p-5">
                     <div className="text-base font-semibold">{p.title}</div>
+                    {p.availability && (
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold text-white ${p.availability === "pre_order" ? "bg-neutral-900" : "bg-emerald-600"}`}>
+                        {p.availability === "pre_order" ? "Pre-order" : "Available now"}
+                      </span>
+                    )}
                     <div className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</div>
                     {p.body && (
                       p.bg_color && media.length === 0 ? (

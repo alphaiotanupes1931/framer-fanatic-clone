@@ -1297,6 +1297,7 @@ export type Database = {
       organization_posts: {
         Row: {
           author_id: string
+          availability: string | null
           bg_color: string | null
           body: string | null
           created_at: string
@@ -1314,6 +1315,7 @@ export type Database = {
         }
         Insert: {
           author_id: string
+          availability?: string | null
           bg_color?: string | null
           body?: string | null
           created_at?: string
@@ -1331,6 +1333,7 @@ export type Database = {
         }
         Update: {
           author_id?: string
+          availability?: string | null
           bg_color?: string | null
           body?: string | null
           created_at?: string

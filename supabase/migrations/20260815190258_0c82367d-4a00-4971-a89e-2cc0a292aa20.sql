@@ -1,0 +1,1 @@
+ALTER TABLE public.organization_posts ADD COLUMN IF NOT EXISTS availability text;
