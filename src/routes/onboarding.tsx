@@ -38,6 +38,7 @@ function Onboarding() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (previewMode) return;
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
         navigate({ to: "/auth" });
@@ -45,7 +46,7 @@ function Onboarding() {
         setUserId(data.session.user.id);
       }
     });
-  }, [navigate]);
+  }, [navigate, previewMode]);
 
   useEffect(() => {
     supabase
