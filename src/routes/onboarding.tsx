@@ -19,9 +19,8 @@ import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/onboarding")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    preview: search['preview'] === "1" || search['preview'] === true ? true : false,
-  }),
+  validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
+    search['preview'] === "1" || search['preview'] === true ? { preview: true } : {},
   component: Onboarding,
   head: () => ({ meta: [{ title: "Welcome - set up your profile" }] }),
 });
