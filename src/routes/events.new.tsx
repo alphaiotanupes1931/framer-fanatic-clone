@@ -207,7 +207,7 @@ function NewEventPage() {
           <button onClick={() => navigate({ to: "/calendar" })} className="p-2 -ml-2 rounded-full hover:bg-secondary" aria-label="Back">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-bold">{isExhibition ? "Create Exhibition" : "Create Event"}</h1>
+          <h1 className="text-xl font-bold">{isExhibition ? "Create Event" : "Create Event"}</h1>
           {orgName && (
             <span className="ml-2 hidden sm:inline text-xs font-medium text-neutral-500">for {orgName}</span>
           )}
@@ -216,7 +216,7 @@ function NewEventPage() {
             disabled={!canSubmit || saving}
             className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
           >
-            {saving ? "Creating…" : isExhibition ? "Create Exhibition" : "Create"}
+            {saving ? "Creating…" : "Create"}
           </button>
         </div>
 
@@ -231,11 +231,11 @@ function NewEventPage() {
           className="w-full aspect-[16/9] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50 hover:border-[#d4580a]/40 hover:bg-[#d4580a]/[0.03] flex flex-col items-center justify-center text-neutral-500 mb-8 overflow-hidden"
         >
           {form.image_url ? (
-            <EventImage src={form.image_url} alt="Exhibition flyer" className="w-full h-full object-cover" />
+            <EventImage src={form.image_url} alt="Event flyer" className="w-full h-full object-cover" />
           ) : uploading ? (
             <><Loader2 className="w-6 h-6 animate-spin mb-2" /><span className="text-sm">Uploading…</span></>
           ) : (
-            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Add Exhibition flyer</span><span className="text-xs text-neutral-400 mt-0.5">Optional</span></>
+            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Add Event flyer</span><span className="text-xs text-neutral-400 mt-0.5">Optional</span></>
           )}
           <input
             ref={fileRef}
@@ -247,7 +247,7 @@ function NewEventPage() {
         </button>
 
         <div className="space-y-6">
-          <Field label="Exhibition Title" required>
+          <Field label="Event Title" required>
             <input className={inputCls} placeholder="What's your event called?" value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={140} />
           </Field>
 
@@ -255,7 +255,7 @@ function NewEventPage() {
             <textarea className={`${inputCls} min-h-[120px]`} placeholder="Tell people about your event..." value={form.description} onChange={(e) => set("description", e.target.value)} maxLength={5000} />
           </Field>
 
-          <Field label="Exhibition Video" optional>
+          <Field label="Event Video" optional>
             <VideoPicker
               value={form.video_url}
               uploading={uploadingVideo}
