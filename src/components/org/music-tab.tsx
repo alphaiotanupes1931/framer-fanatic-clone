@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Disc3, Loader2, Music2, Trash2, Upload } from "lucide-react";
+import { Disc3, Loader2, Music2, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { SmartAudio, Img } from "@/components/shared/smart-img";
+import { Img } from "@/components/shared/smart-img";
+import { PlayButton, usePlayer } from "@/components/org/audio-player";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { formatDuration, readDuration, uploadMediaFile } from "@/components/org/media-upload";
 
@@ -46,6 +47,8 @@ export function MusicTab({
   const [form, setForm] = useState(emptyRelease);
   const [files, setFiles] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+  const addRef = useRef<HTMLInputElement>(null);
+  const [addingTo, setAddingTo] = useState<string | null>(null);
   const singular = label ?? (mode === "album" ? "Release" : "Single");
 
   const load = async () => {
@@ -71,6 +74,12 @@ export function MusicTab({
     if (!files.length) { toast.error("Upload at least one audio file"); return; }
     setBusy(true);
     try {
+      // Upload the audio first so a failed upload never leaves an empty release behind.
+      const uploaded: Array<{ title: string; url: string; duration: number | null }> = [];
+      for (const f of files) {
+        const url = await uploadMediaFile(f, orgId, "audio");
+        uploaded.push({ title: f.name.replace(/\.[a-z0-9]+$/i, ""), url, duration: await readDuration(f) });
+      }
       const { data: rel, error } = await supabase.from("organization_releases").insert({
         org_id: orgId,
         kind: form.kind,
@@ -81,24 +90,50 @@ export function MusicTab({
       }).select("id").single();
       if (error) throw error;
       let n = 1;
-      for (const f of files) {
-        const url = await uploadMediaFile(f, orgId, "audio");
-        const duration = await readDuration(f);
-        const { error: tErr } = await supabase.from("organization_tracks").insert({
+      const { error: tErr } = await supabase.from("organization_tracks").insert(
+        uploaded.map((u) => ({
           org_id: orgId,
           release_id: rel!.id,
-          title: f.name.replace(/\.[a-z0-9]+$/i, ""),
-          audio_url: url,
-          duration_seconds: duration,
+          title: u.title,
+          audio_url: u.url,
+          cover_url: form.cover_url.trim() || null,
+          duration_seconds: u.duration,
           track_number: n++,
-        });
-        if (tErr) throw tErr;
-      }
+        })),
+      );
+      if (tErr) throw tErr;
       toast.success(`${singular} published`);
       reset();
       void load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
+    } finally { setBusy(false); }
+  };
+
+  /** Adds tracks to a release that already exists. */
+  const addTracks = async (releaseId: string, list: File[]) => {
+    if (!list.length) return;
+    setBusy(true);
+    try {
+      let n = tracks.filter((t) => t.release_id === releaseId).length + 1;
+      const rows = [];
+      for (const f of list) {
+        const url = await uploadMediaFile(f, orgId, "audio");
+        rows.push({
+          org_id: orgId,
+          release_id: releaseId,
+          title: f.name.replace(/\.[a-z0-9]+$/i, ""),
+          audio_url: url,
+          duration_seconds: await readDuration(f),
+          track_number: n++,
+        });
+      }
+      const { error } = await supabase.from("organization_tracks").insert(rows);
+      if (error) throw error;
+      toast.success(rows.length === 1 ? "Track added" : `${rows.length} tracks added`);
+      void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not upload those tracks");
     } finally { setBusy(false); }
   };
 
