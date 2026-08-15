@@ -623,7 +623,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
         address={org.address}
       />
     );
-  if (tab === "Shop" || tab === "Print Shop")
+  if (tab === "Shop" || tab === "Print Shop" || tab === "Drops")
     return <StoreTab orgId={org.id} canManage={canManage} title={tab} />;
   if (tab === "Writing" || tab === "Books" || tab === "Poems" || tab === "Publications" || tab === "Essays")
     return <OrgStoriesTab orgId={org.id} canManage={canManage} title={tab} />;
