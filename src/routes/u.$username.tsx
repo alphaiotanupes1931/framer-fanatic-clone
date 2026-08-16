@@ -5,14 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
-  Send, Star, Trash2, Volume2, VolumeX, Grid3x3,
+  Send, Star, Trash2, Grid3x3,
   Calendar, ChevronDown, ChevronLeft, ChevronRight, X as XIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
 import { sortPosts } from "@/lib/sort-posts";
 import { PROFILE_TAGS } from "@/lib/categories";
-import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { bannerLabelForArtist } from "@/lib/artist-tabs";
@@ -186,7 +185,6 @@ function PublicProfilePage() {
   }, [username, me]);
 
   const isSelf = useMemo(() => me && profile && me.id === profile.id, [me, profile]);
-  const canManage = !!isSelf || isAdmin;
 
   // Founding Member flag is admin-only: the RPC returns false for everyone else.
   useEffect(() => {
@@ -220,15 +218,6 @@ function PublicProfilePage() {
     if (profile.role) parts.push(`#${profile.role.toLowerCase()}`);
     return Array.from(new Set(parts));
   }, [profile]);
-
-  const toggleMute = () => {
-    if (!profile) return;
-    const next = !muted;
-    setMuted(next);
-    if (next) window.localStorage.setItem(`pb_mute_user_${profile.id}`, "1");
-    else window.localStorage.removeItem(`pb_mute_user_${profile.id}`);
-    toast.success(next ? "Page muted" : "Page unmuted");
-  };
 
   const deletePage = async () => {
     if (!profile) return;
@@ -518,49 +507,15 @@ function PublicProfilePage() {
               <MessageCircle className="h-4 w-4" /> Message
             </button>
           )}
-          {!isSelf && (
-            <MessageAllButton
-              label="Message All"
-              audienceLabel={`${profile.display_name || profile.username || "artist"}'s followers`}
-              defaultGroupName={`${profile.display_name || profile.username || "Artist"} group chat`}
-              loadCandidates={async () => {
-                const { data: fol } = await supabase
-                  .from("follows")
-                  .select("follower_id")
-                  .eq("following_id", profile.id);
-                const ids = Array.from(new Set(((fol ?? []) as { follower_id: string }[]).map((r) => r.follower_id)));
-                ids.push(profile.id);
-                const unique = Array.from(new Set(ids));
-                if (unique.length === 0) return [];
-                const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: unique });
-                const rows = (profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }[];
-                return rows.map((p) => ({
-                  id: p.id,
-                  display_name: p.display_name,
-                  username: p.username,
-                  avatar_url: p.avatar_url,
-                  subtitle: p.neighborhood || "Follower",
-                }));
-              }}
-            />
-          )}
-          {canManage && (
+          {/* Message All / Delete Page / Mute Page belong to org + artist pages,
+              not to an individual person's profile, so they are not rendered here. */}
+          {isSelf && (
             <button
               onClick={deletePage}
               className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
             >
               <Trash2 className="h-4 w-4" />
-              {isSelf && !isAdmin ? "Remove Artist Page" : "Delete Page"}
-              {isAdmin && !isSelf && <span className="text-[10px] opacity-60">(Admin)</span>}
-            </button>
-          )}
-          {me && !isSelf && (
-            <button
-              onClick={toggleMute}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-            >
-              {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              {muted ? "Unmute Page" : "Mute Page"}
+              Remove Artist Page
             </button>
           )}
         </div>
@@ -597,7 +552,7 @@ function PublicProfilePage() {
           ) : tab === "writings" ? (
             <PersonWritingsTab userId={profile.id} isSelf={!!isSelf} />
           ) : tab === "saved" ? (
-            <PersonSavedTab isSelf={!!isSelf} />
+            <PersonSavedTab userId={profile.id} isSelf={!!isSelf} />
           ) : tab === "attending" ? (
             <PersonAttendingTab userId={profile.id} isSelf={!!isSelf} />
           ) : tab === "organized" ? (
