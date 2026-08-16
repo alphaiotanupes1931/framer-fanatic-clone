@@ -13,6 +13,9 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    event: typeof search['event'] === "string" ? (search['event'] as string) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Organizer Studio - Planet Baltimore" },
@@ -36,6 +39,7 @@ function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
 
 function OrganizerStudioPage() {
   const me = useCurrentProfile();
+  const { event: focusEventId } = Route.useSearch();
   const [tab, setTab] = useState<"manage" | "create" | "campaign">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
@@ -50,6 +54,16 @@ function OrganizerStudioPage() {
       .then(({ data }) => setEvents((data as MyEvent[] | null) ?? []));
   };
   useEffect(load, [me?.id]);
+
+  // Arriving from "create event" lands directly on that event's ticket setup.
+  useEffect(() => {
+    if (!focusEventId || !events) return;
+    const match = events.find((e) => e.id === focusEventId);
+    if (match) {
+      setTab("manage");
+      setSelected(match);
+    }
+  }, [focusEventId, events]);
 
   useEffect(() => {
     if (!events || events.length === 0) { setOverview({ revenue: 0, net: 0, orders: 0, promoters: 0 }); return; }
