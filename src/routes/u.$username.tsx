@@ -552,7 +552,7 @@ function PublicProfilePage() {
           ) : tab === "writings" ? (
             <PersonWritingsTab userId={profile.id} isSelf={!!isSelf} />
           ) : tab === "saved" ? (
-            <PersonSavedTab isSelf={!!isSelf} />
+            <PersonSavedTab userId={profile.id} isSelf={!!isSelf} />
           ) : tab === "attending" ? (
             <PersonAttendingTab userId={profile.id} isSelf={!!isSelf} />
           ) : tab === "organized" ? (
