@@ -5,7 +5,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { MentionField } from "@/components/shared/mention-input";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
@@ -197,14 +197,15 @@ function CreatePostPage() {
                 className="rounded-2xl p-6 min-h-[200px] flex items-center justify-center transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
               >
-                <Textarea
+                <MentionField
+                  multiline
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={setContent}
                   rows={5}
                   maxLength={2000}
-                  placeholder="Share your thoughts..."
+                  placeholder="Share your thoughts... use @ to mention someone"
                   style={{ color: bg.fg }}
-                  className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus-visible:ring-0 ${FONT_SIZES.find((f) => f.id === fontSize)!.cls}`}
+                  className={`w-full resize-none border-0 bg-transparent text-center font-medium outline-none placeholder:opacity-60 ${FONT_SIZES.find((f) => f.id === fontSize)!.cls}`}
                 />
               </div>
               <div>
@@ -248,7 +249,8 @@ function CreatePostPage() {
           ) : (
             <div className="space-y-3">
               <Label className="text-sm font-medium">Caption (optional)</Label>
-              <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={3} maxLength={2000} placeholder="Add a caption..." />
+              <MentionField multiline value={content} onChange={setContent} rows={3} maxLength={2000} placeholder="Add a caption... use @ to mention someone"
+                className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-[#d4580a]" />
             </div>
           )}
 
