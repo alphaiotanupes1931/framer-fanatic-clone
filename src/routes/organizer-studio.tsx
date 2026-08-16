@@ -13,9 +13,8 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    event: typeof search['event'] === "string" ? (search['event'] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { event?: string } =>
+    typeof search['event'] === "string" ? { event: search['event'] as string } : {},
   head: () => ({
     meta: [
       { title: "Organizer Studio - Planet Baltimore" },
