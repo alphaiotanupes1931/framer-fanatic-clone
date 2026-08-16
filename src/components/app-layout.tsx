@@ -134,13 +134,29 @@ export function useCurrentProfile() {
   return profile;
 }
 
+// Cached app data is per-account. Anything left in storage after sign-out is
+// readable by whoever uses the device next, so wipe it on every identity change.
+function clearCachedAppData() {
+  if (typeof window === "undefined") return;
+  try {
+    for (const key of Object.keys(window.localStorage)) {
+      if (key.startsWith("pb:")) window.localStorage.removeItem(key);
+    }
+  } catch {
+    // Storage being unavailable is never fatal.
+  }
+}
+
 if (typeof window !== "undefined") {
   supabase.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED") {
       invalidateCurrentProfile();
       invalidateConnections();
       // Signed URLs are per-session capability links; don't leak them across users.
-      if (event !== "USER_UPDATED") clearSignedUrlCache();
+      if (event !== "USER_UPDATED") {
+        clearSignedUrlCache();
+        clearCachedAppData();
+      }
       publishProfile(null);
       if (event !== "SIGNED_OUT") void loadProfile();
     }
