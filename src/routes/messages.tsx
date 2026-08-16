@@ -291,9 +291,20 @@ function MessagesPage() {
     }
   }, [active, loadMsgs, markRead]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages. A single smooth scroll can stop
+  // short when images/attachments finish loading and grow the thread, so pin
+  // to the bottom again on the next frames.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const pin = () => el.scrollTo({ top: el.scrollHeight });
+    pin();
+    const r1 = requestAnimationFrame(pin);
+    const t = setTimeout(pin, 250);
+    return () => {
+      cancelAnimationFrame(r1);
+      clearTimeout(t);
+    };
   }, [msgs.length, active?.id]);
 
   // Realtime: messages
