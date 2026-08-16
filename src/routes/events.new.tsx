@@ -193,8 +193,9 @@ function NewEventPage() {
           : error.message);
         return;
       }
-      toast.success("Event created");
-      navigate({ to: "/events/$eventId", params: { eventId: (data as { id: string }).id } });
+      toast.success("Event created. Add your ticket types.");
+      // Organizers land in the studio so they can set up ticket types right away.
+      navigate({ to: "/organizer-studio", search: { event: (data as { id: string }).id } });
     } finally {
       setSaving(false);
     }
