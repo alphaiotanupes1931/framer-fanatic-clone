@@ -494,7 +494,7 @@ function MessagesPage() {
       <div className="mb-6">
         <HeroBanner title="Messages" subtitle="Direct conversations with people and organizations across Baltimore." />
       </div>
-      <div className="grid h-[calc(100vh-12rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[360px_1fr]">
+      <div className="grid h-[calc(100dvh-15rem)] min-h-[420px] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:h-[calc(100dvh-12rem)] md:grid-cols-[360px_1fr]">
         {/* Conversation list */}
         <div
           className={`${showList ? "flex" : "hidden"} min-w-0 flex-col border-r border-border md:flex`}
@@ -706,7 +706,7 @@ function MessagesPage() {
                   </div>
                 </div>
               )}
-              <div ref={scrollRef} className="flex-1 space-y-1.5 overflow-y-auto px-4 py-5 sm:px-6">
+              <div ref={scrollRef} className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6">
                 {(msgSearch.trim() ? msgs.filter((m) => m.content.toLowerCase().includes(msgSearch.trim().toLowerCase())) : msgs).map((m, i, arr) => {
                   const mine = m.sender_id === me?.id;
                   const prev = arr[i - 1];
@@ -791,7 +791,7 @@ function MessagesPage() {
                   );
                 })}
               </div>
-              <div className="border-t border-border px-4 py-3 sm:px-6 sm:py-4">
+              <div className="shrink-0 border-t border-border bg-card px-4 py-3 sm:px-6 sm:py-4">
                 <div className="flex items-end gap-2">
                   <textarea
                     value={draft}
