@@ -3099,6 +3099,17 @@ export type Database = {
           username: string
         }[]
       }
+      public_attending_events: {
+        Args: { _user_id: string; lim?: number }
+        Returns: {
+          id: string
+          image_url: string
+          location: string
+          starts_at: string
+          title: string
+          venue_name: string
+        }[]
+      }
       public_creators: {
         Args: { lim?: number }
         Returns: {
@@ -3147,6 +3158,18 @@ export type Database = {
           excerpt: string
           id: string
           title: string
+        }[]
+      }
+      public_saved_posts: {
+        Args: { _user_id: string; lim?: number }
+        Returns: {
+          author_name: string
+          author_username: string
+          content: string
+          created_at: string
+          id: string
+          media_urls: string[]
+          post_type: string
         }[]
       }
       read_email_batch: {
