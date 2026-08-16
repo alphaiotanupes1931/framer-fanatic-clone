@@ -12,6 +12,9 @@ import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img
 import { prefetchImageUrls } from "@/components/smart-image";
 import { readCache, writeCache } from "@/hooks/use-cached-fetch";
 import { useReaction } from "@/hooks/use-reaction";
+import { FollowButton } from "@/components/shared/follow-button";
+import { MentionText } from "@/components/shared/mention-text";
+import { MentionField } from "@/components/shared/mention-input";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -159,7 +162,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
               post.font_size === "sm" ? "text-lg" : post.font_size === "lg" ? "text-3xl" : post.font_size === "xl" ? "text-5xl" : "text-2xl"
             }`}
           >
-            {post.content}
+            <MentionText text={post.content} />
           </div>
         </div>
       )}
@@ -203,8 +206,9 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
               </div>
             </Link>
           ) : <div className="text-sm text-muted-foreground">Someone</div>}
+          <FollowButton userId={post.user_id} currentUserId={meId} compact className="ml-auto shrink-0" />
           {isOwner && (
-            <div className="ml-auto flex items-center gap-1">
+            <div className="flex items-center gap-1">
               <Link to="/edit-post/$id" params={{ id: post.id }} aria-label="Edit post" className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground">
                 <Pencil className="h-4 w-4" />
               </Link>
@@ -221,12 +225,12 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
               <div className={`m-4 rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
                 post.font_size === "sm" ? "text-base" : post.font_size === "lg" ? "text-2xl" : post.font_size === "xl" ? "text-4xl" : "text-xl"
               }`} style={{ background: post.bg_color, color: post.text_color || "#fff" }}>
-                {post.content}
+                <MentionText text={post.content} />
               </div>
             ) : (
               <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
                 <span className="mr-2 font-semibold">{author?.display_name || author?.username || "Someone"}</span>
-                {post.content}
+                <MentionText text={post.content} />
               </div>
             )
           )}
@@ -245,7 +249,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
                   <div className="min-w-0 flex-1">
                     <div className="text-sm text-foreground/90">
                       <span className="mr-1.5 font-semibold text-foreground">{c.author?.display_name || c.author?.username || "Anonymous"}</span>
-                      <span className="whitespace-pre-wrap break-words">{c.body}</span>
+                      <MentionText text={c.body} className="whitespace-pre-wrap break-words" />
                     </div>
                     <div className="text-[11px] text-muted-foreground">{timeAgo(c.created_at)}</div>
                   </div>
@@ -270,8 +274,13 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
           </div>
           {meId ? (
             <div className="flex items-center gap-2 border-t border-border px-4 py-2.5">
-              <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()}
-                placeholder="Add a comment…" className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-sm outline-none focus:border-[#d4580a]" />
+              <MentionField
+                value={text}
+                onChange={setText}
+                onKeyDown={(e) => { if (e.key === "Enter") void send(); }}
+                placeholder="Add a comment…"
+                className="w-full rounded-full border border-border bg-card px-4 py-2 text-sm outline-none focus:border-[#d4580a]"
+              />
               <button onClick={send} disabled={!text.trim()} className="rounded-full bg-[#d4580a] p-2 text-white disabled:opacity-50" aria-label="Send">
                 <Send className="h-4 w-4 -rotate-45" />
               </button>
