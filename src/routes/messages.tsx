@@ -291,9 +291,20 @@ function MessagesPage() {
     }
   }, [active, loadMsgs, markRead]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages. A single smooth scroll can stop
+  // short when images/attachments finish loading and grow the thread, so pin
+  // to the bottom again on the next frames.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const pin = () => el.scrollTo({ top: el.scrollHeight });
+    pin();
+    const r1 = requestAnimationFrame(pin);
+    const t = setTimeout(pin, 250);
+    return () => {
+      cancelAnimationFrame(r1);
+      clearTimeout(t);
+    };
   }, [msgs.length, active?.id]);
 
   // Realtime: messages
@@ -483,7 +494,7 @@ function MessagesPage() {
       <div className="mb-6">
         <HeroBanner title="Messages" subtitle="Direct conversations with people and organizations across Baltimore." />
       </div>
-      <div className="grid h-[calc(100vh-12rem)] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[360px_1fr]">
+      <div className="grid h-[calc(100dvh-15rem)] min-h-[420px] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:h-[calc(100dvh-12rem)] md:grid-cols-[360px_1fr]">
         {/* Conversation list */}
         <div
           className={`${showList ? "flex" : "hidden"} min-w-0 flex-col border-r border-border md:flex`}
@@ -627,7 +638,7 @@ function MessagesPage() {
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+              <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3">
                 <button
                   type="button"
                   onClick={() => setActive(null)}
@@ -695,7 +706,7 @@ function MessagesPage() {
                   </div>
                 </div>
               )}
-              <div ref={scrollRef} className="flex-1 space-y-1.5 overflow-y-auto px-4 py-5 sm:px-6">
+              <div ref={scrollRef} className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6">
                 {(msgSearch.trim() ? msgs.filter((m) => m.content.toLowerCase().includes(msgSearch.trim().toLowerCase())) : msgs).map((m, i, arr) => {
                   const mine = m.sender_id === me?.id;
                   const prev = arr[i - 1];
@@ -780,7 +791,7 @@ function MessagesPage() {
                   );
                 })}
               </div>
-              <div className="border-t border-border px-4 py-3 sm:px-6 sm:py-4">
+              <div className="shrink-0 border-t border-border bg-card px-4 py-3 sm:px-6 sm:py-4">
                 <div className="flex items-end gap-2">
                   <textarea
                     value={draft}
