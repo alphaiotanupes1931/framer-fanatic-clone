@@ -45,6 +45,7 @@ function EventDetail() {
   const [shareOpen, setShareOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savingBk, setSavingBk] = useState(false);
+  const [qty, setQty] = useState(1);
 
   useEffect(() => {
     (async () => {
@@ -73,7 +74,9 @@ function EventDetail() {
     if (!evt) return;
     setBuying(true);
     try {
-      const { url } = await checkoutFn({ data: { eventId: evt.id, returnOrigin: window.location.origin } });
+      const { url } = await checkoutFn({
+        data: { eventId: evt.id, returnOrigin: window.location.origin, quantity: qty },
+      });
       if (url) window.location.href = url;
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start checkout");
@@ -230,10 +233,38 @@ function EventDetail() {
 
         <div className="flex flex-col gap-3 border-t border-border pt-6">
           {priced ? (
-            <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-              <Ticket className="w-4 h-4" />
-              {buying ? "Loading…" : `Buy Ticket · $${((evt.price_cents ?? 0) / 100).toFixed(2)}`}
-            </Button>
+            <>
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <span className="text-sm font-medium text-foreground">Tickets</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    disabled={qty <= 1}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40"
+                    aria-label="Fewer tickets"
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.min(10, q + 1))}
+                    disabled={qty >= 10}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40"
+                    aria-label="More tickets"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                <Ticket className="w-4 h-4" />
+                {buying
+                  ? "Loading…"
+                  : `Buy ${qty > 1 ? `${qty} Tickets` : "Ticket"} · $${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
+              </Button>
+            </>
           ) : (
             <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
               {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "I'm going"}
