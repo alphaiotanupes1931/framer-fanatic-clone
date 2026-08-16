@@ -118,56 +118,84 @@ export function PersonWritingsTab({ userId, isSelf }: { userId: string; isSelf: 
   );
 }
 
-export function PersonSavedTab({ isSelf }: { isSelf: boolean }) {
-  if (!isSelf) {
-    return <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">Saved items are private.</div>;
+/** Saved posts. Public: anyone can browse what this person bookmarked. */
+export function PersonSavedTab({ userId, isSelf }: { userId: string; isSelf: boolean }) {
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("public_saved_posts", { _user_id: userId, lim: 60 });
+      if (cancelled) return;
+      setRows((data as any[]) ?? []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading saved…</div>;
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border py-12 text-center">
+        <Bookmark className="mx-auto h-8 w-8 text-muted-foreground" />
+        <div className="mt-3 text-sm text-muted-foreground">Nothing saved yet.</div>
+        {isSelf && (
+          <Link to="/saved" className="mt-4 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Open Saved</Link>
+        )}
+      </div>
+    );
   }
   return (
-    <div className="rounded-2xl border border-dashed border-border py-12 text-center">
-      <Bookmark className="mx-auto h-8 w-8 text-muted-foreground" />
-      <div className="mt-3 text-sm text-muted-foreground">All of your saved posts, stories and events live here.</div>
-      <Link to="/saved" className="mt-4 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Open Saved</Link>
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {rows.map((p) => {
+        const media = (p.media_urls as string[] | null)?.[0] ?? null;
+        return (
+          <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="group block overflow-hidden rounded-xl border border-border bg-card">
+            {media ? (
+              <SmartImage src={media} alt={p.content ?? "Saved post"} bucket="post-media" className="aspect-square w-full object-cover" />
+            ) : (
+              <div className="flex aspect-square w-full items-center justify-center p-4 text-center text-sm text-muted-foreground">
+                <span className="line-clamp-5">{p.content}</span>
+              </div>
+            )}
+          </Link>
+        );
+      })}
     </div>
   );
 }
 
-/** Upcoming events this person holds a paid ticket for (visible to them only). */
+/** Upcoming events this person is attending. Visible to everyone. */
 export function PersonAttendingTab({ userId, isSelf }: { userId: string; isSelf: boolean }) {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!isSelf) { setLoading(false); return; }
-      const { data } = await supabase
-        .from("tickets")
-        .select("id,event_id,events(title,starts_at,location,venue_name,image_url)")
-        .eq("buyer_id", userId)
-        .eq("status", "paid");
+      const { data } = await supabase.rpc("public_attending_events", { _user_id: userId, lim: 60 });
       if (cancelled) return;
-      setRows(data ?? []);
+      setRows((data as any[]) ?? []);
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [userId, isSelf]);
+  }, [userId]);
 
-  if (!isSelf) return <div className="py-12 text-center text-sm text-muted-foreground">Event attendance is private.</div>;
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
   const now = Date.now();
   const upcoming = rows
-    .filter((r) => r.events && new Date(r.events.starts_at).getTime() >= now)
-    .sort((a, b) => +new Date(a.events.starts_at) - +new Date(b.events.starts_at));
+    .filter((r) => r.starts_at && new Date(r.starts_at).getTime() >= now)
+    .sort((a, b) => +new Date(a.starts_at) - +new Date(b.starts_at));
   if (upcoming.length === 0) return <div className="py-12 text-center text-muted-foreground">No upcoming events yet.</div>;
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {upcoming.map((r) => (
-        <Link key={r.id} to="/events/$eventId" params={{ eventId: r.event_id }} className="block overflow-hidden rounded-2xl border border-border transition hover:shadow-md">
-          {r.events?.image_url && <SmartImage src={r.events.image_url} alt={r.events.title} bucket="event-images" className="h-40 w-full object-cover" />}
+        <Link key={r.id} to="/events/$eventId" params={{ eventId: r.id }} className="block overflow-hidden rounded-2xl border border-border transition hover:shadow-md">
+          {r.image_url && <SmartImage src={r.image_url} alt={r.title} bucket="event-images" className="h-40 w-full object-cover" />}
           <div className="space-y-1.5 p-4">
             <div className="text-xs text-muted-foreground">
-              {new Date(r.events.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+              {new Date(r.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
             </div>
-            <div className="line-clamp-2 font-bold leading-tight">{r.events?.title}</div>
+            <div className="line-clamp-2 font-bold leading-tight">{r.title}</div>
           </div>
         </Link>
       ))}
