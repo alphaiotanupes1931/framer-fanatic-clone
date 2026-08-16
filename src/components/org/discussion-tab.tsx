@@ -12,6 +12,8 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { MentionText } from "@/components/shared/mention-text";
+import { MentionField } from "@/components/shared/mention-input";
 
 const isVideoUrl = (u: string) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
 
@@ -175,9 +177,10 @@ export function DiscussionTab({
     <div className="space-y-5">
       {me ? (
         <div className="space-y-3 rounded-2xl border border-border bg-card p-3">
-          <textarea
+          <MentionField
+            multiline
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={setBody}
             rows={3}
             placeholder={placeholder}
             className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none"
@@ -281,7 +284,7 @@ export function DiscussionTab({
                   )}
                 </header>
 
-                {c.body && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-foreground">{c.body}</p>}
+                {c.body && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-foreground"><MentionText text={c.body} /></p>}
                 {c.media_urls.length > 0 && (
                   <div className={`mt-2 grid gap-2 ${c.media_urls.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                     {c.media_urls.map((u) => (
@@ -322,7 +325,7 @@ export function DiscussionTab({
                           </Avatar>
                           <div className="min-w-0 flex-1 rounded-xl bg-muted/50 px-3 py-2">
                             <div className="text-xs font-semibold text-foreground">{rn}</div>
-                            <div className="whitespace-pre-wrap break-words text-sm text-foreground">{r.body}</div>
+                            <div className="whitespace-pre-wrap break-words text-sm text-foreground"><MentionText text={r.body} /></div>
                           </div>
                           {(canManage || r.user_id === me) && (
                             <button onClick={() => void remove(r.id)} className="rounded-full p-1 text-muted-foreground hover:text-red-600">
@@ -337,12 +340,12 @@ export function DiscussionTab({
 
                 {replyTo === c.id && me && (
                   <div className="mt-3 flex gap-2">
-                    <input
+                    <MentionField
                       value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
+                      onChange={setReplyText}
                       onKeyDown={(e) => { if (e.key === "Enter") void post(replyText, c.id); }}
                       placeholder="Write a reply…"
-                      className="flex-1 rounded-full border border-border bg-background px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none"
+                      className="w-full rounded-full border border-border bg-background px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none"
                     />
                     <button onClick={() => void post(replyText, c.id)} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">
                       Reply

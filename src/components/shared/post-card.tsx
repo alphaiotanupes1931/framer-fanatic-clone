@@ -19,6 +19,8 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { useReaction } from "@/hooks/use-reaction";
 import { FollowButton } from "@/components/shared/follow-button";
+import { MentionText } from "@/components/shared/mention-text";
+import { MentionField } from "@/components/shared/mention-input";
 
 type Post = {
   id: string;
@@ -390,12 +392,18 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               ) : comments.map((c) => (
                 <div key={c.id} className="text-sm">
                   <span className="font-semibold">{c.author_name}</span>{" "}
-                  <span className="text-neutral-700">{c.body}</span>
+                  <MentionText text={c.body} className="text-neutral-700" />
                 </div>
               ))}
             </div>
             <div className="flex items-center gap-2 border-t border-neutral-100 pt-2">
-              <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") submitComment(); }} placeholder="Add a comment..." className="flex-1 rounded-full border border-neutral-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300" />
+              <MentionField
+                value={newComment}
+                onChange={setNewComment}
+                onKeyDown={(e) => { if (e.key === "Enter") void submitComment(); }}
+                placeholder="Add a comment..."
+                className="w-full rounded-full border border-neutral-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+              />
               <Button size="sm" onClick={submitComment} disabled={!newComment.trim()}>Post</Button>
             </div>
           </div>
