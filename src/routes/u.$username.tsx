@@ -5,14 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import {
   MapPin, MessageCircle, UserPlus, UserCheck, Globe, ArrowLeft,
-  Send, Star, Trash2, Volume2, VolumeX, Grid3x3,
+  Send, Star, Trash2, Grid3x3,
   Calendar, ChevronDown, ChevronLeft, ChevronRight, X as XIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
 import { sortPosts } from "@/lib/sort-posts";
 import { PROFILE_TAGS } from "@/lib/categories";
-import { MessageAllButton } from "@/components/message-all-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { bannerLabelForArtist } from "@/lib/artist-tabs";
@@ -186,7 +185,6 @@ function PublicProfilePage() {
   }, [username, me]);
 
   const isSelf = useMemo(() => me && profile && me.id === profile.id, [me, profile]);
-  const canManage = !!isSelf || isAdmin;
 
   // Founding Member flag is admin-only: the RPC returns false for everyone else.
   useEffect(() => {
@@ -220,15 +218,6 @@ function PublicProfilePage() {
     if (profile.role) parts.push(`#${profile.role.toLowerCase()}`);
     return Array.from(new Set(parts));
   }, [profile]);
-
-  const toggleMute = () => {
-    if (!profile) return;
-    const next = !muted;
-    setMuted(next);
-    if (next) window.localStorage.setItem(`pb_mute_user_${profile.id}`, "1");
-    else window.localStorage.removeItem(`pb_mute_user_${profile.id}`);
-    toast.success(next ? "Page muted" : "Page unmuted");
-  };
 
   const deletePage = async () => {
     if (!profile) return;
