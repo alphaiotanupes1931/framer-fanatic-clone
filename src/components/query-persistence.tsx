@@ -1,3 +1,14 @@
+// Private, per-account data (DMs, unread counts, notifications) must never be
+// written to localStorage: it survives sign-out and would be readable by the
+// next person using the device.
+const PRIVATE_QUERY_KEYS = ["messages", "conversations", "unread", "notifications", "saved"];
+
+function isPrivateQuery(key: readonly unknown[]) {
+  return key.some(
+    (part) => typeof part === "string" && PRIVATE_QUERY_KEYS.some((p) => part.toLowerCase().includes(p)),
+  );
+}
+
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
@@ -28,7 +39,7 @@ export function QueryPersistence() {
       persister,
       maxAge: 24 * 60 * 60 * 1000,
       dehydrateOptions: {
-        shouldDehydrateQuery: (q) => q.state.status === "success",
+        shouldDehydrateQuery: (q) => q.state.status === "success" && !isPrivateQuery(q.queryKey),
       },
     });
     return () => unsubscribe();
