@@ -26,7 +26,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const ack = async (note?: string) => {
+        const ack = async (note?: string): Promise<Response> => {
           await logStripeEvent({
             source: "webhook",
             eventType: event.type,
@@ -35,7 +35,8 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             message: note ?? null,
             details: { livemode: event.livemode, created: event.created },
           });
-          return ack();
+          // Stripe only needs a 2xx; anything else makes it retry the event.
+          return new Response("ok", { status: 200 });
         };
 
         try {
