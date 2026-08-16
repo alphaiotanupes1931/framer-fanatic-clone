@@ -638,7 +638,7 @@ function MessagesPage() {
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+              <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3">
                 <button
                   type="button"
                   onClick={() => setActive(null)}
