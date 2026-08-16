@@ -118,6 +118,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     z.object({
       eventId: z.string().uuid(),
       returnOrigin: z.string().url(),
+      quantity: z.number().int().min(1).max(10).default(1),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -146,8 +147,9 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     }
 
     const breakdown = priceBreakdown(event.price_cents);
-    // Platform fee = flat 69¢ Planet Baltimore fee. Routed via application_fee_amount.
-    const applicationFee = breakdown.platformFeeCents;
+    const qty = data.quantity;
+    // Platform fee = flat 69¢ Planet Baltimore fee per ticket. Routed via application_fee_amount.
+    const applicationFee = breakdown.platformFeeCents * qty;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -158,7 +160,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       line_items: checkoutLineItems(breakdown, {
         name: `Ticket: ${event.title}`,
         images: event.image_url ? [event.image_url] : undefined,
-      }),
+      }).map((li) => ({ ...li, quantity: qty })),
       payment_intent_data: {
         application_fee_amount: applicationFee,
         transfer_data: { destination: artist.stripe_account_id },
@@ -167,6 +169,8 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
         event_id: event.id,
         buyer_id: userId,
         artist_id: event.user_id,
+        kind: "ticket",
+        quantity: String(qty),
         artist_net_cents: String(breakdown.artistNetCents),
         platform_tax_cents: String(breakdown.platformTaxCents),
         stripe_fee_cents: String(breakdown.stripeFeeCents),
@@ -174,8 +178,11 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       },
     });
 
-    // Pre-create the ticket as pending
-    await supabase.from("tickets").insert({
+    // Pre-create one pending ticket row per seat. Buyers have no insert rights
+    // on tickets (they may only read their own), so this write must go through
+    // the admin client after the caller has been authenticated above.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const rows = Array.from({ length: qty }, () => ({
       event_id: event.id,
       buyer_id: userId,
       artist_id: event.user_id,
@@ -185,9 +192,11 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       platform_tax_cents: breakdown.platformTaxCents,
       stripe_fee_cents: breakdown.stripeFeeCents,
       status: "pending",
-    });
+    }));
+    const { error: ticketErr } = await supabaseAdmin.from("tickets").insert(rows);
+    if (ticketErr) throw new Error("Could not reserve your ticket. Please try again.");
 
-    return { url: session.url };
+    return { url: session.url, quantity: qty };
   });
 
 /** Check whether an organization's owner has Stripe Connect ready to accept payments. */
