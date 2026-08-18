@@ -388,7 +388,10 @@ function OrgProfile() {
             disabled={joining}
             className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
           >
-            <Users className="h-4 w-4" /> {isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
+            <Users className="h-4 w-4" />{" "}
+            {isGroup
+              ? memberStatus === "approved" ? "Joined" : memberStatus === "pending" ? "Request pending" : "Request to join"
+              : isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
           </button>
         </div>
       </div>
