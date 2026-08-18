@@ -810,6 +810,12 @@ function MessagesPage() {
                     }}
                     rows={1}
                     placeholder="Type a message"
+                    onFocus={() => {
+                      setTimeout(() => {
+                        const el = scrollRef.current;
+                        if (el) el.scrollTop = el.scrollHeight;
+                      }, 250);
+                    }}
                     className="max-h-32 flex-1 resize-none rounded-full border border-border bg-transparent px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                   <button
