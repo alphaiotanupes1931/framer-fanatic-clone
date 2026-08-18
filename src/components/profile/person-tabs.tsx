@@ -203,6 +203,60 @@ export function PersonAttendingTab({ userId, isSelf }: { userId: string; isSelf:
   );
 }
 
+/** Groups and community associations this person has joined. */
+export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: boolean }) {
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: mems } = await supabase
+        .from("organization_members")
+        .select("organization_id, role, status")
+        .eq("user_id", userId);
+      const ids = (mems ?? [])
+        .filter((m: any) => !m.status || m.status === "approved")
+        .map((m: any) => m.organization_id);
+      if (ids.length === 0) {
+        if (!cancelled) { setRows([]); setLoading(false); }
+        return;
+      }
+      const { data: orgs } = await supabase
+        .from("organizations")
+        .select("id, name, slug, type, subtype, avatar_url, is_public")
+        .in("id", ids);
+      if (cancelled) return;
+      const roleById = new Map((mems ?? []).map((m: any) => [m.organization_id, m.role]));
+      setRows((orgs ?? []).filter((o: any) => o.is_public !== false).map((o: any) => ({ ...o, memberRole: roleById.get(o.id) })));
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading memberships…</div>;
+  if (rows.length === 0) {
+    return <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">No memberships yet.</div>;
+  }
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {rows.map((o) => (
+        <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 hover:border-[#d4580a] hover:shadow-sm">
+          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
+            {o.avatar_url && <SmartImage src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-semibold">{o.name}</div>
+            <div className="truncate text-xs uppercase tracking-wider text-muted-foreground">
+              {[o.type, o.subtype, o.memberRole && o.memberRole !== "member" ? o.memberRole : null].filter(Boolean).join(" · ")}
+            </div>
+          </div>
+          <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 /** Public organization / artist pages this person owns. */
 export function PersonPagesTab({ userId, isSelf }: { userId: string; isSelf: boolean }) {
   const [orgs, setOrgs] = useState<any[]>([]);

@@ -21,6 +21,7 @@ import {
   PersonSavedTab,
   PersonAttendingTab,
   PersonPagesTab,
+  PersonMembershipsTab,
 } from "@/components/profile/person-tabs";
 import {
   ArtistEventsGrouped,
@@ -28,10 +29,10 @@ import {
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { PostSplitView } from "@/components/shared/post-split-view";
 import { setMyProfileKind } from "@/lib/profile-kind";
-import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid } from "lucide-react";
+import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid, Users2 } from "lucide-react";
 
 // A person has one canonical public profile with the same tabs everywhere.
-type PersonTabKey = "posts" | "about" | "writings" | "saved" | "attending" | "organized" | "pages";
+type PersonTabKey = "posts" | "about" | "writings" | "saved" | "attending" | "organized" | "pages" | "memberships";
 const PERSON_TABS: Array<{ key: PersonTabKey; label: string; Icon: React.ComponentType<{ className?: string }> }> = [
   { key: "posts", label: "Posts", Icon: Grid2x2 },
   { key: "about", label: "About", Icon: Info },
@@ -40,6 +41,7 @@ const PERSON_TABS: Array<{ key: PersonTabKey; label: string; Icon: React.Compone
   { key: "attending", label: "Attending", Icon: CalendarCheck },
   { key: "organized", label: "Organized", Icon: Calendar },
   { key: "pages", label: "Pages", Icon: LayoutGrid },
+  { key: "memberships", label: "Memberships", Icon: Users2 },
 ];
 
 type PublicProfile = {
@@ -561,6 +563,8 @@ function PublicProfilePage() {
             ) : (
               <ArtistEventsGrouped events={events as never} />
             )
+          ) : tab === "memberships" ? (
+            <PersonMembershipsTab userId={profile.id} isSelf={!!isSelf} />
           ) : (
             <PersonPagesTab userId={profile.id} isSelf={!!isSelf} />
           )}
