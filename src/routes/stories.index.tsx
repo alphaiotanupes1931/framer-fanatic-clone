@@ -202,7 +202,7 @@ function AnonStories() {
       {loading ? <div className="text-paper/60 text-sm">Loading…</div> :
         <PreviewGrid
           items={list}
-          unlockedCount={1}
+          unlockedCount={6}
           signedIn={false}
           thing="story"
           render={(s) => (
