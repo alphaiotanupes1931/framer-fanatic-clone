@@ -8,6 +8,7 @@ import { MapPin, Calendar, Download, Send, ArrowLeft, Share as ShareIcon } from 
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
+import { TicketVerifyView } from "@/components/tickets/ticket-verify-view";
 
 export const Route = createFileRoute("/tickets/$ticketId")({
   component: TicketDetailPage,
@@ -28,6 +29,10 @@ type TicketDetail = {
 
 function TicketDetailPage() {
   const { ticketId } = useParams({ from: "/tickets/$ticketId" });
+  const [verifyMode, setVerifyMode] = useState<boolean | null>(null);
+  useEffect(() => {
+    setVerifyMode(new URLSearchParams(window.location.search).get("verify") === "1");
+  }, []);
   const [t, setT] = useState<TicketDetail | null | undefined>(undefined);
   const [shareOpen, setShareOpen] = useState(false);
   const [holder, setHolder] = useState<{ display_name: string | null; email: string | null } | null>(null);
@@ -51,6 +56,13 @@ function TicketDetailPage() {
     void externalShare(url, t?.events?.title || "Event", undefined);
   };
 
+  if (verifyMode === null) return (
+    <div className="min-h-dvh bg-neutral-100 px-4 py-10">
+      <div className="mx-auto h-96 w-full max-w-md animate-pulse rounded-3xl bg-white" />
+    </div>
+  );
+  if (verifyMode) return <TicketVerifyView ticketId={ticketId} />;
+
   if (t === undefined) return (
     <AppLayout>
       <div className="mx-auto w-full max-w-lg animate-pulse px-4 py-6 space-y-4">
@@ -63,7 +75,7 @@ function TicketDetailPage() {
 
   const when = t.events ? new Date(t.events.starts_at) : null;
   // Scanning the QR opens a public verification page anyone at the door can read.
-  const ticketUrl = siteUrl(`/t/${t.id}`);
+  const ticketUrl = siteUrl(`/tickets/${t.id}?verify=1`);
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&ecc=M&format=png&data=${encodeURIComponent(ticketUrl)}`;
 
   return (

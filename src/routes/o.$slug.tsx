@@ -412,10 +412,10 @@ function OrgProfile() {
               image: org.banner_url || org.avatar_url || null,
             }}
           />
-          {isGroup && isOwner ? (
+          {isOwner ? (
             <span
               className="inline-flex select-none items-center gap-1.5 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-semibold text-orange-700"
-              title="You are the creator of this group"
+              title="You created this page"
             >
               <Users className="h-4 w-4" /> Creator
             </span>
