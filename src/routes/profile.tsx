@@ -62,6 +62,7 @@ function displayTabLabel(t: string, isPublicPreview: boolean) {
 }
 
 import { sortPosts } from "@/lib/sort-posts";
+import { PersonMembershipsTab } from "@/components/profile/person-tabs";
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
   "About": Rss,
