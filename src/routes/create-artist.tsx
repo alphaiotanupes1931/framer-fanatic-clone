@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 import { setMyProfileKind } from "@/lib/profile-kind";
+import { useExistingPage, ExistingPageNotice } from "@/components/create/existing-page-notice";
 
 export const Route = createFileRoute("/create-artist")({
   component: CreateArtistPage,
@@ -36,6 +37,7 @@ function CreateArtistPage() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const { page: existingArtistPage, loading: checkingExisting } = useExistingPage("artist", me?.id);
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     display_name: "",
@@ -51,6 +53,7 @@ function CreateArtistPage() {
   const uploadAvatar = async (file: File) => {
     file = await compressAvatar(file);
     if (!me) { toast.error("Please sign in"); return; }
+    if (existingArtistPage) { toast.error("You already have an Artist page."); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
     setUploading(true);
     try {
@@ -114,6 +117,7 @@ function CreateArtistPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
         <HeroBanner title="Create Artist Page" subtitle="Make as many artist pages as you like, one for each project or alias." />
+        {existingArtistPage ? <ExistingPageNotice label="Artist" page={existingArtistPage} /> : (
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Artist name<span className="text-orange"> *</span></Label>
