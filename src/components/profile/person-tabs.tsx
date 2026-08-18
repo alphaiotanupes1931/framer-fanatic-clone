@@ -212,7 +212,7 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
     (async () => {
       const { data: mems } = await supabase
         .from("organization_members")
-        .select("organization_id, role, status")
+        .select("organization_id, status")
         .eq("user_id", userId);
       const ids = (mems ?? [])
         .filter((m: any) => !m.status || m.status === "approved")
@@ -226,8 +226,7 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
         .select("id, name, slug, type, subtype, avatar_url, is_public")
         .in("id", ids);
       if (cancelled) return;
-      const roleById = new Map((mems ?? []).map((m: any) => [m.organization_id, m.role]));
-      setRows((orgs ?? []).filter((o: any) => o.is_public !== false).map((o: any) => ({ ...o, memberRole: roleById.get(o.id) })));
+      setRows((orgs ?? []).filter((o: any) => o.is_public !== false));
       setLoading(false);
     })();
     return () => { cancelled = true; };
