@@ -112,6 +112,7 @@ function OrgProfile() {
   const [tab, setTab] = useState<Tab>("Posts");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [memberStatus, setMemberStatus] = useState<"none" | "pending" | "approved">("none");
   const [memberCount, setMemberCount] = useState(0);
   const [muted, setMuted] = useState(false);
   const [editAbout, setEditAbout] = useState(false);
@@ -134,15 +135,17 @@ function OrgProfile() {
     })();
   }, [slug]);
   useEffect(() => {
-    if (!org || !me) { setJoined(false); return; }
+    if (!org || !me) { setJoined(false); setMemberStatus("none"); return; }
     (async () => {
       const { data } = await supabase
         .from("organization_members")
-        .select("user_id")
+        .select("user_id, status")
         .eq("organization_id", org.id)
         .eq("user_id", me)
         .maybeSingle();
-      setJoined(!!data);
+      const row = data as { status?: string | null } | null;
+      setJoined(!!row);
+      setMemberStatus(!row ? "none" : row.status === "pending" ? "pending" : "approved");
     })();
   }, [org, me]);
   useEffect(() => {
@@ -151,7 +154,8 @@ function OrgProfile() {
       const { count } = await supabase
         .from("organization_members")
         .select("user_id", { count: "exact", head: true })
-        .eq("organization_id", org.id);
+        .eq("organization_id", org.id)
+        .eq("status", "approved");
       setMemberCount(count ?? 0);
     })();
   }, [org, joined]);
