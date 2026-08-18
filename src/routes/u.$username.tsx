@@ -563,6 +563,8 @@ function PublicProfilePage() {
             ) : (
               <ArtistEventsGrouped events={events as never} />
             )
+          ) : tab === "memberships" ? (
+            <PersonMembershipsTab userId={profile.id} isSelf={!!isSelf} />
           ) : (
             <PersonPagesTab userId={profile.id} isSelf={!!isSelf} />
           )}
