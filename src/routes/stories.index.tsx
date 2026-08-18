@@ -487,6 +487,7 @@ function StoriesSignedIn() {
                     read_minutes: s.read_minutes,
                     author_name: s.author?.display_name || undefined,
                     author_avatar: s.author?.avatar_url || undefined,
+                    author_username: s.author?.username || undefined,
                     category: s.format,
                     created_at: s.created_at,
                     featured: (s as any).featured,
