@@ -114,6 +114,7 @@ function OrgProfile() {
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
   const [memberStatus, setMemberStatus] = useState<"none" | "pending" | "approved">("none");
+  const [pendingCount, setPendingCount] = useState(0);
   const [memberCount, setMemberCount] = useState(0);
   const [muted, setMuted] = useState(false);
   const [editAbout, setEditAbout] = useState(false);
@@ -149,6 +150,17 @@ function OrgProfile() {
       setMemberStatus(!row ? "none" : row.status === "pending" ? "pending" : "approved");
     })();
   }, [org, me]);
+  useEffect(() => {
+    if (!org || org.type !== "group") return;
+    (async () => {
+      const { count } = await supabase
+        .from("organization_members")
+        .select("user_id", { count: "exact", head: true })
+        .eq("organization_id", org.id)
+        .eq("status", "pending");
+      setPendingCount(count ?? 0);
+    })();
+  }, [org]);
   useEffect(() => {
     if (!org) return;
     (async () => {
@@ -500,6 +512,11 @@ function OrgProfile() {
               >
                 {Icon && <Icon className="h-4 w-4" />}
                 {t}
+                {t === "Requests" && pendingCount > 0 && (
+                  <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${active ? "bg-white text-[#d4580a]" : "bg-[#d4580a] text-white"}`}>
+                    {pendingCount}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -507,7 +524,7 @@ function OrgProfile() {
 
         <div className="py-8">
           {isGroup && canManage && tab === "Requests" && (
-            <GroupRequests orgId={org.id} onApproved={() => setMemberCount((c) => c + 1)} />
+            <GroupRequests orgId={org.id} onApproved={() => setMemberCount((c) => c + 1)} onCountChange={setPendingCount} />
           )}
           {isGroup && !canManage && memberStatus !== "approved" ? (
             <div className="mx-auto max-w-md rounded-2xl border border-neutral-200 bg-white p-8 text-center">
@@ -613,7 +630,7 @@ function OrgProfile() {
   );
 }
 
-function GroupRequests({ orgId, onApproved }: { orgId: string; onApproved: () => void }) {
+function GroupRequests({ orgId, onApproved, onCountChange }: { orgId: string; onApproved: () => void; onCountChange?: (n: number) => void }) {
   const [rows, setRows] = useState<{ user_id: string; display_name: string | null; username: string | null; avatar_url: string | null }[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -624,6 +641,7 @@ function GroupRequests({ orgId, onApproved }: { orgId: string; onApproved: () =>
       .eq("organization_id", orgId)
       .eq("status", "pending");
     const ids = ((data ?? []) as { user_id: string }[]).map((r) => r.user_id);
+    onCountChange?.(ids.length);
     if (!ids.length) { setRows([]); return; }
     const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
     setRows(((profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null }[])
@@ -639,12 +657,24 @@ function GroupRequests({ orgId, onApproved }: { orgId: string; onApproved: () =>
     const { error } = await q;
     setBusy(null);
     if (error) { toast.error(error.message); return; }
-    setRows((prev) => prev.filter((r) => r.user_id !== userId));
+    setRows((prev) => {
+      const next = prev.filter((r) => r.user_id !== userId);
+      onCountChange?.(next.length);
+      return next;
+    });
     if (approve) onApproved();
     toast.success(approve ? "Member approved" : "Request declined");
   };
 
-  if (!rows.length) return null;
+  if (!rows.length) {
+    return (
+      <div className="mx-auto max-w-md rounded-2xl border border-neutral-200 bg-white p-10 text-center">
+        <UserPlus className="mx-auto h-8 w-8 text-neutral-400" />
+        <h3 className="mt-3 text-base font-bold text-neutral-900">No pending requests</h3>
+        <p className="mt-1 text-sm text-neutral-500">When someone asks to join, approve or decline them here.</p>
+      </div>
+    );
+  }
   return (
     <div className="mb-6 rounded-2xl border border-neutral-200 bg-white p-4">
       <div className="mb-3 text-sm font-bold text-neutral-900">Join requests ({rows.length})</div>
