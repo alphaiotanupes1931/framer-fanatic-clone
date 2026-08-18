@@ -117,7 +117,7 @@ export function OrgCreateDialog({
 
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Name is required");
-    if (!form.subtype) return toast.error("Organization type is required");
+    if (!form.subtype) return toast.error(type === "group" ? "Group type is required" : "Organization type is required");
     if (!form.neighborhood.trim()) return toast.error("Neighborhood is required");
     setBusy(true);
     try {
@@ -272,7 +272,7 @@ export function OrgCreateDialog({
             <input
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
-              placeholder="Organization name *"
+              placeholder={type === "group" ? "Group name *" : "Organization name *"}
               className={inputCls}
             />
             <input
@@ -286,7 +286,7 @@ export function OrgCreateDialog({
               onChange={(e) => set("subtype", e.target.value)}
               className={`${inputCls} appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23737373%22 stroke-width=%222%22><path d=%22M6 9l6 6 6-6%22/></svg>')] bg-[position:right_1rem_center] bg-no-repeat pr-10 ${form.subtype ? "text-neutral-900" : "text-neutral-400"}`}
             >
-              <option value="" disabled>Organization type *</option>
+              <option value="" disabled>{type === "group" ? "Group type *" : "Organization type *"}</option>
               {subs.map((s) => <option key={s} value={s} className="text-neutral-900">{s}</option>)}
             </select>
             <textarea
