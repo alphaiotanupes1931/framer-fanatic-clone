@@ -41,12 +41,31 @@ export async function externalShare(url: string, title?: string, text?: string):
       if ((e as { name?: string })?.name === "AbortError") return;
     }
   }
+  const { toast } = await import("sonner");
   try {
     await navigator.clipboard.writeText(url);
-    const { toast } = await import("sonner");
     toast.success("Link copied");
+    return;
   } catch {
-    const { toast } = await import("sonner");
-    toast.error("Could not share");
+    // Clipboard can be blocked (embedded frames, repeat calls without a fresh
+    // user gesture). Fall back to a legacy copy, then to showing the link.
   }
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = url;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    if (ok) {
+      toast.success("Link copied");
+      return;
+    }
+  } catch {
+    /* ignore */
+  }
+  toast.message("Copy this link", { description: url, duration: 10000 });
 }
