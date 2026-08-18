@@ -514,7 +514,7 @@ function OrgProfile() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
+        <div className="scrollbar-hide mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 px-1 pb-1">
           {VISIBLE_TABS.map((t) => {
             const active = tab === t;
             const Icon = artistIcons[t] ?? TAB_ICONS[t];
