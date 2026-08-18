@@ -248,13 +248,18 @@ function OrgProfile() {
           .eq("organization_id", org.id).eq("user_id", me);
         if (error) throw error;
         setJoined(false);
-        toast.success(`Left ${org.name}`);
+        setMemberStatus("none");
+        toast.success(memberStatus === "pending" ? "Request cancelled" : `Left ${org.name}`);
       } else {
+        const pending = isGroup;
         const { error } = await supabase.from("organization_members")
-          .insert({ organization_id: org.id, user_id: me });
+          .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
         if (error) throw error;
         setJoined(true);
-        toast.success(`${isAssoc ? "Joined" : "Following"} ${org.name}`);
+        setMemberStatus(pending ? "pending" : "approved");
+        toast.success(pending
+          ? "Request sent. The group creator will review it."
+          : `${isAssoc ? "Joined" : "Following"} ${org.name}`);
       }
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed");
