@@ -362,6 +362,7 @@ function OrgProfile() {
               <Pencil className="h-4 w-4" /> Edit Profile
             </button>
           )}
+          {(!isGroup || canManage) && (
           <MessageAllButton
             label="Message All"
             audienceLabel={`${org.name} members`}
