@@ -8,7 +8,7 @@ export function TextDocTab({
 }: {
   orgId: string;
   canManage: boolean;
-  field: "bylaws" | "rules";
+  field: "bylaws" | "rules" | "mission";
   title: string;
   emptyTitle: string;
   emptyHint: string;
