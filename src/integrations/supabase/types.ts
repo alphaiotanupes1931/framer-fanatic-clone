@@ -360,6 +360,64 @@ export type Database = {
         }
         Relationships: []
       }
+      event_comments: {
+        Row: {
+          content: string
+          created_at: string
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_likes: {
+        Row: {
+          created_at: string
+          event_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_likes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_promoters: {
         Row: {
           commission_rate: number
@@ -3230,6 +3288,26 @@ export type Database = {
         }[]
       }
       touch_last_seen: { Args: never; Returns: undefined }
+      verify_ticket: {
+        Args: { _ticket_id: string }
+        Returns: {
+          address: string
+          checked_in_at: string
+          created_at: string
+          ends_at: string
+          event_id: string
+          event_title: string
+          holder_email: string
+          holder_name: string
+          image_url: string
+          location: string
+          paid_cents: number
+          starts_at: string
+          status: string
+          ticket_id: string
+          venue_name: string
+        }[]
+      }
     }
     Enums: {
       app_role: "attendee" | "artist" | "admin" | "resident" | "visitor"

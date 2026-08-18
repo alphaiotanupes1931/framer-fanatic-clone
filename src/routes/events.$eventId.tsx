@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { EventSocial } from "@/components/event-social";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -294,6 +295,8 @@ function EventDetail() {
             <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />{saved ? "Saved" : "Save"}
           </Button>
         </div>
+
+        <EventSocial eventId={evt.id} hostId={evt.user_id} />
 
         {canDelete && (
           <div className="flex gap-3">

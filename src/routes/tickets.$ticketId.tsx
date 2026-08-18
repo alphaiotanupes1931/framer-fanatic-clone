@@ -62,8 +62,8 @@ function TicketDetailPage() {
   if (!t) return <AppLayout><div className="py-24 text-center text-neutral-500">Ticket not found.</div></AppLayout>;
 
   const when = t.events ? new Date(t.events.starts_at) : null;
-  // Scanning the QR opens this exact ticket page (real, verifiable link).
-  const ticketUrl = siteUrl(`/tickets/${t.id}`);
+  // Scanning the QR opens a public verification page anyone at the door can read.
+  const ticketUrl = siteUrl(`/t/${t.id}`);
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&ecc=M&format=png&data=${encodeURIComponent(ticketUrl)}`;
 
   return (
@@ -144,7 +144,7 @@ function TicketDetailPage() {
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button onClick={() => setShareOpen(true)} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Send className="h-4 w-4 -rotate-45" /> Invite a friend</button>
           <button onClick={shareExternal} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><ShareIcon className="h-4 w-4" /> Share externally</button>
-          <a href={qr} download={`ticket-${t.id.slice(0, 8)}.png`} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Save QR</a>
+          <a href={ticketUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Printable ticket</a>
           {t.events?.id ? (
             <Link to="/events/$eventId" params={{ eventId: t.events.id }} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Calendar className="h-4 w-4" /> Event</Link>
           ) : <span />}
