@@ -60,6 +60,7 @@ type Org = {
   hours: Record<string, { open: string; close: string } | null> | null;
   bylaws?: string | null;
   rules?: string | null;
+  mission?: string | null;
 };
 
 type OrgPost = {
@@ -73,7 +74,7 @@ type OrgPost = {
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
-  "Posts", "Events", "Members", "Threads",
+  "Posts", "Mission", "Events", "Members", "Threads",
   "Polls", "Jobs", "Leaderboard", "Rules", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
@@ -98,7 +99,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Resources: Folder, Jobs: Briefcase, Leaderboard: Trophy, Rules: FileText,
   Invite: UserPlus, Comments: MessageSquare, About: FileText, Requests: UserPlus,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
-  Minutes: FileText, Board: Users, "By Laws": FileText,
+  Minutes: FileText, Board: Users, "By Laws": FileText, Mission: Heart,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
   Artists: Users, Support: Heart, Exhibition: ImageIcon, Exhibitions: ImageIcon, Dues: DollarSign,
 };
@@ -573,6 +574,17 @@ function OrgProfile() {
           {tab === "Press" && <PressTab org={org} canManage={canManage} />}
           {tab === "Updates" && <OrgPostList orgId={org.id} kind="update" canManage={canManage} />}
           {tab === "Posts" && <OrgPostList orgId={org.id} kind={null} canManage={canManage} />}
+          {tab === "Mission" && (
+            <TextDocTab
+              orgId={org.id}
+              canManage={canManage}
+              field="mission"
+              title="Mission"
+              emptyTitle="No mission statement yet"
+              emptyHint={canManage ? "Add your group's mission so members know what you stand for." : "The group has not shared a mission statement yet."}
+              initialValue={org.mission ?? null}
+            />
+          )}
           {tab === "Artists" && <ArtistsTab orgId={org.id} canManage={canManage} />}
           {tab === "Support" && <SupportTab org={org} canManage={canManage} />}
           {tab === "Menu" && (
