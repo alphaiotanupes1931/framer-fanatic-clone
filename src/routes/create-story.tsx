@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { LinkFields, isValidLink, normalizeLink } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/create-story")({
   component: CreateStoryPage,
@@ -58,6 +59,7 @@ function CreateStoryPage() {
     cover_url: "",
     tags: [] as string[],
   });
+  const [link, setLink] = useState({ url: "", title: "", description: "" });
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const upload = useCallback(async (file: File) => {
@@ -140,6 +142,9 @@ function CreateStoryPage() {
         visibility: form.visibility,
         tags: form.tags,
         cover_url: form.cover_url || null,
+        link_url: isValidLink(link.url) ? normalizeLink(link.url) : null,
+        link_title: isValidLink(link.url) ? (link.title.trim() || null) : null,
+        link_description: isValidLink(link.url) ? (link.description.trim() || null) : null,
         read_minutes,
         status,
       };
