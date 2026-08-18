@@ -155,19 +155,19 @@ export function GroupsPage() {
                 params={{ slug: o.slug }}
                 className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
               >
-                <div className="relative h-32 w-full overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-100">
+                <div className="relative h-40 w-full overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-100">
                   {o.banner_url && (
                     <Img src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                   )}
-                  <div className="absolute -bottom-6 left-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 ring-4 ring-white">
+                  <div className="absolute -bottom-8 left-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 ring-[5px] ring-white shadow-md">
                     {o.avatar_url ? (
                       <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />
                     ) : (
-                      <span className="text-lg font-bold text-neutral-400">{o.name.charAt(0).toUpperCase()}</span>
+                      <span className="text-xl font-bold text-neutral-400">{o.name.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
                 </div>
-                <div className="px-4 pb-4 pt-8">
+                <div className="px-4 pb-4 pt-12">
                   <div className="flex min-w-0 items-center gap-1.5">
                     <div className="truncate text-[17px] font-bold text-neutral-900">{o.name}</div>
                     <ShieldCheck className="h-4 w-4 shrink-0 text-orange-500" />

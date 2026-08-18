@@ -193,11 +193,11 @@ export function OrgListPage({
                   className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                   <div className="relative h-40 bg-neutral-100"
                     style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
-                    <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+                    <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
                       {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                     </div>
                   </div>
-                  <div className="px-4 pb-4 pt-8">
+                  <div className="px-4 pb-4 pt-12">
                     <div className="truncate text-base font-bold text-neutral-900">{o.name}</div>
                     {o.subtype && <div className="mt-1 text-sm text-neutral-600">{prettyLabel(o.subtype)}</div>}
                     {o.bio && <p className="mt-2 line-clamp-3 text-sm text-neutral-600">{o.bio}</p>}
@@ -244,11 +244,11 @@ export function OrgListPage({
                 )}
                 <div className="relative h-40 bg-neutral-100"
                   style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
-                  <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+                  <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
                     {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
                 </div>
-                <div className="px-4 pb-4 pt-8">
+                <div className="px-4 pb-4 pt-12">
                   <div className="flex items-center gap-1.5">
                     <div className="truncate text-base font-bold text-neutral-900">{o.name}</div>
                     <span className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-neutral-300" aria-hidden />

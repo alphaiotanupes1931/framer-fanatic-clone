@@ -404,16 +404,27 @@ function OrgProfile() {
               image: org.banner_url || org.avatar_url || null,
             }}
           />
-          <button
-            onClick={toggleJoin}
-            disabled={joining}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
-          >
-            <Users className="h-4 w-4" />{" "}
-            {isGroup
-              ? memberStatus === "approved" ? "Joined" : memberStatus === "pending" ? "Request pending" : "Request to join"
-              : isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
-          </button>
+          {isGroup && isOwner ? (
+            <button
+              type="button"
+              onClick={() => toast.info("You are the creator of this group, so you cannot request to join.")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-semibold text-orange-700 hover:bg-orange-200"
+              title="You are the creator of this group"
+            >
+              <Users className="h-4 w-4" /> Creator
+            </button>
+          ) : (
+            <button
+              onClick={toggleJoin}
+              disabled={joining}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
+            >
+              <Users className="h-4 w-4" />{" "}
+              {isGroup
+                ? memberStatus === "approved" ? "Joined" : memberStatus === "pending" ? "Request pending" : "Request to join"
+                : isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
+            </button>
+          )}
         </div>
       </div>
 
