@@ -35,6 +35,8 @@ type AdminUser = {
   created_at: string;
   last_seen_at: string | null;
   is_admin: boolean;
+  is_founder: boolean;
+  email_confirmed_at: string | null;
 };
 
 function isLive(ts: string | null) {
@@ -51,6 +53,7 @@ function AdminPage() {
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminUser | null>(null);
+  const [onlyVerified, setOnlyVerified] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -79,16 +82,28 @@ function AdminPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return users;
-    return users.filter((u) =>
+    const base = onlyVerified ? users.filter((u) => !!u.email_confirmed_at) : users;
+    if (!s) return base;
+    return base.filter((u) =>
       [u.email, u.display_name, u.username, u.neighborhood]
         .filter(Boolean)
         .some((v) => (v as string).toLowerCase().includes(s)),
     );
-  }, [users, q]);
+  }, [users, q, onlyVerified]);
 
   const liveCount = users.filter((u) => isLive(u.last_seen_at)).length;
   const bannedCount = users.filter((u) => u.banned).length;
+  const verifiedCount = users.filter((u) => !!u.email_confirmed_at).length;
+
+  const toggleFounder = async (u: AdminUser) => {
+    setBusy(u.id);
+    try {
+      await adminRpc({ data: { name: "admin_set_founder", args: { _user_id: u.id, _is_founder: !u.is_founder }, adminToken: getAdminToken() } });
+    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
+    setBusy(null);
+    toast.success(u.is_founder ? "Founding member badge removed" : "Founding member badge granted");
+    setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, is_founder: !u.is_founder } : p)));
+  };
 
   const toggleBan = async (u: AdminUser) => {
     setBusy(u.id);
@@ -129,8 +144,9 @@ function AdminPage() {
       title="Admin"
       subtitle="Manage users, monitor live activity, and moderate accounts."
     >
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <Stat label="Total users" value={users.length} />
+        <Stat label="Verified" value={verifiedCount} accent="bg-sky-500" />
         <Stat label="Live now" value={liveCount} accent="bg-emerald-500" />
         <Stat label="Banned" value={bannedCount} accent="bg-rose-500" />
       </div>
