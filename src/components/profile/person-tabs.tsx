@@ -212,7 +212,7 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
     (async () => {
       const { data: mems } = await supabase
         .from("organization_members")
-        .select("organization_id, role, status")
+        .select("organization_id, status")
         .eq("user_id", userId);
       const ids = (mems ?? [])
         .filter((m: any) => !m.status || m.status === "approved")
@@ -226,8 +226,7 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
         .select("id, name, slug, type, subtype, avatar_url, is_public")
         .in("id", ids);
       if (cancelled) return;
-      const roleById = new Map((mems ?? []).map((m: any) => [m.organization_id, m.role]));
-      setRows((orgs ?? []).filter((o: any) => o.is_public !== false).map((o: any) => ({ ...o, memberRole: roleById.get(o.id) })));
+      setRows((orgs ?? []).filter((o: any) => o.is_public !== false));
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -247,7 +246,7 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
           <div className="min-w-0 flex-1">
             <div className="truncate font-semibold">{o.name}</div>
             <div className="truncate text-xs uppercase tracking-wider text-muted-foreground">
-              {[o.type, o.subtype, o.memberRole && o.memberRole !== "member" ? o.memberRole : null].filter(Boolean).join(" · ")}
+              {[o.type, o.subtype].filter(Boolean).join(" · ")}
             </div>
           </div>
           <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
