@@ -221,7 +221,7 @@ function EventsPage() {
                 <div className="text-xs uppercase tracking-wider text-paper/60 mb-3">More events</div>
                 <PreviewGrid
                   items={events.slice(1)}
-                  unlockedCount={0}
+                  unlockedCount={5}
                   signedIn={false}
                   thing="event"
               render={(e) => <EventCard e={e as EventRow} variant="dark" />}
