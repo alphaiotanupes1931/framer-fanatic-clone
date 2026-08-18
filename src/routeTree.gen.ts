@@ -62,6 +62,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VideosIdRouteImport } from './routes/videos.$id'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as TicketsTicketIdRouteImport } from './routes/tickets.$ticketId'
+import { Route as TTicketIdRouteImport } from './routes/t.$ticketId'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
@@ -351,6 +352,11 @@ const TicketsTicketIdRoute = TicketsTicketIdRouteImport.update({
   path: '/tickets/$ticketId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TTicketIdRoute = TTicketIdRouteImport.update({
+  id: '/t/$ticketId',
+  path: '/t/$ticketId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoriesStoryIdRoute = StoriesStoryIdRouteImport.update({
   id: '/stories/$storyId',
   path: '/stories/$storyId',
@@ -526,6 +532,7 @@ export interface FileRoutesByFullPath {
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
+  '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
   '/u/$username': typeof UUsernameRoute
   '/videos/$id': typeof VideosIdRoute
@@ -603,6 +610,7 @@ export interface FileRoutesByTo {
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
+  '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
   '/u/$username': typeof UUsernameRoute
   '/videos/$id': typeof VideosIdRoute
@@ -681,6 +689,7 @@ export interface FileRoutesById {
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
+  '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
   '/u/$username': typeof UUsernameRoute
   '/videos/$id': typeof VideosIdRoute
@@ -760,6 +769,7 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/posts/$postId'
     | '/stories/$storyId'
+    | '/t/$ticketId'
     | '/tickets/$ticketId'
     | '/u/$username'
     | '/videos/$id'
@@ -837,6 +847,7 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/posts/$postId'
     | '/stories/$storyId'
+    | '/t/$ticketId'
     | '/tickets/$ticketId'
     | '/u/$username'
     | '/videos/$id'
@@ -914,6 +925,7 @@ export interface FileRouteTypes {
     | '/o/$slug'
     | '/posts/$postId'
     | '/stories/$storyId'
+    | '/t/$ticketId'
     | '/tickets/$ticketId'
     | '/u/$username'
     | '/videos/$id'
@@ -991,6 +1003,7 @@ export interface RootRouteChildren {
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
+  TTicketIdRoute: typeof TTicketIdRoute
   TicketsTicketIdRoute: typeof TicketsTicketIdRoute
   UUsernameRoute: typeof UUsernameRoute
   VideosIdRoute: typeof VideosIdRoute
@@ -1381,6 +1394,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TicketsTicketIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/t/$ticketId': {
+      id: '/t/$ticketId'
+      path: '/t/$ticketId'
+      fullPath: '/t/$ticketId'
+      preLoaderRoute: typeof TTicketIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stories/$storyId': {
       id: '/stories/$storyId'
       path: '/stories/$storyId'
@@ -1610,6 +1630,7 @@ const rootRouteChildren: RootRouteChildren = {
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,
+  TTicketIdRoute: TTicketIdRoute,
   TicketsTicketIdRoute: TicketsTicketIdRoute,
   UUsernameRoute: UUsernameRoute,
   VideosIdRoute: VideosIdRoute,
