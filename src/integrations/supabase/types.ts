@@ -2968,10 +2968,12 @@ export type Database = {
           created_at: string
           display_name: string
           email: string
+          email_confirmed_at: string
           hidden_from_showcase: boolean
           id: string
           in_baltimore: boolean
           is_admin: boolean
+          is_founder: boolean
           last_seen_at: string
           neighborhood: string
           role: string
