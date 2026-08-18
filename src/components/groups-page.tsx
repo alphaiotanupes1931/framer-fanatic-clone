@@ -9,6 +9,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { GROUP_SUBTYPES } from "@/lib/categories";
+import { Img } from "@/components/shared/smart-img";
 
 function prettyLabel(v: string) {
   return v
@@ -154,22 +155,17 @@ export function GroupsPage() {
                 params={{ slug: o.slug }}
                 className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
               >
-                <div
-                  className="relative h-32 w-full bg-gradient-to-br from-neutral-200 to-neutral-100"
-                  style={
-                    o.banner_url
-                      ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                      : undefined
-                  }
-                >
-                  <div
-                    className="absolute -bottom-6 left-4 h-16 w-16 overflow-hidden rounded-xl bg-neutral-100 ring-4 ring-white"
-                    style={
-                      o.avatar_url
-                        ? { backgroundImage: `url(${o.avatar_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                        : undefined
-                    }
-                  />
+                <div className="relative h-32 w-full overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-100">
+                  {o.banner_url && (
+                    <Img src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  )}
+                  <div className="absolute -bottom-6 left-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 ring-4 ring-white">
+                    {o.avatar_url ? (
+                      <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-lg font-bold text-neutral-400">{o.name.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
                 </div>
                 <div className="px-4 pb-4 pt-8">
                   <div className="flex min-w-0 items-center gap-1.5">

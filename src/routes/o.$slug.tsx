@@ -362,6 +362,7 @@ function OrgProfile() {
               <Pencil className="h-4 w-4" /> Edit Profile
             </button>
           )}
+          {(!isGroup || canManage) && (
           <MessageAllButton
             label="Message All"
             audienceLabel={`${org.name} members`}
@@ -388,6 +389,7 @@ function OrgProfile() {
               }));
             }}
           />
+          )}
           <ShareButtons
             path={`/o/${org.slug}`}
             title={org.name}
@@ -484,7 +486,7 @@ function OrgProfile() {
               <Trash2 className="h-4 w-4" /> Delete Page {canManage && <span className="text-[10px] opacity-60">(Admin)</span>}
             </button>
           )}
-          {me && (
+          {me && (!isGroup || canManage) && (
             <button
               onClick={toggleMute}
               className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
