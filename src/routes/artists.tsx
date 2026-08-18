@@ -284,7 +284,7 @@ function FindCreatorPage() {
       ) : (
         <PreviewGrid
           items={results}
-          unlockedCount={1}
+          unlockedCount={6}
           signedIn={signedIn}
           thing="creator"
           render={(c) => <Card c={c as Creator} />}
