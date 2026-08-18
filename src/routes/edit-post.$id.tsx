@@ -10,6 +10,7 @@ import { ArrowLeft, ImagePlus, Loader2, Save, X, Users, Globe, Lock, Star } from
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { LinkFields, isValidLink, normalizeLink } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/edit-post/$id")({
   component: EditPostPage,
@@ -56,6 +57,7 @@ function EditPostPage() {
   const [postType, setPostType] = useState<string>("text");
   const [content, setContent] = useState("");
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [link, setLink] = useState({ url: "", title: "", description: "" });
   const [neighborhood, setNeighborhood] = useState("");
   const [category, setCategory] = useState("General");
   const [tag, setTag] = useState("");
@@ -74,6 +76,11 @@ function EditPostPage() {
         ? data.media_urls
         : [data.image_url, data.video_url].filter(Boolean) as string[];
       setMediaUrls(urls);
+      setLink({
+        url: data.link_url || "",
+        title: data.link_title || "",
+        description: data.link_description || "",
+      });
       setNeighborhood(data.neighborhood || "");
       setCategory(data.category || "General");
       setTag(data.tag || "");
@@ -121,6 +128,9 @@ function EditPostPage() {
         image_url: postType === "photo" ? firstImage : null,
         video_url: postType === "video" ? firstVideo : null,
         media_urls: mediaUrls,
+        link_url: isValidLink(link.url) ? normalizeLink(link.url) : null,
+        link_title: isValidLink(link.url) ? (link.title.trim() || null) : null,
+        link_description: isValidLink(link.url) ? (link.description.trim() || null) : null,
         category,
         tag: tag || null,
         visibility,
@@ -242,6 +252,8 @@ function EditPostPage() {
               </Button>
             </div>
           )}
+
+          <LinkFields value={link} onChange={setLink} />
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">

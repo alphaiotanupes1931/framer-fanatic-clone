@@ -11,6 +11,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartImage } from "@/components/smart-image";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { LinkPreviewCard } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/stories/$storyId")({
   component: StoryDetail,
@@ -21,6 +22,7 @@ type Story = {
   id: string; user_id: string; title: string; excerpt: string | null; content: string | null;
   cover_url: string | null; format: string; read_minutes: number | null;
   likes_count: number; comments_count: number; created_at: string;
+  link_url?: string | null; link_title?: string | null; link_description?: string | null;
 };
 
 type Author = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
@@ -231,6 +233,15 @@ function StoryDetail() {
                 {story.content}
               </div>
             )
+          )}
+
+          {story.link_url && (
+            <LinkPreviewCard
+              url={story.link_url}
+              title={story.link_title}
+              description={story.link_description}
+              className="mt-6"
+            />
           )}
 
           <div className="mt-8 flex items-center justify-between border-t border-border pt-4">

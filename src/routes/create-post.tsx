@@ -11,6 +11,7 @@ import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Glo
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { LinkFields, isValidLink, normalizeLink } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/create-post")({
   component: CreatePostPage,
@@ -94,11 +95,8 @@ function CreatePostPage() {
       });
   }, []);
 
-  const normalizedLink = linkUrl.trim() ? (/^https?:\/\//i.test(linkUrl.trim()) ? linkUrl.trim() : `https://${linkUrl.trim()}`) : "";
-  const linkValid = (() => {
-    if (!normalizedLink) return false;
-    try { new URL(normalizedLink); return true; } catch { return false; }
-  })();
+  const normalizedLink = normalizeLink(linkUrl);
+  const linkValid = isValidLink(linkUrl);
   const canSubmit =
     contentValid &&
     (postType === "text" ? content.trim().length > 0
@@ -152,9 +150,9 @@ function CreatePostPage() {
         content: content.trim(),
         image_url: postType === "photo" ? (mediaUrls[0] || imagePath || null) : null,
         video_url: postType === "video" ? (mediaUrls.find((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) || videoPath || null) : null,
-        link_url: postType === "link" ? normalizedLink : null,
-        link_title: postType === "link" ? (linkTitle.trim() || null) : null,
-        link_description: postType === "link" ? (linkDescription.trim() || null) : null,
+        link_url: linkValid ? normalizedLink : null,
+        link_title: linkValid ? (linkTitle.trim() || null) : null,
+        link_description: linkValid ? (linkDescription.trim() || null) : null,
         media_urls: mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
         music_url: null,
         post_type: postType,
@@ -279,32 +277,11 @@ function CreatePostPage() {
             </div>
           )}
 
-          {postType === "link" && (
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Link URL</Label>
-                <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://example.com/article" inputMode="url" />
-                {linkUrl.trim() && !linkValid && <p className="text-xs text-red-600">Enter a valid web address.</p>}
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Link title (optional)</Label>
-                <Input value={linkTitle} onChange={(e) => setLinkTitle(e.target.value)} placeholder="What is this link about?" maxLength={140} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Short description (optional)</Label>
-                <Input value={linkDescription} onChange={(e) => setLinkDescription(e.target.value)} placeholder="Add a little context" maxLength={200} />
-              </div>
-              {linkValid && (
-                <a href={normalizedLink} target="_blank" rel="noreferrer" className="block rounded-xl border border-neutral-200 bg-neutral-50 p-4 hover:border-[#d4580a]">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                    <Link2 className="h-3.5 w-3.5" /> {new URL(normalizedLink).hostname.replace(/^www\./, "")}
-                  </div>
-                  <div className="mt-1 font-semibold text-neutral-900">{linkTitle.trim() || normalizedLink}</div>
-                  {linkDescription.trim() && <div className="mt-0.5 text-sm text-neutral-600">{linkDescription.trim()}</div>}
-                </a>
-              )}
-            </div>
-          )}
+          <LinkFields
+            value={{ url: linkUrl, title: linkTitle, description: linkDescription }}
+            onChange={(v) => { setLinkUrl(v.url); setLinkTitle(v.title); setLinkDescription(v.description); }}
+            heading={postType === "link" ? "Link" : "Add a link (optional)"}
+          />
 
           {postType === "photo" && (
             <div className="space-y-1.5">

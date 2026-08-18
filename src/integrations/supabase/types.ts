@@ -2458,6 +2458,9 @@ export type Database = {
           format: string
           id: string
           likes_count: number
+          link_description: string | null
+          link_title: string | null
+          link_url: string | null
           read_minutes: number | null
           status: string
           tags: string[]
@@ -2477,6 +2480,9 @@ export type Database = {
           format?: string
           id?: string
           likes_count?: number
+          link_description?: string | null
+          link_title?: string | null
+          link_url?: string | null
           read_minutes?: number | null
           status?: string
           tags?: string[]
@@ -2496,6 +2502,9 @@ export type Database = {
           format?: string
           id?: string
           likes_count?: number
+          link_description?: string | null
+          link_title?: string | null
+          link_url?: string | null
           read_minutes?: number | null
           status?: string
           tags?: string[]
