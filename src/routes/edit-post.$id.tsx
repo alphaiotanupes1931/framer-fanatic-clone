@@ -253,6 +253,8 @@ function EditPostPage() {
             </div>
           )}
 
+          <LinkFields value={link} onChange={setLink} />
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">Category</Label>
