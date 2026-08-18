@@ -112,6 +112,7 @@ function OrgProfile() {
   const [tab, setTab] = useState<Tab>("Posts");
   const [joined, setJoined] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [memberStatus, setMemberStatus] = useState<"none" | "pending" | "approved">("none");
   const [memberCount, setMemberCount] = useState(0);
   const [muted, setMuted] = useState(false);
   const [editAbout, setEditAbout] = useState(false);
@@ -134,15 +135,17 @@ function OrgProfile() {
     })();
   }, [slug]);
   useEffect(() => {
-    if (!org || !me) { setJoined(false); return; }
+    if (!org || !me) { setJoined(false); setMemberStatus("none"); return; }
     (async () => {
       const { data } = await supabase
         .from("organization_members")
-        .select("user_id")
+        .select("user_id, status")
         .eq("organization_id", org.id)
         .eq("user_id", me)
         .maybeSingle();
-      setJoined(!!data);
+      const row = data as { status?: string | null } | null;
+      setJoined(!!row);
+      setMemberStatus(!row ? "none" : row.status === "pending" ? "pending" : "approved");
     })();
   }, [org, me]);
   useEffect(() => {
@@ -151,7 +154,8 @@ function OrgProfile() {
       const { count } = await supabase
         .from("organization_members")
         .select("user_id", { count: "exact", head: true })
-        .eq("organization_id", org.id);
+        .eq("organization_id", org.id)
+        .eq("status", "approved");
       setMemberCount(count ?? 0);
     })();
   }, [org, joined]);
@@ -244,13 +248,18 @@ function OrgProfile() {
           .eq("organization_id", org.id).eq("user_id", me);
         if (error) throw error;
         setJoined(false);
-        toast.success(`Left ${org.name}`);
+        setMemberStatus("none");
+        toast.success(memberStatus === "pending" ? "Request cancelled" : `Left ${org.name}`);
       } else {
+        const pending = isGroup;
         const { error } = await supabase.from("organization_members")
-          .insert({ organization_id: org.id, user_id: me });
+          .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
         if (error) throw error;
         setJoined(true);
-        toast.success(`${isAssoc ? "Joined" : "Following"} ${org.name}`);
+        setMemberStatus(pending ? "pending" : "approved");
+        toast.success(pending
+          ? "Request sent. The group creator will review it."
+          : `${isAssoc ? "Joined" : "Following"} ${org.name}`);
       }
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -343,7 +352,8 @@ function OrgProfile() {
               const { data: mem } = await supabase
                 .from("organization_members")
                 .select("user_id")
-                .eq("organization_id", org.id);
+                .eq("organization_id", org.id)
+                .eq("status", "approved");
               const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
               if (org.owner_id) ids.push(org.owner_id);
               const unique = Array.from(new Set(ids));
@@ -379,7 +389,10 @@ function OrgProfile() {
             disabled={joining}
             className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
           >
-            <Users className="h-4 w-4" /> {isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
+            <Users className="h-4 w-4" />{" "}
+            {isGroup
+              ? memberStatus === "approved" ? "Joined" : memberStatus === "pending" ? "Request pending" : "Request to join"
+              : isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
           </button>
         </div>
       </div>
@@ -487,6 +500,26 @@ function OrgProfile() {
         </div>
 
         <div className="py-8">
+          {isGroup && canManage && <GroupRequests orgId={org.id} onApproved={() => setMemberCount((c) => c + 1)} />}
+          {isGroup && !canManage && memberStatus !== "approved" ? (
+            <div className="mx-auto max-w-md rounded-2xl border border-neutral-200 bg-white p-8 text-center">
+              <Users className="mx-auto h-8 w-8 text-neutral-400" />
+              <h2 className="mt-3 text-lg font-bold text-neutral-900">This group is members only</h2>
+              <p className="mt-1 text-sm text-neutral-500">
+                {memberStatus === "pending"
+                  ? "Your request is waiting for the group creator to approve it."
+                  : "Request to join and the group creator will review your request."}
+              </p>
+              <button
+                onClick={toggleJoin}
+                disabled={joining}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-60"
+              >
+                {memberStatus === "pending" ? "Cancel request" : "Request to join"}
+              </button>
+            </div>
+          ) : (
+          <>
           {tab === "About" && (isArtsOrg
             ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
             : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />
@@ -564,9 +597,64 @@ function OrgProfile() {
           {tab === "Comments" && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Leave a comment…" />}
           {tab === "Dues" && <DuesTab orgId={org.id} ownerId={org.owner_id} canManage={canManage} me={me} />}
           {isArtist && <ArtistTabContent tab={tab} org={org} canManage={canManage} me={me} />}
+          </>
+          )}
         </div>
       </div>
     </AppLayout>
+  );
+}
+
+function GroupRequests({ orgId, onApproved }: { orgId: string; onApproved: () => void }) {
+  const [rows, setRows] = useState<{ user_id: string; display_name: string | null; username: string | null; avatar_url: string | null }[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("organization_members")
+      .select("user_id")
+      .eq("organization_id", orgId)
+      .eq("status", "pending");
+    const ids = ((data ?? []) as { user_id: string }[]).map((r) => r.user_id);
+    if (!ids.length) { setRows([]); return; }
+    const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+    setRows(((profs ?? []) as { id: string; display_name: string | null; username: string | null; avatar_url: string | null }[])
+      .map((p) => ({ user_id: p.id, display_name: p.display_name, username: p.username, avatar_url: p.avatar_url })));
+  };
+  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId]);
+
+  const act = async (userId: string, approve: boolean) => {
+    setBusy(userId);
+    const q = approve
+      ? supabase.from("organization_members").update({ status: "approved" }).eq("organization_id", orgId).eq("user_id", userId)
+      : supabase.from("organization_members").delete().eq("organization_id", orgId).eq("user_id", userId);
+    const { error } = await q;
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    setRows((prev) => prev.filter((r) => r.user_id !== userId));
+    if (approve) onApproved();
+    toast.success(approve ? "Member approved" : "Request declined");
+  };
+
+  if (!rows.length) return null;
+  return (
+    <div className="mb-6 rounded-2xl border border-neutral-200 bg-white p-4">
+      <div className="mb-3 text-sm font-bold text-neutral-900">Join requests ({rows.length})</div>
+      <ul className="divide-y divide-neutral-100">
+        {rows.map((r) => (
+          <li key={r.user_id} className="flex items-center justify-between gap-3 py-2.5">
+            <div className="min-w-0 text-sm">
+              <div className="truncate font-medium text-neutral-900">{r.display_name || r.username || "Someone"}</div>
+              {r.username && <div className="truncate text-xs text-neutral-500">@{r.username}</div>}
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <button disabled={busy === r.user_id} onClick={() => act(r.user_id, true)} className="rounded-full bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-neutral-800 disabled:opacity-60">Approve</button>
+              <button disabled={busy === r.user_id} onClick={() => act(r.user_id, false)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60">Decline</button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
