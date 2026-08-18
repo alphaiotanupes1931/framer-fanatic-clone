@@ -24,6 +24,12 @@ type EventRow = {
   neighborhood: string | null; video_url: string | null;
 };
 
+type TicketTier = {
+  id: string; name: string; description: string | null; price_cents: number;
+  quantity: number | null; max_per_buyer: number | null;
+  sale_starts_at: string | null; sale_ends_at: string | null; perks: string[] | null;
+};
+
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
 
 export const Route = createFileRoute("/events/$eventId")({
@@ -47,6 +53,8 @@ function EventDetail() {
   const [saved, setSaved] = useState(false);
   const [savingBk, setSavingBk] = useState(false);
   const [qty, setQty] = useState(1);
+  const [tiers, setTiers] = useState<TicketTier[]>([]);
+  const [tierId, setTierId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -67,6 +75,15 @@ function EventDetail() {
           setSaved(!!sv);
         }
       }
+      const { data: tt } = await supabase
+        .from("ticket_types")
+        .select("id, name, description, price_cents, quantity, max_per_buyer, sale_starts_at, sale_ends_at, perks")
+        .eq("event_id", eventId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      const list = (tt as TicketTier[] | null) ?? [];
+      setTiers(list);
+      if (list.length) setTierId(list[0].id);
       setLoading(false);
     })();
   }, [eventId]);
@@ -76,7 +93,12 @@ function EventDetail() {
     setBuying(true);
     try {
       const { url } = await checkoutFn({
-        data: { eventId: evt.id, returnOrigin: window.location.origin, quantity: qty },
+        data: {
+          eventId: evt.id,
+          returnOrigin: window.location.origin,
+          quantity: qty,
+          ...(selectedTier ? { ticketTypeId: selectedTier.id } : {}),
+        },
       });
       if (url) window.location.href = url;
     } catch (e) {
@@ -85,6 +107,15 @@ function EventDetail() {
       setBuying(false);
     }
   };
+
+  const selectedTier = tiers.find((t) => t.id === tierId) ?? null;
+  const tierOnSale = (t: TicketTier) => {
+    const now = Date.now();
+    if (t.sale_starts_at && new Date(t.sale_starts_at).getTime() > now) return false;
+    if (t.sale_ends_at && new Date(t.sale_ends_at).getTime() < now) return false;
+    return true;
+  };
+  const maxQty = Math.min(10, selectedTier?.max_per_buyer ?? 10);
 
   const rsvp = async () => {
     if (!evt) return;
