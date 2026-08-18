@@ -19,12 +19,12 @@ export function CookieBanner() {
   };
   return (
     <div
-      className="fixed inset-x-2 z-[80] md:inset-x-auto md:right-5 md:bottom-5 md:max-w-md"
-      style={{ bottom: "calc(env(safe-area-inset-bottom) + 4.75rem)" }}
+      className="fixed inset-x-0 bottom-0 z-[60]"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="rounded-xl border border-white/10 bg-neutral-900 p-3 text-white shadow-2xl md:rounded-2xl md:p-5 dark:bg-card dark:text-card-foreground dark:border-border">
-        <div className="flex items-start gap-3">
-          <div className="min-w-0 flex-1 text-[12px] leading-snug md:text-sm">
+      <div className="border-t border-white/10 bg-neutral-900/95 px-3 py-2 text-white backdrop-blur md:px-6 dark:bg-card/95 dark:text-card-foreground dark:border-border">
+        <div className="mx-auto flex max-w-5xl items-center gap-3">
+          <div className="min-w-0 flex-1 truncate text-[11px] leading-snug md:text-xs">
             We use cookies to keep you signed in. See our{" "}
             <Link to="/privacy" className="underline">Privacy</Link> and{" "}
             <Link to="/cookies" className="underline">Cookies</Link>.
