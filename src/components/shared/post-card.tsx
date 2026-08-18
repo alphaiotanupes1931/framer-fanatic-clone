@@ -2,7 +2,7 @@ import { siteUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import { Flag } from "lucide-react";
+import { Flag, Link2 as LinkIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +31,9 @@ type Post = {
   media_urls?: string[] | null;
   music_url?: string | null;
   post_type?: string | null;
+  link_url?: string | null;
+  link_title?: string | null;
+  link_description?: string | null;
   bg_color?: string | null;
   text_color?: string | null;
   font_size?: string | null;
@@ -293,6 +296,21 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           )}
         </div>
       )}
+      {post.link_url && (
+        <a
+          href={post.link_url}
+          target="_blank"
+          rel="noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="order-3 mx-4 my-3 block rounded-2xl border border-border bg-muted/40 p-4 transition hover:border-[#d4580a] sm:mx-6"
+        >
+          <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            <LinkIcon className="h-3.5 w-3.5" /> {safeHost(post.link_url)}
+          </div>
+          <div className="mt-1 font-semibold text-foreground break-words">{post.link_title || post.link_url}</div>
+          {post.link_description && <div className="mt-0.5 text-sm text-muted-foreground break-words">{post.link_description}</div>}
+        </a>
+      )}
       {post.content && (
         (post.post_type === "text" && post.bg_color) ? (
           <Link
@@ -427,4 +445,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       />
     </article>
   );
+}
+function safeHost(url: string): string {
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; }
 }

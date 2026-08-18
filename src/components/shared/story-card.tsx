@@ -27,6 +27,7 @@ type Story = {
   read_minutes?: number | null;
   author_name?: string;
   author_avatar?: string | null;
+  author_username?: string | null;
   category?: string | null;
   created_at?: string | null;
   featured?: boolean | null;
@@ -37,6 +38,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
   const detectedAdmin = useIsAdmin();
   const isAdmin = isAdminProp ?? detectedAdmin;
   const cleanExcerpt = stripHtml(story.excerpt);
+  const authorHandle = story.author_username || story.user_id || null;
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(story.likes_count || 0);
   const [saved, setSaved] = useState(false);
@@ -145,19 +147,21 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
   if (featured) {
     return (
       <article className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
-        <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         <div className="flex items-center gap-2 px-4 pt-3">
-          <Avatar className="h-7 w-7">
-            <SmartAvatarImage src={story.author_avatar ?? undefined} />
-            <AvatarFallback className="bg-slate-100 text-[10px] font-bold text-slate-500">
-              {story.author_name?.charAt(0) ?? "?"}
-            </AvatarFallback>
-          </Avatar>
-          <span className="truncate text-xs font-extrabold text-slate-800">{story.author_name}</span>
+          <AuthorLink handle={authorHandle} className="flex min-w-0 items-center gap-2">
+            <Avatar className="h-7 w-7">
+              <SmartAvatarImage src={story.author_avatar ?? undefined} />
+              <AvatarFallback className="bg-slate-100 text-[10px] font-bold text-slate-500">
+                {story.author_name?.charAt(0) ?? "?"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate text-xs font-extrabold text-slate-800 hover:text-[#d4580a]">{story.author_name}</span>
+          </AuthorLink>
           {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
           {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
           {story.created_at && <span className={`${isOwner ? "mr-9" : "ml-auto"} text-[11px] text-slate-500`}>{timeAgo(story.created_at)}</span>}
         </div>
+        <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         {story.cover_url && (
           <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
             <Img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -184,7 +188,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
-        <Link to="/stories/$storyId" params={{ storyId: story.id }} className="flex min-w-0 flex-1 items-center gap-3">
+        <AuthorLink handle={authorHandle} className="flex min-w-0 flex-1 items-center gap-3">
           <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
             <SmartAvatarImage src={story.author_avatar ?? undefined} />
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">
@@ -193,7 +197,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           </Avatar>
           <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground sm:text-base">
-            <span className="truncate">{story.author_name || "Someone"}</span>
+            <span className="truncate hover:text-[#d4580a]">{story.author_name || "Someone"}</span>
             {story.category && (
               <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">
                 {story.category}
@@ -205,7 +209,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
             {story.created_at ? timeAgo(story.created_at) : ""}
           </div>
           </div>
-        </Link>
+        </AuthorLink>
         {ownerMenu}
       </div>
       {story.cover_url && (
@@ -285,5 +289,18 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         }}
       />
     </article>
+  );
+}
+function AuthorLink({ handle, className, children }: { handle: string | null; className?: string; children: React.ReactNode }) {
+  if (!handle) return <div className={className}>{children}</div>;
+  return (
+    <Link
+      to="/u/$username"
+      params={{ username: handle }}
+      className={className}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+    </Link>
   );
 }

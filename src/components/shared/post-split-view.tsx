@@ -18,6 +18,7 @@ import { MentionField } from "@/components/shared/mention-input";
 
 type Post = {
   id: string; user_id: string; content: string | null;
+  link_url?: string | null; link_title?: string | null; link_description?: string | null;
   image_url: string | null; video_url: string | null;
   media_urls: string[] | null; music_url: string | null;
   post_type: string | null; bg_color: string | null;
@@ -220,6 +221,20 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
         </header>
 
         <div className="flex-1 overflow-y-auto">
+          {post.link_url && (
+            <a
+              href={post.link_url}
+              target="_blank"
+              rel="noreferrer"
+              className="m-4 block rounded-2xl border border-border bg-muted/40 p-4 transition hover:border-[#d4580a]"
+            >
+              <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                {(() => { try { return new URL(post.link_url).hostname.replace(/^www\./, ""); } catch { return post.link_url; } })()}
+              </div>
+              <div className="mt-1 font-semibold text-foreground break-words">{post.link_title || post.link_url}</div>
+              {post.link_description && <div className="mt-0.5 text-sm text-muted-foreground break-words">{post.link_description}</div>}
+            </a>
+          )}
           {post.content && !isTextOnly && (
             (post.post_type === "text" && post.bg_color) ? (
               <div className={`m-4 rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
