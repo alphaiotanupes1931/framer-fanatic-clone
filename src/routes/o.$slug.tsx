@@ -352,7 +352,8 @@ function OrgProfile() {
               const { data: mem } = await supabase
                 .from("organization_members")
                 .select("user_id")
-                .eq("organization_id", org.id);
+                .eq("organization_id", org.id)
+                .eq("status", "approved");
               const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
               if (org.owner_id) ids.push(org.owner_id);
               const unique = Array.from(new Set(ids));
