@@ -87,6 +87,10 @@ const SERVICE_TABS = [
 const ARTS_ORG_TABS = [
   "Posts", "Events", "Artists", "Exhibitions", "Support", "Opportunities", "Press", "Invite", "About", "Comments",
 ] as const;
+// Resident / Visitor pages are lightweight personal pages.
+const PERSON_PAGE_TABS = [
+  "Posts", "Stories", "Events", "About", "Comments", "Invite",
+] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
   Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
