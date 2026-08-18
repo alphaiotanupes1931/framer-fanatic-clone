@@ -3205,6 +3205,7 @@ export type Database = {
           username: string
         }[]
       }
+      set_my_profile_kind: { Args: { _kind: string }; Returns: undefined }
       slugify_username: { Args: { s: string }; Returns: string }
       titlecase_name: { Args: { s: string }; Returns: string }
       top_creators: {
