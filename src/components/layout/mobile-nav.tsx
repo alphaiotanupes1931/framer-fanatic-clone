@@ -1,9 +1,10 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { prefetchHandlers } from "@/lib/prefetch";
 import {
   Home, Search, Plus, User, Menu, MessageCircle, Compass, BookOpen,
   Users, Shield, Palette, Landmark, Building2, MapPin, Calendar, Ticket,
-  Video, Trophy, Settings, PenSquare, Store, Bookmark,
+  Video, Trophy, Settings, PenSquare, Store, Bookmark, LogOut,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -49,6 +50,7 @@ const moreItems: Primary[] = [
 
 export function MobileNav() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
 
   return (
     <nav
@@ -93,7 +95,7 @@ export function MobileNav() {
             <Menu className="h-5 w-5" />
             <span className="mt-0.5 text-[10px] font-medium">More</span>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" side="top" className="z-[1001] w-56">
+          <DropdownMenuContent align="end" side="top" className="z-[1001] max-h-[70vh] w-56 overflow-y-auto">
             {moreItems.map(({ icon: Icon, label, to }) => (
               <DropdownMenuItem key={to + label} asChild>
                 <Link to={to} className="flex cursor-pointer items-center gap-2">
@@ -103,6 +105,16 @@ export function MobileNav() {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={async () => {
+                await supabase.auth.signOut();
+                navigate({ to: "/auth" });
+              }}
+              className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive"
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
