@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { setMyProfileKind } from "@/lib/profile-kind";
+import { slugify } from "@/lib/categories";
 
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
   const me = useCurrentProfile();
@@ -61,21 +61,25 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
     if (!isVisitor && form.neighborhood.trim().length < 2) { toast.error("Neighborhood is required"); return; }
     setSaving(true);
     try {
-      const { error } = await supabase.from("profiles").update({
-        display_name: form.display_name.trim(),
-        category: kind === "resident" ? "Resident" : "Visitor",
-        neighborhood: form.neighborhood.trim() || null,
-        city: form.city.trim() || null,
+      // Resident/Visitor pages are standalone pages (like artist pages).
+      // They must NOT modify the account profile the user signed up with.
+      const slug = `${slugify(form.display_name) || kind}-${Math.random().toString(36).slice(2, 6)}`;
+      const { data, error } = await supabase.from("organizations").insert({
+        owner_id: me.id,
+        type: kind,
+        subtype: kind === "resident" ? "Resident" : "Visitor",
+        name: form.display_name.trim(),
+        slug,
+        neighborhood: isVisitor ? form.city.trim() || null : form.neighborhood.trim() || null,
         bio: form.bio.trim() || null,
         website: form.website.trim() || null,
         avatar_url: form.avatar_url.trim() || null,
         banner_url: form.banner_url.trim() || null,
-      }).eq("id", me.id);
+      }).select("slug").single();
       if (error) throw error;
-      await setMyProfileKind(kind);
-      toast.success("Profile saved");
+      toast.success(kind === "resident" ? "Resident page created" : "Visitor page created");
       await router.invalidate();
-      await navigate({ to: "/profile" });
+      await navigate({ to: "/o/$slug", params: { slug: data.slug } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     } finally {
