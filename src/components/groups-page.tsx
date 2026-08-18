@@ -9,6 +9,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { GROUP_SUBTYPES } from "@/lib/categories";
+import { Img } from "@/components/shared/smart-img";
 
 function prettyLabel(v: string) {
   return v
