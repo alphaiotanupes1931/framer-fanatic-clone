@@ -491,10 +491,16 @@ function MessagesPage() {
 
   return (
     <AppLayout title="" hero={false}>
-      <div className="mb-6">
+      <div className={`mb-6 ${active ? "hidden md:block" : ""}`}>
         <HeroBanner title="Messages" subtitle="Direct conversations with people and organizations across Baltimore." />
       </div>
-      <div className="grid h-[calc(100dvh-15rem)] min-h-[420px] grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card md:h-[calc(100dvh-12rem)] md:grid-cols-[360px_1fr]">
+      <div
+        className={`grid min-h-0 grid-cols-1 overflow-hidden border border-border bg-card md:static md:z-auto md:h-[calc(100dvh-12rem)] md:rounded-2xl md:grid-cols-[360px_1fr] ${
+          active
+            ? "fixed inset-x-0 bottom-0 top-0 z-40 h-[100dvh] rounded-none"
+            : "h-[calc(100dvh-15rem)] min-h-[420px] rounded-2xl"
+        }`}
+      >
         {/* Conversation list */}
         <div
           className={`${showList ? "flex" : "hidden"} min-w-0 flex-col border-r border-border md:flex`}

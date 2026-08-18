@@ -296,6 +296,8 @@ function EventDetail() {
           </Button>
         </div>
 
+        <EventSocial eventId={evt.id} hostId={evt.user_id} />
+
         {canDelete && (
           <div className="flex gap-3">
             {isOwner && (
