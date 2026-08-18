@@ -45,6 +45,7 @@ import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { notifyGroupJoinRequest } from "@/lib/group-requests.functions";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
@@ -95,7 +96,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
   Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
   Resources: Folder, Jobs: Briefcase, Leaderboard: Trophy, Rules: FileText,
-  Invite: UserPlus, Comments: MessageSquare, About: FileText,
+  Invite: UserPlus, Comments: MessageSquare, About: FileText, Requests: UserPlus,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText,
   Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
@@ -202,6 +203,8 @@ function OrgProfile() {
     : isAssoc
     ? COMMUNITY_ASSOC_TABS
     : ASSOC_TABS;
+  const VISIBLE_TABS: readonly string[] =
+    isGroup && canManage ? ["Requests", ...TABS] : TABS;
 
   const handleFileUpload = async (field: "avatar_url" | "banner_url", file: File) => {
     file = await compressImage(file);
@@ -257,6 +260,9 @@ function OrgProfile() {
         if (error) throw error;
         setJoined(true);
         setMemberStatus(pending ? "pending" : "approved");
+        if (pending) {
+          void notifyGroupJoinRequest({ data: { organizationId: org.id } }).catch(() => {});
+        }
         toast.success(pending
           ? "Request sent. The group creator will review it."
           : `${isAssoc ? "Joined" : "Following"} ${org.name}`);
@@ -479,7 +485,7 @@ function OrgProfile() {
 
         {/* Tabs */}
         <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
-          {TABS.map((t) => {
+          {VISIBLE_TABS.map((t) => {
             const active = tab === t;
             const Icon = artistIcons[t] ?? TAB_ICONS[t];
             return (
@@ -500,7 +506,9 @@ function OrgProfile() {
         </div>
 
         <div className="py-8">
-          {isGroup && canManage && <GroupRequests orgId={org.id} onApproved={() => setMemberCount((c) => c + 1)} />}
+          {isGroup && canManage && tab === "Requests" && (
+            <GroupRequests orgId={org.id} onApproved={() => setMemberCount((c) => c + 1)} />
+          )}
           {isGroup && !canManage && memberStatus !== "approved" ? (
             <div className="mx-auto max-w-md rounded-2xl border border-neutral-200 bg-white p-8 text-center">
               <Users className="mx-auto h-8 w-8 text-neutral-400" />
