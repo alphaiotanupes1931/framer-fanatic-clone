@@ -58,12 +58,12 @@ function LeaderboardPage() {
         };
       });
       results.sort((a, b) => b.points - a.points);
-      const top = results.slice(0, 100);
-      // Displayed alphabetically by name.
-      top.sort((a, b) =>
+      // Ranked by activity points, highest first. Ties fall back to name order.
+      results.sort((a, b) =>
+        b.points - a.points ||
         (a.display_name || a.username || "").localeCompare(b.display_name || b.username || "", undefined, { sensitivity: "base" }),
       );
-      return top;
+      return results.slice(0, 100);
     },
   );
   const rows = cachedRows ?? [];
