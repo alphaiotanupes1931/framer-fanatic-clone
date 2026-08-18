@@ -173,7 +173,8 @@ function OrgProfile() {
   const isGroup = org.type === "group";
   const isArtist = org.type === "artist";
   const isArtsOrg = org.type === "arts_org" || isArtist;
-  const isBusiness = !isAssoc && !isGroup && !isArtsOrg;
+  const isPersonPage = org.type === "resident" || org.type === "visitor";
+  const isBusiness = !isAssoc && !isGroup && !isArtsOrg && !isPersonPage;
   const subLower = (org.subtype ?? "").toLowerCase();
   const isRestaurant = isBusiness && /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(subLower);
   const isService = isBusiness && !isRestaurant;
@@ -182,7 +183,9 @@ function OrgProfile() {
   const artistTabs: ArtistTab[] = isArtist ? tabsForArtist(org.subtype, "artist") : [];
   const artistIcons: Record<string, React.ComponentType<{ className?: string }>> = {};
   for (const t of artistTabs) artistIcons[t.label] = t.Icon;
-  const TABS: readonly string[] = isArtist
+  const TABS: readonly string[] = isPersonPage
+    ? PERSON_PAGE_TABS
+    : isArtist
     ? artistTabs.map((t) => t.label)
     : isArtsOrg
     ? // The Artists roster is always visible; it shows an empty state until
