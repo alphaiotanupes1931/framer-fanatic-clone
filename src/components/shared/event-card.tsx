@@ -1,6 +1,6 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Bookmark, Send, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useEventImageUrl } from "@/components/event-image";
@@ -157,8 +157,11 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
           {saved ? "Saved" : "Save"}
         </button>
-        <button type="button" onClick={openShare} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share" title="Share">
+        <button type="button" onClick={openShare} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
           <Send className="h-5 w-5 -rotate-45" />
+        </button>
+        <button type="button" onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+          <Share2 className="h-5 w-5" />
         </button>
         {canDelete && (
           <button type="button" onClick={handleDelete} disabled={deleting} className="ml-auto flex items-center text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
