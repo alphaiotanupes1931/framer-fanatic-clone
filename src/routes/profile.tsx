@@ -560,6 +560,8 @@ function ProfilePage() {
               <MyTicketsTab />
             ) : tab === "My Pages" ? (
               <MyPagesTab profile={profile} isArtist={isArtist} />
+            ) : tab === "Memberships" ? (
+              profile ? <PersonMembershipsTab userId={profile.id} isSelf /> : null
             ) : tab === "My Writings" ? (
               profile ? <MyWritingsTab userId={profile.id} /> : null
             ) : tab === "Saved" ? (
