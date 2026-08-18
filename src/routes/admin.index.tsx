@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { isAdminUnlocked, getAdminToken } from "@/lib/admin-gate";
 import { adminRpc } from "@/lib/admin-site.functions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
