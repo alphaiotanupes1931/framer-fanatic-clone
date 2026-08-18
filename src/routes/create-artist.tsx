@@ -178,12 +178,13 @@ function CreateArtistPage() {
             <ImageUpload value={form.banner_url} onChange={(v) => setForm((f) => ({ ...f, banner_url: v }))} label="Upload banner image" bucket="avatars" />
           </div>
           <div className="flex justify-end">
-            <Button onClick={submit} disabled={!canSubmit || saving}>
+            <Button onClick={submit} disabled={!canSubmit || saving || checkingExisting}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Artist Page
             </Button>
           </div>
         </div>
+        )}
       </div>
     </AppLayout>
   );
