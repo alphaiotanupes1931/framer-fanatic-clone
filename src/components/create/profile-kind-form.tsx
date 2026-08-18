@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import { setMyProfileKind } from "@/lib/profile-kind";
 
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
   const me = useCurrentProfile();
+  const navigate = useNavigate();
+  const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   useEffect(() => {
@@ -71,7 +74,8 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
       if (error) throw error;
       await setMyProfileKind(kind);
       toast.success("Profile saved");
-      window.location.href = "/profile";
+      await router.invalidate();
+      await navigate({ to: "/profile" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     } finally {
