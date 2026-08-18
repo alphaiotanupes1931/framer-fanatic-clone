@@ -262,6 +262,11 @@ function CreateStoryPage() {
           )}
         </div>
 
+        {/* Link */}
+        <div className="mt-6">
+          <LinkFields value={link} onChange={setLink} />
+        </div>
+
         {/* Content */}
         <div className="mt-8 space-y-2">
           <div className="text-sm font-semibold text-neutral-800">Content</div>
