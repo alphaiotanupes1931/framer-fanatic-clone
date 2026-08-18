@@ -29,8 +29,10 @@ type TicketDetail = {
 
 function TicketDetailPage() {
   const { ticketId } = useParams({ from: "/tickets/$ticketId" });
-  const verifyMode =
-    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("verify") === "1";
+  const [verifyMode, setVerifyMode] = useState<boolean | null>(null);
+  useEffect(() => {
+    setVerifyMode(new URLSearchParams(window.location.search).get("verify") === "1");
+  }, []);
   const [t, setT] = useState<TicketDetail | null | undefined>(undefined);
   const [shareOpen, setShareOpen] = useState(false);
   const [holder, setHolder] = useState<{ display_name: string | null; email: string | null } | null>(null);
@@ -54,6 +56,11 @@ function TicketDetailPage() {
     void externalShare(url, t?.events?.title || "Event", undefined);
   };
 
+  if (verifyMode === null) return (
+    <div className="min-h-dvh bg-neutral-100 px-4 py-10">
+      <div className="mx-auto h-96 w-full max-w-md animate-pulse rounded-3xl bg-white" />
+    </div>
+  );
   if (verifyMode) return <TicketVerifyView ticketId={ticketId} />;
 
   if (t === undefined) return (
