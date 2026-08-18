@@ -265,6 +265,16 @@ function AdminPage() {
           <Download className="h-3.5 w-3.5" />
           Export name and email
         </button>
+        <button
+          onClick={() => setOnlyVerified((v) => !v)}
+          className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition ${
+            onlyVerified ? "bg-neutral-900 text-white" : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+          }`}
+          title="Only show accounts that confirmed their email"
+        >
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          {onlyVerified ? "Verified users only" : "Showing all accounts"}
+        </button>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-neutral-200 bg-white">
@@ -309,6 +319,20 @@ function AdminPage() {
                             <Shield className="h-3 w-3" /> Admin
                           </span>
                         )}
+                        {u.email_confirmed_at ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700">
+                            <CheckCircle2 className="h-3 w-3" /> Verified
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-500">
+                            Unverified
+                          </span>
+                        )}
+                        {u.is_founder && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                            <Star className="h-3 w-3" /> Founder
+                          </span>
+                        )}
                       </div>
                       <div className="truncate text-[11px] text-neutral-500">
                         @{u.username || "no-handle"} {u.neighborhood && `- ${u.neighborhood}`}
@@ -337,6 +361,18 @@ function AdminPage() {
                       title="Edit user"
                     >
                       <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toggleFounder(u)}
+                      disabled={busy === u.id}
+                      title={u.is_founder ? "Remove founding member badge" : "Give founding member badge"}
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
+                        u.is_founder
+                          ? "bg-amber-500 text-white hover:bg-amber-600"
+                          : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+                      }`}
+                    >
+                      <Star className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => toggleShowcase(u)}
