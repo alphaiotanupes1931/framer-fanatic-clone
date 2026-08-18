@@ -335,7 +335,7 @@ function OrgProfile() {
       </div>
 
       {/* Avatar overlapping banner + inline action buttons */}
-      <div className="relative flex items-end justify-between gap-3 px-1 sm:px-2">
+      <div className="relative flex flex-col items-start gap-3 px-1 sm:flex-row sm:items-end sm:justify-between sm:px-2">
         <div className="relative -mt-8 inline-block shrink-0">
           <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
             {org.avatar_url && (
@@ -353,7 +353,7 @@ function OrgProfile() {
             </button>
           )}
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2 pb-1">
+        <div className="flex w-full flex-wrap items-center justify-start gap-2 pb-1 sm:w-auto sm:justify-end">
           {canManage && (
             <button
               onClick={() => { setTab("About"); setEditAbout(true); }}
@@ -514,7 +514,7 @@ function OrgProfile() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-1">
+        <div className="scrollbar-hide mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 px-1 pb-1">
           {VISIBLE_TABS.map((t) => {
             const active = tab === t;
             const Icon = artistIcons[t] ?? TAB_ICONS[t];

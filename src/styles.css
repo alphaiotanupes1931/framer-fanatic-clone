@@ -486,3 +486,12 @@ html.theme-mono {
   content-visibility: auto;
   contain-intrinsic-size: auto 420px;
 }
+
+/* Horizontal tab strips: keep the swipe, hide the scrollbar chrome. */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
