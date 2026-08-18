@@ -322,7 +322,22 @@ function EventDetail() {
             </>
           ) : priced ? (
             <>
-              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">          ) : (
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <span className="text-sm font-medium text-foreground">Tickets</span>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
+                  <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                  <button type="button" onClick={() => setQty((q) => Math.min(10, q + 1))} disabled={qty >= 10}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
+                </div>
+              </div>
+              <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                <Ticket className="w-4 h-4" />
+                {buying ? "Loading…" : `Buy ${qty > 1 ? `${qty} Tickets` : "Ticket"} · $${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
+              </Button>
+            </>
+          ) : (
             <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
               {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "I'm going"}
             </Button>
