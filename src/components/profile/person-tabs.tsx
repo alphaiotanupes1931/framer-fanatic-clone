@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bookmark, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
 
@@ -68,6 +69,7 @@ export function PersonAboutTab({ profile }: { profile: any }) {
 /** Published stories written by this person. */
 export function PersonWritingsTab({ userId, isSelf }: { userId: string; isSelf: boolean }) {
   const [rows, setRows] = useState<any[]>([]);
+  const [publishing, setPublishing] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let cancelled = false;
@@ -87,21 +89,36 @@ export function PersonWritingsTab({ userId, isSelf }: { userId: string; isSelf: 
     return () => { cancelled = true; };
   }, [userId, isSelf]);
 
+  const publish = async (id: string) => {
+    setPublishing(id);
+    const { error } = await supabase.from("stories").update({ status: "published" }).eq("id", id);
+    setPublishing(null);
+    if (error) { toast.error(error.message); return; }
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status: "published" } : r)));
+    toast.success("Story published");
+  };
+
+  const header = isSelf ? (
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="text-sm text-muted-foreground">{rows.length} {rows.length === 1 ? "story" : "stories"}</div>
+      <Link to="/create-story" className="inline-flex items-center rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Write a story</Link>
+    </div>
+  ) : null;
+
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading writings…</div>;
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
-        No writings yet.
-        {isSelf && (
-          <div>
-            <Link to="/create-story" className="mt-3 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Write a story</Link>
-          </div>
-        )}
+      <div className="mx-auto w-full max-w-6xl">
+        {header}
+        <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
+          No writings yet.
+        </div>
       </div>
     );
   }
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-3">
+      {header}
       {rows.map((s) => (
         <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex items-stretch overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md">
           {s.cover_url && <SmartImage src={s.cover_url} alt={s.title} bucket="story-covers" className="h-24 w-40 shrink-0 object-cover sm:h-28 sm:w-56" />}
@@ -112,6 +129,17 @@ export function PersonWritingsTab({ userId, isSelf }: { userId: string; isSelf: 
             <div className="line-clamp-1 font-bold leading-tight">{s.title}</div>
             {s.excerpt && <p className="line-clamp-2 text-sm text-muted-foreground">{s.excerpt}</p>}
           </div>
+          {isSelf && s.status !== "published" && (
+            <div className="flex items-center pr-3 sm:pr-4">
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); void publish(s.id); }}
+                disabled={publishing === s.id}
+                className="rounded-full bg-[#d4580a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#b8480a] disabled:opacity-60"
+              >
+                {publishing === s.id ? "Publishing…" : "Publish"}
+              </button>
+            </div>
+          )}
         </Link>
       ))}
     </div>

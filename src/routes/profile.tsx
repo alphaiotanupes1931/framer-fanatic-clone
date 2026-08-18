@@ -101,7 +101,6 @@ function ProfilePage() {
   void category; void isArtist;
   const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
   const [tab, setTab] = useState<Tab>("Posts");
-  const [showEmail, setShowEmail] = useState(false);
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
@@ -449,14 +448,7 @@ function ProfilePage() {
             {profile?.email && !publicPreview && (
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                 <Mail className="h-3.5 w-3.5" />
-                {showEmail ? (
-                  <>
-                    <span className="break-all">{profile.email}</span>
-                    <button onClick={() => setShowEmail(false)} className="ml-1 text-xs font-semibold text-[#d4580a] hover:underline">Hide</button>
-                  </>
-                ) : (
-                  <button onClick={() => setShowEmail(true)} className="text-xs font-semibold text-[#d4580a] hover:underline">Show email</button>
-                )}
+                <span className="break-all">{profile.email}</span>
               </div>
             )}
             <div className="relative mt-1">
@@ -610,7 +602,7 @@ function ProfilePage() {
                 />
               ) : null
             ) : tab === "About" ? (
-              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={showEmail && !publicPreview} />
+              <AboutTab profile={profile} canEdit={!publicPreview} showEmail={!publicPreview} />
             ) : (
               (tab === "Posts") ? (
                 myPosts.length === 0 ? (
@@ -1639,6 +1631,7 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
 }
 
 function MyWritingsTab({ userId }: { userId: string }) {
+  const [publishing, setPublishing] = useState<string | null>(null);
   const [rows, setRows] = useState<Array<{ id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string; status: string }>>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -1661,17 +1654,36 @@ function MyWritingsTab({ userId }: { userId: string }) {
       document.removeEventListener("visibilitychange", onFocus);
     };
   }, [userId]);
+  const publish = async (id: string) => {
+    setPublishing(id);
+    const { error } = await supabase.from("stories").update({ status: "published" }).eq("id", id);
+    setPublishing(null);
+    if (error) { toast.error(error.message); return; }
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status: "published" } : r)));
+    toast.success("Story published");
+  };
+
+  const header = (
+    <div className="mx-auto mb-4 flex w-full max-w-6xl items-center justify-between gap-3">
+      <div className="text-sm text-muted-foreground">{rows.length} {rows.length === 1 ? "story" : "stories"}</div>
+      <Link to="/create-story" className="inline-flex items-center rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Write a story</Link>
+    </div>
+  );
+
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading writings…</div>;
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-neutral-200 py-12 text-center">
-        <div className="text-sm text-muted-foreground">You haven't written any stories yet.</div>
-        <Link to="/create-story" className="mt-3 inline-block rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">Write a story</Link>
+      <div className="mx-auto w-full max-w-6xl">
+        {header}
+        <div className="rounded-2xl border border-dashed border-neutral-200 py-12 text-center">
+          <div className="text-sm text-muted-foreground">You haven't written any stories yet.</div>
+        </div>
       </div>
     );
   }
   return (
     <div className="flex flex-col gap-3 max-w-6xl mx-auto w-full">
+      {header}
       {rows.map((s) => (
         <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex items-stretch overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md">
           {s.cover_url && (
@@ -1682,6 +1694,17 @@ function MyWritingsTab({ userId }: { userId: string }) {
             <div className="font-bold leading-tight line-clamp-1">{s.title}</div>
             {s.excerpt && <p className="text-sm text-muted-foreground line-clamp-2">{s.excerpt}</p>}
           </div>
+          {s.status !== "published" && (
+            <div className="flex items-center pr-3 sm:pr-4">
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); void publish(s.id); }}
+                disabled={publishing === s.id}
+                className="rounded-full bg-[#d4580a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#b8480a] disabled:opacity-60"
+              >
+                {publishing === s.id ? "Publishing…" : "Publish"}
+              </button>
+            </div>
+          )}
         </Link>
       ))}
     </div>
