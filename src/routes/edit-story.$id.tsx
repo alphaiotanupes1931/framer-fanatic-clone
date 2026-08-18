@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { LinkFields, isValidLink, normalizeLink } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/edit-story/$id")({
   component: EditStoryPage,
@@ -54,6 +55,7 @@ function EditStoryPage() {
     title: "", excerpt: "", content: "", format: "blog",
     visibility: "public", cover_url: "", tags: [] as string[],
   });
+  const [link, setLink] = useState({ url: "", title: "", description: "" });
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
@@ -70,6 +72,11 @@ function EditStoryPage() {
         visibility: data.visibility || "public",
         cover_url: data.cover_url || "",
         tags: Array.isArray(data.tags) ? data.tags : [],
+      });
+      setLink({
+        url: (data as { link_url?: string | null }).link_url || "",
+        title: (data as { link_title?: string | null }).link_title || "",
+        description: (data as { link_description?: string | null }).link_description || "",
       });
       setLoading(false);
       setTimeout(() => {
@@ -133,6 +140,9 @@ function EditStoryPage() {
         visibility: form.visibility,
         tags: form.tags,
         cover_url: form.cover_url || null,
+        link_url: isValidLink(link.url) ? normalizeLink(link.url) : null,
+        link_title: isValidLink(link.url) ? (link.title.trim() || null) : null,
+        link_description: isValidLink(link.url) ? (link.description.trim() || null) : null,
         read_minutes,
         updated_at: new Date().toISOString(),
       }).eq("id", id);
@@ -225,6 +235,10 @@ function EditStoryPage() {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="mt-6">
+          <LinkFields value={link} onChange={setLink} />
         </div>
 
         <div className="mt-8 space-y-2">
