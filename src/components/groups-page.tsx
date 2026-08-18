@@ -102,8 +102,8 @@ export function GroupsPage() {
           </div>
         </Link>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative min-w-[220px] flex-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:min-w-[220px] sm:flex-1">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <input
               value={q}
@@ -115,14 +115,14 @@ export function GroupsPage() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as "newest" | "members")}
-            className="rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none"
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none sm:w-auto"
           >
             <option value="newest">Newest</option>
             <option value="members">Most Members</option>
           </select>
         </div>
 
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {CATEGORIES.map((c) => (
             <button
               key={c}
@@ -155,13 +155,13 @@ export function GroupsPage() {
                 params={{ slug: o.slug }}
                 className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
               >
-                <div className="relative h-40 w-full bg-gradient-to-br from-neutral-200 to-neutral-100">
+                <div className="relative h-32 w-full bg-gradient-to-br from-neutral-200 to-neutral-100 sm:h-40">
                   <div className="absolute inset-0 overflow-hidden">
                     {o.banner_url && (
                       <Img src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                     )}
                   </div>
-                  <div className="absolute -bottom-8 left-4 z-20 flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 ring-[5px] ring-white shadow-md">
+                  <div className="absolute -bottom-7 left-4 z-20 flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 shadow-md ring-4 ring-white sm:-bottom-8 sm:h-20 sm:w-20 sm:ring-[5px]">
                     {o.avatar_url ? (
                       <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />
                     ) : (
@@ -169,7 +169,7 @@ export function GroupsPage() {
                     )}
                   </div>
                 </div>
-                <div className="px-4 pb-4 pt-12">
+                <div className="px-4 pb-4 pt-10 sm:pt-12">
                   <div className="flex min-w-0 items-center gap-1.5">
                     <div className="truncate text-[17px] font-bold text-neutral-900">{o.name}</div>
                     <ShieldCheck className="h-4 w-4 shrink-0 text-orange-500" />
