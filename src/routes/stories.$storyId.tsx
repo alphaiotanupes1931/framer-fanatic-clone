@@ -13,6 +13,7 @@ import { SmartImage } from "@/components/smart-image";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/stories/$storyId")({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   component: StoryDetail,
   head: () => ({ meta: [{ title: "Story - Planet Baltimore" }] }),
 });
