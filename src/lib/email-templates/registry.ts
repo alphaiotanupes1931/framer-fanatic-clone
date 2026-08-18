@@ -18,7 +18,9 @@ export interface TemplateEntry {
  *   // then add to TEMPLATES: 'welcome': welcomeTemplate
  */
 import { template as referralInviteTemplate } from './referral-invite'
+import { template as groupJoinRequestTemplate } from './group-join-request'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'referral-invite': referralInviteTemplate,
+  'group-join-request': groupJoinRequestTemplate,
 }
