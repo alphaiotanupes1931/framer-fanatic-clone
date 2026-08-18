@@ -1,7 +1,9 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
   BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, PenLine, Plane, Bookmark,
+  Settings, LogOut,
 } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,7 @@ const utilItems: Item[] = [
   { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: Bookmark, label: "Saved", to: "/saved" },
   { icon: User, label: "Profile", to: "/profile" },
+  { icon: Settings, label: "Settings", to: "/settings" },
 ];
 
 const createItems: Item[] = [
@@ -121,6 +124,17 @@ export function TopMenuBar() {
                   {label}
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={async () => {
+                  await supabase.auth.signOut();
+                  navigate({ to: "/auth" });
+                }}
+                className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
