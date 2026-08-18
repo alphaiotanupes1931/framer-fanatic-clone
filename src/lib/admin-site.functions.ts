@@ -61,6 +61,7 @@ const ALLOWED_ADMIN_RPCS = new Set([
   "admin_list_organizations",
   "admin_set_banned",
   "admin_set_showcase_hidden",
+  "admin_set_founder",
   "admin_update_profile",
   "admin_delete_event",
   "admin_delete_organization",

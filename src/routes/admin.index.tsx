@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { isAdminUnlocked, getAdminToken } from "@/lib/admin-gate";
 import { adminRpc } from "@/lib/admin-site.functions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,8 @@ type AdminUser = {
   created_at: string;
   last_seen_at: string | null;
   is_admin: boolean;
+  is_founder: boolean;
+  email_confirmed_at: string | null;
 };
 
 function isLive(ts: string | null) {
@@ -51,6 +53,7 @@ function AdminPage() {
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminUser | null>(null);
+  const [onlyVerified, setOnlyVerified] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -79,16 +82,28 @@ function AdminPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return users;
-    return users.filter((u) =>
+    const base = onlyVerified ? users.filter((u) => !!u.email_confirmed_at) : users;
+    if (!s) return base;
+    return base.filter((u) =>
       [u.email, u.display_name, u.username, u.neighborhood]
         .filter(Boolean)
         .some((v) => (v as string).toLowerCase().includes(s)),
     );
-  }, [users, q]);
+  }, [users, q, onlyVerified]);
 
   const liveCount = users.filter((u) => isLive(u.last_seen_at)).length;
   const bannedCount = users.filter((u) => u.banned).length;
+  const verifiedCount = users.filter((u) => !!u.email_confirmed_at).length;
+
+  const toggleFounder = async (u: AdminUser) => {
+    setBusy(u.id);
+    try {
+      await adminRpc({ data: { name: "admin_set_founder", args: { _user_id: u.id, _is_founder: !u.is_founder }, adminToken: getAdminToken() } });
+    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
+    setBusy(null);
+    toast.success(u.is_founder ? "Founding member badge removed" : "Founding member badge granted");
+    setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, is_founder: !u.is_founder } : p)));
+  };
 
   const toggleBan = async (u: AdminUser) => {
     setBusy(u.id);
@@ -129,8 +144,9 @@ function AdminPage() {
       title="Admin"
       subtitle="Manage users, monitor live activity, and moderate accounts."
     >
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <Stat label="Total users" value={users.length} />
+        <Stat label="Verified" value={verifiedCount} accent="bg-sky-500" />
         <Stat label="Live now" value={liveCount} accent="bg-emerald-500" />
         <Stat label="Banned" value={bannedCount} accent="bg-rose-500" />
       </div>
@@ -249,6 +265,16 @@ function AdminPage() {
           <Download className="h-3.5 w-3.5" />
           Export name and email
         </button>
+        <button
+          onClick={() => setOnlyVerified((v) => !v)}
+          className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition ${
+            onlyVerified ? "bg-neutral-900 text-white" : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+          }`}
+          title="Only show accounts that confirmed their email"
+        >
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          {onlyVerified ? "Verified users only" : "Showing all accounts"}
+        </button>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-neutral-200 bg-white">
@@ -293,6 +319,20 @@ function AdminPage() {
                             <Shield className="h-3 w-3" /> Admin
                           </span>
                         )}
+                        {u.email_confirmed_at ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700">
+                            <CheckCircle2 className="h-3 w-3" /> Verified
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-500">
+                            Unverified
+                          </span>
+                        )}
+                        {u.is_founder && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                            <Star className="h-3 w-3" /> Founder
+                          </span>
+                        )}
                       </div>
                       <div className="truncate text-[11px] text-neutral-500">
                         @{u.username || "no-handle"} {u.neighborhood && `- ${u.neighborhood}`}
@@ -321,6 +361,18 @@ function AdminPage() {
                       title="Edit user"
                     >
                       <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toggleFounder(u)}
+                      disabled={busy === u.id}
+                      title={u.is_founder ? "Remove founding member badge" : "Give founding member badge"}
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
+                        u.is_founder
+                          ? "bg-amber-500 text-white hover:bg-amber-600"
+                          : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+                      }`}
+                    >
+                      <Star className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => toggleShowcase(u)}
