@@ -51,10 +51,10 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-const FULL_PROFILE_TABS = ["Posts","About","My Writings","Saved","Attending","Organized","My Tickets","My Pages","Memberships","My Dashboard","Payouts"] as const;
+const FULL_PROFILE_TABS = ["Posts","About","My Stories","Saved","Attending","Organized","My Tickets","My Pages","Memberships","My Dashboard","Payouts"] as const;
 /** Tabs other people can see when they visit your profile. */
 // Public preview keeps every tab the owner has, minus purely private money tabs.
-const PUBLIC_PROFILE_TABS = ["Posts","About","My Writings","Saved","Attending","Organized","My Pages","Memberships"] as const;
+const PUBLIC_PROFILE_TABS = ["Posts","About","My Stories","Saved","Attending","Organized","My Pages","Memberships"] as const;
 const TABS_ARTIST_BASE = FULL_PROFILE_TABS;
 const TABS_RESIDENT_BASE = FULL_PROFILE_TABS;
 function displayTabLabel(t: string, isPublicPreview: boolean) {
@@ -66,7 +66,7 @@ import { PersonMembershipsTab } from "@/components/profile/person-tabs";
 const TAB_ICONS: Record<string, typeof LayoutGrid> = {
   "Posts": LayoutGrid,
   "About": Rss,
-  "My Writings": BookOpen,
+  "My Stories": BookOpen,
   "Saved": Bookmark,
   "Attending": Calendar,
   "Organized": CalendarCheck,
@@ -563,7 +563,7 @@ function ProfilePage() {
               <MyPagesTab profile={profile} isArtist={isArtist} />
             ) : tab === "Memberships" ? (
               profile ? <PersonMembershipsTab userId={profile.id} isSelf /> : null
-            ) : tab === "My Writings" ? (
+            ) : tab === "My Stories" ? (
               profile ? <MyWritingsTab userId={profile.id} /> : null
             ) : tab === "Saved" ? (
               <SavedTab />
