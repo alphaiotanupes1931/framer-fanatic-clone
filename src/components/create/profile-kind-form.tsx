@@ -10,12 +10,15 @@ import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { slugify } from "@/lib/categories";
+import { useExistingPage, ExistingPageNotice } from "@/components/create/existing-page-notice";
 
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const kindLabel = kind === "resident" ? "Resident" : "Visitor";
+  const { page: existingPage, loading: checkingExisting } = useExistingPage(kind, me?.id);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   useEffect(() => {
     void (async () => {
@@ -56,6 +59,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
+    if (existingPage) { toast.error(`You already have a ${kindLabel} page.`); return; }
     if (form.display_name.trim().length < 2) { toast.error("Display name is required"); return; }
     if (isVisitor && form.city.trim().length < 2) { toast.error("City is required"); return; }
     if (!isVisitor && form.neighborhood.trim().length < 2) { toast.error("Neighborhood is required"); return; }
@@ -88,6 +92,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
   };
 
   return (
+    existingPage ? <ExistingPageNotice label={kindLabel} page={existingPage} /> :
     <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Display name<span className="text-orange"> *</span></Label>
@@ -132,7 +137,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         </div>
       </div>
       <div className="flex justify-end">
-        <Button onClick={submit} disabled={!canSubmit || saving}>
+        <Button onClick={submit} disabled={!canSubmit || saving || checkingExisting}>
           {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {saveLabel}
         </Button>
