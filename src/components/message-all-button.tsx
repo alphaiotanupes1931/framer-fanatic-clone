@@ -115,13 +115,15 @@ export function MessageAllButton({
       ];
       const { error: mErr } = await supabase.from("conversation_members").insert(rows);
       if (mErr) throw mErr;
-      if (initialMessage?.trim()) {
-        await supabase.from("messages").insert({
-          conversation_id: conv.id,
-          sender_id: me.id,
-          content: initialMessage.trim(),
-        });
-      }
+      // Always post a first message so every recipient gets a notification.
+      const firstMessage =
+        initialMessage?.trim() || `${me.display_name || "Someone"} added you to “${title}”`;
+      const { error: msgErr } = await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: me.id,
+        content: firstMessage,
+      });
+      if (msgErr) throw msgErr;
       toast.success(`Group chat created with ${selectedList.length + 1} members`);
       window.localStorage.setItem("pb_open_conversation", conv.id);
       setOpen(false);
@@ -203,7 +205,11 @@ export function MessageAllButton({
               {loading ? (
                 <div className="p-6 text-center text-sm text-neutral-500">Loading…</div>
               ) : filtered.length === 0 ? (
-                <div className="p-6 text-center text-sm text-neutral-500">No people to show.</div>
+                <div className="p-6 text-center text-sm text-neutral-500">
+                  {q.trim()
+                    ? "No people match your search."
+                    : "No one has joined or followed this page yet, so there is nobody to message."}
+                </div>
               ) : (
                 filtered.map((p) => {
                   const isSel = !!selected[p.id];
