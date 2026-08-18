@@ -405,14 +405,12 @@ function OrgProfile() {
             }}
           />
           {isGroup && isOwner ? (
-            <button
-              type="button"
-              onClick={() => toast.info("You are the creator of this group, so you cannot request to join.")}
-              className="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-semibold text-orange-700 hover:bg-orange-200"
+            <span
+              className="inline-flex select-none items-center gap-1.5 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-semibold text-orange-700"
               title="You are the creator of this group"
             >
               <Users className="h-4 w-4" /> Creator
-            </button>
+            </span>
           ) : (
             <button
               onClick={toggleJoin}
