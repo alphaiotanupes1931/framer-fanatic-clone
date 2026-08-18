@@ -155,11 +155,13 @@ export function GroupsPage() {
                 params={{ slug: o.slug }}
                 className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
               >
-                <div className="relative h-40 w-full overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-100">
-                  {o.banner_url && (
-                    <Img src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  )}
-                  <div className="absolute -bottom-8 left-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 ring-[5px] ring-white shadow-md">
+                <div className="relative h-40 w-full bg-gradient-to-br from-neutral-200 to-neutral-100">
+                  <div className="absolute inset-0 overflow-hidden">
+                    {o.banner_url && (
+                      <Img src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                    )}
+                  </div>
+                  <div className="absolute -bottom-8 left-4 z-20 flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 ring-[5px] ring-white shadow-md">
                     {o.avatar_url ? (
                       <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />
                     ) : (
