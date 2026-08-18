@@ -116,7 +116,7 @@ function CreateArtistPage() {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
-        <HeroBanner title="Create Artist Page" subtitle="Make as many artist pages as you like, one for each project or alias." />
+        <HeroBanner title="Create Artist Page" subtitle="Set up your artist page. One artist page per account." />
         {existingArtistPage ? <ExistingPageNotice label="Artist" page={existingArtistPage} /> : (
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           <div className="space-y-1.5">
