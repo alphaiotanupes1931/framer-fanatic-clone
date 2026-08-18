@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MentionField } from "@/components/shared/mention-input";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
+import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/create-post")({
   }),
 });
 
-type PostType = "text" | "photo" | "video";
+type PostType = "text" | "photo" | "video" | "link";
 type Visibility = "public" | "followers" | "close_friends" | "only_me";
 
 const CATEGORIES = [
@@ -64,6 +64,9 @@ function CreatePostPage() {
   const [imagePath, setImagePath] = useState("");
   const [videoPath, setVideoPath] = useState("");
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkTitle, setLinkTitle] = useState("");
+  const [linkDescription, setLinkDescription] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [category, setCategory] = useState<string>("General");
   const [tag, setTag] = useState<string>("");
@@ -80,9 +83,16 @@ function CreatePostPage() {
   const hasMedia =
     (postType === "photo" && (mediaUrls.length > 0 || !!imagePath)) ||
     (postType === "video" && (mediaUrls.length > 0 || !!videoPath));
+  const normalizedLink = linkUrl.trim() ? (/^https?:\/\//i.test(linkUrl.trim()) ? linkUrl.trim() : `https://${linkUrl.trim()}`) : "";
+  const linkValid = (() => {
+    if (!normalizedLink) return false;
+    try { new URL(normalizedLink); return true; } catch { return false; }
+  })();
   const canSubmit =
     contentValid &&
-    (postType === "text" ? content.trim().length > 0 : hasMedia || content.trim().length > 0);
+    (postType === "text" ? content.trim().length > 0
+      : postType === "link" ? linkValid
+      : hasMedia || content.trim().length > 0);
 
   // Debounced people search for the excluded list
   useEffect(() => {
@@ -131,6 +141,9 @@ function CreatePostPage() {
         content: content.trim(),
         image_url: postType === "photo" ? (mediaUrls[0] || imagePath || null) : null,
         video_url: postType === "video" ? (mediaUrls.find((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) || videoPath || null) : null,
+        link_url: postType === "link" ? normalizedLink : null,
+        link_title: postType === "link" ? (linkTitle.trim() || null) : null,
+        link_description: postType === "link" ? (linkDescription.trim() || null) : null,
         media_urls: mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
         music_url: null,
         post_type: postType,
@@ -157,6 +170,7 @@ function CreatePostPage() {
     { id: "text",  label: "Text",  Icon: TypeIcon },
     { id: "photo", label: "Photo", Icon: ImagePlus },
     { id: "video", label: "Video", Icon: VideoIcon },
+    { id: "link",  label: "Link",  Icon: Link2 },
   ];
 
   const visibilityOpts: { id: Visibility; label: string; hint: string; Icon: typeof Globe }[] = [
@@ -251,6 +265,33 @@ function CreatePostPage() {
               <Label className="text-sm font-medium">Caption (optional)</Label>
               <MentionField multiline value={content} onChange={setContent} rows={3} maxLength={2000} placeholder="Add a caption... use @ to mention someone"
                 className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-[#d4580a]" />
+            </div>
+          )}
+
+          {postType === "link" && (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">Link URL</Label>
+                <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://example.com/article" inputMode="url" />
+                {linkUrl.trim() && !linkValid && <p className="text-xs text-red-600">Enter a valid web address.</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">Link title (optional)</Label>
+                <Input value={linkTitle} onChange={(e) => setLinkTitle(e.target.value)} placeholder="What is this link about?" maxLength={140} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">Short description (optional)</Label>
+                <Input value={linkDescription} onChange={(e) => setLinkDescription(e.target.value)} placeholder="Add a little context" maxLength={200} />
+              </div>
+              {linkValid && (
+                <a href={normalizedLink} target="_blank" rel="noreferrer" className="block rounded-xl border border-neutral-200 bg-neutral-50 p-4 hover:border-[#d4580a]">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <Link2 className="h-3.5 w-3.5" /> {new URL(normalizedLink).hostname.replace(/^www\./, "")}
+                  </div>
+                  <div className="mt-1 font-semibold text-neutral-900">{linkTitle.trim() || normalizedLink}</div>
+                  {linkDescription.trim() && <div className="mt-0.5 text-sm text-neutral-600">{linkDescription.trim()}</div>}
+                </a>
+              )}
             </div>
           )}
 
