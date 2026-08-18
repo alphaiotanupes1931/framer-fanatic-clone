@@ -2061,6 +2061,10 @@ export type Database = {
           is_deleted: boolean
           is_pinned: boolean
           likes_count: number
+          link_description: string | null
+          link_image: string | null
+          link_title: string | null
+          link_url: string | null
           media_urls: string[]
           music_url: string | null
           neighborhood: string | null
@@ -2087,6 +2091,10 @@ export type Database = {
           is_deleted?: boolean
           is_pinned?: boolean
           likes_count?: number
+          link_description?: string | null
+          link_image?: string | null
+          link_title?: string | null
+          link_url?: string | null
           media_urls?: string[]
           music_url?: string | null
           neighborhood?: string | null
@@ -2113,6 +2121,10 @@ export type Database = {
           is_deleted?: boolean
           is_pinned?: boolean
           likes_count?: number
+          link_description?: string | null
+          link_image?: string | null
+          link_title?: string | null
+          link_url?: string | null
           media_urls?: string[]
           music_url?: string | null
           neighborhood?: string | null
