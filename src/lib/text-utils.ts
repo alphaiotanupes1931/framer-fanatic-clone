@@ -15,6 +15,15 @@ export function stripHtml(s: string | null | undefined): string {
     .trim();
 }
 
+// Removes raw URLs from preview text so cards never show a truncated link.
+export function stripUrls(s: string | null | undefined): string {
+  if (!s) return "";
+  return s
+    .replace(/\b(?:https?:\/\/|www\.)\S+/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function truncateText(s: string | null | undefined, maxLen: number): string {
   const text = stripHtml(s);
   if (!text) return "";

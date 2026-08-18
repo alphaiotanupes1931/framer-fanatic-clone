@@ -1845,6 +1845,7 @@ export type Database = {
           created_at: string
           cv: Json
           email: string | null
+          hidden_from_showcase: boolean
           hours: Json | null
           id: string
           is_public: boolean
@@ -1870,6 +1871,7 @@ export type Database = {
           created_at?: string
           cv?: Json
           email?: string | null
+          hidden_from_showcase?: boolean
           hours?: Json | null
           id?: string
           is_public?: boolean
@@ -1895,6 +1897,7 @@ export type Database = {
           created_at?: string
           cv?: Json
           email?: string | null
+          hidden_from_showcase?: boolean
           hours?: Json | null
           id?: string
           is_public?: boolean

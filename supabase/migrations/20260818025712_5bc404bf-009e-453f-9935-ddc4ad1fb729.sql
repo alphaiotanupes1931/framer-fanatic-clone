@@ -1,0 +1,2 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS hidden_from_showcase boolean NOT NULL DEFAULT false;
+UPDATE public.organizations SET hidden_from_showcase = true WHERE id IN ('c6c60834-f448-4202-8051-2c141f6c565f','9e5166a3-2a0a-48ea-adbf-7d615fb1c4d4','9ec707a9-5d06-41d1-b460-d0910e6cf470');
