@@ -119,6 +119,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       eventId: z.string().uuid(),
       returnOrigin: z.string().url(),
       quantity: z.number().int().min(1).max(10).default(1),
+      ticketTypeId: z.string().uuid().optional(),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -135,8 +136,34 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
 
     if (evErr || !event) throw new Error("Event not found");
     if (event.is_published === false) throw new Error("Event is not on sale");
-    if (!event.price_cents || event.price_cents <= 0) {
-      throw new Error("This is a free event - no ticket purchase needed.");
+
+    // Events can sell several tiers. When a tier is chosen it defines price and limits.
+    let tier: { id: string; name: string; price_cents: number; quantity: number | null; max_per_buyer: number | null; sale_starts_at: string | null; sale_ends_at: string | null } | null = null;
+    if (data.ticketTypeId) {
+      const { data: tt } = await supabase
+        .from("ticket_types")
+        .select("id, name, price_cents, quantity, max_per_buyer, sale_starts_at, sale_ends_at, event_id")
+        .eq("id", data.ticketTypeId)
+        .maybeSingle();
+      if (!tt || tt.event_id !== event.id) throw new Error("Ticket type not found for this event.");
+      const now = Date.now();
+      if (tt.sale_starts_at && new Date(tt.sale_starts_at).getTime() > now) throw new Error("Sales for this ticket type haven't started yet.");
+      if (tt.sale_ends_at && new Date(tt.sale_ends_at).getTime() < now) throw new Error("Sales for this ticket type have ended.");
+      if (tt.max_per_buyer && data.quantity > tt.max_per_buyer) throw new Error(`You can buy at most ${tt.max_per_buyer} of this ticket type.`);
+      if (tt.quantity !== null) {
+        const { count } = await supabase
+          .from("tickets")
+          .select("id", { count: "exact", head: true })
+          .eq("ticket_type_id", tt.id)
+          .neq("status", "cancelled");
+        if ((count ?? 0) + data.quantity > tt.quantity) throw new Error("Not enough tickets left in this tier.");
+      }
+      tier = tt;
+    }
+
+    const unitPriceCents = tier ? tier.price_cents : (event.price_cents ?? 0);
+    if (!unitPriceCents || unitPriceCents <= 0) {
+      throw new Error("This is a free ticket - no purchase needed.");
     }
 
     // Get artist's connected account
@@ -146,7 +173,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       throw new Error("This artist hasn't finished setting up payments yet.");
     }
 
-    const breakdown = priceBreakdown(event.price_cents);
+    const breakdown = priceBreakdown(unitPriceCents);
     const qty = data.quantity;
     // Platform fee = flat 69¢ Planet Baltimore fee per ticket. Routed via application_fee_amount.
     const applicationFee = breakdown.platformFeeCents * qty;
@@ -158,7 +185,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
       line_items: checkoutLineItems(breakdown, {
-        name: `Ticket: ${event.title}`,
+        name: tier ? `${tier.name} - ${event.title}` : `Ticket: ${event.title}`,
         images: event.image_url ? [event.image_url] : undefined,
       }).map((li) => ({ ...li, quantity: qty })),
       payment_intent_data: {
@@ -171,6 +198,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
         artist_id: event.user_id,
         kind: "ticket",
         quantity: String(qty),
+        ticket_type_id: tier?.id ?? "",
         artist_net_cents: String(breakdown.artistNetCents),
         platform_tax_cents: String(breakdown.platformTaxCents),
         stripe_fee_cents: String(breakdown.stripeFeeCents),
@@ -191,6 +219,8 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       artist_net_cents: breakdown.artistNetCents,
       platform_tax_cents: breakdown.platformTaxCents,
       stripe_fee_cents: breakdown.stripeFeeCents,
+      ticket_type_id: tier?.id ?? null,
+      ticket_type_name: tier?.name ?? null,
       status: "pending",
     }));
     const { error: ticketErr } = await supabaseAdmin.from("tickets").insert(rows);

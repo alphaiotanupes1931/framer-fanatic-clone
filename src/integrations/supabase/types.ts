@@ -2722,6 +2722,8 @@ export type Database = {
           stripe_checkout_session_id: string | null
           stripe_fee_cents: number
           stripe_payment_intent_id: string | null
+          ticket_type_id: string | null
+          ticket_type_name: string | null
           updated_at: string
         }
         Insert: {
@@ -2739,6 +2741,8 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number
           stripe_payment_intent_id?: string | null
+          ticket_type_id?: string | null
+          ticket_type_name?: string | null
           updated_at?: string
         }
         Update: {
@@ -2756,6 +2760,8 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number
           stripe_payment_intent_id?: string | null
+          ticket_type_id?: string | null
+          ticket_type_name?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2764,6 +2770,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_ticket_type_id_fkey"
+            columns: ["ticket_type_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_types"
             referencedColumns: ["id"]
           },
         ]

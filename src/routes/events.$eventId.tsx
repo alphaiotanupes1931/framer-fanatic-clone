@@ -24,6 +24,12 @@ type EventRow = {
   neighborhood: string | null; video_url: string | null;
 };
 
+type TicketTier = {
+  id: string; name: string; description: string | null; price_cents: number;
+  quantity: number | null; max_per_buyer: number | null;
+  sale_starts_at: string | null; sale_ends_at: string | null; perks: string[] | null;
+};
+
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
 
 export const Route = createFileRoute("/events/$eventId")({
@@ -47,6 +53,8 @@ function EventDetail() {
   const [saved, setSaved] = useState(false);
   const [savingBk, setSavingBk] = useState(false);
   const [qty, setQty] = useState(1);
+  const [tiers, setTiers] = useState<TicketTier[]>([]);
+  const [tierId, setTierId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -67,6 +75,15 @@ function EventDetail() {
           setSaved(!!sv);
         }
       }
+      const { data: tt } = await supabase
+        .from("ticket_types")
+        .select("id, name, description, price_cents, quantity, max_per_buyer, sale_starts_at, sale_ends_at, perks")
+        .eq("event_id", eventId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      const list = (tt as TicketTier[] | null) ?? [];
+      setTiers(list);
+      if (list.length) setTierId(list[0].id);
       setLoading(false);
     })();
   }, [eventId]);
@@ -76,7 +93,12 @@ function EventDetail() {
     setBuying(true);
     try {
       const { url } = await checkoutFn({
-        data: { eventId: evt.id, returnOrigin: window.location.origin, quantity: qty },
+        data: {
+          eventId: evt.id,
+          returnOrigin: window.location.origin,
+          quantity: qty,
+          ...(selectedTier ? { ticketTypeId: selectedTier.id } : {}),
+        },
       });
       if (url) window.location.href = url;
     } catch (e) {
@@ -85,6 +107,15 @@ function EventDetail() {
       setBuying(false);
     }
   };
+
+  const selectedTier = tiers.find((t) => t.id === tierId) ?? null;
+  const tierOnSale = (t: TicketTier) => {
+    const now = Date.now();
+    if (t.sale_starts_at && new Date(t.sale_starts_at).getTime() > now) return false;
+    if (t.sale_ends_at && new Date(t.sale_ends_at).getTime() < now) return false;
+    return true;
+  };
+  const maxQty = Math.min(10, selectedTier?.max_per_buyer ?? 10);
 
   const rsvp = async () => {
     if (!evt) return;
@@ -233,37 +264,77 @@ function EventDetail() {
         {evt.video_url && <EventVideo path={evt.video_url} />}
 
         <div className="flex flex-col gap-3 border-t border-border pt-6">
-          {priced ? (
+          {tiers.length > 0 ? (
+            <>
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-foreground">Choose your ticket</span>
+                {tiers.map((t) => {
+                  const onSale = tierOnSale(t);
+                  const active = t.id === tierId;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      disabled={!onSale}
+                      onClick={() => { setTierId(t.id); setQty(1); }}
+                      className={`w-full rounded-xl border px-4 py-3 text-left transition ${
+                        active ? "border-[#d4580a] bg-[#d4580a]/5" : "border-border hover:border-[#d4580a]/50"
+                      } ${onSale ? "" : "opacity-50"}`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm font-semibold text-foreground">{t.name}</span>
+                        <span className="text-sm font-semibold tabular-nums text-foreground">
+                          {t.price_cents > 0 ? `$${(t.price_cents / 100).toFixed(2)}` : "Free"}
+                        </span>
+                      </div>
+                      {t.description && <p className="mt-0.5 text-xs text-muted-foreground">{t.description}</p>}
+                      {t.perks && t.perks.length > 0 && (
+                        <p className="mt-1 text-xs text-muted-foreground">Includes: {t.perks.join(", ")}</p>
+                      )}
+                      {!onSale && <p className="mt-1 text-xs text-muted-foreground">Not on sale right now</p>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedTier && selectedTier.price_cents > 0 ? (
+                <>
+                  <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                    <span className="text-sm font-medium text-foreground">Quantity</span>
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
+                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
+                      <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                      <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
+                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
+                    </div>
+                  </div>
+                  <Button onClick={buy} disabled={buying || !tierOnSale(selectedTier)} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                    <Ticket className="w-4 h-4" />
+                    {buying ? "Loading…" : `Buy ${qty > 1 ? `${qty} Tickets` : "Ticket"} · $${((selectedTier.price_cents * qty) / 100).toFixed(2)}`}
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                  {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "Reserve free ticket"}
+                </Button>
+              )}
+            </>
+          ) : priced ? (
             <>
               <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
                 <span className="text-sm font-medium text-foreground">Tickets</span>
                 <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    disabled={qty <= 1}
-                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40"
-                    aria-label="Fewer tickets"
-                  >
-                    -
-                  </button>
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
                   <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => Math.min(10, q + 1))}
-                    disabled={qty >= 10}
-                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40"
-                    aria-label="More tickets"
-                  >
-                    +
-                  </button>
+                  <button type="button" onClick={() => setQty((q) => Math.min(10, q + 1))} disabled={qty >= 10}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
                 </div>
               </div>
               <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
                 <Ticket className="w-4 h-4" />
-                {buying
-                  ? "Loading…"
-                  : `Buy ${qty > 1 ? `${qty} Tickets` : "Ticket"} · $${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
+                {buying ? "Loading…" : `Buy ${qty > 1 ? `${qty} Tickets` : "Ticket"} · $${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
               </Button>
             </>
           ) : (

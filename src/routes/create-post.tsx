@@ -68,6 +68,7 @@ function CreatePostPage() {
   const [linkTitle, setLinkTitle] = useState("");
   const [linkDescription, setLinkDescription] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [neighborhoodOptions, setNeighborhoodOptions] = useState<string[]>([]);
   const [category, setCategory] = useState<string>("General");
   const [tag, setTag] = useState<string>("");
   const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
@@ -83,6 +84,16 @@ function CreatePostPage() {
   const hasMedia =
     (postType === "photo" && (mediaUrls.length > 0 || !!imagePath)) ||
     (postType === "video" && (mediaUrls.length > 0 || !!videoPath));
+  useEffect(() => {
+    supabase
+      .from("neighborhoods")
+      .select("name")
+      .order("name", { ascending: true })
+      .then(({ data }) => {
+        if (data) setNeighborhoodOptions(data.map((n: { name: string }) => n.name));
+      });
+  }, []);
+
   const normalizedLink = linkUrl.trim() ? (/^https?:\/\//i.test(linkUrl.trim()) ? linkUrl.trim() : `https://${linkUrl.trim()}`) : "";
   const linkValid = (() => {
     if (!normalizedLink) return false;
@@ -392,7 +403,15 @@ function CreatePostPage() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">Neighborhood</Label>
-              <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} maxLength={80} placeholder="e.g. Hampden" />
+              <select
+                value={neighborhood}
+                onChange={(e) => setNeighborhood(e.target.value)}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">No neighborhood</option>
+                {neighborhoodOptions.map((n) => <option key={n} value={n}>{n}</option>)}
+                {neighborhood && !neighborhoodOptions.includes(neighborhood) && <option value={neighborhood}>{neighborhood}</option>}
+              </select>
             </div>
           </div>
 

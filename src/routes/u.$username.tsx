@@ -36,7 +36,7 @@ type PersonTabKey = "posts" | "about" | "writings" | "saved" | "attending" | "or
 const PERSON_TABS: Array<{ key: PersonTabKey; label: string; Icon: React.ComponentType<{ className?: string }> }> = [
   { key: "posts", label: "Posts", Icon: Grid2x2 },
   { key: "about", label: "About", Icon: Info },
-  { key: "writings", label: "Writings", Icon: BookOpen },
+  { key: "writings", label: "Stories", Icon: BookOpen },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "attending", label: "Attending", Icon: CalendarCheck },
   { key: "organized", label: "Organized", Icon: Calendar },
