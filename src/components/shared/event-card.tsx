@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img } from "@/components/shared/smart-img";
+import { stripHtml, stripUrls } from "@/lib/text-utils";
 
 type EventRow = {
   id: string;
@@ -52,6 +53,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const eventUrl = siteUrl(`/events/${event.id}`);
+  const previewText = stripUrls(stripHtml(event.description));
 
   useEffect(() => {
     if (compact || !me?.id) return;
@@ -121,7 +123,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
       <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
-        {showImage && (
+        {showImage ? (
         <div className="relative aspect-[16/9] overflow-hidden bg-muted">
           <Img
             src={resolvedImage}
@@ -138,6 +140,19 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
             <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">{event.category}</Badge>
           )}
         </div>
+        ) : (
+          <div className="relative flex aspect-[16/6] flex-col justify-end overflow-hidden bg-gradient-to-br from-[#d4580a] to-[#7a2f04] p-4 sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
+              {eventDate ? format(eventDate, "EEE, MMM d") : "Date TBD"}
+            </span>
+            <span className="line-clamp-2 text-base font-extrabold leading-tight text-white sm:text-lg">{event.title}</span>
+            {event.is_free && (
+              <Badge className="absolute left-3 top-3 border-0 bg-green-500/90 text-xs text-white">Free</Badge>
+            )}
+            {event.category && (
+              <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/30 text-xs capitalize text-white">{event.category}</Badge>
+            )}
+          </div>
         )}
         <div className="p-4 sm:p-5">
         <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
@@ -145,7 +160,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
           <span className="truncate">{eventDate ? format(eventDate, "EEE, MMM d · h:mm a") : "Date TBD"}</span>
         </div>
         <h3 className="line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{event.title}</h3>
-        {event.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">{event.description}</p>}
+        {previewText && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">{previewText}</p>}
         <div className="mt-3 flex items-center gap-1 text-[11px] text-muted-foreground sm:text-xs">
           <MapPin className="h-3 w-3" />
           <span className="truncate">{event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore"}</span>
