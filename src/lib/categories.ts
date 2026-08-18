@@ -170,6 +170,8 @@ export const ORG_TYPE_LABEL: Record<string, string> = {
   business: "Business",
   community_assoc: "Community Association",
   group: "Group",
+  resident: "Resident",
+  visitor: "Visitor",
 };
 
 export function subtypesFor(type: string): readonly string[] {
