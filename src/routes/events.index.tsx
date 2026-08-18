@@ -1,5 +1,5 @@
 import { siteUrl } from "@/lib/utils";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -302,11 +302,13 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
     }
   };
 
+  const navigate = useNavigate();
+
   const submit = async () => {
     if (!me) return;
     if (!form.title || !form.starts_at) { toast.error("Title and date required"); return; }
     const priceCents = Math.max(0, Math.round(parseFloat(form.price || "0") * 100));
-    const { error } = await supabase.from("events").insert({
+    const { data: created, error } = await supabase.from("events").insert({
       user_id: me.id,
       title: form.title,
       description: form.description || null,
@@ -314,17 +316,20 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       image_url: form.image_url || null,
       starts_at: new Date(form.starts_at).toISOString(),
       price_cents: priceCents,
-    });
+    }).select("id").maybeSingle();
     if (error) {
       toast.error(error.message.includes("row-level security")
         ? "Only Artists can post events. Upgrade in your profile."
         : error.message);
       return;
     }
-    toast.success("Event posted");
+    toast.success("Event created. Add your ticket types.");
     setOpen(false);
     setForm({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
     reload();
+    const newId = (created as { id: string } | null)?.id;
+    // Organizers continue in the studio so they can set up ticket types.
+    navigate({ to: "/organizer-studio", search: newId ? { event: newId } : {} });
   };
 
   return (
