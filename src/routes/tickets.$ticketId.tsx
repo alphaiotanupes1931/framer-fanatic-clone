@@ -30,6 +30,7 @@ function TicketDetailPage() {
   const { ticketId } = useParams({ from: "/tickets/$ticketId" });
   const [t, setT] = useState<TicketDetail | null | undefined>(undefined);
   const [shareOpen, setShareOpen] = useState(false);
+  const [holder, setHolder] = useState<{ display_name: string | null; email: string | null } | null>(null);
 
   useEffect(() => {
     supabase.from("tickets")
@@ -38,6 +39,12 @@ function TicketDetailPage() {
       .maybeSingle()
       .then(({ data }) => setT((data as TicketDetail | null) ?? null));
   }, [ticketId]);
+
+  useEffect(() => {
+    if (!t?.buyer_id) return;
+    supabase.from("profiles").select("display_name,email").eq("id", t.buyer_id).maybeSingle()
+      .then(({ data }) => setHolder((data as { display_name: string | null; email: string | null } | null) ?? null));
+  }, [t?.buyer_id]);
 
   const shareExternal = () => {
     const url = t?.events?.id ? siteUrl(`/events/${t.events.id}`) : window.location.href;
@@ -55,7 +62,9 @@ function TicketDetailPage() {
   if (!t) return <AppLayout><div className="py-24 text-center text-neutral-500">Ticket not found.</div></AppLayout>;
 
   const when = t.events ? new Date(t.events.starts_at) : null;
-  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&data=${encodeURIComponent(t.id)}`;
+  // Scanning the QR opens this exact ticket page (real, verifiable link).
+  const ticketUrl = siteUrl(`/tickets/${t.id}`);
+  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&ecc=M&format=png&data=${encodeURIComponent(ticketUrl)}`;
 
   return (
     <>
@@ -96,6 +105,11 @@ function TicketDetailPage() {
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">Venue</div>
               <div className="font-semibold">{t.events?.venue_name ?? t.events?.location ?? "TBA"}</div>
               {t.events?.address && <div className="text-xs text-white/60">{t.events.address}</div>}
+            </div>
+            <div className="col-span-2">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">Ticket holder</div>
+              <div className="font-semibold">{holder?.display_name ?? "Guest"}</div>
+              {holder?.email && <div className="break-all text-xs text-white/60">{holder.email}</div>}
             </div>
           </div>
 
