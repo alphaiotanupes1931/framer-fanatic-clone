@@ -11,9 +11,9 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartImage } from "@/components/smart-image";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { LinkPreviewCard } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/stories/$storyId")({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   component: StoryDetail,
   head: () => ({ meta: [{ title: "Story - Planet Baltimore" }] }),
 });
