@@ -87,6 +87,7 @@ function FindCreatorPage() {
           .from("organizations")
           .select("id,name,slug,avatar_url,neighborhood,bio,subtype,created_at")
           .eq("type", "artist")
+          .eq("hidden_from_showcase", false)
           .order("created_at", { ascending: false })
           .limit(96),
       ]);
