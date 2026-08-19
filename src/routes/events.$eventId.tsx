@@ -75,7 +75,14 @@ export const Route = createFileRoute("/events/$eventId")({
     const where = [e.venueName, e.location || e.neighborhood].filter(Boolean).join(", ");
     const when = new Date(e.startsAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
     const description = (e.description ? stripHtml(e.description) : `${e.title} on ${when}${where ? ` at ${where}` : ""} in Baltimore.`).slice(0, 155);
-    const title = `${e.title}${where ? ` at ${where.split(", ")[0]}` : ""} | Planet Baltimore`.slice(0, 60);
+    const suffix = " | Planet Baltimore";
+    const venue = where ? ` at ${where.split(", ")[0]}` : "";
+    let base = `${e.title}${venue}`;
+    if (base.length > 60 - suffix.length) {
+      base = base.slice(0, 60 - suffix.length - 1);
+      base = base.slice(0, base.lastIndexOf(" ") > 20 ? base.lastIndexOf(" ") : base.length).replace(/[,\s]+$/, "");
+    }
+    const title = `${base}${suffix}`;
     const image = e.imageUrl && /^https?:\/\//.test(e.imageUrl) ? e.imageUrl : null;
 
     const jsonLd: Record<string, unknown> = {
