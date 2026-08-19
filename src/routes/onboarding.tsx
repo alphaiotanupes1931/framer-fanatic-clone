@@ -131,7 +131,8 @@ function Onboarding() {
         sessionStorage.removeItem("pb_post_auth_redirect");
       } catch { /* ignore */ }
       if (dest) { window.location.replace(dest); return; }
-      navigate({ to: "/dashboard" });
+      // Send them straight into the follow nudge so the feed isn't empty.
+      navigate({ to: "/welcome" });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Something went wrong";
       toast.error(msg);
