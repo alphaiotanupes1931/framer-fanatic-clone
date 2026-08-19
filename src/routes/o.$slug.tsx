@@ -1,3 +1,4 @@
+import { StaffLoginCard } from "@/components/org/staff-login-card";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
