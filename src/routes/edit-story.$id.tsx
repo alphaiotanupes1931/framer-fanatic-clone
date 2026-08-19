@@ -237,9 +237,6 @@ function EditStoryPage() {
           )}
         </div>
 
-        <div className="mt-6">
-        </div>
-
         <div className="mt-8 space-y-2">
           <div className="text-sm font-semibold text-neutral-800">Content</div>
           <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">

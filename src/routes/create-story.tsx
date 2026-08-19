@@ -262,9 +262,6 @@ function CreateStoryPage() {
           )}
         </div>
 
-        <div className="mt-6">
-        </div>
-
         {/* Content */}
         <div className="mt-8 space-y-2">
           <div className="text-sm font-semibold text-neutral-800">Content</div>
