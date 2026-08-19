@@ -10,7 +10,7 @@ import { ArrowLeft, ImagePlus, Loader2, Save, X, Users, Globe, Lock, Star } from
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
-import { LinkFields, isValidLink, normalizeLink } from "@/components/shared/link-fields";
+import { isValidLink, normalizeLink } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/edit-post/$id")({
   component: EditPostPage,
@@ -253,7 +253,6 @@ function EditPostPage() {
             </div>
           )}
 
-          <LinkFields value={link} onChange={setLink} />
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">

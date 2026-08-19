@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
-import { LinkFields, isValidLink, normalizeLink } from "@/components/shared/link-fields";
+import { isValidLink, normalizeLink } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/create-story")({
   component: CreateStoryPage,
@@ -260,11 +260,6 @@ function CreateStoryPage() {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Link */}
-        <div className="mt-6">
-          <LinkFields value={link} onChange={setLink} />
         </div>
 
         {/* Content */}

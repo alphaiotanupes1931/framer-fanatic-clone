@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MentionField } from "@/components/shared/mention-input";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star, Link2 } from "lucide-react";
+import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
-import { LinkFields, isValidLink, normalizeLink } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/create-post")({
   component: CreatePostPage,
@@ -24,7 +23,7 @@ export const Route = createFileRoute("/create-post")({
   }),
 });
 
-type PostType = "text" | "photo" | "video" | "link";
+type PostType = "text" | "photo" | "video";
 type Visibility = "public" | "followers" | "close_friends" | "only_me";
 
 const CATEGORIES = [
@@ -65,9 +64,6 @@ function CreatePostPage() {
   const [imagePath, setImagePath] = useState("");
   const [videoPath, setVideoPath] = useState("");
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkTitle, setLinkTitle] = useState("");
-  const [linkDescription, setLinkDescription] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [neighborhoodOptions, setNeighborhoodOptions] = useState<string[]>([]);
   const [category, setCategory] = useState<string>("General");
@@ -95,12 +91,9 @@ function CreatePostPage() {
       });
   }, []);
 
-  const normalizedLink = normalizeLink(linkUrl);
-  const linkValid = isValidLink(linkUrl);
   const canSubmit =
     contentValid &&
     (postType === "text" ? content.trim().length > 0
-      : postType === "link" ? linkValid
       : hasMedia || content.trim().length > 0);
 
   // Debounced people search for the excluded list
@@ -150,9 +143,9 @@ function CreatePostPage() {
         content: content.trim(),
         image_url: postType === "photo" ? (mediaUrls[0] || imagePath || null) : null,
         video_url: postType === "video" ? (mediaUrls.find((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) || videoPath || null) : null,
-        link_url: linkValid ? normalizedLink : null,
-        link_title: linkValid ? (linkTitle.trim() || null) : null,
-        link_description: linkValid ? (linkDescription.trim() || null) : null,
+        link_url: null,
+        link_title: null,
+        link_description: null,
         media_urls: mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
         music_url: null,
         post_type: postType,
@@ -179,7 +172,6 @@ function CreatePostPage() {
     { id: "text",  label: "Text",  Icon: TypeIcon },
     { id: "photo", label: "Photo", Icon: ImagePlus },
     { id: "video", label: "Video", Icon: VideoIcon },
-    { id: "link",  label: "Link",  Icon: Link2 },
   ];
 
   const visibilityOpts: { id: Visibility; label: string; hint: string; Icon: typeof Globe }[] = [
@@ -276,12 +268,6 @@ function CreatePostPage() {
                 className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-[#d4580a]" />
             </div>
           )}
-
-          <LinkFields
-            value={{ url: linkUrl, title: linkTitle, description: linkDescription }}
-            onChange={(v) => { setLinkUrl(v.url); setLinkTitle(v.title); setLinkDescription(v.description); }}
-            heading={postType === "link" ? "Link" : "Add a link (optional)"}
-          />
 
           {postType === "photo" && (
             <div className="space-y-1.5">
