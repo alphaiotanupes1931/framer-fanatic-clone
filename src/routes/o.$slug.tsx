@@ -711,10 +711,10 @@ function GroupRequests({ orgId, onApproved, onCountChange }: { orgId: string; on
       <ul className="divide-y divide-neutral-100">
         {rows.map((r) => (
           <li key={r.user_id} className="flex items-center justify-between gap-3 py-2.5">
-            <div className="min-w-0 text-sm">
+            <Link to="/u/$username" params={{ username: r.username || r.user_id }} className="min-w-0 text-sm hover:text-[#d4580a]">
               <div className="truncate font-medium text-neutral-900">{r.display_name || r.username || "Someone"}</div>
               {r.username && <div className="truncate text-xs text-neutral-500">@{r.username}</div>}
-            </div>
+            </Link>
             <div className="flex shrink-0 gap-2">
               <button disabled={busy === r.user_id} onClick={() => act(r.user_id, true)} className="rounded-full bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-neutral-800 disabled:opacity-60">Approve</button>
               <button disabled={busy === r.user_id} onClick={() => act(r.user_id, false)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60">Decline</button>
@@ -1215,8 +1215,13 @@ function MembersTab({ orgId }: { orgId: string }) {
   if (rows.length === 0) return <div className="py-14 text-center text-sm text-neutral-500">No members yet.</div>;
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {rows.map((p) => (
-        <div key={p.id} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3">
+        {rows.map((p) => (
+        <Link
+          key={p.id}
+          to="/u/$username"
+          params={{ username: p.username || p.id }}
+          className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 transition hover:border-orange-300 hover:shadow-sm"
+        >
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-neutral-200">
             {p.avatar_url && <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />}
           </div>
@@ -1224,7 +1229,7 @@ function MembersTab({ orgId }: { orgId: string }) {
             <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username || "Member"}</div>
             {p.neighborhood && <div className="truncate text-xs text-neutral-500">{p.neighborhood}</div>}
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );
