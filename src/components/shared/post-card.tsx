@@ -59,6 +59,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   onPinnedChange?: (id: string, pinned: boolean, pinnedAt: string | null) => void;
   reason?: string;
 }) {
+  const navigate = useNavigate();
   const [likes, setLikes] = useState(post.likes_count ?? 0);
   const { liked, saved, setLiked, setSaved } = useReaction(post.id, currentUserId);
   const [lightbox, setLightbox] = useState(false);
