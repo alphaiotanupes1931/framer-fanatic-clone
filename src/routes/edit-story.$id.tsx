@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   ArrowLeft, Bold, Code2, ImagePlus, Italic, Link2, List, ListOrdered,
-  Loader2, Quote, RemoveFormatting, Save, Strikethrough, Underline, X, ImageIcon,
+  Loader2, Quote, Send, RemoveFormatting, Save, Strikethrough, Underline, X, ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
@@ -49,6 +49,8 @@ function EditStoryPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [status, setStatus] = useState<string>("published");
   const [tagInput, setTagInput] = useState("");
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -64,6 +66,7 @@ function EditStoryPage() {
       const { data, error } = await supabase.from("stories").select("*").eq("id", id).maybeSingle();
       if (error || !data) { toast.error("Story not found"); navigate({ to: "/stories" }); return; }
       setOwnerId(data.user_id);
+      setStatus((data as { status?: string | null }).status || "published");
       setForm({
         title: data.title || "",
         excerpt: data.excerpt || "",
@@ -124,10 +127,15 @@ function EditStoryPage() {
   };
   const removeTag = (t: string) => set("tags", form.tags.filter((x) => x !== t));
 
-  const save = async () => {
+  const save = async (nextStatus?: "published") => {
     if (!me) { toast.error("Please sign in"); return; }
     if (ownerId && ownerId !== me.id) { toast.error("You can only edit your own stories"); return; }
-    setSaving(true);
+    if (nextStatus === "published" && !(form.title.trim() && (form.content || "").replace(/<[^>]*>/g, "").trim())) {
+      toast.error("Title and content are required to publish");
+      return;
+    }
+    const setBusy = nextStatus === "published" ? setPublishing : setSaving;
+    setBusy(true);
     try {
       const plain = (form.content || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
       const words = plain ? plain.split(/\s+/).length : 0;
@@ -144,13 +152,15 @@ function EditStoryPage() {
         link_title: isValidLink(link.url) ? (link.title.trim() || null) : null,
         link_description: isValidLink(link.url) ? (link.description.trim() || null) : null,
         read_minutes,
+        ...(nextStatus === "published" ? { status: "published" } : {}),
         updated_at: new Date().toISOString(),
       }).eq("id", id);
       if (error) throw error;
-      toast.success("Story updated");
+      if (nextStatus === "published") setStatus("published");
+      toast.success(nextStatus === "published" ? "Story published" : "Story updated");
       navigate({ to: "/stories/$storyId", params: { storyId: id } });
     } catch (e) { toast.error(e instanceof Error ? e.message : "Could not save"); }
-    finally { setSaving(false); }
+    finally { setBusy(false); }
   };
 
   const tbBtn = "inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900";
@@ -164,9 +174,15 @@ function EditStoryPage() {
           <Link to="/stories/$storyId" params={{ storyId: id }} className="inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900">
             <ArrowLeft className="h-4 w-4" /> Back to story
           </Link>
-          <Button onClick={save} disabled={saving} className="gap-2 bg-neutral-800 text-white hover:bg-neutral-900">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save changes
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => save()} disabled={saving || publishing} className="gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save changes
+            </Button>
+            <Button onClick={() => save("published")} disabled={saving || publishing} className="gap-2 bg-neutral-800 text-white hover:bg-neutral-900">
+              {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {status === "published" ? "Publish update" : "Publish"}
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2">
