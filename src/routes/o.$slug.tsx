@@ -810,7 +810,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
   return <OrgPostList orgId={org.id} kind={kind} canManage={canManage} />;
 }
 
-function InviteTab({ orgName }: { orgName: string }) {
+function InviteTab({ orgName, orgSlug }: { orgName: string; orgSlug: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -822,7 +822,10 @@ function InviteTab({ orgName }: { orgName: string }) {
       >
         Invite Friends to Join
       </button>
-      <InviteFriendsDialog open={open} onClose={() => setOpen(false)} />
+      <p className="text-center text-xs text-neutral-500">
+        Your link brings them straight to {orgName}, so they join this page and not just the site.
+      </p>
+      <InviteFriendsDialog open={open} onClose={() => setOpen(false)} group={{ slug: orgSlug, name: orgName }} />
     </div>
   );
 }
