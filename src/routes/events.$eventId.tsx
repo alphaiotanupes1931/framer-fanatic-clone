@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReportButton } from "@/components/shared/report-button";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
@@ -377,6 +378,9 @@ function EventDetail() {
           <Button onClick={() => setShareOpen(true)} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2" aria-label="Share">
             <Send className="w-4 h-4 -rotate-45" />Share
           </Button>
+          <div className="flex justify-center pt-1">
+            <ReportButton contentType="event" contentId={eventId} label="Report this event" />
+          </div>
           <Button
             onClick={async () => {
               if (!me) { toast.error("Sign in to save"); return; }

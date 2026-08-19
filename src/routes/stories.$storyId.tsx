@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, ArrowRight, Heart, MessageCircle, Clock, Trash2, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import DOMPurify from "isomorphic-dompurify";
+import { ReportButton } from "@/components/shared/report-button";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartImage } from "@/components/smart-image";
@@ -251,6 +252,7 @@ function StoryDetail() {
             <button onClick={() => setShareOpen(true)} aria-label="Share" title="Share" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-accent">
               <Send className="h-4 w-4 -rotate-45" /> Share
             </button>
+            <ReportButton contentType="story" contentId={storyId} label="Report" className="rounded-full border border-border bg-card px-3 py-1.5" />
           </div>
 
           <section className="mt-10">
