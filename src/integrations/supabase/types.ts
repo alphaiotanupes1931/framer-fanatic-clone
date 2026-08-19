@@ -506,6 +506,7 @@ export type Database = {
           latitude: number | null
           location: string | null
           longitude: number | null
+          max_tickets_per_buyer: number | null
           neighborhood: string | null
           organization_id: string | null
           price_cents: number
@@ -531,6 +532,7 @@ export type Database = {
           latitude?: number | null
           location?: string | null
           longitude?: number | null
+          max_tickets_per_buyer?: number | null
           neighborhood?: string | null
           organization_id?: string | null
           price_cents?: number
@@ -556,6 +558,7 @@ export type Database = {
           latitude?: number | null
           location?: string | null
           longitude?: number | null
+          max_tickets_per_buyer?: number | null
           neighborhood?: string | null
           organization_id?: string | null
           price_cents?: number
