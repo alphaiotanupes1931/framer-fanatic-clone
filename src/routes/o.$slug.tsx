@@ -711,10 +711,10 @@ function GroupRequests({ orgId, onApproved, onCountChange }: { orgId: string; on
       <ul className="divide-y divide-neutral-100">
         {rows.map((r) => (
           <li key={r.user_id} className="flex items-center justify-between gap-3 py-2.5">
-            <div className="min-w-0 text-sm">
+            <Link to="/u/$username" params={{ username: r.username || r.user_id }} className="min-w-0 text-sm hover:text-[#d4580a]">
               <div className="truncate font-medium text-neutral-900">{r.display_name || r.username || "Someone"}</div>
               {r.username && <div className="truncate text-xs text-neutral-500">@{r.username}</div>}
-            </div>
+            </Link>
             <div className="flex shrink-0 gap-2">
               <button disabled={busy === r.user_id} onClick={() => act(r.user_id, true)} className="rounded-full bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-neutral-800 disabled:opacity-60">Approve</button>
               <button disabled={busy === r.user_id} onClick={() => act(r.user_id, false)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60">Decline</button>
