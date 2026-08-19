@@ -326,7 +326,7 @@ function CreatePostPage() {
                 {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
                 {mediaUrls.length ? "Add more" : "Upload images or videos"}
               </Button>
-              <p className="text-xs text-neutral-500">You can upload multiple images and videos in one post.</p>
+              <p className="text-xs text-neutral-500">Max 50MB per video. Supports only landscape videos.</p>
             </div>
           )}
 
@@ -370,7 +370,7 @@ function CreatePostPage() {
                 {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <VideoIcon className="mr-2 h-4 w-4" />}
                 {mediaUrls.length ? "Add more" : "Upload videos or images"}
               </Button>
-              <p className="text-xs text-neutral-500">Max 50MB per video. You can add multiple items.</p>
+              <p className="text-xs text-neutral-500">Max 50MB per video. Supports only landscape videos.</p>
             </div>
           )}
 
