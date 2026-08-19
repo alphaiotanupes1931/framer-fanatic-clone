@@ -86,9 +86,6 @@ export function TopMenuBar() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Link to="/search" aria-label="Search" className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors active:bg-secondary ${currentPath === "/search" ? "text-[#d4580a]" : "text-muted-foreground"}`}>
-            <Search className="h-5 w-5" />
-          </Link>
           <Link to="/notifications" aria-label="Notifications" className={`relative hidden sm:flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors active:bg-secondary ${currentPath === "/notifications" ? "text-[#d4580a]" : "text-muted-foreground"}`}>
             <Bell className="h-5 w-5" />
             {unreadNotifications > 0 && (
