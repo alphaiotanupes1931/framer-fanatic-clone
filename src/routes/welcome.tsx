@@ -148,7 +148,7 @@ function Welcome() {
                       className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${on ? "border-[#d4580a] bg-orange-50" : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"}`}
                     >
                       <Avatar className="h-10 w-10 rounded-full">
-                        <SmartAvatarImage src={c.avatar_url} className="rounded-full object-cover" />
+                        <SmartAvatarImage src={c.avatar_url ?? undefined} className="rounded-full object-cover" />
                         <AvatarFallback className="rounded-full bg-neutral-100 text-sm font-bold text-neutral-600">
                           {(c.display_name || c.username || "?").charAt(0)}
                         </AvatarFallback>
