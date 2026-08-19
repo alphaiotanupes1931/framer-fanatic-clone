@@ -5,12 +5,14 @@ import { EventImage } from "@/components/event-image";
 import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search as SearchIcon, MapPin, Calendar } from "lucide-react";
+import { Search as SearchIcon, MapPin, Calendar, FileText, BookOpen } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
+  validateSearch: (search: Record<string, unknown>): { q?: string } =>
+    typeof search.q === "string" && search.q ? { q: search.q } : {},
   head: () => ({ meta: [{ title: "Search - Planet Baltimore" }] }),
 });
 
@@ -18,19 +20,33 @@ type Person = { id: string; display_name: string | null; username: string | null
 type Org = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
 type Ev = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
 type Business = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
+type PostRow = { id: string; content: string; created_at: string; media_urls: string[] | null };
+type StoryRow = { id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string };
+type Hood = { id: string; name: string; region: string };
 
-const TABS = ["All", "People", "Organizations", "Events", "Businesses"] as const;
+const TABS = ["All", "People", "Organizations", "Events", "Businesses", "Posts", "Stories", "Neighborhoods"] as const;
 type Tab = (typeof TABS)[number];
 
+function stripHtml(s: string) {
+  return s.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function SearchPage() {
-  const [q, setQ] = useState("");
-  const [debounced, setDebounced] = useState("");
+  const { q: initialQ } = Route.useSearch();
+  const [q, setQ] = useState(initialQ ?? "");
+  const [debounced, setDebounced] = useState((initialQ ?? "").trim());
   const [tab, setTab] = useState<Tab>("All");
   const [people, setPeople] = useState<Person[]>([]);
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [events, setEvents] = useState<Ev[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [stories, setStories] = useState<StoryRow[]>([]);
+  const [hoods, setHoods] = useState<Hood[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Keep the field in sync when the header bar navigates here with a new query.
+  useEffect(() => { setQ(initialQ ?? ""); }, [initialQ]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(q.trim()), 250);
@@ -43,7 +59,7 @@ function SearchPage() {
       setLoading(true);
       const hasQ = debounced.length > 0;
       const like = `%${debounced}%`;
-      const [pplRes, orgRes, evRes, bizRes] = await Promise.all([
+      const [pplRes, orgRes, evRes, bizRes, postRes, storyRes, hoodRes] = await Promise.all([
         hasQ
           ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
           : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
@@ -56,12 +72,24 @@ function SearchPage() {
         hasQ
           ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).ilike("name", like).limit(24)
           : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).order("created_at", { ascending: false }).limit(24),
+        hasQ
+          ? supabase.from("posts").select("id,content,created_at,media_urls").eq("is_deleted", false).eq("visibility", "public").ilike("content", like).order("created_at", { ascending: false }).limit(24)
+          : supabase.from("posts").select("id,content,created_at,media_urls").eq("is_deleted", false).eq("visibility", "public").order("created_at", { ascending: false }).limit(12),
+        hasQ
+          ? supabase.from("stories").select("id,title,excerpt,cover_url,created_at").eq("status", "published").ilike("title", like).order("created_at", { ascending: false }).limit(24)
+          : supabase.from("stories").select("id,title,excerpt,cover_url,created_at").eq("status", "published").order("created_at", { ascending: false }).limit(12),
+        hasQ
+          ? supabase.from("neighborhoods").select("id,name,region").ilike("name", like).order("name").limit(24)
+          : supabase.from("neighborhoods").select("id,name,region").order("name").limit(12),
       ]);
       if (cancelled) return;
       setPeople((pplRes.data ?? []) as Person[]);
       setOrgs((orgRes.data ?? []) as Org[]);
       setEvents((evRes.data ?? []) as Ev[]);
       setBusinesses((bizRes.data ?? []) as Business[]);
+      setPosts((postRes.data ?? []) as PostRow[]);
+      setStories((storyRes.data ?? []) as StoryRow[]);
+      setHoods((hoodRes.data ?? []) as Hood[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -69,13 +97,14 @@ function SearchPage() {
 
   const totals = useMemo(() => ({
     People: people.length, Organizations: orgs.length, Events: events.length, Businesses: businesses.length,
-    All: people.length + orgs.length + events.length + businesses.length,
-  }), [people, orgs, events, businesses]);
+    Posts: posts.length, Stories: stories.length, Neighborhoods: hoods.length,
+    All: people.length + orgs.length + events.length + businesses.length + posts.length + stories.length + hoods.length,
+  }), [people, orgs, events, businesses, posts, stories, hoods]);
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        <HeroBanner title="Search" subtitle="Find people, organizations, businesses, and events across Baltimore." />
+        <HeroBanner title="Search" subtitle="Find posts, stories, events, creators, neighborhoods, businesses and organizations across Baltimore." />
 
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
@@ -179,6 +208,62 @@ function SearchPage() {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{b.name}</div>
                         <div className="text-xs text-muted-foreground">Business{b.neighborhood ? ` · ${b.neighborhood}` : ""}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {(tab === "All" || tab === "Posts") && posts.length > 0 && (
+              <Section title="Posts">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {posts.slice(0, tab === "All" ? 6 : 24).map((p) => (
+                    <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                      <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted">
+                        {p.media_urls && p.media_urls[0]
+                          ? <Img src={p.media_urls[0]} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                          : <FileText className="h-4 w-4 text-muted-foreground" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="line-clamp-2 text-sm font-medium text-foreground">{stripHtml(p.content)}</div>
+                        <div className="mt-0.5 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {(tab === "All" || tab === "Stories") && stories.length > 0 && (
+              <Section title="Stories">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {stories.slice(0, tab === "All" ? 6 : 24).map((s) => (
+                    <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                      <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted">
+                        {s.cover_url
+                          ? <Img src={s.cover_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                          : <BookOpen className="h-4 w-4 text-muted-foreground" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-foreground">{s.title}</div>
+                        {s.excerpt && <div className="line-clamp-2 text-xs text-muted-foreground">{stripHtml(s.excerpt)}</div>}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {(tab === "All" || tab === "Neighborhoods") && hoods.length > 0 && (
+              <Section title="Neighborhoods">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {hoods.slice(0, tab === "All" ? 6 : 24).map((n) => (
+                    <Link key={n.id} to="/neighborhoods" search={{ n: n.name }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-muted"><MapPin className="h-4 w-4 text-muted-foreground" /></span>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-foreground">{n.name}</div>
+                        <div className="text-xs text-muted-foreground">{n.region}</div>
                       </div>
                     </Link>
                   ))}

@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
-  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, PenLine, Plane, Bookmark,
+  BookOpen, MessageCircle, Bell, User, Menu, Ticket, Plus, FileText, PenLine, Plane, Bookmark,
   Settings, LogOut,
 } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
@@ -14,6 +14,7 @@ import {
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
 import { Img } from "@/components/shared/smart-img";
+import { GlobalSearch } from "@/components/layout/global-search";
 
 type Item = { icon: typeof Home; label: string; to: string };
 
@@ -85,9 +86,6 @@ export function TopMenuBar() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Link to="/search" aria-label="Search" className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors active:bg-secondary ${currentPath === "/search" ? "text-[#d4580a]" : "text-muted-foreground"}`}>
-            <Search className="h-5 w-5" />
-          </Link>
           <Link to="/notifications" aria-label="Notifications" className={`relative hidden sm:flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors active:bg-secondary ${currentPath === "/notifications" ? "text-[#d4580a]" : "text-muted-foreground"}`}>
             <Bell className="h-5 w-5" />
             {unreadNotifications > 0 && (
@@ -138,6 +136,9 @@ export function TopMenuBar() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+      <div className="px-4 pb-3">
+        <GlobalSearch compact />
       </div>
     </header>
   );

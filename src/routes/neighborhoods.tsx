@@ -14,6 +14,8 @@ import { useCachedFetch } from "@/hooks/use-cached-fetch";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
+  validateSearch: (search: Record<string, unknown>): { n?: string } =>
+    typeof search.n === "string" && search.n ? { n: search.n } : {},
   head: () => pageHead({ path: "/neighborhoods", title: "Baltimore Neighborhoods Guide | Planet Baltimore", description: "Explore Baltimore neighborhood by neighborhood: the people, events and businesses in each one." }),
 });
 
@@ -52,6 +54,7 @@ type TabKey = "events" | "businesses" | "groups" | "artists" | "arts_orgs" | "as
 function NeighborhoodsPage() {
   const auth = useAuthState();
   const navigate = useNavigate();
+  const { n: focusName } = Route.useSearch();
   const { data: cachedList } = useCachedFetch<N[]>("neighborhoods:list", async () => {
     const { data } = await supabase.from("neighborhoods").select("id, name, region").order("name");
     return (data || []) as N[];
@@ -64,6 +67,13 @@ function NeighborhoodsPage() {
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<TabKey>("events");
   const [nq, setNq] = useState("");
+
+  // Opened from the global search bar: jump straight into that neighborhood.
+  useEffect(() => {
+    if (!focusName || list.length === 0) return;
+    const match = list.find((n) => n.name.toLowerCase() === focusName.toLowerCase());
+    if (match) setSelected(match);
+  }, [focusName, list]);
 
   useEffect(() => {
     if (!selected) return;
