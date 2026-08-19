@@ -313,10 +313,12 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       )}
       {post.content && (
         (post.post_type === "text" && post.bg_color) ? (
-          <Link
-            to="/posts/$postId"
-            params={{ postId: post.id }}
-            className={`order-3 mx-4 my-3 block rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
+          <div
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate({ to: "/posts/$postId", params: { postId: post.id } })}
+            onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/posts/$postId", params: { postId: post.id } }); }}
+            className={`order-3 mx-4 my-3 block cursor-pointer rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
               post.font_size === "sm" ? "text-base" :
               post.font_size === "lg" ? "text-3xl" :
               post.font_size === "xl" ? "text-5xl" :
@@ -324,16 +326,18 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
             }`}
             style={{ background: post.bg_color, color: post.text_color || "#fff" }}
           >
-            {post.content}
-          </Link>
+            <MentionText text={post.content} />
+          </div>
         ) : (
-          <Link
-            to="/posts/$postId"
-            params={{ postId: post.id }}
-            className="order-3 block px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-4 sm:text-[17px]"
+          <div
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate({ to: "/posts/$postId", params: { postId: post.id } })}
+            onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/posts/$postId", params: { postId: post.id } }); }}
+            className="order-3 block cursor-pointer px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-4 sm:text-[17px]"
           >
-            {post.content}
-          </Link>
+            <MentionText text={post.content} />
+          </div>
         )
       )}
       {post.tag && (
