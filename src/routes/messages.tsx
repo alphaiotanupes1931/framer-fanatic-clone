@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
+import { MentionText } from "@/components/shared/mention-text";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
