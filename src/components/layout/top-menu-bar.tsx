@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
-  BookOpen, MessageCircle, Bell, User, Menu, Search, Ticket, Plus, FileText, PenLine, Plane, Bookmark,
+  BookOpen, MessageCircle, Bell, User, Menu, Ticket, Plus, FileText, PenLine, Plane, Bookmark,
   Settings, LogOut,
 } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
