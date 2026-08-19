@@ -141,11 +141,6 @@ export function ReferralNetworkDialog({
     setInvites(inviteRows);
     setStats({ total: inviteRows.length, joined, points: joined * 5 });
     setLoadingInvites(false);
-    const { data: claimRows } = await supabase
-      .from("referral_rewards")
-      .select("reward_key, status, points_spent")
-      .eq("user_id", user.id);
-    setClaims(claimRows ?? []);
   };
 
 
