@@ -1641,6 +1641,50 @@ export type Database = {
           },
         ]
       }
+      organization_staff_logins: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          last_login_at: string | null
+          organization_id: string
+          password_hash: string
+          password_salt: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_login_at?: string | null
+          organization_id: string
+          password_hash: string
+          password_salt: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_login_at?: string | null
+          organization_id?: string
+          password_hash?: string
+          password_salt?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_staff_logins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_support_tiers: {
         Row: {
           created_at: string
