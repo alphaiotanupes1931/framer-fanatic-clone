@@ -79,6 +79,7 @@ function ReportsPage() {
     if (r.content_type === "post") return `/posts/${r.content_id}`;
     if (r.content_type === "story") return `/stories/${r.content_id}`;
     if (r.content_type === "event") return `/events/${r.content_id}`;
+    if (r.content_type === "video") return `/videos/${r.content_id}`;
     if (r.content_type === "user") return `/u/${r.content_id}`;
     return null;
   };
