@@ -1,3 +1,4 @@
+import { StaffLoginCard } from "@/components/org/staff-login-card";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -540,6 +541,8 @@ function OrgProfile() {
         </div>
 
         {/* Tabs */}
+        {isOwner && org.type === "business" && <StaffLoginCard orgId={org.id} />}
+
         <div className="scrollbar-hide mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 px-1 pb-1">
           {VISIBLE_TABS.map((t) => {
             const active = tab === t;

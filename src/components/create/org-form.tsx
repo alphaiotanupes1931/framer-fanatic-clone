@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { setStaffLogin } from "@/lib/staff-login.functions";
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "org";
@@ -42,6 +43,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     banner_url: "",
     mission: "",
   });
+  const [staff, setStaff] = useState({ username: "", password: "" });
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
@@ -94,6 +96,13 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     try {
       const baseSlug = slugify(form.name);
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+      if (type === "business" && (staff.username.trim() || staff.password)) {
+        if (staff.username.trim().length < 3 || staff.password.length < 8) {
+          toast.error("Staff username needs 3+ characters and the password 8+ characters");
+          setSaving(false);
+          return;
+        }
+      }
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type,
@@ -109,8 +118,16 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         avatar_url: form.avatar_url.trim() || null,
         banner_url: form.banner_url.trim() || null,
         mission: form.mission.trim() || null,
-      }).select("slug").single();
+      }).select("id, slug").single();
       if (error) throw error;
+      if (type === "business" && staff.username.trim() && staff.password) {
+        try {
+          await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
+          toast.success("Staff login created");
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "Business created, but the staff login could not be saved");
+        }
+      }
       toast.success(`${kindLabel} created`);
       navigate({ to: "/o/$slug", params: { slug: data.slug } });
     } catch (e) {
@@ -200,6 +217,39 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           )}
         </Field>
       </div>
+      {type === "business" && (
+        <div className="space-y-4 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4">
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-900">Staff login (optional)</h3>
+            <p className="mt-1 text-xs text-neutral-600">
+              Create a separate username and password your employees can use to sign in and manage this business page,
+              without ever using your own login. You can change or remove it later from the business page.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Staff username">
+              <Input
+                value={staff.username}
+                autoComplete="off"
+                maxLength={40}
+                placeholder="e.g. joescafe-team"
+                onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
+              />
+            </Field>
+            <Field label="Staff password">
+              <Input
+                type="password"
+                value={staff.password}
+                autoComplete="new-password"
+                maxLength={72}
+                placeholder="At least 8 characters"
+                onChange={(e) => setStaff((s) => ({ ...s, password: e.target.value }))}
+              />
+            </Field>
+          </div>
+          <p className="text-xs text-neutral-500">Employees sign in at planetbaltimore.com/business-login</p>
+        </div>
+      )}
       <div className="flex justify-end">
         <Button onClick={submit} disabled={!canSubmit || saving}>
           {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

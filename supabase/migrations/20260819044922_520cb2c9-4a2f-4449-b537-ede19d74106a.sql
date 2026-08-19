@@ -1,0 +1,1 @@
+DELETE FROM public.organizations WHERE name LIKE 'Test Cafe %';

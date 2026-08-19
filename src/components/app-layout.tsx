@@ -105,7 +105,7 @@ export function invalidateCurrentProfile() {
  * Routes signed-out visitors (and search crawlers) may read without being
  * bounced to the sign-in screen.
  */
-const PUBLIC_PATH_PREFIXES = ["/events/", "/t/", "/invite", "/auth", "/reset-password"];
+const PUBLIC_PATH_PREFIXES = ["/events/", "/t/", "/invite", "/auth", "/reset-password", "/business-login"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATH_PREFIXES.some((p) => pathname.startsWith(p));
