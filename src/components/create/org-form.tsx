@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { setStaffLogin } from "@/lib/staff-login.functions";
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "org";
@@ -42,6 +43,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     banner_url: "",
     mission: "",
   });
+  const [staff, setStaff] = useState({ username: "", password: "" });
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
@@ -94,6 +96,13 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     try {
       const baseSlug = slugify(form.name);
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+      if (type === "business" && (staff.username.trim() || staff.password)) {
+        if (staff.username.trim().length < 3 || staff.password.length < 8) {
+          toast.error("Staff username needs 3+ characters and the password 8+ characters");
+          setSaving(false);
+          return;
+        }
+      }
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type,
@@ -109,8 +118,16 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         avatar_url: form.avatar_url.trim() || null,
         banner_url: form.banner_url.trim() || null,
         mission: form.mission.trim() || null,
-      }).select("slug").single();
+      }).select("id, slug").single();
       if (error) throw error;
+      if (type === "business" && staff.username.trim() && staff.password) {
+        try {
+          await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
+          toast.success("Staff login created");
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "Business created, but the staff login could not be saved");
+        }
+      }
       toast.success(`${kindLabel} created`);
       navigate({ to: "/o/$slug", params: { slug: data.slug } });
     } catch (e) {
