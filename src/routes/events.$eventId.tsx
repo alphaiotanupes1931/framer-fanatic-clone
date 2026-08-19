@@ -115,20 +115,27 @@ function EventDetail() {
     if (t.sale_ends_at && new Date(t.sale_ends_at).getTime() < now) return false;
     return true;
   };
-  const maxQty = Math.min(10, selectedTier?.max_per_buyer ?? 10);
+  // The organizer decides the per-person limit. No cap set means a generous default.
+  const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
+  const maxQty = selectedTier?.max_per_buyer ?? eventCap ?? 20;
 
   const rsvp = async () => {
     if (!evt) return;
     if (!me) { toast.error("Sign in to RSVP"); return; }
     setRsvping(true);
     try {
-      const { data, error } = await supabase.rpc("rsvp_free_event", { _event_id: evt.id });
+      const { data, error } = await supabase.rpc("rsvp_free_event", {
+        _event_id: evt.id,
+        _quantity: qty,
+        _ticket_type_id: selectedTier?.id ?? null,
+      });
       if (error) throw error;
-      const result = data as { alreadyRsvped?: boolean } | null;
+      const result = data as { quantity?: number } | null;
+      const n = result?.quantity ?? qty;
       setRsvped(true);
-      toast.success(result?.alreadyRsvped ? "You're already on the list" : "You're going!");
-    } catch {
-      toast.error("Planet Baltimore could not complete your RSVP. Please try again.");
+      toast.success(n > 1 ? `${n} tickets reserved. Each has its own QR code.` : "You're going!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Planet Baltimore could not complete your RSVP. Please try again.");
     } finally {
       setRsvping(false);
     }
