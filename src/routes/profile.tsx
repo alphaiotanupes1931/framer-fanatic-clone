@@ -1,3 +1,4 @@
+import { BANNER_SPEC } from "@/lib/media-guidelines";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -339,6 +340,13 @@ function ProfilePage() {
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#d4580a] border-t-transparent" />
                 Uploading banner...
               </div>
+            </div>
+          )}
+          {!publicPreview && !profile?.banner_url && !uploadingBanner && (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+              <span className="select-none rounded-full bg-black/25 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white/85 sm:text-xs">
+                {BANNER_SPEC}
+              </span>
             </div>
           )}
           {!publicPreview && (
