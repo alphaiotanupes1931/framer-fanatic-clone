@@ -3180,6 +3180,7 @@ export type Database = {
         Returns: undefined
       }
       admin_upsert_site_content: { Args: { _rows: Json }; Returns: number }
+      cancel_my_rsvp: { Args: { _ticket_id: string }; Returns: Json }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
