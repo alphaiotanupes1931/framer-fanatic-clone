@@ -6,7 +6,6 @@ import { clearDataCache } from "@/hooks/use-cached-fetch";
 import { warmConnections, invalidateConnections } from "@/lib/connections";
 import { SidebarProvider, useSidebar } from "@/components/layout/sidebar-context";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
-import { RightSidebar } from "@/components/layout/right-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { GlobalSearch } from "@/components/layout/global-search";
@@ -197,7 +196,7 @@ export function AppLayout(props: {
 }
 
 function Shell({ children }: { children: ReactNode }) {
-  const { collapsed, rightCollapsed } = useSidebar();
+  const { collapsed } = useSidebar();
   return (
     <div className="min-h-screen bg-background" style={{ minHeight: "100dvh" }}>
       <LeftSidebar />
