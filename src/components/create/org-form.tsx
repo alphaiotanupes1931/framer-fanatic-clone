@@ -217,6 +217,39 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           )}
         </Field>
       </div>
+      {type === "business" && (
+        <div className="space-y-4 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4">
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-900">Staff login (optional)</h3>
+            <p className="mt-1 text-xs text-neutral-600">
+              Create a separate username and password your employees can use to sign in and manage this business page,
+              without ever using your own login. You can change or remove it later from the business page.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Staff username">
+              <Input
+                value={staff.username}
+                autoComplete="off"
+                maxLength={40}
+                placeholder="e.g. joescafe-team"
+                onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
+              />
+            </Field>
+            <Field label="Staff password">
+              <Input
+                type="password"
+                value={staff.password}
+                autoComplete="new-password"
+                maxLength={72}
+                placeholder="At least 8 characters"
+                onChange={(e) => setStaff((s) => ({ ...s, password: e.target.value }))}
+              />
+            </Field>
+          </div>
+          <p className="text-xs text-neutral-500">Employees sign in at planetbaltimore.com/business-login</p>
+        </div>
+      )}
       <div className="flex justify-end">
         <Button onClick={submit} disabled={!canSubmit || saving}>
           {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
