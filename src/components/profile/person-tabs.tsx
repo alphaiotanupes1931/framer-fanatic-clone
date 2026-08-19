@@ -232,19 +232,20 @@ export function PersonAttendingTab({ userId, isSelf }: { userId: string; isSelf:
 }
 
 /** Groups and community associations this person has joined. */
-export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: boolean }) {
+export function PersonMembershipsTab({ userId, isSelf = false }: { userId: string; isSelf?: boolean }) {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const { data: mems } = await supabase
         .from("organization_members")
-        .select("organization_id, status")
+        .select("organization_id, status, is_public")
         .eq("user_id", userId);
-      const ids = (mems ?? [])
-        .filter((m: any) => !m.status || m.status === "approved")
-        .map((m: any) => m.organization_id);
+      const visible = (mems ?? []).filter((m: any) => (!m.status || m.status === "approved") && (isSelf || m.is_public !== false));
+      const publicById = new Map(visible.map((m: any) => [m.organization_id, m.is_public !== false]));
+      const ids = visible.map((m: any) => m.organization_id);
       if (ids.length === 0) {
         if (!cancelled) { setRows([]); setLoading(false); }
         return;
@@ -254,11 +255,26 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
         .select("id, name, slug, type, subtype, avatar_url, is_public")
         .in("id", ids);
       if (cancelled) return;
-      setRows((orgs ?? []).filter((o: any) => o.is_public !== false));
+      setRows((orgs ?? [])
+        .filter((o: any) => o.is_public !== false)
+        .map((o: any) => ({ ...o, membership_public: publicById.get(o.id) !== false })));
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, isSelf]);
+
+  const toggleVisibility = async (orgId: string, next: boolean) => {
+    setBusy(orgId);
+    const { error } = await supabase
+      .from("organization_members")
+      .update({ is_public: next })
+      .eq("organization_id", orgId)
+      .eq("user_id", userId);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    setRows((prev) => prev.map((o) => (o.id === orgId ? { ...o, membership_public: next } : o)));
+    toast.success(next ? "Membership is public" : "Membership is private");
+  };
 
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading memberships…</div>;
   if (rows.length === 0) {
@@ -267,7 +283,8 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {rows.map((o) => (
-        <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 hover:border-[#d4580a] hover:shadow-sm">
+        <div key={o.id} className="rounded-2xl border border-border bg-card p-4">
+        <Link to="/o/$slug" params={{ slug: o.slug }} className="group flex items-center gap-4">
           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
             {o.avatar_url && <SmartImage src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />}
           </div>
@@ -279,6 +296,22 @@ export function PersonMembershipsTab({ userId }: { userId: string; isSelf?: bool
           </div>
           <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
         </Link>
+        {isSelf && (
+          <button
+            type="button"
+            disabled={busy === o.id}
+            onClick={() => void toggleVisibility(o.id, !o.membership_public)}
+            className={`mt-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition disabled:opacity-60 ${
+              o.membership_public
+                ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]"
+                : "border-border text-muted-foreground hover:border-[#d4580a]"
+            }`}
+          >
+            {o.membership_public ? "Public" : "Private"}
+            <span className="font-normal opacity-70">· {o.membership_public ? "shown on your profile" : "only you can see it"}</span>
+          </button>
+        )}
+        </div>
       ))}
     </div>
   );
