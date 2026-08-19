@@ -14,6 +14,7 @@ import { Route as TicketingRouteImport } from './routes/ticketing'
 import { Route as TicketSalesDashboardRouteImport } from './routes/ticket-sales-dashboard'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SitemapEventsDotxmlRouteImport } from './routes/sitemap-events[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SavedRouteImport } from './routes/saved'
@@ -109,6 +110,11 @@ const TermsRoute = TermsRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapEventsDotxmlRoute = SitemapEventsDotxmlRouteImport.update({
+  id: '/sitemap-events.xml',
+  path: '/sitemap-events.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -513,6 +519,7 @@ export interface FileRoutesByFullPath {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/sitemap-events.xml': typeof SitemapEventsDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
@@ -591,6 +598,7 @@ export interface FileRoutesByTo {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/sitemap-events.xml': typeof SitemapEventsDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
@@ -670,6 +678,7 @@ export interface FileRoutesById {
   '/saved': typeof SavedRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/sitemap-events.xml': typeof SitemapEventsDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
@@ -750,6 +759,7 @@ export interface FileRouteTypes {
     | '/saved'
     | '/search'
     | '/settings'
+    | '/sitemap-events.xml'
     | '/support'
     | '/terms'
     | '/ticket-sales-dashboard'
@@ -828,6 +838,7 @@ export interface FileRouteTypes {
     | '/saved'
     | '/search'
     | '/settings'
+    | '/sitemap-events.xml'
     | '/support'
     | '/terms'
     | '/ticket-sales-dashboard'
@@ -906,6 +917,7 @@ export interface FileRouteTypes {
     | '/saved'
     | '/search'
     | '/settings'
+    | '/sitemap-events.xml'
     | '/support'
     | '/terms'
     | '/ticket-sales-dashboard'
@@ -985,6 +997,7 @@ export interface RootRouteChildren {
   SavedRoute: typeof SavedRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
+  SitemapEventsDotxmlRoute: typeof SitemapEventsDotxmlRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
@@ -1056,6 +1069,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-events.xml': {
+      id: '/sitemap-events.xml'
+      path: '/sitemap-events.xml'
+      fullPath: '/sitemap-events.xml'
+      preLoaderRoute: typeof SitemapEventsDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -1612,6 +1632,7 @@ const rootRouteChildren: RootRouteChildren = {
   SavedRoute: SavedRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
+  SitemapEventsDotxmlRoute: SitemapEventsDotxmlRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
