@@ -201,9 +201,8 @@ function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background" style={{ minHeight: "100dvh" }}>
       <LeftSidebar />
-      <RightSidebar />
       <div
-        className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${rightCollapsed ? "xl:mr-0" : "xl:mr-[280px]"} ${collapsed ? "lg:ml-[78px]" : "lg:ml-[288px]"}`}
+        className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${collapsed ? "lg:ml-[78px]" : "lg:ml-[288px]"}`}
       >
         <TopMenuBar />
         <div className="sticky top-0 z-[900] hidden border-b border-border bg-background/95 px-8 py-3 backdrop-blur-md lg:block xl:px-10 2xl:px-14">
