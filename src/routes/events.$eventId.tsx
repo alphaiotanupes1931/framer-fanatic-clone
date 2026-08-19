@@ -127,7 +127,7 @@ function EventDetail() {
       const { data, error } = await supabase.rpc("rsvp_free_event", {
         _event_id: evt.id,
         _quantity: qty,
-        _ticket_type_id: selectedTier?.id ?? null,
+        ...(selectedTier?.id ? { _ticket_type_id: selectedTier.id } : {}),
       });
       if (error) throw error;
       const result = data as { quantity?: number } | null;
@@ -135,7 +135,8 @@ function EventDetail() {
       setRsvped(true);
       toast.success(n > 1 ? `${n} tickets reserved. Each has its own QR code.` : "You're going!");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Planet Baltimore could not complete your RSVP. Please try again.");
+      const msg = (e as { message?: string } | null)?.message;
+      toast.error(msg || "Planet Baltimore could not complete your RSVP. Please try again.");
     } finally {
       setRsvping(false);
     }
