@@ -322,9 +322,21 @@ function EventDetail() {
                   </Button>
                 </>
               ) : (
-                <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-                  {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "Reserve free ticket"}
-                </Button>
+                <>
+                  <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                    <span className="text-sm font-medium text-foreground">Tickets</span>
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
+                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
+                      <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                      <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
+                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
+                    </div>
+                  </div>
+                  <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                    {rsvped ? "You're going ✓" : rsvping ? "Saving…" : qty > 1 ? `Reserve ${qty} free tickets` : "Reserve free ticket"}
+                  </Button>
+                </>
               )}
             </>
           ) : priced ? (
@@ -335,7 +347,7 @@ function EventDetail() {
                   <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
                     className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
                   <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                  <button type="button" onClick={() => setQty((q) => Math.min(10, q + 1))} disabled={qty >= 10}
+                  <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
                     className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
                 </div>
               </div>
@@ -345,9 +357,21 @@ function EventDetail() {
               </Button>
             </>
           ) : (
-            <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-              {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "I'm going"}
-            </Button>
+            <>
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <span className="text-sm font-medium text-foreground">Tickets</span>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
+                  <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                  <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
+                </div>
+              </div>
+              <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                {rsvped ? "You're going ✓" : rsvping ? "Saving…" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
+              </Button>
+            </>
           )}
           <Button onClick={() => setShareOpen(true)} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2" aria-label="Share">
             <Send className="w-4 h-4 -rotate-45" />Share
