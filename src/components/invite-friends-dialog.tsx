@@ -202,7 +202,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
       <DialogContent className="w-[calc(100vw-1rem)] sm:w-[min(95vw,900px)] max-w-none max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" /> Invite Friends
+            <UserPlus className="h-5 w-5" /> {group ? `Invite friends to ${group.name}` : "Invite Friends"}
           </DialogTitle>
         </DialogHeader>
 
@@ -210,7 +210,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
           {/* Invite link box */}
           <div className="rounded-xl border border-border bg-muted/20 p-4">
             <label className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-              <Link2 className="h-3.5 w-3.5" /> Your invite link
+              <Link2 className="h-3.5 w-3.5" /> {group ? `Your invite link to ${group.name}` : "Your invite link"}
             </label>
             <div className="flex gap-2">
               <div className="min-w-0 flex-1 overflow-hidden rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
@@ -224,13 +224,13 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <button
                 type="button"
-                onClick={() => void externalShare(shareUrl, "Join me on Planet Baltimore")}
+                onClick={() => void externalShare(shareUrl, group ? `Join ${group.name} on Planet Baltimore` : "Join me on Planet Baltimore")}
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
               >
                 <Share2 className="h-3.5 w-3.5" /> Share
               </button>
               <a
-                href={`sms:?&body=${encodeURIComponent(`Join me on Planet Baltimore! ${shareUrl}`)}`}
+                href={`sms:?&body=${encodeURIComponent(group ? `Join ${group.name} on Planet Baltimore! ${shareUrl}` : `Join me on Planet Baltimore! ${shareUrl}`)}`}
                 className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
               >
                 Text
@@ -261,7 +261,9 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
               </button>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              Anyone who joins through this link counts toward your network.
+              {group
+                ? `Anyone who opens this link signs in or signs up, then lands right on ${group.name} ready to join.`
+                : "Anyone who joins through this link counts toward your network."}
             </p>
           </div>
 
