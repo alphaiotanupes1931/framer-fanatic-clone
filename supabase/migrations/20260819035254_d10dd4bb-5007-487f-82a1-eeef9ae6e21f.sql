@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.rsvp_free_event(uuid);

@@ -3288,16 +3288,14 @@ export type Database = {
       }
       record_invite_click: { Args: { _token: string }; Returns: string }
       resolve_referrer: { Args: { _username: string }; Returns: string }
-      rsvp_free_event:
-        | { Args: { _event_id: string }; Returns: Json }
-        | {
-            Args: {
-              _event_id: string
-              _quantity?: number
-              _ticket_type_id?: string
-            }
-            Returns: Json
-          }
+      rsvp_free_event: {
+        Args: {
+          _event_id: string
+          _quantity?: number
+          _ticket_type_id?: string
+        }
+        Returns: Json
+      }
       search_all_users: {
         Args: { lim?: number; q?: string }
         Returns: {
