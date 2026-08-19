@@ -1,6 +1,7 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ReportButton } from "@/components/shared/report-button";
 import { Clock, Heart, MessageCircle, Bookmark, Trash2, Send, Star, MoreHorizontal, Pencil } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -142,7 +143,9 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  ) : null;
+  ) : (
+    <ReportButton contentType="story" contentId={story.id} className="shrink-0" />
+  );
 
   if (featured) {
     return (
@@ -180,7 +183,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           </div>
         </div>
         </Link>
-        {isOwner && <div className="absolute right-2 top-2 z-10">{ownerMenu}</div>}
+        <div className="absolute right-2 top-2 z-10 rounded-full bg-white/80 p-1">{ownerMenu}</div>
       </article>
     );
   }

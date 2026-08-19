@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
+import { BANNER_SPEC } from "@/lib/media-guidelines";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -193,6 +194,9 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
               {uploadingBanner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
               Upload background
             </Button>
+          )}
+          {!form.banner_url && (
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{BANNER_SPEC}</p>
           )}
         </Field>
       </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { BANNER_SPEC } from "@/lib/media-guidelines";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -133,7 +134,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
         </div>
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Banner image</Label>
-          <ImageUpload value={form.banner_url} onChange={(v) => set("banner_url", v)} label="Upload banner image" bucket="avatars" />
+          <ImageUpload value={form.banner_url} onChange={(v) => set("banner_url", v)} label="Upload banner image" bucket="avatars" hint={BANNER_SPEC} />
         </div>
       </div>
       <div className="flex justify-end">

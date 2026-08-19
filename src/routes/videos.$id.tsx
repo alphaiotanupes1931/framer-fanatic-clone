@@ -3,6 +3,7 @@ import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
+import { ReportButton } from "@/components/shared/report-button";
 import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
@@ -398,6 +399,9 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
         <button onClick={toggleSave} aria-label={saved ? "Unsave" : "Save"} className={`${pill} ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : ""}`}>
           <Bookmark className={`h-4 w-4 ${saved ? "fill-[#d4580a]" : ""}`} /> {saved ? "Saved" : "Save"}
         </button>
+        {!isOwner && (
+          <span className={pill}><ReportButton contentType="video" contentId={video.id} label="Report" /></span>
+        )}
         {isOwner && (
           <button onClick={startEdit} className={pill}>
             <Pencil className="h-4 w-4" /> Edit

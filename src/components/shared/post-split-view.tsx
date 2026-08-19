@@ -4,6 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Send, Bookmark, Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { ReportButton } from "@/components/shared/report-button";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
@@ -208,6 +209,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
             </Link>
           ) : <div className="text-sm text-muted-foreground">Someone</div>}
           <FollowButton userId={post.user_id} currentUserId={meId} compact className="ml-auto shrink-0" />
+          {!isOwner && <ReportButton contentType="post" contentId={post.id} className="shrink-0" />}
           {isOwner && (
             <div className="flex items-center gap-1">
               <Link to="/edit-post/$id" params={{ id: post.id }} aria-label="Edit post" className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground">
