@@ -3,6 +3,7 @@ import { Flag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { notifyContentReport } from "@/lib/reports.functions";
 
 const REASONS = [
   "Spam or misleading",
@@ -33,11 +34,14 @@ export function ReportDialog({
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) { toast.error("Sign in to report"); setSubmitting(false); return; }
-    const { error } = await supabase.from("content_reports").insert({
+    const { data: inserted, error } = await supabase.from("content_reports").insert({
       reporter_id: uid, content_type: contentType, content_id: contentId, reason, details: details.trim() || null,
-    });
+    }).select("id").single();
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
+    if (inserted?.id) {
+      void notifyContentReport({ data: { reportId: inserted.id } }).catch(() => {});
+    }
     toast.success("Report submitted. Thank you.");
     setDetails("");
     onClose();
