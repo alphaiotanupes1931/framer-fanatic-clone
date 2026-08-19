@@ -407,6 +407,27 @@ const CATEGORIES = [
 function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [cap, setCap] = useState<string>("");
+  const [capLoaded, setCapLoaded] = useState(false);
+  const [savingCap, setSavingCap] = useState(false);
+
+  useEffect(() => {
+    supabase.from("events").select("max_tickets_per_buyer").eq("id", evt.id).maybeSingle()
+      .then(({ data }) => {
+        const v = (data as { max_tickets_per_buyer: number | null } | null)?.max_tickets_per_buyer;
+        setCap(v ? String(v) : "");
+        setCapLoaded(true);
+      });
+  }, [evt.id]);
+
+  const saveCap = async () => {
+    setSavingCap(true);
+    const value = cap.trim() ? Math.max(1, parseInt(cap, 10)) : null;
+    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value }).eq("id", evt.id);
+    setSavingCap(false);
+    if (error) toast.error(error.message);
+    else toast.success(value ? `Limited to ${value} per person` : "Limit removed");
+  };
 
   const load = () => {
     supabase.from("ticket_types").select("*").eq("event_id", evt.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true })
@@ -445,6 +466,32 @@ function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
 
       {showForm && (
         <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); load(); }} />
+      )}
+
+      {capLoaded && (
+        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+          <div className="text-sm font-semibold text-neutral-900">Limit per person</div>
+          <p className="mt-0.5 text-xs text-neutral-500">
+            You decide how many tickets one person can get for this event. Leave blank for no limit. Ticket types can set their own limit too.
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <input
+              type="number"
+              min="1"
+              value={cap}
+              onChange={(e) => setCap(e.target.value)}
+              placeholder="No limit"
+              className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+            />
+            <button
+              onClick={saveCap}
+              disabled={savingCap}
+              className="rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-60"
+            >
+              {savingCap ? "Saving…" : "Save limit"}
+            </button>
+          </div>
+        </div>
       )}
 
       {types && types.length > 0 ? (
