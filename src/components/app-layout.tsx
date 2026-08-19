@@ -6,7 +6,6 @@ import { clearDataCache } from "@/hooks/use-cached-fetch";
 import { warmConnections, invalidateConnections } from "@/lib/connections";
 import { SidebarProvider, useSidebar } from "@/components/layout/sidebar-context";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
-import { RightSidebar } from "@/components/layout/right-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { GlobalSearch } from "@/components/layout/global-search";
@@ -197,13 +196,12 @@ export function AppLayout(props: {
 }
 
 function Shell({ children }: { children: ReactNode }) {
-  const { collapsed, rightCollapsed } = useSidebar();
+  const { collapsed } = useSidebar();
   return (
     <div className="min-h-screen bg-background" style={{ minHeight: "100dvh" }}>
       <LeftSidebar />
-      <RightSidebar />
       <div
-        className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${rightCollapsed ? "xl:mr-0" : "xl:mr-[280px]"} ${collapsed ? "lg:ml-[78px]" : "lg:ml-[288px]"}`}
+        className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${collapsed ? "lg:ml-[78px]" : "lg:ml-[288px]"}`}
       >
         <TopMenuBar />
         <div className="sticky top-0 z-[900] hidden border-b border-border bg-background/95 px-8 py-3 backdrop-blur-md lg:block xl:px-10 2xl:px-14">
