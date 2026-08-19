@@ -5,7 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 const SITE = "https://planetbaltimore.com";
 
 /** Dynamic sitemap listing every upcoming published event detail page. */
-export const Route = createFileRoute("/sitemap-events/xml")({
+export const Route = createFileRoute("/sitemap-events.xml")({
   server: {
     handlers: {
       GET: async () => {
