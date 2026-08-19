@@ -12,6 +12,8 @@ interface InviteFriendsDialogProps {
   open: boolean;
   onClose: () => void;
   inviteUrl?: string;
+  /** When the invite comes from a group, association, or org page. */
+  group?: { slug: string; name: string };
 }
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -24,14 +26,15 @@ const makeToken = () =>
     .replace(/-/g, "")
     .slice(0, 24);
 
-const buildInviteUrl = (username?: string | null, token?: string) => {
+const buildInviteUrl = (username?: string | null, token?: string, groupSlug?: string) => {
   const url = new URL("/invite", PUBLIC_SITE_URL);
   if (username) url.searchParams.set("ref", username);
   if (token) url.searchParams.set("iv", token);
+  if (groupSlug) url.searchParams.set("g", groupSlug);
   return url.toString();
 };
 
-export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps) {
+export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialogProps) {
   const [text, setText] = useState("");
   const [parsed, setParsed] = useState<string[]>([]);
   const [message, setMessage] = useState("");
@@ -39,7 +42,7 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
   const [sending, setSending] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [sent, setSent] = useState(false);
-  const [shareUrl, setShareUrl] = useState(buildInviteUrl());
+  const [shareUrl, setShareUrl] = useState(buildInviteUrl(null, undefined, group?.slug));
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -48,9 +51,9 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
     (async () => {
       const { data: rows } = await supabase.rpc("my_profile");
       const profile = (rows as unknown as Array<Record<string, any>> | null)?.[0];
-      setShareUrl(buildInviteUrl(profile?.username));
+      setShareUrl(buildInviteUrl(profile?.username, undefined, group?.slug));
     })();
-  }, [open]);
+  }, [open, group?.slug]);
 
   const copyLink = async () => {
     try {
@@ -103,7 +106,7 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
       for (const to of emails) {
         const token = makeToken();
         tokens.set(to, token);
-        const trackedUrl = buildInviteUrl(profile?.username, token);
+        const trackedUrl = buildInviteUrl(profile?.username, token, group?.slug);
         const res = await fetch("/lovable/email/transactional/send", {
           method: "POST",
           headers: {
@@ -114,7 +117,14 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
             templateName: "referral-invite",
             recipientEmail: to,
             idempotencyKey: `invite-${session.user.id}-${to}-${Date.now()}`,
-            templateData: { inviterName, personalMessage: message?.trim() || "", inviteUrl: trackedUrl },
+            templateData: {
+              inviterName,
+              personalMessage: [
+                group ? `${inviterName} invited you to join ${group.name} on Planet Baltimore.` : "",
+                message?.trim() || "",
+              ].filter(Boolean).join("\n\n"),
+              inviteUrl: trackedUrl,
+            },
           }),
         });
         if (res.ok) {
