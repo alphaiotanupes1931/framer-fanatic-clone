@@ -717,6 +717,27 @@ export type Database = {
           },
         ]
       }
+      neighborhood_follows: {
+        Row: {
+          created_at: string
+          id: string
+          neighborhood: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          neighborhood: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          neighborhood?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       neighborhoods: {
         Row: {
           created_at: string
