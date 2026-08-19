@@ -617,7 +617,7 @@ function OrgProfile() {
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
           {tab === "Leaderboard" && <MembersTab orgId={org.id} />}
-          {tab === "Invite" && <InviteTab orgName={org.name} />}
+          {tab === "Invite" && <InviteTab orgName={org.name} orgSlug={org.slug} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
           {(tab === "Minutes" || tab === "Resources") && (
