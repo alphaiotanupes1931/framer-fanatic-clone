@@ -16,6 +16,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { EventSocial } from "@/components/event-social";
+import { getPublicEvent } from "@/lib/events.functions";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -33,9 +34,103 @@ type TicketTier = {
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
 
+const SITE = "https://planetbaltimore.com";
+
+function stripHtml(v: string) {
+  return v.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 export const Route = createFileRoute("/events/$eventId")({
   component: EventDetail,
-  head: () => ({ meta: [{ title: "Event - Planet Baltimore" }] }),
+  loader: ({ params }) => getPublicEvent({ data: { eventId: params.eventId } }),
+  errorComponent: () => (
+    <AppLayout>
+      <div className="mx-auto max-w-xl px-4 py-16 text-center">
+        <h1 className="text-xl font-bold">We could not load this event</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Please refresh the page or head back to all events.</p>
+        <Link to="/events" className="mt-4 inline-block text-sm font-semibold text-[#d4580a]">Browse events</Link>
+      </div>
+    </AppLayout>
+  ),
+  notFoundComponent: () => (
+    <AppLayout>
+      <div className="mx-auto max-w-xl px-4 py-16 text-center">
+        <h1 className="text-xl font-bold">Event not found</h1>
+        <Link to="/events" className="mt-4 inline-block text-sm font-semibold text-[#d4580a]">Browse events</Link>
+      </div>
+    </AppLayout>
+  ),
+  head: ({ params, loaderData }) => {
+    const url = `${SITE}/events/${params.eventId}`;
+    if (!loaderData) {
+      return {
+        meta: [
+          { title: "Event unavailable | Planet Baltimore" },
+          { name: "robots", content: "noindex" },
+        ],
+        links: [{ rel: "canonical", href: url }],
+      };
+    }
+    const e = loaderData;
+    const where = [e.venueName, e.location || e.neighborhood].filter(Boolean).join(", ");
+    const when = new Date(e.startsAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
+    const description = (e.description ? stripHtml(e.description) : `${e.title} on ${when}${where ? ` at ${where}` : ""} in Baltimore.`).slice(0, 155);
+    const title = `${e.title}${where ? ` at ${where.split(", ")[0]}` : ""} | Planet Baltimore`.slice(0, 60);
+    const image = e.imageUrl && /^https?:\/\//.test(e.imageUrl) ? e.imageUrl : null;
+
+    const jsonLd: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      name: e.title,
+      description,
+      url,
+      startDate: e.startsAt,
+      eventStatus: e.status === "cancelled" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      location: {
+        "@type": "Place",
+        name: e.venueName || e.location || e.neighborhood || "Baltimore",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: e.address || undefined,
+          addressLocality: "Baltimore",
+          addressRegion: "MD",
+          addressCountry: "US",
+        },
+      },
+      organizer: {
+        "@type": "Organization",
+        name: e.hostName || "Planet Baltimore",
+        url: e.hostUsername ? `${SITE}/u/${e.hostUsername}` : SITE,
+      },
+    };
+    if (e.endsAt) jsonLd.endDate = e.endsAt;
+    if (image) jsonLd.image = [image];
+    jsonLd.offers = {
+      "@type": "Offer",
+      url,
+      price: ((e.priceCents ?? 0) / 100).toFixed(2),
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      validFrom: new Date().toISOString(),
+    };
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        ...(image ? [{ property: "og:image", content: image }, { name: "twitter:image", content: image }] : []),
+        ...(e.isPublished ? [] : [{ name: "robots", content: "noindex" }]),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [{ type: "application/ld+json", children: JSON.stringify(jsonLd) }],
+    };
+  },
 });
 
 function EventDetail() {
