@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/shared/mention-text";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
