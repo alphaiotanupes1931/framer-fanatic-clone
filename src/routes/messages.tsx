@@ -496,7 +496,7 @@ function MessagesPage() {
         <HeroBanner title="Messages" subtitle="Direct conversations with people and organizations across Baltimore." />
       </div>
       <div
-        className={`grid min-h-0 grid-cols-1 overflow-hidden border border-border bg-card md:static md:z-auto md:h-[calc(100dvh-12rem)] md:rounded-2xl md:grid-cols-[360px_1fr] ${
+        className={`grid min-h-0 grid-cols-1 overflow-hidden border border-border bg-card md:sticky md:top-20 md:z-auto md:h-[calc(100dvh-7rem)] md:rounded-2xl md:grid-cols-[360px_1fr] ${
           active
             ? "fixed inset-x-0 bottom-0 top-0 z-40 h-[100dvh] rounded-none"
             : "h-[calc(100dvh-15rem)] min-h-[420px] rounded-2xl"
