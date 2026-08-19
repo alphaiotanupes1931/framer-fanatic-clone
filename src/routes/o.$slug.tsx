@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { clearPendingGroup } from "@/lib/pending-join";
 import { AppLayout } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { FileUpload } from "@/components/shared/file-upload";
