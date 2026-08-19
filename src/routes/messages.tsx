@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
+import { MentionText } from "@/components/shared/mention-text";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 
@@ -770,10 +771,10 @@ function MessagesPage() {
                             {shared ? (
                               <div className="space-y-2">
                                 <SharePreviewCard preview={shared.preview} mine={mine} />
-                                {shared.note && <div className="whitespace-pre-wrap break-words">{shared.note}</div>}
+                                {shared.note && <div className="whitespace-pre-wrap break-words"><MentionText text={shared.note} /></div>}
                               </div>
                             ) : (
-                              <div className="whitespace-pre-wrap break-words">{m.content}</div>
+                              <div className="whitespace-pre-wrap break-words"><MentionText text={m.content} /></div>
                             )}
                             {showTime && (
                               <div className="mt-1 text-[10px] text-muted-foreground">

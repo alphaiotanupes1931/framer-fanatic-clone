@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/shared/mention-text";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -260,12 +261,28 @@ function CreatePostPage() {
                 </div>
               </div>
               <p className="text-xs text-neutral-500 text-right">{content.length}/2000</p>
+              {/^(?:https?:\/\/|www\.)/im.test(content) || /\s(?:https?:\/\/|www\.)/i.test(content) ? (
+                <div className="rounded-xl border border-neutral-200 bg-white p-3">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Preview</p>
+                  <div className="whitespace-pre-wrap break-words text-sm text-neutral-800">
+                    <MentionText text={content} />
+                  </div>
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="space-y-3">
               <Label className="text-sm font-medium">Caption (optional)</Label>
               <MentionField multiline value={content} onChange={setContent} rows={3} maxLength={2000} placeholder="Add a caption... use @ to mention someone"
                 className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-[#d4580a]" />
+              {(/^(?:https?:\/\/|www\.)/im.test(content) || /\s(?:https?:\/\/|www\.)/i.test(content)) && (
+                <div className="rounded-xl border border-neutral-200 bg-white p-3">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Preview</p>
+                  <div className="whitespace-pre-wrap break-words text-sm text-neutral-800">
+                    <MentionText text={content} />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

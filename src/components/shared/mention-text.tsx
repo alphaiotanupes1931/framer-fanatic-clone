@@ -27,7 +27,7 @@ export function MentionText({ text, className = "" }: { text: string; className?
           target="_blank"
           rel="noreferrer noopener"
           onClick={(e) => e.stopPropagation()}
-          className="font-medium text-[#d4580a] underline underline-offset-2 break-words hover:opacity-80"
+          className="font-medium text-blue-600 underline underline-offset-2 decoration-2 break-words hover:text-blue-700 dark:text-blue-400"
         >
           {raw}
         </a>,
