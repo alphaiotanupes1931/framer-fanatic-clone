@@ -1229,6 +1229,7 @@ export type Database = {
       organization_members: {
         Row: {
           created_at: string
+          is_public: boolean
           organization_id: string
           requested_at: string
           status: string
@@ -1236,6 +1237,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          is_public?: boolean
           organization_id: string
           requested_at?: string
           status?: string
@@ -1243,6 +1245,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          is_public?: boolean
           organization_id?: string
           requested_at?: string
           status?: string
