@@ -100,6 +100,16 @@ export function invalidateCurrentProfile() {
   profileRequest = null;
 }
 
+/**
+ * Routes signed-out visitors (and search crawlers) may read without being
+ * bounced to the sign-in screen.
+ */
+const PUBLIC_PATH_PREFIXES = ["/events/", "/t/", "/invite", "/auth", "/reset-password"];
+
+function isPublicPath(pathname: string) {
+  return PUBLIC_PATH_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
 export function useCurrentProfile() {
   const [profile, setProfile] = useState<Profile | null>(profileCache);
   const navigate = useNavigate();
@@ -123,7 +133,8 @@ export function useCurrentProfile() {
     let cancelled = false;
     loadProfile().then((p) => {
       if (cancelled) return;
-      if (!p && !profileCache) navigateRef.current({ to: "/auth" });
+      const path = typeof window !== "undefined" ? window.location.pathname : "";
+      if (!p && !profileCache && !isPublicPath(path)) navigateRef.current({ to: "/auth" });
       // Warm the people-you-know list so share sheets open with no spinner.
       if (p?.id) warmConnections(p.id);
     });
