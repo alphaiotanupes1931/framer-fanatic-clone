@@ -52,6 +52,7 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BusinessesRouteImport } from './routes/businesses'
+import { Route as BusinessLoginRouteImport } from './routes/business-login'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtsOrgsRouteImport } from './routes/arts-orgs'
 import { Route as ArtistsRouteImport } from './routes/artists'
@@ -304,6 +305,11 @@ const BusinessesRoute = BusinessesRouteImport.update({
   path: '/businesses',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessLoginRoute = BusinessLoginRouteImport.update({
+  id: '/business-login',
+  path: '/business-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -489,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
+  '/business-login': typeof BusinessLoginRoute
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
@@ -569,6 +576,7 @@ export interface FileRoutesByTo {
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
+  '/business-login': typeof BusinessLoginRoute
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
@@ -650,6 +658,7 @@ export interface FileRoutesById {
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
+  '/business-login': typeof BusinessLoginRoute
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
   '/community-associations': typeof CommunityAssociationsRoute
@@ -732,6 +741,7 @@ export interface FileRouteTypes {
     | '/artists'
     | '/arts-orgs'
     | '/auth'
+    | '/business-login'
     | '/businesses'
     | '/calendar'
     | '/community-associations'
@@ -812,6 +822,7 @@ export interface FileRouteTypes {
     | '/artists'
     | '/arts-orgs'
     | '/auth'
+    | '/business-login'
     | '/businesses'
     | '/calendar'
     | '/community-associations'
@@ -892,6 +903,7 @@ export interface FileRouteTypes {
     | '/artists'
     | '/arts-orgs'
     | '/auth'
+    | '/business-login'
     | '/businesses'
     | '/calendar'
     | '/community-associations'
@@ -973,6 +985,7 @@ export interface RootRouteChildren {
   ArtistsRoute: typeof ArtistsRoute
   ArtsOrgsRoute: typeof ArtsOrgsRoute
   AuthRoute: typeof AuthRoute
+  BusinessLoginRoute: typeof BusinessLoginRoute
   BusinessesRoute: typeof BusinessesRoute
   CalendarRoute: typeof CalendarRoute
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
@@ -1350,6 +1363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business-login': {
+      id: '/business-login'
+      path: '/business-login'
+      fullPath: '/business-login'
+      preLoaderRoute: typeof BusinessLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -1616,6 +1636,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArtistsRoute: ArtistsRoute,
   ArtsOrgsRoute: ArtsOrgsRoute,
   AuthRoute: AuthRoute,
+  BusinessLoginRoute: BusinessLoginRoute,
   BusinessesRoute: BusinessesRoute,
   CalendarRoute: CalendarRoute,
   CommunityAssociationsRoute: CommunityAssociationsRoute,
