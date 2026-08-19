@@ -23,7 +23,7 @@ export const Route = createFileRoute("/create-post")({
   }),
 });
 
-type PostType = "text" | "photo" | "video" | "link";
+type PostType = "text" | "photo" | "video";
 type Visibility = "public" | "followers" | "close_friends" | "only_me";
 
 const CATEGORIES = [
