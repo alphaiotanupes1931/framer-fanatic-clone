@@ -1423,16 +1423,38 @@ function MyTicketsTab() {
         <div className="rounded-xl border border-dashed border-neutral-200 py-10 text-center text-sm text-neutral-500">No {view} tickets</div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {numbered.map(({ t, seat }) => <TicketStub key={t.id} t={t} seat={seat} />)}
+          {numbered.map(({ t, seat }) => (
+            <TicketStub
+              key={t.id}
+              t={t}
+              seat={seat}
+              onCancelled={() => setTickets((prev) => prev.filter((x) => x.id !== t.id))}
+            />
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-function TicketStub({ t, seat }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null }; seat?: string | null }) {
+function TicketStub({ t, seat, onCancelled }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null }; seat?: string | null; onCancelled?: () => void }) {
   const when = t.events ? new Date(t.events.starts_at) : null;
+  const [cancelling, setCancelling] = useState(false);
+  const isFreeRsvp = (t.buyer_total_cents ?? 0) === 0;
+  const upcoming = when ? when.getTime() >= Date.now() : false;
+
+  const cancelRsvp = async () => {
+    if (!window.confirm("Cancel this RSVP? Your spot will be released.")) return;
+    setCancelling(true);
+    const { error } = await supabase.rpc("cancel_my_rsvp", { _ticket_id: t.id });
+    setCancelling(false);
+    if (error) { toast.error(error.message || "Could not cancel this RSVP"); return; }
+    toast.success("RSVP cancelled");
+    onCancelled?.();
+  };
+
   return (
+    <div className="space-y-2">
     <Link
       to="/tickets/$ticketId"
       params={{ ticketId: t.id }}
@@ -1469,6 +1491,17 @@ function TicketStub({ t, seat }: { t: { id: string; buyer_total_cents: number; e
         <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-white/60">Admit One</div>
       </div>
     </Link>
+    {isFreeRsvp && upcoming && (
+      <button
+        type="button"
+        onClick={cancelRsvp}
+        disabled={cancelling}
+        className="w-full rounded-lg border border-neutral-200 py-2 text-xs font-semibold text-neutral-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+      >
+        {cancelling ? "Cancelling…" : "Cancel RSVP"}
+      </button>
+    )}
+    </div>
   );
 }
 
