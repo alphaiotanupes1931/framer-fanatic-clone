@@ -499,7 +499,7 @@ function MessagesPage() {
       <div
         className={`grid min-h-0 grid-cols-1 overflow-hidden border border-border bg-card md:sticky md:top-20 md:z-auto md:h-[calc(100dvh-11rem)] md:min-h-[420px] md:rounded-2xl md:grid-cols-[360px_1fr] ${
           active
-            ? "fixed inset-x-0 bottom-0 top-0 z-[1002] h-[100dvh] rounded-none pb-[env(safe-area-inset-bottom)]"
+            ? "fixed inset-x-0 bottom-0 top-0 z-[1002] h-[100dvh] rounded-none pt-28 pb-[env(safe-area-inset-bottom)] md:pt-0"
             : "h-[calc(100dvh-15rem)] min-h-[420px] rounded-2xl"
         }`}
       >
