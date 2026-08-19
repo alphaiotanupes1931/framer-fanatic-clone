@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TicketingRouteImport } from './routes/ticketing'
 import { Route as TicketSalesDashboardRouteImport } from './routes/ticket-sales-dashboard'
@@ -87,6 +88,11 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
@@ -525,6 +531,7 @@ export interface FileRoutesByFullPath {
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -604,6 +611,7 @@ export interface FileRoutesByTo {
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -684,6 +692,7 @@ export interface FileRoutesById {
   '/ticket-sales-dashboard': typeof TicketSalesDashboardRoute
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -765,6 +774,7 @@ export interface FileRouteTypes {
     | '/ticket-sales-dashboard'
     | '/ticketing'
     | '/unsubscribe'
+    | '/welcome'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -844,6 +854,7 @@ export interface FileRouteTypes {
     | '/ticket-sales-dashboard'
     | '/ticketing'
     | '/unsubscribe'
+    | '/welcome'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -923,6 +934,7 @@ export interface FileRouteTypes {
     | '/ticket-sales-dashboard'
     | '/ticketing'
     | '/unsubscribe'
+    | '/welcome'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -1003,6 +1015,7 @@ export interface RootRouteChildren {
   TicketSalesDashboardRoute: typeof TicketSalesDashboardRoute
   TicketingRoute: typeof TicketingRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  WelcomeRoute: typeof WelcomeRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
@@ -1036,6 +1049,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/unsubscribe': {
       id: '/unsubscribe'
       path: '/unsubscribe'
@@ -1638,6 +1658,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketSalesDashboardRoute: TicketSalesDashboardRoute,
   TicketingRoute: TicketingRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  WelcomeRoute: WelcomeRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
