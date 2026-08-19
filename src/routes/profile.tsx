@@ -1394,6 +1394,17 @@ function MyTicketsTab() {
     const at = t.events ? new Date(t.events.starts_at).getTime() : 0;
     return view === "upcoming" ? at >= now : at < now;
   });
+  // Several tickets for the same event are separate scannable passes.
+  // Number them so a buyer can hand out "Ticket 2 of 3" without confusion.
+  const totals = new Map<string, number>();
+  for (const t of shown) totals.set(t.event_id, (totals.get(t.event_id) ?? 0) + 1);
+  const seen = new Map<string, number>();
+  const numbered = shown.map((t) => {
+    const n = (seen.get(t.event_id) ?? 0) + 1;
+    seen.set(t.event_id, n);
+    const total = totals.get(t.event_id) ?? 1;
+    return { t, seat: total > 1 ? `Ticket ${n} of ${total}` : null };
+  });
   return (
     <div className="space-y-4">
       <div className="inline-flex rounded-full bg-neutral-100 p-1 text-sm">
@@ -1404,14 +1415,14 @@ function MyTicketsTab() {
         <div className="rounded-xl border border-dashed border-neutral-200 py-10 text-center text-sm text-neutral-500">No {view} tickets</div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map((t) => <TicketStub key={t.id} t={t} />)}
+          {numbered.map(({ t, seat }) => <TicketStub key={t.id} t={t} seat={seat} />)}
         </div>
       )}
     </div>
   );
 }
 
-function TicketStub({ t }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null } }) {
+function TicketStub({ t, seat }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null }; seat?: string | null }) {
   const when = t.events ? new Date(t.events.starts_at) : null;
   return (
     <Link
@@ -1422,6 +1433,9 @@ function TicketStub({ t }: { t: { id: string; buyer_total_cents: number; events:
       <div className="flex-1 p-5">
         <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300">Planet Baltimore Ticket</div>
         <div className="mt-2 line-clamp-2 text-lg font-bold leading-tight">{t.events?.title ?? "Event"}</div>
+        {seat && (
+          <div className="mt-1 inline-flex rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-white/80">{seat}</div>
+        )}
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
           <div>
             <div className="text-white/40">Date</div>

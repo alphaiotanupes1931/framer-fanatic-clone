@@ -1,0 +1,1 @@
+DELETE FROM public.tickets WHERE id IN ('4ec3b21c-7861-412e-b22e-53cd653b498a','c1e4389c-80bf-4095-a320-bd069bf0e156','f4c9e3d7-29a2-4ce7-acf0-7ff141efb07c');

@@ -287,10 +287,9 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       const ev = events.find((e) => e.id === eventId);
       const isFree = !ev || (ev.price_cents ?? 0) <= 0;
       if (isFree) {
-        const { data, error } = await supabase.rpc("rsvp_free_event", { _event_id: eventId });
+        const { error } = await supabase.rpc("rsvp_free_event", { _event_id: eventId, _quantity: 1 });
         if (error) throw error;
-        const result = data as { alreadyRsvped?: boolean } | null;
-        toast.success(result?.alreadyRsvped ? "You're already on the list" : "You're going!");
+        toast.success("You're going!");
       } else {
         const { url } = await checkoutFn({ data: { eventId, returnOrigin: window.location.origin } });
         if (url) window.location.href = url;

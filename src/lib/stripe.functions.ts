@@ -118,7 +118,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     z.object({
       eventId: z.string().uuid(),
       returnOrigin: z.string().url(),
-      quantity: z.number().int().min(1).max(10).default(1),
+      quantity: z.number().int().min(1).max(100).default(1),
       ticketTypeId: z.string().uuid().optional(),
     }).parse(d),
   )
@@ -130,7 +130,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
 
     const { data: event, error: evErr } = await supabase
       .from("events")
-      .select("id, title, user_id, price_cents, image_url, is_published")
+      .select("id, title, user_id, price_cents, image_url, is_published, max_tickets_per_buyer")
       .eq("id", data.eventId)
       .maybeSingle();
 
@@ -149,7 +149,17 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       const now = Date.now();
       if (tt.sale_starts_at && new Date(tt.sale_starts_at).getTime() > now) throw new Error("Sales for this ticket type haven't started yet.");
       if (tt.sale_ends_at && new Date(tt.sale_ends_at).getTime() < now) throw new Error("Sales for this ticket type have ended.");
-      if (tt.max_per_buyer && data.quantity > tt.max_per_buyer) throw new Error(`You can buy at most ${tt.max_per_buyer} of this ticket type.`);
+      if (tt.max_per_buyer) {
+        const { count: owned } = await supabase
+          .from("tickets")
+          .select("id", { count: "exact", head: true })
+          .eq("ticket_type_id", tt.id)
+          .eq("buyer_id", userId)
+          .neq("status", "cancelled");
+        if ((owned ?? 0) + data.quantity > tt.max_per_buyer) {
+          throw new Error(`The organizer limits this ticket to ${tt.max_per_buyer} per person.`);
+        }
+      }
       if (tt.quantity !== null) {
         const { count } = await supabase
           .from("tickets")
@@ -159,6 +169,19 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
         if ((count ?? 0) + data.quantity > tt.quantity) throw new Error("Not enough tickets left in this tier.");
       }
       tier = tt;
+    }
+
+    // Event-level cap set by the organizer (used when the event has no tiers).
+    if (!tier && event.max_tickets_per_buyer) {
+      const { count: owned } = await supabase
+        .from("tickets")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", event.id)
+        .eq("buyer_id", userId)
+        .neq("status", "cancelled");
+      if ((owned ?? 0) + data.quantity > event.max_tickets_per_buyer) {
+        throw new Error(`The organizer limits this event to ${event.max_tickets_per_buyer} tickets per person.`);
+      }
     }
 
     const unitPriceCents = tier ? tier.price_cents : (event.price_cents ?? 0);

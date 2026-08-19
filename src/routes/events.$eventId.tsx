@@ -115,20 +115,28 @@ function EventDetail() {
     if (t.sale_ends_at && new Date(t.sale_ends_at).getTime() < now) return false;
     return true;
   };
-  const maxQty = Math.min(10, selectedTier?.max_per_buyer ?? 10);
+  // The organizer decides the per-person limit. No cap set means a generous default.
+  const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
+  const maxQty = selectedTier?.max_per_buyer ?? eventCap ?? 20;
 
   const rsvp = async () => {
     if (!evt) return;
     if (!me) { toast.error("Sign in to RSVP"); return; }
     setRsvping(true);
     try {
-      const { data, error } = await supabase.rpc("rsvp_free_event", { _event_id: evt.id });
+      const { data, error } = await supabase.rpc("rsvp_free_event", {
+        _event_id: evt.id,
+        _quantity: qty,
+        ...(selectedTier?.id ? { _ticket_type_id: selectedTier.id } : {}),
+      });
       if (error) throw error;
-      const result = data as { alreadyRsvped?: boolean } | null;
+      const result = data as { quantity?: number } | null;
+      const n = result?.quantity ?? qty;
       setRsvped(true);
-      toast.success(result?.alreadyRsvped ? "You're already on the list" : "You're going!");
-    } catch {
-      toast.error("Planet Baltimore could not complete your RSVP. Please try again.");
+      toast.success(n > 1 ? `${n} tickets reserved. Each has its own QR code.` : "You're going!");
+    } catch (e) {
+      const msg = (e as { message?: string } | null)?.message;
+      toast.error(msg || "Planet Baltimore could not complete your RSVP. Please try again.");
     } finally {
       setRsvping(false);
     }
@@ -315,9 +323,21 @@ function EventDetail() {
                   </Button>
                 </>
               ) : (
-                <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-                  {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "Reserve free ticket"}
-                </Button>
+                <>
+                  <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                    <span className="text-sm font-medium text-foreground">Tickets</span>
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
+                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
+                      <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                      <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
+                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
+                    </div>
+                  </div>
+                  <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                    {rsvped ? "You're going ✓" : rsvping ? "Saving…" : qty > 1 ? `Reserve ${qty} free tickets` : "Reserve free ticket"}
+                  </Button>
+                </>
               )}
             </>
           ) : priced ? (
@@ -328,7 +348,7 @@ function EventDetail() {
                   <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
                     className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
                   <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                  <button type="button" onClick={() => setQty((q) => Math.min(10, q + 1))} disabled={qty >= 10}
+                  <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
                     className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
                 </div>
               </div>
@@ -338,9 +358,21 @@ function EventDetail() {
               </Button>
             </>
           ) : (
-            <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-              {rsvped ? "You're going ✓" : rsvping ? "Saving…" : "I'm going"}
-            </Button>
+            <>
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <span className="text-sm font-medium text-foreground">Tickets</span>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
+                  <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                  <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
+                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
+                </div>
+              </div>
+              <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
+                {rsvped ? "You're going ✓" : rsvping ? "Saving…" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
+              </Button>
+            </>
           )}
           <Button onClick={() => setShareOpen(true)} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2" aria-label="Share">
             <Send className="w-4 h-4 -rotate-45" />Share
