@@ -1,6 +1,6 @@
 import { siteUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, MessageCircle, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, Share2, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { Flag, Link2 as LinkIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
