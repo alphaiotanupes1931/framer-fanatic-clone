@@ -12,6 +12,8 @@ interface InviteFriendsDialogProps {
   open: boolean;
   onClose: () => void;
   inviteUrl?: string;
+  /** When the invite comes from a group, association, or org page. */
+  group?: { slug: string; name: string };
 }
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -24,14 +26,15 @@ const makeToken = () =>
     .replace(/-/g, "")
     .slice(0, 24);
 
-const buildInviteUrl = (username?: string | null, token?: string) => {
+const buildInviteUrl = (username?: string | null, token?: string, groupSlug?: string) => {
   const url = new URL("/invite", PUBLIC_SITE_URL);
   if (username) url.searchParams.set("ref", username);
   if (token) url.searchParams.set("iv", token);
+  if (groupSlug) url.searchParams.set("g", groupSlug);
   return url.toString();
 };
 
-export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps) {
+export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialogProps) {
   const [text, setText] = useState("");
   const [parsed, setParsed] = useState<string[]>([]);
   const [message, setMessage] = useState("");
@@ -39,7 +42,7 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
   const [sending, setSending] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [sent, setSent] = useState(false);
-  const [shareUrl, setShareUrl] = useState(buildInviteUrl());
+  const [shareUrl, setShareUrl] = useState(buildInviteUrl(null, undefined, group?.slug));
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -48,9 +51,9 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
     (async () => {
       const { data: rows } = await supabase.rpc("my_profile");
       const profile = (rows as unknown as Array<Record<string, any>> | null)?.[0];
-      setShareUrl(buildInviteUrl(profile?.username));
+      setShareUrl(buildInviteUrl(profile?.username, undefined, group?.slug));
     })();
-  }, [open]);
+  }, [open, group?.slug]);
 
   const copyLink = async () => {
     try {
@@ -103,7 +106,7 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
       for (const to of emails) {
         const token = makeToken();
         tokens.set(to, token);
-        const trackedUrl = buildInviteUrl(profile?.username, token);
+        const trackedUrl = buildInviteUrl(profile?.username, token, group?.slug);
         const res = await fetch("/lovable/email/transactional/send", {
           method: "POST",
           headers: {
@@ -114,7 +117,14 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
             templateName: "referral-invite",
             recipientEmail: to,
             idempotencyKey: `invite-${session.user.id}-${to}-${Date.now()}`,
-            templateData: { inviterName, personalMessage: message?.trim() || "", inviteUrl: trackedUrl },
+            templateData: {
+              inviterName,
+              personalMessage: [
+                group ? `${inviterName} invited you to join ${group.name} on Planet Baltimore.` : "",
+                message?.trim() || "",
+              ].filter(Boolean).join("\n\n"),
+              inviteUrl: trackedUrl,
+            },
           }),
         });
         if (res.ok) {
@@ -192,7 +202,7 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
       <DialogContent className="w-[calc(100vw-1rem)] sm:w-[min(95vw,900px)] max-w-none max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" /> Invite Friends
+            <UserPlus className="h-5 w-5" /> {group ? `Invite friends to ${group.name}` : "Invite Friends"}
           </DialogTitle>
         </DialogHeader>
 
@@ -200,7 +210,7 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
           {/* Invite link box */}
           <div className="rounded-xl border border-border bg-muted/20 p-4">
             <label className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-              <Link2 className="h-3.5 w-3.5" /> Your invite link
+              <Link2 className="h-3.5 w-3.5" /> {group ? `Your invite link to ${group.name}` : "Your invite link"}
             </label>
             <div className="flex gap-2">
               <div className="min-w-0 flex-1 overflow-hidden rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
@@ -214,13 +224,13 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <button
                 type="button"
-                onClick={() => void externalShare(shareUrl, "Join me on Planet Baltimore")}
+                onClick={() => void externalShare(shareUrl, group ? `Join ${group.name} on Planet Baltimore` : "Join me on Planet Baltimore")}
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
               >
                 <Share2 className="h-3.5 w-3.5" /> Share
               </button>
               <a
-                href={`sms:?&body=${encodeURIComponent(`Join me on Planet Baltimore! ${shareUrl}`)}`}
+                href={`sms:?&body=${encodeURIComponent(group ? `Join ${group.name} on Planet Baltimore! ${shareUrl}` : `Join me on Planet Baltimore! ${shareUrl}`)}`}
                 className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
               >
                 Text
@@ -251,7 +261,9 @@ export function InviteFriendsDialog({ open, onClose }: InviteFriendsDialogProps)
               </button>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              Anyone who joins through this link counts toward your network.
+              {group
+                ? `Anyone who opens this link signs in or signs up, then lands right on ${group.name} ready to join.`
+                : "Anyone who joins through this link counts toward your network."}
             </p>
           </div>
 

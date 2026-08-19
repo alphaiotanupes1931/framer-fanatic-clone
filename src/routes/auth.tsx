@@ -16,13 +16,13 @@ import { Img } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
 import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
 
-function popPostAuthRedirect(): string | null {
+function popPostAuthRedirect(consume = true): string | null {
   if (typeof window === "undefined") return null;
   try {
     const fromUrl = new URLSearchParams(window.location.search).get("redirect");
     const stored = sessionStorage.getItem("pb_post_auth_redirect");
     const v = fromUrl || stored;
-    if (v) sessionStorage.removeItem("pb_post_auth_redirect");
+    if (v && consume) sessionStorage.removeItem("pb_post_auth_redirect");
     return v?.startsWith("/") && !v.startsWith("//") ? v : null;
   } catch { return null; }
 }
@@ -66,7 +66,13 @@ function AuthPage() {
       // Confirmation links can land here on a different device, so trust the
       // server-side flag rather than anything saved locally at signup.
       const { data: p } = await supabase.from("profiles").select(ONBOARDING_FIELDS).eq("id", uid).maybeSingle();
-      if (profileNeedsOnboarding(p as any)) { navigate({ to: "/onboarding" }); return; }
+      if (profileNeedsOnboarding(p as any)) {
+        // Keep the destination stored so onboarding can finish the trip.
+        const pending = popPostAuthRedirect(false);
+        if (pending) { try { sessionStorage.setItem("pb_post_auth_redirect", pending); } catch { /* ignore */ } }
+        navigate({ to: "/onboarding" });
+        return;
+      }
       const dest = redirect || popPostAuthRedirect();
       if (dest) { window.location.replace(dest); return; }
       navigate({ to: "/dashboard" });
@@ -106,9 +112,15 @@ function AuthPage() {
         return navigate({ to: "/reset-password" });
       }
       const needsOnboarding = profileNeedsOnboarding(p as any);
+      if (needsOnboarding) {
+        const pending = redirect || popPostAuthRedirect(false);
+        if (pending) { try { sessionStorage.setItem("pb_post_auth_redirect", pending); } catch { /* ignore */ } }
+        navigate({ to: "/onboarding" });
+        return;
+      }
       const dest = redirect || popPostAuthRedirect();
-      if (dest && !needsOnboarding) { window.location.replace(dest); return; }
-      navigate({ to: needsOnboarding ? "/onboarding" : "/dashboard" });
+      if (dest) { window.location.replace(dest); return; }
+      navigate({ to: "/dashboard" });
     } else {
        const dest = redirect || popPostAuthRedirect();
       if (dest) { window.location.replace(dest); return; }

@@ -123,6 +123,14 @@ function Onboarding() {
         )
         .eq("id", userId);
       if (error) throw error;
+      // If they arrived from a group invite, finish the trip there.
+      let dest: string | null = null;
+      try {
+        const v = sessionStorage.getItem("pb_post_auth_redirect");
+        if (v && v.startsWith("/") && !v.startsWith("//")) dest = v;
+        sessionStorage.removeItem("pb_post_auth_redirect");
+      } catch { /* ignore */ }
+      if (dest) { window.location.replace(dest); return; }
       navigate({ to: "/dashboard" });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Something went wrong";

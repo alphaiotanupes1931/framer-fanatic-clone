@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { clearPendingGroup } from "@/lib/pending-join";
 import { AppLayout } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { FileUpload } from "@/components/shared/file-upload";
@@ -122,6 +123,7 @@ function OrgProfile() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
+  const autoJoinDone = useRef(false);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
   }, []);
@@ -149,6 +151,29 @@ function OrgProfile() {
       const row = data as { status?: string | null } | null;
       setJoined(!!row);
       setMemberStatus(!row ? "none" : row.status === "pending" ? "pending" : "approved");
+
+      // Someone arriving from an invite link (/o/slug?join=1) should be put
+      // through the join step without hunting for the button.
+      const wantsJoin = typeof window !== "undefined"
+        && new URLSearchParams(window.location.search).get("join") === "1";
+      if (wantsJoin && !autoJoinDone.current) {
+        autoJoinDone.current = true;
+        clearPendingGroup();
+        if (!row && me !== org.owner_id) {
+          const pending = org.type === "group";
+          const { error } = await supabase
+            .from("organization_members")
+            .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
+          if (!error) {
+            setJoined(true);
+            setMemberStatus(pending ? "pending" : "approved");
+            if (pending) void notifyGroupJoinRequest({ data: { organizationId: org.id } }).catch(() => {});
+            toast.success(pending
+              ? `Request sent to ${org.name}. The creator will review it.`
+              : `You joined ${org.name}`);
+          }
+        }
+      }
     })();
   }, [org, me]);
   useEffect(() => {
@@ -617,7 +642,7 @@ function OrgProfile() {
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
           {tab === "Leaderboard" && <MembersTab orgId={org.id} />}
-          {tab === "Invite" && <InviteTab orgName={org.name} />}
+          {tab === "Invite" && <InviteTab orgName={org.name} orgSlug={org.slug} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
           {(tab === "Minutes" || tab === "Resources") && (
@@ -810,7 +835,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
   return <OrgPostList orgId={org.id} kind={kind} canManage={canManage} />;
 }
 
-function InviteTab({ orgName }: { orgName: string }) {
+function InviteTab({ orgName, orgSlug }: { orgName: string; orgSlug: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -822,7 +847,10 @@ function InviteTab({ orgName }: { orgName: string }) {
       >
         Invite Friends to Join
       </button>
-      <InviteFriendsDialog open={open} onClose={() => setOpen(false)} />
+      <p className="text-center text-xs text-neutral-500">
+        Your link brings them straight to {orgName}, so they join this page and not just the site.
+      </p>
+      <InviteFriendsDialog open={open} onClose={() => setOpen(false)} group={{ slug: orgSlug, name: orgName }} />
     </div>
   );
 }
