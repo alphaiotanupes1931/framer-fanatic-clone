@@ -24,10 +24,6 @@ import {
   Send,
   X,
   Upload,
-  Sparkles,
-  Ticket,
-  Shirt,
-  Star,
   Trash2,
   RefreshCw,
 } from "lucide-react";
@@ -82,36 +78,6 @@ const TIERS = [
   },
 ];
 
-const REWARDS = [
-  {
-    key: "shoutout",
-    name: "Community shoutout",
-    cost: 15,
-    blurb: "Featured on the Planet Baltimore homepage for a week.",
-    icon: Sparkles,
-  },
-  {
-    key: "event-ticket",
-    name: "Free event ticket",
-    cost: 40,
-    blurb: "One free ticket to any Planet Baltimore partner event.",
-    icon: Ticket,
-  },
-  {
-    key: "merch",
-    name: "Planet Baltimore merch",
-    cost: 75,
-    blurb: "Limited edition tee shipped to your door.",
-    icon: Shirt,
-  },
-  {
-    key: "founding-member",
-    name: "Founding member badge",
-    cost: 150,
-    blurb: "Permanent badge on your profile plus early access to new features.",
-    icon: Star,
-  },
-];
 
 export function ReferralNetworkDialog({
   open,
@@ -126,8 +92,6 @@ export function ReferralNetworkDialog({
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
   const [parsedEmails, setParsedEmails] = useState<string[]>([]);
-  const [claims, setClaims] = useState<Array<{ reward_key: string; status: string; points_spent: number }>>([]);
-  const [claiming, setClaiming] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
   const [invites, setInvites] = useState<any[]>([]);
@@ -184,11 +148,6 @@ export function ReferralNetworkDialog({
     setClaims(claimRows ?? []);
   };
 
-  const spentPoints = useMemo(
-    () => claims.reduce((sum, c) => sum + (c.points_spent ?? 0), 0),
-    [claims],
-  );
-  const availablePoints = Math.max(0, stats.points - spentPoints);
 
   const extractEmails = (raw: string) =>
     Array.from(new Set((raw.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
@@ -219,36 +178,6 @@ export function ReferralNetworkDialog({
     toast.success(`Found ${found.length} email${found.length === 1 ? "" : "s"}`);
   };
 
-  const handleClaim = async (reward: (typeof REWARDS)[number]) => {
-    if (availablePoints < reward.cost) {
-      toast.error(`You need ${reward.cost - availablePoints} more points for this gift`);
-      return;
-    }
-    const note = window.prompt(
-      "Where should we reach you about this gift? (email, phone, or shipping address)",
-      "",
-    );
-    if (note === null) return;
-    setClaiming(reward.key);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Please sign in first");
-      const { error } = await supabase.from("referral_rewards").insert({
-        user_id: user.id,
-        reward_key: reward.key,
-        reward_name: reward.name,
-        points_spent: reward.cost,
-        contact_note: note.trim() || null,
-      });
-      if (error) throw error;
-      toast.success(`${reward.name} claimed. We'll be in touch soon.`);
-      await loadStats();
-    } catch (err: any) {
-      toast.error(err.message || "Could not claim this gift");
-    } finally {
-      setClaiming(null);
-    }
-  };
 
   const handleCopy = async () => {
     if (!inviteUrl) return;
@@ -698,60 +627,13 @@ export function ReferralNetworkDialog({
             <TabsContent value="gifts" className="mt-3 space-y-3">
               <div className="rounded-lg border border-border bg-muted/20 p-3 text-center">
                 <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Points available to spend
+                  All referral points go toward Baltimore 100
                 </div>
-                <div className="text-2xl font-bold text-primary">{availablePoints}</div>
+                <div className="text-2xl font-bold text-primary">{stats.points}</div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Earned {stats.points}, spent {spentPoints}. Every friend who joins adds 5 points.
+                  Every friend who joins adds 5 points.
                 </p>
               </div>
-
-              <div className="space-y-2">
-                {REWARDS.map((reward) => {
-                  const claim = claims.find((c) => c.reward_key === reward.key);
-                  const Icon = reward.icon;
-                  const locked = !claim && availablePoints < reward.cost;
-                  return (
-                    <div
-                      key={reward.key}
-                      className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                        <Icon className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-semibold text-foreground sm:text-sm">
-                          {reward.name}
-                        </div>
-                        <div className="text-[11px] text-muted-foreground">{reward.blurb}</div>
-                      </div>
-                      {claim ? (
-                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-semibold capitalize text-primary">
-                          {claim.status}
-                        </span>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant={locked ? "outline" : "default"}
-                          disabled={locked || claiming === reward.key}
-                          onClick={() => void handleClaim(reward)}
-                          className="shrink-0 gap-1.5 text-xs"
-                        >
-                          {claiming === reward.key ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Gift className="h-3.5 w-3.5" />
-                          )}
-                          {locked ? `${reward.cost} pts` : "Claim"}
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Once you claim a gift, our team reaches out using the contact details you provide.
-              </p>
             </TabsContent>
           </Tabs>
 
