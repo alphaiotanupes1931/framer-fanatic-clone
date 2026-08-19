@@ -7,6 +7,7 @@ import { slugify, subtypesFor, ORG_TYPE_LABEL } from "@/lib/categories";
 import { itemHintsFor } from "@/components/org/price-items-section";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { BANNER_SPEC } from "@/lib/media-guidelines";
 
 type Neighborhood = { id: string; name: string };
 
