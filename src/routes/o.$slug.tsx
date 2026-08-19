@@ -122,6 +122,7 @@ function OrgProfile() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
+  const autoJoinDone = useRef(false);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
   }, []);
@@ -149,6 +150,29 @@ function OrgProfile() {
       const row = data as { status?: string | null } | null;
       setJoined(!!row);
       setMemberStatus(!row ? "none" : row.status === "pending" ? "pending" : "approved");
+
+      // Someone arriving from an invite link (/o/slug?join=1) should be put
+      // through the join step without hunting for the button.
+      const wantsJoin = typeof window !== "undefined"
+        && new URLSearchParams(window.location.search).get("join") === "1";
+      if (wantsJoin && !autoJoinDone.current) {
+        autoJoinDone.current = true;
+        clearPendingGroup();
+        if (!row && me !== org.owner_id) {
+          const pending = org.type === "group";
+          const { error } = await supabase
+            .from("organization_members")
+            .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
+          if (!error) {
+            setJoined(true);
+            setMemberStatus(pending ? "pending" : "approved");
+            if (pending) void notifyGroupJoinRequest({ data: { organizationId: org.id } }).catch(() => {});
+            toast.success(pending
+              ? `Request sent to ${org.name}. The creator will review it.`
+              : `You joined ${org.name}`);
+          }
+        }
+      }
     })();
   }, [org, me]);
   useEffect(() => {
