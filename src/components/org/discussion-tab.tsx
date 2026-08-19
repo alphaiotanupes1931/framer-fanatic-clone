@@ -12,6 +12,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { ReportButton } from "@/components/shared/report-button";
 import { MentionText } from "@/components/shared/mention-text";
 import { MentionField } from "@/components/shared/mention-input";
 
@@ -277,6 +278,7 @@ export function DiscussionTab({
                       {c.is_muted ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
                   )}
+                  {c.user_id !== me && <ReportButton contentType="org_post" contentId={c.id} />}
                   {(canManage || c.user_id === me) && (
                     <button onClick={() => void remove(c.id)} title="Delete" className="rounded-full p-1.5 text-muted-foreground hover:text-red-600">
                       <Trash2 className="h-4 w-4" />

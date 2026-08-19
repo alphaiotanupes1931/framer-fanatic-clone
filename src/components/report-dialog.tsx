@@ -20,7 +20,7 @@ export function ReportDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  contentType: "post" | "story" | "comment" | "user" | "event" | "message";
+  contentType: "post" | "story" | "comment" | "user" | "event" | "message" | "video" | "org_post";
   contentId: string;
 }) {
   const [reason, setReason] = useState(REASONS[0]);

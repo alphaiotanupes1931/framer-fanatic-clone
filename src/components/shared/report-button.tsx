@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Flag } from "lucide-react";
 import { ReportDialog } from "@/components/report-dialog";
 
-type ContentType = "post" | "story" | "comment" | "user" | "event" | "message";
+type ContentType = "post" | "story" | "comment" | "user" | "event" | "message" | "video" | "org_post";
 
 /**
  * Small flag button that any content card can render so members can report
