@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Bell, Heart, MessageCircle, UserPlus, Calendar, CheckCheck } from "lucide-react";
+import { Bell, Heart, MessageCircle, UserPlus, Calendar, CheckCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
@@ -132,6 +132,22 @@ function NotificationsPage() {
     toast.success("All marked as read");
   };
 
+  const remove = async (id: string) => {
+    const prev = items;
+    setItems((p) => p.filter((n) => n.id !== id));
+    const { error } = await supabase.from("notifications").delete().eq("id", id);
+    if (error) { setItems(prev); toast.error(error.message); }
+  };
+
+  const clearAll = async () => {
+    if (!uid) return;
+    const prev = items;
+    setItems([]);
+    const { error } = await supabase.from("notifications").delete().eq("user_id", uid);
+    if (error) { setItems(prev); toast.error(error.message); return; }
+    toast.success("Notifications cleared");
+  };
+
   const onClick = async (n: Notif) => {
     if (!n.is_read) {
       await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
@@ -148,10 +164,17 @@ function NotificationsPage() {
         <HeroBanner
           title="Notifications"
           subtitle="Follows, likes, comments, and event updates from your community."
-          cta={items.some((n) => !n.is_read) ? (
-            <Button onClick={markAllRead} variant="outline" className="gap-2 rounded-lg">
-              <CheckCheck className="h-4 w-4" /> Mark all read
-            </Button>
+          cta={items.length ? (
+            <div className="flex gap-2">
+              {items.some((n) => !n.is_read) && (
+                <Button onClick={markAllRead} variant="outline" className="gap-2 rounded-lg">
+                  <CheckCheck className="h-4 w-4" /> Mark all read
+                </Button>
+              )}
+              <Button onClick={clearAll} variant="outline" className="gap-2 rounded-lg">
+                <Trash2 className="h-4 w-4" /> Clear all
+              </Button>
+            </div>
           ) : undefined}
         />
 
@@ -217,6 +240,15 @@ function NotificationsPage() {
                       <p className="mt-0.5 text-xs text-muted-foreground">{relTime(n.created_at)}</p>
                     </div>
                     {!n.is_read && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: "#d4580a" }} />}
+                    <button
+                      type="button"
+                      onClick={() => void remove(n.id)}
+                      aria-label="Delete notification"
+                      title="Delete"
+                      className="ml-1 mt-0.5 flex-shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </li>
               );
