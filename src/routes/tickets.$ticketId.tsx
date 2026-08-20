@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
+import { QrDisplay } from "@/components/tickets/qr-display";
 import { TicketVerifyView } from "@/components/tickets/ticket-verify-view";
 import { emailMyCancellation } from "@/lib/tickets.functions";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
@@ -125,7 +126,6 @@ function TicketDetailPage() {
   const when = t.events ? new Date(t.events.starts_at) : null;
   // Scanning the QR opens a public verification page anyone at the door can read.
   const ticketUrl = siteUrl(`/tickets/${t.id}?verify=1`);
-  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&ecc=M&format=png&data=${encodeURIComponent(ticketUrl)}`;
 
   return (
     <>
@@ -213,7 +213,7 @@ function TicketDetailPage() {
           {/* QR */}
           <div className="relative flex flex-col items-center px-5 py-6 sm:px-6">
             <div className="relative rounded-3xl bg-white p-3 shadow-[0_0_60px_-12px_rgba(255,255,255,0.25)] sm:p-4">
-              <Img src={qr} alt="Ticket QR code" width={220} height={220} className="h-[min(60vw,220px)] w-[min(60vw,220px)]" />
+              <QrDisplay value={ticketUrl} />
               {t.status === "cancelled" && (
                 <div className="absolute inset-0 grid place-items-center rounded-2xl bg-white/70">
                   <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
