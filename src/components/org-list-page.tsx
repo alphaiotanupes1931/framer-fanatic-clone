@@ -242,8 +242,8 @@ export function OrgListPage({
                     <Trash2 className="h-4 w-4" />
                   </button>
                 )}
-                <div className="relative h-40 bg-neutral-100"
-                  style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+                <div className="relative h-40 overflow-hidden bg-neutral-100">
+                  {o.banner_url && <Img src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />}
                   <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
                     {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
