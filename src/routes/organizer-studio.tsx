@@ -14,8 +14,10 @@ import { EventEditForm } from "@/components/organizer/event-edit-form";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
-  validateSearch: (search: Record<string, unknown>): { event?: string } =>
-    typeof search['event'] === "string" ? { event: search['event'] as string } : {},
+  validateSearch: (search: Record<string, unknown>): { event?: string; edit?: boolean } => ({
+    ...(typeof search['event'] === "string" ? { event: search['event'] as string } : {}),
+    ...(search['edit'] === true || search['edit'] === "true" || search['edit'] === "1" ? { edit: true } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Organizer Studio - Planet Baltimore" },
@@ -39,7 +41,7 @@ function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
 
 function OrganizerStudioPage() {
   const me = useCurrentProfile();
-  const { event: focusEventId } = Route.useSearch();
+  const { event: focusEventId, edit: focusEdit } = Route.useSearch();
   const [tab, setTab] = useState<"manage" | "create" | "campaign">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
@@ -194,8 +196,8 @@ function OrganizerStudioPage() {
   );
 }
 
-function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
-  const [tab, setTab] = useState<"details" | "tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">("tickets");
+function EventDetail({ evt, onBack, initialTab }: { evt: MyEvent; onBack: () => void; initialTab?: "details" }) {
+  const [tab, setTab] = useState<"details" | "tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">(initialTab ?? "tickets");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
   const [search, setSearch] = useState("");
