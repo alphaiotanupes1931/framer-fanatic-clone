@@ -1,10 +1,11 @@
 import { siteUrl } from "@/lib/utils";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
-import { MapPin, Calendar, Download, Send, ArrowLeft, Share as ShareIcon } from "lucide-react";
+import { MapPin, Calendar, Download, Send, ArrowLeft, Share as ShareIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
@@ -29,6 +30,7 @@ type TicketDetail = {
 
 function TicketDetailPage() {
   const { ticketId } = useParams({ from: "/tickets/$ticketId" });
+  const navigate = useNavigate();
   const [verifyMode, setVerifyMode] = useState<boolean | null>(null);
   useEffect(() => {
     setVerifyMode(new URLSearchParams(window.location.search).get("verify") === "1");
@@ -36,6 +38,9 @@ function TicketDetailPage() {
   const [t, setT] = useState<TicketDetail | null | undefined>(undefined);
   const [shareOpen, setShareOpen] = useState(false);
   const [holder, setHolder] = useState<{ display_name: string | null; email: string | null } | null>(null);
+  // Sibling tickets let the holder flip through every pass without going back.
+  const [siblings, setSiblings] = useState<string[]>([]);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     supabase.from("tickets")
@@ -50,6 +55,47 @@ function TicketDetailPage() {
     supabase.from("profiles").select("display_name,email").eq("id", t.buyer_id).maybeSingle()
       .then(({ data }) => setHolder((data as { display_name: string | null; email: string | null } | null) ?? null));
   }, [t?.buyer_id]);
+
+  useEffect(() => {
+    if (verifyMode !== false) return;
+    let cancelled = false;
+    (async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("tickets")
+        .select("id")
+        .eq("buyer_id", uid)
+        .eq("status", "paid")
+        .order("created_at", { ascending: false });
+      if (!cancelled) setSiblings(((data ?? []) as { id: string }[]).map((r) => r.id));
+    })();
+    return () => { cancelled = true; };
+  }, [verifyMode]);
+
+  const idx = siblings.indexOf(ticketId);
+  const prevId = idx > 0 ? siblings[idx - 1] : null;
+  const nextId = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && prevId) navigate({ to: "/tickets/$ticketId", params: { ticketId: prevId } });
+      if (e.key === "ArrowRight" && nextId) navigate({ to: "/tickets/$ticketId", params: { ticketId: nextId } });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [prevId, nextId, navigate]);
+
+  const cancelRsvp = async () => {
+    if (!window.confirm("Cancel this RSVP? Your spot will be released.")) return;
+    setCancelling(true);
+    const { error } = await supabase.rpc("cancel_my_rsvp", { _ticket_id: ticketId });
+    setCancelling(false);
+    if (error) { toast.error(error.message || "Could not cancel this RSVP"); return; }
+    toast.success("RSVP cancelled");
+    navigate({ to: "/profile" });
+  };
 
   const shareExternal = () => {
     const url = t?.events?.id ? siteUrl(`/events/${t.events.id}`) : window.location.href;
@@ -82,9 +128,34 @@ function TicketDetailPage() {
     <>
     <AppLayout>
       <div className="mx-auto w-full max-w-lg px-4 py-6">
-        <Link to="/profile" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">
-          <ArrowLeft className="h-4 w-4" /> My tickets
-        </Link>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <Link to="/profile" className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">
+            <ArrowLeft className="h-4 w-4" /> My tickets
+          </Link>
+          {siblings.length > 1 && idx >= 0 && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                aria-label="Previous ticket"
+                disabled={!prevId}
+                onClick={() => prevId && navigate({ to: "/tickets/$ticketId", params: { ticketId: prevId } })}
+                className="rounded-full border border-neutral-200 bg-white p-1.5 text-neutral-600 transition hover:border-[#d4580a] hover:text-[#d4580a] disabled:opacity-30"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="min-w-[64px] text-center text-xs font-semibold text-neutral-500">{idx + 1} of {siblings.length}</span>
+              <button
+                type="button"
+                aria-label="Next ticket"
+                disabled={!nextId}
+                onClick={() => nextId && navigate({ to: "/tickets/$ticketId", params: { ticketId: nextId } })}
+                className="rounded-full border border-neutral-200 bg-white p-1.5 text-neutral-600 transition hover:border-[#d4580a] hover:text-[#d4580a] disabled:opacity-30"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-800 text-white shadow-2xl">
           {/* Cover */}
@@ -166,6 +237,17 @@ function TicketDetailPage() {
           <a href={`https://maps.google.com/?q=${encodeURIComponent(t.events.address)}`} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-100 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-200">
             <MapPin className="h-4 w-4" /> Directions
           </a>
+        )}
+
+        {t.buyer_total_cents === 0 && when && when.getTime() >= Date.now() && (
+          <button
+            type="button"
+            onClick={cancelRsvp}
+            disabled={cancelling}
+            className="mt-3 w-full rounded-xl border border-neutral-200 py-2.5 text-sm font-semibold text-neutral-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+          >
+            {cancelling ? "Cancelling…" : "Cancel RSVP"}
+          </button>
         )}
       </div>
     </AppLayout>
