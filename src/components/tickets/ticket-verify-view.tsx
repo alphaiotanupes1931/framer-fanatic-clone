@@ -190,7 +190,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
             )}
           </div>
           <div className="mt-3 break-all text-center font-mono text-xs uppercase tracking-widest text-neutral-500">
-            #{t.ticket_id}
+            #{t.ticket_id.slice(0, 13).toUpperCase()}
           </div>
           <div className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">
             {cancelled ? "Not valid for entry" : "Present this at the door"}
