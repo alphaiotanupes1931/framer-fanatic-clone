@@ -107,6 +107,25 @@ function TicketDetailPage() {
     void externalShare(url, t?.events?.title || "Event", undefined);
   };
 
+  const saveToCalendar = () => {
+    const ev = t?.events;
+    if (!ev) return;
+    const place = [ev.venue_name, ev.address || ev.location].filter(Boolean).join(", ");
+    downloadIcs(
+      {
+        uid: `ticket-${t!.id}@planetbaltimore.com`,
+        title: ev.title,
+        start: new Date(ev.starts_at),
+        end: ev.ends_at ? new Date(ev.ends_at) : null,
+        location: place || null,
+        description: `Your Planet Baltimore ticket: ${siteUrl(`/tickets/${t!.id}`)}`,
+        url: siteUrl(`/events/${ev.id}`),
+      },
+      ev.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) || "event",
+    );
+    toast.success("Calendar file downloaded");
+  };
+
   if (verifyMode === null) return (
     <div className="min-h-dvh bg-neutral-100 px-4 py-10">
       <div className="mx-auto h-96 w-full max-w-md animate-pulse rounded-3xl bg-white" />
