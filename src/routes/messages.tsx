@@ -505,7 +505,7 @@ function MessagesPage() {
       >
         {/* Conversation list */}
         <div
-          className={`${showList ? "flex" : "hidden"} min-w-0 flex-col border-r border-border md:flex`}
+          className={`${showList ? "flex" : "hidden"} min-h-0 min-w-0 flex-col overflow-hidden border-r border-border md:flex`}
         >
           <div className="space-y-3 px-4 pb-3 pt-4">
             <div className="flex items-center justify-between gap-2">
@@ -529,7 +529,7 @@ function MessagesPage() {
               />
             </div>
           </div>
-          <div className="flex-1 space-y-0.5 overflow-y-auto px-2 pb-2">
+          <div className="min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-2 pb-2">
             {filteredConvs.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-muted-foreground">
                 <MessageSquare className="h-8 w-8" />
