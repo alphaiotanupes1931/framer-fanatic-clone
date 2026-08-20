@@ -201,7 +201,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     }
 
     const qty = data.quantity;
-    // Flat platform fee per ORDER (7¢), never multiplied by ticket quantity, so the
+    // Flat platform fee per ORDER (70¢), never multiplied by ticket quantity, so the
     // breakdown is computed on the full order net rather than a single ticket.
     const breakdown = priceBreakdown(unitPriceCents * qty);
     const applicationFee = breakdown.platformFeeCents;
