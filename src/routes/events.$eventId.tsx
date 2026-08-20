@@ -302,14 +302,14 @@ function EventDetail() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="mx-auto w-full max-w-[600px] space-y-6">
         <button onClick={() => navigate({ to: "/events" })} aria-label="Go back" className="p-2 rounded-full hover:bg-secondary active:scale-90 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ArrowLeft className="w-5 h-5" />
         </button>
 
         {evt.image_url && (
-          <div className="aspect-[16/9] rounded-xl overflow-hidden">
-            <EventImage src={evt.image_url} alt={evt.title} className="w-full h-full object-cover" />
+          <div className="overflow-hidden rounded-2xl border border-border bg-muted">
+            <EventImage src={evt.image_url} alt={evt.title} className="max-h-[520px] w-full object-cover" />
           </div>
         )}
 
