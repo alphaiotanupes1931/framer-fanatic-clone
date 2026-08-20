@@ -450,6 +450,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       {open && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
           <div className="bg-background text-foreground rounded-2xl w-full max-w-lg p-6 border" onClick={(e) => e.stopPropagation()}>
+            {/* create event modal */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-xl font-bold">Create event</h3>
               <button onClick={() => setOpen(false)}><X className="w-5 h-5" /></button>
