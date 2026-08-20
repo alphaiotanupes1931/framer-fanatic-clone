@@ -298,6 +298,16 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         return;
       }
       // Paid: ask how many tickets first, in a sleek sheet, then go to checkout.
+      // Read the real per-buyer cap (event cap, else lowest tier cap) so the
+      // picker never offers more than checkout will actually allow.
+      const [{ data: evRow }, { data: tiers }] = await Promise.all([
+        supabase.from("events").select("max_tickets_per_buyer").eq("id", eventId).maybeSingle(),
+        supabase.from("ticket_types").select("max_per_buyer").eq("event_id", eventId),
+      ]);
+      const tierCaps = (tiers ?? []).map((t) => t.max_per_buyer).filter((n): n is number => !!n);
+      const cap = (evRow as { max_tickets_per_buyer: number | null } | null)?.max_tickets_per_buyer
+        ?? (tierCaps.length ? Math.min(...tierCaps) : null);
+      setQtyMax(Math.max(1, Math.min(cap ?? 20, 100)));
       setQtyEvent(ev);
       setQty(1);
     } catch (e) {
@@ -309,6 +319,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
 
   const [qtyEvent, setQtyEvent] = useState<EventRow | null>(null);
   const [qty, setQty] = useState(1);
+  const [qtyMax, setQtyMax] = useState(20);
   const [checkingOut, setCheckingOut] = useState(false);
 
   const goToCheckout = async () => {
