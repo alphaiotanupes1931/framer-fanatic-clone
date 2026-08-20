@@ -238,7 +238,7 @@ function EventDetail() {
       const n = result?.quantity ?? qty;
       setRsvped(true);
       toast.success(n > 1 ? `${n} tickets reserved. Check your email for your tickets.` : "You're going! Check your email for your ticket.");
-      void emailMyTickets({ data: { eventId: evt.id } }).catch(() => {});
+      void emailMyTickets({ data: { eventId: evt.id } }).catch((err) => console.error("ticket email failed", err));
     } catch (e) {
       const msg = (e as { message?: string } | null)?.message;
       toast.error(msg || "Planet Baltimore could not complete your RSVP. Please try again.");
