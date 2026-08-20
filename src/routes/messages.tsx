@@ -1003,6 +1003,76 @@ function MessagesPage() {
       )}
 
       {broadcastOpen && (
+        <></>
+      )}
+      {membersOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+          onClick={() => setMembersOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-2xl bg-card p-5 shadow-xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div className="min-w-0">
+                <h2 className="truncate text-lg font-bold text-foreground">
+                  {active?.title || "Group chat"}
+                </h2>
+                <p className="text-xs text-muted-foreground">{groupMembers.length} members</p>
+              </div>
+              <button
+                onClick={() => setMembersOpen(false)}
+                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-[60vh] space-y-1 overflow-y-auto">
+              {groupMembers.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">No members found</p>
+              ) : (
+                groupMembers.map((p) =>
+                  p.username ? (
+                    <Link
+                      key={p.id}
+                      to="/u/$username"
+                      params={{ username: p.username }}
+                      onClick={() => setMembersOpen(false)}
+                      className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted"
+                    >
+                      <Avatar className="h-10 w-10">
+                        {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                        <AvatarFallback className="bg-primary/10 text-primary">{initials(p)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-foreground">
+                          {p.display_name || p.username}
+                          {p.id === me?.id && <span className="ml-1 text-xs text-muted-foreground">(You)</span>}
+                        </div>
+                        <div className="truncate text-xs text-muted-foreground">@{p.username}</div>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div key={p.id} className="flex items-center gap-3 rounded-lg p-2">
+                      <Avatar className="h-10 w-10">
+                        {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                        <AvatarFallback className="bg-primary/10 text-primary">{initials(p)}</AvatarFallback>
+                      </Avatar>
+                      <div className="truncate text-sm font-semibold text-foreground">
+                        {p.display_name || "Member"}
+                      </div>
+                    </div>
+                  ),
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {broadcastOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
           onClick={() => !broadcasting && setBroadcastOpen(false)}
