@@ -129,7 +129,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
 
         <div className="px-5 pt-5 sm:px-6 sm:pt-6">
           <div className="flex items-center gap-2">
-            <img src={pbLogoMark} alt="Planet Baltimore" className="-my-2 h-10 w-auto shrink-0 sm:h-11" />
+            <img src={pbLogoMark} alt="Planet Baltimore" className="-my-3 h-14 w-auto shrink-0 sm:h-16" />
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#d4580a]">Planet Baltimore</span>
           </div>
           <h1 className="mt-2 text-xl font-bold leading-tight text-neutral-900 sm:text-2xl">{t.event_title ?? "Event"}</h1>
