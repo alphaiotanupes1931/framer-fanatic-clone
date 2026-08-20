@@ -3194,6 +3194,14 @@ export type Database = {
       }
       admin_upsert_site_content: { Args: { _rows: Json }; Returns: number }
       cancel_my_rsvp: { Args: { _ticket_id: string }; Returns: Json }
+      check_in_ticket: {
+        Args: { _ticket_id: string }
+        Returns: {
+          checked_in_at: string
+          message: string
+          ok: boolean
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
