@@ -68,3 +68,47 @@ export async function sendTicketConfirmation(args: {
     },
   })
 }
+
+/**
+ * Emails a buyer confirmation that their RSVP was cancelled.
+ */
+export async function sendTicketCancellation(args: {
+  buyerId: string
+  eventId: string
+  ticketIds: string[]
+  idempotencyKey: string
+}): Promise<{ sent: boolean; reason?: string }> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+  const { data: buyer } = await supabaseAdmin
+    .from('profiles')
+    .select('email, display_name, username')
+    .eq('id', args.buyerId)
+    .maybeSingle()
+  if (!buyer?.email) return { sent: false, reason: 'no_buyer_email' }
+
+  const { data: event } = await supabaseAdmin
+    .from('events')
+    .select('title, starts_at, venue_name, address, location, image_url')
+    .eq('id', args.eventId)
+    .maybeSingle()
+  if (!event) return { sent: false, reason: 'no_event' }
+
+  const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
+
+  return sendInternalEmail({
+    templateName: 'ticket-cancelled',
+    recipientEmail: buyer.email,
+    idempotencyKey: args.idempotencyKey,
+    templateData: {
+      buyerName: buyer.display_name || buyer.username || 'there',
+      eventTitle: event.title,
+      eventDate: formatDate(event.starts_at),
+      eventLocation: locationParts.join(', '),
+      imageUrl: event.image_url || '',
+      quantity: args.ticketIds.length || 1,
+      eventUrl: `${SITE}/events/${args.eventId}`,
+      ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
+    },
+  })
+}
