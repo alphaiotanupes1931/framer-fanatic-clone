@@ -36,8 +36,14 @@ export function isConnectPlatformProfileError(error: unknown): boolean {
 export async function getSellerDetails(accountId: string) {
   try {
     const acct = await getStripe().accounts.retrieve(accountId);
-    const bp = acct.business_profile ?? {};
-    const addr = (bp as { support_address?: { city?: string | null; state?: string | null } | null }).support_address;
+    const bp = (acct.business_profile ?? {}) as {
+      name?: string | null;
+      support_email?: string | null;
+      support_phone?: string | null;
+      url?: string | null;
+      support_address?: { city?: string | null; state?: string | null } | null;
+    };
+    const addr = bp.support_address;
     return {
       businessName: bp.name || acct.settings?.dashboard?.display_name || null,
       supportEmail: bp.support_email || acct.email || null,
