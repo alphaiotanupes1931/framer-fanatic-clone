@@ -120,7 +120,9 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&ecc=M&format=png&data=${encodeURIComponent(selfUrl)}`;
 
   return (
-    <div className="min-h-dvh bg-neutral-100 px-3 py-5 sm:px-4 sm:py-8 print:bg-white print:py-0">
+    <>
+      <style>{popKeyframes}</style>
+      <div className="min-h-dvh bg-neutral-100 px-3 py-5 sm:px-4 sm:py-8 print:bg-white print:py-0">
       <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl print:shadow-none">
         {(() => {
           const canCheckIn = valid && !t.checked_in_at;
