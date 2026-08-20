@@ -213,7 +213,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      success_url: `${data.returnOrigin}/profile?tab=My%20Tickets&purchase=success`,
+      success_url: `${data.returnOrigin}/profile?tab=My%20Tickets&purchase=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${data.returnOrigin}/events?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
@@ -685,4 +685,111 @@ export const createDuesCheckout = createServerFn({ method: "POST" })
     });
 
     return { url: session.url };
+  });
+/**
+ * Reconciles the signed-in buyer's ticket purchases directly with Stripe.
+ *
+ * The webhook is the primary path, but if it is delayed or misconfigured the
+ * buyer would be left with "pending" tickets and no receipt. This runs on the
+ * post-checkout return (and on the tickets tab) to confirm payment, flip the
+ * rows to paid, notify, and send the confirmation email. All steps are
+ * idempotent, so it is safe to run alongside the webhook.
+ */
+export const reconcileMyTickets = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ sessionId: z.string().optional() }).parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { getStripe } = await import("./stripe.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const stripe = getStripe();
+
+    // Only look at this buyer's unconfirmed orders from the last 7 days.
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    let query = supabaseAdmin
+      .from("tickets")
+      .select("id, event_id, buyer_id, artist_id, stripe_checkout_session_id")
+      .eq("buyer_id", userId)
+      .eq("status", "pending")
+      .gte("created_at", since);
+    if (data.sessionId) query = query.eq("stripe_checkout_session_id", data.sessionId);
+    const { data: pending } = await query;
+    if (!pending?.length) return { confirmed: 0 };
+
+    const bySession = new Map<string, typeof pending>();
+    for (const row of pending) {
+      const sid = row.stripe_checkout_session_id;
+      if (!sid) continue;
+      const list = bySession.get(sid) ?? [];
+      list.push(row);
+      bySession.set(sid, list);
+    }
+
+    let confirmed = 0;
+    for (const [sessionId, rows] of bySession) {
+      let session: import("stripe").Stripe.Checkout.Session;
+      try {
+        session = await stripe.checkout.sessions.retrieve(sessionId);
+      } catch {
+        continue;
+      }
+      if (session.payment_status !== "paid") {
+        if (session.status === "expired") {
+          await supabaseAdmin.from("tickets").update({ status: "failed" }).eq("stripe_checkout_session_id", sessionId);
+        }
+        continue;
+      }
+      const paymentIntentId = typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id ?? null;
+
+      const { data: updated } = await supabaseAdmin
+        .from("tickets")
+        .update({ status: "paid", stripe_payment_intent_id: paymentIntentId })
+        .eq("stripe_checkout_session_id", sessionId)
+        .eq("status", "pending")
+        .select("id, event_id, artist_id, buyer_id");
+      const paid = updated ?? [];
+      if (!paid.length) continue;
+      confirmed += paid.length;
+
+      const first = paid[0]!;
+      const seats = paid.length;
+      await supabaseAdmin.from("notifications").insert({
+        user_id: userId,
+        actor_id: null,
+        type: "ticket_purchased",
+        target_type: "ticket",
+        target_id: first.id,
+        message: seats > 1
+          ? `Your ${seats} tickets are confirmed. Each has its own QR code.`
+          : "Your ticket is confirmed. Tap to view your digital ticket.",
+        metadata: { event_id: first.event_id, ticket_id: first.id, quantity: seats },
+      });
+      if (first.artist_id && first.artist_id !== userId) {
+        await supabaseAdmin.from("notifications").insert({
+          user_id: first.artist_id,
+          actor_id: userId,
+          type: "ticket_sold",
+          target_type: "event",
+          target_id: first.event_id,
+          message: seats > 1 ? `You sold ${seats} tickets.` : "You sold a ticket.",
+          metadata: { event_id: first.event_id, ticket_id: first.id, quantity: seats },
+        });
+      }
+      try {
+        const { sendTicketConfirmation } = await import("./ticket-email.server");
+        await sendTicketConfirmation({
+          buyerId: userId,
+          eventId: first.event_id,
+          ticketIds: paid.map((r) => r.id),
+          // Same key the webhook uses, so a buyer never gets two receipts.
+          idempotencyKey: `ticket-confirm-${sessionId}`,
+        });
+      } catch (err) {
+        console.error("ticket confirmation email failed", err);
+      }
+    }
+
+    return { confirmed };
   });
