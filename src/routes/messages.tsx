@@ -471,6 +471,65 @@ function MessagesPage() {
     setActive({ ...conv, other: (profs?.[0] || undefined) as Profile | undefined, unread: false });
   };
 
+  const resetNewDialog = () => {
+    setPeopleQuery("");
+    setSelectedPeople([]);
+    setNewStep("pick");
+    setGroupName("");
+  };
+
+  const togglePerson = (p: Profile) => {
+    setSelectedPeople((prev) =>
+      prev.some((x) => x.id === p.id) ? prev.filter((x) => x.id !== p.id) : [...prev, p],
+    );
+  };
+
+  const defaultGroupName = useMemo(() => {
+    const names = selectedPeople.map((p) => (p.display_name || p.username || "Someone").split(" ")[0]);
+    if (names.length <= 3) return names.join(", ");
+    return `${names.slice(0, 3).join(", ")} +${names.length - 3}`;
+  }, [selectedPeople]);
+
+  const createGroup = async () => {
+    if (!me || selectedPeople.length < 2) return;
+    setCreatingGroup(true);
+    try {
+      const title = groupName.trim() || defaultGroupName;
+      const { data: conv, error } = await supabase
+        .from("conversations")
+        .insert({
+          is_group: true,
+          title,
+          created_by: me.id,
+          last_message_preview: `${me.display_name || "Someone"} started the group`,
+        })
+        .select("*")
+        .single();
+      if (error || !conv) throw error || new Error("Could not create group");
+      const rows = [
+        { conversation_id: conv.id, user_id: me.id },
+        ...selectedPeople.map((p) => ({ conversation_id: conv.id, user_id: p.id })),
+      ];
+      const { error: mErr } = await supabase.from("conversation_members").insert(rows);
+      if (mErr) throw mErr;
+      const { error: msgErr } = await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: me.id,
+        content: `${me.display_name || "Someone"} started “${title}”`,
+      });
+      if (msgErr) throw msgErr;
+      toast.success(`Group chat created with ${selectedPeople.length + 1} members`);
+      setNewOpen(false);
+      resetNewDialog();
+      await loadConvs();
+      setActive({ ...(conv as Conv), unread: false });
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not create group");
+    } finally {
+      setCreatingGroup(false);
+    }
+  };
+
   const broadcast = async () => {
     if (!me || !broadcastText.trim()) return;
     setBroadcasting(true);
