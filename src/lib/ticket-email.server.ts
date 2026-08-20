@@ -2,6 +2,33 @@ import { sendInternalEmail } from '@/lib/email-internal.server'
 
 const SITE = 'https://www.planetbaltimore.com'
 
+/**
+ * Email clients cannot use our private storage buckets, so turn whatever the
+ * event stores (bare path, public URL, or stale signed URL) into a long-lived
+ * signed URL that renders in any inbox.
+ */
+async function emailSafeImageUrl(
+  raw: string | null | undefined,
+  admin: { storage: { from: (b: string) => { createSignedUrl: (p: string, e: number) => Promise<{ data: { signedUrl: string } | null }> } } },
+): Promise<string> {
+  if (!raw) return ''
+  let bucket = 'event-images'
+  let path = raw
+  const m = raw.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/]+)\/([^?]+)/)
+  if (m) {
+    bucket = m[1]!
+    path = decodeURIComponent(m[2]!)
+  } else if (/^https?:\/\//i.test(raw)) {
+    return raw
+  }
+  try {
+    const { data } = await admin.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365)
+    return data?.signedUrl || ''
+  } catch {
+    return ''
+  }
+}
+
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return ''
   try {
@@ -60,7 +87,7 @@ export async function sendTicketConfirmation(args: {
       eventTitle: event.title,
       eventDate: formatDate(event.starts_at),
       eventLocation: locationParts.join(', '),
-      imageUrl: event.image_url || '',
+      imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
       quantity,
       totalPaid: totalCents > 0 ? `$${(totalCents / 100).toFixed(2)}` : '',
       ticketUrl: `${SITE}/t/${args.ticketIds[0] ?? ''}`,
@@ -105,7 +132,7 @@ export async function sendTicketCancellation(args: {
       eventTitle: event.title,
       eventDate: formatDate(event.starts_at),
       eventLocation: locationParts.join(', '),
-      imageUrl: event.image_url || '',
+      imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
       quantity: args.ticketIds.length || 1,
       eventUrl: `${SITE}/events/${args.eventId}`,
       ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
