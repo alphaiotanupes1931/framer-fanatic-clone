@@ -340,14 +340,21 @@ function OrgProfile() {
       />
 
       {/* Banner with floating actions */}
-      <div
-        className="relative h-44 overflow-hidden rounded-2xl sm:h-60"
-        style={
-          org.banner_url
-            ? { backgroundImage: `url(${org.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-            : { backgroundColor: "#d40a0a" }
-        }
-      >
+      <div className="relative h-44 overflow-hidden rounded-2xl bg-neutral-100 sm:h-60">
+        {org.banner_url ? (
+          <Img src={org.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="eager" decoding="async" />
+        ) : org.avatar_url ? (
+          <>
+            <Img src={org.avatar_url} alt="" className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl" loading="eager" decoding="async" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-100 via-amber-50 to-neutral-100">
+            <span className="text-5xl font-black tracking-tight text-orange-900/25">
+              {org.name.split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("").toUpperCase()}
+            </span>
+          </div>
+        )}
         <div className="absolute right-3 top-3 flex items-center gap-2">
           {canManage && (
             <button
@@ -360,6 +367,7 @@ function OrgProfile() {
           )}
         </div>
       </div>
+
 
       {/* Avatar overlapping banner + inline action buttons */}
       <div className="relative flex flex-col items-start gap-3 px-1 sm:flex-row sm:items-end sm:justify-between sm:px-2">
