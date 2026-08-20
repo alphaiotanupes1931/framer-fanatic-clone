@@ -160,42 +160,43 @@ function TicketDetailPage() {
           )}
         </div>
 
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-800 text-white shadow-2xl">
+        <div className="relative overflow-hidden rounded-[32px] bg-neutral-950 text-white shadow-[0_24px_70px_-24px_rgba(0,0,0,0.6)] ring-1 ring-white/10">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#d4580a]/25 blur-3xl" />
           {/* Cover */}
           {t.events?.image_url && (
-            <div className="relative h-40 w-full">
-              <SmartImage src={t.events.image_url} alt="" bucket="event-images" className="h-full w-full object-cover opacity-70" />
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 to-transparent" />
+            <div className="relative h-44 w-full sm:h-52">
+              <SmartImage src={t.events.image_url} alt="" bucket="event-images" className="h-full w-full object-cover opacity-80" />
+              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
             </div>
           )}
 
           {/* Header */}
-          <div className="px-5 pt-5 sm:px-6 sm:pt-6">
+          <div className="relative px-5 pt-5 sm:px-6 sm:pt-6">
             <div className="flex items-center gap-2">
               <img src={pbLogoWhite} alt="Planet Baltimore" className="-my-3 h-14 w-auto shrink-0 sm:h-16" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-orange-300">Planet Baltimore</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/50">Planet Baltimore</span>
             </div>
-            <h1 className="mt-2 text-xl font-bold leading-tight sm:text-2xl">{t.events?.title ?? "Event"}</h1>
+            <h1 className="mt-2 text-[22px] font-semibold leading-tight tracking-tight sm:text-[26px]">{t.events?.title ?? "Event"}</h1>
           </div>
 
           {/* Details */}
-          <div className="grid grid-cols-2 gap-4 px-5 pb-6 pt-5 text-sm sm:px-6">
-            <div>
+          <div className="relative grid grid-cols-2 gap-3 px-5 pb-6 pt-5 text-sm sm:px-6">
+            <div className="rounded-2xl bg-white/[0.06] p-3.5">
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">Date</div>
               <div className="font-semibold">{when?.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</div>
               <div className="text-xs text-white/60">{when?.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</div>
             </div>
-            <div>
+            <div className="rounded-2xl bg-white/[0.06] p-3.5">
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">Section</div>
               <div className="font-semibold">General Admission</div>
               <div className="text-xs text-white/60">Admit One</div>
             </div>
-            <div className="col-span-2">
+            <div className="col-span-2 rounded-2xl bg-white/[0.06] p-3.5">
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">Venue</div>
               <div className="font-semibold">{t.events?.venue_name ?? t.events?.location ?? "TBA"}</div>
               {t.events?.address && <div className="text-xs text-white/60">{t.events.address}</div>}
             </div>
-            <div className="col-span-2">
+            <div className="col-span-2 rounded-2xl bg-white/[0.06] p-3.5">
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">Ticket holder</div>
               <div className="font-semibold">{holder?.display_name ?? "Guest"}</div>
               {holder?.email && <div className="break-all text-xs text-white/60">{holder.email}</div>}
@@ -206,12 +207,12 @@ function TicketDetailPage() {
           <div className="relative">
             <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
             <div className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
-            <div className="mx-5 border-t-2 border-dashed border-white/20 sm:mx-6" />
+            <div className="mx-5 border-t border-dashed border-white/15 sm:mx-6" />
           </div>
 
           {/* QR */}
-          <div className="flex flex-col items-center px-5 py-6 sm:px-6">
-            <div className="relative rounded-2xl bg-white p-3 sm:p-4">
+          <div className="relative flex flex-col items-center px-5 py-6 sm:px-6">
+            <div className="relative rounded-3xl bg-white p-3 shadow-[0_0_60px_-12px_rgba(255,255,255,0.25)] sm:p-4">
               <Img src={qr} alt="Ticket QR code" width={220} height={220} className="h-[min(60vw,220px)] w-[min(60vw,220px)]" />
               {t.status === "cancelled" && (
                 <div className="absolute inset-0 grid place-items-center rounded-2xl bg-white/70">
@@ -230,7 +231,7 @@ function TicketDetailPage() {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-xs sm:px-6">
+          <div className="relative flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-xs sm:px-6">
             <div>
               <div className="text-white/40">Paid</div>
               <div className="font-semibold">${(t.buyer_total_cents / 100).toFixed(2)}</div>

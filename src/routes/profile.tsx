@@ -1457,52 +1457,68 @@ function TicketStub({ t, seat, onCancelled }: { t: { id: string; buyer_total_cen
 
   return (
     <div className="space-y-2">
-    <Link
-      to="/tickets/$ticketId"
-      params={{ ticketId: t.id }}
-      className="group relative flex overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-lg transition hover:scale-[1.01] hover:shadow-xl"
-    >
-      <div className="flex-1 p-5">
-        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300">Planet Baltimore Ticket</div>
-        <div className="mt-2 line-clamp-2 text-lg font-bold leading-tight">{t.events?.title ?? "Event"}</div>
-        {seat && (
-          <div className="mt-1 inline-flex rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-white/80">{seat}</div>
-        )}
-        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <div className="text-white/40">Date</div>
-            <div className="font-semibold">{when?.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div>
-          </div>
-          <div>
-            <div className="text-white/40">Time</div>
-            <div className="font-semibold">{when?.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</div>
-          </div>
-          <div className="col-span-2">
-            <div className="text-white/40">Venue</div>
-            <div className="truncate font-semibold">{t.events?.venue_name ?? t.events?.location ?? "TBA"}</div>
-          </div>
-        </div>
-        <div className="mt-3 text-[10px] font-mono uppercase text-white/50">#{t.id.slice(0, 8)}</div>
-      </div>
-      {/* Perforation */}
-      <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900 px-4 py-5">
-        <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
-        <div className="rounded-lg bg-white p-1.5">
-          <img alt="QR" src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&margin=0&data=${encodeURIComponent(t.id)}`} className="h-[70px] w-[70px]" />
-        </div>
-        <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-white/60">Admit One</div>
-      </div>
-    </Link>
-    {isFreeRsvp && upcoming && (
-      <button
-        type="button"
-        onClick={cancelRsvp}
-        disabled={cancelling}
-        className="w-full rounded-lg border border-neutral-200 py-2 text-xs font-semibold text-neutral-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+      <Link
+        to="/tickets/$ticketId"
+        params={{ ticketId: t.id }}
+        className="group relative block overflow-hidden rounded-[26px] bg-neutral-950 text-white ring-1 ring-white/10 transition duration-300 hover:-translate-y-0.5 hover:ring-white/25"
       >
-        {cancelling ? "Cancelling…" : "Cancel RSVP"}
-      </button>
-    )}
+        <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[#d4580a]/25 blur-3xl" />
+        <div className="relative px-5 pb-4 pt-5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-white/45">Planet Baltimore</span>
+            {seat && (
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/70 backdrop-blur">{seat}</span>
+            )}
+          </div>
+          <h3 className="mt-2.5 line-clamp-2 text-[19px] font-semibold leading-snug tracking-tight">
+            {t.events?.title ?? "Event"}
+          </h3>
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-white/70">
+            <span className="rounded-full bg-white/[0.07] px-2.5 py-1">
+              {when?.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+            </span>
+            <span className="rounded-full bg-white/[0.07] px-2.5 py-1">
+              {when?.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+            </span>
+            <span className="max-w-full truncate rounded-full bg-white/[0.07] px-2.5 py-1">
+              {t.events?.venue_name ?? t.events?.location ?? "TBA"}
+            </span>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
+          <div className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
+          <div className="mx-5 border-t border-dashed border-white/15" />
+        </div>
+
+        <div className="relative flex items-center gap-3 px-5 py-4">
+          <div className="rounded-xl bg-white p-1.5">
+            <img
+              alt="QR"
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&margin=0&data=${encodeURIComponent(t.id)}`}
+              className="h-12 w-12"
+            />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/45">Admit one</div>
+            <div className="truncate font-mono text-[11px] uppercase tracking-widest text-white/70">#{t.id.slice(0, 8)}</div>
+          </div>
+          <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold text-white/70 transition group-hover:bg-white group-hover:text-neutral-900">
+            View
+          </span>
+        </div>
+      </Link>
+      {isFreeRsvp && upcoming && (
+        <button
+          type="button"
+          onClick={cancelRsvp}
+          disabled={cancelling}
+          className="w-full rounded-xl border border-neutral-200 py-2 text-xs font-semibold text-neutral-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+        >
+          {cancelling ? "Cancelling…" : "Cancel RSVP"}
+        </button>
+      )}
     </div>
   );
 }
