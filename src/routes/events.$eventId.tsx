@@ -17,6 +17,7 @@ import { externalShare } from "@/lib/share-preview";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { EventSocial } from "@/components/event-social";
 import { getPublicEvent } from "@/lib/events.functions";
+import { emailMyTickets } from "@/lib/tickets.functions";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -236,7 +237,8 @@ function EventDetail() {
       const result = data as { quantity?: number } | null;
       const n = result?.quantity ?? qty;
       setRsvped(true);
-      toast.success(n > 1 ? `${n} tickets reserved. Each has its own QR code.` : "You're going!");
+      toast.success(n > 1 ? `${n} tickets reserved. Check your email for your tickets.` : "You're going! Check your email for your ticket.");
+      void emailMyTickets({ data: { eventId: evt.id } }).catch(() => {});
     } catch (e) {
       const msg = (e as { message?: string } | null)?.message;
       toast.error(msg || "Planet Baltimore could not complete your RSVP. Please try again.");
