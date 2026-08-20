@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/utils";
 import { Img } from "@/components/shared/smart-img";
-import { CheckCircle2, XCircle, Printer, MapPin } from "lucide-react";
+import { CheckCircle2, XCircle, Printer, MapPin, Check, Info } from "lucide-react";
 
 type Verified = {
   ticket_id: string;
@@ -24,6 +24,28 @@ type Verified = {
 
 export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   const [t, setT] = useState<Verified | null | undefined>(undefined);
+  const [step, setStep] = useState<null | "notice" | "confirm">(null);
+  const [glow, setGlow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function doCheckIn() {
+    if (busy) return;
+    setBusy(true);
+    setErr(null);
+    setGlow(true);
+    const { data, error } = await supabase.rpc("check_in_ticket", { _ticket_id: ticketId });
+    const row = ((data ?? []) as Array<{ ok: boolean; checked_in_at: string | null; message: string }>)[0];
+    setBusy(false);
+    if (error || !row?.ok) {
+      setGlow(false);
+      setErr(error?.message || row?.message || "Could not check in");
+      if (row?.checked_in_at) setT((p) => (p ? { ...p, checked_in_at: row.checked_in_at } : p));
+      return;
+    }
+    setT((p) => (p ? { ...p, checked_in_at: row.checked_in_at } : p));
+    setTimeout(() => setStep(null), 900);
+  }
 
   useEffect(() => {
     supabase.rpc("verify_ticket", { _ticket_id: ticketId }).then(({ data }) => {
@@ -64,18 +86,44 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   return (
     <div className="min-h-dvh bg-neutral-100 px-4 py-8 print:bg-white print:py-0">
       <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl print:shadow-none">
-        <div className={`px-6 py-4 text-center text-white ${cancelled ? "bg-red-600" : valid ? "bg-emerald-600" : "bg-neutral-700"}`}>
-          <div className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider">
-            {cancelled ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-            {cancelled ? "Cancelled ticket" : t.checked_in_at ? "Already checked in" : valid ? "Valid ticket" : t.status}
-          </div>
-          {cancelled && <div className="mt-1 text-[11px] text-white/80">This RSVP was cancelled. Do not admit.</div>}
-          {t.checked_in_at && (
-            <div className="mt-1 text-[11px] text-white/80">
-              Scanned {new Date(t.checked_in_at).toLocaleString()}
-            </div>
-          )}
-        </div>
+        {(() => {
+          const canCheckIn = valid && !t.checked_in_at;
+          const Tag = canCheckIn ? "button" : "div";
+          return (
+            <Tag
+              {...(canCheckIn
+                ? { onClick: () => { setErr(null); setStep("notice"); }, type: "button" as const }
+                : {})}
+              className={`w-full px-6 py-4 text-center text-white transition ${
+                cancelled
+                  ? "bg-red-600"
+                  : t.checked_in_at
+                    ? "bg-emerald-600"
+                    : valid
+                      ? "bg-neutral-800 hover:bg-neutral-700"
+                      : "bg-neutral-700"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider">
+                {cancelled ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                {cancelled
+                  ? "Cancelled ticket"
+                  : t.checked_in_at
+                    ? "Checked in"
+                    : valid
+                      ? "Not checked in"
+                      : t.status}
+              </div>
+              {cancelled && <div className="mt-1 text-[11px] text-white/80">This RSVP was cancelled. Do not admit.</div>}
+              {canCheckIn && <div className="mt-1 text-[11px] text-white/70">Staff only, tap to check this guest in</div>}
+              {t.checked_in_at && (
+                <div className="mt-1 text-[11px] text-white/80">
+                  Scanned {new Date(t.checked_in_at).toLocaleString()}
+                </div>
+              )}
+            </Tag>
+          );
+        })()}
 
         <div className="px-6 pt-6">
           <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#d4580a]">Planet Baltimore</div>
@@ -142,6 +190,15 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
           <div className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">
             {cancelled ? "Not valid for entry" : "Present this at the door"}
           </div>
+          {!cancelled && (
+            <p className="mt-3 flex items-start gap-1.5 rounded-xl bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
+              <Info className="mt-0.5 h-3 w-3 shrink-0" />
+              <span>
+                Ticket holders: please don't tap check in yourself. Only door staff should do it, and a ticket can only be
+                checked in once, so checking in early makes it unusable at the door.
+              </span>
+            </p>
+          )}
         </div>
       </div>
 
@@ -153,6 +210,62 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
           <Printer className="h-4 w-4" /> Print / Save as PDF
         </button>
       </div>
+
+      {step && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 px-6 print:hidden">
+          <div className="w-full max-w-xs rounded-3xl bg-white p-6 text-center shadow-2xl">
+            {step === "notice" ? (
+              <>
+                <Info className="mx-auto h-8 w-8 text-amber-500" />
+                <h2 className="mt-3 text-base font-bold text-neutral-900">Note</h2>
+                <p className="mt-2 text-sm text-neutral-600">
+                  If you are the ticket holder, do not check in. Only event staff should check tickets in at the door.
+                </p>
+                <div className="mt-5 flex gap-2">
+                  <button
+                    onClick={() => setStep(null)}
+                    className="flex-1 rounded-xl border border-neutral-200 py-2.5 text-sm font-semibold text-neutral-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => setStep("confirm")}
+                    className="flex-1 rounded-xl bg-neutral-900 py-2.5 text-sm font-semibold text-white"
+                  >
+                    OK
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-base font-bold text-neutral-900">Check in</h2>
+                <p className="mt-1 text-sm text-neutral-500">Tap the check mark to admit this guest.</p>
+                <button
+                  onClick={doCheckIn}
+                  disabled={busy || !!t.checked_in_at}
+                  className={`mx-auto mt-5 grid h-24 w-24 place-items-center rounded-full transition-all duration-500 ${
+                    glow
+                      ? "scale-105 bg-emerald-500 text-white shadow-[0_0_40px_rgba(16,185,129,0.75)]"
+                      : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
+                  }`}
+                >
+                  <Check className="h-10 w-10" strokeWidth={3} />
+                </button>
+                <div className="mt-4 text-sm font-semibold text-neutral-900">
+                  {t.checked_in_at ? "Checked in" : busy ? "Checking in..." : "Not checked in"}
+                </div>
+                {err && <div className="mt-2 text-xs text-red-600">{err}</div>}
+                <button
+                  onClick={() => setStep(null)}
+                  className="mt-4 w-full rounded-xl border border-neutral-200 py-2.5 text-sm font-semibold text-neutral-700"
+                >
+                  Close
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
