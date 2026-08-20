@@ -348,6 +348,12 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
         </div>
       )}
 
+      {tab === "details" && (
+        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+          <EventEditForm eventId={evt.id} onSaved={onBack} onCancel={() => setTab("tickets")} />
+        </div>
+      )}
+
       {tab === "tickets" && (
         <TicketsTab evt={evt} soldCount={paid.length} />
       )}
