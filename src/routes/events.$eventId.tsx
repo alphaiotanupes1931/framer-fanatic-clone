@@ -543,3 +543,50 @@ function EventVideo({ path }: { path: string }) {
     </div>
   );
 }
+
+function QtyStepper({ label, qty, max, onChange }: { label: string; qty: number; max: number; onChange: (n: number) => void }) {
+  return (
+    <div className="flex items-center justify-between rounded-2xl bg-secondary/60 px-4 py-3">
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      <div className="flex items-center gap-1 rounded-full bg-background p-1 shadow-sm">
+        <button type="button" onClick={() => onChange(Math.max(1, qty - 1))} disabled={qty <= 1}
+          className="grid h-8 w-8 place-items-center rounded-full text-lg leading-none transition hover:bg-secondary disabled:opacity-30" aria-label="Fewer tickets">−</button>
+        <span className="w-7 text-center text-sm font-bold tabular-nums">{qty}</span>
+        <button type="button" onClick={() => onChange(Math.min(max, qty + 1))} disabled={qty >= max}
+          className="grid h-8 w-8 place-items-center rounded-full text-lg leading-none transition hover:bg-secondary disabled:opacity-30" aria-label="More tickets">+</button>
+      </div>
+    </div>
+  );
+}
+
+function BuyButton({ onClick, disabled, loading, label, amount }: { onClick: () => void; disabled?: boolean; loading?: boolean; label: string; amount?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold text-white shadow-sm transition active:scale-[0.99] disabled:opacity-60"
+      style={{ backgroundColor: "#d4580a" }}
+    >
+      <Ticket className="h-4 w-4" />
+      {loading ? "Loading…" : label}
+      {amount && !loading && <span className="tabular-nums opacity-90">· {amount}</span>}
+    </button>
+  );
+}
+
+function LegacyEventVideo({ path }: { path: string }) {
+  const url = useEventImageUrl(path);
+  return (
+    <div>
+      <h2 className="font-semibold text-foreground mb-2">Video</h2>
+      <div className="overflow-hidden rounded-2xl border border-border bg-white">
+        {url ? (
+          <SmartVideo src={url} controls playsInline className="w-full aspect-video bg-white" />
+        ) : (
+          <div className="w-full aspect-video grid place-items-center text-xs text-white/70">Loading…</div>
+        )}
+      </div>
+    </div>
+  );
+}
