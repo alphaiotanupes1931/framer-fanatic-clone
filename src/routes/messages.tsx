@@ -131,6 +131,7 @@ function MessagesPage() {
   const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
   const [membersOpen, setMembersOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const [savingName, setSavingName] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
