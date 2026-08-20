@@ -228,8 +228,11 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       payment_intent_data: {
         application_fee_amount: applicationFee,
         on_behalf_of: artist.stripe_account_id,
-              transfer_data: { destination: artist.stripe_account_id },
-        description: `${event.title} — ${sellerName}`,
+        transfer_data: { destination: artist.stripe_account_id },
+        description: `${event.title} - ${sellerName}`,
+        // Payment receipt straight from the processor, in addition to our own
+        // ticket email, so the buyer always has proof of purchase.
+        receipt_email: (context.claims as { email?: string } | null)?.email,
       },
       metadata: {
         event_id: event.id,
