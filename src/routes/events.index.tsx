@@ -477,8 +477,8 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
               <span className="w-10 text-center text-3xl font-extrabold tabular-nums transition-all">{qty}</span>
               <button
                 type="button"
-                onClick={() => setQty((n) => Math.min(10, n + 1))}
-                disabled={qty >= 10}
+                onClick={() => setQty((n) => Math.min(qtyMax, n + 1))}
+                disabled={qty >= qtyMax}
                 className="h-11 w-11 rounded-full border border-neutral-200 text-xl font-bold transition active:scale-90 disabled:opacity-40"
               >
                 +
@@ -493,7 +493,9 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
               {checkingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ticket className="h-4 w-4" />}
               Continue · ${(((qtyEvent?.price_cents ?? 0) * qty) / 100).toFixed(2)}
             </button>
-            <p className="mt-2 text-center text-[11px] text-neutral-400">Fees calculated at checkout</p>
+            <p className="mt-2 text-center text-[11px] text-neutral-400">
+              Fees calculated at checkout{qtyMax < 20 ? ` · limit ${qtyMax} per person` : ""}
+            </p>
           </div>
         </DialogContent>
       </Dialog>
