@@ -1002,9 +1002,6 @@ function MessagesPage() {
         </div>
       )}
 
-      {broadcastOpen && (
-        <></>
-      )}
       {membersOpen && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
