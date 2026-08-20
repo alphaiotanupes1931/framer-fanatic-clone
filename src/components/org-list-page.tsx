@@ -191,8 +191,12 @@ export function OrgListPage({
               {items.slice(0, 3).map((o) => (
                 <Link key={`f-${o.id}`} to="/o/$slug" params={{ slug: o.slug }}
                   className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
-                  <div className="relative h-40 bg-neutral-100"
-                    style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+                  <div className="relative h-40 bg-neutral-100">
+                    {o.banner_url && (
+                      <div className="absolute inset-0 overflow-hidden">
+                        <Img src={o.banner_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                      </div>
+                    )}
                     <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
                       {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                     </div>
@@ -242,8 +246,12 @@ export function OrgListPage({
                     <Trash2 className="h-4 w-4" />
                   </button>
                 )}
-                <div className="relative h-40 bg-neutral-100"
-                  style={o.banner_url ? { backgroundImage: `url(${o.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+                <div className="relative h-40 bg-neutral-100">
+                  {o.banner_url && (
+                    <div className="absolute inset-0 overflow-hidden">
+                      <Img src={o.banner_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                    </div>
+                  )}
                   <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
                     {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
