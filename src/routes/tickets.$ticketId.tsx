@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
-import { MapPin, Calendar, Download, Send, ArrowLeft, Share as ShareIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Calendar, CalendarPlus, Download, Send, ArrowLeft, Share as ShareIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
 import { QrDisplay } from "@/components/tickets/qr-display";
+import { downloadIcs } from "@/lib/ics";
 import { TicketVerifyView } from "@/components/tickets/ticket-verify-view";
 import { emailMyCancellation } from "@/lib/tickets.functions";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
@@ -104,6 +105,25 @@ function TicketDetailPage() {
   const shareExternal = () => {
     const url = t?.events?.id ? siteUrl(`/events/${t.events.id}`) : window.location.href;
     void externalShare(url, t?.events?.title || "Event", undefined);
+  };
+
+  const saveToCalendar = () => {
+    const ev = t?.events;
+    if (!ev) return;
+    const place = [ev.venue_name, ev.address || ev.location].filter(Boolean).join(", ");
+    downloadIcs(
+      {
+        uid: `ticket-${t!.id}@planetbaltimore.com`,
+        title: ev.title,
+        start: new Date(ev.starts_at),
+        end: ev.ends_at ? new Date(ev.ends_at) : null,
+        location: place || null,
+        description: `Your Planet Baltimore ticket: ${siteUrl(`/tickets/${t!.id}`)}`,
+        url: siteUrl(`/events/${ev.id}`),
+      },
+      ev.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) || "event",
+    );
+    toast.success("Calendar file downloaded");
   };
 
   if (verifyMode === null) return (
@@ -249,6 +269,15 @@ function TicketDetailPage() {
           {t.events?.id ? (
             <Link to="/events/$eventId" params={{ eventId: t.events.id }} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Calendar className="h-4 w-4" /> Event</Link>
           ) : <span />}
+          {t.events && when && (
+            <button
+              type="button"
+              onClick={saveToCalendar}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a] sm:col-span-2"
+            >
+              <CalendarPlus className="h-4 w-4" /> Download calendar (.ics)
+            </button>
+          )}
         </div>
 
         {t.events?.address && (
