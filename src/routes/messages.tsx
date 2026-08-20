@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Check, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MentionText } from "@/components/shared/mention-text";
@@ -117,6 +117,10 @@ function MessagesPage() {
   const [newOpen, setNewOpen] = useState(false);
   const [people, setPeople] = useState<Profile[]>([]);
   const [peopleQuery, setPeopleQuery] = useState("");
+  const [selectedPeople, setSelectedPeople] = useState<Profile[]>([]);
+  const [newStep, setNewStep] = useState<"pick" | "confirm">("pick");
+  const [groupName, setGroupName] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
   const [broadcasting, setBroadcasting] = useState(false);
   const [broadcastOpen, setBroadcastOpen] = useState(false);
   const [broadcastText, setBroadcastText] = useState("");
@@ -465,6 +469,65 @@ function MessagesPage() {
     await loadConvs();
     const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: [otherId] });
     setActive({ ...conv, other: (profs?.[0] || undefined) as Profile | undefined, unread: false });
+  };
+
+  const resetNewDialog = () => {
+    setPeopleQuery("");
+    setSelectedPeople([]);
+    setNewStep("pick");
+    setGroupName("");
+  };
+
+  const togglePerson = (p: Profile) => {
+    setSelectedPeople((prev) =>
+      prev.some((x) => x.id === p.id) ? prev.filter((x) => x.id !== p.id) : [...prev, p],
+    );
+  };
+
+  const defaultGroupName = useMemo(() => {
+    const names = selectedPeople.map((p) => (p.display_name || p.username || "Someone").split(" ")[0]);
+    if (names.length <= 3) return names.join(", ");
+    return `${names.slice(0, 3).join(", ")} +${names.length - 3}`;
+  }, [selectedPeople]);
+
+  const createGroup = async () => {
+    if (!me || selectedPeople.length < 2) return;
+    setCreatingGroup(true);
+    try {
+      const title = groupName.trim() || defaultGroupName;
+      const { data: conv, error } = await supabase
+        .from("conversations")
+        .insert({
+          is_group: true,
+          title,
+          created_by: me.id,
+          last_message_preview: `${me.display_name || "Someone"} started the group`,
+        })
+        .select("*")
+        .single();
+      if (error || !conv) throw error || new Error("Could not create group");
+      const rows = [
+        { conversation_id: conv.id, user_id: me.id },
+        ...selectedPeople.map((p) => ({ conversation_id: conv.id, user_id: p.id })),
+      ];
+      const { error: mErr } = await supabase.from("conversation_members").insert(rows);
+      if (mErr) throw mErr;
+      const { error: msgErr } = await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: me.id,
+        content: `${me.display_name || "Someone"} started “${title}”`,
+      });
+      if (msgErr) throw msgErr;
+      toast.success(`Group chat created with ${selectedPeople.length + 1} members`);
+      setNewOpen(false);
+      resetNewDialog();
+      await loadConvs();
+      setActive({ ...(conv as Conv), unread: false });
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not create group");
+    } finally {
+      setCreatingGroup(false);
+    }
   };
 
   const broadcast = async () => {
@@ -951,7 +1014,8 @@ function MessagesPage() {
       <Dialog
         open={newOpen}
         onOpenChange={(v) => {
-          if (!v) setPeopleQuery("");
+          if (creatingGroup) return;
+          if (!v) resetNewDialog();
           setNewOpen(v);
         }}
       >
@@ -961,10 +1025,92 @@ function MessagesPage() {
         >
           <DialogHeader className="px-5 pb-3 pt-5 text-left">
             <DialogTitle className="text-lg font-bold text-foreground">
-              Start a conversation
+              {newStep === "confirm" ? "New group chat" : "Start a conversation"}
             </DialogTitle>
+            <p className="text-xs text-muted-foreground">
+              {newStep === "confirm"
+                ? `You're creating a group chat with ${selectedPeople.length} people.`
+                : "Tap people to select. Pick 2 or more to make a group chat."}
+            </p>
           </DialogHeader>
+          {newStep === "confirm" ? (
+            <div className="px-5 pb-5">
+              <div className="mb-4 flex flex-wrap gap-3 rounded-xl border border-border bg-muted/40 p-4">
+                {selectedPeople.map((p) => (
+                  <div key={p.id} className="flex w-16 flex-col items-center gap-1">
+                    <div className="relative">
+                      <Avatar className="h-12 w-12">
+                        {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {initials(p)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <button
+                        onClick={() => {
+                          const next = selectedPeople.filter((x) => x.id !== p.id);
+                          setSelectedPeople(next);
+                          if (next.length < 2) setNewStep("pick");
+                        }}
+                        aria-label={`Remove ${p.display_name || p.username}`}
+                        className="absolute -right-1 -top-1 rounded-full bg-foreground p-0.5 text-background"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    <span className="w-full truncate text-center text-[11px] text-muted-foreground">
+                      {(p.display_name || p.username || "").split(" ")[0]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">
+                Group name (optional)
+              </label>
+              <input
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                placeholder={defaultGroupName}
+                className="mb-4 w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setNewStep("pick")}
+                  disabled={creatingGroup}
+                  className="flex-1 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={createGroup}
+                  disabled={creatingGroup}
+                  className="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                >
+                  {creatingGroup ? "Creating..." : "Create group chat"}
+                </button>
+              </div>
+            </div>
+          ) : (
           <div className="px-5 pb-5">
+            {selectedPeople.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {selectedPeople.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => togglePerson(p)}
+                    className="flex items-center gap-1.5 rounded-full bg-primary/10 py-1 pl-1 pr-2 text-xs font-semibold text-primary"
+                  >
+                    <Avatar className="h-5 w-5">
+                      {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                      <AvatarFallback className="bg-primary/20 text-[9px] text-primary">
+                        {initials(p)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="max-w-[100px] truncate">{p.display_name || p.username}</span>
+                    <X className="h-3 w-3" />
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -975,15 +1121,17 @@ function MessagesPage() {
                 className="w-full rounded-full border border-border bg-muted py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               />
             </div>
-            <div className="max-h-[60vh] space-y-1 overflow-y-auto">
+            <div className="max-h-[45vh] space-y-1 overflow-y-auto">
               {filteredPeople.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">No people found</p>
               ) : (
-                filteredPeople.map((p) => (
+                filteredPeople.map((p) => {
+                  const isSelected = selectedPeople.some((x) => x.id === p.id);
+                  return (
                   <button
                     key={p.id}
-                    onClick={() => startConv(p.id)}
-                    className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-muted"
+                    onClick={() => togglePerson(p)}
+                    className={`flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-muted ${isSelected ? "bg-primary/5" : ""}`}
                   >
                     <Avatar className="h-9 w-9">
                       {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
@@ -991,7 +1139,7 @@ function MessagesPage() {
                         {initials(p)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-foreground">
                         {p.display_name || p.username}
                       </div>
@@ -999,11 +1147,36 @@ function MessagesPage() {
                         <div className="truncate text-xs text-muted-foreground">@{p.username}</div>
                       )}
                     </div>
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${isSelected ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}
+                    >
+                      {isSelected && <Check className="h-3 w-3" />}
+                    </span>
                   </button>
-                ))
+                  );
+                })
               )}
             </div>
+            <button
+              disabled={selectedPeople.length === 0}
+              onClick={() => {
+                if (selectedPeople.length === 1) {
+                  void startConv(selectedPeople[0].id);
+                  setSelectedPeople([]);
+                } else {
+                  setNewStep("confirm");
+                }
+              }}
+              className="mt-4 w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-40"
+            >
+              {selectedPeople.length > 1
+                ? `Next: group chat with ${selectedPeople.length}`
+                : selectedPeople.length === 1
+                  ? `Message ${selectedPeople[0].display_name || selectedPeople[0].username}`
+                  : "Select people"}
+            </button>
           </div>
+          )}
         </DialogContent>
       </Dialog>
 
