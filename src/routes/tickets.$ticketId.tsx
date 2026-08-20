@@ -126,7 +126,6 @@ function TicketDetailPage() {
   const when = t.events ? new Date(t.events.starts_at) : null;
   // Scanning the QR opens a public verification page anyone at the door can read.
   const ticketUrl = siteUrl(`/tickets/${t.id}?verify=1`);
-  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&ecc=M&format=png&data=${encodeURIComponent(ticketUrl)}`;
 
   return (
     <>

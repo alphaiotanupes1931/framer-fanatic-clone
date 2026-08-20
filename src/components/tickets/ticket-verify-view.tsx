@@ -118,7 +118,6 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   const cancelled = t.status === "cancelled";
   const valid = !cancelled && (t.status === "paid" || t.status === "rsvp" || t.status === "free" || t.status === "confirmed");
   const selfUrl = siteUrl(`/tickets/${t.ticket_id}?verify=1`);
-  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&ecc=M&format=png&data=${encodeURIComponent(selfUrl)}`;
 
   return (
     <>
