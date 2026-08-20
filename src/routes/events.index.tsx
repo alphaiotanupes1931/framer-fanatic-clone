@@ -16,6 +16,7 @@ import { compressImage } from "@/lib/image-compress";
 import { pageHead } from "@/lib/seo";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { emailMyTickets } from "@/lib/tickets.functions";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -294,7 +295,8 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       if (isFree) {
         const { error } = await supabase.rpc("rsvp_free_event", { _event_id: eventId, _quantity: 1 });
         if (error) throw error;
-        toast.success("You're going!");
+        toast.success("You're going! Check your email for your ticket.");
+        void emailMyTickets({ data: { eventId } }).catch(() => {});
         return;
       }
       // Paid: ask how many tickets first, in a sleek sheet, then go to checkout.
