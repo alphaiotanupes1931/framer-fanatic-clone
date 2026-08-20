@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/utils";
 import { Img } from "@/components/shared/smart-img";
-import { CheckCircle2, Printer, MapPin } from "lucide-react";
+import { CheckCircle2, XCircle, Printer, MapPin } from "lucide-react";
 
 type Verified = {
   ticket_id: string;

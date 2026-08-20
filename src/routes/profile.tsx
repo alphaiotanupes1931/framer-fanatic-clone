@@ -1449,6 +1449,7 @@ function TicketStub({ t, seat, onCancelled }: { t: { id: string; buyer_total_cen
     const { error } = await supabase.rpc("cancel_my_rsvp", { _ticket_id: t.id });
     setCancelling(false);
     if (error) { toast.error(error.message || "Could not cancel this RSVP"); return; }
+    void emailMyCancellation({ data: { ticketId: t.id } }).catch((err) => console.error("cancellation email failed", err));
     toast.success("RSVP cancelled");
     onCancelled?.();
   };
