@@ -374,11 +374,12 @@ function EventDetail() {
 
         {evt.video_url && <EventVideo path={evt.video_url} />}
 
-        <div className="flex flex-col gap-3 border-t border-border pt-6">
+        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+          <div className="flex flex-col gap-4 p-4 sm:p-5">
           {tiers.length > 0 ? (
             <>
               <div className="space-y-2">
-                <span className="text-sm font-medium text-foreground">Choose your ticket</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Choose your ticket</span>
                 {tiers.map((t) => {
                   const onSale = tierOnSale(t);
                   const active = t.id === tierId;
@@ -388,8 +389,8 @@ function EventDetail() {
                       type="button"
                       disabled={!onSale}
                       onClick={() => { setTierId(t.id); setQty(1); }}
-                      className={`w-full rounded-xl border px-4 py-3 text-left transition ${
-                        active ? "border-[#d4580a] bg-[#d4580a]/5" : "border-border hover:border-[#d4580a]/50"
+                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                        active ? "border-[#d4580a] bg-[#d4580a]/5 ring-1 ring-[#d4580a]/30" : "border-border hover:border-[#d4580a]/50"
                       } ${onSale ? "" : "opacity-50"}`}
                     >
                       <div className="flex items-center justify-between gap-3">
@@ -410,79 +411,62 @@ function EventDetail() {
 
               {selectedTier && selectedTier.price_cents > 0 ? (
                 <>
-                  <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                    <span className="text-sm font-medium text-foreground">Quantity</span>
-                    <div className="flex items-center gap-3">
-                      <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
-                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
-                      <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                      <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
-                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
-                    </div>
-                  </div>
-                  <Button onClick={buy} disabled={buying || !tierOnSale(selectedTier)} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-                    <Ticket className="w-4 h-4" />
-                    {buying ? "Loading…" : `Buy ${qty > 1 ? `${qty} Tickets` : "Ticket"} · $${((selectedTier.price_cents * qty) / 100).toFixed(2)}`}
-                  </Button>
+                  <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
+                  <BuyButton
+                    onClick={buy}
+                    disabled={buying || !tierOnSale(selectedTier)}
+                    loading={buying}
+                    label={`Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+                    amount={`$${((selectedTier.price_cents * qty) / 100).toFixed(2)}`}
+                  />
                 </>
               ) : (
                 <>
-                  <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                    <span className="text-sm font-medium text-foreground">Tickets</span>
-                    <div className="flex items-center gap-3">
-                      <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
-                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
-                      <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                      <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
-                        className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
-                    </div>
-                  </div>
-                  <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-                    {rsvped ? "You're going ✓" : rsvping ? "Saving…" : qty > 1 ? `Reserve ${qty} free tickets` : "Reserve free ticket"}
-                  </Button>
+                  <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
+                  <BuyButton
+                    onClick={rsvp}
+                    disabled={rsvping || rsvped}
+                    loading={rsvping}
+                    label={rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} free tickets` : "Reserve free ticket"}
+                  />
                 </>
               )}
             </>
           ) : priced ? (
             <>
-              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                <span className="text-sm font-medium text-foreground">Tickets</span>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
-                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
-                  <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                  <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
-                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
-                </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">General admission</span>
+                <span className="text-lg font-bold tabular-nums text-foreground">${((evt.price_cents ?? 0) / 100).toFixed(2)}</span>
               </div>
-              <Button onClick={buy} disabled={buying} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-                <Ticket className="w-4 h-4" />
-                {buying ? "Loading…" : `Buy ${qty > 1 ? `${qty} Tickets` : "Ticket"} · $${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
-              </Button>
+              <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
+              <BuyButton
+                onClick={buy}
+                disabled={buying}
+                loading={buying}
+                label={`Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+                amount={`$${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
+              />
             </>
           ) : (
             <>
-              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                <span className="text-sm font-medium text-foreground">Tickets</span>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1}
-                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="Fewer tickets">-</button>
-                  <span className="w-6 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                  <button type="button" onClick={() => setQty((q) => Math.min(maxQty, q + 1))} disabled={qty >= maxQty}
-                    className="h-8 w-8 rounded-full border border-border text-lg leading-none disabled:opacity-40" aria-label="More tickets">+</button>
-                </div>
-              </div>
-              <Button onClick={rsvp} disabled={rsvping || rsvped} className="w-full rounded-lg h-11 font-medium gap-2 text-white" style={{ backgroundColor: "#d4580a" }}>
-                {rsvped ? "You're going ✓" : rsvping ? "Saving…" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
-              </Button>
+              <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
+              <BuyButton
+                onClick={rsvp}
+                disabled={rsvping || rsvped}
+                loading={rsvping}
+                label={rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
+              />
             </>
           )}
-          <Button onClick={() => setShareOpen(true)} variant="outline" className="w-full rounded-lg h-10 font-medium gap-2" aria-label="Share">
+          {(priced || tiers.some((t) => t.price_cents > 0)) && (
+            <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+              Secure checkout by Stripe. You'll see the seller's business name and contact details before you pay.
+            </p>
+          )}
+          <div className="flex items-center gap-2">
+          <Button onClick={() => setShareOpen(true)} variant="outline" className="h-10 flex-1 rounded-full font-medium gap-2" aria-label="Share">
             <Send className="w-4 h-4 -rotate-45" />Share
           </Button>
-          <div className="flex justify-center pt-1">
-            <ReportButton contentType="event" contentId={eventId} label="Report this event" />
-          </div>
           <Button
             onClick={async () => {
               if (!me) { toast.error("Sign in to save"); return; }
@@ -498,11 +482,16 @@ function EventDetail() {
               setSavingBk(false);
             }}
             variant="outline"
-            className="w-full rounded-lg h-10 font-medium gap-2"
+            className="h-10 flex-1 rounded-full font-medium gap-2"
             aria-label="Save"
           >
             <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />{saved ? "Saved" : "Save"}
           </Button>
+          </div>
+          <div className="flex justify-center">
+            <ReportButton contentType="event" contentId={eventId} label="Report this event" />
+          </div>
+          </div>
         </div>
 
         <EventSocial eventId={evt.id} hostId={evt.user_id} />
