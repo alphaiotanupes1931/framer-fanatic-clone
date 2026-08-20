@@ -10,12 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Check, MessageSquare, Pencil, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, Camera, Check, MessageSquare, Pencil, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MentionText } from "@/components/shared/mention-text";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { compressAvatar, STORED_URL_TTL } from "@/lib/image-compress";
 
 const SHARE_LABELS: Record<SharePreview["type"], string> = {
   story: "Story",
@@ -73,6 +74,7 @@ type Conv = {
   last_read_at_b: string;
   is_group?: boolean | null;
   title?: string | null;
+  image_url?: string | null;
   created_by?: string | null;
   my_last_read?: string | null;
   cleared_at_a?: string | null;
@@ -129,6 +131,7 @@ function MessagesPage() {
   const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
   const [membersOpen, setMembersOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const [savingName, setSavingName] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -610,6 +613,34 @@ function MessagesPage() {
     }
   };
 
+  // Group cover photos live in shared storage and on the conversation row, so
+  // every member sees the same picture rather than a device-local one.
+  const uploadGroupCover = async (file: File) => {
+    if (!active?.is_group || !me) return;
+    setUploadingCover(true);
+    try {
+      const img = await compressAvatar(file);
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${me.id}/group-${active.id}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, img, { upsert: true, contentType: img.type || "image/jpeg", cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
+      if (signErr || !signed) throw signErr || new Error("Could not sign URL");
+      const url = signed.signedUrl;
+      const { error } = await supabase.from("conversations").update({ image_url: url }).eq("id", active.id);
+      if (error) throw error;
+      setActive((c) => (c ? { ...c, image_url: url } : c));
+      setConvs((prev) => prev.map((c) => (c.id === active.id ? { ...c, image_url: url } : c)));
+      toast.success("Group photo updated");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not upload photo");
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
   return (
     <AppLayout title="" hero={false}>
       <div className={`mb-4 ${active ? "hidden md:block" : ""} md:hidden`}>
@@ -683,6 +714,7 @@ function MessagesPage() {
                   ) : (
                     <Avatar className="h-12 w-12">
                       {!c.is_group && c.other?.avatar_url && <SmartAvatarImage src={c.other.avatar_url} alt="" />}
+                      {c.is_group && c.image_url && <SmartAvatarImage src={c.image_url} alt="" />}
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
                       </AvatarFallback>
@@ -813,6 +845,14 @@ function MessagesPage() {
                     onClick={() => setMembersOpen(true)}
                     className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-muted"
                   >
+                    {active.image_url ? (
+                      <Avatar className="h-10 w-10">
+                        <SmartAvatarImage src={active.image_url} alt="" />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          <Users className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
                     <div className="flex -space-x-2">
                       {(groupMembers.length ? groupMembers.slice(0, 3) : [null]).map((p, i) => (
                         <Avatar key={p?.id || i} className="h-9 w-9 border-2 border-card">
@@ -823,6 +863,7 @@ function MessagesPage() {
                         </Avatar>
                       ))}
                     </div>
+                    )}
                     <div className="min-w-0">
                       <div className="truncate font-semibold text-foreground">
                         {active.title || "Group chat"}
@@ -1208,6 +1249,31 @@ function MessagesPage() {
           className="w-full max-w-md gap-0 border border-border bg-card p-0 rounded-t-2xl sm:rounded-2xl"
         >
           <DialogHeader className="px-5 pb-3 pt-5 text-left">
+            <label className="group relative mb-3 block aspect-[16/9] w-full cursor-pointer overflow-hidden rounded-xl border border-border bg-muted">
+              {active?.image_url ? (
+                <Img src={active.image_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex h-full w-full flex-col items-center justify-center gap-1 text-xs text-muted-foreground">
+                  <Camera className="h-6 w-6" />
+                  Add a group photo (1200 x 675 px)
+                </span>
+              )}
+              <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground shadow">
+                <Camera className="h-3.5 w-3.5" />
+                {uploadingCover ? "Uploading..." : active?.image_url ? "Change photo" : "Upload photo"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingCover}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) void uploadGroupCover(f);
+                }}
+              />
+            </label>
             <div className="min-w-0">
               {renaming ? (
                 <div className="flex items-center gap-2">

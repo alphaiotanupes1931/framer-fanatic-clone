@@ -143,6 +143,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          image_url: string | null
           is_group: boolean
           last_message_at: string
           last_message_preview: string | null
@@ -158,6 +159,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          image_url?: string | null
           is_group?: boolean
           last_message_at?: string
           last_message_preview?: string | null
@@ -173,6 +175,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          image_url?: string | null
           is_group?: boolean
           last_message_at?: string
           last_message_preview?: string | null
