@@ -142,15 +142,20 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
                       : "bg-neutral-700"
               }`}
             >
-              <div className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider">
+              <div
+                className={`flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider ${headerPulse ? "scale-105" : "scale-100"} transition-transform duration-300`}
+                style={headerPulse ? { animation: "slide-up-fade 0.45s ease-out" } : undefined}
+              >
                 {cancelled ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                {cancelled
-                  ? "Cancelled ticket"
-                  : t.checked_in_at
-                    ? "Checked in"
-                    : valid
-                      ? "Not checked in"
-                      : t.status}
+                <span className="inline-block">
+                  {cancelled
+                    ? "Cancelled ticket"
+                    : t.checked_in_at
+                      ? "Checked in"
+                      : valid
+                        ? "Not checked in"
+                        : t.status}
+                </span>
               </div>
               {cancelled && <div className="mt-1 text-[11px] text-white/80">This RSVP was cancelled. Do not admit.</div>}
               {canCheckIn && <div className="mt-1 text-[11px] text-white/70">Staff only, tap to check this guest in</div>}
