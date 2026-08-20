@@ -172,7 +172,7 @@ function TicketDetailPage() {
           {/* Header */}
           <div className="px-5 pt-5 sm:px-6 sm:pt-6">
             <div className="flex items-center gap-2">
-              <img src={pbLogoWhite} alt="Planet Baltimore" className="h-6 w-auto shrink-0 sm:h-7" />
+              <img src={pbLogoWhite} alt="Planet Baltimore" className="-my-2 h-10 w-auto shrink-0 sm:h-11" />
               <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-orange-300">Planet Baltimore</span>
             </div>
             <h1 className="mt-2 text-xl font-bold leading-tight sm:text-2xl">{t.events?.title ?? "Event"}</h1>
