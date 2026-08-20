@@ -159,7 +159,8 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
 
       if (error) { toast.error(error.message); return; }
       toast.success("Event updated");
-      navigate({ to: "/events/$eventId", params: { eventId } });
+      if (onSaved) onSaved();
+      else navigate({ to: "/events/$eventId", params: { eventId } });
     } finally {
       setSaving(false);
     }
@@ -167,18 +168,16 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
 
   if (loading) {
     return (
-      <AppLayout>
-        <div className="flex items-center justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-neutral-400" /></div>
-      </AppLayout>
+      <div className="flex items-center justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-neutral-400" /></div>
     );
   }
 
   return (
-    <AppLayout>
+    <div>
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between mb-8">
-          <button onClick={() => navigate({ to: "/events/$eventId", params: { eventId } })} className="p-2 -ml-2 rounded-full hover:bg-secondary" aria-label="Back">
-            <ArrowLeft className="w-5 h-5" />
+          <button onClick={() => (onCancel ? onCancel() : navigate({ to: "/events/$eventId", params: { eventId } }))} className="rounded-full px-3 py-2 text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">
+            Cancel
           </button>
           <h1 className="text-xl font-bold">Edit Event</h1>
           <button
