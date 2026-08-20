@@ -810,6 +810,9 @@ function MessagesPage() {
                   const next = arr[i + 1];
                   const showAvatar = !mine && (!next || next.sender_id !== m.sender_id);
                   const showTime = !next || next.sender_id !== m.sender_id;
+                  const sender = active.is_group ? memberById.get(m.sender_id) : active.other;
+                  const showSenderName =
+                    !mine && active.is_group && (!prev || prev.sender_id !== m.sender_id);
                   return (
                     <div
                       key={m.id}
@@ -817,24 +820,24 @@ function MessagesPage() {
                     >
                       {!mine && (
                         <div className="w-7 shrink-0">
-                          {showAvatar && !active.is_group && active.other?.username ? (
-                            <Link to="/u/$username" params={{ username: active.other.username }}>
+                          {showAvatar && sender?.username ? (
+                            <Link to="/u/$username" params={{ username: sender.username }}>
                               <Avatar className="h-7 w-7">
-                                {active.other?.avatar_url && (
-                                  <SmartAvatarImage src={active.other.avatar_url} alt="" />
+                                {sender.avatar_url && (
+                                  <SmartAvatarImage src={sender.avatar_url} alt="" />
                                 )}
                                 <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
-                                  {initials(active.other)}
+                                  {initials(sender)}
                                 </AvatarFallback>
                               </Avatar>
                             </Link>
                           ) : showAvatar && (
                             <Avatar className="h-7 w-7">
-                              {active.other?.avatar_url && (
-                                <SmartAvatarImage src={active.other.avatar_url} alt="" />
+                              {sender?.avatar_url && (
+                                <SmartAvatarImage src={sender.avatar_url} alt="" />
                               )}
                               <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
-                                {initials(active.other)}
+                                {initials(sender)}
                               </AvatarFallback>
                             </Avatar>
                           )}
@@ -858,6 +861,21 @@ function MessagesPage() {
                               mine ? "bg-muted/70" : "border border-border bg-transparent"
                             }`}
                           >
+                            {showSenderName && (
+                              sender?.username ? (
+                                <Link
+                                  to="/u/$username"
+                                  params={{ username: sender.username }}
+                                  className="mb-1 block truncate text-xs font-semibold text-primary hover:underline"
+                                >
+                                  {sender.display_name || sender.username}
+                                </Link>
+                              ) : (
+                                <div className="mb-1 truncate text-xs font-semibold text-muted-foreground">
+                                  Member
+                                </div>
+                              )
+                            )}
                             {shared ? (
                               <div className="space-y-2">
                                 <SharePreviewCard preview={shared.preview} mine={mine} />
