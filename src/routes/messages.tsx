@@ -102,6 +102,7 @@ function formatWhen(iso: string) {
 
 function MessagesPage() {
   const me = useCurrentProfile();
+  const navigate = useNavigate();
   const [convs, setConvs] = useState<Conv[]>([]);
   const [active, setActive] = useState<Conv | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
