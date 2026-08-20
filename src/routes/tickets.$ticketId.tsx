@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
+import { QrDisplay } from "@/components/tickets/qr-display";
 import { TicketVerifyView } from "@/components/tickets/ticket-verify-view";
 import { emailMyCancellation } from "@/lib/tickets.functions";
 import pbLogoWhite from "@/assets/pb-logo-white.png";

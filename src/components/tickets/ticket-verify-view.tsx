@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/utils";
 import { Img } from "@/components/shared/smart-img";
 import { CheckCircle2, XCircle, Printer, MapPin, Check, Info } from "lucide-react";
+import { QrDisplay } from "@/components/tickets/qr-display";
 import pbLogoMark from "@/assets/pb-logo.png";
 
 const popKeyframes = `
