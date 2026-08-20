@@ -128,6 +128,9 @@ function MessagesPage() {
   const [msgSearchOpen, setMsgSearchOpen] = useState(false);
   const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
   const [membersOpen, setMembersOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
+  const [savingName, setSavingName] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const decorate = useCallback(
