@@ -286,19 +286,34 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
               <>
                 <h2 className="text-base font-bold text-neutral-900">Check in</h2>
                 <p className="mt-1 text-sm text-neutral-500">Tap the check mark to admit this guest.</p>
-                <button
-                  onClick={doCheckIn}
-                  disabled={busy || !!t.checked_in_at}
-                  className={`mx-auto mt-5 grid h-24 w-24 place-items-center rounded-full transition-all duration-500 ${
-                    glow
-                      ? "scale-105 bg-emerald-500 text-white shadow-[0_0_40px_rgba(16,185,129,0.75)]"
-                      : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
-                  }`}
+                <div className="relative mx-auto mt-5 flex h-24 w-24 items-center justify-center">
+                  {successPulse && (
+                    <div
+                      className="absolute inset-0 rounded-full border-2 border-emerald-400"
+                      style={{ animation: "ring-burst 0.65s ease-out forwards" }}
+                    />
+                  )}
+                  <button
+                    onClick={doCheckIn}
+                    disabled={busy || !!t.checked_in_at}
+                    className={`relative z-10 grid h-24 w-24 place-items-center rounded-full transition-all duration-500 ${
+                      glow
+                        ? "scale-105 bg-emerald-500 text-white shadow-[0_0_50px_rgba(16,185,129,0.85)]"
+                        : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
+                    }`}
+                  >
+                    <Check
+                      className="h-10 w-10"
+                      strokeWidth={3}
+                      style={successPulse ? { animation: "check-pop 0.55s ease-out forwards" } : undefined}
+                    />
+                  </button>
+                </div>
+                <div
+                  className="mt-4 text-sm font-semibold text-neutral-900"
+                  style={successPulse ? { animation: "slide-up-fade 0.4s ease-out" } : undefined}
                 >
-                  <Check className="h-10 w-10" strokeWidth={3} />
-                </button>
-                <div className="mt-4 text-sm font-semibold text-neutral-900">
-                  {t.checked_in_at ? "Checked in" : busy ? "Checking in..." : "Not checked in"}
+                  {t.checked_in_at ? "Checked in" : busy ? "Checking in…" : "Not checked in"}
                 </div>
                 {err && <div className="mt-2 text-xs text-red-600">{err}</div>}
                 <button
