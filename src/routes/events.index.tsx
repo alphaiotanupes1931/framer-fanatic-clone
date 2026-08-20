@@ -447,6 +447,46 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         )}
       </div>
 
+      <Dialog open={!!qtyEvent} onOpenChange={(o) => { if (!o && !checkingOut) setQtyEvent(null); }}>
+        <DialogContent className="max-w-sm rounded-3xl p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6">
+            <DialogTitle className="text-base font-bold">{qtyEvent?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="px-6 pb-6 pt-4">
+            <p className="text-sm text-neutral-500">How many tickets?</p>
+            <div className="mt-4 flex items-center justify-center gap-6">
+              <button
+                type="button"
+                onClick={() => setQty((n) => Math.max(1, n - 1))}
+                disabled={qty <= 1}
+                className="h-11 w-11 rounded-full border border-neutral-200 text-xl font-bold transition active:scale-90 disabled:opacity-40"
+              >
+                −
+              </button>
+              <span className="w-10 text-center text-3xl font-extrabold tabular-nums transition-all">{qty}</span>
+              <button
+                type="button"
+                onClick={() => setQty((n) => Math.min(10, n + 1))}
+                disabled={qty >= 10}
+                className="h-11 w-11 rounded-full border border-neutral-200 text-xl font-bold transition active:scale-90 disabled:opacity-40"
+              >
+                +
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={goToCheckout}
+              disabled={checkingOut}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#d4580a] px-5 py-3 text-sm font-bold text-white transition hover:brightness-95 disabled:opacity-60"
+            >
+              {checkingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ticket className="h-4 w-4" />}
+              Continue · ${(((qtyEvent?.price_cents ?? 0) * qty) / 100).toFixed(2)}
+            </button>
+            <p className="mt-2 text-center text-[11px] text-neutral-400">Fees calculated at checkout</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {open && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
           <div className="bg-background text-foreground rounded-2xl w-full max-w-lg p-6 border" onClick={(e) => e.stopPropagation()}>
