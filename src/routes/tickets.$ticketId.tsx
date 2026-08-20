@@ -249,6 +249,15 @@ function TicketDetailPage() {
           {t.events?.id ? (
             <Link to="/events/$eventId" params={{ eventId: t.events.id }} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Calendar className="h-4 w-4" /> Event</Link>
           ) : <span />}
+          {t.events && when && (
+            <button
+              type="button"
+              onClick={saveToCalendar}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a] sm:col-span-2"
+            >
+              <CalendarPlus className="h-4 w-4" /> Download calendar (.ics)
+            </button>
+          )}
         </div>
 
         {t.events?.address && (
