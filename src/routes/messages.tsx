@@ -116,6 +116,8 @@ function MessagesPage() {
   const [broadcastText, setBroadcastText] = useState("");
   const [msgSearch, setMsgSearch] = useState("");
   const [msgSearchOpen, setMsgSearchOpen] = useState(false);
+  const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
+  const [membersOpen, setMembersOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const decorate = useCallback(
@@ -292,6 +294,32 @@ function MessagesPage() {
       setMsgSearchOpen(false);
     }
   }, [active, loadMsgs, markRead]);
+
+  // Load group members (avatars + names) for group chats
+  useEffect(() => {
+    let cancelled = false;
+    setMembersOpen(false);
+    if (!active?.is_group) {
+      setGroupMembers([]);
+      return;
+    }
+    (async () => {
+      const { data: rows } = await supabase
+        .from("conversation_members")
+        .select("user_id")
+        .eq("conversation_id", active.id);
+      const ids = (rows || []).map((r) => r.user_id as string);
+      if (!ids.length) { if (!cancelled) setGroupMembers([]); return; }
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+      if (!cancelled) setGroupMembers((profs || []) as Profile[]);
+    })();
+    return () => { cancelled = true; };
+  }, [active?.id, active?.is_group]);
+
+  const memberById = useMemo(
+    () => new Map(groupMembers.map((p) => [p.id, p])),
+    [groupMembers],
+  );
 
   // Auto-scroll to bottom on new messages. A single smooth scroll can stop
   // short when images/attachments finish loading and grow the thread, so pin
