@@ -200,10 +200,11 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       throw new Error("This organizer hasn't finished setting up payments yet.");
     }
 
-    const breakdown = priceBreakdown(unitPriceCents);
     const qty = data.quantity;
-    // Platform fee = flat 69¢ Planet Baltimore fee per ticket. Routed via application_fee_amount.
-    const applicationFee = breakdown.platformFeeCents * qty;
+    // Flat platform fee per ORDER (7¢), never multiplied by ticket quantity, so the
+    // breakdown is computed on the full order net rather than a single ticket.
+    const breakdown = priceBreakdown(unitPriceCents * qty);
+    const applicationFee = breakdown.platformFeeCents;
 
     // Show the buyer exactly who they are paying, straight from Stripe.
     const seller = await getSellerDetails(artist.stripe_account_id);
@@ -220,10 +221,10 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
         submit: { message: sellerLine },
       },
       line_items: checkoutLineItems(breakdown, {
-        name: tier ? `${tier.name} - ${event.title}` : `Ticket: ${event.title}`,
+        name: `${tier ? `${tier.name} - ${event.title}` : `Ticket: ${event.title}`}${qty > 1 ? ` x${qty}` : ""}`,
         description: `${event.title} · Sold by ${sellerName} via Planet Baltimore`,
         images: event.image_url ? [event.image_url] : undefined,
-      }).map((li) => ({ ...li, quantity: qty })),
+      }),
       payment_intent_data: {
         application_fee_amount: applicationFee,
         on_behalf_of: artist.stripe_account_id,
@@ -248,15 +249,17 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     // on tickets (they may only read their own), so this write must go through
     // the admin client after the caller has been authenticated above.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const rows = Array.from({ length: qty }, () => ({
+    // Order-level totals split across seats; any remainder lands on the first row.
+    const split = (total: number, i: number) => Math.floor(total / qty) + (i === 0 ? total % qty : 0);
+    const rows = Array.from({ length: qty }, (_, i) => ({
       event_id: event.id,
       buyer_id: userId,
       artist_id: event.user_id,
       stripe_checkout_session_id: session.id,
-      buyer_total_cents: breakdown.buyerTotalCents,
-      artist_net_cents: breakdown.artistNetCents,
-      platform_tax_cents: breakdown.platformTaxCents,
-      stripe_fee_cents: breakdown.stripeFeeCents,
+      buyer_total_cents: split(breakdown.buyerTotalCents, i),
+      artist_net_cents: unitPriceCents,
+      platform_tax_cents: split(breakdown.platformTaxCents, i),
+      stripe_fee_cents: split(breakdown.stripeFeeCents, i),
       ticket_type_id: tier?.id ?? null,
       ticket_type_name: tier?.name ?? null,
       status: "pending",
