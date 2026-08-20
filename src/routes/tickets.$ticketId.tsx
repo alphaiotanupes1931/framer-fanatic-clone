@@ -252,7 +252,7 @@ function TicketDetailPage() {
           </a>
         )}
 
-        {t.buyer_total_cents === 0 && when && when.getTime() >= Date.now() && (
+        {t.buyer_total_cents === 0 && t.status !== "cancelled" && when && when.getTime() >= Date.now() && (
           <button
             type="button"
             onClick={cancelRsvp}
