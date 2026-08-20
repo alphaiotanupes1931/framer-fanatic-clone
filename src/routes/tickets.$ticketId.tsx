@@ -11,6 +11,7 @@ import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
 import { TicketVerifyView } from "@/components/tickets/ticket-verify-view";
 import { emailMyCancellation } from "@/lib/tickets.functions";
+import pbLogoWhite from "@/assets/pb-logo-white.png";
 
 export const Route = createFileRoute("/tickets/$ticketId")({
   component: TicketDetailPage,
