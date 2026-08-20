@@ -220,7 +220,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
 
         <div className="flex flex-col items-center px-5 py-6 sm:px-6">
           <div className="relative">
-            <Img src={qr} alt="Ticket QR code" width={220} height={220} className="h-[min(62vw,220px)] w-[min(62vw,220px)]" />
+            <QrDisplay value={selfUrl} />
             {cancelled && (
               <div className="absolute inset-0 grid place-items-center bg-white/70">
                 <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
