@@ -1064,24 +1064,23 @@ function MessagesPage() {
         </DialogContent>
       </Dialog>
 
-      {broadcastOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => !broadcasting && setBroadcastOpen(false)}
+      <Dialog
+        open={broadcastOpen}
+        onOpenChange={(v) => {
+          if (!v && broadcasting) return;
+          setBroadcastOpen(v);
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="w-full max-w-md gap-0 border border-border bg-card p-0 rounded-2xl"
         >
-          <div
-            className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Message all followers</h2>
-              <button
-                onClick={() => !broadcasting && setBroadcastOpen(false)}
-                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+          <DialogHeader className="px-5 pb-3 pt-5 text-left">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              Message all followers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-5 pb-5">
             <p className="mb-3 text-xs text-muted-foreground">
               Sends a direct message to every follower. They will see it in their inbox.
             </p>
@@ -1100,8 +1099,8 @@ function MessagesPage() {
               {broadcasting ? "Sending..." : "Send to followers"}
             </button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
