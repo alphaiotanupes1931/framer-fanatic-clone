@@ -24,6 +24,28 @@ export async function getPayoutAccount(profileId: string) {
   return data;
 }
 
+/**
+ * The stored `stripe_charges_enabled` flag can lag behind Stripe (webhook missed,
+ * onboarding finished in another tab). Re-check live with Stripe and sync the
+ * profile so a fully onboarded seller is never blocked by a stale flag.
+ */
+export async function refreshChargesEnabled(profileId: string, accountId: string): Promise<boolean> {
+  try {
+    const acct = await getStripe().accounts.retrieve(accountId);
+    const enabled = !!acct.charges_enabled;
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        stripe_charges_enabled: enabled,
+        stripe_account_status: enabled ? "active" : "pending",
+      })
+      .eq("id", profileId);
+    return enabled;
+  } catch {
+    return false;
+  }
+}
+
 export function isConnectPlatformProfileError(error: unknown): boolean {
   const message = error instanceof Error ? error.message.toLowerCase() : "";
   return message.includes("responsibilities of managing losses") || message.includes("connect/platform-profile");

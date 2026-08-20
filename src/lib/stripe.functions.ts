@@ -124,7 +124,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING, getSellerDetails, sellerBlurb } =
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING, getSellerDetails, sellerBlurb, refreshChargesEnabled } =
       await import("./stripe.server");
     const stripe = getStripe();
 
@@ -192,8 +192,12 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     // Get artist's connected account
     const artist = await getPayoutAccount(event.user_id);
 
-    if (!artist?.stripe_account_id || !artist.stripe_charges_enabled) {
-      throw new Error("This artist hasn't finished setting up payments yet.");
+    if (!artist?.stripe_account_id) {
+      throw new Error("This organizer hasn't set up payments yet, so tickets can't be sold.");
+    }
+    // The stored flag can be stale; confirm with Stripe before blocking the sale.
+    if (!artist.stripe_charges_enabled && !(await refreshChargesEnabled(event.user_id, artist.stripe_account_id))) {
+      throw new Error("This organizer hasn't finished setting up payments yet.");
     }
 
     const breakdown = priceBreakdown(unitPriceCents);
