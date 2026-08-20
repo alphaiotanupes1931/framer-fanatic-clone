@@ -5,6 +5,23 @@ import { Img } from "@/components/shared/smart-img";
 import { CheckCircle2, XCircle, Printer, MapPin, Check, Info } from "lucide-react";
 import pbLogoMark from "@/assets/pb-logo.png";
 
+const popKeyframes = `
+@keyframes check-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.45); }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1.25); }
+}
+@keyframes ring-burst {
+  0% { transform: scale(0.7); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes slide-up-fade {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+`;
+
 type Verified = {
   ticket_id: string;
   status: string;
