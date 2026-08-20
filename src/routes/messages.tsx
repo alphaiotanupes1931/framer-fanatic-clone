@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Check, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, Check, MessageSquare, Pencil, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MentionText } from "@/components/shared/mention-text";
@@ -128,6 +128,9 @@ function MessagesPage() {
   const [msgSearchOpen, setMsgSearchOpen] = useState(false);
   const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
   const [membersOpen, setMembersOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
+  const [savingName, setSavingName] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const decorate = useCallback(
@@ -587,6 +590,25 @@ function MessagesPage() {
   };
 
   const showList = !active;
+
+  const saveGroupName = async () => {
+    if (!active?.is_group) return;
+    const next = renameValue.trim();
+    if (!next) { toast.error("Give the group a name"); return; }
+    setSavingName(true);
+    try {
+      const { error } = await supabase.from("conversations").update({ title: next }).eq("id", active.id);
+      if (error) throw error;
+      setActive((c) => (c ? { ...c, title: next } : c));
+      setConvs((prev) => prev.map((c) => (c.id === active.id ? { ...c, title: next } : c)));
+      setRenaming(false);
+      toast.success("Group name updated");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not rename group");
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   return (
     <AppLayout title="" hero={false}>
@@ -1187,9 +1209,49 @@ function MessagesPage() {
         >
           <DialogHeader className="px-5 pb-3 pt-5 text-left">
             <div className="min-w-0">
-              <DialogTitle className="truncate text-lg font-bold text-foreground">
-                {active?.title || "Group chat"}
-              </DialogTitle>
+              {renaming ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    autoFocus
+                    value={renameValue}
+                    maxLength={80}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") void saveGroupName(); if (e.key === "Escape") setRenaming(false); }}
+                    placeholder="Group name"
+                    className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground outline-none focus:border-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void saveGroupName()}
+                    disabled={savingName}
+                    className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                  >
+                    {savingName ? "Saving" : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRenaming(false)}
+                    className="rounded-lg px-2 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <DialogTitle className="truncate text-lg font-bold text-foreground">
+                    {active?.title || "Group chat"}
+                  </DialogTitle>
+                  <button
+                    type="button"
+                    onClick={() => { setRenameValue(active?.title || ""); setRenaming(true); }}
+                    className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    aria-label="Rename group"
+                    title="Rename group"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">{groupMembers.length} members</p>
             </div>
           </DialogHeader>

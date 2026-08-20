@@ -7,14 +7,17 @@ import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
   Zap, Crown, Star, Tag, MapPin, PartyPopper, AlertTriangle, GraduationCap,
-  ChevronUp, ChevronDown, Upload, Eye, X,
+  ChevronUp, ChevronDown, Upload, Eye, X, Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
+import { EventEditForm } from "@/components/organizer/event-edit-form";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
-  validateSearch: (search: Record<string, unknown>): { event?: string } =>
-    typeof search['event'] === "string" ? { event: search['event'] as string } : {},
+  validateSearch: (search: Record<string, unknown>): { event?: string; edit?: boolean } => ({
+    ...(typeof search['event'] === "string" ? { event: search['event'] as string } : {}),
+    ...(search['edit'] === true || search['edit'] === "true" || search['edit'] === "1" ? { edit: true } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Organizer Studio - Planet Baltimore" },
@@ -38,7 +41,7 @@ function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
 
 function OrganizerStudioPage() {
   const me = useCurrentProfile();
-  const { event: focusEventId } = Route.useSearch();
+  const { event: focusEventId, edit: focusEdit } = Route.useSearch();
   const [tab, setTab] = useState<"manage" | "create" | "campaign">("manage");
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
@@ -186,15 +189,15 @@ function OrganizerStudioPage() {
             )}
           </>
         ) : (
-          <EventDetail evt={selected} onBack={() => setSelected(null)} />
+          <EventDetail evt={selected} onBack={() => setSelected(null)} initialTab={focusEdit ? "details" : undefined} />
         )}
       </div>
     </AppLayout>
   );
 }
 
-function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
-  const [tab, setTab] = useState<"tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">("tickets");
+function EventDetail({ evt, onBack, initialTab }: { evt: MyEvent; onBack: () => void; initialTab?: "details" }) {
+  const [tab, setTab] = useState<"details" | "tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">(initialTab ?? "tickets");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
   const [search, setSearch] = useState("");
@@ -243,6 +246,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   const net = paid.reduce((s, t) => s + t.artist_net_cents, 0);
 
   const tabs = [
+    { id: "details", label: "Edit Details", icon: Pencil },
     { id: "tickets", label: "Tickets", icon: Ticket },
     { id: "attendees", label: "Attendees", icon: Users },
     { id: "checkin", label: "Check-In", icon: CheckSquare },
@@ -343,6 +347,12 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {tab === "details" && (
+        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+          <EventEditForm eventId={evt.id} onSaved={onBack} onCancel={() => setTab("tickets")} />
         </div>
       )}
 
