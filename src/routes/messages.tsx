@@ -117,6 +117,10 @@ function MessagesPage() {
   const [newOpen, setNewOpen] = useState(false);
   const [people, setPeople] = useState<Profile[]>([]);
   const [peopleQuery, setPeopleQuery] = useState("");
+  const [selectedPeople, setSelectedPeople] = useState<Profile[]>([]);
+  const [newStep, setNewStep] = useState<"pick" | "confirm">("pick");
+  const [groupName, setGroupName] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
   const [broadcasting, setBroadcasting] = useState(false);
   const [broadcastOpen, setBroadcastOpen] = useState(false);
   const [broadcastText, setBroadcastText] = useState("");
