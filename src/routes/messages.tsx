@@ -4,7 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MentionText } from "@/components/shared/mention-text";
@@ -942,24 +948,23 @@ function MessagesPage() {
         </div>
       </div>
 
-      {newOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
-          onClick={() => setNewOpen(false)}
+      <Dialog
+        open={newOpen}
+        onOpenChange={(v) => {
+          if (!v) setPeopleQuery("");
+          setNewOpen(v);
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="w-full max-w-md gap-0 border border-border bg-card p-0 rounded-t-2xl sm:rounded-2xl"
         >
-          <div
-            className="w-full max-w-md rounded-t-2xl bg-card p-5 shadow-xl sm:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Start a conversation</h2>
-              <button
-                onClick={() => setNewOpen(false)}
-                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+          <DialogHeader className="px-5 pb-3 pt-5 text-left">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              Start a conversation
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-5 pb-5">
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -999,33 +1004,23 @@ function MessagesPage() {
               )}
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
-      {membersOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
-          onClick={() => setMembersOpen(false)}
+      <Dialog open={membersOpen} onOpenChange={setMembersOpen}>
+        <DialogContent
+          hideClose
+          className="w-full max-w-md gap-0 border border-border bg-card p-0 rounded-t-2xl sm:rounded-2xl"
         >
-          <div
-            className="w-full max-w-md rounded-t-2xl bg-card p-5 shadow-xl sm:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <div className="min-w-0">
-                <h2 className="truncate text-lg font-bold text-foreground">
-                  {active?.title || "Group chat"}
-                </h2>
-                <p className="text-xs text-muted-foreground">{groupMembers.length} members</p>
-              </div>
-              <button
-                onClick={() => setMembersOpen(false)}
-                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
+          <DialogHeader className="px-5 pb-3 pt-5 text-left">
+            <div className="min-w-0">
+              <DialogTitle className="truncate text-lg font-bold text-foreground">
+                {active?.title || "Group chat"}
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground">{groupMembers.length} members</p>
             </div>
+          </DialogHeader>
+          <div className="px-5 pb-5">
             <div className="max-h-[60vh] space-y-1 overflow-y-auto">
               {groupMembers.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">No members found</p>
@@ -1066,27 +1061,26 @@ function MessagesPage() {
               )}
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
-      {broadcastOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => !broadcasting && setBroadcastOpen(false)}
+      <Dialog
+        open={broadcastOpen}
+        onOpenChange={(v) => {
+          if (!v && broadcasting) return;
+          setBroadcastOpen(v);
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="w-full max-w-md gap-0 border border-border bg-card p-0 rounded-2xl"
         >
-          <div
-            className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Message all followers</h2>
-              <button
-                onClick={() => !broadcasting && setBroadcastOpen(false)}
-                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+          <DialogHeader className="px-5 pb-3 pt-5 text-left">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              Message all followers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-5 pb-5">
             <p className="mb-3 text-xs text-muted-foreground">
               Sends a direct message to every follower. They will see it in their inbox.
             </p>
@@ -1105,8 +1099,8 @@ function MessagesPage() {
               {broadcasting ? "Sending..." : "Send to followers"}
             </button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
