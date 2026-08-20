@@ -231,7 +231,7 @@ function TicketDetailPage() {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-xs sm:px-6">
+          <div className="relative flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-xs sm:px-6">
             <div>
               <div className="text-white/40">Paid</div>
               <div className="font-semibold">${(t.buyer_total_cents / 100).toFixed(2)}</div>
