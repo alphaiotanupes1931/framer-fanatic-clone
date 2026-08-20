@@ -177,9 +177,13 @@ function EventsPage() {
   const { data: cachedEvents, loading: dataLoading, refetch } = useCachedFetch<EventRow[]>(
     "events:upcoming",
     async () => {
+      // Include events happening today (or already started but not over) so a
+      // freshly created event doesn't vanish the moment its start time passes.
+      const cutoff = new Date();
+      cutoff.setHours(0, 0, 0, 0);
       const { data } = await supabase
         .from("events").select("*")
-        .gte("starts_at", new Date().toISOString())
+        .gte("starts_at", cutoff.toISOString())
         .order("starts_at", { ascending: true }).limit(24);
       return (data as EventRow[] | null) ?? [];
     },
