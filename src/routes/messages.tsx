@@ -10,12 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Check, MessageSquare, Pencil, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, Camera, Check, MessageSquare, Pencil, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MentionText } from "@/components/shared/mention-text";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { compressAvatar, STORED_URL_TTL } from "@/lib/image-compress";
 
 const SHARE_LABELS: Record<SharePreview["type"], string> = {
   story: "Story",
@@ -73,6 +74,7 @@ type Conv = {
   last_read_at_b: string;
   is_group?: boolean | null;
   title?: string | null;
+  image_url?: string | null;
   created_by?: string | null;
   my_last_read?: string | null;
   cleared_at_a?: string | null;
