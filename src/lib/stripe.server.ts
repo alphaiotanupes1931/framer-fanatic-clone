@@ -29,6 +29,49 @@ export function isConnectPlatformProfileError(error: unknown): boolean {
   return message.includes("responsibilities of managing losses") || message.includes("connect/platform-profile");
 }
 
+/**
+ * Pull the seller's public-facing details straight from their Stripe account so
+ * the buyer can see who they are actually paying (name, business, contact).
+ */
+export async function getSellerDetails(accountId: string) {
+  try {
+    const acct = await getStripe().accounts.retrieve(accountId);
+    const bp = (acct.business_profile ?? {}) as {
+      name?: string | null;
+      support_email?: string | null;
+      support_phone?: string | null;
+      url?: string | null;
+      support_address?: { city?: string | null; state?: string | null } | null;
+    };
+    const addr = bp.support_address;
+    return {
+      businessName: bp.name || acct.settings?.dashboard?.display_name || null,
+      supportEmail: bp.support_email || acct.email || null,
+      supportPhone: bp.support_phone || null,
+      website: bp.url || null,
+      city: addr?.city ?? null,
+      state: addr?.state ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** One short line describing the seller, safe for Stripe Checkout custom text. */
+export function sellerBlurb(
+  seller: Awaited<ReturnType<typeof getSellerDetails>>,
+  fallbackName: string,
+): string {
+  const name = seller?.businessName || fallbackName;
+  const parts = [`Sold by ${name}`];
+  const place = [seller?.city, seller?.state].filter(Boolean).join(", ");
+  if (place) parts.push(place);
+  if (seller?.supportPhone) parts.push(seller.supportPhone);
+  if (seller?.supportEmail) parts.push(seller.supportEmail);
+  if (seller?.website) parts.push(seller.website);
+  return parts.join(" · ").slice(0, 1200);
+}
+
 // Planet Baltimore platform fee: flat 69¢ per paid ticket.
 export const PLATFORM_FEE_CENTS = 69;
 

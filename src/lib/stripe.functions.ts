@@ -124,7 +124,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING } =
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING, getSellerDetails, sellerBlurb } =
       await import("./stripe.server");
     const stripe = getStripe();
 
@@ -201,20 +201,30 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     // Platform fee = flat 69¢ Planet Baltimore fee per ticket. Routed via application_fee_amount.
     const applicationFee = breakdown.platformFeeCents * qty;
 
+    // Show the buyer exactly who they are paying, straight from Stripe.
+    const seller = await getSellerDetails(artist.stripe_account_id);
+    const sellerName = seller?.businessName || artist.display_name || artist.username || "the organizer";
+    const sellerLine = sellerBlurb(seller, artist.display_name || artist.username || "the organizer");
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       success_url: `${data.returnOrigin}/profile?tab=My%20Tickets&purchase=success`,
       cancel_url: `${data.returnOrigin}/events?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
+      custom_text: {
+        submit: { message: sellerLine },
+      },
       line_items: checkoutLineItems(breakdown, {
         name: tier ? `${tier.name} - ${event.title}` : `Ticket: ${event.title}`,
+        description: `${event.title} · Sold by ${sellerName} via Planet Baltimore`,
         images: event.image_url ? [event.image_url] : undefined,
       }).map((li) => ({ ...li, quantity: qty })),
       payment_intent_data: {
         application_fee_amount: applicationFee,
         on_behalf_of: artist.stripe_account_id,
               transfer_data: { destination: artist.stripe_account_id },
+        description: `${event.title} — ${sellerName}`,
       },
       metadata: {
         event_id: event.id,
