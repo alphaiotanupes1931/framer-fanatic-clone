@@ -31,6 +31,35 @@ type Org = {
   avatar_url: string | null; banner_url: string | null;
 };
 
+/**
+ * Card cover art. Pages without an uploaded banner used to render a blank grey
+ * block, so fall back to a blurred blow-up of the avatar, then to a tinted
+ * gradient with the page initials.
+ */
+function OrgCardCover({ name, bannerUrl, avatarUrl }: { name: string; bannerUrl: string | null; avatarUrl: string | null }) {
+  if (bannerUrl) {
+    return (
+      <div className="absolute inset-0 overflow-hidden">
+        <Img src={bannerUrl} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+      </div>
+    );
+  }
+  if (avatarUrl) {
+    return (
+      <div className="absolute inset-0 overflow-hidden">
+        <Img src={avatarUrl} alt="" className="h-full w-full scale-125 object-cover blur-xl" loading="lazy" decoding="async" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
+      </div>
+    );
+  }
+  const initials = name.split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("").toUpperCase();
+  return (
+    <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-gradient-to-br from-orange-100 via-amber-50 to-neutral-100">
+      <span className="text-4xl font-black tracking-tight text-orange-900/25">{initials}</span>
+    </div>
+  );
+}
+
 export function OrgListPage({
   type,
   title,
@@ -192,11 +221,7 @@ export function OrgListPage({
                 <Link key={`f-${o.id}`} to="/o/$slug" params={{ slug: o.slug }}
                   className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                   <div className="relative h-40 bg-neutral-100">
-                    {o.banner_url && (
-                      <div className="absolute inset-0 overflow-hidden">
-                        <Img src={o.banner_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-                      </div>
-                    )}
+                    <OrgCardCover name={o.name} bannerUrl={o.banner_url} avatarUrl={o.avatar_url} />
                     <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
                       {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                     </div>
@@ -247,11 +272,7 @@ export function OrgListPage({
                   </button>
                 )}
                 <div className="relative h-40 bg-neutral-100">
-                  {o.banner_url && (
-                    <div className="absolute inset-0 overflow-hidden">
-                      <Img src={o.banner_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-                    </div>
-                  )}
+                  <OrgCardCover name={o.name} bannerUrl={o.banner_url} avatarUrl={o.avatar_url} />
                   <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
                     {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
