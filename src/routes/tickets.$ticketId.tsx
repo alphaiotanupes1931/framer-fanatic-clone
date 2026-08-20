@@ -213,7 +213,7 @@ function TicketDetailPage() {
           {/* QR */}
           <div className="relative flex flex-col items-center px-5 py-6 sm:px-6">
             <div className="relative rounded-3xl bg-white p-3 shadow-[0_0_60px_-12px_rgba(255,255,255,0.25)] sm:p-4">
-              <Img src={qr} alt="Ticket QR code" width={220} height={220} className="h-[min(60vw,220px)] w-[min(60vw,220px)]" />
+              <QrDisplay value={ticketUrl} />
               {t.status === "cancelled" && (
                 <div className="absolute inset-0 grid place-items-center rounded-2xl bg-white/70">
                   <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
