@@ -15,6 +15,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { compressImage } from "@/lib/image-compress";
 import { pageHead } from "@/lib/seo";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -294,14 +295,33 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         const { error } = await supabase.rpc("rsvp_free_event", { _event_id: eventId, _quantity: 1 });
         if (error) throw error;
         toast.success("You're going!");
-      } else {
-        const { url } = await checkoutFn({ data: { eventId, returnOrigin: window.location.origin } });
-        if (url) window.location.href = url;
+        return;
       }
+      // Paid: ask how many tickets first, in a sleek sheet, then go to checkout.
+      setQtyEvent(ev);
+      setQty(1);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start checkout");
     } finally {
       setBuying(null);
+    }
+  };
+
+  const [qtyEvent, setQtyEvent] = useState<EventRow | null>(null);
+  const [qty, setQty] = useState(1);
+  const [checkingOut, setCheckingOut] = useState(false);
+
+  const goToCheckout = async () => {
+    if (!qtyEvent) return;
+    setCheckingOut(true);
+    try {
+      const { url } = await checkoutFn({
+        data: { eventId: qtyEvent.id, quantity: qty, returnOrigin: window.location.origin },
+      });
+      if (url) window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not start checkout");
+      setCheckingOut(false);
     }
   };
 
