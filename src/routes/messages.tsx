@@ -591,6 +591,25 @@ function MessagesPage() {
 
   const showList = !active;
 
+  const saveGroupName = async () => {
+    if (!active?.is_group) return;
+    const next = renameValue.trim();
+    if (!next) { toast.error("Give the group a name"); return; }
+    setSavingName(true);
+    try {
+      const { error } = await supabase.from("conversations").update({ title: next }).eq("id", active.id);
+      if (error) throw error;
+      setActive((c) => (c ? { ...c, title: next } : c));
+      setConvs((prev) => prev.map((c) => (c.id === active.id ? { ...c, title: next } : c)));
+      setRenaming(false);
+      toast.success("Group name updated");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not rename group");
+    } finally {
+      setSavingName(false);
+    }
+  };
+
   return (
     <AppLayout title="" hero={false}>
       <div className={`mb-4 ${active ? "hidden md:block" : ""} md:hidden`}>
