@@ -714,6 +714,7 @@ function MessagesPage() {
                   ) : (
                     <Avatar className="h-12 w-12">
                       {!c.is_group && c.other?.avatar_url && <SmartAvatarImage src={c.other.avatar_url} alt="" />}
+                      {c.is_group && c.image_url && <SmartAvatarImage src={c.image_url} alt="" />}
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {c.is_group ? <Users className="h-5 w-5" /> : initials(c.other)}
                       </AvatarFallback>
