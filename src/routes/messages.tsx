@@ -948,24 +948,23 @@ function MessagesPage() {
         </div>
       </div>
 
-      {newOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
-          onClick={() => setNewOpen(false)}
+      <Dialog
+        open={newOpen}
+        onOpenChange={(v) => {
+          if (!v) setPeopleQuery("");
+          setNewOpen(v);
+        }}
+      >
+        <DialogContent
+          hideClose
+          className="w-full max-w-md gap-0 border border-border bg-card p-0 rounded-t-2xl sm:rounded-2xl"
         >
-          <div
-            className="w-full max-w-md rounded-t-2xl bg-card p-5 shadow-xl sm:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Start a conversation</h2>
-              <button
-                onClick={() => setNewOpen(false)}
-                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+          <DialogHeader className="px-5 pb-3 pt-5 text-left">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              Start a conversation
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-5 pb-5">
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -1005,8 +1004,8 @@ function MessagesPage() {
               )}
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {membersOpen && (
         <div
