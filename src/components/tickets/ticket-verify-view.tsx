@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/utils";
 import { Img } from "@/components/shared/smart-img";
 import { CheckCircle2, XCircle, Printer, MapPin, Check, Info } from "lucide-react";
+import pbLogoMark from "@/assets/pb-logo.png";
 
 type Verified = {
   ticket_id: string;
@@ -66,7 +67,8 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
     return (
       <div className="grid min-h-dvh place-items-center bg-neutral-100 px-4">
         <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-xl">
-          <div className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#d4580a]">Planet Baltimore</div>
+          <img src={pbLogoMark} alt="Planet Baltimore" className="mx-auto h-12 w-auto" />
+          <div className="mt-2 text-[11px] font-bold uppercase tracking-[0.25em] text-[#d4580a]">Planet Baltimore</div>
           <h1 className="mt-3 text-xl font-bold text-neutral-900">Ticket not valid</h1>
           <p className="mt-2 text-sm text-neutral-500">
             This ticket code was not recognized. Ask the guest to open the ticket in their Planet Baltimore account.
@@ -84,7 +86,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&ecc=M&format=png&data=${encodeURIComponent(selfUrl)}`;
 
   return (
-    <div className="min-h-dvh bg-neutral-100 px-4 py-8 print:bg-white print:py-0">
+    <div className="min-h-dvh bg-neutral-100 px-3 py-5 sm:px-4 sm:py-8 print:bg-white print:py-0">
       <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl print:shadow-none">
         {(() => {
           const canCheckIn = valid && !t.checked_in_at;
@@ -125,12 +127,15 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
           );
         })()}
 
-        <div className="px-6 pt-6">
-          <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#d4580a]">Planet Baltimore</div>
-          <h1 className="mt-2 text-2xl font-bold leading-tight text-neutral-900">{t.event_title ?? "Event"}</h1>
+        <div className="px-5 pt-5 sm:px-6 sm:pt-6">
+          <div className="flex items-center gap-2">
+            <img src={pbLogoMark} alt="Planet Baltimore" className="-my-3 h-14 w-auto shrink-0 sm:h-16" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#d4580a]">Planet Baltimore</span>
+          </div>
+          <h1 className="mt-2 text-xl font-bold leading-tight text-neutral-900 sm:text-2xl">{t.event_title ?? "Event"}</h1>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 px-6 py-5 text-sm">
+        <div className="grid grid-cols-2 gap-4 px-5 py-5 text-sm sm:px-6">
           <div>
             <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-neutral-400">Date</div>
             <div className="font-semibold text-neutral-900">
@@ -168,12 +173,12 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
         <div className="relative">
           <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-neutral-100 print:hidden" />
           <div className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-neutral-100 print:hidden" />
-          <div className="mx-6 border-t-2 border-dashed border-neutral-200" />
+          <div className="mx-5 border-t-2 border-dashed border-neutral-200 sm:mx-6" />
         </div>
 
-        <div className="flex flex-col items-center px-6 py-6">
+        <div className="flex flex-col items-center px-5 py-6 sm:px-6">
           <div className="relative">
-            <Img src={qr} alt="Ticket QR code" width={220} height={220} />
+            <Img src={qr} alt="Ticket QR code" width={220} height={220} className="h-[min(62vw,220px)] w-[min(62vw,220px)]" />
             {cancelled && (
               <div className="absolute inset-0 grid place-items-center bg-white/70">
                 <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
@@ -185,7 +190,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
             )}
           </div>
           <div className="mt-3 break-all text-center font-mono text-xs uppercase tracking-widest text-neutral-500">
-            #{t.ticket_id}
+            #{t.ticket_id.slice(0, 13).toUpperCase()}
           </div>
           <div className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">
             {cancelled ? "Not valid for entry" : "Present this at the door"}

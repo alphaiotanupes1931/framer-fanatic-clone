@@ -11,6 +11,7 @@ import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
 import { TicketVerifyView } from "@/components/tickets/ticket-verify-view";
 import { emailMyCancellation } from "@/lib/tickets.functions";
+import pbLogoWhite from "@/assets/pb-logo-white.png";
 
 export const Route = createFileRoute("/tickets/$ticketId")({
   component: TicketDetailPage,
@@ -169,13 +170,16 @@ function TicketDetailPage() {
           )}
 
           {/* Header */}
-          <div className="px-6 pt-6">
-            <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-orange-300">Planet Baltimore</div>
-            <h1 className="mt-2 text-2xl font-bold leading-tight">{t.events?.title ?? "Event"}</h1>
+          <div className="px-5 pt-5 sm:px-6 sm:pt-6">
+            <div className="flex items-center gap-2">
+              <img src={pbLogoWhite} alt="Planet Baltimore" className="-my-3 h-14 w-auto shrink-0 sm:h-16" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-orange-300">Planet Baltimore</span>
+            </div>
+            <h1 className="mt-2 text-xl font-bold leading-tight sm:text-2xl">{t.events?.title ?? "Event"}</h1>
           </div>
 
           {/* Details */}
-          <div className="grid grid-cols-2 gap-4 px-6 pb-6 pt-5 text-sm">
+          <div className="grid grid-cols-2 gap-4 px-5 pb-6 pt-5 text-sm sm:px-6">
             <div>
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">Date</div>
               <div className="font-semibold">{when?.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</div>
@@ -202,13 +206,13 @@ function TicketDetailPage() {
           <div className="relative">
             <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
             <div className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white" />
-            <div className="mx-6 border-t-2 border-dashed border-white/20" />
+            <div className="mx-5 border-t-2 border-dashed border-white/20 sm:mx-6" />
           </div>
 
           {/* QR */}
-          <div className="flex flex-col items-center px-6 py-6">
-            <div className="relative rounded-2xl bg-white p-4">
-              <Img src={qr} alt="Ticket QR code" width={220} height={220} />
+          <div className="flex flex-col items-center px-5 py-6 sm:px-6">
+            <div className="relative rounded-2xl bg-white p-3 sm:p-4">
+              <Img src={qr} alt="Ticket QR code" width={220} height={220} className="h-[min(60vw,220px)] w-[min(60vw,220px)]" />
               {t.status === "cancelled" && (
                 <div className="absolute inset-0 grid place-items-center rounded-2xl bg-white/70">
                   <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
@@ -219,14 +223,14 @@ function TicketDetailPage() {
                 </div>
               )}
             </div>
-            <div className="mt-3 font-mono text-xs uppercase tracking-widest text-white/70">#{t.id.slice(0, 12)}</div>
+            <div className="mt-3 break-all text-center font-mono text-[11px] uppercase tracking-widest text-white/70 sm:text-xs">#{t.id.slice(0, 12)}</div>
             <div className="mt-1 text-[10px] uppercase tracking-wider text-white/40">
               {t.status === "cancelled" ? "This ticket is no longer valid" : "Show this QR code at the door"}
             </div>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-white/10 px-6 py-4 text-xs">
+          <div className="flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-xs sm:px-6">
             <div>
               <div className="text-white/40">Paid</div>
               <div className="font-semibold">${(t.buyer_total_cents / 100).toFixed(2)}</div>
@@ -237,7 +241,7 @@ function TicketDetailPage() {
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <button onClick={() => setShareOpen(true)} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Send className="h-4 w-4 -rotate-45" /> Invite a friend</button>
           <button onClick={shareExternal} className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><ShareIcon className="h-4 w-4" /> Share externally</button>
           <a href={ticketUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Printable ticket</a>
