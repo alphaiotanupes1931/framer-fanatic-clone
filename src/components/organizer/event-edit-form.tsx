@@ -274,7 +274,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
 
         <div className="h-12" />
       </div>
-    </AppLayout>
+    </div>
   );
 }
 
