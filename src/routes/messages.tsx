@@ -716,6 +716,33 @@ function MessagesPage() {
                       </AvatarFallback>
                     </Avatar>
                   </Link>
+                ) : active.is_group ? (
+                  <button
+                    type="button"
+                    onClick={() => setMembersOpen(true)}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-muted"
+                  >
+                    <div className="flex -space-x-2">
+                      {(groupMembers.length ? groupMembers.slice(0, 3) : [null]).map((p, i) => (
+                        <Avatar key={p?.id || i} className="h-9 w-9 border-2 border-card">
+                          {p?.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {p ? initials(p) : <Users className="h-4 w-4" />}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold text-foreground">
+                        {active.title || "Group chat"}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {groupMembers.length
+                          ? `${groupMembers.length} members · tap to see everyone`
+                          : "Group chat"}
+                      </div>
+                    </div>
+                  </button>
                 ) : (
                   <Avatar className="h-9 w-9">
                     {!active.is_group && active.other?.avatar_url && (
@@ -726,6 +753,7 @@ function MessagesPage() {
                     </AvatarFallback>
                   </Avatar>
                 )}
+                {!active.is_group && (
                 <div className="min-w-0">
                   {!active.is_group && active.other?.username ? (
                     <Link
@@ -737,12 +765,10 @@ function MessagesPage() {
                     </Link>
                   ) : (
                     <div className="truncate font-semibold text-foreground">
-                      {active.is_group ? (active.title || "Group chat") : "Unknown"}
+                      Unknown
                     </div>
                   )}
-                  {active.is_group ? (
-                    <div className="truncate text-xs text-muted-foreground">Group chat</div>
-                  ) : active.other?.username ? (
+                  {active.other?.username ? (
                     <Link
                       to="/u/$username"
                       params={{ username: active.other.username }}
@@ -752,6 +778,7 @@ function MessagesPage() {
                     </Link>
                   ) : null}
                 </div>
+                )}
                 <button
                   type="button"
                   onClick={() => setMsgSearchOpen((v) => !v)}
