@@ -1381,11 +1381,20 @@ function MyTicketsTab() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"upcoming" | "past">("upcoming");
+  const reconcile = useServerFn(reconcileMyTickets);
   useEffect(() => {
     (async () => {
       const { data: sess } = await supabase.auth.getSession();
       const uid = sess.session?.user.id;
       if (!uid) { setLoading(false); return; }
+      // Confirm any purchase Stripe already collected but the webhook missed,
+      // which also triggers the receipt email.
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const sessionId = params.get("session_id") ?? undefined;
+        const res = await reconcile({ data: sessionId ? { sessionId } : {} });
+        if (res?.confirmed) toast.success("Purchase confirmed. Your receipt is on the way by email.");
+      } catch { /* reconciliation is best-effort */ }
       const { data } = await supabase
         .from("tickets")
         .select("id, status, buyer_total_cents, event_id, events(title, starts_at, location, venue_name)")
