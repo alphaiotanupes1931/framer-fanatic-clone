@@ -1925,6 +1925,8 @@ export type Database = {
           neighborhood: string | null
           owner_id: string
           phone: string | null
+          pinned: boolean
+          pinned_at: string | null
           rules: string | null
           slug: string
           subtype: string | null
@@ -1951,6 +1953,8 @@ export type Database = {
           neighborhood?: string | null
           owner_id: string
           phone?: string | null
+          pinned?: boolean
+          pinned_at?: string | null
           rules?: string | null
           slug: string
           subtype?: string | null
@@ -1977,6 +1981,8 @@ export type Database = {
           neighborhood?: string | null
           owner_id?: string
           phone?: string | null
+          pinned?: boolean
+          pinned_at?: string | null
           rules?: string | null
           slug?: string
           subtype?: string | null
@@ -3158,6 +3164,10 @@ export type Database = {
       }
       admin_set_founder: {
         Args: { _is_founder: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_set_org_pinned: {
+        Args: { _org_id: string; _pinned: boolean }
         Returns: undefined
       }
       admin_set_showcase_hidden: {
