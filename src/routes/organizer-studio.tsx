@@ -7,7 +7,7 @@ import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
   Zap, Crown, Star, Tag, MapPin, PartyPopper, AlertTriangle, GraduationCap,
-  ChevronUp, ChevronDown, Upload, Eye, X,
+  ChevronUp, ChevronDown, Upload, Eye, X, Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EventEditForm } from "@/components/organizer/event-edit-form";
