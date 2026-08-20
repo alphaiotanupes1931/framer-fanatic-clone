@@ -307,6 +307,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
