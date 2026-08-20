@@ -6,7 +6,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, MessageSquare, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { MentionText } from "@/components/shared/mention-text";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
@@ -102,6 +102,7 @@ function formatWhen(iso: string) {
 
 function MessagesPage() {
   const me = useCurrentProfile();
+  const navigate = useNavigate();
   const [convs, setConvs] = useState<Conv[]>([]);
   const [active, setActive] = useState<Conv | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -570,9 +571,30 @@ function MessagesPage() {
                   )}
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-semibold text-foreground">
-                        {c.is_group ? (c.title || "Group chat") : (c.other?.display_name || c.other?.username || "Unknown")}
-                      </span>
+                      {!c.is_group && c.other?.username ? (
+                        <span
+                          role="link"
+                          tabIndex={0}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            navigate({ to: "/u/$username", params: { username: c.other!.username! } });
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.stopPropagation();
+                              navigate({ to: "/u/$username", params: { username: c.other!.username! } });
+                            }
+                          }}
+                          className="truncate text-sm font-semibold text-foreground hover:underline"
+                        >
+                          {c.other?.display_name || c.other?.username}
+                        </span>
+                      ) : (
+                        <span className="truncate text-sm font-semibold text-foreground">
+                          {c.is_group ? (c.title || "Group chat") : "Unknown"}
+                        </span>
+                      )}
                       <span className="shrink-0 text-[11px] text-muted-foreground">
                         {formatWhen(c.last_message_at)}
                       </span>
@@ -677,18 +699,30 @@ function MessagesPage() {
                   </Avatar>
                 )}
                 <div className="min-w-0">
-                  <div className="truncate font-semibold text-foreground">
-                    {active.is_group
-                      ? (active.title || "Group chat")
-                      : (active.other?.display_name || active.other?.username)}
-                  </div>
-                  {active.is_group ? (
-                    <div className="truncate text-xs text-muted-foreground">Group chat</div>
-                  ) : active.other?.username && (
-                    <div className="truncate text-xs text-muted-foreground">
-                      @{active.other.username}
+                  {!active.is_group && active.other?.username ? (
+                    <Link
+                      to="/u/$username"
+                      params={{ username: active.other.username }}
+                      className="block truncate font-semibold text-foreground hover:underline"
+                    >
+                      {active.other?.display_name || active.other?.username}
+                    </Link>
+                  ) : (
+                    <div className="truncate font-semibold text-foreground">
+                      {active.is_group ? (active.title || "Group chat") : "Unknown"}
                     </div>
                   )}
+                  {active.is_group ? (
+                    <div className="truncate text-xs text-muted-foreground">Group chat</div>
+                  ) : active.other?.username ? (
+                    <Link
+                      to="/u/$username"
+                      params={{ username: active.other.username }}
+                      className="block truncate text-xs text-muted-foreground hover:underline"
+                    >
+                      @{active.other.username}
+                    </Link>
+                  ) : null}
                 </div>
                 <button
                   type="button"
