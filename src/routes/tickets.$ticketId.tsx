@@ -10,6 +10,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
 import { TicketVerifyView } from "@/components/tickets/ticket-verify-view";
+import { emailMyCancellation } from "@/lib/tickets.functions";
 
 export const Route = createFileRoute("/tickets/$ticketId")({
   component: TicketDetailPage,
@@ -93,6 +94,7 @@ function TicketDetailPage() {
     const { error } = await supabase.rpc("cancel_my_rsvp", { _ticket_id: ticketId });
     setCancelling(false);
     if (error) { toast.error(error.message || "Could not cancel this RSVP"); return; }
+    void emailMyCancellation({ data: { ticketId } }).catch((err) => console.error("cancellation email failed", err));
     toast.success("RSVP cancelled");
     navigate({ to: "/profile" });
   };
@@ -205,11 +207,22 @@ function TicketDetailPage() {
 
           {/* QR */}
           <div className="flex flex-col items-center px-6 py-6">
-            <div className="rounded-2xl bg-white p-4">
+            <div className="relative rounded-2xl bg-white p-4">
               <Img src={qr} alt="Ticket QR code" width={220} height={220} />
+              {t.status === "cancelled" && (
+                <div className="absolute inset-0 grid place-items-center rounded-2xl bg-white/70">
+                  <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
+                    <line x1="8" y1="8" x2="92" y2="92" stroke="currentColor" strokeWidth="6" />
+                    <line x1="92" y1="8" x2="8" y2="92" stroke="currentColor" strokeWidth="6" />
+                  </svg>
+                  <span className="relative rounded-full bg-red-600 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white">Cancelled</span>
+                </div>
+              )}
             </div>
             <div className="mt-3 font-mono text-xs uppercase tracking-widest text-white/70">#{t.id.slice(0, 12)}</div>
-            <div className="mt-1 text-[10px] uppercase tracking-wider text-white/40">Show this QR code at the door</div>
+            <div className="mt-1 text-[10px] uppercase tracking-wider text-white/40">
+              {t.status === "cancelled" ? "This ticket is no longer valid" : "Show this QR code at the door"}
+            </div>
           </div>
 
           {/* Footer */}
@@ -218,8 +231,8 @@ function TicketDetailPage() {
               <div className="text-white/40">Paid</div>
               <div className="font-semibold">${(t.buyer_total_cents / 100).toFixed(2)}</div>
             </div>
-            <div className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${t.status === "paid" ? "bg-emerald-500/20 text-emerald-300" : "bg-white/10 text-white/60"}`}>
-              {t.status === "paid" ? "Confirmed" : t.status}
+            <div className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${t.status === "cancelled" ? "bg-red-500/20 text-red-300" : t.status === "paid" ? "bg-emerald-500/20 text-emerald-300" : "bg-white/10 text-white/60"}`}>
+              {t.status === "cancelled" ? "Cancelled" : t.status === "paid" ? "Confirmed" : t.status}
             </div>
           </div>
         </div>
@@ -239,7 +252,7 @@ function TicketDetailPage() {
           </a>
         )}
 
-        {t.buyer_total_cents === 0 && when && when.getTime() >= Date.now() && (
+        {t.buyer_total_cents === 0 && t.status !== "cancelled" && when && when.getTime() >= Date.now() && (
           <button
             type="button"
             onClick={cancelRsvp}

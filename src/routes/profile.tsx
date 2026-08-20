@@ -1,4 +1,5 @@
 import { BANNER_SPEC } from "@/lib/media-guidelines";
+import { emailMyCancellation } from "@/lib/tickets.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -1449,6 +1450,7 @@ function TicketStub({ t, seat, onCancelled }: { t: { id: string; buyer_total_cen
     const { error } = await supabase.rpc("cancel_my_rsvp", { _ticket_id: t.id });
     setCancelling(false);
     if (error) { toast.error(error.message || "Could not cancel this RSVP"); return; }
+    void emailMyCancellation({ data: { ticketId: t.id } }).catch((err) => console.error("cancellation email failed", err));
     toast.success("RSVP cancelled");
     onCancelled?.();
   };

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/utils";
 import { Img } from "@/components/shared/smart-img";
-import { CheckCircle2, Printer, MapPin } from "lucide-react";
+import { CheckCircle2, XCircle, Printer, MapPin } from "lucide-react";
 
 type Verified = {
   ticket_id: string;
@@ -56,18 +56,20 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   }
 
   const when = t.starts_at ? new Date(t.starts_at) : null;
-  const valid = t.status === "paid" || t.status === "rsvp" || t.status === "free" || t.status === "confirmed";
+  const cancelled = t.status === "cancelled";
+  const valid = !cancelled && (t.status === "paid" || t.status === "rsvp" || t.status === "free" || t.status === "confirmed");
   const selfUrl = siteUrl(`/tickets/${t.ticket_id}?verify=1`);
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&ecc=M&format=png&data=${encodeURIComponent(selfUrl)}`;
 
   return (
     <div className="min-h-dvh bg-neutral-100 px-4 py-8 print:bg-white print:py-0">
       <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl print:shadow-none">
-        <div className={`px-6 py-4 text-center text-white ${valid ? "bg-emerald-600" : "bg-neutral-700"}`}>
+        <div className={`px-6 py-4 text-center text-white ${cancelled ? "bg-red-600" : valid ? "bg-emerald-600" : "bg-neutral-700"}`}>
           <div className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider">
-            <CheckCircle2 className="h-4 w-4" />
-            {t.checked_in_at ? "Already checked in" : valid ? "Valid ticket" : t.status}
+            {cancelled ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+            {cancelled ? "Cancelled ticket" : t.checked_in_at ? "Already checked in" : valid ? "Valid ticket" : t.status}
           </div>
+          {cancelled && <div className="mt-1 text-[11px] text-white/80">This RSVP was cancelled. Do not admit.</div>}
           {t.checked_in_at && (
             <div className="mt-1 text-[11px] text-white/80">
               Scanned {new Date(t.checked_in_at).toLocaleString()}
@@ -122,11 +124,24 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
         </div>
 
         <div className="flex flex-col items-center px-6 py-6">
-          <Img src={qr} alt="Ticket QR code" width={220} height={220} />
+          <div className="relative">
+            <Img src={qr} alt="Ticket QR code" width={220} height={220} />
+            {cancelled && (
+              <div className="absolute inset-0 grid place-items-center bg-white/70">
+                <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
+                  <line x1="8" y1="8" x2="92" y2="92" stroke="currentColor" strokeWidth="6" />
+                  <line x1="92" y1="8" x2="8" y2="92" stroke="currentColor" strokeWidth="6" />
+                </svg>
+                <span className="relative rounded-full bg-red-600 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white">Cancelled</span>
+              </div>
+            )}
+          </div>
           <div className="mt-3 break-all text-center font-mono text-xs uppercase tracking-widest text-neutral-500">
             #{t.ticket_id}
           </div>
-          <div className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">Present this at the door</div>
+          <div className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">
+            {cancelled ? "Not valid for entry" : "Present this at the door"}
+          </div>
         </div>
       </div>
 
