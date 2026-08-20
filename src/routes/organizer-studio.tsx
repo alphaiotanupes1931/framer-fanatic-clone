@@ -957,8 +957,8 @@ function PayoutsTab({ paid, buyers, revenue, net }: { paid: Ticket[]; buyers: Re
   const orders = paid.length;
   // Stripe: 2.9% + 30¢ per successful charge
   const stripeFees = Math.round(revenue * 0.029) + orders * 30;
-  // Planet Baltimore platform fee: $0.69 per order
-  const platformFees = orders * 69;
+  // Planet Baltimore platform fee: flat $0.07 per order (not per ticket)
+  const platformFees = orders * 7;
   const totalFees = stripeFees + platformFees;
   const takeHome = Math.max(0, revenue - totalFees);
   void net;
@@ -971,7 +971,7 @@ function PayoutsTab({ paid, buyers, revenue, net }: { paid: Ticket[]; buyers: Re
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-neutral-600">Platform fee</div>
-              <div className="text-xs text-neutral-400">2.9% + 99 cent /order</div>
+              <div className="text-xs text-neutral-400">2.9% + 30 cents card processing, plus a flat 7 cent platform fee per order</div>
             </div>
             <span className="font-semibold text-red-500">-{fmt(totalFees)} {revenue > 0 && <span className="text-xs font-normal">({(totalFees / revenue * 100).toFixed(1)}%)</span>}</span>
           </div>
