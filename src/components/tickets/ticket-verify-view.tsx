@@ -29,6 +29,8 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   const [glow, setGlow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [successPulse, setSuccessPulse] = useState(false);
+  const [headerPulse, setHeaderPulse] = useState(false);
 
   async function doCheckIn() {
     if (busy) return;
@@ -44,9 +46,24 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
       if (row?.checked_in_at) setT((p) => (p ? { ...p, checked_in_at: row.checked_in_at } : p));
       return;
     }
+    setSuccessPulse(true);
     setT((p) => (p ? { ...p, checked_in_at: row.checked_in_at } : p));
-    setTimeout(() => setStep(null), 900);
+    setTimeout(() => {
+      setStep(null);
+      setGlow(false);
+      setSuccessPulse(false);
+      setHeaderPulse(true);
+      setTimeout(() => setHeaderPulse(false), 900);
+    }, 750);
   }
+
+  useEffect(() => {
+    if (t?.checked_in_at) {
+      setHeaderPulse(true);
+      const id = setTimeout(() => setHeaderPulse(false), 900);
+      return () => clearTimeout(id);
+    }
+  }, [t?.checked_in_at]);
 
   useEffect(() => {
     supabase.rpc("verify_ticket", { _ticket_id: ticketId }).then(({ data }) => {
