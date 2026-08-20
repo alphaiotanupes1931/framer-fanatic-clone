@@ -230,6 +230,17 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                     : "Your ticket is confirmed. Tap to view your digital ticket.",
                   metadata: { event_id: first.event_id, ticket_id: first.id, quantity: seats },
                 });
+                try {
+                  const { sendTicketConfirmation } = await import("@/lib/ticket-email.server");
+                  await sendTicketConfirmation({
+                    buyerId: first.buyer_id,
+                    eventId: first.event_id,
+                    ticketIds: rowsPaid.map((r) => r.id),
+                    idempotencyKey: `ticket-confirm-${session.id}`,
+                  });
+                } catch (err) {
+                  console.error("ticket confirmation email failed", err);
+                }
               }
               if (first.artist_id && first.artist_id !== first.buyer_id) {
                 await supabaseAdmin.from("notifications").insert({
