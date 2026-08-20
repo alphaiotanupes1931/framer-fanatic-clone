@@ -116,6 +116,8 @@ function MessagesPage() {
   const [broadcastText, setBroadcastText] = useState("");
   const [msgSearch, setMsgSearch] = useState("");
   const [msgSearchOpen, setMsgSearchOpen] = useState(false);
+  const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
+  const [membersOpen, setMembersOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const decorate = useCallback(
@@ -292,6 +294,32 @@ function MessagesPage() {
       setMsgSearchOpen(false);
     }
   }, [active, loadMsgs, markRead]);
+
+  // Load group members (avatars + names) for group chats
+  useEffect(() => {
+    let cancelled = false;
+    setMembersOpen(false);
+    if (!active?.is_group) {
+      setGroupMembers([]);
+      return;
+    }
+    (async () => {
+      const { data: rows } = await supabase
+        .from("conversation_members")
+        .select("user_id")
+        .eq("conversation_id", active.id);
+      const ids = (rows || []).map((r) => r.user_id as string);
+      if (!ids.length) { if (!cancelled) setGroupMembers([]); return; }
+      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+      if (!cancelled) setGroupMembers((profs || []) as Profile[]);
+    })();
+    return () => { cancelled = true; };
+  }, [active?.id, active?.is_group]);
+
+  const memberById = useMemo(
+    () => new Map(groupMembers.map((p) => [p.id, p])),
+    [groupMembers],
+  );
 
   // Auto-scroll to bottom on new messages. A single smooth scroll can stop
   // short when images/attachments finish loading and grow the thread, so pin
@@ -688,6 +716,33 @@ function MessagesPage() {
                       </AvatarFallback>
                     </Avatar>
                   </Link>
+                ) : active.is_group ? (
+                  <button
+                    type="button"
+                    onClick={() => setMembersOpen(true)}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-muted"
+                  >
+                    <div className="flex -space-x-2">
+                      {(groupMembers.length ? groupMembers.slice(0, 3) : [null]).map((p, i) => (
+                        <Avatar key={p?.id || i} className="h-9 w-9 border-2 border-card">
+                          {p?.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {p ? initials(p) : <Users className="h-4 w-4" />}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold text-foreground">
+                        {active.title || "Group chat"}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {groupMembers.length
+                          ? `${groupMembers.length} members · tap to see everyone`
+                          : "Group chat"}
+                      </div>
+                    </div>
+                  </button>
                 ) : (
                   <Avatar className="h-9 w-9">
                     {!active.is_group && active.other?.avatar_url && (
@@ -698,6 +753,7 @@ function MessagesPage() {
                     </AvatarFallback>
                   </Avatar>
                 )}
+                {!active.is_group && (
                 <div className="min-w-0">
                   {!active.is_group && active.other?.username ? (
                     <Link
@@ -709,12 +765,10 @@ function MessagesPage() {
                     </Link>
                   ) : (
                     <div className="truncate font-semibold text-foreground">
-                      {active.is_group ? (active.title || "Group chat") : "Unknown"}
+                      Unknown
                     </div>
                   )}
-                  {active.is_group ? (
-                    <div className="truncate text-xs text-muted-foreground">Group chat</div>
-                  ) : active.other?.username ? (
+                  {active.other?.username ? (
                     <Link
                       to="/u/$username"
                       params={{ username: active.other.username }}
@@ -724,6 +778,7 @@ function MessagesPage() {
                     </Link>
                   ) : null}
                 </div>
+                )}
                 <button
                   type="button"
                   onClick={() => setMsgSearchOpen((v) => !v)}
@@ -755,6 +810,9 @@ function MessagesPage() {
                   const next = arr[i + 1];
                   const showAvatar = !mine && (!next || next.sender_id !== m.sender_id);
                   const showTime = !next || next.sender_id !== m.sender_id;
+                  const sender = active.is_group ? memberById.get(m.sender_id) : active.other;
+                  const showSenderName =
+                    !mine && active.is_group && (!prev || prev.sender_id !== m.sender_id);
                   return (
                     <div
                       key={m.id}
@@ -762,24 +820,24 @@ function MessagesPage() {
                     >
                       {!mine && (
                         <div className="w-7 shrink-0">
-                          {showAvatar && !active.is_group && active.other?.username ? (
-                            <Link to="/u/$username" params={{ username: active.other.username }}>
+                          {showAvatar && sender?.username ? (
+                            <Link to="/u/$username" params={{ username: sender.username }}>
                               <Avatar className="h-7 w-7">
-                                {active.other?.avatar_url && (
-                                  <SmartAvatarImage src={active.other.avatar_url} alt="" />
+                                {sender.avatar_url && (
+                                  <SmartAvatarImage src={sender.avatar_url} alt="" />
                                 )}
                                 <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
-                                  {initials(active.other)}
+                                  {initials(sender)}
                                 </AvatarFallback>
                               </Avatar>
                             </Link>
                           ) : showAvatar && (
                             <Avatar className="h-7 w-7">
-                              {active.other?.avatar_url && (
-                                <SmartAvatarImage src={active.other.avatar_url} alt="" />
+                              {sender?.avatar_url && (
+                                <SmartAvatarImage src={sender.avatar_url} alt="" />
                               )}
                               <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
-                                {initials(active.other)}
+                                {initials(sender)}
                               </AvatarFallback>
                             </Avatar>
                           )}
@@ -803,6 +861,21 @@ function MessagesPage() {
                               mine ? "bg-muted/70" : "border border-border bg-transparent"
                             }`}
                           >
+                            {showSenderName && (
+                              sender?.username ? (
+                                <Link
+                                  to="/u/$username"
+                                  params={{ username: sender.username }}
+                                  className="mb-1 block truncate text-xs font-semibold text-primary hover:underline"
+                                >
+                                  {sender.display_name || sender.username}
+                                </Link>
+                              ) : (
+                                <div className="mb-1 truncate text-xs font-semibold text-muted-foreground">
+                                  Member
+                                </div>
+                              )
+                            )}
                             {shared ? (
                               <div className="space-y-2">
                                 <SharePreviewCard preview={shared.preview} mine={mine} />
@@ -923,6 +996,73 @@ function MessagesPage() {
                     </div>
                   </button>
                 ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {membersOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+          onClick={() => setMembersOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-2xl bg-card p-5 shadow-xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div className="min-w-0">
+                <h2 className="truncate text-lg font-bold text-foreground">
+                  {active?.title || "Group chat"}
+                </h2>
+                <p className="text-xs text-muted-foreground">{groupMembers.length} members</p>
+              </div>
+              <button
+                onClick={() => setMembersOpen(false)}
+                className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-[60vh] space-y-1 overflow-y-auto">
+              {groupMembers.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">No members found</p>
+              ) : (
+                groupMembers.map((p) =>
+                  p.username ? (
+                    <Link
+                      key={p.id}
+                      to="/u/$username"
+                      params={{ username: p.username }}
+                      onClick={() => setMembersOpen(false)}
+                      className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted"
+                    >
+                      <Avatar className="h-10 w-10">
+                        {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                        <AvatarFallback className="bg-primary/10 text-primary">{initials(p)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-foreground">
+                          {p.display_name || p.username}
+                          {p.id === me?.id && <span className="ml-1 text-xs text-muted-foreground">(You)</span>}
+                        </div>
+                        <div className="truncate text-xs text-muted-foreground">@{p.username}</div>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div key={p.id} className="flex items-center gap-3 rounded-lg p-2">
+                      <Avatar className="h-10 w-10">
+                        {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
+                        <AvatarFallback className="bg-primary/10 text-primary">{initials(p)}</AvatarFallback>
+                      </Avatar>
+                      <div className="truncate text-sm font-semibold text-foreground">
+                        {p.display_name || "Member"}
+                      </div>
+                    </div>
+                  ),
+                )
               )}
             </div>
           </div>
