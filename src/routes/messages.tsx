@@ -596,6 +596,8 @@ function MessagesPage() {
 
   const saveGroupName = async () => {
     if (!active?.is_group) return;
+    // fallthrough below
+    if (!active?.is_group) return;
     const next = renameValue.trim();
     if (!next) { toast.error("Give the group a name"); return; }
     setSavingName(true);
