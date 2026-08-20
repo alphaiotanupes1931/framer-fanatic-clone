@@ -845,6 +845,14 @@ function MessagesPage() {
                     onClick={() => setMembersOpen(true)}
                     className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-muted"
                   >
+                    {active.image_url ? (
+                      <Avatar className="h-10 w-10">
+                        <SmartAvatarImage src={active.image_url} alt="" />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          <Users className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
                     <div className="flex -space-x-2">
                       {(groupMembers.length ? groupMembers.slice(0, 3) : [null]).map((p, i) => (
                         <Avatar key={p?.id || i} className="h-9 w-9 border-2 border-card">
@@ -855,6 +863,7 @@ function MessagesPage() {
                         </Avatar>
                       ))}
                     </div>
+                    )}
                     <div className="min-w-0">
                       <div className="truncate font-semibold text-foreground">
                         {active.title || "Group chat"}
