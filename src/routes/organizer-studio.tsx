@@ -189,7 +189,7 @@ function OrganizerStudioPage() {
             )}
           </>
         ) : (
-          <EventDetail evt={selected} onBack={() => setSelected(null)} />
+          <EventDetail evt={selected} onBack={() => setSelected(null)} initialTab={focusEdit ? "details" : undefined} />
         )}
       </div>
     </AppLayout>
