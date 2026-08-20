@@ -5,6 +5,23 @@ import { Img } from "@/components/shared/smart-img";
 import { CheckCircle2, XCircle, Printer, MapPin, Check, Info } from "lucide-react";
 import pbLogoMark from "@/assets/pb-logo.png";
 
+const popKeyframes = `
+@keyframes check-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.45); }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1.25); }
+}
+@keyframes ring-burst {
+  0% { transform: scale(0.7); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes slide-up-fade {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+`;
+
 type Verified = {
   ticket_id: string;
   status: string;
@@ -29,6 +46,8 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   const [glow, setGlow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [successPulse, setSuccessPulse] = useState(false);
+  const [headerPulse, setHeaderPulse] = useState(false);
 
   async function doCheckIn() {
     if (busy) return;
@@ -44,9 +63,24 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
       if (row?.checked_in_at) setT((p) => (p ? { ...p, checked_in_at: row.checked_in_at } : p));
       return;
     }
+    setSuccessPulse(true);
     setT((p) => (p ? { ...p, checked_in_at: row.checked_in_at } : p));
-    setTimeout(() => setStep(null), 900);
+    setTimeout(() => {
+      setStep(null);
+      setGlow(false);
+      setSuccessPulse(false);
+      setHeaderPulse(true);
+      setTimeout(() => setHeaderPulse(false), 900);
+    }, 750);
   }
+
+  useEffect(() => {
+    if (t?.checked_in_at) {
+      setHeaderPulse(true);
+      const id = setTimeout(() => setHeaderPulse(false), 900);
+      return () => clearTimeout(id);
+    }
+  }, [t?.checked_in_at]);
 
   useEffect(() => {
     supabase.rpc("verify_ticket", { _ticket_id: ticketId }).then(({ data }) => {
@@ -86,7 +120,9 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&ecc=M&format=png&data=${encodeURIComponent(selfUrl)}`;
 
   return (
-    <div className="min-h-dvh bg-neutral-100 px-3 py-5 sm:px-4 sm:py-8 print:bg-white print:py-0">
+    <>
+      <style>{popKeyframes}</style>
+      <div className="min-h-dvh bg-neutral-100 px-3 py-5 sm:px-4 sm:py-8 print:bg-white print:py-0">
       <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl print:shadow-none">
         {(() => {
           const canCheckIn = valid && !t.checked_in_at;
@@ -106,15 +142,20 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
                       : "bg-neutral-700"
               }`}
             >
-              <div className="flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider">
+              <div
+                className={`flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider ${headerPulse ? "scale-105" : "scale-100"} transition-transform duration-300`}
+                style={headerPulse ? { animation: "slide-up-fade 0.45s ease-out" } : undefined}
+              >
                 {cancelled ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                {cancelled
-                  ? "Cancelled ticket"
-                  : t.checked_in_at
-                    ? "Checked in"
-                    : valid
-                      ? "Not checked in"
-                      : t.status}
+                <span className="inline-block">
+                  {cancelled
+                    ? "Cancelled ticket"
+                    : t.checked_in_at
+                      ? "Checked in"
+                      : valid
+                        ? "Not checked in"
+                        : t.status}
+                </span>
               </div>
               {cancelled && <div className="mt-1 text-[11px] text-white/80">This RSVP was cancelled. Do not admit.</div>}
               {canCheckIn && <div className="mt-1 text-[11px] text-white/70">Staff only, tap to check this guest in</div>}
@@ -245,19 +286,34 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
               <>
                 <h2 className="text-base font-bold text-neutral-900">Check in</h2>
                 <p className="mt-1 text-sm text-neutral-500">Tap the check mark to admit this guest.</p>
-                <button
-                  onClick={doCheckIn}
-                  disabled={busy || !!t.checked_in_at}
-                  className={`mx-auto mt-5 grid h-24 w-24 place-items-center rounded-full transition-all duration-500 ${
-                    glow
-                      ? "scale-105 bg-emerald-500 text-white shadow-[0_0_40px_rgba(16,185,129,0.75)]"
-                      : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
-                  }`}
+                <div className="relative mx-auto mt-5 flex h-24 w-24 items-center justify-center">
+                  {successPulse && (
+                    <div
+                      className="absolute inset-0 rounded-full border-2 border-emerald-400"
+                      style={{ animation: "ring-burst 0.65s ease-out forwards" }}
+                    />
+                  )}
+                  <button
+                    onClick={doCheckIn}
+                    disabled={busy || !!t.checked_in_at}
+                    className={`relative z-10 grid h-24 w-24 place-items-center rounded-full transition-all duration-500 ${
+                      glow
+                        ? "scale-105 bg-emerald-500 text-white shadow-[0_0_50px_rgba(16,185,129,0.85)]"
+                        : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
+                    }`}
+                  >
+                    <Check
+                      className="h-10 w-10"
+                      strokeWidth={3}
+                      style={successPulse ? { animation: "check-pop 0.55s ease-out forwards" } : undefined}
+                    />
+                  </button>
+                </div>
+                <div
+                  className="mt-4 text-sm font-semibold text-neutral-900"
+                  style={successPulse ? { animation: "slide-up-fade 0.4s ease-out" } : undefined}
                 >
-                  <Check className="h-10 w-10" strokeWidth={3} />
-                </button>
-                <div className="mt-4 text-sm font-semibold text-neutral-900">
-                  {t.checked_in_at ? "Checked in" : busy ? "Checking in..." : "Not checked in"}
+                  {t.checked_in_at ? "Checked in" : busy ? "Checking in…" : "Not checked in"}
                 </div>
                 {err && <div className="mt-2 text-xs text-red-600">{err}</div>}
                 <button
@@ -271,6 +327,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
