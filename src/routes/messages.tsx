@@ -1249,6 +1249,31 @@ function MessagesPage() {
           className="w-full max-w-md gap-0 border border-border bg-card p-0 rounded-t-2xl sm:rounded-2xl"
         >
           <DialogHeader className="px-5 pb-3 pt-5 text-left">
+            <label className="group relative mb-3 block aspect-[16/9] w-full cursor-pointer overflow-hidden rounded-xl border border-border bg-muted">
+              {active?.image_url ? (
+                <Img src={active.image_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex h-full w-full flex-col items-center justify-center gap-1 text-xs text-muted-foreground">
+                  <Camera className="h-6 w-6" />
+                  Add a group photo (1200 x 675 px)
+                </span>
+              )}
+              <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground shadow">
+                <Camera className="h-3.5 w-3.5" />
+                {uploadingCover ? "Uploading..." : active?.image_url ? "Change photo" : "Upload photo"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingCover}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) void uploadGroupCover(f);
+                }}
+              />
+            </label>
             <div className="min-w-0">
               {renaming ? (
                 <div className="flex items-center gap-2">
