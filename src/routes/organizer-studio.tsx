@@ -10,6 +10,7 @@ import {
   ChevronUp, ChevronDown, Upload, Eye, X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { EventEditForm } from "@/components/organizer/event-edit-form";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
@@ -194,7 +195,7 @@ function OrganizerStudioPage() {
 }
 
 function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
-  const [tab, setTab] = useState<"tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">("tickets");
+  const [tab, setTab] = useState<"details" | "tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">("tickets");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
   const [search, setSearch] = useState("");
@@ -243,6 +244,7 @@ function EventDetail({ evt, onBack }: { evt: MyEvent; onBack: () => void }) {
   const net = paid.reduce((s, t) => s + t.artist_net_cents, 0);
 
   const tabs = [
+    { id: "details", label: "Edit Details", icon: Pencil },
     { id: "tickets", label: "Tickets", icon: Ticket },
     { id: "attendees", label: "Attendees", icon: Users },
     { id: "checkin", label: "Check-In", icon: CheckSquare },
