@@ -94,8 +94,8 @@ export function sellerBlurb(
   return parts.join(" · ").slice(0, 1200);
 }
 
-// Planet Baltimore platform fee: flat 69¢ per paid ticket.
-export const PLATFORM_FEE_CENTS = 69;
+// Planet Baltimore platform fee: flat 7¢ per order (never multiplied by quantity).
+export const PLATFORM_FEE_CENTS = 7;
 
 // Stripe US standard pricing: 2.9% + 30¢ per successful card charge.
 export const STRIPE_PERCENT = 0.029;
@@ -104,11 +104,14 @@ export const STRIPE_FIXED_CENTS = 30;
 /**
  * Given the price the artist wants to NET (in cents), compute:
  *  - buyerTotal: what the buyer is charged (grossed up so artist still nets `artistNet` after fees)
- *  - platformFeeCents: flat 69¢ Planet Baltimore platform fee (routed via application_fee_amount)
+ *  - platformFeeCents: flat 7¢ Planet Baltimore platform fee (routed via application_fee_amount)
  *  - stripeFeeCents: estimated Stripe processing fee (2.9% + 30¢)
  *
  * Math:
  *  buyerTotal = (artistNet + platformFee + 0.30) / (1 - 0.029)
+ *
+ * Pass the FULL order net (unit price x quantity) so the flat platform fee is
+ * charged once per order rather than once per ticket.
  */
 export function priceBreakdown(artistNetCents: number) {
   const net = Math.max(0, Math.floor(artistNetCents));
