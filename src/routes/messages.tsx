@@ -596,8 +596,6 @@ function MessagesPage() {
 
   const saveGroupName = async () => {
     if (!active?.is_group) return;
-    // fallthrough below
-    if (!active?.is_group) return;
     const next = renameValue.trim();
     if (!next) { toast.error("Give the group a name"); return; }
     setSavingName(true);
@@ -612,6 +610,34 @@ function MessagesPage() {
       toast.error(e instanceof Error ? e.message : "Could not rename group");
     } finally {
       setSavingName(false);
+    }
+  };
+
+  // Group cover photos live in shared storage and on the conversation row, so
+  // every member sees the same picture rather than a device-local one.
+  const uploadGroupCover = async (file: File) => {
+    if (!active?.is_group || !me) return;
+    setUploadingCover(true);
+    try {
+      const img = await compressAvatar(file);
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${me.id}/group-${active.id}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, img, { upsert: true, contentType: img.type || "image/jpeg", cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
+      if (signErr || !signed) throw signErr || new Error("Could not sign URL");
+      const url = signed.signedUrl;
+      const { error } = await supabase.from("conversations").update({ image_url: url }).eq("id", active.id);
+      if (error) throw error;
+      setActive((c) => (c ? { ...c, image_url: url } : c));
+      setConvs((prev) => prev.map((c) => (c.id === active.id ? { ...c, image_url: url } : c)));
+      toast.success("Group photo updated");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not upload photo");
+    } finally {
+      setUploadingCover(false);
     }
   };
 
