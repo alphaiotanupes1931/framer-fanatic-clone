@@ -213,7 +213,8 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       }).map((li) => ({ ...li, quantity: qty })),
       payment_intent_data: {
         application_fee_amount: applicationFee,
-        transfer_data: { destination: artist.stripe_account_id },
+        on_behalf_of: artist.stripe_account_id,
+              transfer_data: { destination: artist.stripe_account_id },
       },
       metadata: {
         event_id: event.id,
@@ -356,6 +357,7 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
         ? {
             subscription_data: {
               application_fee_percent: feePercent,
+              on_behalf_of: owner.stripe_account_id,
               transfer_data: { destination: owner.stripe_account_id },
               metadata,
             },
@@ -363,6 +365,7 @@ export const createOrgDonationCheckout = createServerFn({ method: "POST" })
         : {
             payment_intent_data: {
               application_fee_amount: breakdown.platformFeeCents,
+              on_behalf_of: owner.stripe_account_id,
               transfer_data: { destination: owner.stripe_account_id },
             },
           }),
@@ -424,7 +427,8 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
       }),
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
-        transfer_data: { destination: owner.stripe_account_id },
+        on_behalf_of: owner.stripe_account_id,
+              transfer_data: { destination: owner.stripe_account_id },
       },
       metadata: {
         kind: "artwork",
@@ -498,7 +502,8 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       }),
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
-        transfer_data: { destination: owner.stripe_account_id },
+        on_behalf_of: owner.stripe_account_id,
+              transfer_data: { destination: owner.stripe_account_id },
       },
       metadata: {
         kind: "product",
@@ -634,7 +639,8 @@ export const createDuesCheckout = createServerFn({ method: "POST" })
       }),
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
-        transfer_data: { destination: owner.stripe_account_id },
+        on_behalf_of: owner.stripe_account_id,
+              transfer_data: { destination: owner.stripe_account_id },
       },
       metadata: {
         kind: "dues",
