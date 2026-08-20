@@ -6,7 +6,8 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
-import { Plus, MapPin, Search, Users, ShieldCheck, Building2 } from "lucide-react";
+import { Plus, MapPin, Search, Users, ShieldCheck, Building2, Pin, PinOff } from "lucide-react";
+import { toast } from "sonner";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { GROUP_SUBTYPES } from "@/lib/categories";
 import { Img } from "@/components/shared/smart-img";
@@ -26,6 +27,8 @@ type Org = {
   avatar_url: string | null; banner_url: string | null;
   member_count?: number | null;
   created_at?: string;
+  pinned?: boolean | null;
+  pinned_at?: string | null;
 };
 
 const CATEGORIES = ["All", ...GROUP_SUBTYPES] as const;
@@ -46,6 +49,9 @@ export function GroupsPage() {
     const rows = (data ?? []) as Org[];
     // Prioritize items that have images (avatar or banner) so cards with visuals show first.
     rows.sort((a, b) => {
+      const aPin = a.pinned ? 1 : 0;
+      const bPin = b.pinned ? 1 : 0;
+      if (aPin !== bPin) return bPin - aPin;
       const aHas = a.avatar_url || a.banner_url ? 1 : 0;
       const bHas = b.avatar_url || b.banner_url ? 1 : 0;
       return bHas - aHas;
@@ -55,9 +61,19 @@ export function GroupsPage() {
   const items = useMemo(() => data ?? [], [data]);
   const load = refetch;
 
+  async function togglePin(o: Org) {
+    const { error } = await supabase.rpc("admin_set_org_pinned", { _org_id: o.id, _pinned: !o.pinned });
+    if (error) {
+      toast.error("Could not update pin");
+      return;
+    }
+    toast.success(o.pinned ? "Unpinned" : "Pinned to the top");
+    void load();
+  }
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return items.filter((o) => {
+    const list = items.filter((o) => {
       if (cat !== "All" && (o.subtype ?? "").toLowerCase() !== cat.toLowerCase()) return false;
       if (!needle) return true;
       return (
@@ -66,6 +82,7 @@ export function GroupsPage() {
         (o.neighborhood ?? "").toLowerCase().includes(needle)
       );
     });
+    return [...list].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
   }, [items, q, cat]);
 
   return (
@@ -149,11 +166,21 @@ export function GroupsPage() {
         ) : (
           <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((o) => (
+              <div key={o.id} className="relative">
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); void togglePin(o); }}
+                  title={o.pinned ? "Unpin group" : "Pin to top for everyone"}
+                  className="absolute right-3 top-3 z-30 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-neutral-700 shadow ring-1 ring-neutral-200 hover:bg-white"
+                >
+                  {o.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                </button>
+              )}
               <Link
-                key={o.id}
                 to="/o/$slug"
                 params={{ slug: o.slug }}
-                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
+                className="group block overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
               >
                 <div className="relative h-32 w-full bg-gradient-to-br from-neutral-200 to-neutral-100 sm:h-40">
                   <div className="absolute inset-0 overflow-hidden">
@@ -171,6 +198,11 @@ export function GroupsPage() {
                 </div>
                 <div className="px-4 pb-4 pt-10 sm:pt-12">
                   <div className="flex min-w-0 items-center gap-1.5">
+                    {o.pinned && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#d4580a]/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#d4580a]">
+                        <Pin className="h-3 w-3" /> Pinned
+                      </span>
+                    )}
                     <div className="truncate text-[17px] font-bold text-neutral-900">{o.name}</div>
                     <ShieldCheck className="h-4 w-4 shrink-0 text-orange-500" />
                   </div>
@@ -198,6 +230,7 @@ export function GroupsPage() {
                   </div>
                 </div>
               </Link>
+              </div>
             ))}
           </div>
         )}
