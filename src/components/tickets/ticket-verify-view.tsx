@@ -115,7 +115,8 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
   }
 
   const when = t.starts_at ? new Date(t.starts_at) : null;
-  const cancelled = t.status === "cancelled";
+  const refunded = t.status === "refunded";
+  const cancelled = t.status === "cancelled" || refunded;
   const valid = !cancelled && (t.status === "paid" || t.status === "rsvp" || t.status === "free" || t.status === "confirmed");
   const selfUrl = siteUrl(`/tickets/${t.ticket_id}?verify=1`);
 
@@ -157,7 +158,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
                         : t.status}
                 </span>
               </div>
-              {cancelled && <div className="mt-1 text-[11px] text-white/80">This RSVP was cancelled. Do not admit.</div>}
+              {cancelled && <div className="mt-1 text-[11px] text-white/80">{refunded ? "This ticket was refunded. Do not admit." : "This RSVP was cancelled. Do not admit."}</div>}
               {canCheckIn && <div className="mt-1 text-[11px] text-white/70">Staff only, tap to check this guest in</div>}
               {t.checked_in_at && (
                 <div className="mt-1 text-[11px] text-white/80">

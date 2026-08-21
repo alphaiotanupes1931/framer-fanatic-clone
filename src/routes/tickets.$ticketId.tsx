@@ -234,7 +234,7 @@ function TicketDetailPage() {
           <div className="relative flex flex-col items-center px-5 py-6 sm:px-6">
             <div className="relative rounded-3xl bg-white p-3 shadow-[0_0_60px_-12px_rgba(255,255,255,0.25)] sm:p-4">
               <QrDisplay value={ticketUrl} />
-              {t.status === "cancelled" && (
+              {(t.status === "cancelled" || t.status === "refunded") && (
                 <div className="absolute inset-0 grid place-items-center rounded-2xl bg-white/70">
                   <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-red-600" aria-hidden>
                     <line x1="8" y1="8" x2="92" y2="92" stroke="currentColor" strokeWidth="6" />
@@ -246,7 +246,7 @@ function TicketDetailPage() {
             </div>
             <div className="mt-3 break-all text-center font-mono text-[11px] uppercase tracking-widest text-white/70 sm:text-xs">#{t.id.slice(0, 12)}</div>
             <div className="mt-1 text-[10px] uppercase tracking-wider text-white/40">
-              {t.status === "cancelled" ? "This ticket is no longer valid" : "Show this QR code at the door"}
+              {t.status === "cancelled" || t.status === "refunded" ? "This ticket is no longer valid" : "Show this QR code at the door"}
             </div>
           </div>
 
@@ -256,8 +256,8 @@ function TicketDetailPage() {
               <div className="text-white/40">Paid</div>
               <div className="font-semibold">${(t.buyer_total_cents / 100).toFixed(2)}</div>
             </div>
-            <div className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${t.status === "cancelled" ? "bg-red-500/20 text-red-300" : t.status === "paid" ? "bg-emerald-500/20 text-emerald-300" : "bg-white/10 text-white/60"}`}>
-              {t.status === "cancelled" ? "Cancelled" : t.status === "paid" ? "Confirmed" : t.status}
+            <div className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${t.status === "cancelled" || t.status === "refunded" ? "bg-red-500/20 text-red-300" : t.status === "paid" ? "bg-emerald-500/20 text-emerald-300" : "bg-white/10 text-white/60"}`}>
+              {t.status === "cancelled" ? "Cancelled" : t.status === "refunded" ? "Refunded" : t.status === "paid" ? "Confirmed" : t.status}
             </div>
           </div>
         </div>
@@ -286,7 +286,7 @@ function TicketDetailPage() {
           </a>
         )}
 
-        {t.buyer_total_cents === 0 && t.status !== "cancelled" && when && when.getTime() >= Date.now() && (
+        {t.buyer_total_cents === 0 && t.status !== "cancelled" && t.status !== "refunded" && when && when.getTime() >= Date.now() && (
           <button
             type="button"
             onClick={cancelRsvp}
