@@ -83,6 +83,7 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
+import { Route as ApiAdminCheckStripeWebhooksRouteImport } from './routes/api/admin/check-stripe-webhooks'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -460,6 +461,12 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminCheckStripeWebhooksRoute =
+  ApiAdminCheckStripeWebhooksRouteImport.update({
+    id: '/api/admin/check-stripe-webhooks',
+    path: '/api/admin/check-stripe-webhooks',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -561,6 +568,7 @@ export interface FileRoutesByFullPath {
   '/events/': typeof EventsIndexRoute
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
+  '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
@@ -642,6 +650,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsIndexRoute
   '/stories': typeof StoriesIndexRoute
   '/videos': typeof VideosIndexRoute
+  '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
@@ -724,6 +733,7 @@ export interface FileRoutesById {
   '/events/': typeof EventsIndexRoute
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
+  '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug_/donate': typeof OSlugDonateRoute
@@ -807,6 +817,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/stories/'
     | '/videos/'
+    | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
@@ -888,6 +899,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/stories'
     | '/videos'
+    | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
@@ -969,6 +981,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/stories/'
     | '/videos/'
+    | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
     | '/lovable/email/suppression'
     | '/o/$slug_/donate'
@@ -1050,6 +1063,7 @@ export interface RootRouteChildren {
   EventsIndexRoute: typeof EventsIndexRoute
   StoriesIndexRoute: typeof StoriesIndexRoute
   VideosIndexRoute: typeof VideosIndexRoute
+  ApiAdminCheckStripeWebhooksRoute: typeof ApiAdminCheckStripeWebhooksRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   OSlugDonateRoute: typeof OSlugDonateRoute
@@ -1580,6 +1594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/check-stripe-webhooks': {
+      id: '/api/admin/check-stripe-webhooks'
+      path: '/api/admin/check-stripe-webhooks'
+      fullPath: '/api/admin/check-stripe-webhooks'
+      preLoaderRoute: typeof ApiAdminCheckStripeWebhooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1701,6 +1722,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsIndexRoute: EventsIndexRoute,
   StoriesIndexRoute: StoriesIndexRoute,
   VideosIndexRoute: VideosIndexRoute,
+  ApiAdminCheckStripeWebhooksRoute: ApiAdminCheckStripeWebhooksRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   OSlugDonateRoute: OSlugDonateRoute,

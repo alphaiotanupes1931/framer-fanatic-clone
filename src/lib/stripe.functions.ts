@@ -789,10 +789,12 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
           // Same key the webhook uses, so a buyer never gets two receipts.
           idempotencyKey: `ticket-confirm-${sessionId}`,
         });
-      } catch (err) {
-        console.error("ticket confirmation email failed", err);
-      }
+    } catch (err) {
+      console.error("ticket confirmation email failed", err);
     }
+  }
 
-    return { confirmed };
-  });
+  return { confirmed };
+});
+
+
