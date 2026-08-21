@@ -14,7 +14,8 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         const { logStripeEvent, logStripeError } = await import("@/lib/stripe-log.server");
         try {
           if (!whSecret) throw new Error("STRIPE_WEBHOOK_SECRET not configured");
-          event = stripe.webhooks.constructEvent(body, sig, whSecret);
+          // Workers/edge runtime uses SubtleCrypto: signature verification must be async.
+          event = await stripe.webhooks.constructEventAsync(body, sig, whSecret);
         } catch (err) {
           console.error("Stripe webhook signature verification failed", err);
           await logStripeError("webhook", "signature.verification_failed", err, {
