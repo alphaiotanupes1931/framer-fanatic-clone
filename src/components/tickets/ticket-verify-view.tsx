@@ -150,7 +150,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
                 {cancelled ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
                 <span className="inline-block">
                   {cancelled
-                    ? "Cancelled ticket"
+                    ? (refunded ? "Refunded ticket" : "Cancelled ticket")
                     : t.checked_in_at
                       ? "Checked in"
                       : valid
