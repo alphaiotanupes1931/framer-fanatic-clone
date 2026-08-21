@@ -50,11 +50,13 @@ async function buildAndStoreTicketPdf(
   admin: any,
   eventId: string,
   input: import('@/lib/ticket-pdf.server').TicketPdfInput,
+  /** Stable key so every ticket in one order overwrites the same document. */
+  storageKey?: string,
 ): Promise<string> {
   try {
     const { buildTicketPdf } = await import('@/lib/ticket-pdf.server')
     const bytes = await buildTicketPdf(input)
-    const path = `${eventId}/${input.tickets[0]?.id ?? crypto.randomUUID()}.pdf`
+    const path = `${eventId}/${storageKey || input.tickets[0]?.id || crypto.randomUUID()}.pdf`
     const { error } = await admin.storage
       .from('ticket-pdfs')
       .upload(path, bytes, { contentType: 'application/pdf', upsert: true })
@@ -67,6 +69,57 @@ async function buildAndStoreTicketPdf(
     console.error('ticket pdf generation failed', err)
     return ''
   }
+}
+
+/**
+ * Expands a set of ticket ids to every ticket bought in the same order, so one
+ * PDF carries all seats even when the caller only knows about some rows (for
+ * example when the webhook and the client-side reconcile each update a subset).
+ * Orders are grouped by Stripe checkout session, falling back to the payment
+ * intent, then to the ids as given for free RSVPs.
+ */
+async function expandOrderTickets(
+  admin: any,
+  eventId: string,
+  ticketIds: string[],
+): Promise<{ ids: string[]; totalCents: number; storageKey: string }> {
+  const fallback = { ids: ticketIds, totalCents: 0, storageKey: ticketIds[0] ?? '' }
+  const { data: seed } = await admin
+    .from('tickets')
+    .select('id, buyer_id, buyer_total_cents, stripe_checkout_session_id, stripe_payment_intent_id, created_at')
+    .in('id', ticketIds)
+  const seedRows = (seed ?? []) as {
+    id: string
+    buyer_id: string | null
+    buyer_total_cents: number | null
+    stripe_checkout_session_id: string | null
+    stripe_payment_intent_id: string | null
+    created_at: string
+  }[]
+  if (!seedRows.length) return fallback
+
+  const sessionId = seedRows.find((r) => r.stripe_checkout_session_id)?.stripe_checkout_session_id ?? null
+  const intentId = seedRows.find((r) => r.stripe_payment_intent_id)?.stripe_payment_intent_id ?? null
+
+  let orderRows = seedRows
+  if (sessionId || intentId) {
+    const query = admin
+      .from('tickets')
+      .select('id, buyer_total_cents, created_at')
+      .eq('event_id', eventId)
+      .order('created_at', { ascending: true })
+    const { data: all } = sessionId
+      ? await query.eq('stripe_checkout_session_id', sessionId)
+      : await query.eq('stripe_payment_intent_id', intentId!)
+    if (all?.length) orderRows = all as typeof seedRows
+  } else {
+    orderRows = [...seedRows].sort((a, b) => a.created_at.localeCompare(b.created_at))
+  }
+
+  const ids = Array.from(new Set([...orderRows.map((r) => r.id), ...ticketIds]))
+  const byId = new Map(orderRows.map((r) => [r.id, r.buyer_total_cents ?? 0]))
+  const totalCents = ids.reduce((sum, id) => sum + (byId.get(id) ?? 0), 0)
+  return { ids, totalCents, storageKey: sessionId || intentId || ids[0] || '' }
 }
 
 /**
@@ -95,14 +148,12 @@ export async function sendTicketConfirmation(args: {
     .maybeSingle()
   if (!event) return { sent: false, reason: 'no_event' }
 
-  const { data: tickets } = await supabaseAdmin
-    .from('tickets')
-    .select('id, buyer_total_cents')
-    .in('id', args.ticketIds)
-
-  const rows = tickets ?? []
-  const totalCents = rows.reduce((sum, t) => sum + (t.buyer_total_cents ?? 0), 0)
-  const quantity = rows.length || args.ticketIds.length || 1
+  // One order can span several seats, and the caller may only know about some
+  // of them, so pull in every ticket from the same Stripe order.
+  const order = await expandOrderTickets(supabaseAdmin, args.eventId, args.ticketIds)
+  const ticketIds = order.ids
+  const totalCents = order.totalCents
+  const quantity = ticketIds.length || 1
 
   const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
   const buyerName = buyer.display_name || buyer.username || 'there'
@@ -114,8 +165,8 @@ export async function sendTicketConfirmation(args: {
     eventLocation: locationParts.join(', '),
     buyerName,
     totalPaid,
-    tickets: args.ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
-  })
+    tickets: ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
+  }, order.storageKey)
 
   return sendInternalEmail({
     templateName: 'ticket-confirmation',
@@ -129,9 +180,9 @@ export async function sendTicketConfirmation(args: {
       imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
       quantity,
       totalPaid,
-      ticketUrl: `${SITE}/t/${args.ticketIds[0] ?? ''}`,
+      ticketUrl: `${SITE}/t/${ticketIds[0] ?? ''}`,
       pdfUrl,
-      ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
+      ticketCodes: ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
     },
   })
 }
@@ -168,6 +219,9 @@ export async function sendTicketCancellation(args: {
 
   const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
   const buyerName = buyer?.display_name || buyer?.username || 'there'
+  // Void every seat from the order in the same document the buyer already has.
+  const order = await expandOrderTickets(supabaseAdmin, args.eventId, args.ticketIds)
+  const ticketIds = order.ids
   const refundAmount =
     typeof args.refundedCents === 'number' && args.refundedCents > 0
       ? `$${(args.refundedCents / 100).toFixed(2)}`
@@ -180,7 +234,7 @@ export async function sendTicketCancellation(args: {
     eventLocation: locationParts.join(', '),
     buyerName,
     totalPaid: refundAmount,
-    tickets: args.ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
+    tickets: ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
     voidLabel: kind === 'refunded' ? 'REFUNDED' : 'CANCELLED',
     voidNote:
       kind === 'refunded'
@@ -188,7 +242,7 @@ export async function sendTicketCancellation(args: {
           ? `Refunded ${refundAmount}`
           : 'Refund issued'
         : 'This RSVP was cancelled',
-  })
+  }, order.storageKey)
 
   if (!buyer?.email) return { sent: false, reason: 'no_buyer_email' }
 
@@ -202,9 +256,9 @@ export async function sendTicketCancellation(args: {
       eventDate: formatDate(event.starts_at),
       eventLocation: locationParts.join(', '),
       imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
-      quantity: args.ticketIds.length || 1,
+      quantity: ticketIds.length || 1,
       eventUrl: `${SITE}/events/${args.eventId}`,
-      ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
+      ticketCodes: ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
       reason: kind,
       refundAmount,
       pdfUrl,
