@@ -18,6 +18,7 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as SitemapEventsDotxmlRouteImport } from './routes/sitemap-events[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -133,6 +134,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanRoute = ScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SavedRoute = SavedRouteImport.update({
@@ -537,6 +543,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
+  '/scan': typeof ScanRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap-events.xml': typeof SitemapEventsDotxmlRoute
@@ -619,6 +626,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
+  '/scan': typeof ScanRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap-events.xml': typeof SitemapEventsDotxmlRoute
@@ -702,6 +710,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
+  '/scan': typeof ScanRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap-events.xml': typeof SitemapEventsDotxmlRoute
@@ -786,6 +795,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/saved'
+    | '/scan'
     | '/search'
     | '/settings'
     | '/sitemap-events.xml'
@@ -868,6 +878,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/saved'
+    | '/scan'
     | '/search'
     | '/settings'
     | '/sitemap-events.xml'
@@ -950,6 +961,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/saved'
+    | '/scan'
     | '/search'
     | '/settings'
     | '/sitemap-events.xml'
@@ -1033,6 +1045,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SavedRoute: typeof SavedRoute
+  ScanRoute: typeof ScanRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   SitemapEventsDotxmlRoute: typeof SitemapEventsDotxmlRoute
@@ -1137,6 +1150,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan': {
+      id: '/scan'
+      path: '/scan'
+      fullPath: '/scan'
+      preLoaderRoute: typeof ScanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/saved': {
@@ -1692,6 +1712,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SavedRoute: SavedRoute,
+  ScanRoute: ScanRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   SitemapEventsDotxmlRoute: SitemapEventsDotxmlRoute,
