@@ -234,7 +234,7 @@ function EventDetail() {
 
   const rsvp = async () => {
     if (!evt) return;
-    if (!me) { toast.error("Sign in to RSVP"); return; }
+    if (!me) { sendToSignUp(); return; }
     setRsvping(true);
     try {
       const { data, error } = await supabase.rpc("rsvp_free_event", {
