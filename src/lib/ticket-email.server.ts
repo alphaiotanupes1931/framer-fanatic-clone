@@ -105,20 +105,32 @@ export async function sendTicketConfirmation(args: {
   const quantity = rows.length || args.ticketIds.length || 1
 
   const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
+  const buyerName = buyer.display_name || buyer.username || 'there'
+  const totalPaid = totalCents > 0 ? `$${(totalCents / 100).toFixed(2)}` : ''
+
+  const pdfUrl = await buildAndStoreTicketPdf(supabaseAdmin, args.eventId, {
+    eventTitle: event.title,
+    eventDate: formatDate(event.starts_at),
+    eventLocation: locationParts.join(', '),
+    buyerName,
+    totalPaid,
+    tickets: args.ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
+  })
 
   return sendInternalEmail({
     templateName: 'ticket-confirmation',
     recipientEmail: buyer.email,
     idempotencyKey: args.idempotencyKey,
     templateData: {
-      buyerName: buyer.display_name || buyer.username || 'there',
+      buyerName,
       eventTitle: event.title,
       eventDate: formatDate(event.starts_at),
       eventLocation: locationParts.join(', '),
       imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
       quantity,
-      totalPaid: totalCents > 0 ? `$${(totalCents / 100).toFixed(2)}` : '',
+      totalPaid,
       ticketUrl: `${SITE}/t/${args.ticketIds[0] ?? ''}`,
+      pdfUrl,
       ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
     },
   })
