@@ -2810,6 +2810,8 @@ export type Database = {
           event_id: string
           id: string
           platform_tax_cents: number
+          refunded_at: string | null
+          refunded_cents: number | null
           status: string
           stripe_checkout_session_id: string | null
           stripe_fee_cents: number
@@ -2829,6 +2831,8 @@ export type Database = {
           event_id: string
           id?: string
           platform_tax_cents: number
+          refunded_at?: string | null
+          refunded_cents?: number | null
           status?: string
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number
@@ -2848,6 +2852,8 @@ export type Database = {
           event_id?: string
           id?: string
           platform_tax_cents?: number
+          refunded_at?: string | null
+          refunded_cents?: number | null
           status?: string
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number

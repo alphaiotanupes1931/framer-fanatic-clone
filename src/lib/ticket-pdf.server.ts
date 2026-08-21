@@ -9,6 +9,10 @@ export interface TicketPdfInput {
   buyerName: string
   totalPaid: string
   tickets: { id: string; url: string }[]
+  /** When set (e.g. "REFUNDED" / "CANCELLED"), the stub is stamped void and the QR is disabled. */
+  voidLabel?: string
+  /** Optional second line under the void stamp, e.g. "Refunded $25.00 on Aug 20, 2026". */
+  voidNote?: string
 }
 
 const PAGE_W = 420
@@ -18,6 +22,7 @@ const BLACK = rgb(0.039, 0.039, 0.039)
 const WHITE = rgb(1, 1, 1)
 const MUTED = rgb(0.56, 0.56, 0.56)
 const LINE = rgb(0.19, 0.19, 0.19)
+const RED = rgb(0.86, 0.15, 0.15)
 
 function clip(font: PDFFont, text: string, size: number, maxWidth: number): string {
   let out = text
@@ -143,7 +148,7 @@ export async function buildTicketPdf(input: TicketPdfInput): Promise<Uint8Array>
       ['NAME', input.buyerName],
       ['TICKETS', String(total)],
       ['TOTAL', input.totalPaid || 'Free'],
-      ['STATUS', 'Not checked in'],
+      ['STATUS', input.voidLabel ? input.voidLabel : 'Not checked in'],
     ]
     const colW = innerW / 2
     cells.forEach(([label, value], i) => {
@@ -153,11 +158,38 @@ export async function buildTicketPdf(input: TicketPdfInput): Promise<Uint8Array>
       page.drawText(clip(bold, value, 12, colW - 12), { x: cx, y: cy - 15, size: 12, font: bold, color: WHITE })
     })
 
-    const hint = 'Show this QR code at the door.'
+    const hint = input.voidLabel
+      ? 'This ticket is no longer valid for entry.'
+      : 'Show this QR code at the door.'
     page.drawText(hint, {
       x: (PAGE_W - regular.widthOfTextAtSize(hint, 9)) / 2,
-      y: 34, size: 9, font: regular, color: MUTED,
+      y: 34, size: 9, font: regular, color: input.voidLabel ? RED : MUTED,
     })
+
+    if (input.voidLabel) {
+      // Dim the QR so it cannot be scanned in, then stamp the stub.
+      page.drawRectangle({
+        x: qrX - 10, y: qrY - 10, width: qrSize + 20, height: qrSize + 20,
+        color: BLACK, opacity: 0.82,
+      })
+      const stamp = input.voidLabel.toUpperCase()
+      const stampSize = 30
+      page.drawRectangle({
+        x: PAD, y: qrY + qrSize / 2 - 24, width: innerW, height: 48,
+        color: RED, opacity: 0.92,
+      })
+      page.drawText(stamp, {
+        x: (PAGE_W - bold.widthOfTextAtSize(stamp, stampSize)) / 2,
+        y: qrY + qrSize / 2 - 10, size: stampSize, font: bold, color: WHITE,
+      })
+      if (input.voidNote) {
+        const note = clip(regular, input.voidNote, 10, innerW)
+        page.drawText(note, {
+          x: (PAGE_W - regular.widthOfTextAtSize(note, 10)) / 2,
+          y: qrY + qrSize / 2 - 40, size: 10, font: regular, color: WHITE,
+        })
+      }
+    }
   })
 
   return pdf.save()
