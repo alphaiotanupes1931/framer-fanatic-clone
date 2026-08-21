@@ -775,8 +775,14 @@ function CheckInTab({
 
       {mode === "scanner" ? (
         <div className="rounded-xl border border-neutral-200 bg-white p-6">
+          <Link
+            to="/scan"
+            className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+          >
+            <Camera className="h-4 w-4" /> Open QR scanner
+          </Link>
           <p className="text-sm text-neutral-600">
-            Type or paste the ticket code shown under the attendee's QR code, then check them in.
+            Or type or paste the ticket code shown under the attendee's QR code, then check them in.
           </p>
           <div className="mt-4 flex gap-2">
             <input
