@@ -13,6 +13,7 @@ interface TicketConfirmationProps {
   quantity?: number
   totalPaid?: string
   ticketUrl?: string
+  pdfUrl?: string
   ticketCodes?: string[]
 }
 
@@ -25,6 +26,7 @@ export const TicketConfirmationEmail = ({
   quantity = 1,
   totalPaid = '',
   ticketUrl = 'https://www.planetbaltimore.com/tickets',
+  pdfUrl = '',
   ticketCodes = [],
 }: TicketConfirmationProps) => (
   <Html lang="en" dir="ltr">
@@ -82,7 +84,10 @@ export const TicketConfirmationEmail = ({
             ) : null}
 
             <Button style={button} href={ticketUrl}>View your QR ticket</Button>
-            <Text style={hint}>Show the QR code at the door. Each ticket has its own code.</Text>
+            {pdfUrl ? (
+              <Button style={buttonGhost} href={pdfUrl}>Download PDF ticket</Button>
+            ) : null}
+            <Text style={hint}>Show the QR code at the door, or print the PDF. Each ticket has its own code.</Text>
           </Section>
         </Section>
 
@@ -145,6 +150,11 @@ const button = {
   fontWeight: '700', padding: '14px 28px', textDecoration: 'none', display: 'block',
   margin: '18px 0 10px', textAlign: 'center' as const,
 }
+const buttonGhost = {
+  backgroundColor: '#151515', border: '1px solid #303030', borderRadius: '9999px', color: '#ffffff',
+  fontSize: '15px', fontWeight: '700', padding: '13px 28px', textDecoration: 'none', display: 'block',
+  margin: '0 0 12px', textAlign: 'center' as const,
+}
 const hint = { color: '#7a7a7a', fontSize: '13px', lineHeight: '19px', margin: '0', textAlign: 'center' as const }
 const footer = { color: '#b3b3b3', fontSize: '12px', textAlign: 'center' as const, margin: '20px 0 0' }
 
@@ -162,6 +172,7 @@ export const template = {
     quantity: 2,
     totalPaid: '$40.00',
     ticketUrl: 'https://www.planetbaltimore.com/tickets',
+    pdfUrl: 'https://www.planetbaltimore.com/ticket.pdf',
     ticketCodes: ['A1B2C3D4', 'E5F6G7H8'],
   },
 } satisfies TemplateEntry
