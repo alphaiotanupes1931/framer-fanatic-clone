@@ -13,6 +13,9 @@ interface TicketCancelledProps {
   quantity?: number
   eventUrl?: string
   ticketCodes?: string[]
+  reason?: 'cancelled' | 'refunded'
+  refundAmount?: string
+  pdfUrl?: string
 }
 
 export const TicketCancelledEmail = ({
@@ -24,10 +27,17 @@ export const TicketCancelledEmail = ({
   quantity = 1,
   eventUrl = 'https://www.planetbaltimore.com/events',
   ticketCodes = [],
-}: TicketCancelledProps) => (
+  reason = 'cancelled',
+  refundAmount = '',
+  pdfUrl = '',
+}: TicketCancelledProps) => {
+  const refunded = reason === 'refunded'
+  return (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{`Your RSVP for ${eventTitle} is cancelled`}</Preview>
+    <Preview>{refunded
+      ? `Your refund for ${eventTitle} is confirmed`
+      : `Your RSVP for ${eventTitle} is cancelled`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Text style={brand}>PLANET BALTIMORE</Text>
@@ -39,7 +49,9 @@ export const TicketCancelledEmail = ({
 
           <Section style={stubTop}>
             <Text style={badge}>
-              {quantity > 1 ? `${quantity} tickets cancelled` : 'RSVP cancelled'}
+              {refunded
+                ? quantity > 1 ? `${quantity} tickets refunded` : 'Ticket refunded'
+                : quantity > 1 ? `${quantity} tickets cancelled` : 'RSVP cancelled'}
             </Text>
             <Heading style={h1}>{eventTitle}</Heading>
             {eventDate ? <Text style={meta}>{eventDate}</Text> : null}
@@ -61,14 +73,14 @@ export const TicketCancelledEmail = ({
                 <Text style={cellValue}>{buyerName}</Text>
               </Column>
               <Column style={cell}>
-                <Text style={cellLabel}>Released</Text>
-                <Text style={cellValue}>{quantity}</Text>
+                <Text style={cellLabel}>{refunded ? 'Refunded' : 'Released'}</Text>
+                <Text style={cellValue}>{refunded && refundAmount ? refundAmount : quantity}</Text>
               </Column>
             </Row>
             <Row>
               <Column style={cell}>
                 <Text style={cellLabel}>Status</Text>
-                <Text style={cellValueRed}>Cancelled</Text>
+                <Text style={cellValueRed}>{refunded ? 'Refunded' : 'Cancelled'}</Text>
               </Column>
               <Column style={cell}>
                 <Text style={cellLabel}>Entry</Text>
@@ -80,11 +92,26 @@ export const TicketCancelledEmail = ({
             ) : null}
 
             <Text style={notice}>
-              Your spot has been released and your QR code will not scan at the door.
+              {refunded
+                ? `Your refund${refundAmount ? ` of ${refundAmount}` : ''} is on its way back to your original payment method, and typically lands within 5 to 10 business days. Your QR code will not scan at the door.`
+                : 'Your spot has been released and your QR code will not scan at the door.'}
             </Text>
 
-            <Button style={button} href={eventUrl}>Change your mind? RSVP again</Button>
-            <Text style={hint}>If you did not cancel this, reply to this email and we will help.</Text>
+            {pdfUrl ? (
+              <Text style={hint}>
+                Your saved PDF ticket has been updated and now shows as{' '}
+                {refunded ? 'refunded' : 'cancelled'}.
+              </Text>
+            ) : null}
+
+            <Button style={button} href={eventUrl}>
+              {refunded ? 'View the event' : 'Change your mind? RSVP again'}
+            </Button>
+            <Text style={hint}>
+              {refunded
+                ? 'Questions about this refund? Just reply to this email.'
+                : 'If you did not cancel this, reply to this email and we will help.'}
+            </Text>
           </Section>
         </Section>
 
@@ -92,7 +119,8 @@ export const TicketCancelledEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export default TicketCancelledEmail
 
