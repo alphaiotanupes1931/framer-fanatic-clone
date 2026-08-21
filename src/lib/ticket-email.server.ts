@@ -42,6 +42,34 @@ function formatDate(iso: string | null | undefined): string {
 }
 
 /**
+ * Renders the dark-stub PDF ticket, stores it, and returns a long-lived signed
+ * link. Email delivery cannot carry file attachments, so the confirmation email
+ * links to this PDF instead. Failures are non-fatal: the email still sends.
+ */
+async function buildAndStoreTicketPdf(
+  admin: any,
+  eventId: string,
+  input: import('@/lib/ticket-pdf.server').TicketPdfInput,
+): Promise<string> {
+  try {
+    const { buildTicketPdf } = await import('@/lib/ticket-pdf.server')
+    const bytes = await buildTicketPdf(input)
+    const path = `${eventId}/${input.tickets[0]?.id ?? crypto.randomUUID()}.pdf`
+    const { error } = await admin.storage
+      .from('ticket-pdfs')
+      .upload(path, bytes, { contentType: 'application/pdf', upsert: true })
+    if (error) throw error
+    const { data } = await admin.storage
+      .from('ticket-pdfs')
+      .createSignedUrl(path, 60 * 60 * 24 * 365)
+    return data?.signedUrl || ''
+  } catch (err) {
+    console.error('ticket pdf generation failed', err)
+    return ''
+  }
+}
+
+/**
  * Emails a buyer their ticket confirmation for one event purchase/RSVP.
  * Safe to call more than once: the idempotency key dedupes queued sends.
  */
@@ -77,20 +105,32 @@ export async function sendTicketConfirmation(args: {
   const quantity = rows.length || args.ticketIds.length || 1
 
   const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
+  const buyerName = buyer.display_name || buyer.username || 'there'
+  const totalPaid = totalCents > 0 ? `$${(totalCents / 100).toFixed(2)}` : ''
+
+  const pdfUrl = await buildAndStoreTicketPdf(supabaseAdmin, args.eventId, {
+    eventTitle: event.title,
+    eventDate: formatDate(event.starts_at),
+    eventLocation: locationParts.join(', '),
+    buyerName,
+    totalPaid,
+    tickets: args.ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
+  })
 
   return sendInternalEmail({
     templateName: 'ticket-confirmation',
     recipientEmail: buyer.email,
     idempotencyKey: args.idempotencyKey,
     templateData: {
-      buyerName: buyer.display_name || buyer.username || 'there',
+      buyerName,
       eventTitle: event.title,
       eventDate: formatDate(event.starts_at),
       eventLocation: locationParts.join(', '),
       imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
       quantity,
-      totalPaid: totalCents > 0 ? `$${(totalCents / 100).toFixed(2)}` : '',
+      totalPaid,
       ticketUrl: `${SITE}/t/${args.ticketIds[0] ?? ''}`,
+      pdfUrl,
       ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
     },
   })
