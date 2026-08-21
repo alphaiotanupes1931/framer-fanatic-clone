@@ -50,11 +50,13 @@ async function buildAndStoreTicketPdf(
   admin: any,
   eventId: string,
   input: import('@/lib/ticket-pdf.server').TicketPdfInput,
+  /** Stable key so every ticket in one order overwrites the same document. */
+  storageKey?: string,
 ): Promise<string> {
   try {
     const { buildTicketPdf } = await import('@/lib/ticket-pdf.server')
     const bytes = await buildTicketPdf(input)
-    const path = `${eventId}/${input.tickets[0]?.id ?? crypto.randomUUID()}.pdf`
+    const path = `${eventId}/${storageKey || input.tickets[0]?.id || crypto.randomUUID()}.pdf`
     const { error } = await admin.storage
       .from('ticket-pdfs')
       .upload(path, bytes, { contentType: 'application/pdf', upsert: true })
@@ -67,6 +69,57 @@ async function buildAndStoreTicketPdf(
     console.error('ticket pdf generation failed', err)
     return ''
   }
+}
+
+/**
+ * Expands a set of ticket ids to every ticket bought in the same order, so one
+ * PDF carries all seats even when the caller only knows about some rows (for
+ * example when the webhook and the client-side reconcile each update a subset).
+ * Orders are grouped by Stripe checkout session, falling back to the payment
+ * intent, then to the ids as given for free RSVPs.
+ */
+async function expandOrderTickets(
+  admin: any,
+  eventId: string,
+  ticketIds: string[],
+): Promise<{ ids: string[]; totalCents: number; storageKey: string }> {
+  const fallback = { ids: ticketIds, totalCents: 0, storageKey: ticketIds[0] ?? '' }
+  const { data: seed } = await admin
+    .from('tickets')
+    .select('id, buyer_id, buyer_total_cents, stripe_checkout_session_id, stripe_payment_intent_id, created_at')
+    .in('id', ticketIds)
+  const seedRows = (seed ?? []) as {
+    id: string
+    buyer_id: string | null
+    buyer_total_cents: number | null
+    stripe_checkout_session_id: string | null
+    stripe_payment_intent_id: string | null
+    created_at: string
+  }[]
+  if (!seedRows.length) return fallback
+
+  const sessionId = seedRows.find((r) => r.stripe_checkout_session_id)?.stripe_checkout_session_id ?? null
+  const intentId = seedRows.find((r) => r.stripe_payment_intent_id)?.stripe_payment_intent_id ?? null
+
+  let orderRows = seedRows
+  if (sessionId || intentId) {
+    const query = admin
+      .from('tickets')
+      .select('id, buyer_total_cents, created_at')
+      .eq('event_id', eventId)
+      .order('created_at', { ascending: true })
+    const { data: all } = sessionId
+      ? await query.eq('stripe_checkout_session_id', sessionId)
+      : await query.eq('stripe_payment_intent_id', intentId!)
+    if (all?.length) orderRows = all as typeof seedRows
+  } else {
+    orderRows = [...seedRows].sort((a, b) => a.created_at.localeCompare(b.created_at))
+  }
+
+  const ids = Array.from(new Set([...orderRows.map((r) => r.id), ...ticketIds]))
+  const byId = new Map(orderRows.map((r) => [r.id, r.buyer_total_cents ?? 0]))
+  const totalCents = ids.reduce((sum, id) => sum + (byId.get(id) ?? 0), 0)
+  return { ids, totalCents, storageKey: sessionId || intentId || ids[0] || '' }
 }
 
 /**
