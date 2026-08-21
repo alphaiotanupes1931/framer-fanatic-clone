@@ -137,22 +137,27 @@ export async function sendTicketConfirmation(args: {
 }
 
 /**
- * Emails a buyer confirmation that their RSVP was cancelled.
+ * Emails a buyer that their tickets were cancelled or refunded, and re-renders
+ * the stored PDF with a void stamp so any previously shared download link
+ * immediately reflects the new status.
  */
 export async function sendTicketCancellation(args: {
   buyerId: string
   eventId: string
   ticketIds: string[]
   idempotencyKey: string
+  /** "cancelled" (RSVP released) or "refunded" (money returned). */
+  reason?: 'cancelled' | 'refunded'
+  refundedCents?: number
 }): Promise<{ sent: boolean; reason?: string }> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+  const kind = args.reason ?? 'cancelled'
 
   const { data: buyer } = await supabaseAdmin
     .from('profiles')
     .select('email, display_name, username')
     .eq('id', args.buyerId)
     .maybeSingle()
-  if (!buyer?.email) return { sent: false, reason: 'no_buyer_email' }
 
   const { data: event } = await supabaseAdmin
     .from('events')
@@ -162,13 +167,37 @@ export async function sendTicketCancellation(args: {
   if (!event) return { sent: false, reason: 'no_event' }
 
   const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
+  const buyerName = buyer?.display_name || buyer?.username || 'there'
+  const refundAmount =
+    typeof args.refundedCents === 'number' && args.refundedCents > 0
+      ? `$${(args.refundedCents / 100).toFixed(2)}`
+      : ''
+
+  // Void the stored PDF first so the download link never shows a live QR.
+  const pdfUrl = await buildAndStoreTicketPdf(supabaseAdmin, args.eventId, {
+    eventTitle: event.title,
+    eventDate: formatDate(event.starts_at),
+    eventLocation: locationParts.join(', '),
+    buyerName,
+    totalPaid: refundAmount,
+    tickets: args.ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
+    voidLabel: kind === 'refunded' ? 'REFUNDED' : 'CANCELLED',
+    voidNote:
+      kind === 'refunded'
+        ? refundAmount
+          ? `Refunded ${refundAmount}`
+          : 'Refund issued'
+        : 'This RSVP was cancelled',
+  })
+
+  if (!buyer?.email) return { sent: false, reason: 'no_buyer_email' }
 
   return sendInternalEmail({
     templateName: 'ticket-cancelled',
     recipientEmail: buyer.email,
     idempotencyKey: args.idempotencyKey,
     templateData: {
-      buyerName: buyer.display_name || buyer.username || 'there',
+      buyerName,
       eventTitle: event.title,
       eventDate: formatDate(event.starts_at),
       eventLocation: locationParts.join(', '),
@@ -176,6 +205,9 @@ export async function sendTicketCancellation(args: {
       quantity: args.ticketIds.length || 1,
       eventUrl: `${SITE}/events/${args.eventId}`,
       ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
+      reason: kind,
+      refundAmount,
+      pdfUrl,
     },
   })
 }
