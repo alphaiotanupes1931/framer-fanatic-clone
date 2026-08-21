@@ -148,14 +148,12 @@ export async function sendTicketConfirmation(args: {
     .maybeSingle()
   if (!event) return { sent: false, reason: 'no_event' }
 
-  const { data: tickets } = await supabaseAdmin
-    .from('tickets')
-    .select('id, buyer_total_cents')
-    .in('id', args.ticketIds)
-
-  const rows = tickets ?? []
-  const totalCents = rows.reduce((sum, t) => sum + (t.buyer_total_cents ?? 0), 0)
-  const quantity = rows.length || args.ticketIds.length || 1
+  // One order can span several seats, and the caller may only know about some
+  // of them, so pull in every ticket from the same Stripe order.
+  const order = await expandOrderTickets(supabaseAdmin, args.eventId, args.ticketIds)
+  const ticketIds = order.ids
+  const totalCents = order.totalCents
+  const quantity = ticketIds.length || 1
 
   const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
   const buyerName = buyer.display_name || buyer.username || 'there'
@@ -167,8 +165,8 @@ export async function sendTicketConfirmation(args: {
     eventLocation: locationParts.join(', '),
     buyerName,
     totalPaid,
-    tickets: args.ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
-  })
+    tickets: ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
+  }, order.storageKey)
 
   return sendInternalEmail({
     templateName: 'ticket-confirmation',
@@ -182,9 +180,9 @@ export async function sendTicketConfirmation(args: {
       imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
       quantity,
       totalPaid,
-      ticketUrl: `${SITE}/t/${args.ticketIds[0] ?? ''}`,
+      ticketUrl: `${SITE}/t/${ticketIds[0] ?? ''}`,
       pdfUrl,
-      ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
+      ticketCodes: ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
     },
   })
 }
@@ -221,6 +219,9 @@ export async function sendTicketCancellation(args: {
 
   const locationParts = [event.venue_name, event.address || event.location].filter(Boolean)
   const buyerName = buyer?.display_name || buyer?.username || 'there'
+  // Void every seat from the order in the same document the buyer already has.
+  const order = await expandOrderTickets(supabaseAdmin, args.eventId, args.ticketIds)
+  const ticketIds = order.ids
   const refundAmount =
     typeof args.refundedCents === 'number' && args.refundedCents > 0
       ? `$${(args.refundedCents / 100).toFixed(2)}`
@@ -233,7 +234,7 @@ export async function sendTicketCancellation(args: {
     eventLocation: locationParts.join(', '),
     buyerName,
     totalPaid: refundAmount,
-    tickets: args.ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
+    tickets: ticketIds.map((id) => ({ id, url: `${SITE}/tickets/${id}?verify=1` })),
     voidLabel: kind === 'refunded' ? 'REFUNDED' : 'CANCELLED',
     voidNote:
       kind === 'refunded'
@@ -241,7 +242,7 @@ export async function sendTicketCancellation(args: {
           ? `Refunded ${refundAmount}`
           : 'Refund issued'
         : 'This RSVP was cancelled',
-  })
+  }, order.storageKey)
 
   if (!buyer?.email) return { sent: false, reason: 'no_buyer_email' }
 
@@ -255,9 +256,9 @@ export async function sendTicketCancellation(args: {
       eventDate: formatDate(event.starts_at),
       eventLocation: locationParts.join(', '),
       imageUrl: await emailSafeImageUrl(event.image_url, supabaseAdmin as any),
-      quantity: args.ticketIds.length || 1,
+      quantity: ticketIds.length || 1,
       eventUrl: `${SITE}/events/${args.eventId}`,
-      ticketCodes: args.ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
+      ticketCodes: ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
       reason: kind,
       refundAmount,
       pdfUrl,
