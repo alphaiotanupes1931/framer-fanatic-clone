@@ -192,8 +192,17 @@ function EventDetail() {
     })();
   }, [eventId]);
 
+  // Guests who tap a ticket action get sent to sign up, then straight back here.
+  const sendToSignUp = () => {
+    const dest = `/events/${eventId}`;
+    try { sessionStorage.setItem("pb_post_auth_redirect", dest); } catch { /* ignore */ }
+    toast.message("Create a free account to get your ticket");
+    navigate({ to: "/auth", search: { redirect: dest } });
+  };
+
   const buy = async () => {
     if (!evt) return;
+    if (!me) { sendToSignUp(); return; }
     setBuying(true);
     try {
       const { url } = await checkoutFn({
@@ -225,7 +234,7 @@ function EventDetail() {
 
   const rsvp = async () => {
     if (!evt) return;
-    if (!me) { toast.error("Sign in to RSVP"); return; }
+    if (!me) { sendToSignUp(); return; }
     setRsvping(true);
     try {
       const { data, error } = await supabase.rpc("rsvp_free_event", {
