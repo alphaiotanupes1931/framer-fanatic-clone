@@ -137,8 +137,8 @@ export async function buildTicketPdf(input: TicketPdfInput): Promise<Uint8Array>
       x: (PAGE_W - mono.widthOfTextAtSize(code, 13)) / 2, y: ty, size: 13, font: mono, color: WHITE,
     })
 
-    // Detail grid
-    ty -= 32
+    // Detail grid, anchored near the bottom so pages stay balanced
+    ty = Math.min(ty - 32, 128)
     const cells: [string, string][] = [
       ['NAME', input.buyerName],
       ['TICKETS', String(total)],
