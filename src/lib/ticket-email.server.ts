@@ -42,6 +42,34 @@ function formatDate(iso: string | null | undefined): string {
 }
 
 /**
+ * Renders the dark-stub PDF ticket, stores it, and returns a long-lived signed
+ * link. Email delivery cannot carry file attachments, so the confirmation email
+ * links to this PDF instead. Failures are non-fatal: the email still sends.
+ */
+async function buildAndStoreTicketPdf(
+  admin: any,
+  eventId: string,
+  input: import('@/lib/ticket-pdf.server').TicketPdfInput,
+): Promise<string> {
+  try {
+    const { buildTicketPdf } = await import('@/lib/ticket-pdf.server')
+    const bytes = await buildTicketPdf(input)
+    const path = `${eventId}/${input.tickets[0]?.id ?? crypto.randomUUID()}.pdf`
+    const { error } = await admin.storage
+      .from('ticket-pdfs')
+      .upload(path, bytes, { contentType: 'application/pdf', upsert: true })
+    if (error) throw error
+    const { data } = await admin.storage
+      .from('ticket-pdfs')
+      .createSignedUrl(path, 60 * 60 * 24 * 365)
+    return data?.signedUrl || ''
+  } catch (err) {
+    console.error('ticket pdf generation failed', err)
+    return ''
+  }
+}
+
+/**
  * Emails a buyer their ticket confirmation for one event purchase/RSVP.
  * Safe to call more than once: the idempotency key dedupes queued sends.
  */
