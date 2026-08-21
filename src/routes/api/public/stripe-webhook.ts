@@ -255,6 +255,49 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                 });
               }
             }
+          } else if (event.type === "charge.refunded") {
+            // Full or partial refund issued from Stripe or the dashboard.
+            const charge = event.data.object as import("stripe").Stripe.Charge;
+            const pi = typeof charge.payment_intent === "string"
+              ? charge.payment_intent
+              : charge.payment_intent?.id ?? null;
+            if (pi) {
+              const { processTicketRefund } = await import("@/lib/ticket-refund.server");
+              const res = await processTicketRefund({
+                paymentIntentId: pi,
+                refundedCents: charge.amount_refunded ?? undefined,
+                eventKey: `${pi}-${charge.amount_refunded ?? 0}`,
+              });
+              return ack(res.handled ? `refunded ${res.ticketIds.length} ticket(s)` : "no matching tickets");
+            }
+          } else if (event.type === "refund.updated" || event.type === "charge.refund.updated") {
+            const refund = event.data.object as import("stripe").Stripe.Refund;
+            const pi = typeof refund.payment_intent === "string"
+              ? refund.payment_intent
+              : refund.payment_intent?.id ?? null;
+            if (pi && refund.status === "succeeded") {
+              const { processTicketRefund } = await import("@/lib/ticket-refund.server");
+              const res = await processTicketRefund({
+                paymentIntentId: pi,
+                refundedCents: refund.amount ?? undefined,
+                eventKey: refund.id,
+              });
+              return ack(res.handled ? `refunded ${res.ticketIds.length} ticket(s)` : "no matching tickets");
+            }
+          } else if (event.type === "charge.dispute.closed") {
+            const dispute = event.data.object as import("stripe").Stripe.Dispute;
+            const pi = typeof dispute.payment_intent === "string"
+              ? dispute.payment_intent
+              : dispute.payment_intent?.id ?? null;
+            if (pi && dispute.status === "lost") {
+              const { processTicketRefund } = await import("@/lib/ticket-refund.server");
+              const res = await processTicketRefund({
+                paymentIntentId: pi,
+                refundedCents: dispute.amount ?? undefined,
+                eventKey: dispute.id,
+              });
+              return ack(res.handled ? `chargeback voided ${res.ticketIds.length} ticket(s)` : "no matching tickets");
+            }
           } else if (event.type === "invoice.paid") {
             // Renewal of a recurring donation.
             const invoice = event.data.object as import("stripe").Stripe.Invoice;
