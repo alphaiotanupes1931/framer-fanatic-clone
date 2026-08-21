@@ -789,10 +789,30 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
           // Same key the webhook uses, so a buyer never gets two receipts.
           idempotencyKey: `ticket-confirm-${sessionId}`,
         });
-      } catch (err) {
-        console.error("ticket confirmation email failed", err);
-      }
+    } catch (err) {
+      console.error("ticket confirmation email failed", err);
     }
+  }
 
-    return { confirmed };
-  });
+  return { confirmed };
+});
+
+/** List Stripe webhook endpoints so admins can verify the live domain is registered. */
+export const checkStripeWebhooks = createServerFn({ method: "GET" }).handler(async () => {
+  const { getStripe } = await import("./stripe.server");
+  const stripe = getStripe();
+  const endpoints = await stripe.webhookEndpoints.list({ limit: 20 });
+  return {
+    count: endpoints.data.length,
+    endpoints: endpoints.data.map((e) => ({
+      id: e.id,
+      url: e.url,
+      status: e.status,
+      enabled_events: e.enabled_events,
+      secret_redacted: e.secret ? "***" + e.secret.slice(-6) : null,
+      livemode: e.livemode,
+      created: e.created,
+    })),
+  };
+});
+
