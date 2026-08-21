@@ -1954,7 +1954,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     let q = supabase.from("organization_posts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
     // Press items live only on the Press tab; never mix them into the general post feed.
     if (kind) q = q.eq("kind", kind);
-    else q = q.neq("kind", "press");
+    else q = q.or("kind.is.null,kind.neq.press");
     const { data } = await q;
     setItems(((data ?? []) as unknown[]).map((r) => {
       const row = r as Record<string, unknown>;
