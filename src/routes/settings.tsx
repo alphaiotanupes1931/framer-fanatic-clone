@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -449,6 +450,7 @@ function StripeSection() {
   }, [profile?.id, profile?.stripe_account_id, profile?.stripe_charges_enabled, refreshFn]);
 
   const onboard = async () => {
+    const pre = openExternalWindow();
     setBusy(true);
     setErrorMsg(null);
     try {
@@ -456,6 +458,7 @@ function StripeSection() {
       if (!account.ok) {
         setErrorMsg(account.message);
         toast.error(account.message);
+        closeExternalWindow(pre);
         setBusy(false);
         return;
       }
@@ -463,8 +466,9 @@ function StripeSection() {
         returnUrl: `${window.location.origin}/settings?stripe=ok`,
         refreshUrl: `${window.location.origin}/settings?stripe=refresh`,
       }});
-      window.location.href = url;
+      navigateExternal(url, pre);
     } catch (e) {
+      closeExternalWindow(pre);
       const message = sanitizeErrorMessage(e, "Could not start payout setup");
       setErrorMsg(message);
       toast.error(message);

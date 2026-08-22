@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { createDuesCheckout } from "@/lib/stripe.functions";
@@ -73,11 +74,13 @@ export function DuesTab({ orgId, ownerId, canManage, me }: { orgId: string; owne
   const handlePay = async (tier: Tier) => {
     if (!me) { toast.error("Please sign in to pay dues."); return; }
     setBusyTierId(tier.id);
+    const pre = openExternalWindow();
     try {
       const res = await checkout({ data: { tierId: tier.id, returnOrigin: window.location.origin } });
-      if (res?.url) window.location.href = res.url;
-      else toast.error("Could not start checkout.");
+      if (res?.url) navigateExternal(res.url, pre);
+      else { closeExternalWindow(pre); toast.error("Could not start checkout."); }
     } catch (e) {
+      closeExternalWindow(pre);
       toast.error(e instanceof Error ? e.message : "Checkout failed");
     } finally {
       setBusyTierId(null);

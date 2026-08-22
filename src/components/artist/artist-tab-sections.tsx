@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -891,10 +892,13 @@ export function ArtistAvailableWorksTab({ userId, canEdit }: { userId: string; c
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) { toast.error("Please sign in to purchase."); navigate({ to: "/auth" }); return; }
     setBusyId(it.id);
+    const pre = openExternalWindow();
     try {
       const { url } = await checkout({ data: { workId: it.id, returnOrigin: window.location.origin } });
-      if (url) window.location.href = url;
+      if (url) navigateExternal(url, pre);
+      else closeExternalWindow(pre);
     } catch (e: any) {
+      closeExternalWindow(pre);
       toast.error(e?.message ?? "Could not start checkout.");
     } finally {
       setBusyId(null);

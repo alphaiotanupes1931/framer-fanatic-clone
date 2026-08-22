@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -204,6 +205,7 @@ function EventDetail() {
     if (!evt) return;
     if (!me) { sendToSignUp(); return; }
     setBuying(true);
+    const pre = openExternalWindow();
     try {
       const { url } = await checkoutFn({
         data: {
@@ -213,8 +215,10 @@ function EventDetail() {
           ...(selectedTier ? { ticketTypeId: selectedTier.id } : {}),
         },
       });
-      if (url) window.location.href = url;
+      if (url) navigateExternal(url, pre);
+      else closeExternalWindow(pre);
     } catch (e) {
+      closeExternalWindow(pre);
       toast.error(e instanceof Error ? e.message : "Could not start checkout");
     } finally {
       setBuying(false);
