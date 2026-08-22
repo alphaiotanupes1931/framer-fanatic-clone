@@ -1,4 +1,4 @@
-import { BANNER_SPEC } from "@/lib/media-guidelines";
+import { BannerWatermark } from "@/components/shared/banner-watermark";
 import { emailMyCancellation } from "@/lib/tickets.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -356,13 +356,8 @@ function ProfilePage() {
               </div>
             </div>
           )}
-          {!publicPreview && !profile?.banner_url && !uploadingBanner && (
-            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-              <span className="select-none rounded-full bg-black/25 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white/85 sm:text-xs">
-                {BANNER_SPEC}
-              </span>
-            </div>
-          )}
+          {!publicPreview && !profile?.banner_url && !uploadingBanner && <BannerWatermark />}
+
           {!publicPreview && (
           <>
           <button
