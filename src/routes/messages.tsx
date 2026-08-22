@@ -341,8 +341,8 @@ function MessagesPage() {
   }, [active?.id, active?.is_group]);
 
   const memberById = useMemo(
-    () => new Map(groupMembers.map((p) => [p.id, p])),
-    [groupMembers],
+    () => new Map([...groupMembers, ...extraSenders].map((p) => [p.id, p])),
+    [groupMembers, extraSenders],
   );
 
   // Auto-scroll to bottom on new messages. A single smooth scroll can stop
