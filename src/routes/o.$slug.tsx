@@ -441,6 +441,11 @@ function OrgProfile() {
           <Img src={org.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="eager" decoding="async" />
         ) : canManage ? (
           <BannerWatermark />
+        ) : org.avatar_url ? (
+          <div className="absolute inset-0 overflow-hidden">
+            <Img src={org.avatar_url} alt="" className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl" />
+            <div className="absolute inset-0 bg-white/20" />
+          </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-100 via-amber-50 to-neutral-100">
             <span className="text-5xl font-black tracking-tight text-orange-900/25">
@@ -448,6 +453,7 @@ function OrgProfile() {
             </span>
           </div>
         )}
+
 
         <div className="absolute right-3 top-3 flex items-center gap-2">
           {canManage && (
