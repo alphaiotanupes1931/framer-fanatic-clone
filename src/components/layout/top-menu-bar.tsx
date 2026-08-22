@@ -1,9 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
-  BookOpen, MessageCircle, Bell, User, Menu, Ticket, Plus, FileText, PenLine, Plane, Bookmark,
-  Settings, LogOut,
+  Home, MessageCircle, Bell, Menu, Plus, LogOut,
 } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
@@ -15,43 +13,8 @@ import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
 import { Img } from "@/components/shared/smart-img";
 import { GlobalSearch } from "@/components/layout/global-search";
+import { navItems, utilItems, createItems } from "@/lib/nav-items";
 
-type Item = { icon: typeof Home; label: string; to: string };
-
-const navItems: Item[] = [
-  { icon: Shield, label: "Associations", to: "/community-associations" },
-  { icon: Palette, label: "Artists", to: "/artists" },
-  { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
-  { icon: Building2, label: "Businesses", to: "/businesses" },
-  { icon: Users, label: "Groups", to: "/groups" },
-  { icon: Calendar, label: "Community Calendar", to: "/calendar" },
-  { icon: Compass, label: "Discover", to: "/search" },
-  { icon: Ticket, label: "Events", to: "/events" },
-  { icon: Ticket, label: "Festivals", to: "/festivals" },
-  { icon: Home, label: "Home", to: "/dashboard" },
-  { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
-  { icon: BookOpen, label: "Stories", to: "/stories" },
-];
-
-const utilItems: Item[] = [
-  { icon: MessageCircle, label: "Messages", to: "/messages" },
-  { icon: Bell, label: "Notifications", to: "/notifications" },
-  { icon: Bookmark, label: "Saved", to: "/saved" },
-  { icon: User, label: "Profile", to: "/profile" },
-  { icon: Settings, label: "Settings", to: "/settings" },
-];
-
-const createItems: Item[] = [
-  { icon: Palette, label: "Artist Page", to: "/create-artist" },
-  { icon: Landmark, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: Building2, label: "Business", to: "/create-business" },
-  { icon: Shield, label: "Community Association", to: "/create-community-association" },
-  { icon: Users, label: "Groups", to: "/create-community" },
-  { icon: FileText, label: "New Post", to: "/create-post" },
-  { icon: PenLine, label: "New Story", to: "/create-story" },
-  { icon: Home, label: "Resident Profile", to: "/create-resident" },
-  { icon: Plane, label: "Visitor Profile", to: "/create-visitor" },
-];
 
 export function TopMenuBar() {
   const navigate = useNavigate();
