@@ -150,8 +150,10 @@ function CreatePostPage() {
         media_urls: mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
         music_url: null,
         post_type: postType,
-        bg_color: postType === "text" && bg.bg ? bg.bg : null,
-        text_color: postType === "text" && bg.bg ? bg.fg : null,
+        // Text posts always carry their canvas colours so the published card
+        // looks exactly like the square composer, line breaks included.
+        bg_color: postType === "text" ? (bg.bg || "#F5F5F4") : null,
+        text_color: postType === "text" ? (bg.bg ? bg.fg : "#1c1917") : null,
         font_size: postType === "text" ? fontSize : null,
         category,
         tag: tag || null,
