@@ -110,6 +110,11 @@ export function ShareToUsersDialog({
     return () => { cancelled = true; };
   }, [open, me?.id]);
 
+  // Reset pagination whenever the search query changes.
+  useEffect(() => {
+    setPage(1);
+  }, [q]);
+
   // Persist the in-progress selection + note so closing and reopening the
   // dialog for the same content does not lose the user's work.
   useEffect(() => {
