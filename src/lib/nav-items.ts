@@ -1,7 +1,7 @@
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
   BookOpen, MessageCircle, Bell, User, Ticket, FileText, PenLine, Plane, Bookmark,
-  Settings, Video, Trophy,
+  Settings, Video, Trophy, Gift,
 } from "lucide-react";
 
 export type NavItem = { icon: typeof Home; label: string; to: string };
