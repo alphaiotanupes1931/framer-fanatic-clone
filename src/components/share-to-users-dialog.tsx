@@ -111,9 +111,10 @@ export function ShareToUsersDialog({
     }
     const recipients = targetIds && targetIds.length ? targetIds : selectedIds;
     if (recipients.length === 0) {
-      toast.error("Pick at least one person");
+      toast.error("Select at least one person to share with.");
       return;
     }
+
     setSending(true);
     const body = preview
       ? encodeSharePreview({ ...preview, url }, note)
