@@ -97,7 +97,7 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { preview } = Route.useSearch();
+  const { preview, tab: tabParam, purchase, session_id: purchaseSessionId } = Route.useSearch();
   // Public preview: same profile, rendered without any owner-only controls.
   const publicPreview = preview === "public";
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
