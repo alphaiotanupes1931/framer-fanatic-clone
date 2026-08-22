@@ -184,8 +184,18 @@ function OrgProfile() {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
   }, []);
   useEffect(() => {
+    let cancelled = false;
     (async () => {
+      // Clear the previous page immediately: keeping the old org around while
+      // the new slug loads briefly showed the previous owner's management
+      // buttons (Message All / Delete Page / Mute Page) on someone else's page.
+      setOrg(null);
       setLoaded(false);
+      setJoined(false);
+      setMemberStatus("none");
+      setMemberCount(0);
+      setPendingCount(0);
+      autoJoinDone.current = false;
       let { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
       // Private page: try the access code this browser already unlocked with.
       if (!data && typeof window !== "undefined") {
@@ -198,6 +208,7 @@ function OrgProfile() {
           } catch { /* stay locked */ }
         }
       }
+      if (cancelled) return;
       setOrg(data as Org | null);
       setLoaded(true);
       const o = data as Org | null;
@@ -207,7 +218,9 @@ function OrgProfile() {
       if (isBiz && foodLike) setTab("Menu");
       else if (isBiz) setTab("Services");
     })();
+    return () => { cancelled = true; };
   }, [slug]);
+
 
   useEffect(() => {
     if (!org || !me) { setJoined(false); setMemberStatus("none"); return; }
