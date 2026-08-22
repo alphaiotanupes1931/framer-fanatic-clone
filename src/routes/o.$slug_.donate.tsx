@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AppLayout } from "@/components/app-layout";
@@ -78,6 +79,7 @@ function DonatePage() {
       return;
     }
     setSubmitting(true);
+    const pre = openExternalWindow();
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
@@ -94,8 +96,10 @@ function DonatePage() {
           interval,
         },
       });
-      if (url) window.location.href = url;
+      if (url) navigateExternal(url, pre);
+      else closeExternalWindow(pre);
     } catch (e: any) {
+      closeExternalWindow(pre);
       toast.error(e?.message ?? "Could not start checkout.");
     } finally {
       setSubmitting(false);

@@ -1,4 +1,5 @@
 import { BannerWatermark } from "@/components/shared/banner-watermark";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { emailMyCancellation } from "@/lib/tickets.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -1643,6 +1644,7 @@ function StripeTab() {
   }, [profile?.id, profile?.stripe_account_id, refreshFn]);
 
   const onboard = async () => {
+    const pre = openExternalWindow();
     setBusy(true);
     setErrorMsg(null);
     try {
@@ -1650,6 +1652,7 @@ function StripeTab() {
       if (!account.ok) {
         setErrorMsg(account.message);
         toast.error(account.message);
+        closeExternalWindow(pre);
         setBusy(false);
         return;
       }
@@ -1657,8 +1660,9 @@ function StripeTab() {
         returnUrl: `${window.location.origin}/settings?stripe=ok`,
         refreshUrl: `${window.location.origin}/settings?stripe=refresh`,
       }});
-      window.location.href = url;
+      navigateExternal(url, pre);
     } catch (e) {
+      closeExternalWindow(pre);
       const msg = sanitizeErrorMessage(e, "Could not start onboarding");
       setErrorMsg(msg);
       toast.error(msg);

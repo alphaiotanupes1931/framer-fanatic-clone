@@ -1,4 +1,5 @@
 import { siteUrl } from "@/lib/utils";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -327,12 +328,15 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const goToCheckout = async () => {
     if (!qtyEvent) return;
     setCheckingOut(true);
+    const pre = openExternalWindow();
     try {
       const { url } = await checkoutFn({
         data: { eventId: qtyEvent.id, quantity: qty, returnOrigin: window.location.origin },
       });
-      if (url) window.location.href = url;
+      if (url) navigateExternal(url, pre);
+      else closeExternalWindow(pre);
     } catch (e) {
+      closeExternalWindow(pre);
       toast.error(e instanceof Error ? e.message : "Could not start checkout");
       setCheckingOut(false);
     }

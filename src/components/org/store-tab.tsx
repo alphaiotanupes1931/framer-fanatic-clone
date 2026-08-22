@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, Trash2, Pencil, ShoppingBag, X } from "lucide-react";
 import { toast } from "sonner";
@@ -64,12 +65,15 @@ export function StoreTab({
 
   const buy = async (p: Product) => {
     setBuying(p.id);
+    const pre = openExternalWindow();
     try {
       const res = await createProductCheckout({
         data: { productId: p.id, quantity: 1, returnOrigin: window.location.origin },
       });
-      if (res?.url) window.location.href = res.url;
+      if (res?.url) navigateExternal(res.url, pre);
+      else closeExternalWindow(pre);
     } catch (e) {
+      closeExternalWindow(pre);
       toast.error(e instanceof Error ? e.message : "Could not start checkout");
     } finally {
       setBuying(null);
