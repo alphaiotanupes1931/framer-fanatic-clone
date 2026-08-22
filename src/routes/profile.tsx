@@ -109,7 +109,13 @@ function ProfilePage() {
   const categoryTabs: Array<{ label: string; kind: string }> = [];
   void category; void isArtist;
   const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
-  const [tab, setTab] = useState<Tab>("Posts");
+  // Deep links (and the Stripe return URL) decide which tab opens first.
+  const [tab, setTab] = useState<Tab>(() => {
+    if (purchase === "success") return "My Tickets";
+    if (tabParam && FULL_PROFILE_TABS.includes(tabParam as never)) return tabParam;
+    return "Posts";
+  });
+
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
