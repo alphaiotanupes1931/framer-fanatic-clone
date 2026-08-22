@@ -60,7 +60,7 @@ type Org = {
   phone: string | null; email: string | null; address: string | null;
   neighborhood: string | null; avatar_url: string | null; banner_url: string | null;
   hours: Record<string, { open: string; close: string } | null> | null;
-  is_public?: boolean | null;
+  is_public?: boolean;
   bylaws?: string | null;
   rules?: string | null;
   mission?: string | null;
