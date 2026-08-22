@@ -705,19 +705,36 @@ function CheckInTab({
   const [code, setCode] = useState("");
   const total = paid.length;
 
+  // Check-ins usually happen on a phone at the door while this screen is open
+  // on another device, so keep it live instead of loading once on mount.
   useEffect(() => {
     let alive = true;
-    supabase
-      .from("tickets")
-      .select("id, checked_in_at")
-      .eq("event_id", eventId)
-      .then(({ data }) => {
-        if (!alive || !data) return;
-        const next: Record<string, string | null> = {};
-        for (const t of data as Array<{ id: string; checked_in_at: string | null }>) next[t.id] = t.checked_in_at;
-        setState(next);
-      });
-    return () => { alive = false; };
+    const load = async () => {
+      const { data } = await supabase
+        .from("tickets")
+        .select("id, checked_in_at")
+        .eq("event_id", eventId);
+      if (!alive || !data) return;
+      const next: Record<string, string | null> = {};
+      for (const t of data as Array<{ id: string; checked_in_at: string | null }>) next[t.id] = t.checked_in_at;
+      setState(next);
+    };
+    void load();
+    const timer = window.setInterval(() => { if (!document.hidden) void load(); }, 15000);
+    const onFocus = () => void load();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    const channel = supabase
+      .channel(`checkin-${eventId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "tickets", filter: `event_id=eq.${eventId}` }, () => void load())
+      .subscribe();
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+      void supabase.removeChannel(channel);
+    };
   }, [eventId]);
 
   const toggle = async (ticketId: string) => {
