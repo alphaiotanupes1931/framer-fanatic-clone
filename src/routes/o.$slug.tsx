@@ -2390,15 +2390,23 @@ function PrivatePageGate({ slug, onUnlock }: { slug: string; onUnlock: (org: Org
 
   return (
     <AppLayout title="" hero={false}>
-      <div className="mx-auto max-w-md py-16 text-center">
+      <div className="mx-auto max-w-md px-4 py-16 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-50">
           <Lock className="h-6 w-6 text-amber-700" />
         </div>
         <h1 className="text-xl font-bold text-neutral-900">This page is private</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          It is hidden from search engines and from everyone except the creator, admins, and approved members.
-          If you were given an access code, enter it below.
-        </p>
+        <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/50 p-4 text-left text-sm text-neutral-700">
+          <p className="font-semibold text-neutral-900">Why you are seeing this</p>
+          <p className="mt-1">
+            The creator of this page has set it to private. That means it is hidden from Google and other search engines, and only the creator, admins, approved members, or people with a special access code can view it.
+          </p>
+          <p className="mt-3 font-semibold text-neutral-900">Are you the creator?</p>
+          <p className="mt-1">
+            Sign in to your account, go to <span className="font-semibold">My Pages</span>, and switch this page from private to public. Once it is public, anyone can view and share it.
+          </p>
+          <p className="mt-3 font-semibold text-neutral-900">Have an access code?</p>
+          <p className="mt-1">Enter the code below to unlock this page for this browser session.</p>
+        </div>
         <form onSubmit={submit} className="mt-6 flex gap-2">
           <input
             value={code}
