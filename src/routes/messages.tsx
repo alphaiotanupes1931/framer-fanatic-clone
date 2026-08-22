@@ -977,8 +977,10 @@ function MessagesPage() {
                   const showAvatar = !mine && (!next || next.sender_id !== m.sender_id);
                   const showTime = !next || next.sender_id !== m.sender_id;
                   const sender = active.is_group ? memberById.get(m.sender_id) : active.other;
-                  const showSenderName =
-                    !mine && active.is_group && (!prev || prev.sender_id !== m.sender_id);
+                  // In a group, always label who wrote each reply so the
+                  // thread is readable even when one person sends several
+                  // messages in a row.
+                  const showSenderName = !mine && !!active.is_group;
                   return (
                     <div
                       key={m.id}
