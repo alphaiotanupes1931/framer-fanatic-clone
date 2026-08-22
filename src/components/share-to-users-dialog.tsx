@@ -7,6 +7,7 @@ import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
+import { logShareEvent } from "@/lib/share-log";
 import { getConnectionsSnapshot, loadConnections, type Person } from "@/lib/connections";
 
 function initials(name: string | null | undefined) {
@@ -121,7 +122,17 @@ export function ShareToUsersDialog({
       return;
     }
 
+    const isRetry = Boolean(targetIds && targetIds.length);
     setSending(true);
+    void logShareEvent({
+      actorId: me.id,
+      url,
+      title,
+      kind: preview?.type ?? null,
+      isRetry,
+      recipientCount: recipients.length,
+      outcome: "attempt",
+    });
     const body = preview
       ? encodeSharePreview({ ...preview, url }, note)
       : `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
@@ -131,6 +142,7 @@ export function ShareToUsersDialog({
     const nextResults: Record<string, 'success' | 'failed'> = {};
     setSentRecipients((prev) => Array.from(new Set([...prev, ...recipients])));
     try {
+
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
       for (const uid of recipients) {
         try {
@@ -188,6 +200,21 @@ export function ShareToUsersDialog({
       setResults((prev) => ({ ...prev, ...nextResults }));
       setShowResults(true);
 
+      void logShareEvent({
+        actorId: me.id,
+        url,
+        title,
+        kind: preview?.type ?? null,
+        isRetry,
+        recipientCount: recipients.length,
+        successCount: successes,
+        failureCount: failedIds.length,
+        failureReasons: failures,
+        outcome: failedIds.length === 0 ? "success" : successes > 0 ? "partial" : "failure",
+      });
+
+
+
       if (failedIds.length === 0) {
         toast.success(
           `Shared with ${successes} ${successes === 1 ? "person" : "people"}`,
@@ -212,7 +239,21 @@ export function ShareToUsersDialog({
         toast.error(failures[0] || "Failed to share");
       }
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed to share");
+      const msg = e instanceof Error ? e.message : "Failed to share";
+      void logShareEvent({
+        actorId: me.id,
+        url,
+        title,
+        kind: preview?.type ?? null,
+        isRetry,
+        recipientCount: recipients.length,
+        successCount: 0,
+        failureCount: recipients.length,
+        failureReasons: [msg],
+        outcome: "failure",
+      });
+      toast.error(msg);
+
     } finally {
       setSending(false);
     }
