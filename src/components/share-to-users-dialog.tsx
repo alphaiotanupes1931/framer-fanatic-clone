@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
@@ -26,6 +27,7 @@ export function ShareToUsersDialog({
   preview?: SharePreview;
 }) {
   const me = useCurrentProfile();
+  const navigate = useNavigate();
   const [people, setPeople] = useState<Person[]>(() => getConnectionsSnapshot(me?.id)?.all ?? []);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Record<string, boolean>>({});
@@ -81,6 +83,17 @@ export function ShareToUsersDialog({
       }),
     [failed, people],
   );
+
+  const openDetails = () => {
+    if (!url) return;
+    const isExternal = url.startsWith("http") && !url.startsWith(window.location.origin);
+    if (isExternal) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      const path = url.replace(/^https?:\/\/[^/]+/, "") || "/";
+      navigate({ to: path });
+    }
+  };
 
   const copyLink = async () => {
     try {
@@ -163,10 +176,26 @@ export function ShareToUsersDialog({
       setFailReason(failures[0] || null);
 
       if (failedIds.length === 0) {
-        toast.success(`Shared with ${successes} ${successes === 1 ? "person" : "people"}`);
+        toast.success(
+          `Shared with ${successes} ${successes === 1 ? "person" : "people"}`,
+          {
+            action: {
+              label: "View details",
+              onClick: openDetails,
+            },
+          },
+        );
         onClose();
       } else if (successes > 0) {
-        toast.warning(`Shared with ${successes} of ${recipients.length}. ${failedIds.length} did not go through.`);
+        toast.warning(
+          `Shared with ${successes} of ${recipients.length}. ${failedIds.length} did not go through.`,
+          {
+            action: {
+              label: "View details",
+              onClick: openDetails,
+            },
+          },
+        );
       } else {
         toast.error(failures[0] || "Failed to share");
       }
