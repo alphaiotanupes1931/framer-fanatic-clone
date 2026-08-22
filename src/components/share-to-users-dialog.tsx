@@ -239,7 +239,21 @@ export function ShareToUsersDialog({
         toast.error(failures[0] || "Failed to share");
       }
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed to share");
+      const msg = e instanceof Error ? e.message : "Failed to share";
+      void logShareEvent({
+        actorId: me.id,
+        url,
+        title,
+        kind: preview?.type ?? null,
+        isRetry,
+        recipientCount: recipients.length,
+        successCount: 0,
+        failureCount: recipients.length,
+        failureReasons: [msg],
+        outcome: "failure",
+      });
+      toast.error(msg);
+
     } finally {
       setSending(false);
     }
