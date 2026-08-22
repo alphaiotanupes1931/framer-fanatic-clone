@@ -48,6 +48,8 @@ import { ShareButtons } from "@/components/shared/share-buttons";
 import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { notifyGroupJoinRequest } from "@/lib/group-requests.functions";
+import { getOrgSeo, unlockOrgWithCode, setOrgAccessCode } from "@/lib/org-access.functions";
+
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
