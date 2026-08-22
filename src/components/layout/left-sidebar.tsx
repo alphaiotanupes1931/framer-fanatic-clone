@@ -23,20 +23,9 @@ import { Img } from "@/components/shared/smart-img";
 import { prefetchHandlers } from "@/lib/prefetch";
 import type { ReactNode, ComponentType } from "react";
 
-// Route-path map: repo path -> this app's existing TanStack route.
+// Desktop and mobile share one navigation config so both surfaces always
+// offer exactly the same destinations, in the same order.
 type NavItem = { icon: typeof Home; label: string; to: string };
-
-const createItems: NavItem[] = [
-  { icon: PaletteIcon, label: "Artist Page", to: "/create-artist" },
-  { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: BusinessIcon, label: "Business", to: "/create-business" },
-  { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
-  { icon: UsersIcon, label: "Groups", to: "/create-community" },
-  { icon: FileText, label: "New Post", to: "/create-post" },
-  { icon: PenLine, label: "New Story", to: "/create-story" },
-  { icon: HomeIcon, label: "Resident Profile", to: "/create-resident" },
-  { icon: PlaneIcon, label: "Visitor Profile", to: "/create-visitor" },
-];
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Home", to: "/dashboard" },
