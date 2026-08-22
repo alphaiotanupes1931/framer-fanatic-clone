@@ -43,16 +43,17 @@ import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
+import { Img, SmartFileLink, SmartVideo, SmartAvatarImage } from "@/components/shared/smart-img";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { notifyGroupJoinRequest } from "@/lib/group-requests.functions";
-import { getOrgSeo, unlockOrgWithCode, setOrgAccessCode } from "@/lib/org-access.functions";
+import { getOrgSeo, unlockOrgWithCode, setOrgAccessCode, getPrivateOrgFallback } from "@/lib/org-access.functions";
 
 
 export const Route = createFileRoute("/o/$slug")({
