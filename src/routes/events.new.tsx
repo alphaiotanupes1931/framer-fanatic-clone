@@ -353,19 +353,14 @@ function NewEventPage() {
             </select>
           </Field>
 
-          <Field label="Ticketing Mode" required>
-            <select className={inputCls} value={form.ticketing} onChange={(e) => set("ticketing", e.target.value as "rsvp" | "paid")}>
-              <option value="rsvp">RSVP Only</option>
-              <option value="paid">Paid Tickets</option>
-            </select>
-          </Field>
+          <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
+            <div className="text-sm font-semibold text-neutral-900">Tickets are set up next</div>
+            <p className="mt-1 text-[13px] text-neutral-600">
+              After you create this event you go straight to Organizer Studio, where you add your ticket types
+              (free RSVP, general admission, tiers, prices, and quantities).
+            </p>
+          </div>
 
-          {form.ticketing === "paid" && (
-            <Field label="Ticket Price (USD you net)" required>
-              <input type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" value={form.price} onChange={(e) => set("price", e.target.value)} />
-              <p className="mt-1 text-[11px] text-neutral-500">Processing fees and the platform fee are added on top automatically.</p>
-            </Field>
-          )}
 
           <Field label="Capacity" optional>
             <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
