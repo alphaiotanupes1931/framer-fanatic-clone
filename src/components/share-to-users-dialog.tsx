@@ -123,7 +123,7 @@ export function ShareToUsersDialog({
     setFailed([]);
     setFailReason(null);
     setResults({});
-    setShowResults(false);
+    setStep('select');
     setSentRecipients([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -211,7 +211,7 @@ export function ShareToUsersDialog({
   };
 
   useEffect(() => {
-    if (!open || showResults || selectedIds.length === 0) {
+    if (!open || step === 'results' || selectedIds.length === 0) {
       setInvalid({});
       return;
     }
@@ -230,7 +230,7 @@ export function ShareToUsersDialog({
       clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, showResults, selectedIds.join(",")]);
+  }, [open, step === 'results', selectedIds.join(",")]);
 
   const invalidIds = useMemo(() => Object.keys(invalid), [invalid]);
 
@@ -363,7 +363,7 @@ export function ShareToUsersDialog({
       setFailed(failedIds);
       setFailReason(failures[0] || null);
       setResults((prev) => ({ ...prev, ...nextResults }));
-      setShowResults(true);
+      setStep('results');
 
       void logShareEvent({
         actorId: me.id,
@@ -507,7 +507,7 @@ export function ShareToUsersDialog({
           </button>
 
 
-          {!showResults && (
+          {!step === 'results' && (
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
               <input
@@ -519,7 +519,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {showResults ? (
+          {step === 'results' ? (
             <div className="rounded-lg border border-neutral-200">
               <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
                 <Check className="h-3.5 w-3.5" /> Results ({sentRecipients.length} {sentRecipients.length === 1 ? "person" : "people"})
@@ -622,7 +622,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {!showResults && (
+          {!step === 'results' && (
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -634,13 +634,13 @@ export function ShareToUsersDialog({
         </div>
 
         <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
-          {!showResults && people.length > 0 && selectedIds.length === 0 && (
+          {!step === 'results' && people.length > 0 && selectedIds.length === 0 && (
             <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
               <span className="font-semibold">Select at least one person</span> to share with.
             </div>
           )}
 
-          {!showResults && invalidIds.length > 0 && (
+          {!step === 'results' && invalidIds.length > 0 && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
@@ -673,7 +673,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {!showResults && checking && selectedIds.length > 0 && (
+          {!step === 'results' && checking && selectedIds.length > 0 && (
             <div className="text-xs text-neutral-500">Checking recipients…</div>
           )}
 
@@ -706,14 +706,14 @@ export function ShareToUsersDialog({
           )}
           <button
             type="button"
-            disabled={sending || (!showResults && selectedIds.length === 0)}
-            onClick={() => (showResults ? onClose() : void send())}
+            disabled={sending || (!step === 'results' && selectedIds.length === 0)}
+            onClick={() => (step === 'results' ? onClose() : void send())}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:bg-neutral-300"
           >
-            {showResults ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+            {step === 'results' ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
             {sending
               ? "Sending…"
-              : showResults
+              : step === 'results'
               ? "Done"
               : selectedIds.length > 0
               ? `Send to ${selectedIds.length} ${selectedIds.length === 1 ? "person" : "people"}`
