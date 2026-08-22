@@ -56,18 +56,28 @@ export function ShareToUsersDialog({
     return () => { cancelled = true; };
   }, [open, me?.id]);
 
+  // Persist the in-progress selection + note so closing and reopening the
+  // dialog for the same content does not lose the user's work.
   useEffect(() => {
-    if (!open) {
-      setSelected({});
-      setNote("");
-      setQ("");
-      setFailed([]);
-      setFailReason(null);
-      setResults({});
-      setShowResults(false);
-      setSentRecipients([]);
+    if (open) {
+      const draft = readShareDraft(url);
+      if (draft) {
+        setSelected(draft.selected || {});
+        setNote(draft.note || "");
+      }
+      return;
     }
+    // Closing: keep the draft, reset only transient send/result state.
+    writeShareDraft(url, { selected, note });
+    setQ("");
+    setFailed([]);
+    setFailReason(null);
+    setResults({});
+    setShowResults(false);
+    setSentRecipients([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
