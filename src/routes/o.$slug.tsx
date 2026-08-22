@@ -2367,9 +2367,32 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
  * only ever see this shell plus a noindex tag; the real content is never sent.
  * Someone holding the owner's access code can unlock it for this browser tab.
  */
+type FallbackInfo = {
+  id: string;
+  name: string;
+  slug: string;
+  ownerId: string;
+  owner: { id: string; display_name: string | null; username: string | null; avatar_url: string | null } | null;
+};
+
 function PrivatePageGate({ slug, onUnlock }: { slug: string; onUnlock: (org: Org) => void }) {
+  const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [me, setMe] = useState<string | null>(null);
+  const [info, setInfo] = useState<FallbackInfo | null>(null);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+  const [followBusy, setFollowBusy] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [contactBusy, setContactBusy] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
+    setLoadingInfo(true);
+    getPrivateOrgFallback({ data: { slug } })
+      .then(setInfo)
+      .finally(() => setLoadingInfo(false));
+  }, [slug]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2384,6 +2407,72 @@ function PrivatePageGate({ slug, onUnlock }: { slug: string; onUnlock: (org: Org
       toast.error("Could not unlock this page");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!me) {
+      navigate({ to: "/auth", search: { redirect: `/o/${slug}` } });
+      return;
+    }
+    if (!info) return;
+    setFollowBusy(true);
+    try {
+      const { error } = await supabase
+        .from("organization_followers")
+        .insert({ organization_id: info.id, user_id: me });
+      if (error) {
+        if (error.code === "23505") {
+          toast.info("You are already following this page");
+          setIsFollowing(true);
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success(`You are now following ${info.name}`);
+        setIsFollowing(true);
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not follow this page");
+    } finally {
+      setFollowBusy(false);
+    }
+  };
+
+  const handleContact = async () => {
+    if (!me) {
+      navigate({ to: "/auth", search: { redirect: `/o/${slug}` } });
+      return;
+    }
+    if (!info?.owner) return;
+    setContactBusy(true);
+    try {
+      const ownerId = info.ownerId;
+      const [a, b] = me < ownerId ? [me, ownerId] : [ownerId, me];
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("user_a", a)
+        .eq("user_b", b)
+        .maybeSingle();
+      let conversationId = existing?.id;
+      if (!existing) {
+        const { data: created, error } = await supabase
+          .from("conversations")
+          .insert({ user_a: a, user_b: b })
+          .select("id")
+          .single();
+        if (error) throw error;
+        conversationId = created?.id;
+      }
+      if (conversationId) {
+        window.localStorage.setItem("pb_open_conversation", conversationId);
+        navigate({ to: "/messages" });
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not start a message");
+    } finally {
+      setContactBusy(false);
     }
   };
 
@@ -2406,6 +2495,62 @@ function PrivatePageGate({ slug, onUnlock }: { slug: string; onUnlock: (org: Org
           <p className="mt-3 font-semibold text-neutral-900">Have an access code?</p>
           <p className="mt-1">Enter the code below to unlock this page for this browser session.</p>
         </div>
+
+        {/* Fallback actions for visitors */}
+        <div className="mt-6 rounded-2xl border border-neutral-200 bg-white p-5 text-left shadow-sm">
+          <div className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Still want to connect?</div>
+          {loadingInfo ? (
+            <div className="mt-4 flex items-center gap-3 text-sm text-neutral-500">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading page info…
+            </div>
+          ) : info ? (
+            <>
+              <div className="mt-3 flex items-center gap-3">
+                <Avatar className="h-11 w-11">
+                  {info.owner?.avatar_url && (
+                    <SmartAvatarImage src={info.owner.avatar_url} alt={info.owner.display_name || "Owner"} />
+                  )}
+                  <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">
+                    {(info.owner?.display_name || info.owner?.username || "O")[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="truncate text-base font-bold text-neutral-900">{info.name}</div>
+                  <div className="truncate text-sm text-neutral-500">
+                    {info.owner?.display_name || info.owner?.username || "Page owner"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-2">
+                <button
+                  type="button"
+                  onClick={handleFollow}
+                  disabled={followBusy || isFollowing}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-60"
+                >
+                  {followBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
+                  {isFollowing ? "Following" : me ? `Follow ${info.name}` : "Sign in to follow"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleContact}
+                  disabled={contactBusy}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] transition hover:bg-[#d4580a]/[0.06] disabled:opacity-60"
+                >
+                  {contactBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+                  {me ? "Message the owner" : "Sign in to message the owner"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="mt-3 text-sm text-neutral-500">
+              This page is not available to visitors right now. You can still browse other public pages on Planet Baltimore.
+            </div>
+          )}
+        </div>
+
         <form onSubmit={submit} className="mt-6 flex gap-2">
           <input
             value={code}
