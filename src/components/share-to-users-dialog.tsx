@@ -88,53 +88,71 @@ export function ShareToUsersDialog({
       return;
     }
     setSending(true);
+    const body = preview
+      ? encodeSharePreview({ ...preview, url }, note)
+      : `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
+    let successes = 0;
+    const failures: string[] = [];
     try {
-      const body = preview
-        ? encodeSharePreview({ ...preview, url }, note)
-        : `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
       for (const uid of selectedIds) {
-        const { data: mine } = await supabase
-          .from("conversation_members")
-          .select("conversation_id")
-          .eq("user_id", me.id);
-        const myConvIds = (mine ?? []).map((r: { conversation_id: string }) => r.conversation_id);
-        let convId: string | null = null;
-        if (myConvIds.length) {
-          const { data: shared } = await supabase
+        try {
+          const { data: mine } = await supabase
             .from("conversation_members")
             .select("conversation_id")
-            .eq("user_id", uid)
-            .in("conversation_id", myConvIds);
-          convId = (shared ?? [])[0]?.conversation_id ?? null;
+            .eq("user_id", me.id);
+          const myConvIds = (mine ?? []).map((r: { conversation_id: string }) => r.conversation_id);
+          let convId: string | null = null;
+          if (myConvIds.length) {
+            const { data: shared } = await supabase
+              .from("conversation_members")
+              .select("conversation_id")
+              .eq("user_id", uid)
+              .in("conversation_id", myConvIds);
+            convId = (shared ?? [])[0]?.conversation_id ?? null;
+          }
+          if (!convId) {
+            const { data: conv, error } = await supabase
+              .from("conversations")
+              .insert({
+                is_group: false,
+                created_by: me.id,
+                user_a: me.id,
+                user_b: uid,
+                last_message_preview: (title || url).slice(0, 140),
+              })
+              .select("id")
+              .single();
+            if (error || !conv) throw error || new Error("Could not create conversation");
+            convId = conv.id;
+            const { error: mErr } = await supabase.from("conversation_members").insert([
+              { conversation_id: convId, user_id: me.id },
+              { conversation_id: convId, user_id: uid },
+            ]);
+            if (mErr) throw mErr;
+          }
+          const { error: msgErr } = await supabase
+            .from("messages")
+            .insert({ conversation_id: convId, sender_id: me.id, content: body });
+          if (msgErr) throw msgErr;
+          successes += 1;
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : "Could not send";
+          failures.push(msg);
+          console.error("Share to user failed", { uid, error: msg });
         }
-        if (!convId) {
-          const { data: conv, error } = await supabase
-            .from("conversations")
-            .insert({
-              is_group: false,
-              created_by: me.id,
-              user_a: me.id,
-              user_b: uid,
-              last_message_preview: (title || url).slice(0, 140),
-            })
-            .select("id")
-            .single();
-          if (error || !conv) throw error || new Error("Could not create conversation");
-          convId = conv.id;
-          const { error: mErr } = await supabase.from("conversation_members").insert([
-            { conversation_id: convId, user_id: me.id },
-            { conversation_id: convId, user_id: uid },
-          ]);
-          if (mErr) throw mErr;
-        }
-        const { error: msgErr } = await supabase
-          .from("messages")
-          .insert({ conversation_id: convId, sender_id: me.id, content: body });
-        if (msgErr) throw msgErr;
       }
-      toast.success(`Shared with ${selectedIds.length} ${selectedIds.length === 1 ? "person" : "people"}`);
-      onClose();
+
+      if (successes > 0) {
+        toast.success(
+          failures.length === 0
+            ? `Shared with ${successes} ${successes === 1 ? "person" : "people"}`
+            : `Shared with ${successes} of ${selectedIds.length} people`,
+        );
+        onClose();
+      } else {
+        toast.error(failures[0] || "Failed to share");
+      }
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed to share");
     } finally {
