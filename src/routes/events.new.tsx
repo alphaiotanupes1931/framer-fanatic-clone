@@ -49,8 +49,6 @@ function NewEventPage() {
     address: "",
     neighborhood: "",
     category: "community",
-    ticketing: "rsvp" as "rsvp" | "paid",
-    price: "",
     capacity: "",
   });
 
@@ -165,7 +163,6 @@ function NewEventPage() {
     try {
       const starts = startMode === "now" ? new Date().toISOString() : new Date(form.starts_at).toISOString();
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
-      const priceCents = form.ticketing === "paid" ? Math.max(0, Math.round(parseFloat(form.price || "0") * 100)) : 0;
       const capacity = form.capacity ? Math.max(0, parseInt(form.capacity, 10)) : null;
 
       const { data, error } = await supabase.from("events").insert({
@@ -183,7 +180,7 @@ function NewEventPage() {
         location: isOnline ? "Online" : form.venue_name.trim() || form.address.trim() || null,
         neighborhood: isOnline ? "Online" : form.neighborhood || null,
         category: form.category || null,
-        price_cents: priceCents,
+        price_cents: 0,
         capacity,
       }).select("id").single();
 
@@ -193,7 +190,7 @@ function NewEventPage() {
           : error.message);
         return;
       }
-      toast.success("Event created. Add your ticket types.");
+      toast.success("Event created. Now set up your ticket types.");
       // Organizers land in the studio so they can set up ticket types right away.
       navigate({ to: "/organizer-studio", search: { event: (data as { id: string }).id } });
     } finally {
