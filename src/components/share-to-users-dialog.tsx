@@ -121,7 +121,17 @@ export function ShareToUsersDialog({
       return;
     }
 
+    const isRetry = Boolean(targetIds && targetIds.length);
     setSending(true);
+    void logShareEvent({
+      actorId: me.id,
+      url,
+      title,
+      kind: preview?.kind ?? null,
+      isRetry,
+      recipientCount: recipients.length,
+      outcome: "attempt",
+    });
     const body = preview
       ? encodeSharePreview({ ...preview, url }, note)
       : `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
@@ -131,6 +141,7 @@ export function ShareToUsersDialog({
     const nextResults: Record<string, 'success' | 'failed'> = {};
     setSentRecipients((prev) => Array.from(new Set([...prev, ...recipients])));
     try {
+
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
       for (const uid of recipients) {
         try {
