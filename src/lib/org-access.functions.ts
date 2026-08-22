@@ -81,3 +81,32 @@ export const setOrgAccessCode = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+/** Public-safe fallback info for a private page: name and owner so visitors can still follow or contact. */
+export const getPrivateOrgFallback = createServerFn({ method: "GET" })
+  .inputValidator((data: { slug: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: org } = await supabaseAdmin
+        .from("organizations")
+        .select("id, name, owner_id, is_public")
+        .eq("slug", data.slug)
+        .maybeSingle();
+      if (!org || org.is_public !== false) return null;
+      const { data: owner } = await supabaseAdmin
+        .from("profiles")
+        .select("id, display_name, username, avatar_url")
+        .eq("id", org.owner_id)
+        .maybeSingle();
+      return {
+        id: org.id as string,
+        name: org.name as string,
+        slug: data.slug,
+        ownerId: org.owner_id as string,
+        owner: owner as { id: string; display_name: string | null; username: string | null; avatar_url: string | null } | null,
+      };
+    } catch {
+      return null;
+    }
+  });
