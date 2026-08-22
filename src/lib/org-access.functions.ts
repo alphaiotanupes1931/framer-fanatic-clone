@@ -61,7 +61,9 @@ export const unlockOrgWithCode = createServerFn({ method: "POST" })
     const hash = await sha256Hex(code.toLowerCase());
     if (hash !== row.access_code_hash) return { ok: false as const };
     const { access_code_hash: _omit, ...safe } = row as Record<string, unknown>;
-    return { ok: true as const, org: JSON.parse(JSON.stringify(safe)) as Record<string, string | number | boolean | null> };
+    // Serialized as a string so the payload stays trivially serializable.
+    return { ok: true as const, orgJson: JSON.stringify(safe) };
+
 
   });
 
