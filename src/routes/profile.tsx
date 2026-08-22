@@ -1388,7 +1388,90 @@ function ArtistEventsTab({ userId }: { userId: string }) {
   );
 }
 
+/**
+ * Shown when Stripe sends the buyer back after a paid checkout. Stripe's own
+ * redirect is silent, so without this the purchase looked like it vanished.
+ * It confirms the order with Stripe (in case the webhook is slow or missed),
+ * which also triggers the receipt email, then links straight to the ticket.
+ */
+function PurchaseConfirmation({ sessionId }: { sessionId?: string }) {
+  const reconcile = useServerFn(reconcileMyTickets);
+  const [open, setOpen] = useState(true);
+  const [state, setState] = useState<"working" | "done" | "pending">("working");
+  const [ticketId, setTicketId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await reconcile({ data: sessionId ? { sessionId } : {} });
+      } catch { /* webhook may have already handled it */ }
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) return;
+      let q = supabase
+        .from("tickets")
+        .select("id, status")
+        .eq("buyer_id", uid)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (sessionId) q = q.eq("stripe_checkout_session_id", sessionId);
+      const { data } = await q;
+      if (cancelled) return;
+      const row = data?.[0];
+      setTicketId(row?.id ?? null);
+      setState(row?.status === "paid" ? "done" : "pending");
+    })();
+    return () => { cancelled = true; };
+  }, [sessionId]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-sm rounded-2xl bg-background p-6 text-center shadow-xl">
+        {state === "working" ? (
+          <>
+            <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-[#d4580a]" />
+            <h2 className="text-lg font-bold">Confirming your purchase…</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Hang tight, this only takes a second.</p>
+          </>
+        ) : state === "done" ? (
+          <>
+            <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-emerald-600" />
+            <h2 className="text-lg font-bold">You're in! Ticket confirmed</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your receipt and ticket PDF are on the way by email. You can also open your ticket right here.
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              {ticketId && (
+                <Link to="/tickets/$ticketId" params={{ ticketId }} className="rounded-full bg-[#d4580a] px-4 py-2.5 text-sm font-semibold text-white">
+                  View my ticket
+                </Link>
+              )}
+              <button onClick={() => setOpen(false)} className="rounded-full border border-border px-4 py-2.5 text-sm font-semibold">
+                Back to My Tickets
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <AlertCircle className="mx-auto mb-3 h-12 w-12 text-amber-500" />
+            <h2 className="text-lg font-bold">Payment received, finishing up</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your bank confirmed the payment. The ticket will appear in My Tickets within a minute and we'll email your receipt.
+            </p>
+            <button onClick={() => setOpen(false)} className="mt-5 w-full rounded-full border border-border px-4 py-2.5 text-sm font-semibold">
+              Close
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MyTicketsTab() {
+
   type TicketRow = {
     id: string; status: string; buyer_total_cents: number; event_id: string;
     events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null;
