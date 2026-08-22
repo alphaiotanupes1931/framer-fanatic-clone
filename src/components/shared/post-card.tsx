@@ -319,7 +319,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
             tabIndex={0}
             onClick={() => navigate({ to: "/posts/$postId", params: { postId: post.id } })}
             onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/posts/$postId", params: { postId: post.id } }); }}
-            className={`order-3 mx-4 my-3 block cursor-pointer rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
+            className={`order-3 mx-4 my-3 flex aspect-square cursor-pointer items-center justify-center overflow-y-auto rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
               post.font_size === "sm" ? "text-base" :
               post.font_size === "lg" ? "text-3xl" :
               post.font_size === "xl" ? "text-5xl" :
