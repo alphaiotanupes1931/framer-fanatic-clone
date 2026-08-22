@@ -2369,6 +2369,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                         </button>
                       </div>
                     )}
+                    <OrgPostComments orgId={orgId} postId={p.id} />
                   </div>
                 </div>
               );
