@@ -3547,6 +3547,15 @@ export type Database = {
         }[]
       }
       touch_last_seen: { Args: never; Returns: undefined }
+      validate_share_recipients: {
+        Args: { _ids: string[] }
+        Returns: {
+          display_name: string
+          id: string
+          status: string
+          username: string
+        }[]
+      }
       verify_ticket: {
         Args: { _ticket_id: string }
         Returns: {

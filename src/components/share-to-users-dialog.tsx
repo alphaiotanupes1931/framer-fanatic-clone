@@ -15,6 +15,14 @@ function initials(name: string | null | undefined) {
 }
 
 type ShareDraft = { selected: Record<string, boolean>; note: string };
+type RecipientIssue = "deactivated" | "blocked" | "missing";
+type ValidationRow = { id: string; display_name: string | null; username: string | null; status: string };
+const ISSUE_LABEL: Record<RecipientIssue, string> = {
+  deactivated: "account deactivated",
+  blocked: "not connected with you",
+  missing: "account no longer exists",
+};
+
 
 const draftKey = (url: string) => `pb:share-draft:${url}`;
 
@@ -79,6 +87,9 @@ export function ShareToUsersDialog({
   const [results, setResults] = useState<Record<string, 'success' | 'failed'>>({});
   const [showResults, setShowResults] = useState(false);
   const [sentRecipients, setSentRecipients] = useState<string[]>([]);
+  const [invalid, setInvalid] = useState<Record<string, RecipientIssue>>({});
+  const [checking, setChecking] = useState(false);
+
 
   useEffect(() => {
     if (!open || !me?.id) return;
@@ -173,6 +184,57 @@ export function ShareToUsersDialog({
     [failed, people],
   );
 
+  // ----- Recipient validation (deactivated / blocked / missing accounts) -----
+  const nameOf = (id: string) => {
+    const p = people.find((x) => x.id === id);
+    return p?.display_name || p?.username || "Someone";
+  };
+
+  const validateRecipients = async (ids: string[]): Promise<Record<string, RecipientIssue>> => {
+    if (ids.length === 0) return {};
+    try {
+      const { data, error } = await supabase.rpc(
+        "validate_share_recipients" as never,
+        { _ids: ids } as never,
+      );
+      if (error) throw error;
+      const rows = (data as unknown as ValidationRow[]) ?? [];
+      const map: Record<string, RecipientIssue> = {};
+      for (const r of rows) {
+        if (r.status && r.status !== "ok") map[r.id] = r.status as RecipientIssue;
+      }
+      return map;
+    } catch (e) {
+      console.warn("Recipient validation unavailable", e);
+      return {};
+    }
+  };
+
+  useEffect(() => {
+    if (!open || showResults || selectedIds.length === 0) {
+      setInvalid({});
+      return;
+    }
+    let cancelled = false;
+    setChecking(true);
+    const t = setTimeout(() => {
+      void validateRecipients(selectedIds).then((map) => {
+        if (cancelled) return;
+        setInvalid(map);
+        setChecking(false);
+      });
+    }, 350);
+    return () => {
+      cancelled = true;
+      setChecking(false);
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, showResults, selectedIds.join(",")]);
+
+  const invalidIds = useMemo(() => Object.keys(invalid), [invalid]);
+
+
   const openDetails = () => {
     if (!url) return;
     const isExternal = url.startsWith("http") && !url.startsWith(window.location.origin);
@@ -198,13 +260,34 @@ export function ShareToUsersDialog({
       toast.error("Please sign in");
       return;
     }
-    const recipients = targetIds && targetIds.length ? targetIds : selectedIds;
-    if (recipients.length === 0) {
+    const requested = targetIds && targetIds.length ? targetIds : selectedIds;
+    if (requested.length === 0) {
       toast.error("Select at least one person to share with.");
       return;
     }
 
+    // Final safety check right before sending, in case someone was deactivated
+    // or unfollowed while the dialog was open.
+    setChecking(true);
+    const issues = await validateRecipients(requested);
+    setChecking(false);
+    setInvalid(issues);
+    const blockedNames = Object.keys(issues).map((id) => `${nameOf(id)} (${ISSUE_LABEL[issues[id]]})`);
+    const recipients = requested.filter((id) => !issues[id]);
+    if (recipients.length === 0) {
+      toast.error(
+        blockedNames.length
+          ? `Can't share with ${blockedNames.join(", ")}`
+          : "Select at least one person to share with.",
+      );
+      return;
+    }
+    if (blockedNames.length) {
+      toast.warning(`Skipping ${blockedNames.length}: ${blockedNames.join(", ")}`);
+    }
+
     const isRetry = Boolean(targetIds && targetIds.length);
+
     setSending(true);
     void logShareEvent({
       actorId: me.id,
@@ -556,6 +639,45 @@ export function ShareToUsersDialog({
               <span className="font-semibold">Select at least one person</span> to share with.
             </div>
           )}
+
+          {!showResults && invalidIds.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-red-900">
+                    {invalidIds.length} {invalidIds.length === 1 ? "person can't" : "people can't"} be shared with
+                  </div>
+                  <ul className="mt-1 space-y-0.5 text-xs text-red-800">
+                    {invalidIds.map((id) => (
+                      <li key={id} className="truncate">
+                        {nameOf(id)} ({ISSUE_LABEL[invalid[id]]})
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelected((s) => {
+                        const next = { ...s };
+                        for (const id of invalidIds) next[id] = false;
+                        return next;
+                      })
+                    }
+                    className="mt-2 rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-900 hover:bg-red-100"
+                  >
+                    Remove them from the list
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!showResults && checking && selectedIds.length > 0 && (
+            <div className="text-xs text-neutral-500">Checking recipients…</div>
+          )}
+
+
 
           {failed.length > 0 && (
             <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
