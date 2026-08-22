@@ -173,6 +173,57 @@ export function ShareToUsersDialog({
     [failed, people],
   );
 
+  // ----- Recipient validation (deactivated / blocked / missing accounts) -----
+  const nameOf = (id: string) => {
+    const p = people.find((x) => x.id === id);
+    return p?.display_name || p?.username || "Someone";
+  };
+
+  const validateRecipients = async (ids: string[]): Promise<Record<string, RecipientIssue>> => {
+    if (ids.length === 0) return {};
+    try {
+      const { data, error } = await supabase.rpc(
+        "validate_share_recipients" as never,
+        { _ids: ids } as never,
+      );
+      if (error) throw error;
+      const rows = (data as unknown as ValidationRow[]) ?? [];
+      const map: Record<string, RecipientIssue> = {};
+      for (const r of rows) {
+        if (r.status && r.status !== "ok") map[r.id] = r.status as RecipientIssue;
+      }
+      return map;
+    } catch (e) {
+      console.warn("Recipient validation unavailable", e);
+      return {};
+    }
+  };
+
+  useEffect(() => {
+    if (!open || showResults || selectedIds.length === 0) {
+      setInvalid({});
+      return;
+    }
+    let cancelled = false;
+    setChecking(true);
+    const t = setTimeout(() => {
+      void validateRecipients(selectedIds).then((map) => {
+        if (cancelled) return;
+        setInvalid(map);
+        setChecking(false);
+      });
+    }, 350);
+    return () => {
+      cancelled = true;
+      setChecking(false);
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, showResults, selectedIds.join(",")]);
+
+  const invalidIds = useMemo(() => Object.keys(invalid), [invalid]);
+
+
   const openDetails = () => {
     if (!url) return;
     const isExternal = url.startsWith("http") && !url.startsWith(window.location.origin);
