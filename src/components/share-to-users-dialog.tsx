@@ -85,7 +85,7 @@ export function ShareToUsersDialog({
   const [failed, setFailed] = useState<string[]>([]);
   const [failReason, setFailReason] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, 'success' | 'failed'>>({});
-  const [showResults, setShowResults] = useState(false);
+  const [step, setStep] = useState<'select' | 'confirm' | 'results'>('select');
   const [sentRecipients, setSentRecipients] = useState<string[]>([]);
   const [invalid, setInvalid] = useState<Record<string, RecipientIssue>>({});
   const [checking, setChecking] = useState(false);
@@ -123,7 +123,7 @@ export function ShareToUsersDialog({
     setFailed([]);
     setFailReason(null);
     setResults({});
-    setShowResults(false);
+    setStep('select');
     setSentRecipients([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -211,7 +211,7 @@ export function ShareToUsersDialog({
   };
 
   useEffect(() => {
-    if (!open || showResults || selectedIds.length === 0) {
+    if (!open || step === 'results' || selectedIds.length === 0) {
       setInvalid({});
       return;
     }
@@ -230,7 +230,7 @@ export function ShareToUsersDialog({
       clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, showResults, selectedIds.join(",")]);
+  }, [open, step === 'results', selectedIds.join(",")]);
 
   const invalidIds = useMemo(() => Object.keys(invalid), [invalid]);
 
@@ -363,7 +363,7 @@ export function ShareToUsersDialog({
       setFailed(failedIds);
       setFailReason(failures[0] || null);
       setResults((prev) => ({ ...prev, ...nextResults }));
-      setShowResults(true);
+      setStep('results');
 
       void logShareEvent({
         actorId: me.id,
@@ -507,7 +507,7 @@ export function ShareToUsersDialog({
           </button>
 
 
-          {!showResults && (
+          {step === 'select' && (
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
               <input
@@ -519,51 +519,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {showResults ? (
-            <div className="rounded-lg border border-neutral-200">
-              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
-                <Check className="h-3.5 w-3.5" /> Results ({sentRecipients.length} {sentRecipients.length === 1 ? "person" : "people"})
-              </div>
-              <div className="max-h-64 overflow-y-auto">
-                {sentRecipients.length === 0 ? (
-                  <div className="p-6 text-center text-sm text-neutral-500">No results yet.</div>
-                ) : (
-                  sentRecipients.map((uid) => {
-                    const p = people.find((x) => x.id === uid);
-                    const status = results[uid];
-                    if (!p) return null;
-                    return (
-                      <div
-                        key={uid}
-                        className="flex items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0"
-                      >
-                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
-                          {p.avatar_url ? (
-                            <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            initials(p.display_name || p.username)
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username}</div>
-                          {p.username && <div className="truncate text-xs text-neutral-500">@{p.username}</div>}
-                        </div>
-                        {status === 'success' ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600">
-                            <Check className="h-4 w-4" /> Sent
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600">
-                            <X className="h-4 w-4" /> Failed
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          ) : (
+          {step === 'select' && (
             <div className="rounded-lg border border-neutral-200">
               <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-2.5">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-neutral-600">
@@ -622,7 +578,99 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {!showResults && (
+          {step === 'confirm' && (
+            <div className="rounded-lg border border-neutral-200 bg-white">
+              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
+                <Send className="h-3.5 w-3.5" /> Ready to share?
+              </div>
+              <div className="space-y-4 p-4">
+                <div>
+                  <div className="text-sm font-semibold text-neutral-900">
+                    Sending to {selectedIds.length} {selectedIds.length === 1 ? "person" : "people"}
+                  </div>
+                  <div className="mt-2 max-h-48 space-y-2 overflow-y-auto rounded-md bg-neutral-50 p-2">
+                    {selectedIds.map((uid) => {
+                      const p = people.find((x) => x.id === uid);
+                      if (!p) return null;
+                      return (
+                        <div key={uid} className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
+                            {p.avatar_url ? (
+                              <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              initials(p.display_name || p.username)
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1 text-sm text-neutral-800">
+                            <span className="font-semibold">{p.display_name || p.username}</span>
+                            {p.username && <span className="text-neutral-500"> @{p.username}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                {note.trim() ? (
+                  <div>
+                    <div className="text-sm font-semibold text-neutral-900">Your note</div>
+                    <div className="mt-1 whitespace-pre-wrap rounded-md bg-neutral-50 p-3 text-sm text-neutral-700">
+                      {note.trim()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-neutral-500">No note added.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 'results' && (
+            <div className="rounded-lg border border-neutral-200">
+              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
+                <Check className="h-3.5 w-3.5" /> Results ({sentRecipients.length} {sentRecipients.length === 1 ? "person" : "people"})
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {sentRecipients.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-neutral-500">No results yet.</div>
+                ) : (
+                  sentRecipients.map((uid) => {
+                    const p = people.find((x) => x.id === uid);
+                    const status = results[uid];
+                    if (!p) return null;
+                    return (
+                      <div
+                        key={uid}
+                        className="flex items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0"
+                      >
+                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
+                          {p.avatar_url ? (
+                            <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            initials(p.display_name || p.username)
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username}</div>
+                          {p.username && <div className="truncate text-xs text-neutral-500">@{p.username}</div>}
+                        </div>
+                        {status === 'success' ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600">
+                            <Check className="h-4 w-4" /> Sent
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600">
+                            <X className="h-4 w-4" /> Failed
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 'select' && (
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -634,13 +682,13 @@ export function ShareToUsersDialog({
         </div>
 
         <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
-          {!showResults && people.length > 0 && selectedIds.length === 0 && (
+          {step === 'select' && people.length > 0 && selectedIds.length === 0 && (
             <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
               <span className="font-semibold">Select at least one person</span> to share with.
             </div>
           )}
 
-          {!showResults && invalidIds.length > 0 && (
+          {step === 'select' && invalidIds.length > 0 && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
@@ -673,7 +721,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {!showResults && checking && selectedIds.length > 0 && (
+          {step === 'select' && checking && selectedIds.length > 0 && (
             <div className="text-xs text-neutral-500">Checking recipients…</div>
           )}
 
@@ -704,17 +752,33 @@ export function ShareToUsersDialog({
               </button>
             </div>
           )}
+          {step === 'confirm' && (
+            <button
+              type="button"
+              disabled={sending}
+              onClick={() => setStep('select')}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Back to edit
+            </button>
+          )}
           <button
             type="button"
-            disabled={sending || (!showResults && selectedIds.length === 0)}
-            onClick={() => (showResults ? onClose() : void send())}
+            disabled={sending || (step === 'select' && selectedIds.length === 0) || (step === 'confirm' && invalidIds.length > 0)}
+            onClick={() => {
+              if (step === 'results') return onClose();
+              if (step === 'confirm') return void send();
+              setStep('confirm');
+            }}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:bg-neutral-300"
           >
-            {showResults ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+            {step === 'results' ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
             {sending
               ? "Sending…"
-              : showResults
+              : step === 'results'
               ? "Done"
+              : step === 'confirm'
+              ? `Confirm send to ${selectedIds.length} ${selectedIds.length === 1 ? "person" : "people"}`
               : selectedIds.length > 0
               ? `Send to ${selectedIds.length} ${selectedIds.length === 1 ? "person" : "people"}`
               : "Select people to share"}
