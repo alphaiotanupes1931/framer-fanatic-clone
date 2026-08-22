@@ -82,6 +82,39 @@ export function ShareToUsersDialog({
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
+  const allFilteredSelected = useMemo(
+    () => filtered.length > 0 && filtered.every((p) => selected[p.id]),
+    [filtered, selected],
+  );
+
+  const selectAllFiltered = () => {
+    setSelected((s) => {
+      const next = { ...s };
+      for (const p of filtered) {
+        next[p.id] = true;
+      }
+      return next;
+    });
+  };
+
+  const deselectAllFiltered = () => {
+    setSelected((s) => {
+      const next = { ...s };
+      for (const p of filtered) {
+        next[p.id] = false;
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      deselectAllFiltered();
+    } else {
+      selectAllFiltered();
+    }
+  };
+
   const failedNames = useMemo(
     () =>
       failed.map((id) => {
@@ -396,8 +429,19 @@ export function ShareToUsersDialog({
             </div>
           ) : (
             <div className="rounded-lg border border-neutral-200">
-              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
-                <Users className="h-3.5 w-3.5" /> Followers ({selectedIds.length} selected)
+              <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-2.5">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-neutral-600">
+                  <Users className="h-3.5 w-3.5" /> Followers ({selectedIds.length} selected)
+                </div>
+                {filtered.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={toggleSelectAll}
+                    className="text-xs font-semibold text-[#d4580a] hover:underline"
+                  >
+                    {allFilteredSelected ? "Deselect all" : "Select all followers"}
+                  </button>
+                )}
               </div>
               <div className="max-h-64 overflow-y-auto">
                 {loading ? (
