@@ -172,6 +172,8 @@ function OrgProfile() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
   const autoJoinDone = useRef(false);
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
   }, []);
