@@ -2559,6 +2559,51 @@ export type Database = {
         }
         Relationships: []
       }
+      share_events: {
+        Row: {
+          actor_id: string
+          created_at: string
+          failure_count: number
+          failure_reasons: string[]
+          id: string
+          is_retry: boolean
+          outcome: string
+          recipient_count: number
+          share_kind: string | null
+          share_title: string | null
+          share_url: string | null
+          success_count: number
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          failure_count?: number
+          failure_reasons?: string[]
+          id?: string
+          is_retry?: boolean
+          outcome?: string
+          recipient_count?: number
+          share_kind?: string | null
+          share_title?: string | null
+          share_url?: string | null
+          success_count?: number
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          failure_count?: number
+          failure_reasons?: string[]
+          id?: string
+          is_retry?: boolean
+          outcome?: string
+          recipient_count?: number
+          share_kind?: string | null
+          share_title?: string | null
+          share_url?: string | null
+          success_count?: number
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string
