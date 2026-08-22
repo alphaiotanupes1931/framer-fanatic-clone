@@ -43,6 +43,10 @@ import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Img, SmartFileLink, SmartVideo } from "@/components/shared/smart-img";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { timeAgo } from "@/lib/text-utils";
@@ -401,22 +405,16 @@ function OrgProfile() {
           </div>
           {canManage && <AccessCodeControl orgId={org.id} />}
           {canManage && (
-            <button
-              type="button"
-              onClick={async () => {
-                const { error } = await supabase.from("organizations").update({ is_public: true }).eq("id", org.id);
-                if (error) { toast.error("Could not make this page public"); return; }
-                setOrg((prev) => (prev ? { ...prev, is_public: true } : prev));
-                toast.success("Page is now public");
-              }}
-              className="shrink-0 rounded-full bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
-            >
-              Make public
-            </button>
+            <MakePublicButton
+              orgId={org.id}
+              orgName={org.name}
+              onDone={() => setOrg((prev) => (prev ? { ...prev, is_public: true } : prev))}
+            />
           )}
 
         </div>
       )}
+
 
 
       {/* Hidden file inputs for uploads */}
@@ -2432,7 +2430,91 @@ function PrivatePageGate({ slug, onUnlock }: { slug: string; onUnlock: (org: Org
 }
 
 /** Owner control: hand out (or clear) a shared access code for a private page. */
+function MakePublicButton({ orgId, orgName, onDone }: { orgId: string; orgName: string; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [lastChange, setLastChange] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("org_visibility_audit")
+        .select("new_is_public, created_at")
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (active && data) {
+        setLastChange(
+          `Last changed to ${data.new_is_public ? "public" : "private"} ${timeAgo(data.created_at as string)}`,
+        );
+      }
+    })();
+    return () => { active = false; };
+  }, [orgId]);
+
+  const confirm = async () => {
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("organizations").update({ is_public: true }).eq("id", orgId);
+      if (error) { toast.error("Could not make this page public"); return; }
+      const { data: auth } = await supabase.auth.getUser();
+      if (auth?.user) {
+        await supabase.from("org_visibility_audit").insert({
+          organization_id: orgId,
+          actor_id: auth.user.id,
+          previous_is_public: false,
+          new_is_public: true,
+          note: `Made public from the page banner by ${auth.user.email ?? auth.user.id}`,
+        });
+      }
+      onDone();
+      setOpen(false);
+      toast.success(`${orgName} is now public. This change was recorded in the page's visibility history.`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="rounded-full bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+        >
+          Make public
+        </button>
+        {lastChange && <span className="text-[11px] text-amber-800/80">{lastChange}</span>}
+      </div>
+
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Make this page public?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Anyone on the internet will be able to view {orgName}, and search engines will be allowed to index it.
+              Any access code stays in place but is no longer needed. This action is recorded in the page's
+              visibility history with your account and the time of the change. You can switch it back to private
+              at any time from My Pages.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); void confirm(); }} disabled={busy}>
+              {busy ? "Publishing..." : "Yes, make it public"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 function AccessCodeControl({ orgId }: { orgId: string }) {
+
   const [code, setCode] = useState("");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);

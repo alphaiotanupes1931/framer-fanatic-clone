@@ -840,6 +840,44 @@ export type Database = {
         }
         Relationships: []
       }
+      org_visibility_audit: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          new_is_public: boolean
+          note: string | null
+          organization_id: string
+          previous_is_public: boolean | null
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          new_is_public: boolean
+          note?: string | null
+          organization_id: string
+          previous_is_public?: boolean | null
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          new_is_public?: boolean
+          note?: string | null
+          organization_id?: string
+          previous_is_public?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_visibility_audit_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_artists: {
         Row: {
           bio: string | null
