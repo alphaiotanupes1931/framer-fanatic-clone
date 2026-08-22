@@ -15,6 +15,14 @@ function initials(name: string | null | undefined) {
 }
 
 type ShareDraft = { selected: Record<string, boolean>; note: string };
+type RecipientIssue = "deactivated" | "blocked" | "missing";
+type ValidationRow = { id: string; display_name: string | null; username: string | null; status: string };
+const ISSUE_LABEL: Record<RecipientIssue, string> = {
+  deactivated: "account deactivated",
+  blocked: "not connected with you",
+  missing: "account no longer exists",
+};
+
 
 const draftKey = (url: string) => `pb:share-draft:${url}`;
 
