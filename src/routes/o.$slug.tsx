@@ -272,7 +272,11 @@ function OrgProfile() {
       : null;
     setTab(wanted || "Posts");
   }, [org]);
-  if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
+  if (!org && !loaded) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
+  // Either the page does not exist or it is private and this visitor is not
+  // the owner, an admin, or an approved member. Offer the access code path.
+  if (!org) return <PrivatePageGate slug={slug} onUnlock={(o) => { setOrg(o); setLoaded(true); }} />;
+
 
   const isOwner = !!me && me === org.owner_id;
   const canManage = isOwner || isAdmin;
