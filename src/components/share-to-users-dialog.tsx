@@ -682,13 +682,13 @@ export function ShareToUsersDialog({
         </div>
 
         <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
-          {step !== 'results' && people.length > 0 && selectedIds.length === 0 && (
+          {step === 'select' && people.length > 0 && selectedIds.length === 0 && (
             <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
               <span className="font-semibold">Select at least one person</span> to share with.
             </div>
           )}
 
-          {step !== 'results' && invalidIds.length > 0 && (
+          {step === 'select' && invalidIds.length > 0 && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
@@ -721,7 +721,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {step !== 'results' && checking && selectedIds.length > 0 && (
+          {step === 'select' && checking && selectedIds.length > 0 && (
             <div className="text-xs text-neutral-500">Checking recipients…</div>
           )}
 
