@@ -82,6 +82,39 @@ export function ShareToUsersDialog({
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
+  const allFilteredSelected = useMemo(
+    () => filtered.length > 0 && filtered.every((p) => selected[p.id]),
+    [filtered, selected],
+  );
+
+  const selectAllFiltered = () => {
+    setSelected((s) => {
+      const next = { ...s };
+      for (const p of filtered) {
+        next[p.id] = true;
+      }
+      return next;
+    });
+  };
+
+  const deselectAllFiltered = () => {
+    setSelected((s) => {
+      const next = { ...s };
+      for (const p of filtered) {
+        next[p.id] = false;
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      deselectAllFiltered();
+    } else {
+      selectAllFiltered();
+    }
+  };
+
   const failedNames = useMemo(
     () =>
       failed.map((id) => {
