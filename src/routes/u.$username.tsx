@@ -142,6 +142,17 @@ function PublicProfilePage() {
         .rpc("public_profile_by_username", { _username: username });
       const publicProfile = data?.[0] as PublicProfile | undefined;
       if (cancelled) return;
+      if (!publicProfile) {
+        // @mentions also cover artist pages, arts orgs, businesses and groups.
+        // Those live at /o/$slug, so fall through to the page when the handle
+        // is not a person.
+        const { data: resolved } = await supabase.rpc("resolve_handle", { _handle: username });
+        const org = (resolved as Array<{ kind: string; slug: string }> | null)?.find((r) => r.kind === "org");
+        if (org && !cancelled) {
+          navigate({ to: "/o/$slug", params: { slug: org.slug }, replace: true });
+          return;
+        }
+      }
       setProfile(publicProfile || null);
       if (publicProfile) {
         setMuted(window.localStorage.getItem(`pb_mute_user_${publicProfile.id}`) === "1");
