@@ -217,23 +217,47 @@ export function ShareToUsersDialog({
 
       if (failedIds.length === 0) {
         toast.success(
-          `Shared with ${successes} ${successes === 1 ? "person" : "people"}`,
-          {
-            action: {
-              label: "View details",
-              onClick: openDetails,
-            },
-          },
+          <div className="flex flex-col gap-2">
+            <div>Shared with {successes} {successes === 1 ? "person" : "people"}</div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { openDetails(); toast.dismiss(); }}
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-[#d4580a] hover:bg-neutral-100"
+              >
+                View details
+              </button>
+              <button
+                type="button"
+                onClick={() => { void copyLink(); toast.dismiss(); }}
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-[#d4580a] hover:bg-neutral-100"
+              >
+                Copy link
+              </button>
+            </div>
+          </div>,
         );
       } else if (successes > 0) {
         toast.warning(
-          `Shared with ${successes} of ${recipients.length}. ${failedIds.length} did not go through.`,
-          {
-            action: {
-              label: "View details",
-              onClick: openDetails,
-            },
-          },
+          <div className="flex flex-col gap-2">
+            <div>Shared with {successes} of {recipients.length}. {failedIds.length} did not go through.</div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { openDetails(); toast.dismiss(); }}
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-amber-700 hover:bg-neutral-100"
+              >
+                View details
+              </button>
+              <button
+                type="button"
+                onClick={() => { void copyLink(); toast.dismiss(); }}
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-amber-700 hover:bg-neutral-100"
+              >
+                Copy link
+              </button>
+            </div>
+          </div>,
         );
       } else {
         toast.error(failures[0] || "Failed to share");
