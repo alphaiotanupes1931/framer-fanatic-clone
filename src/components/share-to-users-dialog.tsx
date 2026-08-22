@@ -288,11 +288,36 @@ export function ShareToUsersDialog({
           />
         </div>
 
-        <div className="border-t border-neutral-200 px-5 py-4">
+        <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
+          {failed.length > 0 && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-amber-900">
+                    {failed.length} {failed.length === 1 ? "message" : "messages"} did not send
+                  </div>
+                  <div className="mt-0.5 truncate text-xs text-amber-800">
+                    {failedNames.join(", ")}
+                  </div>
+                  {failReason && <div className="mt-1 text-xs text-amber-700">{failReason}</div>}
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={sending}
+                onClick={() => void send(failed)}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-400 bg-white px-4 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw className={`h-4 w-4 ${sending ? "animate-spin" : ""}`} />
+                {sending ? "Retrying…" : `Retry ${failed.length} failed`}
+              </button>
+            </div>
+          )}
           <button
             type="button"
             disabled={sending || selectedIds.length === 0}
-            onClick={send}
+            onClick={() => void send()}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:bg-neutral-300"
           >
             <Send className="h-4 w-4" />
