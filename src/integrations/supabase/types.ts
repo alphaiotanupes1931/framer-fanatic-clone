@@ -3240,6 +3240,7 @@ export type Database = {
         Returns: undefined
       }
       admin_upsert_site_content: { Args: { _rows: Json }; Returns: number }
+      can_view_org: { Args: { _org: string }; Returns: boolean }
       cancel_my_rsvp: { Args: { _ticket_id: string }; Returns: Json }
       check_in_ticket: {
         Args: { _ticket_id: string }
