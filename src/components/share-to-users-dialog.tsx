@@ -260,13 +260,34 @@ export function ShareToUsersDialog({
       toast.error("Please sign in");
       return;
     }
-    const recipients = targetIds && targetIds.length ? targetIds : selectedIds;
-    if (recipients.length === 0) {
+    const requested = targetIds && targetIds.length ? targetIds : selectedIds;
+    if (requested.length === 0) {
       toast.error("Select at least one person to share with.");
       return;
     }
 
+    // Final safety check right before sending, in case someone was deactivated
+    // or unfollowed while the dialog was open.
+    setChecking(true);
+    const issues = await validateRecipients(requested);
+    setChecking(false);
+    setInvalid(issues);
+    const blockedNames = Object.keys(issues).map((id) => `${nameOf(id)} (${ISSUE_LABEL[issues[id]]})`);
+    const recipients = requested.filter((id) => !issues[id]);
+    if (recipients.length === 0) {
+      toast.error(
+        blockedNames.length
+          ? `Can't share with ${blockedNames.join(", ")}`
+          : "Select at least one person to share with.",
+      );
+      return;
+    }
+    if (blockedNames.length) {
+      toast.warning(`Skipping ${blockedNames.length}: ${blockedNames.join(", ")}`);
+    }
+
     const isRetry = Boolean(targetIds && targetIds.length);
+
     setSending(true);
     void logShareEvent({
       actorId: me.id,
