@@ -401,22 +401,16 @@ function OrgProfile() {
           </div>
           {canManage && <AccessCodeControl orgId={org.id} />}
           {canManage && (
-            <button
-              type="button"
-              onClick={async () => {
-                const { error } = await supabase.from("organizations").update({ is_public: true }).eq("id", org.id);
-                if (error) { toast.error("Could not make this page public"); return; }
-                setOrg((prev) => (prev ? { ...prev, is_public: true } : prev));
-                toast.success("Page is now public");
-              }}
-              className="shrink-0 rounded-full bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
-            >
-              Make public
-            </button>
+            <MakePublicButton
+              orgId={org.id}
+              orgName={org.name}
+              onDone={() => setOrg((prev) => (prev ? { ...prev, is_public: true } : prev))}
+            />
           )}
 
         </div>
       )}
+
 
 
       {/* Hidden file inputs for uploads */}
