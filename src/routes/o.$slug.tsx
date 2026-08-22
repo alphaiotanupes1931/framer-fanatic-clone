@@ -48,11 +48,57 @@ import { ShareButtons } from "@/components/shared/share-buttons";
 import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { notifyGroupJoinRequest } from "@/lib/group-requests.functions";
+import { getOrgSeo, unlockOrgWithCode, setOrgAccessCode } from "@/lib/org-access.functions";
+
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
-  head: () => ({ meta: [{ title: "Organization - Planet Baltimore" }] }),
+  // Public read only. A private page comes back as not indexable, so search
+  // engines get an explicit noindex and no canonical for it.
+  loader: async ({ params }) => {
+    try {
+      return await getOrgSeo({ data: { slug: params.slug } });
+    } catch {
+      return { indexable: false as const };
+    }
+  },
+  errorComponent: () => (
+    <AppLayout title="" hero={false}>
+      <div className="py-20 text-center text-muted-foreground">This page could not be loaded.</div>
+    </AppLayout>
+  ),
+  notFoundComponent: () => (
+    <AppLayout title="" hero={false}>
+      <div className="py-20 text-center text-muted-foreground">Page not found.</div>
+    </AppLayout>
+  ),
+  head: ({ params, loaderData }) => {
+    if (!loaderData?.indexable) {
+      return {
+        meta: [
+          { title: "Private page - Planet Baltimore" },
+          { name: "robots", content: "noindex, nofollow, noarchive" },
+          { name: "googlebot", content: "noindex, nofollow" },
+        ],
+      };
+    }
+    const url = `https://planetbaltimore.com/o/${params.slug}`;
+    const description = loaderData.description || `${loaderData.name} on Planet Baltimore.`;
+    return {
+      meta: [
+        { title: `${loaderData.name} - Planet Baltimore` },
+        { name: "description", content: description },
+        { property: "og:title", content: loaderData.name },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
 });
+
 
 type Org = {
   id: string; owner_id: string; type: string; subtype: string | null;
@@ -126,13 +172,28 @@ function OrgProfile() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
   const autoJoinDone = useRef(false);
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
   }, []);
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
+      setLoaded(false);
+      let { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
+      // Private page: try the access code this browser already unlocked with.
+      if (!data && typeof window !== "undefined") {
+        const saved = sessionStorage.getItem(`pb_org_code_${slug}`);
+        if (saved) {
+          try {
+            const res = await unlockOrgWithCode({ data: { slug, code: saved } });
+            if (res.ok) data = JSON.parse(res.orgJson);
+            else sessionStorage.removeItem(`pb_org_code_${slug}`);
+          } catch { /* stay locked */ }
+        }
+      }
       setOrg(data as Org | null);
+      setLoaded(true);
       const o = data as Org | null;
       const sub = (o?.subtype ?? "").toLowerCase();
       const isBiz = o?.type !== "community_assoc" && o?.type !== "group" && o?.type !== "arts_org" && o?.type !== "artist";
@@ -141,6 +202,7 @@ function OrgProfile() {
       else if (isBiz) setTab("Services");
     })();
   }, [slug]);
+
   useEffect(() => {
     if (!org || !me) { setJoined(false); setMemberStatus("none"); return; }
     (async () => {
@@ -210,7 +272,11 @@ function OrgProfile() {
       : null;
     setTab(wanted || "Posts");
   }, [org]);
-  if (!org) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
+  if (!org && !loaded) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
+  // Either the page does not exist or it is private and this visitor is not
+  // the owner, an admin, or an approved member. Offer the access code path.
+  if (!org) return <PrivatePageGate slug={slug} onUnlock={(o) => { setOrg(o); setLoaded(true); }} />;
+
 
   const isOwner = !!me && me === org.owner_id;
   const canManage = isOwner || isAdmin;
@@ -330,9 +396,10 @@ function OrgProfile() {
           <div className="min-w-0 flex-1 text-sm text-amber-900">
             <span className="font-semibold">This page is private.</span>{" "}
             {canManage
-              ? "Only you and admins can see it. It will not appear in the Artists list or search until you make it public."
-              : "Only the creator and admins can see it."}
+              ? "Search engines are told not to index it, and only you, admins, and approved members can open it. Set an access code to share it with someone specific."
+              : "Only the creator, admins, and approved members can see it."}
           </div>
+          {canManage && <AccessCodeControl orgId={org.id} />}
           {canManage && (
             <button
               type="button"
@@ -347,6 +414,7 @@ function OrgProfile() {
               Make public
             </button>
           )}
+
         </div>
       )}
 
@@ -2291,6 +2359,123 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
           </DialogContent>
         </Dialog>
       )}
+    </div>
+  );
+}
+
+/**
+ * Shown instead of the page when it is private (or missing). Search engines
+ * only ever see this shell plus a noindex tag; the real content is never sent.
+ * Someone holding the owner's access code can unlock it for this browser tab.
+ */
+function PrivatePageGate({ slug, onUnlock }: { slug: string; onUnlock: (org: Org) => void }) {
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setBusy(true);
+    try {
+      const res = await unlockOrgWithCode({ data: { slug, code } });
+      if (!res.ok) { toast.error("That access code is not right"); return; }
+      sessionStorage.setItem(`pb_org_code_${slug}`, code.trim());
+      onUnlock(JSON.parse(res.orgJson) as Org);
+    } catch {
+      toast.error("Could not unlock this page");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <AppLayout title="" hero={false}>
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-50">
+          <Lock className="h-6 w-6 text-amber-700" />
+        </div>
+        <h1 className="text-xl font-bold text-neutral-900">This page is private</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          It is hidden from search engines and from everyone except the creator, admins, and approved members.
+          If you were given an access code, enter it below.
+        </p>
+        <form onSubmit={submit} className="mt-6 flex gap-2">
+          <input
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Access code"
+            autoComplete="off"
+            className="min-w-0 flex-1 rounded-full border border-border px-4 py-2.5 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="shrink-0 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {busy ? "Checking…" : "Unlock"}
+          </button>
+        </form>
+        <Link to="/dashboard" className="mt-6 inline-block text-sm font-semibold text-muted-foreground underline">
+          Back to Planet Baltimore
+        </Link>
+      </div>
+    </AppLayout>
+  );
+}
+
+/** Owner control: hand out (or clear) a shared access code for a private page. */
+function AccessCodeControl({ orgId }: { orgId: string }) {
+  const [code, setCode] = useState("");
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const save = async (value: string | null) => {
+    setBusy(true);
+    try {
+      await setOrgAccessCode({ data: { orgId, code: value } });
+      toast.success(value ? "Access code saved" : "Access code removed");
+      setOpen(false);
+      setCode("");
+    } catch {
+      toast.error("Could not save the access code");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="shrink-0 rounded-full border border-amber-300 px-4 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+      >
+        Set access code
+      </button>
+    );
+  }
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2">
+      <input
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="Code to share (e.g. studio2026)"
+        className="min-w-0 flex-1 rounded-full border border-amber-300 bg-white px-3 py-1.5 text-xs"
+      />
+      <button
+        type="button"
+        disabled={busy || !code.trim()}
+        onClick={() => save(code.trim())}
+        className="rounded-full bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+      >
+        Save
+      </button>
+      <button type="button" disabled={busy} onClick={() => save(null)} className="rounded-full border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800">
+        Remove
+      </button>
+      <button type="button" onClick={() => setOpen(false)} className="text-xs font-semibold text-amber-800 underline">
+        Cancel
+      </button>
     </div>
   );
 }

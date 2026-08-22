@@ -1911,6 +1911,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          access_code_hash: string | null
           address: string | null
           avatar_url: string | null
           banner_url: string | null
@@ -1939,6 +1940,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          access_code_hash?: string | null
           address?: string | null
           avatar_url?: string | null
           banner_url?: string | null
@@ -1967,6 +1969,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          access_code_hash?: string | null
           address?: string | null
           avatar_url?: string | null
           banner_url?: string | null
@@ -3253,6 +3256,7 @@ export type Database = {
         Returns: boolean
       }
       is_founder_visible: { Args: { _user_id: string }; Returns: boolean }
+      is_org_member: { Args: { _org: string; _uid: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
