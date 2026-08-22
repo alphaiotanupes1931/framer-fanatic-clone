@@ -795,7 +795,7 @@ export function ShareToUsersDialog({
             <button
               type="button"
               disabled={sending}
-              onClick={() => setStep('select')}
+              onClick={() => { setStep('select'); setEditingNote(false); setPendingNote(""); }}
               className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Back to edit
