@@ -136,6 +136,7 @@ export function ShareToUsersDialog({
     setSentRecipients([]);
     setEditingNote(false);
     setPendingNote("");
+    setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
