@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
-import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil } from "lucide-react";
+import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
@@ -91,6 +91,8 @@ export function ShareToUsersDialog({
   const [checking, setChecking] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
   const [pendingNote, setPendingNote] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 25;
 
 
   useEffect(() => {
@@ -107,6 +109,11 @@ export function ShareToUsersDialog({
     });
     return () => { cancelled = true; };
   }, [open, me?.id]);
+
+  // Reset pagination whenever the search query changes.
+  useEffect(() => {
+    setPage(1);
+  }, [q]);
 
   // Persist the in-progress selection + note so closing and reopening the
   // dialog for the same content does not lose the user's work.
@@ -129,6 +136,7 @@ export function ShareToUsersDialog({
     setSentRecipients([]);
     setEditingNote(false);
     setPendingNote("");
+    setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -142,6 +150,12 @@ export function ShareToUsersDialog({
         (p.username || "").toLowerCase().includes(term),
     );
   }, [people, q]);
+
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), [filtered.length]);
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, page]);
 
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
@@ -547,7 +561,7 @@ export function ShareToUsersDialog({
                     {people.length === 0 ? "Follow some people to share with them." : "No matches."}
                   </div>
                 ) : (
-                  filtered.map((p) => {
+                  paginated.map((p) => {
                     const on = !!selected[p.id];
                     return (
                       <button
@@ -579,6 +593,31 @@ export function ShareToUsersDialog({
                   })
                 )}
               </div>
+              {filtered.length > PAGE_SIZE && (
+                <div className="flex items-center justify-between border-t border-neutral-200 bg-neutral-50 px-4 py-2.5">
+                  <div className="text-xs text-neutral-600">
+                    Page {page} of {totalPages} ({filtered.length} total)
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
+                    >
+                      <ChevronLeft className="h-4 w-4" /> Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page >= totalPages}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
+                    >
+                      Next <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
