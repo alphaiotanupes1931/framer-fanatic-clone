@@ -328,6 +328,12 @@ export function ShareToUsersDialog({
         </div>
 
         <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
+          {people.length > 0 && selectedIds.length === 0 && (
+            <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
+              <span className="font-semibold">Select at least one person</span> to share with.
+            </div>
+          )}
+
           {failed.length > 0 && (
             <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
               <div className="flex items-start gap-2">
