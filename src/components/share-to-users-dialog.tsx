@@ -91,6 +91,8 @@ export function ShareToUsersDialog({
   const [checking, setChecking] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
   const [pendingNote, setPendingNote] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 25;
 
 
   useEffect(() => {
