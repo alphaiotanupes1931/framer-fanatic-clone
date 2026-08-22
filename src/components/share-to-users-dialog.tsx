@@ -97,7 +97,7 @@ export function ShareToUsersDialog({
     const failedIds: string[] = [];
     try {
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
-      for (const uid of selectedIds) {
+      for (const uid of recipients) {
         try {
           const { data: mine } = await supabase
             .from("conversation_members")
