@@ -73,6 +73,15 @@ export function ShareToUsersDialog({
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
+  const failedNames = useMemo(
+    () =>
+      failed.map((id) => {
+        const p = people.find((x) => x.id === id);
+        return p?.display_name || p?.username || "Someone";
+      }),
+    [failed, people],
+  );
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
