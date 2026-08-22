@@ -27,6 +27,7 @@ export function ShareToUsersDialog({
   preview?: SharePreview;
 }) {
   const me = useCurrentProfile();
+  const navigate = useNavigate();
   const [people, setPeople] = useState<Person[]>(() => getConnectionsSnapshot(me?.id)?.all ?? []);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Record<string, boolean>>({});
