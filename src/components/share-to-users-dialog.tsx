@@ -55,6 +55,8 @@ export function ShareToUsersDialog({
       setSelected({});
       setNote("");
       setQ("");
+      setFailed([]);
+      setFailReason(null);
     }
   }, [open]);
 
