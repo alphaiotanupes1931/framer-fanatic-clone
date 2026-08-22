@@ -640,6 +640,45 @@ export function ShareToUsersDialog({
             </div>
           )}
 
+          {!showResults && invalidIds.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-red-900">
+                    {invalidIds.length} {invalidIds.length === 1 ? "person can't" : "people can't"} be shared with
+                  </div>
+                  <ul className="mt-1 space-y-0.5 text-xs text-red-800">
+                    {invalidIds.map((id) => (
+                      <li key={id} className="truncate">
+                        {nameOf(id)} — {ISSUE_LABEL[invalid[id]]}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelected((s) => {
+                        const next = { ...s };
+                        for (const id of invalidIds) next[id] = false;
+                        return next;
+                      })
+                    }
+                    className="mt-2 rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-900 hover:bg-red-100"
+                  >
+                    Remove them from the list
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!showResults && checking && selectedIds.length > 0 && (
+            <div className="text-xs text-neutral-500">Checking recipients…</div>
+          )}
+
+
+
           {failed.length > 0 && (
             <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
               <div className="flex items-start gap-2">
