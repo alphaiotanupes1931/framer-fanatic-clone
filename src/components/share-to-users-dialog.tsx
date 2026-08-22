@@ -298,6 +298,10 @@ export function ShareToUsersDialog({
 
 
       if (failedIds.length === 0) {
+        clearShareDraft(url);
+        setSelected({});
+        setNote("");
+
         toast.success(
           <div className="flex flex-col gap-2">
             <div>Shared with {successes} {successes === 1 ? "person" : "people"}</div>
