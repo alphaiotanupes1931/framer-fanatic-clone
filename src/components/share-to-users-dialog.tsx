@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
-import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw } from "lucide-react";
+import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
