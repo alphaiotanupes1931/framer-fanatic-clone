@@ -14,6 +14,45 @@ function initials(name: string | null | undefined) {
   return (name || "U").trim()[0]?.toUpperCase() || "U";
 }
 
+type ShareDraft = { selected: Record<string, boolean>; note: string };
+
+const draftKey = (url: string) => `pb:share-draft:${url}`;
+
+function readShareDraft(url: string): ShareDraft | null {
+  try {
+    const raw = sessionStorage.getItem(draftKey(url));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ShareDraft;
+    if (!parsed || typeof parsed !== "object") return null;
+    return { selected: parsed.selected || {}, note: parsed.note || "" };
+  } catch {
+    return null;
+  }
+}
+
+function writeShareDraft(url: string, draft: ShareDraft) {
+  try {
+    const hasSelection = Object.values(draft.selected || {}).some(Boolean);
+    if (!hasSelection && !draft.note.trim()) {
+      sessionStorage.removeItem(draftKey(url));
+      return;
+    }
+    sessionStorage.setItem(draftKey(url), JSON.stringify(draft));
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+function clearShareDraft(url: string) {
+  try {
+    sessionStorage.removeItem(draftKey(url));
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+
+
 export function ShareToUsersDialog({
   open,
   onClose,
