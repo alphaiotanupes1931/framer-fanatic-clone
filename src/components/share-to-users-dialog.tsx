@@ -651,7 +651,7 @@ export function ShareToUsersDialog({
                   <ul className="mt-1 space-y-0.5 text-xs text-red-800">
                     {invalidIds.map((id) => (
                       <li key={id} className="truncate">
-                        {nameOf(id)} — {ISSUE_LABEL[invalid[id]]}
+                        {nameOf(id)} ({ISSUE_LABEL[invalid[id]]})
                       </li>
                     ))}
                   </ul>
