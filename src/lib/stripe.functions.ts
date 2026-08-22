@@ -717,7 +717,34 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
       .gte("created_at", since);
     if (data.sessionId) query = query.eq("stripe_checkout_session_id", data.sessionId);
     const { data: pending } = await query;
-    if (!pending?.length) return { confirmed: 0 };
+    if (!pending?.length) {
+      // The webhook may have already flipped the rows to paid but failed to
+      // send the receipt. Re-send for this session; the idempotency key makes
+      // a duplicate send a no-op.
+      if (data.sessionId) {
+        const { data: paidRows } = await supabaseAdmin
+          .from("tickets")
+          .select("id, event_id")
+          .eq("buyer_id", userId)
+          .eq("status", "paid")
+          .eq("stripe_checkout_session_id", data.sessionId);
+        if (paidRows?.length) {
+          try {
+            const { sendTicketConfirmation } = await import("./ticket-email.server");
+            await sendTicketConfirmation({
+              buyerId: userId,
+              eventId: paidRows[0]!.event_id,
+              ticketIds: paidRows.map((r) => r.id),
+              idempotencyKey: `ticket-confirm-${data.sessionId}`,
+            });
+          } catch (err) {
+            console.error("ticket confirmation email retry failed", err);
+          }
+        }
+      }
+      return { confirmed: 0 };
+    }
+
 
     const bySession = new Map<string, typeof pending>();
     for (const row of pending) {

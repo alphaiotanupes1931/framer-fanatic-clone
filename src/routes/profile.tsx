@@ -38,10 +38,16 @@ import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compr
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
   // ?preview=public renders this same page the way other people see it.
+  // ?tab=... deep-links a tab; Stripe returns here with ?purchase=success&session_id=...
   validateSearch: (search: Record<string, unknown>) => {
-    if (search.preview === "public") return { preview: "public" as const };
-    return {};
+    const out: { preview?: "public"; tab?: string; purchase?: string; session_id?: string } = {};
+    if (search.preview === "public") out.preview = "public";
+    if (typeof search.tab === "string") out.tab = search.tab;
+    if (typeof search.purchase === "string") out.purchase = search.purchase;
+    if (typeof search.session_id === "string") out.session_id = search.session_id;
+    return out;
   },
+
   head: () => ({
     meta: [
       { title: "My Profile | Planet Baltimore" },
@@ -91,7 +97,7 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { preview } = Route.useSearch();
+  const { preview, tab: tabParam, purchase, session_id: purchaseSessionId } = Route.useSearch();
   // Public preview: same profile, rendered without any owner-only controls.
   const publicPreview = preview === "public";
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
@@ -103,7 +109,13 @@ function ProfilePage() {
   const categoryTabs: Array<{ label: string; kind: string }> = [];
   void category; void isArtist;
   const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
-  const [tab, setTab] = useState<Tab>("Posts");
+  // Deep links (and the Stripe return URL) decide which tab opens first.
+  const [tab, setTab] = useState<Tab>(() => {
+    if (purchase === "success") return "My Tickets";
+    if (tabParam && FULL_PROFILE_TABS.includes(tabParam as never)) return tabParam;
+    return "Posts";
+  });
+
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, referrals: 0 });
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [msgOpen, setMsgOpen] = useState(false);
@@ -713,6 +725,8 @@ function ProfilePage() {
         onClose={() => setReferralOpen(false)}
         profile={profile}
       />
+      {purchase === "success" && <PurchaseConfirmation sessionId={purchaseSessionId} />}
+
       {postViewerIdx !== null && myPosts[postViewerIdx] && (
         <div
           role="dialog"
@@ -1374,7 +1388,90 @@ function ArtistEventsTab({ userId }: { userId: string }) {
   );
 }
 
+/**
+ * Shown when Stripe sends the buyer back after a paid checkout. Stripe's own
+ * redirect is silent, so without this the purchase looked like it vanished.
+ * It confirms the order with Stripe (in case the webhook is slow or missed),
+ * which also triggers the receipt email, then links straight to the ticket.
+ */
+function PurchaseConfirmation({ sessionId }: { sessionId?: string }) {
+  const reconcile = useServerFn(reconcileMyTickets);
+  const [open, setOpen] = useState(true);
+  const [state, setState] = useState<"working" | "done" | "pending">("working");
+  const [ticketId, setTicketId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await reconcile({ data: sessionId ? { sessionId } : {} });
+      } catch { /* webhook may have already handled it */ }
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) return;
+      let q = supabase
+        .from("tickets")
+        .select("id, status")
+        .eq("buyer_id", uid)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (sessionId) q = q.eq("stripe_checkout_session_id", sessionId);
+      const { data } = await q;
+      if (cancelled) return;
+      const row = data?.[0];
+      setTicketId(row?.id ?? null);
+      setState(row?.status === "paid" ? "done" : "pending");
+    })();
+    return () => { cancelled = true; };
+  }, [sessionId]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-sm rounded-2xl bg-background p-6 text-center shadow-xl">
+        {state === "working" ? (
+          <>
+            <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-[#d4580a]" />
+            <h2 className="text-lg font-bold">Confirming your purchase…</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Hang tight, this only takes a second.</p>
+          </>
+        ) : state === "done" ? (
+          <>
+            <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-emerald-600" />
+            <h2 className="text-lg font-bold">You're in! Ticket confirmed</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your receipt and ticket PDF are on the way by email. You can also open your ticket right here.
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              {ticketId && (
+                <Link to="/tickets/$ticketId" params={{ ticketId }} className="rounded-full bg-[#d4580a] px-4 py-2.5 text-sm font-semibold text-white">
+                  View my ticket
+                </Link>
+              )}
+              <button onClick={() => setOpen(false)} className="rounded-full border border-border px-4 py-2.5 text-sm font-semibold">
+                Back to My Tickets
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <AlertCircle className="mx-auto mb-3 h-12 w-12 text-amber-500" />
+            <h2 className="text-lg font-bold">Payment received, finishing up</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your bank confirmed the payment. The ticket will appear in My Tickets within a minute and we'll email your receipt.
+            </p>
+            <button onClick={() => setOpen(false)} className="mt-5 w-full rounded-full border border-border px-4 py-2.5 text-sm font-semibold">
+              Close
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MyTicketsTab() {
+
   type TicketRow = {
     id: string; status: string; buyer_total_cents: number; event_id: string;
     events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null;
