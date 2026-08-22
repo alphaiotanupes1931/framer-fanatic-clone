@@ -514,19 +514,14 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
               <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
               <input type="datetime-local" className="w-full rounded-lg border bg-transparent px-3 py-2" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} />
               <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-              <div>
-                <input
-                  type="number" step="0.01" min="0"
-                  className="w-full rounded-lg border bg-transparent px-3 py-2"
-                  placeholder="Ticket price you want to NET in USD (0 = free)"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                />
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Processing fees and the platform fee are added on top automatically, you net the
-                  exact amount you enter.
+              <div className="rounded-lg border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-3">
+                <div className="text-sm font-semibold">Tickets are set up next</div>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  When you create this event we take you to Organizer Studio, where you add your ticket types
+                  (free RSVP, tiers, prices, and quantities).
                 </p>
               </div>
+
               <div className="rounded-lg border bg-transparent p-3">
                 <div className="flex items-center gap-3">
                   {form.image_url ? (
