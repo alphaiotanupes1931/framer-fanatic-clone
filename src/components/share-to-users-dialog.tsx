@@ -7,6 +7,7 @@ import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
+import { logShareEvent } from "@/lib/share-log";
 import { getConnectionsSnapshot, loadConnections, type Person } from "@/lib/connections";
 
 function initials(name: string | null | undefined) {
@@ -127,7 +128,7 @@ export function ShareToUsersDialog({
       actorId: me.id,
       url,
       title,
-      kind: preview?.kind ?? null,
+      kind: preview?.type ?? null,
       isRetry,
       recipientCount: recipients.length,
       outcome: "attempt",
