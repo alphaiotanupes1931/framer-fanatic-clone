@@ -752,10 +752,24 @@ export function ShareToUsersDialog({
               </button>
             </div>
           )}
+          {step === 'confirm' && (
+            <button
+              type="button"
+              disabled={sending}
+              onClick={() => setStep('select')}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Back to edit
+            </button>
+          )}
           <button
             type="button"
-            disabled={sending || (step !== 'results' && selectedIds.length === 0)}
-            onClick={() => (step === 'results' ? onClose() : void send())}
+            disabled={sending || (step === 'select' && selectedIds.length === 0)}
+            onClick={() => {
+              if (step === 'results') return onClose();
+              if (step === 'confirm') return void send();
+              setStep('confirm');
+            }}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:bg-neutral-300"
           >
             {step === 'results' ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
@@ -763,6 +777,8 @@ export function ShareToUsersDialog({
               ? "Sending…"
               : step === 'results'
               ? "Done"
+              : step === 'confirm'
+              ? `Confirm send to ${selectedIds.length} ${selectedIds.length === 1 ? "person" : "people"}`
               : selectedIds.length > 0
               ? `Send to ${selectedIds.length} ${selectedIds.length === 1 ? "person" : "people"}`
               : "Select people to share"}
