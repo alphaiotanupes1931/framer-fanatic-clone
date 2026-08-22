@@ -20,7 +20,7 @@ export const Route = createFileRoute("/referrals")({
 });
 
 function ReferralsPage() {
-  const { profile } = useCurrentProfile();
+  const profile = useCurrentProfile();
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
 

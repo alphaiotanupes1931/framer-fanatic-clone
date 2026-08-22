@@ -22,6 +22,7 @@ import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ReferralsRouteImport } from './routes/referrals'
 import { Route as PromoterDashboardRouteImport } from './routes/promoter-dashboard'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -154,6 +155,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferralsRoute = ReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PromoterDashboardRoute = PromoterDashboardRouteImport.update({
@@ -540,6 +546,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/promoter-dashboard': typeof PromoterDashboardRoute
+  '/referrals': typeof ReferralsRoute
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
@@ -623,6 +630,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/promoter-dashboard': typeof PromoterDashboardRoute
+  '/referrals': typeof ReferralsRoute
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
@@ -707,6 +715,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/promoter-dashboard': typeof PromoterDashboardRoute
+  '/referrals': typeof ReferralsRoute
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/saved': typeof SavedRoute
@@ -792,6 +801,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/promoter-dashboard'
+    | '/referrals'
     | '/reports'
     | '/reset-password'
     | '/saved'
@@ -875,6 +885,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/promoter-dashboard'
+    | '/referrals'
     | '/reports'
     | '/reset-password'
     | '/saved'
@@ -958,6 +969,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/promoter-dashboard'
+    | '/referrals'
     | '/reports'
     | '/reset-password'
     | '/saved'
@@ -1042,6 +1054,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   PromoterDashboardRoute: typeof PromoterDashboardRoute
+  ReferralsRoute: typeof ReferralsRoute
   ReportsRoute: typeof ReportsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SavedRoute: typeof SavedRoute
@@ -1178,6 +1191,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/referrals': {
+      id: '/referrals'
+      path: '/referrals'
+      fullPath: '/referrals'
+      preLoaderRoute: typeof ReferralsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/promoter-dashboard': {
@@ -1709,6 +1729,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   PromoterDashboardRoute: PromoterDashboardRoute,
+  ReferralsRoute: ReferralsRoute,
   ReportsRoute: ReportsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SavedRoute: SavedRoute,
