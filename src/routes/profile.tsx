@@ -38,10 +38,16 @@ import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compr
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
   // ?preview=public renders this same page the way other people see it.
+  // ?tab=... deep-links a tab; Stripe returns here with ?purchase=success&session_id=...
   validateSearch: (search: Record<string, unknown>) => {
-    if (search.preview === "public") return { preview: "public" as const };
-    return {};
+    const out: { preview?: "public"; tab?: string; purchase?: string; session_id?: string } = {};
+    if (search.preview === "public") out.preview = "public";
+    if (typeof search.tab === "string") out.tab = search.tab;
+    if (typeof search.purchase === "string") out.purchase = search.purchase;
+    if (typeof search.session_id === "string") out.session_id = search.session_id;
+    return out;
   },
+
   head: () => ({
     meta: [
       { title: "My Profile | Planet Baltimore" },
