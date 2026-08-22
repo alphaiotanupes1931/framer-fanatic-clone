@@ -396,9 +396,10 @@ function OrgProfile() {
           <div className="min-w-0 flex-1 text-sm text-amber-900">
             <span className="font-semibold">This page is private.</span>{" "}
             {canManage
-              ? "Only you and admins can see it. It will not appear in the Artists list or search until you make it public."
-              : "Only the creator and admins can see it."}
+              ? "Search engines are told not to index it, and only you, admins, and approved members can open it. Set an access code to share it with someone specific."
+              : "Only the creator, admins, and approved members can see it."}
           </div>
+          {canManage && <AccessCodeControl orgId={org.id} />}
           {canManage && (
             <button
               type="button"
@@ -413,6 +414,7 @@ function OrgProfile() {
               Make public
             </button>
           )}
+
         </div>
       )}
 
