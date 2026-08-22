@@ -32,6 +32,8 @@ export function ShareToUsersDialog({
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState<string[]>([]);
+  const [failReason, setFailReason] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !me?.id) return;
