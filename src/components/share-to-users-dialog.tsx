@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
-import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw } from "lucide-react";
+import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
@@ -89,6 +89,8 @@ export function ShareToUsersDialog({
   const [sentRecipients, setSentRecipients] = useState<string[]>([]);
   const [invalid, setInvalid] = useState<Record<string, RecipientIssue>>({});
   const [checking, setChecking] = useState(false);
+  const [editingNote, setEditingNote] = useState(false);
+  const [pendingNote, setPendingNote] = useState("");
 
 
   useEffect(() => {
@@ -125,6 +127,8 @@ export function ShareToUsersDialog({
     setResults({});
     setStep('select');
     setSentRecipients([]);
+    setEditingNote(false);
+    setPendingNote("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -610,16 +614,51 @@ export function ShareToUsersDialog({
                     })}
                   </div>
                 </div>
-                {note.trim() ? (
-                  <div>
+                <div>
+                  <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold text-neutral-900">Your note</div>
+                    <button
+                      type="button"
+                      onClick={() => { setPendingNote(note); setEditingNote(true); }}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-[#d4580a] hover:bg-orange-50"
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Edit note
+                    </button>
+                  </div>
+                  {editingNote ? (
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        value={pendingNote}
+                        onChange={(e) => setPendingNote(e.target.value)}
+                        rows={3}
+                        placeholder="Add a note (optional)"
+                        className="w-full resize-none rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setNote(pendingNote); setEditingNote(false); }}
+                          className="rounded-md bg-[#d4580a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#b8480a]"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingNote(false)}
+                          className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : note.trim() ? (
                     <div className="mt-1 whitespace-pre-wrap rounded-md bg-neutral-50 p-3 text-sm text-neutral-700">
                       {note.trim()}
                     </div>
-                  </div>
-                ) : (
-                  <div className="text-sm text-neutral-500">No note added.</div>
-                )}
+                  ) : (
+                    <div className="mt-1 text-sm text-neutral-500">No note added.</div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -756,7 +795,7 @@ export function ShareToUsersDialog({
             <button
               type="button"
               disabled={sending}
-              onClick={() => setStep('select')}
+              onClick={() => { setStep('select'); setEditingNote(false); setPendingNote(""); }}
               className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Back to edit
