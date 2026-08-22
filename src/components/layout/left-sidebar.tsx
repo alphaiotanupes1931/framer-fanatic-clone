@@ -21,6 +21,11 @@ import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
 import { Img } from "@/components/shared/smart-img";
 import { prefetchHandlers } from "@/lib/prefetch";
+import {
+  navItems as sharedNavItems,
+  utilItems as sharedUtilItems,
+  createItems as sharedCreateItems,
+} from "@/lib/nav-items";
 import type { ReactNode, ComponentType } from "react";
 
 // Desktop and mobile share one navigation config so both surfaces always
