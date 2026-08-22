@@ -151,6 +151,12 @@ export function ShareToUsersDialog({
     );
   }, [people, q]);
 
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), [filtered.length]);
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, page]);
+
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
