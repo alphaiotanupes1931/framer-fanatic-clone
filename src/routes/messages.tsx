@@ -340,6 +340,32 @@ function MessagesPage() {
     return () => { cancelled = true; };
   }, [active?.id, active?.is_group]);
 
+  // Some senders in a group thread may have left the group (or were never in
+  // conversation_members), which used to render their replies as "Member".
+  // Backfill any sender profile the member list doesn't cover.
+  const [extraSenders, setExtraSenders] = useState<Profile[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    if (!active?.is_group) { setExtraSenders([]); return; }
+    const known = new Set(groupMembers.map((p) => p.id));
+    const missing = Array.from(
+      new Set(msgs.map((m) => m.sender_id).filter((id) => id && id !== me?.id && !known.has(id))),
+    );
+    if (!missing.length) return;
+    (async () => {
+      const { data } = await supabase.rpc("public_profiles_by_ids", { _ids: missing });
+      if (!cancelled && data?.length) {
+        setExtraSenders((prev) => {
+          const map = new Map(prev.map((p) => [p.id, p]));
+          for (const p of data as Profile[]) map.set(p.id, p);
+          return Array.from(map.values());
+        });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [active?.id, active?.is_group, groupMembers, msgs, me?.id]);
+
+
   const memberById = useMemo(
     () => new Map([...groupMembers, ...extraSenders].map((p) => [p.id, p])),
     [groupMembers, extraSenders],
