@@ -561,7 +561,7 @@ export function ShareToUsersDialog({
                     {people.length === 0 ? "Follow some people to share with them." : "No matches."}
                   </div>
                 ) : (
-                  filtered.map((p) => {
+                  paginated.map((p) => {
                     const on = !!selected[p.id];
                     return (
                       <button
@@ -593,6 +593,31 @@ export function ShareToUsersDialog({
                   })
                 )}
               </div>
+              {filtered.length > PAGE_SIZE && (
+                <div className="flex items-center justify-between border-t border-neutral-200 bg-neutral-50 px-4 py-2.5">
+                  <div className="text-xs text-neutral-600">
+                    Page {page} of {totalPages} ({filtered.length} total)
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
+                    >
+                      <ChevronLeft className="h-4 w-4" /> Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page >= totalPages}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
+                    >
+                      Next <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
