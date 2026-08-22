@@ -36,6 +36,9 @@ export function ShareToUsersDialog({
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState<string[]>([]);
   const [failReason, setFailReason] = useState<string | null>(null);
+  const [results, setResults] = useState<Record<string, 'success' | 'failed'>>({});
+  const [showResults, setShowResults] = useState(false);
+  const [sentRecipients, setSentRecipients] = useState<string[]>([]);
 
   useEffect(() => {
     if (!open || !me?.id) return;
@@ -59,6 +62,9 @@ export function ShareToUsersDialog({
       setQ("");
       setFailed([]);
       setFailReason(null);
+      setResults({});
+      setShowResults(false);
+      setSentRecipients([]);
     }
   }, [open]);
 
@@ -122,6 +128,8 @@ export function ShareToUsersDialog({
     let successes = 0;
     const failures: string[] = [];
     const failedIds: string[] = [];
+    const nextResults: Record<string, 'success' | 'failed'> = {};
+    setSentRecipients((prev) => Array.from(new Set([...prev, ...recipients])));
     try {
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
       for (const uid of recipients) {
@@ -165,16 +173,20 @@ export function ShareToUsersDialog({
             .insert({ conversation_id: convId, sender_id: me.id, content: body });
           if (msgErr) throw msgErr;
           successes += 1;
+          nextResults[uid] = 'success';
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : "Could not send";
           failures.push(msg);
           failedIds.push(uid);
+          nextResults[uid] = 'failed';
           console.error("Share to user failed", { uid, error: msg });
         }
       }
 
       setFailed(failedIds);
       setFailReason(failures[0] || null);
+      setResults((prev) => ({ ...prev, ...nextResults }));
+      setShowResults(true);
 
       if (failedIds.length === 0) {
         toast.success(
@@ -186,7 +198,6 @@ export function ShareToUsersDialog({
             },
           },
         );
-        onClose();
       } else if (successes > 0) {
         toast.warning(
           `Shared with ${successes} of ${recipients.length}. ${failedIds.length} did not go through.`,
@@ -262,73 +273,123 @@ export function ShareToUsersDialog({
           </button>
 
 
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search people you follow…"
-              className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-orange-400 focus:outline-none"
-            />
-          </div>
-
-          <div className="rounded-lg border border-neutral-200">
-            <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
-              <Users className="h-3.5 w-3.5" /> Followers ({selectedIds.length} selected)
+          {!showResults && (
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search people you follow…"
+                className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-orange-400 focus:outline-none"
+              />
             </div>
-            <div className="max-h-64 overflow-y-auto">
-              {loading ? (
-                <div className="p-6 text-center text-sm text-neutral-500">Loading…</div>
-              ) : filtered.length === 0 ? (
-                <div className="p-6 text-center text-sm text-neutral-500">
-                  {people.length === 0 ? "Follow some people to share with them." : "No matches."}
-                </div>
-              ) : (
-                filtered.map((p) => {
-                  const on = !!selected[p.id];
-                  return (
-                    <button
-                      type="button"
-                      key={p.id}
-                      onClick={() => toggle(p.id)}
-                      className="flex w-full items-center gap-3 border-b border-neutral-100 px-4 py-2.5 text-left last:border-b-0 hover:bg-neutral-50"
-                    >
-                      <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
-                        {p.avatar_url ? (
-                          <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+          )}
+
+          {showResults ? (
+            <div className="rounded-lg border border-neutral-200">
+              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
+                <Check className="h-3.5 w-3.5" /> Results ({sentRecipients.length} {sentRecipients.length === 1 ? "person" : "people"})
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {sentRecipients.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-neutral-500">No results yet.</div>
+                ) : (
+                  sentRecipients.map((uid) => {
+                    const p = people.find((x) => x.id === uid);
+                    const status = results[uid];
+                    if (!p) return null;
+                    return (
+                      <div
+                        key={uid}
+                        className="flex items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0"
+                      >
+                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
+                          {p.avatar_url ? (
+                            <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            initials(p.display_name || p.username)
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username}</div>
+                          {p.username && <div className="truncate text-xs text-neutral-500">@{p.username}</div>}
+                        </div>
+                        {status === 'success' ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600">
+                            <Check className="h-4 w-4" /> Sent
+                          </span>
                         ) : (
-                          initials(p.display_name || p.username)
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600">
+                            <X className="h-4 w-4" /> Failed
+                          </span>
                         )}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username}</div>
-                        {p.username && <div className="truncate text-xs text-neutral-500">@{p.username}</div>}
-                      </div>
-                      <div
-                        className={`flex h-6 w-6 items-center justify-center rounded-full border ${
-                          on ? "border-[#d4580a] bg-[#d4580a] text-white" : "border-neutral-300 text-transparent"
-                        }`}
-                      >
-                        <Check className="h-4 w-4" />
-                      </div>
-                    </button>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-lg border border-neutral-200">
+              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
+                <Users className="h-3.5 w-3.5" /> Followers ({selectedIds.length} selected)
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {loading ? (
+                  <div className="p-6 text-center text-sm text-neutral-500">Loading…</div>
+                ) : filtered.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-neutral-500">
+                    {people.length === 0 ? "Follow some people to share with them." : "No matches."}
+                  </div>
+                ) : (
+                  filtered.map((p) => {
+                    const on = !!selected[p.id];
+                    return (
+                      <button
+                        type="button"
+                        key={p.id}
+                        onClick={() => toggle(p.id)}
+                        className="flex w-full items-center gap-3 border-b border-neutral-100 px-4 py-2.5 text-left last:border-b-0 hover:bg-neutral-50"
+                      >
+                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
+                          {p.avatar_url ? (
+                            <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            initials(p.display_name || p.username)
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username}</div>
+                          {p.username && <div className="truncate text-xs text-neutral-500">@{p.username}</div>}
+                        </div>
+                        <div
+                          className={`flex h-6 w-6 items-center justify-center rounded-full border ${
+                            on ? "border-[#d4580a] bg-[#d4580a] text-white" : "border-neutral-300 text-transparent"
+                          }`}
+                        >
+                          <Check className="h-4 w-4" />
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
 
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={2}
-            placeholder="Add a note (optional)"
-            className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm focus:border-orange-400 focus:outline-none"
-          />
+          {!showResults && (
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              placeholder="Add a note (optional)"
+              className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm focus:border-orange-400 focus:outline-none"
+            />
+          )}
         </div>
 
         <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
-          {people.length > 0 && selectedIds.length === 0 && (
+          {!showResults && people.length > 0 && selectedIds.length === 0 && (
             <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
               <span className="font-semibold">Select at least one person</span> to share with.
             </div>
@@ -361,13 +422,15 @@ export function ShareToUsersDialog({
           )}
           <button
             type="button"
-            disabled={sending || selectedIds.length === 0}
-            onClick={() => void send()}
+            disabled={sending || (!showResults && selectedIds.length === 0)}
+            onClick={() => (showResults ? onClose() : void send())}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:bg-neutral-300"
           >
-            <Send className="h-4 w-4" />
+            {showResults ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
             {sending
               ? "Sending…"
+              : showResults
+              ? "Done"
               : selectedIds.length > 0
               ? `Send to ${selectedIds.length} ${selectedIds.length === 1 ? "person" : "people"}`
               : "Select people to share"}
