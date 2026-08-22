@@ -622,7 +622,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {step !== 'results' && (
+          {step === 'select' && (
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
