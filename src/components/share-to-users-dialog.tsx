@@ -89,6 +89,7 @@ export function ShareToUsersDialog({
   const [sentRecipients, setSentRecipients] = useState<string[]>([]);
   const [invalid, setInvalid] = useState<Record<string, RecipientIssue>>({});
   const [checking, setChecking] = useState(false);
+  const [editingNote, setEditingNote] = useState(false);
 
 
   useEffect(() => {
