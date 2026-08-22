@@ -78,12 +78,13 @@ export function ShareToUsersDialog({
     }
   };
 
-  const send = async () => {
+  const send = async (targetIds?: string[]) => {
     if (!me) {
       toast.error("Please sign in");
       return;
     }
-    if (selectedIds.length === 0) {
+    const recipients = targetIds && targetIds.length ? targetIds : selectedIds;
+    if (recipients.length === 0) {
       toast.error("Pick at least one person");
       return;
     }
@@ -93,6 +94,7 @@ export function ShareToUsersDialog({
       : `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
     let successes = 0;
     const failures: string[] = [];
+    const failedIds: string[] = [];
     try {
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
       for (const uid of selectedIds) {
