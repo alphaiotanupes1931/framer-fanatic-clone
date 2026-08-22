@@ -177,8 +177,21 @@ function OrgProfile() {
   }, []);
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
+      setLoaded(false);
+      let { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
+      // Private page: try the access code this browser already unlocked with.
+      if (!data && typeof window !== "undefined") {
+        const saved = sessionStorage.getItem(`pb_org_code_${slug}`);
+        if (saved) {
+          try {
+            const res = await unlockOrgWithCode({ data: { slug, code: saved } });
+            if (res.ok) data = JSON.parse(res.orgJson);
+            else sessionStorage.removeItem(`pb_org_code_${slug}`);
+          } catch { /* stay locked */ }
+        }
+      }
       setOrg(data as Org | null);
+      setLoaded(true);
       const o = data as Org | null;
       const sub = (o?.subtype ?? "").toLowerCase();
       const isBiz = o?.type !== "community_assoc" && o?.type !== "group" && o?.type !== "arts_org" && o?.type !== "artist";
@@ -187,6 +200,7 @@ function OrgProfile() {
       else if (isBiz) setTab("Services");
     })();
   }, [slug]);
+
   useEffect(() => {
     if (!org || !me) { setJoined(false); setMemberStatus("none"); return; }
     (async () => {
