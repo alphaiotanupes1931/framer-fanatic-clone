@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -261,9 +263,15 @@ function MessagesPage() {
     [me, active],
   );
 
+  const [groupDeleteNotice, setGroupDeleteNotice] = useState(false);
+
   const deleteMessage = useCallback(
     async (m: Msg) => {
       if (!me) return;
+      // Group messages belong to the whole group, so they can't be removed
+      // by a single member (the delete never sticks and the message returns
+      // on refresh). Tell the user instead of pretending it worked.
+      if (active?.is_group) { setGroupDeleteNotice(true); return; }
       if (!confirm("Delete this message for you? It won't be removed for others.")) return;
       const next = Array.from(new Set([...(m.deleted_for || []), me.id]));
       const { error } = await supabase
@@ -273,7 +281,7 @@ function MessagesPage() {
       if (error) { toast.error(error.message); return; }
       setMsgs((prev) => prev.filter((x) => x.id !== m.id));
     },
-    [me],
+    [me, active?.is_group],
   );
 
   const markRead = useCallback(
@@ -1400,6 +1408,27 @@ function MessagesPage() {
               {broadcasting ? "Sending..." : "Send to followers"}
             </button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={groupDeleteNotice} onOpenChange={setGroupDeleteNotice}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Cannot delete group message</DialogTitle>
+            <DialogDescription>
+              Messages sent in a group belong to everyone in the conversation, so they can't
+              be deleted. You can leave or clear the chat instead.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setGroupDeleteNotice(false)}
+              className="w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Got it
+            </button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppLayout>
