@@ -84,6 +84,17 @@ export function ShareToUsersDialog({
     [failed, people],
   );
 
+  const openDetails = () => {
+    if (!url) return;
+    const isExternal = url.startsWith("http") && !url.startsWith(window.location.origin);
+    if (isExternal) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      const path = url.replace(/^https?:\/\/[^/]+/, "") || "/";
+      navigate({ to: path });
+    }
+  };
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
