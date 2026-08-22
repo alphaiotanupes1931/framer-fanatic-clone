@@ -1,16 +1,13 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { prefetchHandlers } from "@/lib/prefetch";
-import {
-  Home, Search, Plus, User, Menu, MessageCircle, Compass, BookOpen,
-  Users, Shield, Palette, Landmark, Building2, MapPin, Calendar, Ticket,
-  Video, Trophy, Settings, PenSquare, Store, Bookmark, LogOut,
-} from "lucide-react";
+import { Home, Search, Plus, User, Menu, LogOut } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { navItems, utilItems, createItems, type NavItem } from "@/lib/nav-items";
 
-type Primary = { icon: typeof Home; label: string; to: string };
+type Primary = NavItem;
 
 const primaryItems: Primary[] = [
   { icon: Home, label: "Home", to: "/dashboard" },
@@ -18,35 +15,8 @@ const primaryItems: Primary[] = [
   { icon: User, label: "Profile", to: "/profile" },
 ];
 
-const createItems = [
-  { icon: Ticket, label: "Event", to: "/events/new" },
-  { icon: Users, label: "Groups", to: "/groups" },
-  { icon: Palette, label: "Artist Page", to: "/artists" },
-  { icon: Landmark, label: "Arts Org", to: "/arts-orgs" },
-  { icon: Building2, label: "Business", to: "/businesses" },
-  { icon: Video, label: "Video", to: "/videos" },
-  { icon: Store, label: "Marketplace Listing", to: "/marketplace" },
-  { icon: PenSquare, label: "Post to Feed", to: "/dashboard" },
-] as const;
+const moreItems: Primary[] = [...navItems, ...utilItems];
 
-const moreItems: Primary[] = [
-  { icon: Compass, label: "Discover", to: "/search" },
-  { icon: BookOpen, label: "Stories", to: "/stories" },
-  { icon: Ticket, label: "Events", to: "/events" },
-  { icon: Ticket, label: "Festivals", to: "/festivals" },
-  { icon: Calendar, label: "Calendar", to: "/calendar" },
-  { icon: MessageCircle, label: "Messages", to: "/messages" },
-  { icon: Bookmark, label: "Saved", to: "/saved" },
-  { icon: Users, label: "Groups", to: "/groups" },
-  { icon: Shield, label: "Associations", to: "/community-associations" },
-  { icon: Palette, label: "Artists", to: "/artists" },
-  { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
-  { icon: Building2, label: "Businesses", to: "/businesses" },
-  { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
-  { icon: Video, label: "Videos", to: "/videos" },
-  { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
-  { icon: Settings, label: "Settings", to: "/settings" },
-];
 
 export function MobileNav() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
