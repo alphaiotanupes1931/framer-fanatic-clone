@@ -90,6 +90,7 @@ export function ShareToUsersDialog({
   const [invalid, setInvalid] = useState<Record<string, RecipientIssue>>({});
   const [checking, setChecking] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
+  const [pendingNote, setPendingNote] = useState("");
 
 
   useEffect(() => {
