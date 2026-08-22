@@ -2360,3 +2360,120 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     </div>
   );
 }
+
+/**
+ * Shown instead of the page when it is private (or missing). Search engines
+ * only ever see this shell plus a noindex tag; the real content is never sent.
+ * Someone holding the owner's access code can unlock it for this browser tab.
+ */
+function PrivatePageGate({ slug, onUnlock }: { slug: string; onUnlock: (org: Org) => void }) {
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setBusy(true);
+    try {
+      const res = await unlockOrgWithCode({ data: { slug, code } });
+      if (!res.ok) { toast.error("That access code is not right"); return; }
+      sessionStorage.setItem(`pb_org_code_${slug}`, code.trim());
+      onUnlock(JSON.parse(res.orgJson) as Org);
+    } catch {
+      toast.error("Could not unlock this page");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <AppLayout title="" hero={false}>
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-50">
+          <Lock className="h-6 w-6 text-amber-700" />
+        </div>
+        <h1 className="text-xl font-bold text-neutral-900">This page is private</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          It is hidden from search engines and from everyone except the creator, admins, and approved members.
+          If you were given an access code, enter it below.
+        </p>
+        <form onSubmit={submit} className="mt-6 flex gap-2">
+          <input
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Access code"
+            autoComplete="off"
+            className="min-w-0 flex-1 rounded-full border border-border px-4 py-2.5 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="shrink-0 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {busy ? "Checking…" : "Unlock"}
+          </button>
+        </form>
+        <Link to="/dashboard" className="mt-6 inline-block text-sm font-semibold text-muted-foreground underline">
+          Back to Planet Baltimore
+        </Link>
+      </div>
+    </AppLayout>
+  );
+}
+
+/** Owner control: hand out (or clear) a shared access code for a private page. */
+function AccessCodeControl({ orgId }: { orgId: string }) {
+  const [code, setCode] = useState("");
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const save = async (value: string | null) => {
+    setBusy(true);
+    try {
+      await setOrgAccessCode({ data: { orgId, code: value } });
+      toast.success(value ? "Access code saved" : "Access code removed");
+      setOpen(false);
+      setCode("");
+    } catch {
+      toast.error("Could not save the access code");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="shrink-0 rounded-full border border-amber-300 px-4 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+      >
+        Set access code
+      </button>
+    );
+  }
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2">
+      <input
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="Code to share (e.g. studio2026)"
+        className="min-w-0 flex-1 rounded-full border border-amber-300 bg-white px-3 py-1.5 text-xs"
+      />
+      <button
+        type="button"
+        disabled={busy || !code.trim()}
+        onClick={() => save(code.trim())}
+        className="rounded-full bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+      >
+        Save
+      </button>
+      <button type="button" disabled={busy} onClick={() => save(null)} className="rounded-full border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800">
+        Remove
+      </button>
+      <button type="button" onClick={() => setOpen(false)} className="text-xs font-semibold text-amber-800 underline">
+        Cancel
+      </button>
+    </div>
+  );
+}
