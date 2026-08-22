@@ -42,6 +42,7 @@ import { SponsorsTab } from "@/components/org/sponsors-tab";
 import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
+import { BannerWatermark } from "@/components/shared/banner-watermark";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
