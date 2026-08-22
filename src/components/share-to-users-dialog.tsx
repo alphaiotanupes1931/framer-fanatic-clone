@@ -141,17 +141,19 @@ export function ShareToUsersDialog({
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : "Could not send";
           failures.push(msg);
+          failedIds.push(uid);
           console.error("Share to user failed", { uid, error: msg });
         }
       }
 
-      if (successes > 0) {
-        toast.success(
-          failures.length === 0
-            ? `Shared with ${successes} ${successes === 1 ? "person" : "people"}`
-            : `Shared with ${successes} of ${selectedIds.length} people`,
-        );
+      setFailed(failedIds);
+      setFailReason(failures[0] || null);
+
+      if (failedIds.length === 0) {
+        toast.success(`Shared with ${successes} ${successes === 1 ? "person" : "people"}`);
         onClose();
+      } else if (successes > 0) {
+        toast.warning(`Shared with ${successes} of ${recipients.length}. ${failedIds.length} did not go through.`);
       } else {
         toast.error(failures[0] || "Failed to share");
       }
