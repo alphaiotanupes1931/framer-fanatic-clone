@@ -14,7 +14,7 @@ import {
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
   ChevronLeft, ChevronRight, Heart, DollarSign,
   Loader2, ImagePlus, Video as VideoIcon, Type as TypeIcon, X,
-  Upload,
+  Upload, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { tabsForArtist, type ArtistTab } from "@/lib/artist-tabs";
@@ -324,6 +324,33 @@ function OrgProfile() {
         <ArrowLeft className="h-5 w-5" />
       </button>
 
+      {org.is_public === false && (
+        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <Lock className="h-4 w-4 shrink-0 text-amber-700" />
+          <div className="min-w-0 flex-1 text-sm text-amber-900">
+            <span className="font-semibold">This page is private.</span>{" "}
+            {canManage
+              ? "Only you and admins can see it. It will not appear in the Artists list or search until you make it public."
+              : "Only the creator and admins can see it."}
+          </div>
+          {canManage && (
+            <button
+              type="button"
+              onClick={async () => {
+                const { error } = await supabase.from("organizations").update({ is_public: true }).eq("id", org.id);
+                if (error) { toast.error("Could not make this page public"); return; }
+                setOrg((prev) => (prev ? { ...prev, is_public: true } : prev));
+                toast.success("Page is now public");
+              }}
+              className="shrink-0 rounded-full bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+            >
+              Make public
+            </button>
+          )}
+        </div>
+      )}
+
+
       {/* Hidden file inputs for uploads */}
       <input
         ref={avatarInputRef}
@@ -473,6 +500,11 @@ function OrgProfile() {
       <div className="mt-3 px-1 sm:px-2">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">{org.name}</h1>
+          {org.is_public === false && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+              <Lock className="h-3 w-3" /> Private
+            </span>
+          )}
           {isAssoc && (
             <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
               <Star className="h-3 w-3" /> Grant Founding
