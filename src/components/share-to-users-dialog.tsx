@@ -519,51 +519,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {step === 'results' ? (
-            <div className="rounded-lg border border-neutral-200">
-              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
-                <Check className="h-3.5 w-3.5" /> Results ({sentRecipients.length} {sentRecipients.length === 1 ? "person" : "people"})
-              </div>
-              <div className="max-h-64 overflow-y-auto">
-                {sentRecipients.length === 0 ? (
-                  <div className="p-6 text-center text-sm text-neutral-500">No results yet.</div>
-                ) : (
-                  sentRecipients.map((uid) => {
-                    const p = people.find((x) => x.id === uid);
-                    const status = results[uid];
-                    if (!p) return null;
-                    return (
-                      <div
-                        key={uid}
-                        className="flex items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0"
-                      >
-                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
-                          {p.avatar_url ? (
-                            <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            initials(p.display_name || p.username)
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username}</div>
-                          {p.username && <div className="truncate text-xs text-neutral-500">@{p.username}</div>}
-                        </div>
-                        {status === 'success' ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600">
-                            <Check className="h-4 w-4" /> Sent
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600">
-                            <X className="h-4 w-4" /> Failed
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          ) : (
+          {step === 'select' && (
             <div className="rounded-lg border border-neutral-200">
               <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-2.5">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-neutral-600">
@@ -615,6 +571,98 @@ export function ShareToUsersDialog({
                           <Check className="h-4 w-4" />
                         </div>
                       </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 'confirm' && (
+            <div className="rounded-lg border border-neutral-200 bg-white">
+              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
+                <Send className="h-3.5 w-3.5 -rotate-45" /> Ready to share?
+              </div>
+              <div className="space-y-4 p-4">
+                <div>
+                  <div className="text-sm font-semibold text-neutral-900">
+                    Sending to {selectedIds.length} {selectedIds.length === 1 ? "person" : "people"}
+                  </div>
+                  <div className="mt-2 max-h-48 space-y-2 overflow-y-auto rounded-md bg-neutral-50 p-2">
+                    {selectedIds.map((uid) => {
+                      const p = people.find((x) => x.id === uid);
+                      if (!p) return null;
+                      return (
+                        <div key={uid} className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
+                            {p.avatar_url ? (
+                              <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              initials(p.display_name || p.username)
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1 text-sm text-neutral-800">
+                            <span className="font-semibold">{p.display_name || p.username}</span>
+                            {p.username && <span className="text-neutral-500"> @{p.username}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                {note.trim() ? (
+                  <div>
+                    <div className="text-sm font-semibold text-neutral-900">Your note</div>
+                    <div className="mt-1 whitespace-pre-wrap rounded-md bg-neutral-50 p-3 text-sm text-neutral-700">
+                      {note.trim()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-neutral-500">No note added.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 'results' && (
+            <div className="rounded-lg border border-neutral-200">
+              <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
+                <Check className="h-3.5 w-3.5" /> Results ({sentRecipients.length} {sentRecipients.length === 1 ? "person" : "people"})
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {sentRecipients.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-neutral-500">No results yet.</div>
+                ) : (
+                  sentRecipients.map((uid) => {
+                    const p = people.find((x) => x.id === uid);
+                    const status = results[uid];
+                    if (!p) return null;
+                    return (
+                      <div
+                        key={uid}
+                        className="flex items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0"
+                      >
+                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
+                          {p.avatar_url ? (
+                            <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            initials(p.display_name || p.username)
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username}</div>
+                          {p.username && <div className="truncate text-xs text-neutral-500">@{p.username}</div>}
+                        </div>
+                        {status === 'success' ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600">
+                            <Check className="h-4 w-4" /> Sent
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600">
+                            <X className="h-4 w-4" /> Failed
+                          </span>
+                        )}
+                      </div>
                     );
                   })
                 )}
