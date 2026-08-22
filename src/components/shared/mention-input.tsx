@@ -3,7 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 
-type Person = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
+type Person = {
+  id: string;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  /** "user" for people, "org" for artist pages, arts orgs, businesses and groups. */
+  kind?: string;
+  subtype?: string | null;
+};
 
 type Base = {
   value: string;
@@ -39,8 +47,27 @@ export function MentionField({
     if (query === null || query.length < 1) { setPeople([]); return; }
     let cancelled = false;
     const t = setTimeout(async () => {
-      const { data } = await supabase.rpc("search_all_users", { q: query, lim: 6 });
-      if (!cancelled) { setPeople((data ?? []) as Person[]); setActive(0); }
+      // Mentions cover people AND pages (artists, arts orgs, businesses, groups).
+      const { data } = await supabase.rpc("search_mentionables", { q: query, lim: 6 });
+      const rows = (data ?? []) as Array<{
+        id: string; handle: string | null; name: string | null; avatar_url: string | null; kind: string; subtype: string | null;
+      }>;
+      if (!cancelled) {
+        setPeople(
+          rows
+            .filter((r) => !!r.handle)
+            .slice(0, 8)
+            .map((r) => ({
+              id: `${r.kind}:${r.id}`,
+              display_name: r.name,
+              username: r.handle,
+              avatar_url: r.avatar_url,
+              kind: r.kind,
+              subtype: r.subtype,
+            })),
+        );
+        setActive(0);
+      }
     }, 150);
     return () => { cancelled = true; clearTimeout(t); };
   }, [query]);
@@ -117,6 +144,11 @@ export function MentionField({
                 </Avatar>
                 <span className="truncate font-medium text-foreground">{p.display_name || p.username}</span>
                 {p.username && <span className="truncate text-xs text-muted-foreground">@{p.username}</span>}
+                {p.kind === "org" && (
+                  <span className="ml-auto shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">
+                    {p.subtype || "Page"}
+                  </span>
+                )}
               </button>
             </li>
           ))}
