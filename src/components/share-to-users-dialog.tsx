@@ -87,6 +87,9 @@ export function ShareToUsersDialog({
   const [results, setResults] = useState<Record<string, 'success' | 'failed'>>({});
   const [showResults, setShowResults] = useState(false);
   const [sentRecipients, setSentRecipients] = useState<string[]>([]);
+  const [invalid, setInvalid] = useState<Record<string, RecipientIssue>>({});
+  const [checking, setChecking] = useState(false);
+
 
   useEffect(() => {
     if (!open || !me?.id) return;
