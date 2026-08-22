@@ -581,7 +581,7 @@ export function ShareToUsersDialog({
           {step === 'confirm' && (
             <div className="rounded-lg border border-neutral-200 bg-white">
               <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-neutral-600">
-                <Send className="h-3.5 w-3.5 -rotate-45" /> Ready to share?
+                <Send className="h-3.5 w-3.5" /> Ready to share?
               </div>
               <div className="space-y-4 p-4">
                 <div>
