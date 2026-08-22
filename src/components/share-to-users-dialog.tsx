@@ -507,7 +507,7 @@ export function ShareToUsersDialog({
           </button>
 
 
-          {!step === 'results' && (
+          {step !== 'results' && (
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
               <input
@@ -622,7 +622,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {!step === 'results' && (
+          {step !== 'results' && (
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -634,13 +634,13 @@ export function ShareToUsersDialog({
         </div>
 
         <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
-          {!step === 'results' && people.length > 0 && selectedIds.length === 0 && (
+          {step !== 'results' && people.length > 0 && selectedIds.length === 0 && (
             <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900">
               <span className="font-semibold">Select at least one person</span> to share with.
             </div>
           )}
 
-          {!step === 'results' && invalidIds.length > 0 && (
+          {step !== 'results' && invalidIds.length > 0 && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
@@ -673,7 +673,7 @@ export function ShareToUsersDialog({
             </div>
           )}
 
-          {!step === 'results' && checking && selectedIds.length > 0 && (
+          {step !== 'results' && checking && selectedIds.length > 0 && (
             <div className="text-xs text-neutral-500">Checking recipients…</div>
           )}
 
@@ -706,7 +706,7 @@ export function ShareToUsersDialog({
           )}
           <button
             type="button"
-            disabled={sending || (!step === 'results' && selectedIds.length === 0)}
+            disabled={sending || (step !== 'results' && selectedIds.length === 0)}
             onClick={() => (step === 'results' ? onClose() : void send())}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:bg-neutral-300"
           >
