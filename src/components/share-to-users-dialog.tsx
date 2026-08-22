@@ -764,7 +764,7 @@ export function ShareToUsersDialog({
           )}
           <button
             type="button"
-            disabled={sending || (step === 'select' && selectedIds.length === 0)}
+            disabled={sending || (step === 'select' && selectedIds.length === 0) || (step === 'confirm' && invalidIds.length > 0)}
             onClick={() => {
               if (step === 'results') return onClose();
               if (step === 'confirm') return void send();
