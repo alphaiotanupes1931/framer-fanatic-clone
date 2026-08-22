@@ -51,8 +51,52 @@ import { notifyGroupJoinRequest } from "@/lib/group-requests.functions";
 
 export const Route = createFileRoute("/o/$slug")({
   component: OrgProfile,
-  head: () => ({ meta: [{ title: "Organization - Planet Baltimore" }] }),
+  // Public read only. A private page comes back as not indexable, so search
+  // engines get an explicit noindex and no canonical for it.
+  loader: async ({ params }) => {
+    try {
+      return await getOrgSeo({ data: { slug: params.slug } });
+    } catch {
+      return { indexable: false as const };
+    }
+  },
+  errorComponent: () => (
+    <AppLayout title="" hero={false}>
+      <div className="py-20 text-center text-muted-foreground">This page could not be loaded.</div>
+    </AppLayout>
+  ),
+  notFoundComponent: () => (
+    <AppLayout title="" hero={false}>
+      <div className="py-20 text-center text-muted-foreground">Page not found.</div>
+    </AppLayout>
+  ),
+  head: ({ params, loaderData }) => {
+    if (!loaderData?.indexable) {
+      return {
+        meta: [
+          { title: "Private page - Planet Baltimore" },
+          { name: "robots", content: "noindex, nofollow, noarchive" },
+          { name: "googlebot", content: "noindex, nofollow" },
+        ],
+      };
+    }
+    const url = `https://planetbaltimore.com/o/${params.slug}`;
+    const description = loaderData.description || `${loaderData.name} on Planet Baltimore.`;
+    return {
+      meta: [
+        { title: `${loaderData.name} - Planet Baltimore` },
+        { name: "description", content: description },
+        { property: "og:title", content: loaderData.name },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
 });
+
 
 type Org = {
   id: string; owner_id: string; type: string; subtype: string | null;
