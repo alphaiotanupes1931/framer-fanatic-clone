@@ -1,7 +1,7 @@
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
   BookOpen, MessageCircle, Bell, User, Ticket, FileText, PenLine, Plane, Bookmark,
-  Settings, Video, Trophy,
+  Settings, Video, Trophy, Gift,
 } from "lucide-react";
 
 export type NavItem = { icon: typeof Home; label: string; to: string };
@@ -12,6 +12,8 @@ export const navItems: NavItem[] = [
   { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
   { icon: Shield, label: "Associations", to: "/community-associations" },
   { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
+  // Referrals feed Baltimore 100 points, so it sits directly under it.
+  { icon: Gift, label: "Referrals", to: "/referrals" },
   { icon: Building2, label: "Businesses", to: "/businesses" },
   { icon: Calendar, label: "Community Calendar", to: "/calendar" },
   { icon: Compass, label: "Discover", to: "/search" },

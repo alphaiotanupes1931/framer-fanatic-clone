@@ -1054,6 +1054,7 @@ export type Database = {
           media_urls: Json
           org_id: string
           parent_id: string | null
+          post_id: string | null
           user_id: string
         }
         Insert: {
@@ -1064,6 +1065,7 @@ export type Database = {
           media_urls?: Json
           org_id: string
           parent_id?: string | null
+          post_id?: string | null
           user_id: string
         }
         Update: {
@@ -1074,6 +1076,7 @@ export type Database = {
           media_urls?: Json
           org_id?: string
           parent_id?: string | null
+          post_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1089,6 +1092,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "organization_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "organization_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -3426,6 +3436,13 @@ export type Database = {
         }[]
       }
       record_invite_click: { Args: { _token: string }; Returns: string }
+      resolve_handle: {
+        Args: { _handle: string }
+        Returns: {
+          kind: string
+          slug: string
+        }[]
+      }
       resolve_referrer: { Args: { _username: string }; Returns: string }
       rsvp_free_event: {
         Args: {
@@ -3455,6 +3472,17 @@ export type Database = {
           neighborhood: string
           role: string
           username: string
+        }[]
+      }
+      search_mentionables: {
+        Args: { lim?: number; q: string }
+        Returns: {
+          avatar_url: string
+          handle: string
+          id: string
+          kind: string
+          name: string
+          subtype: string
         }[]
       }
       set_my_profile_kind: { Args: { _kind: string }; Returns: undefined }

@@ -1,3 +1,4 @@
+import { OrgPostComments } from "@/components/org/org-post-comments";
 import { StaffLoginCard } from "@/components/org/staff-login-card";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -2369,6 +2370,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                         </button>
                       </div>
                     )}
+                    <OrgPostComments orgId={orgId} postId={p.id} />
                   </div>
                 </div>
               );

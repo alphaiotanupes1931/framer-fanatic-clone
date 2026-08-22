@@ -21,44 +21,19 @@ import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
 import { Img } from "@/components/shared/smart-img";
 import { prefetchHandlers } from "@/lib/prefetch";
+import {
+  navItems as sharedNavItems,
+  utilItems as sharedUtilItems,
+  createItems as sharedCreateItems,
+} from "@/lib/nav-items";
 import type { ReactNode, ComponentType } from "react";
 
-// Route-path map: repo path -> this app's existing TanStack route.
+// Desktop and mobile share one navigation config so both surfaces always
+// offer exactly the same destinations, in the same order.
 type NavItem = { icon: typeof Home; label: string; to: string };
 
-const createItems: NavItem[] = [
-  { icon: PaletteIcon, label: "Artist Page", to: "/create-artist" },
-  { icon: LandmarkIcon, label: "Arts Organization", to: "/create-arts-org" },
-  { icon: BusinessIcon, label: "Business", to: "/create-business" },
-  { icon: ShieldIcon, label: "Community Association", to: "/create-community-association" },
-  { icon: UsersIcon, label: "Groups", to: "/create-community" },
-  { icon: FileText, label: "New Post", to: "/create-post" },
-  { icon: PenLine, label: "New Story", to: "/create-story" },
-  { icon: HomeIcon, label: "Resident Profile", to: "/create-resident" },
-  { icon: PlaneIcon, label: "Visitor Profile", to: "/create-visitor" },
-];
-
-const navItems: NavItem[] = [
-  { icon: Home, label: "Home", to: "/dashboard" },
-  { icon: Palette, label: "Artists", to: "/artists" },
-  { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
-  { icon: Building2, label: "Businesses", to: "/businesses" },
-  { icon: Calendar, label: "Calendar", to: "/calendar" },
-  { icon: Shield, label: "Community Associations", to: "/community-associations" },
-  { icon: Compass, label: "Discover", to: "/discover" },
-  { icon: Ticket, label: "Events", to: "/events" },
-  { icon: Ticket, label: "Festivals", to: "/festivals" },
-  { icon: Users, label: "Groups", to: "/groups" },
-  { icon: MessageCircle, label: "Messages", to: "/messages" },
-  { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
-  { icon: Bell, label: "Notifications", to: "/notifications" },
-  { icon: User, label: "Profile", to: "/profile" },
-  { icon: Search, label: "Search", to: "/search" },
-  { icon: BookOpen, label: "Stories", to: "/stories" },
-  { icon: Video, label: "Videos", to: "/videos" },
-  { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
-  { icon: Settings, label: "Settings", to: "/settings" },
-];
+const navItems: NavItem[] = [...sharedNavItems, ...sharedUtilItems];
+const createItems: NavItem[] = sharedCreateItems;
 
 function SidebarCard({ title, icon: Icon, children, action }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; action?: ReactNode }) {
   return (

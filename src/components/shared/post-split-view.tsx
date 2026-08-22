@@ -239,7 +239,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
           )}
           {post.content && !isTextOnly && (
             (post.post_type === "text" && post.bg_color) ? (
-              <div className={`m-4 rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
+              <div className={`m-4 flex aspect-square items-center justify-center overflow-y-auto rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
                 post.font_size === "sm" ? "text-base" : post.font_size === "lg" ? "text-2xl" : post.font_size === "xl" ? "text-4xl" : "text-xl"
               }`} style={{ background: post.bg_color, color: post.text_color || "#fff" }}>
                 <MentionText text={post.content} />

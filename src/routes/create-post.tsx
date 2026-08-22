@@ -150,8 +150,10 @@ function CreatePostPage() {
         media_urls: mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
         music_url: null,
         post_type: postType,
-        bg_color: postType === "text" && bg.bg ? bg.bg : null,
-        text_color: postType === "text" && bg.bg ? bg.fg : null,
+        // Text posts always carry their canvas colours so the published card
+        // looks exactly like the square composer, line breaks included.
+        bg_color: postType === "text" ? (bg.bg || "#F5F5F4") : null,
+        text_color: postType === "text" ? (bg.bg ? bg.fg : "#1c1917") : null,
         font_size: postType === "text" ? fontSize : null,
         category,
         tag: tag || null,
@@ -209,15 +211,16 @@ function CreatePostPage() {
           {/* Composer */}
           {postType === "text" ? (
             <div className="space-y-3">
+              {/* Square canvas: what you type here is exactly what gets published. */}
               <div
-                className="rounded-2xl p-6 min-h-[200px] flex items-center justify-center transition"
+                className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-y-auto rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
               >
                 <MentionField
                   multiline
                   value={content}
                   onChange={setContent}
-                  rows={5}
+                  rows={8}
                   maxLength={2000}
                   placeholder="Share your thoughts... use @ to mention someone"
                   style={{ color: bg.fg }}
