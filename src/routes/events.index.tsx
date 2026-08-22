@@ -248,7 +248,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const { isArtist } = useUserRole();
   const checkoutFn = useServerFn(createTicketCheckout);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
+  const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "" });
   const [buying, setBuying] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -343,7 +343,6 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const submit = async () => {
     if (!me) return;
     if (!form.title || !form.starts_at) { toast.error("Title and date required"); return; }
-    const priceCents = Math.max(0, Math.round(parseFloat(form.price || "0") * 100));
     const { data: created, error } = await supabase.from("events").insert({
       user_id: me.id,
       title: form.title,
@@ -351,7 +350,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       location: form.location || null,
       image_url: form.image_url || null,
       starts_at: new Date(form.starts_at).toISOString(),
-      price_cents: priceCents,
+      price_cents: 0,
     }).select("id").maybeSingle();
     if (error) {
       toast.error(error.message.includes("row-level security")
@@ -359,9 +358,9 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         : error.message);
       return;
     }
-    toast.success("Event created. Add your ticket types.");
+    toast.success("Event created. Now set up your ticket types.");
     setOpen(false);
-    setForm({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
+    setForm({ title: "", description: "", location: "", image_url: "", starts_at: "" });
     reload();
     const newId = (created as { id: string } | null)?.id;
     // Organizers continue in the studio so they can set up ticket types.
