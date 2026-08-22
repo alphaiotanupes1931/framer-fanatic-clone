@@ -27,27 +27,8 @@ import type { ReactNode, ComponentType } from "react";
 // offer exactly the same destinations, in the same order.
 type NavItem = { icon: typeof Home; label: string; to: string };
 
-const navItems: NavItem[] = [
-  { icon: Home, label: "Home", to: "/dashboard" },
-  { icon: Palette, label: "Artists", to: "/artists" },
-  { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
-  { icon: Building2, label: "Businesses", to: "/businesses" },
-  { icon: Calendar, label: "Calendar", to: "/calendar" },
-  { icon: Shield, label: "Community Associations", to: "/community-associations" },
-  { icon: Compass, label: "Discover", to: "/discover" },
-  { icon: Ticket, label: "Events", to: "/events" },
-  { icon: Ticket, label: "Festivals", to: "/festivals" },
-  { icon: Users, label: "Groups", to: "/groups" },
-  { icon: MessageCircle, label: "Messages", to: "/messages" },
-  { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
-  { icon: Bell, label: "Notifications", to: "/notifications" },
-  { icon: User, label: "Profile", to: "/profile" },
-  { icon: Search, label: "Search", to: "/search" },
-  { icon: BookOpen, label: "Stories", to: "/stories" },
-  { icon: Video, label: "Videos", to: "/videos" },
-  { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
-  { icon: Settings, label: "Settings", to: "/settings" },
-];
+const navItems: NavItem[] = [...sharedNavItems, ...sharedUtilItems];
+const createItems: NavItem[] = sharedCreateItems;
 
 function SidebarCard({ title, icon: Icon, children, action }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; action?: ReactNode }) {
   return (
