@@ -200,6 +200,21 @@ export function ShareToUsersDialog({
       setResults((prev) => ({ ...prev, ...nextResults }));
       setShowResults(true);
 
+      void logShareEvent({
+        actorId: me.id,
+        url,
+        title,
+        kind: preview?.type ?? null,
+        isRetry,
+        recipientCount: recipients.length,
+        successCount: successes,
+        failureCount: failedIds.length,
+        failureReasons: failures,
+        outcome: failedIds.length === 0 ? "success" : successes > 0 ? "partial" : "failure",
+      });
+
+
+
       if (failedIds.length === 0) {
         toast.success(
           `Shared with ${successes} ${successes === 1 ? "person" : "people"}`,
