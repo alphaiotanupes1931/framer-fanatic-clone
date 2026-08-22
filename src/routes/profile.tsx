@@ -725,6 +725,8 @@ function ProfilePage() {
         onClose={() => setReferralOpen(false)}
         profile={profile}
       />
+      {purchase === "success" && <PurchaseConfirmation sessionId={purchaseSessionId} />}
+
       {postViewerIdx !== null && myPosts[postViewerIdx] && (
         <div
           role="dialog"
