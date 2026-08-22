@@ -1,5 +1,4 @@
 import { BannerWatermark } from "@/components/shared/banner-watermark";
-import { BANNER_SPEC } from "@/lib/media-guidelines";
 import { emailMyCancellation } from "@/lib/tickets.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
