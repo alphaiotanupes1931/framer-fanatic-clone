@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Send, Users, X, Search, Link as LinkIcon, Check } from "lucide-react";
+import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
@@ -32,6 +32,8 @@ export function ShareToUsersDialog({
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState<string[]>([]);
+  const [failReason, setFailReason] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !me?.id) return;
@@ -53,6 +55,8 @@ export function ShareToUsersDialog({
       setSelected({});
       setNote("");
       setQ("");
+      setFailed([]);
+      setFailReason(null);
     }
   }, [open]);
 
@@ -69,6 +73,15 @@ export function ShareToUsersDialog({
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
+  const failedNames = useMemo(
+    () =>
+      failed.map((id) => {
+        const p = people.find((x) => x.id === id);
+        return p?.display_name || p?.username || "Someone";
+      }),
+    [failed, people],
+  );
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
@@ -78,12 +91,13 @@ export function ShareToUsersDialog({
     }
   };
 
-  const send = async () => {
+  const send = async (targetIds?: string[]) => {
     if (!me) {
       toast.error("Please sign in");
       return;
     }
-    if (selectedIds.length === 0) {
+    const recipients = targetIds && targetIds.length ? targetIds : selectedIds;
+    if (recipients.length === 0) {
       toast.error("Pick at least one person");
       return;
     }
@@ -93,9 +107,10 @@ export function ShareToUsersDialog({
       : `${note.trim() ? note.trim() + "\n\n" : ""}${title ? title + "\n" : ""}${url}`;
     let successes = 0;
     const failures: string[] = [];
+    const failedIds: string[] = [];
     try {
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
-      for (const uid of selectedIds) {
+      for (const uid of recipients) {
         try {
           const { data: mine } = await supabase
             .from("conversation_members")
@@ -139,17 +154,19 @@ export function ShareToUsersDialog({
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : "Could not send";
           failures.push(msg);
+          failedIds.push(uid);
           console.error("Share to user failed", { uid, error: msg });
         }
       }
 
-      if (successes > 0) {
-        toast.success(
-          failures.length === 0
-            ? `Shared with ${successes} ${successes === 1 ? "person" : "people"}`
-            : `Shared with ${successes} of ${selectedIds.length} people`,
-        );
+      setFailed(failedIds);
+      setFailReason(failures[0] || null);
+
+      if (failedIds.length === 0) {
+        toast.success(`Shared with ${successes} ${successes === 1 ? "person" : "people"}`);
         onClose();
+      } else if (successes > 0) {
+        toast.warning(`Shared with ${successes} of ${recipients.length}. ${failedIds.length} did not go through.`);
       } else {
         toast.error(failures[0] || "Failed to share");
       }
@@ -280,11 +297,36 @@ export function ShareToUsersDialog({
           />
         </div>
 
-        <div className="border-t border-neutral-200 px-5 py-4">
+        <div className="space-y-3 border-t border-neutral-200 px-5 py-4">
+          {failed.length > 0 && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-amber-900">
+                    {failed.length} {failed.length === 1 ? "message" : "messages"} did not send
+                  </div>
+                  <div className="mt-0.5 truncate text-xs text-amber-800">
+                    {failedNames.join(", ")}
+                  </div>
+                  {failReason && <div className="mt-1 text-xs text-amber-700">{failReason}</div>}
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={sending}
+                onClick={() => void send(failed)}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-400 bg-white px-4 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw className={`h-4 w-4 ${sending ? "animate-spin" : ""}`} />
+                {sending ? "Retrying…" : `Retry ${failed.length} failed`}
+              </button>
+            </div>
+          )}
           <button
             type="button"
             disabled={sending || selectedIds.length === 0}
-            onClick={send}
+            onClick={() => void send()}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#d4580a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:bg-neutral-300"
           >
             <Send className="h-4 w-4" />
