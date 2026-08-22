@@ -248,7 +248,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const { isArtist } = useUserRole();
   const checkoutFn = useServerFn(createTicketCheckout);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
+  const [form, setForm] = useState({ title: "", description: "", location: "", image_url: "", starts_at: "" });
   const [buying, setBuying] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -343,7 +343,6 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const submit = async () => {
     if (!me) return;
     if (!form.title || !form.starts_at) { toast.error("Title and date required"); return; }
-    const priceCents = Math.max(0, Math.round(parseFloat(form.price || "0") * 100));
     const { data: created, error } = await supabase.from("events").insert({
       user_id: me.id,
       title: form.title,
@@ -351,7 +350,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
       location: form.location || null,
       image_url: form.image_url || null,
       starts_at: new Date(form.starts_at).toISOString(),
-      price_cents: priceCents,
+      price_cents: 0,
     }).select("id").maybeSingle();
     if (error) {
       toast.error(error.message.includes("row-level security")
@@ -359,9 +358,9 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         : error.message);
       return;
     }
-    toast.success("Event created. Add your ticket types.");
+    toast.success("Event created. Now set up your ticket types.");
     setOpen(false);
-    setForm({ title: "", description: "", location: "", image_url: "", starts_at: "", price: "" });
+    setForm({ title: "", description: "", location: "", image_url: "", starts_at: "" });
     reload();
     const newId = (created as { id: string } | null)?.id;
     // Organizers continue in the studio so they can set up ticket types.
@@ -514,19 +513,14 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
               <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
               <input type="datetime-local" className="w-full rounded-lg border bg-transparent px-3 py-2" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} />
               <input className="w-full rounded-lg border bg-transparent px-3 py-2" placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-              <div>
-                <input
-                  type="number" step="0.01" min="0"
-                  className="w-full rounded-lg border bg-transparent px-3 py-2"
-                  placeholder="Ticket price you want to NET in USD (0 = free)"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                />
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Processing fees and the platform fee are added on top automatically, you net the
-                  exact amount you enter.
+              <div className="rounded-lg border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-3">
+                <div className="text-sm font-semibold">Tickets are set up next</div>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  When you create this event we take you to Organizer Studio, where you add your ticket types
+                  (free RSVP, tiers, prices, and quantities).
                 </p>
               </div>
+
               <div className="rounded-lg border bg-transparent p-3">
                 <div className="flex items-center gap-3">
                   {form.image_url ? (

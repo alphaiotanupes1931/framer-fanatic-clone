@@ -49,8 +49,6 @@ function NewEventPage() {
     address: "",
     neighborhood: "",
     category: "community",
-    ticketing: "rsvp" as "rsvp" | "paid",
-    price: "",
     capacity: "",
   });
 
@@ -165,7 +163,6 @@ function NewEventPage() {
     try {
       const starts = startMode === "now" ? new Date().toISOString() : new Date(form.starts_at).toISOString();
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
-      const priceCents = form.ticketing === "paid" ? Math.max(0, Math.round(parseFloat(form.price || "0") * 100)) : 0;
       const capacity = form.capacity ? Math.max(0, parseInt(form.capacity, 10)) : null;
 
       const { data, error } = await supabase.from("events").insert({
@@ -183,7 +180,7 @@ function NewEventPage() {
         location: isOnline ? "Online" : form.venue_name.trim() || form.address.trim() || null,
         neighborhood: isOnline ? "Online" : form.neighborhood || null,
         category: form.category || null,
-        price_cents: priceCents,
+        price_cents: 0,
         capacity,
       }).select("id").single();
 
@@ -193,7 +190,7 @@ function NewEventPage() {
           : error.message);
         return;
       }
-      toast.success("Event created. Add your ticket types.");
+      toast.success("Event created. Now set up your ticket types.");
       // Organizers land in the studio so they can set up ticket types right away.
       navigate({ to: "/organizer-studio", search: { event: (data as { id: string }).id } });
     } finally {
@@ -353,19 +350,14 @@ function NewEventPage() {
             </select>
           </Field>
 
-          <Field label="Ticketing Mode" required>
-            <select className={inputCls} value={form.ticketing} onChange={(e) => set("ticketing", e.target.value as "rsvp" | "paid")}>
-              <option value="rsvp">RSVP Only</option>
-              <option value="paid">Paid Tickets</option>
-            </select>
-          </Field>
+          <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
+            <div className="text-sm font-semibold text-neutral-900">Tickets are set up next</div>
+            <p className="mt-1 text-[13px] text-neutral-600">
+              After you create this event you go straight to Organizer Studio, where you add your ticket types
+              (free RSVP, general admission, tiers, prices, and quantities).
+            </p>
+          </div>
 
-          {form.ticketing === "paid" && (
-            <Field label="Ticket Price (USD you net)" required>
-              <input type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" value={form.price} onChange={(e) => set("price", e.target.value)} />
-              <p className="mt-1 text-[11px] text-neutral-500">Processing fees and the platform fee are added on top automatically.</p>
-            </Field>
-          )}
 
           <Field label="Capacity" optional>
             <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
