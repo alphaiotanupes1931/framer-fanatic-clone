@@ -3530,6 +3530,16 @@ export type Database = {
           subtype: string
         }[]
       }
+      search_my_connections: {
+        Args: { _cursor?: string; _limit?: number; _q?: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          sort_key: string
+          username: string
+        }[]
+      }
       set_my_profile_kind: { Args: { _kind: string }; Returns: undefined }
       slugify_username: { Args: { s: string }; Returns: string }
       titlecase_name: { Args: { s: string }; Returns: string }
