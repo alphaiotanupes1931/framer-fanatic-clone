@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash2 } from "lucide-react";
