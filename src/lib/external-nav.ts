@@ -30,8 +30,25 @@ export function navigateExternal(url: string, pre?: Window | null): void {
     pre.location.href = url;
     return;
   }
-  const win = window.open(url, "_blank", "noopener,noreferrer");
-  if (!win) window.location.href = url; // popup blocked: fall back to same tab
+  let win: Window | null = null;
+  try {
+    win = window.open(url, "_blank");
+    if (win) win.opener = null;
+  } catch {
+    win = null;
+  }
+  if (!win) {
+    // Popup blocked: use a temporary anchor, which browsers allow more often
+    // than window.open, before giving up and using the current tab.
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
 }
 
 /** Close a pre-opened window when the flow failed before we got a URL. */
