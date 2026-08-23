@@ -37,7 +37,7 @@ function CreateArtistPage() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const { page: existingArtistPage, loading: checkingExisting } = useExistingPage("artist", me?.id);
+  const { page: existingArtistPage, loading: checkingExisting, refetch: refetchExisting } = useExistingPage("artist", me?.id);
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     display_name: "",
