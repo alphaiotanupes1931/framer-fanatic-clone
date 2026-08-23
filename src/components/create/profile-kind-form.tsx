@@ -19,7 +19,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const kindLabel = kind === "resident" ? "Resident" : "Visitor";
-  const { page: existingPage, loading: checkingExisting } = useExistingPage(kind, me?.id);
+  const { page: existingPage, loading: checkingExisting, refetch: refetchExisting } = useExistingPage(kind, me?.id);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   useEffect(() => {
     void (async () => {
