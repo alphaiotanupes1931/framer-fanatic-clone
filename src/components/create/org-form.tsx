@@ -83,7 +83,9 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       form.mission.trim().length > 9 &&
       form.neighborhood.trim().length > 0 &&
       /.+@.+\..+/.test(form.email.trim())
-    : form.name.trim().length > 1 && form.neighborhood.trim().length > 0;
+    : type === "group"
+      ? form.name.trim().length > 1
+      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0;
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
