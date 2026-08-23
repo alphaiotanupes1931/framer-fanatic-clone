@@ -204,15 +204,39 @@ export function ShareToUsersDialog({
     [filtered, selected],
   );
 
-  const selectAllFiltered = () => {
+  // Selects everyone matching the current search, not just the loaded page:
+  // walks the cursor server-side until it runs out of results.
+  const selectAllFiltered = async () => {
     setSelected((s) => {
       const next = { ...s };
-      for (const p of filtered) {
-        next[p.id] = true;
-      }
+      for (const p of filtered) next[p.id] = true;
       return next;
     });
+    let after: string | null = cursor;
+    let more = hasMore;
+    let guard = 0;
+    while (more && guard < 40) {
+      guard += 1;
+      try {
+        const data = await fetchConnections(q, after);
+        if (data.length === 0) break;
+        mergeKnown(data);
+        setRows((prev) => [...prev, ...data]);
+        setSelected((s) => {
+          const next = { ...s };
+          for (const p of data) next[p.id] = true;
+          return next;
+        });
+        after = data[data.length - 1].sort_key;
+        setCursor(after);
+        more = data.length === PAGE_SIZE;
+        setHasMore(more);
+      } catch {
+        break;
+      }
+    }
   };
+
 
   const deselectAllFiltered = () => {
     setSelected((s) => {
