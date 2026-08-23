@@ -34,7 +34,7 @@ export function useExistingPage(kind: string, ownerId?: string) {
   return { page, loading };
 }
 
-export function ExistingPageNotice({ label, page, kind }: { label: string; page: { slug: string; name: string }; kind: string }) {
+export function ExistingPageNotice({ label, page }: { label: string; page: { slug: string; name: string } }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
 
