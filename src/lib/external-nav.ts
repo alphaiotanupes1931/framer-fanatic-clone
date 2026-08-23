@@ -10,8 +10,18 @@
  */
 export function openExternalWindow(): Window | null {
   if (typeof window === "undefined") return null;
-  return window.open("about:blank", "_blank", "noopener,noreferrer");
+  // NOTE: do not pass "noopener" here. Browsers return null for noopener
+  // windows, which would leave us with no handle and force a same-tab
+  // fallback after the async call. We null out `opener` manually instead.
+  const win = window.open("about:blank", "_blank");
+  try {
+    if (win) win.opener = null;
+  } catch {
+    /* cross-origin guard, safe to ignore */
+  }
+  return win;
 }
+
 
 /** Send the user to an external URL in a separate window. */
 export function navigateExternal(url: string, pre?: Window | null): void {
