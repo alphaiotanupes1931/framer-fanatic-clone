@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
-import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
 import { logShareEvent } from "@/lib/share-log";
-import { getConnectionsSnapshot, loadConnections, type Person } from "@/lib/connections";
+import { type Person } from "@/lib/connections";
 
 function initials(name: string | null | undefined) {
   return (name || "U").trim()[0]?.toUpperCase() || "U";
@@ -76,7 +76,7 @@ export function ShareToUsersDialog({
 }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
-  const [people, setPeople] = useState<Person[]>(() => getConnectionsSnapshot(me?.id)?.all ?? []);
+  const [people, setPeople] = useState<Person[]>([]);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [note, setNote] = useState("");
@@ -248,11 +248,11 @@ export function ShareToUsersDialog({
     });
   };
 
-  const toggleSelectAll = () => {
-    if (allFilteredSelected) {
+  const toggleSelectAll = async () => {
+    if (allFilteredSelected && !hasMore) {
       deselectAllFiltered();
     } else {
-      selectAllFiltered();
+      await selectAllFiltered();
     }
   };
 
@@ -653,7 +653,7 @@ export function ShareToUsersDialog({
                 {filtered.length > 0 && (
                   <button
                     type="button"
-                    onClick={toggleSelectAll}
+                    onClick={() => void toggleSelectAll()}
                     className="text-xs font-semibold text-[#d4580a] hover:underline"
                   >
                     {allFilteredSelected ? "Deselect all" : "Select all followers"}
@@ -665,7 +665,7 @@ export function ShareToUsersDialog({
                   <div className="p-6 text-center text-sm text-neutral-500">Loading…</div>
                 ) : filtered.length === 0 ? (
                   <div className="p-6 text-center text-sm text-neutral-500">
-                    {people.length === 0 ? "Follow some people to share with them." : "No matches."}
+                    {q.trim() ? "No matches." : "Follow some people to share with them."}
                   </div>
                 ) : (
                   paginated.map((p) => {
