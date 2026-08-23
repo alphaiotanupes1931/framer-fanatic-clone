@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
-import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, RefreshCw, Pencil, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
 import { logShareEvent } from "@/lib/share-log";
-import { getConnectionsSnapshot, loadConnections, type Person } from "@/lib/connections";
+import { type Person } from "@/lib/connections";
 
 function initials(name: string | null | undefined) {
   return (name || "U").trim()[0]?.toUpperCase() || "U";
@@ -76,7 +76,7 @@ export function ShareToUsersDialog({
 }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
-  const [people, setPeople] = useState<Person[]>(() => getConnectionsSnapshot(me?.id)?.all ?? []);
+  const [people, setPeople] = useState<Person[]>([]);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [note, setNote] = useState("");
@@ -91,29 +91,76 @@ export function ShareToUsersDialog({
   const [checking, setChecking] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
   const [pendingNote, setPendingNote] = useState("");
-  const [page, setPage] = useState(1);
+  // Server-side cursor pagination for the follower picker.
+  const [rows, setRows] = useState<Person[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const PAGE_SIZE = 25;
 
+  type ConnRow = Person & { sort_key: string };
 
+  const fetchConnections = async (search: string, after: string | null) => {
+    const { data, error } = await supabase.rpc(
+      "search_my_connections" as never,
+      { _q: search.trim() || null, _cursor: after, _limit: PAGE_SIZE } as never,
+    );
+    if (error) throw error;
+    return ((data as unknown as ConnRow[]) ?? []);
+  };
+
+  // Merge every row we have ever seen into `people` so name lookups keep
+  // working for recipients selected on an earlier page or search.
+  const mergeKnown = (incoming: Person[]) => {
+    setPeople((prev) => {
+      const byId = new Map(prev.map((p) => [p.id, p]));
+      for (const p of incoming) byId.set(p.id, { id: p.id, display_name: p.display_name, username: p.username, avatar_url: p.avatar_url });
+      return Array.from(byId.values());
+    });
+  };
+
+  // Debounced first page for the current search term.
   useEffect(() => {
     if (!open || !me?.id) return;
-    // Paint from the shared cache immediately, then revalidate in the background.
-    const snap = getConnectionsSnapshot(me.id);
-    if (snap) setPeople(snap.all.slice(0, 200));
-    setLoading(!snap);
     let cancelled = false;
-    void loadConnections(me.id).then((s) => {
-      if (cancelled) return;
-      setPeople(s.all.slice(0, 200));
-      setLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, [open, me?.id]);
+    setLoading(true);
+    const t = setTimeout(() => {
+      void fetchConnections(q, null)
+        .then((data) => {
+          if (cancelled) return;
+          setRows(data);
+          mergeKnown(data);
+          setCursor(data.length ? data[data.length - 1].sort_key : null);
+          setHasMore(data.length === PAGE_SIZE);
+          setLoading(false);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setRows([]);
+          setHasMore(false);
+          setLoading(false);
+        });
+    }, q ? 250 : 0);
+    return () => { cancelled = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, me?.id, q]);
 
-  // Reset pagination whenever the search query changes.
-  useEffect(() => {
-    setPage(1);
-  }, [q]);
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await fetchConnections(q, cursor);
+      setRows((prev) => [...prev, ...data]);
+      mergeKnown(data);
+      if (data.length) setCursor(data[data.length - 1].sort_key);
+      setHasMore(data.length === PAGE_SIZE);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
 
   // Persist the in-progress selection + note so closing and reopening the
   // dialog for the same content does not lose the user's work.
@@ -136,26 +183,17 @@ export function ShareToUsersDialog({
     setSentRecipients([]);
     setEditingNote(false);
     setPendingNote("");
-    setPage(1);
+    setRows([]);
+    setCursor(null);
+    setHasMore(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
 
-  const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    if (!term) return people;
-    return people.filter(
-      (p) =>
-        (p.display_name || "").toLowerCase().includes(term) ||
-        (p.username || "").toLowerCase().includes(term),
-    );
-  }, [people, q]);
+  // Results come back already filtered by the server.
+  const filtered = rows;
+  const paginated = rows;
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), [filtered.length]);
-  const paginated = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, page]);
 
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const selectedPeople = useMemo(() => people.filter((p) => selected[p.id]), [people, selected]);
@@ -166,15 +204,39 @@ export function ShareToUsersDialog({
     [filtered, selected],
   );
 
-  const selectAllFiltered = () => {
+  // Selects everyone matching the current search, not just the loaded page:
+  // walks the cursor server-side until it runs out of results.
+  const selectAllFiltered = async () => {
     setSelected((s) => {
       const next = { ...s };
-      for (const p of filtered) {
-        next[p.id] = true;
-      }
+      for (const p of filtered) next[p.id] = true;
       return next;
     });
+    let after: string | null = cursor;
+    let more = hasMore;
+    let guard = 0;
+    while (more && guard < 40) {
+      guard += 1;
+      try {
+        const data = await fetchConnections(q, after);
+        if (data.length === 0) break;
+        mergeKnown(data);
+        setRows((prev) => [...prev, ...data]);
+        setSelected((s) => {
+          const next = { ...s };
+          for (const p of data) next[p.id] = true;
+          return next;
+        });
+        after = data[data.length - 1].sort_key;
+        setCursor(after);
+        more = data.length === PAGE_SIZE;
+        setHasMore(more);
+      } catch {
+        break;
+      }
+    }
   };
+
 
   const deselectAllFiltered = () => {
     setSelected((s) => {
@@ -186,11 +248,11 @@ export function ShareToUsersDialog({
     });
   };
 
-  const toggleSelectAll = () => {
-    if (allFilteredSelected) {
+  const toggleSelectAll = async () => {
+    if (allFilteredSelected && !hasMore) {
       deselectAllFiltered();
     } else {
-      selectAllFiltered();
+      await selectAllFiltered();
     }
   };
 
@@ -591,7 +653,7 @@ export function ShareToUsersDialog({
                 {filtered.length > 0 && (
                   <button
                     type="button"
-                    onClick={toggleSelectAll}
+                    onClick={() => void toggleSelectAll()}
                     className="text-xs font-semibold text-[#d4580a] hover:underline"
                   >
                     {allFilteredSelected ? "Deselect all" : "Select all followers"}
@@ -603,7 +665,7 @@ export function ShareToUsersDialog({
                   <div className="p-6 text-center text-sm text-neutral-500">Loading…</div>
                 ) : filtered.length === 0 ? (
                   <div className="p-6 text-center text-sm text-neutral-500">
-                    {people.length === 0 ? "Follow some people to share with them." : "No matches."}
+                    {q.trim() ? "No matches." : "Follow some people to share with them."}
                   </div>
                 ) : (
                   paginated.map((p) => {
@@ -638,31 +700,20 @@ export function ShareToUsersDialog({
                   })
                 )}
               </div>
-              {filtered.length > PAGE_SIZE && (
+              {(hasMore || loadingMore) && (
                 <div className="flex items-center justify-between border-t border-neutral-200 bg-neutral-50 px-4 py-2.5">
-                  <div className="text-xs text-neutral-600">
-                    Page {page} of {totalPages} ({filtered.length} total)
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page <= 1}
-                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
-                    >
-                      <ChevronLeft className="h-4 w-4" /> Prev
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page >= totalPages}
-                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
-                    >
-                      Next <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <div className="text-xs text-neutral-600">Showing {rows.length}</div>
+                  <button
+                    type="button"
+                    onClick={() => void loadMore()}
+                    disabled={loadingMore}
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
+                  >
+                    {loadingMore ? "Loading…" : "Load more"} <ChevronRight className="h-4 w-4" />
+                  </button>
                 </div>
               )}
+
             </div>
           )}
 

@@ -10,8 +10,18 @@
  */
 export function openExternalWindow(): Window | null {
   if (typeof window === "undefined") return null;
-  return window.open("about:blank", "_blank", "noopener,noreferrer");
+  // NOTE: do not pass "noopener" here. Browsers return null for noopener
+  // windows, which would leave us with no handle and force a same-tab
+  // fallback after the async call. We null out `opener` manually instead.
+  const win = window.open("about:blank", "_blank");
+  try {
+    if (win) win.opener = null;
+  } catch {
+    /* cross-origin guard, safe to ignore */
+  }
+  return win;
 }
+
 
 /** Send the user to an external URL in a separate window. */
 export function navigateExternal(url: string, pre?: Window | null): void {
@@ -20,8 +30,25 @@ export function navigateExternal(url: string, pre?: Window | null): void {
     pre.location.href = url;
     return;
   }
-  const win = window.open(url, "_blank", "noopener,noreferrer");
-  if (!win) window.location.href = url; // popup blocked: fall back to same tab
+  let win: Window | null = null;
+  try {
+    win = window.open(url, "_blank");
+    if (win) win.opener = null;
+  } catch {
+    win = null;
+  }
+  if (!win) {
+    // Popup blocked: use a temporary anchor, which browsers allow more often
+    // than window.open, before giving up and using the current tab.
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
 }
 
 /** Close a pre-opened window when the flow failed before we got a URL. */
