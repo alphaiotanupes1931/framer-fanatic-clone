@@ -83,13 +83,15 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       form.mission.trim().length > 9 &&
       form.neighborhood.trim().length > 0 &&
       /.+@.+\..+/.test(form.email.trim())
-    : form.name.trim().length > 1 && form.neighborhood.trim().length > 0;
+    : type === "group"
+      ? form.name.trim().length > 1
+      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0;
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
-    if (!form.neighborhood.trim()) { toast.error("Neighborhood is required"); return; }
+    if (!form.neighborhood.trim() && type !== "group") { toast.error("Neighborhood is required"); return; }
     if (!canSubmit) {
-      toast.error(strict ? "Please fill in every required field" : "Name and neighborhood are required");
+      toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name is required" : "Name and neighborhood are required");
       return;
     }
     setSaving(true);
@@ -161,7 +163,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         </Field>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Neighborhood" required>
+        <Field label="Neighborhood" required={type !== "group"}>
           <select
             value={form.neighborhood}
             onChange={(e) => set("neighborhood", e.target.value)}
