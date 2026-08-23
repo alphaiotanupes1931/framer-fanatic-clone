@@ -538,6 +538,50 @@ export function ShareToUsersDialog({
             </div>
           )}
 
+          {step === 'select' && selectedPeople.length > 0 && (
+            <div className="rounded-lg border border-neutral-200 bg-white">
+              <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-2.5">
+                <div className="text-xs font-bold uppercase tracking-wide text-neutral-700">
+                  {selectedPeople.length} selected
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelected({})}
+                  className="text-xs font-semibold text-red-600 hover:underline"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 p-3">
+                {selectedPeople.map((p) => (
+                  <div
+                    key={p.id}
+                    className="group flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 pr-2 pl-1 py-1 text-sm text-neutral-900 hover:border-neutral-300"
+                  >
+                    <div className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-[10px] font-bold text-[#d4580a]">
+                      {p.avatar_url ? (
+                        <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        initials(p.display_name || p.username)
+                      )}
+                    </div>
+                    <span className="max-w-[120px] truncate text-xs font-medium">
+                      {p.display_name || p.username}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggle(p.id)}
+                      className="rounded-full p-0.5 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
+                      aria-label={`Remove ${p.display_name || p.username}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {step === 'select' && (
             <div className="rounded-lg border border-neutral-200">
               <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-2.5">
