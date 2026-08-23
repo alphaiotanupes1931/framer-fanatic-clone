@@ -93,7 +93,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
   };
 
   return (
-    existingPage ? <ExistingPageNotice label={kindLabel} page={existingPage} /> :
+    existingPage ? <ExistingPageNotice label={kindLabel} page={existingPage} refetch={refetchExisting} /> :
     <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Display name<span className="text-orange"> *</span></Label>
