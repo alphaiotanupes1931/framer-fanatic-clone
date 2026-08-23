@@ -163,7 +163,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         </Field>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Neighborhood" required>
+        <Field label="Neighborhood" required={type !== "group"}>
           <select
             value={form.neighborhood}
             onChange={(e) => set("neighborhood", e.target.value)}
