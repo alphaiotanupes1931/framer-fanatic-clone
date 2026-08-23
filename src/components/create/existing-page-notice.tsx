@@ -11,6 +11,8 @@ export type ExistingPage = { slug: string; name: string } | null;
 export function useExistingPage(kind: string, ownerId?: string) {
   const [page, setPage] = useState<ExistingPage>(null);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
+  const refetch = () => setRefresh((n) => n + 1);
   useEffect(() => {
     let cancelled = false;
     if (!ownerId) { setLoading(false); return; }
@@ -30,8 +32,8 @@ export function useExistingPage(kind: string, ownerId?: string) {
       }
     })();
     return () => { cancelled = true; };
-  }, [kind, ownerId]);
-  return { page, loading };
+  }, [kind, ownerId, refresh]);
+  return { page, loading, refetch };
 }
 
 export function ExistingPageNotice({ label, page }: { label: string; page: { slug: string; name: string } }) {
