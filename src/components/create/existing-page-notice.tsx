@@ -36,8 +36,7 @@ export function useExistingPage(kind: string, ownerId?: string) {
   return { page, loading, refetch };
 }
 
-export function ExistingPageNotice({ label, page }: { label: string; page: { slug: string; name: string } }) {
-  const router = useRouter();
+export function ExistingPageNotice({ label, page, refetch }: { label: string; page: { slug: string; name: string }; refetch?: () => void }) {
   const [deleting, setDeleting] = useState(false);
 
   const deletePage = async () => {
@@ -51,7 +50,7 @@ export function ExistingPageNotice({ label, page }: { label: string; page: { slu
       return;
     }
     toast.success(`${label} page deleted`);
-    await router.invalidate();
+    refetch?.();
   };
 
   return (
