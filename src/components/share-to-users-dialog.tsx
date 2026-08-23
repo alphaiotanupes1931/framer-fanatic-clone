@@ -91,29 +91,76 @@ export function ShareToUsersDialog({
   const [checking, setChecking] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
   const [pendingNote, setPendingNote] = useState("");
-  const [page, setPage] = useState(1);
+  // Server-side cursor pagination for the follower picker.
+  const [rows, setRows] = useState<Person[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const PAGE_SIZE = 25;
 
+  type ConnRow = Person & { sort_key: string };
 
+  const fetchConnections = async (search: string, after: string | null) => {
+    const { data, error } = await supabase.rpc(
+      "search_my_connections" as never,
+      { _q: search.trim() || null, _cursor: after, _limit: PAGE_SIZE } as never,
+    );
+    if (error) throw error;
+    return ((data as unknown as ConnRow[]) ?? []);
+  };
+
+  // Merge every row we have ever seen into `people` so name lookups keep
+  // working for recipients selected on an earlier page or search.
+  const mergeKnown = (incoming: Person[]) => {
+    setPeople((prev) => {
+      const byId = new Map(prev.map((p) => [p.id, p]));
+      for (const p of incoming) byId.set(p.id, { id: p.id, display_name: p.display_name, username: p.username, avatar_url: p.avatar_url });
+      return Array.from(byId.values());
+    });
+  };
+
+  // Debounced first page for the current search term.
   useEffect(() => {
     if (!open || !me?.id) return;
-    // Paint from the shared cache immediately, then revalidate in the background.
-    const snap = getConnectionsSnapshot(me.id);
-    if (snap) setPeople(snap.all.slice(0, 200));
-    setLoading(!snap);
     let cancelled = false;
-    void loadConnections(me.id).then((s) => {
-      if (cancelled) return;
-      setPeople(s.all.slice(0, 200));
-      setLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, [open, me?.id]);
+    setLoading(true);
+    const t = setTimeout(() => {
+      void fetchConnections(q, null)
+        .then((data) => {
+          if (cancelled) return;
+          setRows(data);
+          mergeKnown(data);
+          setCursor(data.length ? data[data.length - 1].sort_key : null);
+          setHasMore(data.length === PAGE_SIZE);
+          setLoading(false);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setRows([]);
+          setHasMore(false);
+          setLoading(false);
+        });
+    }, q ? 250 : 0);
+    return () => { cancelled = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, me?.id, q]);
 
-  // Reset pagination whenever the search query changes.
-  useEffect(() => {
-    setPage(1);
-  }, [q]);
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await fetchConnections(q, cursor);
+      setRows((prev) => [...prev, ...data]);
+      mergeKnown(data);
+      if (data.length) setCursor(data[data.length - 1].sort_key);
+      setHasMore(data.length === PAGE_SIZE);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
 
   // Persist the in-progress selection + note so closing and reopening the
   // dialog for the same content does not lose the user's work.
