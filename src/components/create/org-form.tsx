@@ -89,9 +89,9 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
-    if (!form.neighborhood.trim()) { toast.error("Neighborhood is required"); return; }
+    if (!form.neighborhood.trim() && type !== "group") { toast.error("Neighborhood is required"); return; }
     if (!canSubmit) {
-      toast.error(strict ? "Please fill in every required field" : "Name and neighborhood are required");
+      toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name is required" : "Name and neighborhood are required");
       return;
     }
     setSaving(true);
