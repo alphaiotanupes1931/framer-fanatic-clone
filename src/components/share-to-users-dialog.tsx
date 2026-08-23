@@ -183,26 +183,17 @@ export function ShareToUsersDialog({
     setSentRecipients([]);
     setEditingNote(false);
     setPendingNote("");
-    setPage(1);
+    setRows([]);
+    setCursor(null);
+    setHasMore(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
 
-  const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    if (!term) return people;
-    return people.filter(
-      (p) =>
-        (p.display_name || "").toLowerCase().includes(term) ||
-        (p.username || "").toLowerCase().includes(term),
-    );
-  }, [people, q]);
+  // Results come back already filtered by the server.
+  const filtered = rows;
+  const paginated = rows;
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), [filtered.length]);
-  const paginated = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, page]);
 
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const selectedPeople = useMemo(() => people.filter((p) => selected[p.id]), [people, selected]);
