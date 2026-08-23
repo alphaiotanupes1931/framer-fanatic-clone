@@ -158,6 +158,7 @@ export function ShareToUsersDialog({
   }, [filtered, page]);
 
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
+  const selectedPeople = useMemo(() => people.filter((p) => selected[p.id]), [people, selected]);
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
   const allFilteredSelected = useMemo(
