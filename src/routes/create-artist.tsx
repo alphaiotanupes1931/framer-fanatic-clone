@@ -117,7 +117,7 @@ function CreateArtistPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
         <HeroBanner title="Create Artist Page" subtitle="Set up your artist page. One artist page per account." />
-        {existingArtistPage ? <ExistingPageNotice label="Artist" page={existingArtistPage} /> : (
+        {existingArtistPage ? <ExistingPageNotice label="Artist" page={existingArtistPage} refetch={refetchExisting} /> : (
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Artist name<span className="text-orange"> *</span></Label>
