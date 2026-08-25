@@ -130,28 +130,32 @@ function Onboarding() {
       navigate({ to: "/admin" });
       return;
     }
-    if (!userId || !file) return;
+    if (!userId) return;
     setBusy(true);
     try {
-      const compressed = await compressAvatar(file);
-      const ext = compressed.name.split(".").pop() || "jpg";
-      const path = `${userId}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("avatars")
-        .upload(path, compressed, { upsert: true, contentType: compressed.type });
-      if (upErr) throw upErr;
-      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
-      const avatar_url = signed?.signedUrl ?? null;
+      let avatar_url: string | null = null;
+      if (file) {
+        const compressed = await compressAvatar(file);
+        const ext = compressed.name.split(".").pop() || "jpg";
+        const path = `${userId}/avatar-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("avatars")
+          .upload(path, compressed, { upsert: true, contentType: compressed.type });
+        if (upErr) throw upErr;
+        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
+        avatar_url = signed?.signedUrl ?? null;
+      }
 
       const { error } = await supabase
         .from("profiles")
         .update(
           isVisitor
-            ? { avatar_url, city: homeCity.trim(), category: "Visitor", onboarded: true }
-            : { avatar_url, neighborhood, onboarded: true },
+            ? { ...(avatar_url ? { avatar_url } : {}), city: homeCity.trim(), category: "Visitor", onboarded: true }
+            : { ...(avatar_url ? { avatar_url } : {}), neighborhood, onboarded: true },
         )
         .eq("id", userId);
       if (error) throw error;
+
 
       // Resident and artist pages are personal profiles, so they take over the
       // account's profile type. Arts orgs and businesses stay as extra pages.
