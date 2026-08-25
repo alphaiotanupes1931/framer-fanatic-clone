@@ -258,11 +258,43 @@ function Onboarding() {
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
-          <div className="mt-3 flex justify-center gap-1.5">
-            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
-              <span key={n} className={`h-1.5 w-8 rounded-full ${n <= stepIndex ? "bg-orange-600" : "bg-neutral-200"}`} />
-            ))}
+          <div
+            className="mt-4"
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={totalSteps}
+            aria-valuenow={stepIndex}
+            aria-valuetext={`Step ${stepIndex} of ${totalSteps}: ${stepLabels[stepIndex - 1]}`}
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
+              <span>Step {stepIndex} of {totalSteps}</span>
+              <span className="text-orange-600">{stepLabels[stepIndex - 1]}</span>
+            </div>
+            <div className="mt-2 flex gap-1.5">
+              {stepLabels.map((label, i) => (
+                <div key={label} className="flex-1">
+                  <span
+                    className={`block h-1.5 rounded-full transition-colors ${
+                      i + 1 < stepIndex ? "bg-orange-600" : i + 1 === stepIndex ? "bg-orange-500" : "bg-neutral-200"
+                    }`}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mt-1.5 flex gap-1.5">
+              {stepLabels.map((label, i) => (
+                <span
+                  key={label}
+                  className={`flex-1 truncate text-[10px] leading-tight ${
+                    i + 1 === stepIndex ? "font-semibold text-neutral-800" : "text-neutral-400"
+                  }`}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
+
         </CardHeader>
         <CardContent className="space-y-6">
           {step === 0 && (
