@@ -26,6 +26,7 @@ import {
   utilItems as sharedUtilItems,
   createItems as sharedCreateItems,
 } from "@/lib/nav-items";
+import { GlobalSearch } from "./global-search";
 import type { ReactNode, ComponentType } from "react";
 
 // Desktop and mobile share one navigation config so both surfaces always
