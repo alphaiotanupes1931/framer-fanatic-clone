@@ -54,6 +54,7 @@ function LeaderboardPage() {
           posts: s.posts,
           comments: s.comments,
           likes: s.likes,
+          referrals,
           points: s.posts * 5 + s.comments * 2 + s.likes + referrals * 5,
         };
       });
