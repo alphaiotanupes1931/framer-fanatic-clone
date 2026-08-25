@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { isAdminUnlocked, getAdminToken } from "@/lib/admin-gate";
 import { adminRpc } from "@/lib/admin-site.functions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText, Star } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText, Star, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -227,6 +227,10 @@ function AdminPage() {
           </Link>
         </div>
       </div>
+
+      <LocationStats unlocked={unlocked} />
+
+
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <div className="flex flex-1 items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2.5">
@@ -689,6 +693,84 @@ function DangerZone({ onUserDeleted }: { onUserDeleted: (id: string) => void }) 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+type LocationStatRow = { kind: string; label: string; total: number };
+
+function StatList({ title, rows, total }: { title: string; rows: LocationStatRow[]; total: number }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{title}</p>
+      {rows.length === 0 ? (
+        <p className="mt-2 text-xs text-muted-foreground">No data yet.</p>
+      ) : (
+        <ul className="mt-2 space-y-1.5">
+          {rows.map((r) => {
+            const pct = total > 0 ? Math.round((r.total / total) * 1000) / 10 : 0;
+            return (
+              <li key={r.label} className="text-xs text-neutral-700">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="truncate">{r.label}</span>
+                  <span className="shrink-0 font-semibold text-neutral-900">
+                    {pct}% ({r.total})
+                  </span>
+                </div>
+                <div className="mt-1 h-1.5 w-full rounded-full bg-neutral-100">
+                  <div className="h-1.5 rounded-full bg-orange" style={{ width: `${pct}%` }} />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function LocationStats({ unlocked }: { unlocked: boolean }) {
+  const [rows, setRows] = useState<LocationStatRow[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!unlocked) return;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await adminRpc({ data: { name: "admin_location_stats", adminToken: getAdminToken() } });
+        setRows(((res.data as LocationStatRow[]) ?? []).map((r) => ({ ...r, total: Number(r.total) })));
+      } catch (e) {
+        toast.error((e as Error).message);
+      }
+      setLoading(false);
+    })();
+  }, [unlocked]);
+
+  const sort = (kind: string) =>
+    rows.filter((r) => r.kind === kind).sort((a, b) => b.total - a.total);
+  const audience = sort("audience");
+  const hoods = sort("neighborhood");
+  const cities = sort("visitor_city");
+  const sum = (list: LocationStatRow[]) => list.reduce((n, r) => n + r.total, 0);
+
+  return (
+    <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+        <MapPin className="h-4 w-4 text-orange" /> Location stats
+      </div>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        Where members are based, by share of accounts.
+      </p>
+      {loading ? (
+        <p className="mt-3 text-xs text-muted-foreground">Loading…</p>
+      ) : (
+        <div className="mt-4 grid gap-6 md:grid-cols-3">
+          <StatList title="Residents vs visitors" rows={audience} total={sum(audience)} />
+          <StatList title="Resident neighborhoods" rows={hoods.slice(0, 15)} total={sum(hoods)} />
+          <StatList title="Visitors by city" rows={cities.slice(0, 15)} total={sum(cities)} />
+        </div>
+      )}
     </div>
   );
 }

@@ -31,13 +31,20 @@ export const Route = createFileRoute("/onboarding")({
 type JoinKind = "resident" | "artist" | "arts_org" | "business";
 
 const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; blurb: string; nameLabel: string }> = [
-  { value: "resident", label: "Resident", blurb: "You live in Baltimore and want to connect with your neighbors.", nameLabel: "Your name" },
+  { value: "resident", label: "Individual", blurb: "A personal page for you as a Baltimore resident.", nameLabel: "Your name" },
   { value: "artist", label: "Artist", blurb: "You make music, art, film, writing or performance.", nameLabel: "Artist name" },
   { value: "arts_org", label: "Arts Organization", blurb: "A gallery, venue, collective or nonprofit.", nameLabel: "Organization name" },
   { value: "business", label: "Business", blurb: "A shop, restaurant, cafe, bar or service.", nameLabel: "Business name" },
 ];
 
 const ARTIST_CATEGORIES = ["Music", "DJ", "Podcast", "Visual Art", "Photography", "Video", "Literary", "Fashion", "Mixed Media", "Performance", "Other"];
+
+const US_STATES = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+  "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+  "VA", "WA", "WV", "WI", "WY",
+];
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "page";
@@ -46,22 +53,29 @@ function slugify(s: string) {
 function Onboarding() {
   const navigate = useNavigate();
   const { preview: previewMode } = Route.useSearch();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  // 0 = resident or visitor, 1 = how you want to join, 2 = photo + location, 3 = page setup
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
   const [neighborhood, setNeighborhood] = useState<string>("");
-  const [isVisitor, setIsVisitor] = useState(false);
+  const [audience, setAudience] = useState<"resident" | "visitor" | "">("");
   const [homeCity, setHomeCity] = useState<string>("");
+  const [homeState, setHomeState] = useState<string>("");
   const [kind, setKind] = useState<JoinKind | "">("");
   const [pageName, setPageName] = useState("");
   const [category, setCategory] = useState("");
   const [bio, setBio] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const isVisitor = audience === "visitor";
   const selected = JOIN_OPTIONS.find((o) => o.value === kind);
+  const pageLabel = isVisitor ? "Visitor" : selected?.label ?? "page";
+  const nameLabel = isVisitor ? "Your name" : selected?.nameLabel ?? "Name";
+  const totalSteps = isVisitor ? 3 : 4;
+  const stepIndex = isVisitor && step > 1 ? step - 1 : step + 1;
 
   useEffect(() => {
     if (previewMode) return;
@@ -85,10 +99,10 @@ function Onboarding() {
           .eq("id", uid)
           .maybeSingle()
           .then(({ data: p }) => {
-            setIsVisitor(visitor || (p?.category ?? "") === "Visitor");
+            if (visitor || (p?.category ?? "") === "Visitor") setAudience("visitor");
             if (p?.display_name) setPageName((n) => n || (p.display_name as string));
           });
-        if (visitor) setIsVisitor(true);
+        if (visitor) setAudience("visitor");
       }
     });
   }, [navigate, previewMode]);
@@ -110,20 +124,32 @@ function Onboarding() {
     setPreview(URL.createObjectURL(f));
   };
 
-  const locationReady = isVisitor ? homeCity.trim().length > 1 : !!neighborhood;
-  const step3Ready = pageName.trim().length > 1 && (kind !== "artist" || !!category);
+  const homeLocation = homeCity.trim() && homeState ? `${homeCity.trim()}, ${homeState}` : "";
+  const locationReady = isVisitor ? !!homeLocation : !!neighborhood;
+  const step3Ready = pageName.trim().length > 1 && (isVisitor || kind !== "artist" || !!category);
+
+  const startAudience = (choice: "resident" | "visitor") => {
+    setAudience(choice);
+    if (choice === "visitor") {
+      setKind("");
+      setStep(2);
+    } else {
+      setStep(1);
+    }
+  };
 
   const goStep3 = () => {
     if (!locationReady) {
-      toast.error(isVisitor ? "Tell us where you are visiting from." : "Choose your neighborhood.");
+      toast.error(isVisitor ? "Tell us the city and state you are visiting from." : "Choose your neighborhood.");
       return;
     }
     setStep(3);
   };
 
+  const backFromLocation = () => setStep(isVisitor ? 0 : 1);
 
   const finish = async () => {
-    if (!kind) { toast.error("Choose how you want to join."); return; }
+    if (!isVisitor && !kind) { toast.error("Choose how you want to join."); return; }
     if (!step3Ready) { toast.error("Fill in the required fields to continue."); return; }
     if (previewMode) {
       toast.success("Preview only, nothing was saved.");
@@ -150,27 +176,28 @@ function Onboarding() {
         .from("profiles")
         .update(
           isVisitor
-            ? { ...(avatar_url ? { avatar_url } : {}), city: homeCity.trim(), category: "Visitor", onboarded: true }
+            ? { ...(avatar_url ? { avatar_url } : {}), city: homeLocation, category: "Visitor", onboarded: true }
             : { ...(avatar_url ? { avatar_url } : {}), neighborhood, onboarded: true },
         )
         .eq("id", userId);
       if (error) throw error;
 
-
-      // Resident and artist pages are personal profiles, so they take over the
-      // account's profile type. Arts orgs and businesses stay as extra pages.
-      if (kind === "resident" || kind === "artist") {
+      // Visitor, resident and artist pages are personal profiles, so they take
+      // over the account's profile type. Arts orgs and businesses stay as extra pages.
+      if (isVisitor) {
+        await setMyProfileKind("visitor");
+      } else if (kind === "resident" || kind === "artist") {
         await setMyProfileKind(kind);
       }
 
       const slug = `${slugify(pageName)}-${Math.random().toString(36).slice(2, 6)}`;
       const { data: org, error: orgErr } = await supabase.from("organizations").insert({
         owner_id: userId,
-        type: kind,
-        subtype: kind === "artist" ? category : (selected?.label ?? null),
+        type: isVisitor ? "visitor" : kind,
+        subtype: isVisitor ? "Visitor" : kind === "artist" ? category : (selected?.label ?? null),
         name: pageName.trim(),
         slug,
-        neighborhood: isVisitor ? homeCity.trim() || null : neighborhood || null,
+        neighborhood: isVisitor ? homeLocation || null : neighborhood || null,
         bio: bio.trim() || null,
         avatar_url,
       }).select("slug").single();
@@ -192,6 +219,28 @@ function Onboarding() {
     }
   };
 
+  const title =
+    step === 0
+      ? "Do you live in Baltimore?"
+      : step === 1
+      ? "Choose how you want to join"
+      : step === 2
+      ? "Your photo and location"
+      : `Set up your ${pageLabel} page`;
+
+  const description =
+    step === 0
+      ? "This tells us whether to set you up as a resident or a visitor."
+      : step === 1
+      ? "Pick the page that best describes you. You can add more pages later."
+      : step === 2
+      ? isVisitor
+        ? "Add a photo if you like, then tell us the city and state you are coming from."
+        : "Add a photo if you like, then tell us where you are based."
+      : isVisitor
+      ? "A visitor page keeps you in the loop while you are in town."
+      : selected?.blurb;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
       <Toaster richColors />
@@ -203,23 +252,38 @@ function Onboarding() {
       <Card className="w-full max-w-md border-orange-200">
         <CardHeader className="text-center">
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
-          <CardTitle className="text-2xl">
-            {step === 1 ? "Choose how you want to join" : step === 2 ? "Your photo and location" : `Set up your ${selected?.label ?? "page"} page`}
-          </CardTitle>
-          <CardDescription>
-            {step === 1
-              ? "Pick the page that best describes you. You can add more pages later."
-              : step === 2
-              ? "Add a photo if you like, then tell us where you are based."
-              : selected?.blurb}
-          </CardDescription>
+          <CardTitle className="text-2xl">{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
           <div className="mt-3 flex justify-center gap-1.5">
-            {[1, 2, 3].map((n) => (
-              <span key={n} className={`h-1.5 w-8 rounded-full ${n <= step ? "bg-orange-600" : "bg-neutral-200"}`} />
+            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
+              <span key={n} className={`h-1.5 w-8 rounded-full ${n <= stepIndex ? "bg-orange-600" : "bg-neutral-200"}`} />
             ))}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {step === 0 && (
+            <>
+              <div className="grid gap-3">
+                <button
+                  type="button"
+                  onClick={() => startAudience("resident")}
+                  className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
+                >
+                  <p className="font-semibold text-neutral-900">Resident</p>
+                  <p className="text-xs text-neutral-500">I live in Baltimore. Next you pick the kind of page you want.</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startAudience("visitor")}
+                  className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
+                >
+                  <p className="font-semibold text-neutral-900">Visitor</p>
+                  <p className="text-xs text-neutral-500">I am from somewhere else. Set me up with a visitor page.</p>
+                </button>
+              </div>
+            </>
+          )}
+
           {step === 1 && (
             <>
               <div className="space-y-2">
@@ -237,12 +301,17 @@ function Onboarding() {
                 {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
               </div>
               <p className="rounded-lg bg-neutral-100 p-3 text-xs text-neutral-600">
-                Resident and Artist pages become your main profile. Arts Organization and Business pages
-                live alongside it, and creating a Resident or Artist page later will take over as your profile.
+                Individual and Artist pages become your main profile. Arts Organization and Business pages
+                live alongside it, so you can be a resident and an artist at the same time.
               </p>
-              <Button onClick={() => setStep(2)} disabled={!kind} className="w-full bg-orange-600 text-white hover:bg-orange-700">
-                Continue
-              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+                <Button onClick={() => setStep(2)} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+                  Continue
+                </Button>
+              </div>
             </>
           )}
 
@@ -276,15 +345,30 @@ function Onboarding() {
                 </Button>
               </div>
               {isVisitor ? (
-                <div className="space-y-2">
-                  <Label htmlFor="homeCity">Where are you visiting from? <span className="text-orange-600">*</span></Label>
-                  <Input
-                    id="homeCity"
-                    value={homeCity}
-                    onChange={(e) => setHomeCity(e.target.value)}
-                    placeholder="City, county, state (e.g. Silver Spring, Montgomery County, MD)"
-                    maxLength={120}
-                  />
+                <div className="grid gap-3 sm:grid-cols-[1fr_7rem]">
+                  <div className="space-y-2">
+                    <Label htmlFor="homeCity">City you are visiting from <span className="text-orange-600">*</span></Label>
+                    <Input
+                      id="homeCity"
+                      value={homeCity}
+                      onChange={(e) => setHomeCity(e.target.value)}
+                      placeholder="e.g. Silver Spring"
+                      maxLength={80}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="homeState">State <span className="text-orange-600">*</span></Label>
+                    <Select value={homeState} onValueChange={setHomeState}>
+                      <SelectTrigger id="homeState">
+                        <SelectValue placeholder="ST" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {US_STATES.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -302,7 +386,7 @@ function Onboarding() {
                 </div>
               )}
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => setStep(1)} className="gap-1">
+                <Button type="button" variant="outline" onClick={backFromLocation} className="gap-1">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
                 <Button onClick={goStep3} disabled={!locationReady} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
@@ -312,14 +396,13 @@ function Onboarding() {
             </>
           )}
 
-
           {step === 3 && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="pageName">{selected?.nameLabel ?? "Name"} <span className="text-orange-600">*</span></Label>
+                <Label htmlFor="pageName">{nameLabel} <span className="text-orange-600">*</span></Label>
                 <Input id="pageName" value={pageName} onChange={(e) => setPageName(e.target.value)} maxLength={80} />
               </div>
-              {kind === "artist" && (
+              {!isVisitor && kind === "artist" && (
                 <div className="space-y-2">
                   <Label htmlFor="artistCategory">Discipline <span className="text-orange-600">*</span></Label>
                   <Select value={category} onValueChange={setCategory}>
@@ -343,7 +426,7 @@ function Onboarding() {
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
                 <Button onClick={() => finish()} disabled={busy || !step3Ready} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
-                  {busy ? "Saving…" : `Create my ${selected?.label ?? "page"}`}
+                  {busy ? "Saving…" : `Create my ${pageLabel} page`}
                 </Button>
               </div>
             </>

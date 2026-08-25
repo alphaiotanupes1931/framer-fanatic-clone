@@ -57,6 +57,7 @@ type AdminRpcArgs = Record<string, unknown> | undefined;
 
 const ALLOWED_ADMIN_RPCS = new Set([
   "admin_list_users",
+  "admin_location_stats",
   "admin_list_events",
   "admin_list_organizations",
   "admin_set_banned",

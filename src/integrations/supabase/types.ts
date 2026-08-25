@@ -3263,6 +3263,14 @@ export type Database = {
           username: string
         }[]
       }
+      admin_location_stats: {
+        Args: never
+        Returns: {
+          kind: string
+          label: string
+          total: number
+        }[]
+      }
       admin_set_banned: {
         Args: { _banned: boolean; _user_id: string }
         Returns: undefined
