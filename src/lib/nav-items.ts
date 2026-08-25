@@ -17,7 +17,7 @@ export const navItems: NavItem[] = [
   { icon: Gift, label: "Referrals", to: "/referrals" },
   { icon: Building2, label: "Businesses", to: "/businesses" },
   { icon: Calendar, label: "Community Calendar", to: "/calendar" },
-  { icon: Compass, label: "Discover", to: "/search" },
+  { icon: Search, label: "Search", to: "/search" },
   { icon: Ticket, label: "Events", to: "/events" },
   { icon: Ticket, label: "Festivals", to: "/festivals" },
   { icon: Users, label: "Groups", to: "/groups" },
