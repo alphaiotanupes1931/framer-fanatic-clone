@@ -12,7 +12,6 @@ import {
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
 import { Img } from "@/components/shared/smart-img";
-import { GlobalSearch } from "@/components/layout/global-search";
 import { navItems, utilItems, createItems } from "@/lib/nav-items";
 
 
@@ -99,9 +98,6 @@ export function TopMenuBar() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
-      <div className="px-4 pb-3">
-        <GlobalSearch compact />
       </div>
     </header>
   );

@@ -3,7 +3,7 @@ import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
   BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic, ShoppingBag, Flag,
-  LayoutDashboard, Menu, Sparkles,
+  LayoutDashboard, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -26,6 +26,7 @@ import {
   utilItems as sharedUtilItems,
   createItems as sharedCreateItems,
 } from "@/lib/nav-items";
+import { GlobalSearch } from "./global-search";
 import type { ReactNode, ComponentType } from "react";
 
 // Desktop and mobile share one navigation config so both surfaces always
@@ -35,33 +36,37 @@ type NavItem = { icon: typeof Home; label: string; to: string };
 const navItems: NavItem[] = [...sharedNavItems, ...sharedUtilItems];
 const createItems: NavItem[] = sharedCreateItems;
 
-function SidebarCard({ title, icon: Icon, children, action }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; action?: ReactNode }) {
+function SidebarCard({ title, icon: Icon, children, action }: { title?: string; icon?: ComponentType<{ className?: string }>; children: ReactNode; action?: ReactNode }) {
   return (
     <section className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-slate-700" />
-          <h3 className="text-base font-semibold tracking-tight text-slate-900">{title}</h3>
+      {title && Icon && (
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Icon className="h-4 w-4 text-slate-700" />
+            <h3 className="text-base font-semibold tracking-tight text-slate-900">{title}</h3>
+          </div>
+          {action}
         </div>
-        {action}
-      </div>
-      <div className="px-2 py-2">{children}</div>
+      )}
+      <div className={`px-2 py-2 ${title ? "" : "pt-1"}`}>{children}</div>
     </section>
   );
 }
 
-function SidebarCardCollapsed({ title, icon: Icon, children }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode }) {
+function SidebarCardCollapsed({ title, icon: Icon, children }: { title?: string; icon?: ComponentType<{ className?: string }>; children: ReactNode }) {
   return (
     <section className="mb-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center justify-center border-b border-slate-200 px-2 py-3">
-            <Icon className="h-4 w-4 text-slate-700" />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="right">{title}</TooltipContent>
-      </Tooltip>
-      <div className="flex flex-col items-center gap-1 px-1 py-2">{children}</div>
+      {title && Icon && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center justify-center border-b border-slate-200 px-2 py-3">
+              <Icon className="h-4 w-4 text-slate-700" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right">{title}</TooltipContent>
+        </Tooltip>
+      )}
+      <div className={`flex flex-col items-center gap-1 px-1 py-2 ${title ? "" : "pt-1"}`}>{children}</div>
     </section>
   );
 }
@@ -153,8 +158,30 @@ export function LeftSidebar() {
             </div>
           )}
 
+          {/* Search */}
           {collapsed ? (
-            <SidebarCardCollapsed title="Menu" icon={Menu}>
+            <SidebarCardCollapsed>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/search"
+                    className="relative flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900"
+                    aria-label="Search"
+                  >
+                    <Search className="h-5 w-5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">Search</TooltipContent>
+              </Tooltip>
+            </SidebarCardCollapsed>
+          ) : (
+            <div className="mb-4">
+              <GlobalSearch className="w-full" />
+            </div>
+          )}
+
+          {collapsed ? (
+            <SidebarCardCollapsed>
               {visibleNavItems.map((item) => {
                 const active = isActive(item.to);
                 const Icon = item.icon;
@@ -181,7 +208,7 @@ export function LeftSidebar() {
               })}
             </SidebarCardCollapsed>
           ) : (
-            <SidebarCard title="Menu" icon={Menu}>
+            <SidebarCard>
               <nav className="space-y-0.5">
                 {visibleNavItems.map((item) => {
                   const active = isActive(item.to);
