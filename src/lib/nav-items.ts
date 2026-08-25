@@ -6,8 +6,9 @@ import {
 
 export type NavItem = { icon: typeof Home; label: string; to: string };
 
-/** Main navigation, alphabetical. Shared by desktop menu and mobile "More". */
+/** Main navigation: Home is pinned first, then alphabetical. Shared by desktop menu and mobile "More". */
 export const navItems: NavItem[] = [
+  { icon: Home, label: "Home", to: "/dashboard" },
   { icon: Palette, label: "Artists", to: "/artists" },
   { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
   { icon: Shield, label: "Associations", to: "/community-associations" },
@@ -20,7 +21,6 @@ export const navItems: NavItem[] = [
   { icon: Ticket, label: "Events", to: "/events" },
   { icon: Ticket, label: "Festivals", to: "/festivals" },
   { icon: Users, label: "Groups", to: "/groups" },
-  { icon: Home, label: "Home", to: "/dashboard" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
   { icon: BookOpen, label: "Stories", to: "/stories" },
   { icon: Video, label: "Videos", to: "/videos" },
