@@ -32,10 +32,10 @@ export const Route = createFileRoute("/onboarding")({
 type JoinKind = "resident" | "artist" | "arts_org" | "business";
 
 const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string; blurb: string }> = [
-  { value: "resident", label: "Personal", nameLabel: "Your name", blurb: "Your Personal page becomes your main profile." },
-  { value: "artist", label: "Artist", nameLabel: "Artist name", blurb: "Your Artist page becomes your main profile." },
-  { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name", blurb: "An Arts Organization page sits alongside your main profile." },
-  { value: "business", label: "Business", nameLabel: "Business name", blurb: "A Business page sits alongside your main profile." },
+  { value: "resident", label: "Personal", nameLabel: "Your name", blurb: "Resident, neighbor, community member." },
+  { value: "artist", label: "Artist", nameLabel: "Artist name", blurb: "Musician, painter, DJ, photographer, filmmaker." },
+  { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name", blurb: "Theater, gallery, collective, festival, venue." },
+  { value: "business", label: "Business", nameLabel: "Business name", blurb: "Coffee shop, daycare, studio, store, restaurant." },
 ];
 
 
