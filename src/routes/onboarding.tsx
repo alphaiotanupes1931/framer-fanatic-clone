@@ -380,14 +380,7 @@ function Onboarding() {
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
-          <div
-            className="mt-4"
-            role="progressbar"
-            aria-valuemin={1}
-            aria-valuemax={totalSteps}
-            aria-valuenow={stepIndex}
-            aria-valuetext={`Step ${stepIndex} of ${totalSteps}`}
-          >
+          <div className="mt-4" aria-hidden="true">
             <div className="mt-2 flex gap-1.5">
               {Array.from({ length: totalSteps }).map((_, i) => (
                 <div key={i} className="flex-1">
@@ -400,6 +393,7 @@ function Onboarding() {
               ))}
             </div>
           </div>
+
 
 
         </CardHeader>
