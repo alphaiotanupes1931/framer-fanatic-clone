@@ -31,12 +31,13 @@ export const Route = createFileRoute("/onboarding")({
 
 type JoinKind = "resident" | "artist" | "arts_org" | "business";
 
-const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string }> = [
-  { value: "resident", label: "Personal", nameLabel: "Your name" },
-  { value: "artist", label: "Artist", nameLabel: "Artist name" },
-  { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name" },
-  { value: "business", label: "Business", nameLabel: "Business name" },
+const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string; blurb: string }> = [
+  { value: "resident", label: "Personal", nameLabel: "Your name", blurb: "Your Personal page becomes your main profile." },
+  { value: "artist", label: "Artist", nameLabel: "Artist name", blurb: "Your Artist page becomes your main profile." },
+  { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name", blurb: "An Arts Organization page sits alongside your main profile." },
+  { value: "business", label: "Business", nameLabel: "Business name", blurb: "A Business page sits alongside your main profile." },
 ];
+
 
 const ARTIST_CATEGORIES = ["Music", "DJ", "Podcast", "Visual Art", "Photography", "Video", "Literary", "Fashion", "Mixed Media", "Performance", "Other"];
 
