@@ -386,15 +386,11 @@ function Onboarding() {
             aria-valuemin={1}
             aria-valuemax={totalSteps}
             aria-valuenow={stepIndex}
-            aria-valuetext={`Step ${stepIndex} of ${totalSteps}: ${stepLabels[stepIndex - 1]}`}
+            aria-valuetext={`Step ${stepIndex} of ${totalSteps}`}
           >
-            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
-              <span>Step {stepIndex} of {totalSteps}</span>
-              <span className="text-orange-600">{stepLabels[stepIndex - 1]}</span>
-            </div>
             <div className="mt-2 flex gap-1.5">
-              {stepLabels.map((label, i) => (
-                <div key={label} className="flex-1">
+              {Array.from({ length: totalSteps }).map((_, i) => (
+                <div key={i} className="flex-1">
                   <span
                     className={`block h-1.5 rounded-full transition-colors ${
                       i + 1 < stepIndex ? "bg-orange-600" : i + 1 === stepIndex ? "bg-orange-500" : "bg-neutral-200"
@@ -404,6 +400,7 @@ function Onboarding() {
               ))}
             </div>
           </div>
+
 
         </CardHeader>
         <CardContent className="space-y-6">
