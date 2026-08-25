@@ -99,7 +99,14 @@ function Onboarding() {
   const draft = useRef<Partial<OnboardingDraft>>(loadDraft()).current;
   // 0 = resident or visitor, 1 = how you want to join, 2 = photo + location, 3 = page setup
   // The photo cannot be restored, so never resume past the photo step.
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(() => (draft.step != null ? (Math.min(draft.step, 2) as 0 | 1 | 2) : 0));
+  // Visitors have no page-type step, so a saved step 1 resumes at the photo step.
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(() => {
+    if (draft.step == null) return 0;
+    const resumed = Math.min(draft.step, 2) as 0 | 1 | 2;
+    if (draft.audience === "visitor" && resumed === 1) return 2;
+    return resumed;
+  });
+
   const [userId, setUserId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
