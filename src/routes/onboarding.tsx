@@ -204,13 +204,13 @@ function Onboarding() {
         <CardHeader className="text-center">
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">
-            {step === 1 ? "Add a profile photo" : step === 2 ? "Choose how you want to join" : `Set up your ${selected?.label ?? "page"} page`}
+            {step === 1 ? "Choose how you want to join" : step === 2 ? "Your photo and location" : `Set up your ${selected?.label ?? "page"} page`}
           </CardTitle>
           <CardDescription>
             {step === 1
-              ? "All fields below are required so your neighbors can recognize you."
-              : step === 2
               ? "Pick the page that best describes you. You can add more pages later."
+              : step === 2
+              ? "Add a photo if you like, then tell us where you are based."
               : selected?.blurb}
           </CardDescription>
           <div className="mt-3 flex justify-center gap-1.5">
@@ -222,8 +222,34 @@ function Onboarding() {
         <CardContent className="space-y-6">
           {step === 1 && (
             <>
+              <div className="space-y-2">
+                <Label htmlFor="joinKind">How do you want to join? <span className="text-orange-600">*</span></Label>
+                <Select value={kind} onValueChange={(v) => setKind(v as JoinKind)}>
+                  <SelectTrigger id="joinKind">
+                    <SelectValue placeholder="Select a page type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOIN_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
+              </div>
+              <p className="rounded-lg bg-neutral-100 p-3 text-xs text-neutral-600">
+                Resident and Artist pages become your main profile. Arts Organization and Business pages
+                live alongside it, and creating a Resident or Artist page later will take over as your profile.
+              </p>
+              <Button onClick={() => setStep(2)} disabled={!kind} className="w-full bg-orange-600 text-white hover:bg-orange-700">
+                Continue
+              </Button>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
               <div className="flex flex-col items-center gap-4">
-                <p className="text-xs font-medium text-orange-600">Profile photo (required)</p>
+                <p className="text-xs font-medium text-neutral-500">Profile photo (optional)</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
@@ -275,42 +301,17 @@ function Onboarding() {
                   </Select>
                 </div>
               )}
-              <Button onClick={goStep2} disabled={!step1Ready} className="w-full bg-orange-600 text-white hover:bg-orange-700">
-                Continue
-              </Button>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="joinKind">How do you want to join? <span className="text-orange-600">*</span></Label>
-                <Select value={kind} onValueChange={(v) => setKind(v as JoinKind)}>
-                  <SelectTrigger id="joinKind">
-                    <SelectValue placeholder="Select a page type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {JOIN_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
-              </div>
-              <p className="rounded-lg bg-neutral-100 p-3 text-xs text-neutral-600">
-                Resident and Artist pages become your main profile. Arts Organization and Business pages
-                live alongside it, and creating a Resident or Artist page later will take over as your profile.
-              </p>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(1)} className="gap-1">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
-                <Button onClick={() => setStep(3)} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+                <Button onClick={goStep3} disabled={!locationReady} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
                   Continue
                 </Button>
               </div>
             </>
           )}
+
 
           {step === 3 && (
             <>
