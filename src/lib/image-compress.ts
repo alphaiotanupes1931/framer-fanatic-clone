@@ -16,11 +16,28 @@ const QUALITY = 0.82;
 const SKIP_BELOW_BYTES = 200 * 1024;
 
 function isCompressible(file: File) {
-  return /^image\/(jpeg|jpg|png|webp)$/i.test(file.type);
+  if (/^image\/(jpeg|jpg|png|webp|heic|heif|avif|bmp|tiff?)$/i.test(file.type)) return true;
+  // iPhone photos sometimes arrive with an empty MIME type; fall back to the extension.
+  if (!file.type) return /\.(jpe?g|png|webp|heics?|heif|avif|bmp|tiff?)$/i.test(file.name);
+  return false;
 }
 
-function loadBitmap(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
+/** True for formats browsers other than Safari usually cannot decode. */
+export function isLikelyUnsupportedImage(file: File) {
+  return /heic|heif/i.test(file.type) || /\.(heics?|heif)$/i.test(file.name);
+}
+
+
+async function loadBitmap(file: File): Promise<HTMLImageElement | ImageBitmap> {
+  // createImageBitmap handles more formats (HEIC on Safari, AVIF, TIFF) than <img>.
+  if (typeof createImageBitmap === "function") {
+    try {
+      return await createImageBitmap(file);
+    } catch {
+      /* fall through to <img> */
+    }
+  }
+  return await new Promise<HTMLImageElement>((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
@@ -34,6 +51,12 @@ function loadBitmap(file: File): Promise<HTMLImageElement> {
     img.src = url;
   });
 }
+
+/** Decode any supported image file to a drawable source. Throws on failure. */
+export async function decodeImage(file: File) {
+  return await loadBitmap(file);
+}
+
 
 export type CompressOptions = { maxEdge?: number; quality?: number };
 
@@ -51,8 +74,9 @@ export async function compressImage(file: File, opts: CompressOptions = {}): Pro
     const quality = opts.quality ?? QUALITY;
 
     const img = await loadBitmap(file);
-    const w = img.naturalWidth;
-    const h = img.naturalHeight;
+    const w = "naturalWidth" in img ? img.naturalWidth : img.width;
+    const h = "naturalHeight" in img ? img.naturalHeight : img.height;
+
     if (!w || !h) return file;
 
     const scale = Math.min(1, maxEdge / Math.max(w, h));
