@@ -169,6 +169,14 @@ function Onboarding() {
     });
   }, [navigate, previewMode]);
 
+  // Visitors never see the page-type step, so bounce them forward if they land on it.
+  useEffect(() => {
+    if (!isVisitor) return;
+    if (kind) setKind("");
+    if (step === 1) setStep(2);
+  }, [isVisitor, kind, step]);
+
+
   useEffect(() => {
     supabase
       .from("neighborhoods")
