@@ -103,10 +103,10 @@ function LeaderboardPage() {
               <div className="min-w-0 flex-1">
                 <div className="font-bold">{r.display_name || r.username || "Anonymous"}</div>
                 <div className="mt-0.5 flex gap-3 text-xs text-neutral-500">
-                  <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {r.posts}</span>
-                  <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {r.comments}</span>
-                  <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {r.likes}</span>
-                  <span className="flex items-center gap-1"><Gift className="h-3 w-3" /> {r.referrals}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><FileText className="h-4 w-4" /> {r.posts}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><MessageCircle className="h-4 w-4" /> {r.comments}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><Heart className="h-4 w-4" /> {r.likes}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><Gift className="h-4 w-4" /> {r.referrals}</span>
                 </div>
               </div>
               <div className="text-lg font-bold text-orange-600">{r.points} <span className="text-sm font-normal text-neutral-400">pts</span></div>
