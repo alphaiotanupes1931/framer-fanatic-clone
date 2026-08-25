@@ -357,7 +357,8 @@ function Onboarding() {
         : "Add a profile photo, then tell us where you are based."
       : isVisitor
       ? "A visitor page keeps you in the loop while you are in town."
-      : "Set up your page.";
+      : selected?.blurb ?? "Set up your page.";
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
