@@ -106,6 +106,7 @@ function LeaderboardPage() {
                   <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {r.posts}</span>
                   <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {r.comments}</span>
                   <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {r.likes}</span>
+                  <span className="flex items-center gap-1"><Gift className="h-3 w-3" /> {r.referrals}</span>
                 </div>
               </div>
               <div className="text-lg font-bold text-orange-600">{r.points} <span className="text-sm font-normal text-neutral-400">pts</span></div>
