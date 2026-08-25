@@ -35,6 +35,7 @@ import { ExternalShareDialog } from "@/components/external-share-dialog";
 import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compress";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -256,11 +257,23 @@ function ProfilePage() {
     location.reload();
   };
 
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropKind, setCropKind] = useState<"avatar" | "banner">("avatar");
+  const [cropOpen, setCropOpen] = useState(false);
+
+  const pickForCrop = (f: File, kind: "avatar" | "banner") => {
+    const looksLikeImage = f.type.startsWith("image/") || /\.(jpe?g|png|webp|heics?|heif|avif|bmp|tiff?|gif)$/i.test(f.name);
+    if (!looksLikeImage) { toast.error("Please choose an image file."); return; }
+    setCropKind(kind);
+    setCropFile(f);
+    setCropOpen(true);
+  };
+
   const uploadBanner = async (file: File) => {
     file = await compressImage(file);
     if (!profile) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image is too large (max 10MB)");
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("Image is too large (max 25MB)");
       return;
     }
     setUploadingBanner(true);
@@ -282,7 +295,7 @@ function ProfilePage() {
   const uploadAvatar = async (file: File) => {
     file = await compressAvatar(file);
     if (!profile) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
+    if (file.size > 25 * 1024 * 1024) { toast.error("Image is too large (max 25MB)"); return; }
     setUploadingAvatar(true);
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
     const path = `${profile.id}/avatar-${Date.now()}.${ext}`;
@@ -372,11 +385,11 @@ function ProfilePage() {
           <input
             ref={bannerInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f) void uploadBanner(f);
+              pickForCrop(f, "banner");
               e.target.value = "";
             }}
           />
@@ -405,9 +418,9 @@ function ProfilePage() {
               <input
                 ref={avatarInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAvatar(f); e.target.value = ""; }}
+                onChange={(e) => { const f = e.target.files?.[0]; pickForCrop(f, "avatar"); e.target.value = ""; }}
               />
               </>
               )}
