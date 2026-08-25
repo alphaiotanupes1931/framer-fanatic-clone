@@ -15,7 +15,7 @@ type Props = {
   hint?: string;
 };
 
-export function ImageUpload({ value, onChange, label = "Upload photo", bucket = "post-media", className, accept = "image/*", hint }: Props) {
+export function ImageUpload({ value, onChange, label = "Upload photo", bucket = "post-media", className, accept = "image/*,.heic,.heif", hint }: Props) {
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
