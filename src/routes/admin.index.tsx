@@ -228,6 +228,10 @@ function AdminPage() {
         </div>
       </div>
 
+      <LocationStats unlocked={unlocked} />
+
+
+
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <div className="flex flex-1 items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2.5">
           <SearchIcon className="h-4 w-4 text-neutral-400" />
