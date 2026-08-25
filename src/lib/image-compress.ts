@@ -28,8 +28,16 @@ export function isLikelyUnsupportedImage(file: File) {
 }
 
 
-function loadBitmap(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
+async function loadBitmap(file: File): Promise<HTMLImageElement | ImageBitmap> {
+  // createImageBitmap handles more formats (HEIC on Safari, AVIF, TIFF) than <img>.
+  if (typeof createImageBitmap === "function") {
+    try {
+      return await createImageBitmap(file);
+    } catch {
+      /* fall through to <img> */
+    }
+  }
+  return await new Promise<HTMLImageElement>((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
@@ -43,6 +51,12 @@ function loadBitmap(file: File): Promise<HTMLImageElement> {
     img.src = url;
   });
 }
+
+/** Decode any supported image file to a drawable source. Throws on failure. */
+export async function decodeImage(file: File) {
+  return await loadBitmap(file);
+}
+
 
 export type CompressOptions = { maxEdge?: number; quality?: number };
 
