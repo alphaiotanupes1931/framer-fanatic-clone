@@ -448,7 +448,7 @@ function Onboarding() {
             <>
               <div className="space-y-2">
                 <Label htmlFor="joinKind">How do you want to join? <span className="text-orange-600">*</span></Label>
-                <Select value={kind} onValueChange={(v) => setKind(v as JoinKind)}>
+                <Select value={kind} onValueChange={(v) => chooseKind(v as JoinKind)}>
                   <SelectTrigger id="joinKind">
                     <SelectValue placeholder="Select a page type" />
                   </SelectTrigger>
@@ -458,14 +458,16 @@ function Onboarding() {
                     ))}
                   </SelectContent>
                 </Select>
+                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
               </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
-                <Button onClick={() => setStep(2)} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+                <Button onClick={continueFromKind} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
                   Continue
                 </Button>
+
               </div>
             </>
           )}
