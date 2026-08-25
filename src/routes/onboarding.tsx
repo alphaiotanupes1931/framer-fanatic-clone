@@ -162,10 +162,9 @@ function Onboarding() {
       const { data: org, error: orgErr } = await supabase.from("organizations").insert({
         owner_id: userId,
         type: kind,
-        subtype: selected?.label ?? null,
+        subtype: kind === "artist" ? category : (selected?.label ?? null),
         name: pageName.trim(),
         slug,
-        category: kind === "artist" ? category : null,
         neighborhood: isVisitor ? homeCity.trim() || null : neighborhood || null,
         bio: bio.trim() || null,
         avatar_url,
