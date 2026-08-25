@@ -26,7 +26,6 @@ import {
   utilItems as sharedUtilItems,
   createItems as sharedCreateItems,
 } from "@/lib/nav-items";
-import { GlobalSearch } from "./global-search";
 import type { ReactNode, ComponentType } from "react";
 
 // Desktop and mobile share one navigation config so both surfaces always
@@ -155,28 +154,6 @@ export function LeftSidebar() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          )}
-
-          {/* Search */}
-          {collapsed ? (
-            <SidebarCardCollapsed>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/search"
-                    className="relative flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900"
-                    aria-label="Search"
-                  >
-                    <Search className="h-5 w-5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Search</TooltipContent>
-              </Tooltip>
-            </SidebarCardCollapsed>
-          ) : (
-            <div className="mb-4">
-              <GlobalSearch className="w-full" />
             </div>
           )}
 
