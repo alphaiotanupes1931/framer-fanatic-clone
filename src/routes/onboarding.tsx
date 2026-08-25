@@ -405,18 +405,6 @@ function Onboarding() {
                 </div>
               ))}
             </div>
-            <div className="mt-1.5 flex gap-1.5">
-              {stepLabels.map((label, i) => (
-                <span
-                  key={label}
-                  className={`flex-1 truncate text-[10px] leading-tight ${
-                    i + 1 === stepIndex ? "font-semibold text-neutral-800" : "text-neutral-400"
-                  }`}
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
           </div>
 
         </CardHeader>
