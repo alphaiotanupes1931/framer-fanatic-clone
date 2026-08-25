@@ -110,16 +110,17 @@ function Onboarding() {
     setPreview(URL.createObjectURL(f));
   };
 
-  const step1Ready = (previewMode || !!file) && (isVisitor ? homeCity.trim().length > 1 : !!neighborhood);
+  const locationReady = isVisitor ? homeCity.trim().length > 1 : !!neighborhood;
   const step3Ready = pageName.trim().length > 1 && (kind !== "artist" || !!category);
 
-  const goStep2 = () => {
-    if (!step1Ready) {
-      toast.error(!file && !previewMode ? "Add a profile photo to continue." : isVisitor ? "Tell us where you are visiting from." : "Choose your neighborhood.");
+  const goStep3 = () => {
+    if (!locationReady) {
+      toast.error(isVisitor ? "Tell us where you are visiting from." : "Choose your neighborhood.");
       return;
     }
-    setStep(2);
+    setStep(3);
   };
+
 
   const finish = async () => {
     if (!kind) { toast.error("Choose how you want to join."); return; }
