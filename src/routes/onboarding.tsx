@@ -95,8 +95,10 @@ function Onboarding() {
 
   const navigate = useNavigate();
   const { preview: previewMode } = Route.useSearch();
+  const draft = useRef<Partial<OnboardingDraft>>(loadDraft()).current;
   // 0 = resident or visitor, 1 = how you want to join, 2 = photo + location, 3 = page setup
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
+  // The photo cannot be restored, so never resume past the photo step.
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(() => (draft.step != null ? (Math.min(draft.step, 2) as 0 | 1 | 2) : 0));
   const [userId, setUserId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -104,17 +106,18 @@ function Onboarding() {
   const [cropOpen, setCropOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
-  const [neighborhood, setNeighborhood] = useState<string>("");
-  const [audience, setAudience] = useState<"resident" | "visitor" | "">("");
-  const [homeCity, setHomeCity] = useState<string>("");
-  const [homeState, setHomeState] = useState<string>("");
+  const [neighborhood, setNeighborhood] = useState<string>(draft.neighborhood ?? "");
+  const [audience, setAudience] = useState<"resident" | "visitor" | "">(draft.audience ?? "");
+  const [homeCity, setHomeCity] = useState<string>(draft.homeCity ?? "");
+  const [homeState, setHomeState] = useState<string>(draft.homeState ?? "");
   const [cityError, setCityError] = useState<string | null>(null);
   const [stateError, setStateError] = useState<string | null>(null);
-  const [kind, setKind] = useState<JoinKind | "">("");
-  const [pageName, setPageName] = useState("");
+  const [kind, setKind] = useState<JoinKind | "">((draft.kind as JoinKind) ?? "");
+  const [pageName, setPageName] = useState(draft.pageName ?? "");
 
-  const [category, setCategory] = useState("");
-  const [bio, setBio] = useState("");
+  const [category, setCategory] = useState(draft.category ?? "");
+  const [bio, setBio] = useState(draft.bio ?? "");
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const isVisitor = audience === "visitor";
