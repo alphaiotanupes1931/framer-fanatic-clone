@@ -251,8 +251,8 @@ function Onboarding() {
       ? "Pick the page that best describes you. You can add more pages later."
       : step === 2
       ? isVisitor
-        ? "Add a photo if you like, then tell us the city and state you are coming from."
-        : "Add a photo if you like, then tell us where you are based."
+        ? "Add a profile photo, then tell us the city and state you are coming from."
+        : "Add a profile photo, then tell us where you are based."
       : isVisitor
       ? "A visitor page keeps you in the loop while you are in town."
       : "Set up your page.";
@@ -260,6 +260,15 @@ function Onboarding() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
       <Toaster richColors />
+      <ImageCropDialog
+        file={rawFile}
+        open={cropOpen}
+        onOpenChange={setCropOpen}
+        aspect={1}
+        maxEdge={512}
+        title="Crop your profile photo"
+        onCropped={onCropped}
+      />
       {previewMode && (
         <div className="fixed inset-x-0 top-0 z-50 bg-neutral-900 px-4 py-2 text-center text-xs font-semibold text-white">
           Admin preview, nothing you enter here is saved.
