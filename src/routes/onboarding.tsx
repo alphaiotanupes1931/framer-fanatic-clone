@@ -174,8 +174,14 @@ function Onboarding() {
       toast.error("Add a profile photo to continue.");
       return;
     }
-    if (!locationReady) {
-      toast.error(isVisitor ? "Tell us the city and state you are visiting from." : "Choose your neighborhood.");
+    if (isVisitor) {
+      const cErr = validateCity(homeCity);
+      const sErr = validateState(homeState);
+      setCityError(cErr);
+      setStateError(sErr);
+      if (cErr || sErr) return;
+    } else if (!neighborhood) {
+      toast.error("Choose your neighborhood.");
       return;
     }
     setStep(3);
