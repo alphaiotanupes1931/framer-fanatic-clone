@@ -229,6 +229,21 @@ function Onboarding() {
     }
   };
 
+  // Personal, Arts Organization and Business pages have no artist category.
+  const chooseKind = (value: JoinKind) => {
+    setKind(value);
+    if (value !== "artist") setCategory("");
+  };
+
+  const continueFromKind = () => {
+    if (!kind) {
+      toast.error("Choose how you want to join.");
+      return;
+    }
+    setStep(2);
+  };
+
+
   const goStep3 = () => {
     if (!file) {
       toast.error("Add a profile photo to continue.");
