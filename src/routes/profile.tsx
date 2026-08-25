@@ -389,13 +389,23 @@ function ProfilePage() {
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
-              pickForCrop(f, "banner");
+              if (f) pickForCrop(f, "banner");
               e.target.value = "";
             }}
           />
           </>
           )}
         </div>
+
+        <ImageCropDialog
+          file={cropFile}
+          open={cropOpen}
+          onOpenChange={setCropOpen}
+          aspect={cropKind === "avatar" ? 1 : 3}
+          maxEdge={cropKind === "avatar" ? 512 : 1600}
+          title={cropKind === "avatar" ? "Crop your profile photo" : "Crop your banner"}
+          onCropped={(f) => { if (cropKind === "avatar") void uploadAvatar(f); else void uploadBanner(f); }}
+        />
 
         <div className="relative px-4 pb-6 sm:px-6">
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
@@ -420,7 +430,7 @@ function ProfilePage() {
                 type="file"
                 accept="image/*,.heic,.heif"
                 className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; pickForCrop(f, "avatar"); e.target.value = ""; }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) pickForCrop(f, "avatar"); e.target.value = ""; }}
               />
               </>
               )}
