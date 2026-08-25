@@ -12,7 +12,6 @@ import {
 import pbLogo from "@/assets/pb-logo.png";
 import pbLogoWhite from "@/assets/pb-logo-white.png";
 import { Img } from "@/components/shared/smart-img";
-import { GlobalSearch } from "@/components/layout/global-search";
 import { navItems, utilItems, createItems } from "@/lib/nav-items";
 
 
