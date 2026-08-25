@@ -446,19 +446,27 @@ function Onboarding() {
 
           {step === 1 && (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="joinKind">How do you want to join? <span className="text-orange-600">*</span></Label>
-                <Select value={kind} onValueChange={(v) => chooseKind(v as JoinKind)}>
-                  <SelectTrigger id="joinKind">
-                    <SelectValue placeholder="Select a page type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {JOIN_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
+              <div className="space-y-3">
+                <Label>How do you want to join? <span className="text-orange-600">*</span></Label>
+                <div className="grid gap-3">
+                  {JOIN_OPTIONS.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      onClick={() => chooseKind(o.value)}
+                      className={`rounded-xl border p-4 text-left transition ${
+                        kind === o.value
+                          ? "border-orange-500 bg-orange-50"
+                          : "border-neutral-200 hover:border-orange-400 hover:bg-orange-50"
+                      }`}
+                    >
+                      <p className={`font-semibold ${kind === o.value ? "text-orange-700" : "text-neutral-900"}`}>
+                        {o.label}
+                      </p>
+                      <p className="text-xs text-neutral-500">{o.blurb}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
