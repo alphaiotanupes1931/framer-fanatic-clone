@@ -74,8 +74,9 @@ export async function compressImage(file: File, opts: CompressOptions = {}): Pro
     const quality = opts.quality ?? QUALITY;
 
     const img = await loadBitmap(file);
-    const w = img.naturalWidth;
-    const h = img.naturalHeight;
+    const w = "naturalWidth" in img ? img.naturalWidth : img.width;
+    const h = "naturalHeight" in img ? img.naturalHeight : img.height;
+
     if (!w || !h) return file;
 
     const scale = Math.min(1, maxEdge / Math.max(w, h));
