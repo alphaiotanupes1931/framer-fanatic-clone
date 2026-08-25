@@ -30,11 +30,11 @@ export const Route = createFileRoute("/onboarding")({
 
 type JoinKind = "resident" | "artist" | "arts_org" | "business";
 
-const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; blurb: string; nameLabel: string }> = [
-  { value: "resident", label: "Individual", blurb: "A personal page for you as a Baltimore resident.", nameLabel: "Your name" },
-  { value: "artist", label: "Artist", blurb: "You make music, art, film, writing or performance.", nameLabel: "Artist name" },
-  { value: "arts_org", label: "Arts Organization", blurb: "A gallery, venue, collective or nonprofit.", nameLabel: "Organization name" },
-  { value: "business", label: "Business", blurb: "A shop, restaurant, cafe, bar or service.", nameLabel: "Business name" },
+const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string }> = [
+  { value: "resident", label: "Personal", nameLabel: "Your name" },
+  { value: "artist", label: "Artist", nameLabel: "Artist name" },
+  { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name" },
+  { value: "business", label: "Business", nameLabel: "Business name" },
 ];
 
 const ARTIST_CATEGORIES = ["Music", "DJ", "Podcast", "Visual Art", "Photography", "Video", "Literary", "Fashion", "Mixed Media", "Performance", "Other"];
@@ -243,7 +243,7 @@ function Onboarding() {
         : "Add a photo if you like, then tell us where you are based."
       : isVisitor
       ? "A visitor page keeps you in the loop while you are in town."
-      : selected?.blurb;
+      : "Set up your page.";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
@@ -334,12 +334,7 @@ function Onboarding() {
                     ))}
                   </SelectContent>
                 </Select>
-                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
               </div>
-              <p className="rounded-lg bg-neutral-100 p-3 text-xs text-neutral-600">
-                Individual and Artist pages become your main profile. Arts Organization and Business pages
-                live alongside it, so you can be a resident and an artist at the same time.
-              </p>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
                   <ArrowLeft className="h-4 w-4" /> Back
