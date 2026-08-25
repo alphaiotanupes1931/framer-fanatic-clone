@@ -36,17 +36,19 @@ type NavItem = { icon: typeof Home; label: string; to: string };
 const navItems: NavItem[] = [...sharedNavItems, ...sharedUtilItems];
 const createItems: NavItem[] = sharedCreateItems;
 
-function SidebarCard({ title, icon: Icon, children, action }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; action?: ReactNode }) {
+function SidebarCard({ title, icon: Icon, children, action }: { title?: string; icon?: ComponentType<{ className?: string }>; children: ReactNode; action?: ReactNode }) {
   return (
     <section className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-slate-700" />
-          <h3 className="text-base font-semibold tracking-tight text-slate-900">{title}</h3>
+      {title && Icon && (
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Icon className="h-4 w-4 text-slate-700" />
+            <h3 className="text-base font-semibold tracking-tight text-slate-900">{title}</h3>
+          </div>
+          {action}
         </div>
-        {action}
-      </div>
-      <div className="px-2 py-2">{children}</div>
+      )}
+      <div className={`px-2 py-2 ${title ? "" : "pt-1"}`}>{children}</div>
     </section>
   );
 }
