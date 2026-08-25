@@ -74,8 +74,12 @@ function Onboarding() {
   const selected = JOIN_OPTIONS.find((o) => o.value === kind);
   const pageLabel = isVisitor ? "Visitor" : selected?.label ?? "page";
   const nameLabel = isVisitor ? "Your name" : selected?.nameLabel ?? "Name";
-  const totalSteps = isVisitor ? 3 : 4;
+  const stepLabels = isVisitor
+    ? ["Who you are", "Photo & location", `${pageLabel} page`]
+    : ["Who you are", "Page type", "Photo & location", `${pageLabel} page`];
+  const totalSteps = stepLabels.length;
   const stepIndex = isVisitor && step > 1 ? step - 1 : step + 1;
+
 
   useEffect(() => {
     if (previewMode) return;
