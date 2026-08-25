@@ -287,6 +287,8 @@ function Onboarding() {
         avatar_url,
       }).select("slug").single();
       if (orgErr) throw orgErr;
+      clearDraft();
+
 
       let dest: string | null = null;
       try {
