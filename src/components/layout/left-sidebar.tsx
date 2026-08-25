@@ -53,18 +53,20 @@ function SidebarCard({ title, icon: Icon, children, action }: { title?: string; 
   );
 }
 
-function SidebarCardCollapsed({ title, icon: Icon, children }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode }) {
+function SidebarCardCollapsed({ title, icon: Icon, children }: { title?: string; icon?: ComponentType<{ className?: string }>; children: ReactNode }) {
   return (
     <section className="mb-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center justify-center border-b border-slate-200 px-2 py-3">
-            <Icon className="h-4 w-4 text-slate-700" />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="right">{title}</TooltipContent>
-      </Tooltip>
-      <div className="flex flex-col items-center gap-1 px-1 py-2">{children}</div>
+      {title && Icon && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center justify-center border-b border-slate-200 px-2 py-3">
+              <Icon className="h-4 w-4 text-slate-700" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right">{title}</TooltipContent>
+        </Tooltip>
+      )}
+      <div className={`flex flex-col items-center gap-1 px-1 py-2 ${title ? "" : "pt-1"}`}>{children}</div>
     </section>
   );
 }
