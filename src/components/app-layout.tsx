@@ -204,11 +204,6 @@ function Shell({ children }: { children: ReactNode }) {
         className={`flex min-h-[100dvh] flex-col transition-all duration-300 ${collapsed ? "lg:ml-[78px]" : "lg:ml-[288px]"}`}
       >
         <TopMenuBar />
-        <div className="sticky top-0 z-[900] hidden border-b border-border bg-background/95 px-8 py-3 backdrop-blur-md lg:block xl:px-10 2xl:px-14">
-          <div className="mx-auto w-full max-w-[1600px]">
-            <GlobalSearch className="max-w-2xl" />
-          </div>
-        </div>
         <main className="w-full flex-1">
           <div className="mx-auto w-full max-w-[1600px] min-w-0 px-3 py-4 pb-[calc(5rem+env(safe-area-inset-bottom))] text-base sm:px-6 sm:py-6 lg:px-8 lg:py-8 lg:pb-10 xl:px-10 2xl:px-14 lg:text-[18px] [&_.text-xs]:text-[13px] [&_.text-sm]:text-[15px] [&_.text-base]:text-[17px]">
             {children}
