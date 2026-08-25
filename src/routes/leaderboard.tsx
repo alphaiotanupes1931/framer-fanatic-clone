@@ -84,10 +84,10 @@ function LeaderboardPage() {
       <div className="h-6" />
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-neutral-200 bg-white px-6 py-4 text-sm text-neutral-600">
-          <span className="flex items-center gap-1.5"><FileText className="h-4 w-4" /> <b>5 pts</b> / post</span>
-          <span className="flex items-center gap-1.5"><MessageCircle className="h-4 w-4" /> <b>2 pts</b> / comment</span>
-          <span className="flex items-center gap-1.5"><Heart className="h-4 w-4" /> <b>1 pt</b> / like received</span>
-          <span className="flex items-center gap-1.5"><Gift className="h-4 w-4" /> <b>5 pts</b> / referral</span>
+          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><FileText className="h-4 w-4" /> <b>5 pts</b> / post</span>
+          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><MessageCircle className="h-4 w-4" /> <b>2 pts</b> / comment</span>
+          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><Heart className="h-4 w-4" /> <b>1 pt</b> / like received</span>
+          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><Gift className="h-4 w-4" /> <b>5 pts</b> / referral</span>
         </div>
 
         {rows.length === 0 && <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">No activity yet.</div>}
@@ -103,10 +103,10 @@ function LeaderboardPage() {
               <div className="min-w-0 flex-1">
                 <div className="font-bold">{r.display_name || r.username || "Anonymous"}</div>
                 <div className="mt-0.5 flex gap-3 text-xs text-neutral-500">
-                  <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {r.posts}</span>
-                  <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {r.comments}</span>
-                  <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {r.likes}</span>
-                  <span className="flex items-center gap-1"><Gift className="h-3 w-3" /> {r.referrals}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><FileText className="h-4 w-4" /> {r.posts}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><MessageCircle className="h-4 w-4" /> {r.comments}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><Heart className="h-4 w-4" /> {r.likes}</span>
+                  <span className="flex items-center gap-1.5 transition-colors hover:text-orange-600"><Gift className="h-4 w-4" /> {r.referrals}</span>
                 </div>
               </div>
               <div className="text-lg font-bold text-orange-600">{r.points} <span className="text-sm font-normal text-neutral-400">pts</span></div>
