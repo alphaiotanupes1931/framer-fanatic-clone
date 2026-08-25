@@ -63,8 +63,36 @@ function validateState(value: string) {
   return null;
 }
 
+const DRAFT_KEY = "pb_onboarding_draft";
+
+type OnboardingDraft = {
+  step: 0 | 1 | 2 | 3;
+  audience: "resident" | "visitor" | "";
+  kind: string;
+  pageName: string;
+  category: string;
+  bio: string;
+  neighborhood: string;
+  homeCity: string;
+  homeState: string;
+};
+
+function loadDraft(): Partial<OnboardingDraft> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as Partial<OnboardingDraft>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+}
 
 function Onboarding() {
+
   const navigate = useNavigate();
   const { preview: previewMode } = Route.useSearch();
   // 0 = resident or visitor, 1 = how you want to join, 2 = photo + location, 3 = page setup
