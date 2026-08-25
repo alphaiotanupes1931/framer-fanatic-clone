@@ -16,8 +16,17 @@ const QUALITY = 0.82;
 const SKIP_BELOW_BYTES = 200 * 1024;
 
 function isCompressible(file: File) {
-  return /^image\/(jpeg|jpg|png|webp)$/i.test(file.type);
+  if (/^image\/(jpeg|jpg|png|webp|heic|heif|avif|bmp|tiff?)$/i.test(file.type)) return true;
+  // iPhone photos sometimes arrive with an empty MIME type; fall back to the extension.
+  if (!file.type) return /\.(jpe?g|png|webp|heics?|heif|avif|bmp|tiff?)$/i.test(file.name);
+  return false;
 }
+
+/** True for formats browsers other than Safari usually cannot decode. */
+export function isLikelyUnsupportedImage(file: File) {
+  return /heic|heif/i.test(file.type) || /\.(heics?|heif)$/i.test(file.name);
+}
+
 
 function loadBitmap(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
