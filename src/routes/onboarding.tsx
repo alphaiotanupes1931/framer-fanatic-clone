@@ -51,6 +51,19 @@ function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "page";
 }
 
+function validateCity(value: string) {
+  const v = value.trim();
+  if (!v) return "City is required.";
+  if (v.length < 2) return "City must be at least 2 characters.";
+  return null;
+}
+
+function validateState(value: string) {
+  if (!value) return "State is required.";
+  return null;
+}
+
+
 function Onboarding() {
   const navigate = useNavigate();
   const { preview: previewMode } = Route.useSearch();
@@ -67,8 +80,11 @@ function Onboarding() {
   const [audience, setAudience] = useState<"resident" | "visitor" | "">("");
   const [homeCity, setHomeCity] = useState<string>("");
   const [homeState, setHomeState] = useState<string>("");
+  const [cityError, setCityError] = useState<string | null>(null);
+  const [stateError, setStateError] = useState<string | null>(null);
   const [kind, setKind] = useState<JoinKind | "">("");
   const [pageName, setPageName] = useState("");
+
   const [category, setCategory] = useState("");
   const [bio, setBio] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -137,7 +153,10 @@ function Onboarding() {
   };
 
   const homeLocation = homeCity.trim() && homeState ? `${homeCity.trim()}, ${homeState}` : "";
-  const locationReady = (isVisitor ? !!homeLocation : !!neighborhood) && !!file;
+  const homeCityValid = !isVisitor || validateCity(homeCity) === null;
+  const homeStateValid = !isVisitor || validateState(homeState) === null;
+  const locationReady = (isVisitor ? homeCityValid && homeStateValid : !!neighborhood) && !!file;
+
   const step3Ready = pageName.trim().length > 1 && (isVisitor || kind !== "artist" || !!category);
 
   const startAudience = (choice: "resident" | "visitor") => {
@@ -155,8 +174,14 @@ function Onboarding() {
       toast.error("Add a profile photo to continue.");
       return;
     }
-    if (!locationReady) {
-      toast.error(isVisitor ? "Tell us the city and state you are visiting from." : "Choose your neighborhood.");
+    if (isVisitor) {
+      const cErr = validateCity(homeCity);
+      const sErr = validateState(homeState);
+      setCityError(cErr);
+      setStateError(sErr);
+      if (cErr || sErr) return;
+    } else if (!neighborhood) {
+      toast.error("Choose your neighborhood.");
       return;
     }
     setStep(3);
@@ -403,15 +428,28 @@ function Onboarding() {
                     <Input
                       id="homeCity"
                       value={homeCity}
-                      onChange={(e) => setHomeCity(e.target.value)}
+                      onChange={(e) => {
+                        setHomeCity(e.target.value);
+                        setCityError(validateCity(e.target.value));
+                      }}
+                      onBlur={(e) => setCityError(validateCity(e.target.value))}
                       placeholder="e.g. Silver Spring"
                       maxLength={80}
+                      aria-invalid={!!cityError}
+                      className={cityError ? "border-red-500 focus-visible:ring-red-500" : ""}
                     />
+                    {cityError && <p className="text-xs text-red-600">{cityError}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="homeState">State <span className="text-orange-600">*</span></Label>
-                    <Select value={homeState} onValueChange={setHomeState}>
-                      <SelectTrigger id="homeState">
+                    <Select
+                      value={homeState}
+                      onValueChange={(v) => {
+                        setHomeState(v);
+                        setStateError(validateState(v));
+                      }}
+                    >
+                      <SelectTrigger id="homeState" aria-invalid={!!stateError} className={stateError ? "border-red-500 focus:ring-red-500" : ""}>
                         <SelectValue placeholder="ST" />
                       </SelectTrigger>
                       <SelectContent className="max-h-72">
@@ -420,8 +458,10 @@ function Onboarding() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {stateError && <p className="text-xs text-red-600">{stateError}</p>}
                   </div>
                 </div>
+
               ) : (
                 <div className="space-y-2">
                   <Label htmlFor="neighborhood">Your Baltimore neighborhood <span className="text-orange-600">*</span></Label>
