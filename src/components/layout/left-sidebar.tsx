@@ -3,7 +3,7 @@ import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
   BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic, ShoppingBag, Flag,
-  LayoutDashboard, Menu, Sparkles,
+  LayoutDashboard, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
