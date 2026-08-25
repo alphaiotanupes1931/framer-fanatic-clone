@@ -19,6 +19,7 @@ import { Camera, Upload, ArrowLeft } from "lucide-react";
 import pbLogo from "@/assets/pb-logo.png";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { setMyProfileKind } from "@/lib/profile-kind";
 
 export const Route = createFileRoute("/onboarding")({
@@ -58,6 +59,8 @@ function Onboarding() {
   const [userId, setUserId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [rawFile, setRawFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
   const [neighborhood, setNeighborhood] = useState<string>("");
@@ -122,14 +125,19 @@ function Onboarding() {
   }, []);
 
   const onPick = (f: File) => {
-    if (!f.type.startsWith("image/")) return toast.error("Please choose an image file.");
-    if (f.size > 5 * 1024 * 1024) return toast.error("Max image size is 5MB.");
+    const looksLikeImage = f.type.startsWith("image/") || /\.(jpe?g|png|webp|heics?|heif|avif|bmp|tiff?|gif)$/i.test(f.name);
+    if (!looksLikeImage) return toast.error("Please choose an image file.");
+    setRawFile(f);
+    setCropOpen(true);
+  };
+
+  const onCropped = (f: File) => {
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
 
   const homeLocation = homeCity.trim() && homeState ? `${homeCity.trim()}, ${homeState}` : "";
-  const locationReady = isVisitor ? !!homeLocation : !!neighborhood;
+  const locationReady = (isVisitor ? !!homeLocation : !!neighborhood) && !!file;
   const step3Ready = pageName.trim().length > 1 && (isVisitor || kind !== "artist" || !!category);
 
   const startAudience = (choice: "resident" | "visitor") => {
@@ -143,6 +151,10 @@ function Onboarding() {
   };
 
   const goStep3 = () => {
+    if (!file) {
+      toast.error("Add a profile photo to continue.");
+      return;
+    }
     if (!locationReady) {
       toast.error(isVisitor ? "Tell us the city and state you are visiting from." : "Choose your neighborhood.");
       return;
@@ -349,7 +361,7 @@ function Onboarding() {
           {step === 2 && (
             <>
               <div className="flex flex-col items-center gap-4">
-                <p className="text-xs font-medium text-neutral-500">Profile photo (optional)</p>
+                <p className="text-xs font-medium text-neutral-500">Profile photo <span className="text-orange-600">*</span></p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
@@ -367,7 +379,7 @@ function Onboarding() {
                 <input
                   ref={fileRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif"
                   className="hidden"
                   onChange={(e) => e.target.files?.[0] && onPick(e.target.files[0])}
                 />
