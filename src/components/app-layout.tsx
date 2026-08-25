@@ -8,7 +8,7 @@ import { SidebarProvider, useSidebar } from "@/components/layout/sidebar-context
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { GlobalSearch } from "@/components/layout/global-search";
+
 
 export type Profile = {
   id: string;
