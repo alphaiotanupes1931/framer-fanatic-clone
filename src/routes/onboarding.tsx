@@ -334,6 +334,7 @@ function Onboarding() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
                   <ArrowLeft className="h-4 w-4" /> Back
