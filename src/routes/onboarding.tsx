@@ -430,7 +430,7 @@ function Onboarding() {
                   className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
                 >
                   <p className="font-semibold text-neutral-900">Resident</p>
-                  <p className="text-xs text-neutral-500">I live in Baltimore. Next you pick the kind of page you want.</p>
+                  <p className="text-xs text-neutral-500">I live in Baltimore. Next you pick Personal, Artist, Arts Organization or Business.</p>
                 </button>
                 <button
                   type="button"
