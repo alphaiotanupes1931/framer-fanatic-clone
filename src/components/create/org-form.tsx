@@ -56,7 +56,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
   const uploadImage = async (field: "avatar_url" | "banner_url", file: File) => {
     file = await compressImage(file);
     if (!me) return;
-    const maxMb = field === "banner_url" ? 10 : 5;
+    const maxMb = 25;
     if (file.size > maxMb * 1024 * 1024) { toast.error(`Image must be under ${maxMb}MB`); return; }
     const setBusy = field === "banner_url" ? setUploadingBanner : setUploading;
     setBusy(true);
