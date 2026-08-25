@@ -31,12 +31,13 @@ export const Route = createFileRoute("/onboarding")({
 
 type JoinKind = "resident" | "artist" | "arts_org" | "business";
 
-const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string }> = [
-  { value: "resident", label: "Personal", nameLabel: "Your name" },
-  { value: "artist", label: "Artist", nameLabel: "Artist name" },
-  { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name" },
-  { value: "business", label: "Business", nameLabel: "Business name" },
+const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string; blurb: string }> = [
+  { value: "resident", label: "Personal", nameLabel: "Your name", blurb: "Your Personal page becomes your main profile." },
+  { value: "artist", label: "Artist", nameLabel: "Artist name", blurb: "Your Artist page becomes your main profile." },
+  { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name", blurb: "An Arts Organization page sits alongside your main profile." },
+  { value: "business", label: "Business", nameLabel: "Business name", blurb: "A Business page sits alongside your main profile." },
 ];
+
 
 const ARTIST_CATEGORIES = ["Music", "DJ", "Podcast", "Visual Art", "Photography", "Video", "Literary", "Fashion", "Mixed Media", "Performance", "Other"];
 
@@ -98,7 +99,14 @@ function Onboarding() {
   const draft = useRef<Partial<OnboardingDraft>>(loadDraft()).current;
   // 0 = resident or visitor, 1 = how you want to join, 2 = photo + location, 3 = page setup
   // The photo cannot be restored, so never resume past the photo step.
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(() => (draft.step != null ? (Math.min(draft.step, 2) as 0 | 1 | 2) : 0));
+  // Visitors have no page-type step, so a saved step 1 resumes at the photo step.
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(() => {
+    if (draft.step == null) return 0;
+    const resumed = Math.min(draft.step, 2) as 0 | 1 | 2;
+    if (draft.audience === "visitor" && resumed === 1) return 2;
+    return resumed;
+  });
+
   const [userId, setUserId] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -161,6 +169,14 @@ function Onboarding() {
     });
   }, [navigate, previewMode]);
 
+  // Visitors never see the page-type step, so bounce them forward if they land on it.
+  useEffect(() => {
+    if (!isVisitor) return;
+    if (kind) setKind("");
+    if (step === 1) setStep(2);
+  }, [isVisitor, kind, step]);
+
+
   useEffect(() => {
     supabase
       .from("neighborhoods")
@@ -212,6 +228,21 @@ function Onboarding() {
       setStep(1);
     }
   };
+
+  // Personal, Arts Organization and Business pages have no artist category.
+  const chooseKind = (value: JoinKind) => {
+    setKind(value);
+    if (value !== "artist") setCategory("");
+  };
+
+  const continueFromKind = () => {
+    if (!kind) {
+      toast.error("Choose how you want to join.");
+      return;
+    }
+    setStep(2);
+  };
+
 
   const goStep3 = () => {
     if (!file) {
@@ -326,7 +357,8 @@ function Onboarding() {
         : "Add a profile photo, then tell us where you are based."
       : isVisitor
       ? "A visitor page keeps you in the loop while you are in town."
-      : "Set up your page.";
+      : selected?.blurb ?? "Set up your page.";
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
@@ -398,7 +430,7 @@ function Onboarding() {
                   className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
                 >
                   <p className="font-semibold text-neutral-900">Resident</p>
-                  <p className="text-xs text-neutral-500">I live in Baltimore. Next you pick the kind of page you want.</p>
+                  <p className="text-xs text-neutral-500">I live in Baltimore. Next you pick Personal, Artist, Arts Organization or Business.</p>
                 </button>
                 <button
                   type="button"
@@ -416,7 +448,7 @@ function Onboarding() {
             <>
               <div className="space-y-2">
                 <Label htmlFor="joinKind">How do you want to join? <span className="text-orange-600">*</span></Label>
-                <Select value={kind} onValueChange={(v) => setKind(v as JoinKind)}>
+                <Select value={kind} onValueChange={(v) => chooseKind(v as JoinKind)}>
                   <SelectTrigger id="joinKind">
                     <SelectValue placeholder="Select a page type" />
                   </SelectTrigger>
@@ -426,14 +458,16 @@ function Onboarding() {
                     ))}
                   </SelectContent>
                 </Select>
+                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
               </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
-                <Button onClick={() => setStep(2)} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+                <Button onClick={continueFromKind} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
                   Continue
                 </Button>
+
               </div>
             </>
           )}
