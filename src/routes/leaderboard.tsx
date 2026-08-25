@@ -17,7 +17,7 @@ export const Route = createFileRoute("/leaderboard")({
 
 type Row = {
   id: string; display_name: string | null; username: string | null; avatar_url: string | null;
-  posts: number; comments: number; likes: number; points: number;
+  posts: number; comments: number; likes: number; referrals: number; points: number;
 };
 
 function LeaderboardPage() {
