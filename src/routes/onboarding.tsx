@@ -110,16 +110,17 @@ function Onboarding() {
     setPreview(URL.createObjectURL(f));
   };
 
-  const step1Ready = (previewMode || !!file) && (isVisitor ? homeCity.trim().length > 1 : !!neighborhood);
+  const locationReady = isVisitor ? homeCity.trim().length > 1 : !!neighborhood;
   const step3Ready = pageName.trim().length > 1 && (kind !== "artist" || !!category);
 
-  const goStep2 = () => {
-    if (!step1Ready) {
-      toast.error(!file && !previewMode ? "Add a profile photo to continue." : isVisitor ? "Tell us where you are visiting from." : "Choose your neighborhood.");
+  const goStep3 = () => {
+    if (!locationReady) {
+      toast.error(isVisitor ? "Tell us where you are visiting from." : "Choose your neighborhood.");
       return;
     }
-    setStep(2);
+    setStep(3);
   };
+
 
   const finish = async () => {
     if (!kind) { toast.error("Choose how you want to join."); return; }
@@ -129,28 +130,32 @@ function Onboarding() {
       navigate({ to: "/admin" });
       return;
     }
-    if (!userId || !file) return;
+    if (!userId) return;
     setBusy(true);
     try {
-      const compressed = await compressAvatar(file);
-      const ext = compressed.name.split(".").pop() || "jpg";
-      const path = `${userId}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("avatars")
-        .upload(path, compressed, { upsert: true, contentType: compressed.type });
-      if (upErr) throw upErr;
-      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
-      const avatar_url = signed?.signedUrl ?? null;
+      let avatar_url: string | null = null;
+      if (file) {
+        const compressed = await compressAvatar(file);
+        const ext = compressed.name.split(".").pop() || "jpg";
+        const path = `${userId}/avatar-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("avatars")
+          .upload(path, compressed, { upsert: true, contentType: compressed.type });
+        if (upErr) throw upErr;
+        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
+        avatar_url = signed?.signedUrl ?? null;
+      }
 
       const { error } = await supabase
         .from("profiles")
         .update(
           isVisitor
-            ? { avatar_url, city: homeCity.trim(), category: "Visitor", onboarded: true }
-            : { avatar_url, neighborhood, onboarded: true },
+            ? { ...(avatar_url ? { avatar_url } : {}), city: homeCity.trim(), category: "Visitor", onboarded: true }
+            : { ...(avatar_url ? { avatar_url } : {}), neighborhood, onboarded: true },
         )
         .eq("id", userId);
       if (error) throw error;
+
 
       // Resident and artist pages are personal profiles, so they take over the
       // account's profile type. Arts orgs and businesses stay as extra pages.
@@ -199,13 +204,13 @@ function Onboarding() {
         <CardHeader className="text-center">
           <Img src={pbLogo} alt="Logo" className="mx-auto mb-4 h-12 w-auto" />
           <CardTitle className="text-2xl">
-            {step === 1 ? "Add a profile photo" : step === 2 ? "Choose how you want to join" : `Set up your ${selected?.label ?? "page"} page`}
+            {step === 1 ? "Choose how you want to join" : step === 2 ? "Your photo and location" : `Set up your ${selected?.label ?? "page"} page`}
           </CardTitle>
           <CardDescription>
             {step === 1
-              ? "All fields below are required so your neighbors can recognize you."
-              : step === 2
               ? "Pick the page that best describes you. You can add more pages later."
+              : step === 2
+              ? "Add a photo if you like, then tell us where you are based."
               : selected?.blurb}
           </CardDescription>
           <div className="mt-3 flex justify-center gap-1.5">
@@ -217,8 +222,34 @@ function Onboarding() {
         <CardContent className="space-y-6">
           {step === 1 && (
             <>
+              <div className="space-y-2">
+                <Label htmlFor="joinKind">How do you want to join? <span className="text-orange-600">*</span></Label>
+                <Select value={kind} onValueChange={(v) => setKind(v as JoinKind)}>
+                  <SelectTrigger id="joinKind">
+                    <SelectValue placeholder="Select a page type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOIN_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
+              </div>
+              <p className="rounded-lg bg-neutral-100 p-3 text-xs text-neutral-600">
+                Resident and Artist pages become your main profile. Arts Organization and Business pages
+                live alongside it, and creating a Resident or Artist page later will take over as your profile.
+              </p>
+              <Button onClick={() => setStep(2)} disabled={!kind} className="w-full bg-orange-600 text-white hover:bg-orange-700">
+                Continue
+              </Button>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
               <div className="flex flex-col items-center gap-4">
-                <p className="text-xs font-medium text-orange-600">Profile photo (required)</p>
+                <p className="text-xs font-medium text-neutral-500">Profile photo (optional)</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
@@ -270,42 +301,17 @@ function Onboarding() {
                   </Select>
                 </div>
               )}
-              <Button onClick={goStep2} disabled={!step1Ready} className="w-full bg-orange-600 text-white hover:bg-orange-700">
-                Continue
-              </Button>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="joinKind">How do you want to join? <span className="text-orange-600">*</span></Label>
-                <Select value={kind} onValueChange={(v) => setKind(v as JoinKind)}>
-                  <SelectTrigger id="joinKind">
-                    <SelectValue placeholder="Select a page type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {JOIN_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
-              </div>
-              <p className="rounded-lg bg-neutral-100 p-3 text-xs text-neutral-600">
-                Resident and Artist pages become your main profile. Arts Organization and Business pages
-                live alongside it, and creating a Resident or Artist page later will take over as your profile.
-              </p>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(1)} className="gap-1">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
-                <Button onClick={() => setStep(3)} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+                <Button onClick={goStep3} disabled={!locationReady} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
                   Continue
                 </Button>
               </div>
             </>
           )}
+
 
           {step === 3 && (
             <>
