@@ -188,7 +188,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           <Input value={form.address} onChange={(e) => set("address", e.target.value)} maxLength={200} />
         </Field>
         <Field label="Logo / avatar">
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("avatar_url", f); }} />
+          <input ref={fileRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("avatar_url", f); }} />
           {form.avatar_url ? (
             <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
               <span className="truncate">Logo attached</span>
@@ -202,7 +202,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           )}
         </Field>
         <Field label="Banner image">
-          <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("banner_url", f); }} />
+          <input ref={bannerRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("banner_url", f); }} />
           {form.banner_url ? (
             <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
               <span className="truncate">Background attached</span>

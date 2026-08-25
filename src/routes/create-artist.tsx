@@ -54,7 +54,7 @@ function CreateArtistPage() {
     file = await compressAvatar(file);
     if (!me) { toast.error("Please sign in"); return; }
     if (existingArtistPage) { toast.error("You already have an Artist page."); return; }
-    if (file.size > 10 * 1024 * 1024) { toast.error("Image is too large (max 10MB)"); return; }
+    if (file.size > 25 * 1024 * 1024) { toast.error("Image is too large (max 25MB)"); return; }
     setUploading(true);
     try {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
@@ -165,7 +165,7 @@ function CreateArtistPage() {
                 <input
                   ref={fileRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif"
                   className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAvatar(f); e.target.value = ""; }}
                 />
