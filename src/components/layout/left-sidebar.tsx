@@ -208,7 +208,7 @@ export function LeftSidebar() {
               })}
             </SidebarCardCollapsed>
           ) : (
-            <SidebarCard title="Menu" icon={Menu}>
+            <SidebarCard>
               <nav className="space-y-0.5">
                 {visibleNavItems.map((item) => {
                   const active = isActive(item.to);
