@@ -171,6 +171,19 @@ function Onboarding() {
       });
   }, []);
 
+  // Auto-save progress so a refresh or going back keeps everything filled in.
+  useEffect(() => {
+    if (previewMode) return;
+    try {
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ step, audience, kind, pageName, category, bio, neighborhood, homeCity, homeState }),
+      );
+    } catch { /* ignore */ }
+  }, [previewMode, step, audience, kind, pageName, category, bio, neighborhood, homeCity, homeState]);
+
+
+
   const onPick = (f: File) => {
     const looksLikeImage = f.type.startsWith("image/") || /\.(jpe?g|png|webp|heics?|heif|avif|bmp|tiff?|gif)$/i.test(f.name);
     if (!looksLikeImage) return toast.error("Please choose an image file.");
