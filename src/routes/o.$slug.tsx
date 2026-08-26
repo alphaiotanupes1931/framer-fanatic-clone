@@ -290,7 +290,12 @@ function OrgProfile() {
     const wanted = typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("tab")
       : null;
-    setTab(wanted || "Posts");
+    // Deep links may use any casing (?tab=portfolio); match the real tab label
+    // case-insensitively so the right content renders instead of the fallback.
+    const match = wanted
+      ? VISIBLE_TABS.find((t) => t.toLowerCase() === wanted.toLowerCase())
+      : undefined;
+    setTab(match ?? "Posts");
   }, [org]);
   if (!org && !loaded) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
   // Either the page does not exist or it is private and this visitor is not
