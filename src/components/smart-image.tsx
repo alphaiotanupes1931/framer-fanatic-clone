@@ -43,6 +43,20 @@ function cacheKey(bucket: string, path: string) {
   return `${bucket}::${path}`;
 }
 
+function signedUrlHasTimeLeft(url: string): boolean {
+  try {
+    const token = new URL(url).searchParams.get("token");
+    if (!token) return true;
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) return false;
+    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "="))) as { exp?: number };
+    return typeof payload.exp === "number" && payload.exp * 1000 > Date.now() + 60_000;
+  } catch {
+    return false;
+  }
+}
+
 let hydrated = false;
 function hydrateCache() {
   if (hydrated || typeof window === "undefined") return;
@@ -89,8 +103,14 @@ export function clearSignedUrlCache() {
 
 function readCache(bucket: string, path: string): string | null {
   hydrateCache();
-  const hit = cache.get(cacheKey(bucket, path));
-  return hit && hit.exp > Date.now() ? hit.url : null;
+  const key = cacheKey(bucket, path);
+  const hit = cache.get(key);
+  if (hit && hit.exp > Date.now() && signedUrlHasTimeLeft(hit.url)) return hit.url;
+  if (hit) {
+    cache.delete(key);
+    persistCache();
+  }
+  return null;
 }
 
 function writeCache(bucket: string, path: string, url: string) {
@@ -221,7 +241,12 @@ async function resolveAsync(src: string, bucketHint?: string): Promise<string | 
   const cached = readCache(t.bucket, t.path);
   if (cached) return cached;
   const signed = await signBatched(t.bucket, t.path);
-  if (signed && (await urlResolves(signed))) return signed;
+  // The storage service has already confirmed this exact bucket and path by
+  // returning a signed URL. Do not probe it with a cross-origin HEAD request:
+  // browsers can block that probe even though the same URL loads correctly in
+  // an image or video element, which previously made valid post previews fall
+  // back to their expired database URL and render as empty boxes.
+  if (signed) return signed;
   // The hinted bucket didn't have the object (older uploads landed in a
   // different bucket). Try the rest before giving up.
   for (const b of CANDIDATE_BUCKETS) {

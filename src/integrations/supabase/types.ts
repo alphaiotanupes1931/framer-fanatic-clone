@@ -3304,6 +3304,7 @@ export type Database = {
       }
       admin_upsert_site_content: { Args: { _rows: Json }; Returns: number }
       can_view_org: { Args: { _org: string }; Returns: boolean }
+      can_view_post_media: { Args: { _object_name: string }; Returns: boolean }
       cancel_my_rsvp: { Args: { _ticket_id: string }; Returns: Json }
       check_in_ticket: {
         Args: { _ticket_id: string }
