@@ -201,6 +201,17 @@ function OrgProfile() {
       setPendingCount(0);
       autoJoinDone.current = false;
       let { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
+      if (!data) {
+        const baseSlug = slug.replace(/-[a-z0-9]{4}$/i, "").replace(/-/g, " ");
+        const { data: slugMatch } = await supabase
+          .from("organizations")
+          .select("*")
+          .or(`slug.ilike.${slug}%,name.ilike.${baseSlug}`)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        data = slugMatch;
+      }
       // Private page: try the access code this browser already unlocked with.
       if (!data && typeof window !== "undefined") {
         const saved = sessionStorage.getItem(`pb_org_code_${slug}`);
