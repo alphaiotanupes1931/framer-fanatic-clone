@@ -88,14 +88,15 @@ export function LeftSidebar() {
 
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
-  const baseNavItems: NavItem[] = isAdmin
-    ? [...navItems, { icon: Flag, label: "Content Reports", to: "/reports" }]
-    : navItems;
-
-  const homeItem = baseNavItems.find((item) => item.to === "/dashboard")!;
-  const otherNavItems = baseNavItems
-    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.label !== "Saved")
+  const homeItem = navItems.find((item) => item.to === "/dashboard")!;
+  // Settings and Content Reports live in their own boxed sections at the
+  // bottom of the sidebar (like Home), not inside the main nav list.
+  const otherNavItems = navItems
+    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.label !== "Saved")
     .sort((a, b) => a.label.localeCompare(b.label));
+
+  const settingsItem: NavItem = { icon: Settings, label: "Settings", to: "/settings" };
+  const reportsItem: NavItem = { icon: Flag, label: "Content Reports", to: "/reports" };
 
   const renderNavLink = (item: NavItem) => {
     const active = isActive(item.to);
@@ -233,6 +234,15 @@ export function LeftSidebar() {
         {/* Footer */}
         <div className={`space-y-3 px-3 pb-3 ${collapsed ? "px-2" : ""}`}>
           {collapsed ? (
+            <>
+            {isAdmin && (
+              <SidebarCardCollapsed>
+                {renderCollapsedNavLink(reportsItem)}
+              </SidebarCardCollapsed>
+            )}
+            <SidebarCardCollapsed>
+              {renderCollapsedNavLink(settingsItem)}
+            </SidebarCardCollapsed>
             <SidebarCardCollapsed title="Account" icon={User}>
               {user ? (
                 <Tooltip>
@@ -257,7 +267,17 @@ export function LeftSidebar() {
                 {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
               </button>
             </SidebarCardCollapsed>
+            </>
           ) : (
+            <>
+            {isAdmin && (
+              <SidebarCard>
+                <nav className="space-y-0.5">{renderNavLink(reportsItem)}</nav>
+              </SidebarCard>
+            )}
+            <SidebarCard>
+              <nav className="space-y-0.5">{renderNavLink(settingsItem)}</nav>
+            </SidebarCard>
             <SidebarCard title="Account" icon={User} action={
               <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
                 {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -277,6 +297,7 @@ export function LeftSidebar() {
                 )}
               </div>
             </SidebarCard>
+            </>
           )}
         </div>
       </aside>

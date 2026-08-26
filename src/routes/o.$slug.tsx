@@ -46,6 +46,7 @@ import { VotingTab } from "@/components/org/voting-tab";
 import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { BannerWatermark } from "@/components/shared/banner-watermark";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -181,6 +182,16 @@ function OrgProfile() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropField, setCropField] = useState<"avatar_url" | "banner_url">("banner_url");
+  const [cropOpen, setCropOpen] = useState(false);
+  const pickForCrop = (f: File, field: "avatar_url" | "banner_url") => {
+    const looksLikeImage = f.type.startsWith("image/") || /\.(jpe?g|png|webp|heics?|heif|avif|bmp|tiff?|gif)$/i.test(f.name);
+    if (!looksLikeImage) { toast.error("Please choose an image file."); return; }
+    setCropField(field);
+    setCropFile(f);
+    setCropOpen(true);
+  };
   const autoJoinDone = useRef(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -455,16 +466,25 @@ function OrgProfile() {
       <input
         ref={avatarInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload("avatar_url", f); e.target.value = ""; }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) pickForCrop(f, "avatar_url"); e.target.value = ""; }}
       />
       <input
         ref={bannerInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload("banner_url", f); e.target.value = ""; }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) pickForCrop(f, "banner_url"); e.target.value = ""; }}
+      />
+      <ImageCropDialog
+        file={cropFile}
+        open={cropOpen}
+        onOpenChange={setCropOpen}
+        aspect={cropField === "avatar_url" ? 1 : 3}
+        maxEdge={cropField === "avatar_url" ? 512 : 1600}
+        title={cropField === "avatar_url" ? "Crop your page photo" : "Crop your banner"}
+        onCropped={(f) => void handleFileUpload(cropField, f)}
       />
 
       {/* Banner with floating actions */}

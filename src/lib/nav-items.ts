@@ -14,7 +14,7 @@ export const navItems: NavItem[] = [
   { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
   { icon: Building2, label: "Businesses", to: "/businesses" },
   { icon: Shield, label: "Community Associations", to: "/community-associations" },
-  { icon: Calendar, label: "Community Calendar", to: "/calendar" },
+  { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Ticket, label: "Events", to: "/events" },
   { icon: Ticket, label: "Festivals", to: "/festivals" },
   { icon: Users, label: "Groups", to: "/groups" },
