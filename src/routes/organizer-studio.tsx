@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { EventEditForm } from "@/components/organizer/event-edit-form";
 import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
+import { richHtmlToEmailDocument } from "@/lib/rich-email";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
@@ -1229,6 +1230,7 @@ const TEMPLATES: { key: string; label: string; subject: (t: string) => string; b
 function CampaignTab({ events }: { events: MyEvent[] }) {
   const [audiences, setAudiences] = useState<Audience[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [openAudience, setOpenAudience] = useState<Audience | null>(null);
 
   const [fromName, setFromName] = useState("Planet Baltimore");
@@ -1359,11 +1361,53 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
     return `${html}<p>Event details and tickets: <a href="${eventLink}">${eventLink}</a></p>`;
   };
 
-  const send = () => {
-    if (recipients.length === 0) return toast.error("Add at least one recipient");
-    if (!subject.trim()) return toast.error("Add a subject");
-    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(richHtmlToPlainText(withEventLink(body)))}`;
-    window.location.href = href;
+  const send = async () => {
+    if (recipients.length === 0) return toast.error("Add at least one valid recipient email");
+    if (!subject.trim()) return toast.error("Add a subject before sending");
+    if (richHtmlIsEmpty(body)) return toast.error("Write a message before sending");
+    if (!evt || !eventLink) return toast.error("Choose an event before sending");
+
+    setSending(true);
+    const toastId = toast.loading(`Sending to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"}…`);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Please sign in again before sending");
+
+      let sent = 0;
+      const failures: string[] = [];
+      for (const recipientEmail of recipients) {
+        const response = await fetch("/lovable/email/transactional/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            templateName: "event-invitation",
+            recipientEmail,
+            idempotencyKey: `event-invitation-${evt.id}-${recipientEmail}-${Date.now()}`,
+            templateData: {
+              fromName: fromName.trim() || "Planet Baltimore",
+              subject: subject.trim(),
+              messageDocument: richHtmlToEmailDocument(withEventLink(body)),
+              eventTitle: `View ${evt.title} details and tickets`,
+              eventUrl: eventLink,
+            },
+          }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.success !== false) sent += 1;
+        else failures.push(result.error || result.reason || "Delivery failed");
+      }
+
+      if (failures.length === 0) toast.success(`Invitation sent to ${sent} recipient${sent === 1 ? "" : "s"}`, { id: toastId });
+      else if (sent > 0) toast.warning(`Sent to ${sent}. ${failures.length} could not be sent.`, { id: toastId });
+      else throw new Error(failures[0] || "The invitation could not be sent");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "The invitation could not be sent", { id: toastId });
+    } finally {
+      setSending(false);
+    }
   };
 
   const copyAll = async () => {
@@ -1506,11 +1550,11 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
             <Copy className="h-4 w-4" /> Copy draft
           </button>
           <div className="flex-1" />
-          <button onClick={send} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a]">
-            <Send className="h-4 w-4" /> Send to {recipients.length} recipient{recipients.length === 1 ? "" : "s"}
+          <button onClick={() => void send()} disabled={sending} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:opacity-60">
+            <Send className="h-4 w-4" /> {sending ? "Sending…" : `Send to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"}`}
           </button>
         </div>
-        <p className="mt-2 text-xs text-neutral-500">Send opens your own email app with everyone on BCC, so addresses stay private.</p>
+        <p className="mt-2 text-xs text-neutral-500">Invitations are sent directly. Choose an event and add a subject, message, and at least one valid email.</p>
 
         {preview && (
           <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
