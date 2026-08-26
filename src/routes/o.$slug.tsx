@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clearPendingGroup } from "@/lib/pending-join";
 import { AppLayout } from "@/components/app-layout";
+import { RichTextEditor } from "@/components/rich-text-editor";
+import { RichHtml } from "@/components/rich-html";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { FileUpload } from "@/components/shared/file-upload";
 import { useUserRole } from "@/hooks/use-user-role";
