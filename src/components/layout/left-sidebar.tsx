@@ -93,7 +93,9 @@ export function LeftSidebar() {
     : navItems;
 
   const homeItem = baseNavItems.find((item) => item.to === "/dashboard")!;
-  const otherNavItems = baseNavItems.filter((item) => item.to !== "/dashboard");
+  const otherNavItems = baseNavItems
+    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.label !== "Saved")
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const renderNavLink = (item: NavItem) => {
     const active = isActive(item.to);
