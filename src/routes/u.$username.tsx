@@ -99,6 +99,15 @@ function PublicProfilePage() {
 
   const isOwner = !!me && !!profile && me.id === profile.id;
 
+  // The account owner has exactly one profile page: /profile. Landing on your
+  // own /u/:username (e.g. by tapping your avatar on your own post) used to
+  // render a second, stripped-down copy of your profile with owner controls.
+  useEffect(() => {
+    if (isOwner) navigate({ to: "/profile", replace: true });
+  }, [isOwner, navigate]);
+
+
+
   useEffect(() => {
     if (!isOwner) return;
     (async () => {
@@ -510,36 +519,26 @@ function PublicProfilePage() {
           </div>
         )}
 
-        {/* Action row */}
+        {/* Action row. This page is only ever another person's profile, so it
+            never shows owner controls (Edit Profile / Remove Artist Page). */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {isSelf && (
-            <Link
-              to="/profile"
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-            >
-              Edit Profile
-            </Link>
-          )}
-          {!isSelf && (
-            <button
-              onClick={startMessage}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-            >
-              <MessageCircle className="h-4 w-4" /> Message
-            </button>
-          )}
-          {/* Message All / Delete Page / Mute Page belong to org + artist pages,
-              not to an individual person's profile, so they are not rendered here. */}
-          {isSelf && (
+          <button
+            onClick={startMessage}
+            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+          >
+            <MessageCircle className="h-4 w-4" /> Message
+          </button>
+          {isAdmin && (
             <button
               onClick={deletePage}
               className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
             >
               <Trash2 className="h-4 w-4" />
-              Remove Artist Page
+              Delete Profile
             </button>
           )}
         </div>
+
 
         {/* Tabs */}
         <div className="mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200">
