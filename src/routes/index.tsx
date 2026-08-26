@@ -17,6 +17,8 @@ import { SiteColorInjector } from "@/components/site-color-injector";
 import { Img } from "@/components/shared/smart-img";
 import { useSmartImageUrl } from "@/components/smart-image";
 import { pageHead } from "@/lib/seo";
+import { popPostAuthRedirect } from "@/lib/pending-join";
+import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
 
 export const Route = createFileRoute("/")({
   head: () => ({
