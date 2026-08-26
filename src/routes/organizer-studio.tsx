@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { EventEditForm } from "@/components/organizer/event-edit-form";
+import { RichTextEditor, richHtmlToPlainText } from "@/components/rich-text-editor";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
@@ -876,11 +877,13 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
     }
   };
 
+  const toHtml = (plain: string) => plain.split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+
   const applyTemplate = (kind: string) => {
-    if (kind === "venue") { setSubject(`Venue update for ${evtTitle}`); setBody(`Hi there,\n\nQuick heads up about the venue for ${evtTitle}. Please note the following updates:\n\n[venue details]\n\nSee you soon!`); }
-    if (kind === "reminder") { setSubject(`Reminder: ${evtTitle} is coming up`); setBody(`Hi,\n\nJust a friendly reminder that ${evtTitle} is coming up. Doors open at [time].\n\nCan't wait to see you!`); }
-    if (kind === "thanks") { setSubject(`Thank you for coming to ${evtTitle}`); setBody(`Hi,\n\nThank you for coming out to ${evtTitle}. It meant the world to have you there!\n\n— The team`); }
-    if (kind === "important") { setSubject(`Important update about ${evtTitle}`); setBody(`Hi,\n\nWe have an important update regarding ${evtTitle}:\n\n[update details]\n\nThank you for your understanding.`); }
+    if (kind === "venue") { setSubject(`Venue update for ${evtTitle}`); setBody(toHtml(`Hi there,\n\nQuick heads up about the venue for ${evtTitle}. Please note the following updates:\n\n[venue details]\n\nSee you soon!`)); }
+    if (kind === "reminder") { setSubject(`Reminder: ${evtTitle} is coming up`); setBody(toHtml(`Hi,\n\nJust a friendly reminder that ${evtTitle} is coming up. Doors open at [time].\n\nCan't wait to see you!`)); }
+    if (kind === "thanks") { setSubject(`Thank you for coming to ${evtTitle}`); setBody(toHtml(`Hi,\n\nThank you for coming out to ${evtTitle}. It meant the world to have you there!\n\n- The team`)); }
+    if (kind === "important") { setSubject(`Important update about ${evtTitle}`); setBody(toHtml(`Hi,\n\nWe have an important update regarding ${evtTitle}:\n\n[update details]\n\nThank you for your understanding.`)); }
   };
 
   const send = async () => {
@@ -900,7 +903,7 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
           is_group: true,
           title: subject.trim().slice(0, 120),
           created_by: meId,
-          last_message_preview: body.trim().slice(0, 140),
+          last_message_preview: richHtmlToPlainText(body).slice(0, 140),
         })
         .select("id")
         .single();
@@ -915,7 +918,7 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
       const { error: msgErr } = await supabase.from("messages").insert({
         conversation_id: conv.id,
         sender_id: meId,
-        content: `${subject.trim()}\n\n${body.trim()}`,
+        content: `${subject.trim()}\n\n${richHtmlToPlainText(body)}`,
       });
       if (msgErr) throw msgErr;
 
@@ -965,8 +968,8 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
 
       <div>
         <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Message *</label>
-        <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 1000))} placeholder="Write your message to attendees here..." rows={6} className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm" />
-        <div className="mt-1 text-right text-[11px] text-neutral-400">{body.length}/1000</div>
+        <RichTextEditor value={body} onChange={setBody} placeholder="Write your message to attendees here..." minHeight={150} className="mt-1" />
+        <div className="mt-1 text-right text-[11px] text-neutral-400">{richHtmlToPlainText(body).length}/1000</div>
       </div>
 
       <button onClick={send} disabled={busy || count === 0 || !subject.trim() || !body.trim()} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-400 px-4 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
@@ -1344,27 +1347,28 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
       : "soon";
     const where = evt?.venue_name || evt?.location || "Baltimore";
     setSubject(tpl.subject(title));
-    setBody(`${tpl.body(title, when, where)}${eventLink ? `\n\nEvent details and tickets: ${eventLink}` : ""}\n\n${fromName}`);
+    const plain = `${tpl.body(title, when, where)}${eventLink ? `\n\nEvent details and tickets: ${eventLink}` : ""}\n\n${fromName}`;
+    setBody(plain.split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join(""));
   };
 
   // The invitation always carries the event link so recipients can tap
   // straight through to the event page, even if they edit the message.
-  const withEventLink = (text: string) => {
-    if (!eventLink) return text;
-    if (text.includes(eventLink)) return text;
-    return `${text.trimEnd()}\n\nEvent details and tickets: ${eventLink}`;
+  const withEventLink = (html: string) => {
+    if (!eventLink) return html;
+    if (html.includes(eventLink)) return html;
+    return `${html}<p>Event details and tickets: <a href="${eventLink}">${eventLink}</a></p>`;
   };
 
   const send = () => {
     if (recipients.length === 0) return toast.error("Add at least one recipient");
     if (!subject.trim()) return toast.error("Add a subject");
-    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(withEventLink(body))}`;
+    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(richHtmlToPlainText(withEventLink(body)))}`;
     window.location.href = href;
   };
 
   const copyAll = async () => {
     try {
-      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${withEventLink(body)}`);
+      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${richHtmlToPlainText(withEventLink(body))}`);
       toast.success("Draft copied");
     } catch { toast.error("Could not copy"); }
   };
@@ -1425,12 +1429,11 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
 
         <div className="mt-4">
           <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500">Message</label>
-          <textarea
+          <RichTextEditor
             value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={10}
+            onChange={setBody}
             placeholder="Write your email here, or start from a template above."
-            className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm leading-relaxed text-neutral-900 outline-none focus:border-[#d4580a] focus:bg-white"
+            minHeight={220}
           />
         </div>
 
@@ -1515,7 +1518,14 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
             <div className="text-sm font-semibold text-neutral-900">{fromName || "—"}</div>
             <div className="mt-2 text-xs text-neutral-500">Subject</div>
             <div className="text-sm font-semibold text-neutral-900">{subject || "(no subject)"}</div>
-            <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">{withEventLink(body) || "(empty message)"}</div>
+            {withEventLink(body) ? (
+              <div
+                className="prose prose-sm prose-neutral mt-2 max-w-none text-sm leading-relaxed text-neutral-800 [&_a]:text-[#d4580a] [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: withEventLink(body) }}
+              />
+            ) : (
+              <div className="mt-2 text-sm leading-relaxed text-neutral-400">(empty message)</div>
+            )}
             {eventLink && (
               <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#d4580a]/10 px-3 py-1 text-xs font-medium text-[#b8480a]">
                 Event link included: {eventLink}

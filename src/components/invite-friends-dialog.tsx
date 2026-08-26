@@ -7,6 +7,7 @@ import { UserPlus, Upload, Loader2, Check, Copy, Share2, Link2, Send } from "luc
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { externalShare } from "@/lib/share-preview";
+import { RichTextEditor, richHtmlToPlainText } from "@/components/rich-text-editor";
 
 interface InviteFriendsDialogProps {
   open: boolean;
@@ -121,7 +122,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
               inviterName,
               personalMessage: [
                 group ? `${inviterName} invited you to join ${group.name} on Planet Baltimore.` : "",
-                message?.trim() || "",
+                richHtmlToPlainText(message) || "",
               ].filter(Boolean).join("\n\n"),
               inviteUrl: trackedUrl,
             },
@@ -318,11 +319,11 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
 
             <div>
               <label className="mb-1.5 block text-sm font-medium">Personal message (optional)</label>
-              <Textarea
+              <RichTextEditor
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={setMessage}
                 placeholder="Tell them why they'd love Planet Baltimore..."
-                rows={3}
+                minHeight={120}
               />
             </div>
 
