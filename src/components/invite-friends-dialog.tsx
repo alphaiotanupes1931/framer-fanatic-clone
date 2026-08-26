@@ -7,7 +7,8 @@ import { UserPlus, Upload, Loader2, Check, Copy, Share2, Link2, Send } from "luc
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { externalShare } from "@/lib/share-preview";
-import { RichTextEditor, richHtmlToPlainText } from "@/components/rich-text-editor";
+import { RichTextEditor } from "@/components/rich-text-editor";
+import { richHtmlToEmailDocument } from "@/lib/rich-email";
 
 interface InviteFriendsDialogProps {
   open: boolean;
@@ -120,10 +121,8 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
             idempotencyKey: `invite-${session.user.id}-${to}-${Date.now()}`,
             templateData: {
               inviterName,
-              personalMessage: [
-                group ? `${inviterName} invited you to join ${group.name} on Planet Baltimore.` : "",
-                richHtmlToPlainText(message) || "",
-              ].filter(Boolean).join("\n\n"),
+              personalMessageIntro: group ? `${inviterName} invited you to join ${group.name} on Planet Baltimore.` : "",
+              personalMessageDocument: richHtmlToEmailDocument(message),
               inviteUrl: trackedUrl,
             },
           }),

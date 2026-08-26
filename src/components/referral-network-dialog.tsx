@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { RichTextEditor, richHtmlToPlainText } from "@/components/rich-text-editor";
+import { RichTextEditor } from "@/components/rich-text-editor";
+import { richHtmlToEmailDocument } from "@/lib/rich-email";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Gift,
@@ -213,7 +214,7 @@ export function ReferralNetworkDialog({
           idempotencyKey: `referral-${session.user.id}-${to}-${Date.now()}`,
           templateData: {
             inviterName,
-            personalMessage: richHtmlToPlainText(message) || "",
+            personalMessageDocument: richHtmlToEmailDocument(message),
             inviteUrl: trackedUrl,
           },
         }),
