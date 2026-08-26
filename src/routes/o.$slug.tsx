@@ -2204,7 +2204,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     const active = c.bg === bg.bg;
                     return (
                       <button key={c.name} type="button" onClick={() => setBg(c)} title={c.name}
-                        className={`h-8 w-8 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
+                        className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
                         style={{ background: c.bg || "linear-gradient(135deg, #fff 50%, #eee 50%)" }} />
                     );
                   })}
