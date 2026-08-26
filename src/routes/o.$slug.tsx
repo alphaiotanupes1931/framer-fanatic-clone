@@ -202,11 +202,10 @@ function OrgProfile() {
       autoJoinDone.current = false;
       let { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
       if (!data) {
-        const baseSlug = slug.replace(/-[a-z0-9]{4}$/i, "").replace(/-/g, " ");
         const { data: slugMatch } = await supabase
           .from("organizations")
           .select("*")
-          .or(`slug.ilike.${slug}%,name.ilike.${baseSlug}`)
+          .ilike("slug", `${slug}-%`)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
