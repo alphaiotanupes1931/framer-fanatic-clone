@@ -466,7 +466,7 @@ function OrgProfile() {
       <input
         ref={avatarInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) pickForCrop(f, "avatar_url"); e.target.value = ""; }}
       />
