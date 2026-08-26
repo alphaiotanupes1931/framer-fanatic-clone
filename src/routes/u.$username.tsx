@@ -28,6 +28,7 @@ import {
 } from "@/components/artist/artist-tab-sections";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { PostSplitView } from "@/components/shared/post-split-view";
+import { RichHtml } from "@/components/rich-html";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid, Users2 } from "lucide-react";
 
