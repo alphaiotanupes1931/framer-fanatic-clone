@@ -392,39 +392,35 @@ export function ShareToUsersDialog({
       // Send one direct message per recipient. Reuse an existing 1:1 conversation if any.
       for (const uid of recipients) {
         try {
-          const { data: mine } = await supabase
-            .from("conversation_members")
-            .select("conversation_id")
-            .eq("user_id", me.id);
-          const myConvIds = (mine ?? []).map((r: { conversation_id: string }) => r.conversation_id);
-          let convId: string | null = null;
-          if (myConvIds.length) {
-            const { data: shared } = await supabase
-              .from("conversation_members")
-              .select("conversation_id")
-              .eq("user_id", uid)
-              .in("conversation_id", myConvIds);
-            convId = (shared ?? [])[0]?.conversation_id ?? null;
-          }
+          // Direct threads are keyed by the sorted user pair; always look up and
+          // insert with the normalized order so no duplicate thread can exist.
+          const [a, b] = me.id < uid ? [me.id, uid] : [uid, me.id];
+          const { data: existing } = await supabase
+            .from("conversations")
+            .select("id")
+            .eq("user_a", a)
+            .eq("user_b", b)
+            .eq("is_group", false)
+            .maybeSingle();
+          let convId: string | null = (existing?.id as string | undefined) ?? null;
           if (!convId) {
             const { data: conv, error } = await supabase
               .from("conversations")
               .insert({
                 is_group: false,
                 created_by: me.id,
-                user_a: me.id,
-                user_b: uid,
+                user_a: a,
+                user_b: b,
                 last_message_preview: (title || url).slice(0, 140),
               })
               .select("id")
               .single();
             if (error || !conv) throw error || new Error("Could not create conversation");
             convId = conv.id;
-            const { error: mErr } = await supabase.from("conversation_members").insert([
-              { conversation_id: convId, user_id: me.id },
-              { conversation_id: convId, user_id: uid },
+            await supabase.from("conversation_members").insert([
+              { conversation_id: convId, user_id: a },
+              { conversation_id: convId, user_id: b },
             ]);
-            if (mErr) throw mErr;
           }
           const { error: msgErr } = await supabase
             .from("messages")
