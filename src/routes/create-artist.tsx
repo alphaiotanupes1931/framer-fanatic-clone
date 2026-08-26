@@ -5,7 +5,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2, Camera } from "lucide-react";

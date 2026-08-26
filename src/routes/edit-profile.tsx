@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Upload } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
 import { compressImage } from "@/lib/image-compress";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 export const Route = createFileRoute("/edit-profile")({
   head: () => ({ meta: [{ title: "Edit Profile - Planet Baltimore" }, { name: "robots", content: "noindex" }] }),
