@@ -14,6 +14,21 @@ export function setPendingGroup(slug: string) {
   } catch { /* storage blocked */ }
 }
 
+// Resume where a guest was headed before we made them sign up (ticket
+// checkout, group invite, etc). With email confirmation on, the inbox link
+// lands on the home page, so readers other than /auth need this too.
+export function popPostAuthRedirect(consume = true): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const v = sessionStorage.getItem(REDIRECT_KEY);
+    if (consume) sessionStorage.removeItem(REDIRECT_KEY);
+    if (v && v.startsWith("/") && !v.startsWith("//")) return v;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function peekPendingGroup(): string | null {
   if (typeof window === "undefined") return null;
   try { return localStorage.getItem(KEY); } catch { return null; }
