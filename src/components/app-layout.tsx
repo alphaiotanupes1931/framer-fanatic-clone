@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSignedUrlCache } from "@/components/smart-image";
@@ -38,16 +38,6 @@ const profileSubscribers = new Set<(p: Profile | null) => void>();
 // check. Persisting it means a hard refresh paints the signed-in chrome right
 // away instead of flashing the logged-out version for a moment.
 const PROFILE_STORAGE_KEY = "pb:profile:v1";
-
-function readStoredProfile(): Profile | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(PROFILE_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Profile) : null;
-  } catch {
-    return null;
-  }
-}
 
 function storeProfile(p: Profile | null) {
   if (typeof window === "undefined") return;
@@ -113,16 +103,8 @@ function isPublicPath(pathname: string) {
 export function useCurrentProfile() {
   const [profile, setProfile] = useState<Profile | null>(profileCache);
   const navigate = useNavigate();
-  // Seed from the persisted copy before the first paint so the signed-in UI
-  // doesn't flash its logged-out state on a fresh page load.
-  useLayoutEffect(() => {
-    if (profileCache) return;
-    const stored = readStoredProfile();
-    if (stored) {
-      profileCache = stored;
-      setProfile(stored);
-    }
-  }, []);
+  // Owner-only UI must be driven by the live session, never a stale persisted
+  // profile from another account on the same browser.
   // useNavigate() returns a new function on every render; keeping it in the
   // dependency list re-ran this effect after each state update, which is what
   // made profile/story pages refetch and flicker in a loop.
@@ -161,11 +143,11 @@ function clearCachedAppData() {
 
 if (typeof window !== "undefined") {
   supabase.auth.onAuthStateChange((event) => {
-    if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED") {
+    if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED" || event === "INITIAL_SESSION") {
       invalidateCurrentProfile();
       invalidateConnections();
       // Signed URLs are per-session capability links; don't leak them across users.
-      if (event !== "USER_UPDATED") {
+      if (event !== "USER_UPDATED" && event !== "INITIAL_SESSION") {
         clearSignedUrlCache();
         clearDataCache();
         clearCachedAppData();
