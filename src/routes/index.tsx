@@ -50,6 +50,32 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  // Email-confirmation links land here. If this session is a fresh signup or
+  // had somewhere to go before auth (e.g. buying a ticket), send them onward.
+  useEffect(() => {
+    (async () => {
+      try {
+        const pending = popPostAuthRedirect(false);
+        const fresh = localStorage.getItem("pb_new_signup") === "1";
+        if (!pending && !fresh) return;
+        const { data } = await supabase.auth.getSession();
+        const uid = data.session?.user.id;
+        if (!uid) return;
+        const { data: p } = await supabase
+          .from("profiles")
+          .select(ONBOARDING_FIELDS)
+          .eq("id", uid)
+          .maybeSingle();
+        if (profileNeedsOnboarding(p as never)) {
+          window.location.replace("/onboarding");
+          return;
+        }
+        if (pending) {
+          window.location.replace(pending);
+        }
+      } catch { /* non-fatal: stay on home */ }
+    })();
+  }, []);
   return (
     <div className="min-h-screen bg-blue text-ink overflow-x-hidden font-sans">
       <SiteColorInjector />
