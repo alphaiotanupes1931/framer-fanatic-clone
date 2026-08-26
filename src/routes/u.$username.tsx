@@ -99,6 +99,15 @@ function PublicProfilePage() {
 
   const isOwner = !!me && !!profile && me.id === profile.id;
 
+  // The account owner has exactly one profile page: /profile. Landing on your
+  // own /u/:username (e.g. by tapping your avatar on your own post) used to
+  // render a second, stripped-down copy of your profile with owner controls.
+  useEffect(() => {
+    if (isOwner) navigate({ to: "/profile", replace: true });
+  }, [isOwner, navigate]);
+
+
+
   useEffect(() => {
     if (!isOwner) return;
     (async () => {
