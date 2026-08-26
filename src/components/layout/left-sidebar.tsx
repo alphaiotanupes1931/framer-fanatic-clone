@@ -267,7 +267,17 @@ export function LeftSidebar() {
                 {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
               </button>
             </SidebarCardCollapsed>
+            </>
           ) : (
+            <>
+            {isAdmin && (
+              <SidebarCard>
+                <nav className="space-y-0.5">{renderNavLink(reportsItem)}</nav>
+              </SidebarCard>
+            )}
+            <SidebarCard>
+              <nav className="space-y-0.5">{renderNavLink(settingsItem)}</nav>
+            </SidebarCard>
             <SidebarCard title="Account" icon={User} action={
               <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
                 {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
