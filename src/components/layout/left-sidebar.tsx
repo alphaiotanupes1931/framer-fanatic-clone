@@ -297,6 +297,7 @@ export function LeftSidebar() {
                 )}
               </div>
             </SidebarCard>
+            </>
           )}
         </div>
       </aside>
