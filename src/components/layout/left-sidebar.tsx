@@ -234,6 +234,15 @@ export function LeftSidebar() {
         {/* Footer */}
         <div className={`space-y-3 px-3 pb-3 ${collapsed ? "px-2" : ""}`}>
           {collapsed ? (
+            <>
+            {isAdmin && (
+              <SidebarCardCollapsed>
+                {renderCollapsedNavLink(reportsItem)}
+              </SidebarCardCollapsed>
+            )}
+            <SidebarCardCollapsed>
+              {renderCollapsedNavLink(settingsItem)}
+            </SidebarCardCollapsed>
             <SidebarCardCollapsed title="Account" icon={User}>
               {user ? (
                 <Tooltip>
