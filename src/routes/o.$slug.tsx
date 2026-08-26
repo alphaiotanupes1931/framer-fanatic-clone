@@ -468,14 +468,23 @@ function OrgProfile() {
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload("avatar_url", f); e.target.value = ""; }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) pickForCrop(f, "avatar_url"); e.target.value = ""; }}
       />
       <input
         ref={bannerInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload("banner_url", f); e.target.value = ""; }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) pickForCrop(f, "banner_url"); e.target.value = ""; }}
+      />
+      <ImageCropDialog
+        file={cropFile}
+        open={cropOpen}
+        onOpenChange={setCropOpen}
+        aspect={cropField === "avatar_url" ? 1 : 3}
+        maxEdge={cropField === "avatar_url" ? 512 : 1600}
+        title={cropField === "avatar_url" ? "Crop your page photo" : "Crop your banner"}
+        onCropped={(f) => void handleFileUpload(cropField, f)}
       />
 
       {/* Banner with floating actions */}
