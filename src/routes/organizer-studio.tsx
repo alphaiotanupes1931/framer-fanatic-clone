@@ -1324,6 +1324,9 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
   };
 
   const evt = events.find((e) => e.id === eventId) || null;
+  const eventLink = evt
+    ? `https://www.planetbaltimore.com/events/${evt.id}`
+    : null;
 
   const recipients = useMemo(() => {
     const set = new Set<string>();
@@ -1341,19 +1344,27 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
       : "soon";
     const where = evt?.venue_name || evt?.location || "Baltimore";
     setSubject(tpl.subject(title));
-    setBody(`${tpl.body(title, when, where)}\n\n${fromName}`);
+    setBody(`${tpl.body(title, when, where)}${eventLink ? `\n\nEvent details and tickets: ${eventLink}` : ""}\n\n${fromName}`);
+  };
+
+  // The invitation always carries the event link so recipients can tap
+  // straight through to the event page, even if they edit the message.
+  const withEventLink = (text: string) => {
+    if (!eventLink) return text;
+    if (text.includes(eventLink)) return text;
+    return `${text.trimEnd()}\n\nEvent details and tickets: ${eventLink}`;
   };
 
   const send = () => {
     if (recipients.length === 0) return toast.error("Add at least one recipient");
     if (!subject.trim()) return toast.error("Add a subject");
-    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(withEventLink(body))}`;
     window.location.href = href;
   };
 
   const copyAll = async () => {
     try {
-      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
+      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${withEventLink(body)}`);
       toast.success("Draft copied");
     } catch { toast.error("Could not copy"); }
   };
@@ -1504,7 +1515,12 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
             <div className="text-sm font-semibold text-neutral-900">{fromName || "—"}</div>
             <div className="mt-2 text-xs text-neutral-500">Subject</div>
             <div className="text-sm font-semibold text-neutral-900">{subject || "(no subject)"}</div>
-            <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">{body || "(empty message)"}</div>
+            <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">{withEventLink(body) || "(empty message)"}</div>
+            {eventLink && (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#d4580a]/10 px-3 py-1 text-xs font-medium text-[#b8480a]">
+                Event link included: {eventLink}
+              </div>
+            )}
           </div>
         )}
       </div>
