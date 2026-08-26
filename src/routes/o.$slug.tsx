@@ -182,6 +182,16 @@ function OrgProfile() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<null | "avatar_url" | "banner_url">(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropField, setCropField] = useState<"avatar_url" | "banner_url">("banner_url");
+  const [cropOpen, setCropOpen] = useState(false);
+  const pickForCrop = (f: File, field: "avatar_url" | "banner_url") => {
+    const looksLikeImage = f.type.startsWith("image/") || /\.(jpe?g|png|webp|heics?|heif|avif|bmp|tiff?|gif)$/i.test(f.name);
+    if (!looksLikeImage) { toast.error("Please choose an image file."); return; }
+    setCropField(field);
+    setCropFile(f);
+    setCropOpen(true);
+  };
   const autoJoinDone = useRef(false);
   const [loaded, setLoaded] = useState(false);
 
