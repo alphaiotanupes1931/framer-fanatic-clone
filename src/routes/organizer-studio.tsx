@@ -1515,7 +1515,12 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
             <div className="text-sm font-semibold text-neutral-900">{fromName || "—"}</div>
             <div className="mt-2 text-xs text-neutral-500">Subject</div>
             <div className="text-sm font-semibold text-neutral-900">{subject || "(no subject)"}</div>
-            <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">{body || "(empty message)"}</div>
+            <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">{withEventLink(body) || "(empty message)"}</div>
+            {eventLink && (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#d4580a]/10 px-3 py-1 text-xs font-medium text-[#b8480a]">
+                Event link included: {eventLink}
+              </div>
+            )}
           </div>
         )}
       </div>
