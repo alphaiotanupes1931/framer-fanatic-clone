@@ -89,8 +89,7 @@ export function LeftSidebar() {
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
   const homeItem = navItems.find((item) => item.to === "/dashboard")!;
-  // Settings and Content Reports live in their own boxed sections at the
-  // bottom of the sidebar (like Home), not inside the main nav list.
+  // Settings and Content Reports live under the Account section.
   const otherNavItems = navItems
     .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.label !== "Saved")
     .sort((a, b) => a.label.localeCompare(b.label));
@@ -235,15 +234,9 @@ export function LeftSidebar() {
         <div className={`space-y-3 px-3 pb-3 ${collapsed ? "px-2" : ""}`}>
           {collapsed ? (
             <>
-            {isAdmin && (
-              <SidebarCardCollapsed>
-                {renderCollapsedNavLink(reportsItem)}
-              </SidebarCardCollapsed>
-            )}
-            <SidebarCardCollapsed>
-              {renderCollapsedNavLink(settingsItem)}
-            </SidebarCardCollapsed>
             <SidebarCardCollapsed title="Account" icon={User}>
+              {renderCollapsedNavLink(settingsItem)}
+              {isAdmin && renderCollapsedNavLink(reportsItem)}
               {user ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -270,20 +263,14 @@ export function LeftSidebar() {
             </>
           ) : (
             <>
-            {isAdmin && (
-              <SidebarCard>
-                <nav className="space-y-0.5">{renderNavLink(reportsItem)}</nav>
-              </SidebarCard>
-            )}
-            <SidebarCard>
-              <nav className="space-y-0.5">{renderNavLink(settingsItem)}</nav>
-            </SidebarCard>
             <SidebarCard title="Account" icon={User} action={
               <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
                 {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
               </button>
             }>
               <div className="space-y-0.5">
+                {renderNavLink(settingsItem)}
+                {isAdmin && renderNavLink(reportsItem)}
                 {user ? (
                   <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]">
                     <LogOut className="h-5 w-5 flex-shrink-0 text-slate-500" />
