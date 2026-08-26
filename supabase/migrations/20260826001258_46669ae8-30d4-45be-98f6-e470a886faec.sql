@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.public_profile_by_username(text) TO anon;
