@@ -136,7 +136,8 @@ const ASSOC_TABS = [
   "Polls", "Jobs", "Leaderboard", "Rules", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
-  "Posts", "Events", "Polls", "Voting", "Minutes", "Members", "Board", "By Laws", "Invite", "Comments", "About", "Dues",
+  "Posts", "Mission", "Events", "Members", "Threads",
+  "Polls", "Voting", "Minutes", "Board", "Jobs", "Leaderboard", "Rules", "By Laws", "Invite", "Comments", "About", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
   "Posts", "Menu", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
@@ -2189,10 +2190,10 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
 
           {mode === "text" ? (
             <div className="space-y-3">
-              <div className="rounded-2xl p-6 min-h-[160px] flex items-center justify-center transition"
+              <div className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-y-auto rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}>
-                <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} rows={4}
-                  placeholder="Share your thoughts..."
+                <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} rows={8}
+                  placeholder="Share your thoughts... use @ to mention someone"
                   style={{ color: bg.fg }}
                   className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus:outline-none ${FONT_SIZE_CLASS[fontSize]}`} />
               </div>
@@ -2203,7 +2204,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     const active = c.bg === bg.bg;
                     return (
                       <button key={c.name} type="button" onClick={() => setBg(c)} title={c.name}
-                        className={`h-8 w-8 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
+                        className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-[#d4580a] scale-110" : "border-neutral-200"}`}
                         style={{ background: c.bg || "linear-gradient(135deg, #fff 50%, #eee 50%)" }} />
                     );
                   })}
