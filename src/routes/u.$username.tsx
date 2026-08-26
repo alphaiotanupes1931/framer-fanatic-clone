@@ -312,7 +312,8 @@ function PublicProfilePage() {
   // A person has one canonical public profile. Standalone artist and
   // organization pages live at /o/$slug and are never selected by URL search.
   const isArtistView = false;
-  const tabs = PERSON_TABS;
+  // Saved is private to the owner; everyone else sees the public tabs only.
+  const tabs = isSelf ? PERSON_TABS : PERSON_TABS.filter((t) => t.key !== "saved");
   const canEdit = !!isSelf;
 
   return (
