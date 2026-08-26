@@ -1324,6 +1324,9 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
   };
 
   const evt = events.find((e) => e.id === eventId) || null;
+  const eventLink = evt
+    ? `https://www.planetbaltimore.com/events/${evt.id}`
+    : null;
 
   const recipients = useMemo(() => {
     const set = new Set<string>();
