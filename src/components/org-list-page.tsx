@@ -239,7 +239,7 @@ export function OrgListPage({
                 </Link>
               ))}
             </div>
-            <h2 className="mt-8 mb-3 text-lg font-bold text-neutral-900">All Organizations</h2>
+            {items.length > 3 && <h2 className="mt-8 mb-3 text-lg font-bold text-neutral-900">All Organizations</h2>}
           </section>
         )}
 
@@ -258,7 +258,7 @@ export function OrgListPage({
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((o) => (
+            {(showFeatured ? items.slice(3) : items).map((o) => (
               <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }}
                 className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                 {isAdmin && (
