@@ -88,14 +88,15 @@ export function LeftSidebar() {
 
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
-  const baseNavItems: NavItem[] = isAdmin
-    ? [...navItems, { icon: Flag, label: "Content Reports", to: "/reports" }]
-    : navItems;
-
-  const homeItem = baseNavItems.find((item) => item.to === "/dashboard")!;
-  const otherNavItems = baseNavItems
-    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.label !== "Saved")
+  const homeItem = navItems.find((item) => item.to === "/dashboard")!;
+  // Settings and Content Reports live in their own boxed sections at the
+  // bottom of the sidebar (like Home), not inside the main nav list.
+  const otherNavItems = navItems
+    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.label !== "Saved")
     .sort((a, b) => a.label.localeCompare(b.label));
+
+  const settingsItem: NavItem = { icon: Settings, label: "Settings", to: "/settings" };
+  const reportsItem: NavItem = { icon: Flag, label: "Content Reports", to: "/reports" };
 
   const renderNavLink = (item: NavItem) => {
     const active = isActive(item.to);
