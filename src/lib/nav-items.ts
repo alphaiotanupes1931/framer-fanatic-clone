@@ -11,7 +11,7 @@ export const navItems: NavItem[] = [
   { icon: Home, label: "Home", to: "/dashboard" },
   { icon: Palette, label: "Artists", to: "/artists" },
   { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
-  { icon: Shield, label: "Associations", to: "/community-associations" },
+  { icon: Shield, label: "Community Associations", to: "/community-associations" },
   { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
   // Referrals feed Baltimore 100 points, so it sits directly under it.
   { icon: Gift, label: "Referrals", to: "/referrals" },
