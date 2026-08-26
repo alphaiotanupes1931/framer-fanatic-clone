@@ -88,10 +88,14 @@ export function LeftSidebar() {
 
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
-  const homeItem = visibleNavItems.find((item) => item.to === "/dashboard")!;
-  const otherNavItems = visibleNavItems.filter((item) => item.to !== "/dashboard");
+  const baseNavItems: NavItem[] = isAdmin
+    ? [...navItems, { icon: Flag, label: "Content Reports", to: "/reports" }]
+    : navItems;
 
-  const renderNavLink = (item: NavItem, isHome = false) => {
+  const homeItem = baseNavItems.find((item) => item.to === "/dashboard")!;
+  const otherNavItems = baseNavItems.filter((item) => item.to !== "/dashboard");
+
+  const renderNavLink = (item: NavItem) => {
     const active = isActive(item.to);
     const Icon = item.icon;
     const badge = item.label === "Notifications" ? unreadNotifications : item.label === "Messages" ? unreadMessages : 0;
@@ -100,7 +104,7 @@ export function LeftSidebar() {
         key={item.label}
         to={item.to}
         {...prefetchHandlers(item.to)}
-        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"} ${isHome ? "justify-center" : ""}`}
+        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
       >
         <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-150 ${active ? "scale-110 text-slate-900" : "text-slate-500"}`} />
         <span className="flex-1 truncate">{item.label}</span>
@@ -137,10 +141,6 @@ export function LeftSidebar() {
       </Tooltip>
     );
   };
-
-  const visibleNavItems = isAdmin
-    ? [...otherNavItems, { icon: Flag, label: "Content Reports", to: "/reports" } as NavItem]
-    : otherNavItems;
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -208,58 +208,23 @@ export function LeftSidebar() {
           )}
 
           {collapsed ? (
-            <SidebarCardCollapsed>
-              {visibleNavItems.map((item) => {
-                const active = isActive(item.to);
-                const Icon = item.icon;
-                const badge = item.label === "Notifications" ? unreadNotifications : item.label === "Messages" ? unreadMessages : 0;
-                return (
-                  <Tooltip key={item.label}>
-                    <TooltipTrigger asChild>
-                      <Link
-                        to={item.to}
-                        {...prefetchHandlers(item.to)}
-                        className={`relative flex w-10 items-center justify-center rounded-lg py-2 transition-all ${active ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
-                      >
-                        <Icon className="h-5 w-5" />
-                        {badge > 0 && (
-                          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ backgroundColor: "#d4580a" }}>
-                            {badge > 99 ? "99+" : badge}
-                          </span>
-                        )}
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">{item.label}</TooltipContent>
-                  </Tooltip>
-                );
-              })}
-            </SidebarCardCollapsed>
+            <>
+              <SidebarCardCollapsed>
+                {renderCollapsedNavLink(homeItem)}
+              </SidebarCardCollapsed>
+              <SidebarCardCollapsed>
+                {otherNavItems.map((item) => renderCollapsedNavLink(item))}
+              </SidebarCardCollapsed>
+            </>
           ) : (
-            <SidebarCard>
-              <nav className="space-y-0.5">
-                {visibleNavItems.map((item) => {
-                  const active = isActive(item.to);
-                  const Icon = item.icon;
-                  const badge = item.label === "Notifications" ? unreadNotifications : item.label === "Messages" ? unreadMessages : 0;
-                  return (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      {...prefetchHandlers(item.to)}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
-                    >
-                      <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-150 ${active ? "scale-110 text-slate-900" : "text-slate-500"}`} />
-                      <span className="flex-1 truncate">{item.label}</span>
-                      {badge > 0 && (
-                        <span className="flex h-[18px] min-w-[18px] flex-shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ backgroundColor: "#d4580a" }}>
-                          {badge > 99 ? "99+" : badge}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </SidebarCard>
+            <>
+              <SidebarCard>
+                <nav className="space-y-0.5">{renderNavLink(homeItem)}</nav>
+              </SidebarCard>
+              <SidebarCard>
+                <nav className="space-y-0.5">{otherNavItems.map((item) => renderNavLink(item))}</nav>
+              </SidebarCard>
+            </>
           )}
         </div>
 
