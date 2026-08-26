@@ -1364,7 +1364,7 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
 
   const copyAll = async () => {
     try {
-      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
+      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${withEventLink(body)}`);
       toast.success("Draft copied");
     } catch { toast.error("Could not copy"); }
   };
