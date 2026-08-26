@@ -162,7 +162,7 @@ function StoryDetail() {
       </Link>
 
       <article className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-border bg-card">
-        {story.cover_url && (
+        {story.cover_url ? (
           <div className="w-full bg-muted">
             <SmartImage
               src={story.cover_url}
@@ -227,7 +227,7 @@ function StoryDetail() {
               <div className="text-xs text-muted-foreground">Published {dateLabel}</div>
             </div>
           </div>
-        )}
+        ) : null}
 
         <div className="mt-6">
           <span className="inline-block rounded-lg bg-secondary px-3 py-1 text-xs font-semibold text-foreground">{story.format}</span>
