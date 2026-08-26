@@ -328,7 +328,7 @@ export function PersonPagesTab({ userId, isSelf }: { userId: string; isSelf: boo
         .from("organizations")
         .select("id, name, slug, type, subtype, avatar_url, is_public")
         .eq("owner_id", userId)
-        .not("type", "in", '("resident","visitor")');
+        .not("type", "in", "(resident,visitor)");
       if (!isSelf) q = q.neq("is_public", false);
       const { data } = await q;
       if (cancelled) return;
