@@ -239,7 +239,7 @@ export function OrgListPage({
                 </Link>
               ))}
             </div>
-            <h2 className="mt-8 mb-3 text-lg font-bold text-neutral-900">All Organizations</h2>
+            {items.length > 3 && <h2 className="mt-8 mb-3 text-lg font-bold text-neutral-900">All Organizations</h2>}
           </section>
         )}
 
