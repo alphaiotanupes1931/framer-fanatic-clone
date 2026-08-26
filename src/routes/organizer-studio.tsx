@@ -887,7 +887,7 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
   };
 
   const send = async () => {
-    if (!subject.trim() || !body.trim()) { toast.error("Subject and message are required"); return; }
+    if (!subject.trim() || richHtmlIsEmpty(body)) { toast.error("Subject and message are required"); return; }
     if (count === 0) { toast.error("No attendees to message yet"); return; }
     setBusy(true);
     try {
@@ -972,7 +972,7 @@ function MessageTab({ eventId, evtTitle, recipients }: { eventId: string; evtTit
         <div className="mt-1 text-right text-[11px] text-neutral-400">{richHtmlToPlainText(body).length}/1000</div>
       </div>
 
-      <button onClick={send} disabled={busy || count === 0 || !subject.trim() || !body.trim()} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-400 px-4 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
+      <button onClick={send} disabled={busy || count === 0 || !subject.trim() || richHtmlIsEmpty(body)} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-400 px-4 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
         <Send className="h-4 w-4" /> {busy ? "Sending…" : `Send to ${count} Attendee${count === 1 ? "" : "s"}`}
       </button>
     </div>
