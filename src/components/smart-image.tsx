@@ -43,6 +43,20 @@ function cacheKey(bucket: string, path: string) {
   return `${bucket}::${path}`;
 }
 
+function signedUrlHasTimeLeft(url: string): boolean {
+  try {
+    const token = new URL(url).searchParams.get("token");
+    if (!token) return true;
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) return false;
+    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "="))) as { exp?: number };
+    return typeof payload.exp === "number" && payload.exp * 1000 > Date.now() + 60_000;
+  } catch {
+    return false;
+  }
+}
+
 let hydrated = false;
 function hydrateCache() {
   if (hydrated || typeof window === "undefined") return;
@@ -89,8 +103,14 @@ export function clearSignedUrlCache() {
 
 function readCache(bucket: string, path: string): string | null {
   hydrateCache();
-  const hit = cache.get(cacheKey(bucket, path));
-  return hit && hit.exp > Date.now() ? hit.url : null;
+  const key = cacheKey(bucket, path);
+  const hit = cache.get(key);
+  if (hit && hit.exp > Date.now() && signedUrlHasTimeLeft(hit.url)) return hit.url;
+  if (hit) {
+    cache.delete(key);
+    persistCache();
+  }
+  return null;
 }
 
 function writeCache(bucket: string, path: string, url: string) {
