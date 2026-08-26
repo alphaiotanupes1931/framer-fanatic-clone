@@ -141,7 +141,7 @@ function CreateArtistPage() {
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Bio</Label>
-            <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={1000} />
+            <RichTextEditor value={form.bio} onChange={(v) => set("bio", v)} placeholder="Tell people about yourself and your work..." minHeight={120} />
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Website</Label>

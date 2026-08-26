@@ -221,7 +221,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
           </Field>
 
           <Field label="Description" optional>
-            <textarea className={`${inputCls} min-h-[120px]`} value={form.description} onChange={(e) => set("description", e.target.value)} maxLength={5000} />
+            <RichTextEditor value={form.description} onChange={(v) => set("description", v)} placeholder="Tell people about your event..." minHeight={140} />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">

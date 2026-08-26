@@ -135,8 +135,7 @@ function EditProfilePage() {
         <Field label="Username" value={form.username} onChange={(v) => setForm({ ...form, username: v })} />
         <div>
           <label className="mb-1 block text-sm font-semibold">Bio</label>
-          <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={4}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none" />
+          <RichTextEditor value={form.bio} onChange={(v) => setForm({ ...form, bio: v })} placeholder="Tell people about yourself..." minHeight={120} />
         </div>
         <Field label="City" value={form.city} onChange={(v) => setForm({ ...form, city: v })} />
         <Field label="Neighborhood" value={form.neighborhood} onChange={(v) => setForm({ ...form, neighborhood: v })} />

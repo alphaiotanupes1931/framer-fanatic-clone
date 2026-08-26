@@ -250,7 +250,7 @@ function NewEventPage() {
           </Field>
 
           <Field label="Description" optional>
-            <textarea className={`${inputCls} min-h-[120px]`} placeholder="Tell people about your event..." value={form.description} onChange={(e) => set("description", e.target.value)} maxLength={5000} />
+            <RichTextEditor value={form.description} onChange={(v) => set("description", v)} placeholder="Tell people about your event..." minHeight={140} />
           </Field>
 
           <Field label="Event Video" optional>
