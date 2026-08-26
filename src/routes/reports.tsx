@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Flag, Loader2, Check, Trash2, ExternalLink } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
@@ -29,6 +29,7 @@ const STATUS_TABS: Array<Report["status"] | "all"> = ["pending", "resolved", "di
 
 function ReportsPage() {
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const navigate = useNavigate();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Report["status"] | "all">("pending");
@@ -144,9 +145,13 @@ function ReportsPage() {
                       {" · "}Content ID: <code className="rounded bg-muted px-1 py-0.5 text-[11px]">{r.content_id}</code>
                     </div>
                     {href && (
-                      <a href={href} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#d4580a] hover:underline">
+                      <button
+                        type="button"
+                        onClick={() => navigate({ to: href })}
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#d4580a] hover:underline"
+                      >
                         View content <ExternalLink className="h-3 w-3" />
-                      </a>
+                      </button>
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
