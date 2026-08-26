@@ -5,7 +5,7 @@ import { HeroBanner } from "@/components/shared/hero-banner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2, Camera } from "lucide-react";
@@ -141,7 +141,7 @@ function CreateArtistPage() {
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Bio</Label>
-            <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={1000} />
+            <RichTextEditor value={form.bio} onChange={(v) => set("bio", v)} placeholder="Tell people about yourself and your work..." minHeight={120} />
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Website</Label>

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clearPendingGroup } from "@/lib/pending-join";
 import { AppLayout } from "@/components/app-layout";
+import { RichTextEditor } from "@/components/rich-text-editor";
+import { RichHtml } from "@/components/rich-html";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { FileUpload } from "@/components/shared/file-upload";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -615,7 +617,11 @@ function OrgProfile() {
           </div>
         )}
         {org.bio && (
-          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{org.bio}</p>
+          /<[a-z][\s\S]*>/i.test(org.bio) ? (
+            <RichHtml html={org.bio} className="mt-3 max-w-3xl text-[15px] text-neutral-700" />
+          ) : (
+            <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700 whitespace-pre-wrap">{org.bio}</p>
+          )
         )}
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
           <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {memberCount} {memberCount === 1 ? "member" : "members"}</span>
@@ -1037,7 +1043,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
       {edit ? (
         <div className="space-y-3 rounded-2xl border border-border bg-neutral-50 p-4 text-sm">
           <input value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="Name" className="w-full rounded-lg border border-border px-3 py-2 font-semibold" />
-          <textarea value={form.bio} onChange={(e) => setForm({...form, bio: e.target.value})} placeholder="About" rows={4} className="w-full rounded-lg border border-border px-3 py-2" />
+          <RichTextEditor value={form.bio} onChange={(v) => setForm({...form, bio: v})} placeholder="About" minHeight={120} />
           <div className="grid grid-cols-2 gap-2">
             <input value={form.website} onChange={(e) => setForm({...form, website: e.target.value})} placeholder="Website" className="rounded-lg border border-border px-3 py-2" />
             <input value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} placeholder="Phone" className="rounded-lg border border-border px-3 py-2" />
@@ -1074,7 +1080,11 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-border p-4">
             <h3 className="mb-2 text-sm font-semibold">About</h3>
-            <p className="text-sm text-neutral-700 whitespace-pre-wrap">{org.bio || "No description yet."}</p>
+            {org.bio && /<[a-z][\s\S]*>/i.test(org.bio) ? (
+              <RichHtml html={org.bio} className="text-sm text-neutral-700" />
+            ) : (
+              <p className="text-sm text-neutral-700 whitespace-pre-wrap">{org.bio || "No description yet."}</p>
+            )}
           </div>
           {org.hours && days.some((d) => org.hours?.[d]) && (
             <div className="rounded-2xl border border-border p-4">

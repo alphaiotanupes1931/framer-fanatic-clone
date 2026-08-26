@@ -17,6 +17,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { EventSocial } from "@/components/event-social";
+import { RichHtml } from "@/components/rich-html";
 import { getPublicEvent } from "@/lib/events.functions";
 import { emailMyTickets } from "@/lib/tickets.functions";
 
@@ -383,7 +384,11 @@ function EventDetail() {
         {evt.description && (
           <div>
             <h2 className="font-semibold text-foreground mb-2">About this event</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{evt.description}</p>
+            {/<[a-z][\s\S]*>/i.test(evt.description) ? (
+              <RichHtml html={evt.description} className="text-sm text-muted-foreground" />
+            ) : (
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{evt.description}</p>
+            )}
           </div>
         )}
 

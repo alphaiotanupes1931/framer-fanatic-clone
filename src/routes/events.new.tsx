@@ -8,6 +8,7 @@ import { EventImage } from "@/components/event-image";
 import { useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
@@ -250,7 +251,7 @@ function NewEventPage() {
           </Field>
 
           <Field label="Description" optional>
-            <textarea className={`${inputCls} min-h-[120px]`} placeholder="Tell people about your event..." value={form.description} onChange={(e) => set("description", e.target.value)} maxLength={5000} />
+            <RichTextEditor value={form.description} onChange={(v) => set("description", v)} placeholder="Tell people about your event..." minHeight={140} />
           </Field>
 
           <Field label="Event Video" optional>

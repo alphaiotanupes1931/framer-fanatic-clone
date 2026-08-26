@@ -28,6 +28,7 @@ import {
 } from "@/components/artist/artist-tab-sections";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { PostSplitView } from "@/components/shared/post-split-view";
+import { RichHtml } from "@/components/rich-html";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { Grid2x2, Info, BookOpen, Bookmark, CalendarCheck, LayoutGrid, Users2 } from "lucide-react";
 
@@ -405,7 +406,11 @@ function PublicProfilePage() {
           )}
         </div>
         {profile.bio && (
-          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{profile.bio}</p>
+          /<[a-z][\s\S]*>/i.test(profile.bio) ? (
+            <RichHtml html={profile.bio} className="mt-3 max-w-3xl text-[15px] text-neutral-700" />
+          ) : (
+            <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700 whitespace-pre-wrap">{profile.bio}</p>
+          )
         )}
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
           {(profile.neighborhood || isOwner) && (
