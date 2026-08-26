@@ -1766,7 +1766,8 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
       const { data } = await supabase
         .from("organizations")
         .select("id, name, slug, type, subtype, avatar_url, is_public")
-        .eq("owner_id", profile.id);
+        .eq("owner_id", profile.id)
+        .not("type", "in", '("resident","visitor")');
       setOrgs(data ?? []);
     })();
   }, [profile?.id]);
