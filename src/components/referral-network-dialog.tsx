@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor, richHtmlToPlainText } from "@/components/rich-text-editor";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Gift,
@@ -99,7 +100,7 @@ export function ReferralNetworkDialog({
   const [resending, setResending] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkBusy, setBulkBusy] = useState(false);
-  const messageRef = useRef<HTMLTextAreaElement>(null);
+  
 
   const inviteUrl = useMemo(() => {
     return buildInviteUrl(profile?.username);
@@ -212,7 +213,7 @@ export function ReferralNetworkDialog({
           idempotencyKey: `referral-${session.user.id}-${to}-${Date.now()}`,
           templateData: {
             inviterName,
-            personalMessage: message?.trim() || "",
+            personalMessage: richHtmlToPlainText(message) || "",
             inviteUrl: trackedUrl,
           },
         }),
@@ -560,12 +561,11 @@ export function ReferralNetworkDialog({
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">
                     Personal message (optional)
                   </label>
-                  <Textarea
-                    ref={messageRef}
+                  <RichTextEditor
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={setMessage}
                     placeholder="Tell them why they'd love Planet Baltimore..."
-                    rows={3}
+                    minHeight={110}
                   />
                 </div>
                 <Button
