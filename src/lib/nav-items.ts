@@ -1,6 +1,6 @@
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
-  BookOpen, MessageCircle, Bell, User, Ticket, FileText, PenLine, Plane, Bookmark,
+  BookOpen, MessageCircle, Bell, User, Ticket, FileText, PenLine, Plane,
   Settings, Video, Trophy, Search,
 } from "lucide-react";
 
@@ -29,7 +29,6 @@ export const utilItems: NavItem[] = [
   { icon: MessageCircle, label: "Messages", to: "/messages" },
   { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: User, label: "Profile", to: "/profile" },
-  { icon: Bookmark, label: "Saved", to: "/saved" },
   { icon: Settings, label: "Settings", to: "/settings" },
 ];
 
