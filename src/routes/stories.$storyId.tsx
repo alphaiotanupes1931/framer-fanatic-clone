@@ -172,7 +172,7 @@ function StoryDetail() {
               loading="eager"
             />
           </div>
-        )}
+        ) : null}
 
         <div className="flex min-w-0 flex-col p-5 sm:p-8">
         <div className="flex items-start justify-between gap-3">
