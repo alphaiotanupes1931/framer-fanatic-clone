@@ -57,6 +57,8 @@ type PublicProfile = {
   website: string | null;
 };
 
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfilePage,
   head: () => ({
@@ -142,7 +144,7 @@ function PublicProfilePage() {
         .rpc("public_profile_by_username", { _username: username });
       const publicProfile = data?.[0] as PublicProfile | undefined;
       if (cancelled) return;
-      if (!publicProfile) {
+      if (!publicProfile && !uuidPattern.test(username)) {
         // @mentions also cover artist pages, arts orgs, businesses and groups.
         // Those live at /o/$slug, so fall through to the page when the handle
         // is not a person.

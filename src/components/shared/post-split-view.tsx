@@ -151,6 +151,7 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
   const initials = (author?.display_name || author?.username || "U").slice(0, 2).toUpperCase();
   const isOwner = meId && meId === post.user_id;
   const isTextOnly = !hasMedia;
+  const authorProfilePath = author?.username ? { to: "/u/$username" as const, params: { username: author.username } } : null;
 
   return (
     <div className={`grid overflow-hidden bg-background ${isTextOnly ? "md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
@@ -196,8 +197,8 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
       )}
       <div className="flex min-w-0 flex-col">
         <header className="flex items-center gap-3 border-b border-border px-4 py-3">
-          {author ? (
-            <Link to="/u/$username" params={{ username: author.username || author.id }} className="flex min-w-0 items-center gap-2.5">
+          {author && authorProfilePath ? (
+            <Link {...authorProfilePath} className="flex min-w-0 items-center gap-2.5">
               <Avatar className="h-9 w-9 shrink-0">
                 {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
                 <AvatarFallback className="bg-[#d4580a]/10 text-xs text-[#d4580a]">{initials}</AvatarFallback>
@@ -207,6 +208,17 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
                 <div className="truncate text-[11px] text-muted-foreground">{post.neighborhood || "Baltimore"}</div>
               </div>
             </Link>
+          ) : author ? (
+            <div className="flex min-w-0 items-center gap-2.5">
+              <Avatar className="h-9 w-9 shrink-0">
+                {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
+                <AvatarFallback className="bg-[#d4580a]/10 text-xs text-[#d4580a]">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold text-foreground">{author.display_name || author.username || "Someone"}</div>
+                <div className="truncate text-[11px] text-muted-foreground">{post.neighborhood || "Baltimore"}</div>
+              </div>
+            </div>
           ) : <div className="text-sm text-muted-foreground">Someone</div>}
           <FollowButton userId={post.user_id} currentUserId={meId} compact className="ml-auto shrink-0" />
           {!isOwner && <ReportButton contentType="post" contentId={post.id} className="shrink-0" />}
