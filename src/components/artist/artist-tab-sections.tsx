@@ -180,22 +180,30 @@ export function ArtistGalleryTab({ userId, canEdit }: { userId: string; canEdit:
 
       {active && viewIdx !== null && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-white/95 p-3 sm:p-6" onClick={() => setViewIdx(null)}>
+          {viewIdx > 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setViewIdx(viewIdx - 1); }}
+              aria-label="Previous work"
+              className="absolute left-2 top-1/2 z-[71] hidden -translate-y-1/2 rounded-full bg-white/90 p-3 shadow-lg ring-1 ring-black/5 hover:bg-white md:flex lg:left-6"
+            >
+              <ChevronDown className="h-6 w-6 rotate-90" />
+            </button>
+          )}
+          {viewIdx < items.length - 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setViewIdx(viewIdx + 1); }}
+              aria-label="Next work"
+              className="absolute right-2 top-1/2 z-[71] hidden -translate-y-1/2 rounded-full bg-white/90 p-3 shadow-lg ring-1 ring-black/5 hover:bg-white md:flex lg:right-6"
+            >
+              <ChevronDown className="h-6 w-6 -rotate-90" />
+            </button>
+          )}
           <div
             onClick={(e) => e.stopPropagation()}
             className="relative grid max-h-[94vh] w-full max-w-6xl grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-2xl md:grid-cols-[minmax(0,1.4fr)_minmax(300px,420px)]"
           >
             <div className="relative flex items-center justify-center bg-white p-4">
               {active.media_url && <Img src={active.media_url} alt={active.title ?? ""} className="max-h-[88vh] w-full object-contain" />}
-              {viewIdx > 0 && (
-                <button onClick={() => setViewIdx(viewIdx - 1)} aria-label="Previous work" className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow hover:bg-white">
-                  <ChevronDown className="h-5 w-5 rotate-90" />
-                </button>
-              )}
-              {viewIdx < items.length - 1 && (
-                <button onClick={() => setViewIdx(viewIdx + 1)} aria-label="Next work" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow hover:bg-white">
-                  <ChevronDown className="h-5 w-5 -rotate-90" />
-                </button>
-              )}
             </div>
             <div className="max-h-[88vh] overflow-y-auto border-t border-border p-6 md:border-l md:border-t-0">
               <div className="flex items-start justify-between gap-3">
