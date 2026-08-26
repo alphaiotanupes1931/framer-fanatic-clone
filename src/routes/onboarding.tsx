@@ -296,22 +296,35 @@ function Onboarding() {
         .eq("id", userId);
       if (error) throw error;
 
-      // Visitor, resident and artist pages are personal profiles, so they take
-      // over the account's profile type. Arts orgs and businesses stay as extra pages.
+      // Resident and visitor are the account's one canonical personal profile.
+      // Artist, arts organization and business choices create separate owned pages.
       if (isVisitor) {
         await setMyProfileKind("visitor");
-      } else if (kind === "resident" || kind === "artist") {
-        await setMyProfileKind(kind);
+      } else if (kind === "resident") {
+        await setMyProfileKind("resident");
+      }
+
+      if (isVisitor || kind === "resident") {
+        clearDraft();
+        let dest: string | null = null;
+        try {
+          const v = sessionStorage.getItem("pb_post_auth_redirect");
+          if (v && v.startsWith("/") && !v.startsWith("//")) dest = v;
+          sessionStorage.removeItem("pb_post_auth_redirect");
+        } catch { /* ignore */ }
+        if (dest) { window.location.replace(dest); return; }
+        await navigate({ to: "/profile" });
+        return;
       }
 
       const slug = `${slugify(pageName)}-${Math.random().toString(36).slice(2, 6)}`;
       const { data: org, error: orgErr } = await supabase.from("organizations").insert({
         owner_id: userId,
-        type: isVisitor ? "visitor" : kind,
-        subtype: isVisitor ? "Visitor" : kind === "artist" ? category : (selected?.label ?? null),
+        type: kind,
+        subtype: kind === "artist" ? category : (selected?.label ?? null),
         name: pageName.trim(),
         slug,
-        neighborhood: isVisitor ? homeLocation || null : neighborhood || null,
+        neighborhood: neighborhood || null,
         bio: bio.trim() || null,
         avatar_url,
       }).select("slug").single();

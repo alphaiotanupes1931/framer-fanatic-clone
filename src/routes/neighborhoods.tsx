@@ -190,7 +190,7 @@ function NeighborhoodsPage() {
                 { key: "groups", label: "Groups", count: groups.length, Icon: Users },
                 { key: "artists", label: "Artists", count: artists.length, Icon: Palette },
                 { key: "arts_orgs", label: "Arts Orgs", count: artsOrgs.length, Icon: Landmark },
-                { key: "associations", label: "Associations", count: associations.length, Icon: Landmark },
+                { key: "associations", label: "Community Associations", count: associations.length, Icon: Landmark },
               ];
               const activeOrgs =
                 tab === "businesses" ? businesses :

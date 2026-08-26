@@ -1763,10 +1763,17 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
   useEffect(() => {
     if (!profile?.id) return;
     (async () => {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const ownerId = userData.user?.id;
+      if (userError || !ownerId || ownerId !== profile.id) {
+        setOrgs([]);
+        return;
+      }
       const { data } = await supabase
         .from("organizations")
         .select("id, name, slug, type, subtype, avatar_url, is_public")
-        .eq("owner_id", profile.id);
+        .eq("owner_id", ownerId)
+        .not("type", "in", "(resident,visitor)");
       setOrgs(data ?? []);
     })();
   }, [profile?.id]);

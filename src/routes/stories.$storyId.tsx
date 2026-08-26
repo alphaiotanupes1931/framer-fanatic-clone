@@ -162,7 +162,7 @@ function StoryDetail() {
       </Link>
 
       <article className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-border bg-card">
-        {story.cover_url && (
+        {story.cover_url ? (
           <div className="w-full bg-muted">
             <SmartImage
               src={story.cover_url}
@@ -172,7 +172,7 @@ function StoryDetail() {
               loading="eager"
             />
           </div>
-        )}
+        ) : null}
 
         <div className="flex min-w-0 flex-col p-5 sm:p-8">
         <div className="flex items-start justify-between gap-3">
@@ -205,8 +205,8 @@ function StoryDetail() {
           <span>{dateLabel}</span>
         </div>
 
-        {author && (
-          <Link to="/u/$username" params={{ username: author.username || author.id }} className="mt-5 flex items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-3">
+        {author?.username ? (
+          <Link to="/u/$username" params={{ username: author.username }} className="mt-5 flex items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-3">
             <Avatar className="h-11 w-11">
               {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
               <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>
@@ -216,7 +216,18 @@ function StoryDetail() {
               <div className="text-xs text-muted-foreground">Published {dateLabel}</div>
             </div>
           </Link>
-        )}
+        ) : author ? (
+          <div className="mt-5 flex items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-3">
+            <Avatar className="h-11 w-11">
+              {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
+              <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-semibold text-foreground">{author.display_name || "Someone"}</div>
+              <div className="text-xs text-muted-foreground">Published {dateLabel}</div>
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-6">
           <span className="inline-block rounded-lg bg-secondary px-3 py-1 text-xs font-semibold text-foreground">{story.format}</span>

@@ -251,19 +251,29 @@ export function DiscussionTab({
             if (hidden) return null;
             const name = c.author?.display_name || c.author?.username || "Someone";
             const replies = repliesFor(c.id);
+            const authorProfilePath = c.author?.username ? { to: "/u/$username" as const, params: { username: c.author.username } } : null;
             return (
               <article key={c.id} className={`rounded-2xl border border-border bg-card p-3 ${c.is_muted ? "opacity-60" : ""}`}>
                 <header className="flex items-center gap-3">
-                  <Link to="/u/$username" params={{ username: c.author?.username || c.user_id }} className="shrink-0">
-                    <Avatar className="h-9 w-9">
+                  {authorProfilePath ? (
+                    <Link {...authorProfilePath} className="shrink-0">
+                      <Avatar className="h-9 w-9">
+                        {c.author?.avatar_url && <SmartAvatarImage src={c.author.avatar_url} />}
+                        <AvatarFallback className="bg-muted text-xs">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <Avatar className="h-9 w-9 shrink-0">
                       {c.author?.avatar_url && <SmartAvatarImage src={c.author.avatar_url} />}
                       <AvatarFallback className="bg-muted text-xs">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
                     </Avatar>
-                  </Link>
+                  )}
                   <div className="min-w-0 flex-1">
-                    <Link to="/u/$username" params={{ username: c.author?.username || c.user_id }} className="block truncate text-sm font-semibold text-foreground hover:text-[#d4580a]">
-                      {name}
-                    </Link>
+                    {authorProfilePath ? (
+                      <Link {...authorProfilePath} className="block truncate text-sm font-semibold text-foreground hover:text-[#d4580a]">{name}</Link>
+                    ) : (
+                      <span className="block truncate text-sm font-semibold text-foreground">{name}</span>
+                    )}
                     <div className="text-[11px] text-muted-foreground">
                       {timeAgo(c.created_at)}{c.is_muted ? " · hidden" : ""}
                     </div>

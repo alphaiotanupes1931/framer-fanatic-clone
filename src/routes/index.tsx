@@ -1047,7 +1047,7 @@ function Footer() {
     { h: "Community", l: [
       { label: "Stories", to: "/stories" },
       { label: "Leaderboard", to: "/leaderboard" },
-      { label: "Associations", to: "/community-associations" },
+      { label: "Community Associations", to: "/community-associations" },
     ]},
     { h: "Account", l: signedIn ? [
       { label: "Dashboard", to: "/dashboard" },

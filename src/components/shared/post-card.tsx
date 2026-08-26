@@ -73,6 +73,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const isAdmin = useIsAdmin();
   const [isFeatured, setIsFeatured] = useState(!!post.featured);
   const [featuring, setFeaturing] = useState(false);
+  const authorProfilePath = post.author_username ? { to: "/u/$username" as const, params: { username: post.author_username } } : null;
 
   const toggleFeatured = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -185,17 +186,26 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
       )}
       <header className="order-4 mx-4 mb-1 mt-1 flex items-center gap-3 rounded-2xl bg-muted/40 px-4 py-3 sm:mx-6">
-        <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="shrink-0">
-          <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
+        {authorProfilePath ? (
+          <Link {...authorProfilePath} className="shrink-0">
+            <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
+              {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
+              <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
+            </Avatar>
+          </Link>
+        ) : (
+          <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
             {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
           </Avatar>
-        </Link>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground sm:text-base">
-            <Link to="/u/$username" params={{ username: post.author_username || post.user_id }} className="truncate hover:text-[#d4580a]">
-              {authorName}
-            </Link>
+            {authorProfilePath ? (
+              <Link {...authorProfilePath} className="truncate hover:text-[#d4580a]">{authorName}</Link>
+            ) : (
+              <span className="truncate">{authorName}</span>
+            )}
             {post.is_founder && (
               <span title="Founding Member" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
                 <Star className="h-3 w-3" strokeWidth={2} /> Founding Member
