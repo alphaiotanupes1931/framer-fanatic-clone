@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { EventEditForm } from "@/components/organizer/event-edit-form";
-import { RichTextEditor, richHtmlToPlainText } from "@/components/rich-text-editor";
+import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
