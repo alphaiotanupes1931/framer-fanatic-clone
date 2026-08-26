@@ -1341,13 +1341,21 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
       : "soon";
     const where = evt?.venue_name || evt?.location || "Baltimore";
     setSubject(tpl.subject(title));
-    setBody(`${tpl.body(title, when, where)}\n\n${fromName}`);
+    setBody(`${tpl.body(title, when, where)}${eventLink ? `\n\nEvent details and tickets: ${eventLink}` : ""}\n\n${fromName}`);
+  };
+
+  // The invitation always carries the event link so recipients can tap
+  // straight through to the event page, even if they edit the message.
+  const withEventLink = (text: string) => {
+    if (!eventLink) return text;
+    if (text.includes(eventLink)) return text;
+    return `${text.trimEnd()}\n\nEvent details and tickets: ${eventLink}`;
   };
 
   const send = () => {
     if (recipients.length === 0) return toast.error("Add at least one recipient");
     if (!subject.trim()) return toast.error("Add a subject");
-    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(withEventLink(body))}`;
     window.location.href = href;
   };
 
