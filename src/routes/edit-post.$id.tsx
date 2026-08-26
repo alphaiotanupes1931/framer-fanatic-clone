@@ -172,7 +172,7 @@ function EditPostPage() {
             <Label className="text-sm font-medium">Content</Label>
             {postType === "text" ? (
               <div
-                className="rounded-2xl p-6 min-h-[180px] flex items-center justify-center"
+                className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-y-auto rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
               >
                 <Textarea

@@ -2190,10 +2190,10 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
 
           {mode === "text" ? (
             <div className="space-y-3">
-              <div className="rounded-2xl p-6 min-h-[160px] flex items-center justify-center transition"
+              <div className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-y-auto rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}>
-                <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} rows={4}
-                  placeholder="Share your thoughts..."
+                <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} rows={8}
+                  placeholder="Share your thoughts... use @ to mention someone"
                   style={{ color: bg.fg }}
                   className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus:outline-none ${FONT_SIZE_CLASS[fontSize]}`} />
               </div>
