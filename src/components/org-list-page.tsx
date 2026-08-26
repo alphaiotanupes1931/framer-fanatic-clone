@@ -258,7 +258,7 @@ export function OrgListPage({
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((o) => (
+            {(showFeatured ? items.slice(3) : items).map((o) => (
               <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }}
                 className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                 {isAdmin && (
