@@ -201,6 +201,16 @@ function OrgProfile() {
       setPendingCount(0);
       autoJoinDone.current = false;
       let { data } = await supabase.from("organizations").select("*").eq("slug", slug).maybeSingle();
+      if (!data) {
+        const { data: slugMatch } = await supabase
+          .from("organizations")
+          .select("*")
+          .ilike("slug", `${slug}-%`)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        data = slugMatch;
+      }
       // Private page: try the access code this browser already unlocked with.
       if (!data && typeof window !== "undefined") {
         const saved = sessionStorage.getItem(`pb_org_code_${slug}`);
@@ -682,7 +692,7 @@ function OrgProfile() {
         {/* Tabs */}
         {isOwner && org.type === "business" && <StaffLoginCard orgId={org.id} />}
 
-        <div className="scrollbar-hide mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 px-1 pb-1">
+        <div className="scrollbar-hide mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 px-1 pb-1 md:flex-wrap md:overflow-x-visible">
           {VISIBLE_TABS.map((t) => {
             const active = tab === t;
             const Icon = artistIcons[t] ?? TAB_ICONS[t];
