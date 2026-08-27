@@ -140,7 +140,9 @@ function OrganizerStudioPage() {
           <CampaignTab events={events ?? []} />
         ) : !selected ? (
           <>
+            <DraftsSection />
             <div className="text-sm font-semibold text-neutral-700">Select an event</div>
+
             {events === null ? (
               <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">Loading…</div>
             ) : events.length === 0 ? (
