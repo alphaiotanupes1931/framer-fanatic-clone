@@ -13,6 +13,56 @@ import { toast } from "sonner";
 import { EventEditForm } from "@/components/organizer/event-edit-form";
 import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
+import { deleteEventDraft, listEventDrafts, type EventDraft } from "@/lib/event-drafts";
+import { FileText } from "lucide-react";
+
+/** Unfinished events saved locally from the create-event page. */
+function DraftsSection() {
+  const [drafts, setDrafts] = useState<EventDraft[]>([]);
+
+  useEffect(() => {
+    const sync = () => setDrafts(listEventDrafts());
+    sync();
+    window.addEventListener("pb:event-drafts", sync);
+    return () => window.removeEventListener("pb:event-drafts", sync);
+  }, []);
+
+  if (drafts.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-neutral-700">
+        <FileText className="h-4 w-4 text-[#d4580a]" /> Drafts
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {drafts.map((d) => (
+          <div key={d.id} className="group flex items-start justify-between gap-3 rounded-xl border border-dashed border-neutral-300 bg-white p-4 transition hover:border-[#d4580a]/50">
+            <Link
+              to="/events/new"
+              search={{ draft: d.id, ...(d.org ? { org: d.org } : {}), ...(d.kind ? { kind: d.kind } : {}) }}
+              className="min-w-0 flex-1"
+            >
+              <div className="truncate font-semibold text-neutral-900 group-hover:text-[#d4580a]">
+                {d.form.title.trim() || "Untitled event"}
+              </div>
+              <div className="mt-1 text-xs text-neutral-500">
+                {d.pricing === "paid" ? "Paid tickets" : "Free"} · saved {new Date(d.updated_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+              </div>
+            </Link>
+            <button
+              onClick={() => { deleteEventDraft(d.id); setDrafts(listEventDrafts()); }}
+              title="Discard draft"
+              className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
