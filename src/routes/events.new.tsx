@@ -32,7 +32,7 @@ const CATEGORIES = ["community", "music", "art", "food", "wellness", "family", "
 function NewEventPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
-  const { org: orgId, kind } = Route.useSearch();
+  const { org: orgId, kind, draft: draftId } = Route.useSearch();
   const isExhibition = kind === "exhibition";
   const [orgName, setOrgName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -43,7 +43,18 @@ function NewEventPage() {
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
   const [isOnline, setIsOnline] = useState(false);
+  const [pricing, setPricing] = useState<"free" | "paid">("free");
+  const [connecting, setConnecting] = useState(false);
+  const [created, setCreated] = useState(false);
   const [venueBook, setVenueBook] = useState<Array<{ venue_name: string; address: string | null; neighborhood: string | null }>>([]);
+  const draftIdRef = useRef<string>(draftId ?? crypto.randomUUID());
+  const createdRef = useRef(false);
+
+  const ensureFn = useServerFn(ensureConnectAccount);
+  const linkFn = useServerFn(createConnectOnboardingLink);
+
+  const payoutsReady = !!me?.stripe_charges_enabled;
+  const needsStripe = pricing === "paid" && !!me && !payoutsReady;
 
   const [form, setForm] = useState({
     image_url: "",
@@ -58,6 +69,7 @@ function NewEventPage() {
     category: "community",
     capacity: "",
   });
+
 
   useEffect(() => {
     (async () => {
