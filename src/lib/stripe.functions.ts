@@ -72,6 +72,18 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
       throw new Error("No Stripe account on file. Click Connect Stripe first.");
     }
 
+    // Already onboarded accounts should land in their Express dashboard to
+    // update bank/payout details; onboarding links can be rejected for them.
+    try {
+      const acct = await stripe.accounts.retrieve(profile.stripe_account_id);
+      if (acct.charges_enabled && acct.details_submitted) {
+        const loginLink = await stripe.accounts.createLoginLink(profile.stripe_account_id);
+        return { url: loginLink.url };
+      }
+    } catch (error) {
+      console.error("Payout dashboard link failed, falling back to onboarding", error);
+    }
+
     const link = await stripe.accountLinks.create({
       account: profile.stripe_account_id,
       return_url: data.returnUrl,
@@ -80,6 +92,7 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
     });
 
     return { url: link.url };
+
   });
 
 /** Pull the latest Stripe account state and update the profile. */

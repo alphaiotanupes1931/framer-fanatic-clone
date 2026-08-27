@@ -511,10 +511,11 @@ function StripeSection() {
         </div>
         {errorMsg ? (
           <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-            <div className="font-semibold">Payout setup is not available yet</div>
+            <div className="font-semibold">{status?.chargesEnabled ? "Couldn't open your payout dashboard" : "Payout setup is not available yet"}</div>
             <div className="mt-1">{errorMsg}</div>
           </div>
         ) : null}
+
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground">
