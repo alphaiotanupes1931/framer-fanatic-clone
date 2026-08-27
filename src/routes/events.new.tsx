@@ -1,23 +1,29 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, CreditCard, ImagePlus, Loader2, Save, Video as VideoIcon, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { useServerFn } from "@tanstack/react-start";
+import { ensureConnectAccount, createConnectOnboardingLink } from "@/lib/stripe.functions";
+import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
+import { deleteEventDraft, draftHasContent, getEventDraft, saveEventDraft } from "@/lib/event-drafts";
 
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
   head: () => ({ meta: [{ title: "Create Event - Planet Baltimore" }] }),
-  validateSearch: (s: Record<string, unknown>): { org?: string; kind?: "exhibition" } => ({
+  validateSearch: (s: Record<string, unknown>): { org?: string; kind?: "exhibition"; draft?: string } => ({
     ...(typeof s.org === "string" ? { org: s.org } : {}),
     ...(s.kind === "exhibition" ? { kind: "exhibition" as const } : {}),
+    ...(typeof s.draft === "string" ? { draft: s.draft } : {}),
   }),
 });
+
 
 type Neighborhood = { id: string; name: string };
 
