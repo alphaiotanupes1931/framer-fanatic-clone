@@ -525,6 +525,21 @@ function NewEventPage() {
         <div className="h-12" />
       </div>
 
+      {created && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-white/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <CheckCircle2 className="h-10 w-10 text-[#d4580a]" />
+            <div className="text-base font-semibold text-neutral-900">Event has been created</div>
+            <div className="flex items-center gap-2 text-sm text-neutral-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {pricing === "paid" ? "Stripe is connecting…" : "Opening Organizer Studio…"}
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
     </AppLayout>
   );
 }
