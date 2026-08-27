@@ -305,13 +305,22 @@ function NewEventPage() {
           {orgName && (
             <span className="ml-2 hidden sm:inline text-xs font-medium text-neutral-500">for {orgName}</span>
           )}
-          <button
-            onClick={submit}
-            disabled={!canSubmit || saving}
-            className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
-          >
-            {saving ? "Creating…" : "Create"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={saveDraft}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3.5 py-2 text-sm font-semibold text-neutral-600 hover:border-[#d4580a]/50 hover:text-[#d4580a]"
+            >
+              <Save className="h-4 w-4" /> Draft
+            </button>
+            <button
+              onClick={submit}
+              disabled={!canSubmit || saving || needsStripe}
+              className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
+            >
+              {saving ? "Creating…" : "Create"}
+            </button>
+          </div>
+
         </div>
 
         <p className="text-xs text-neutral-500 mb-4">
