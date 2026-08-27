@@ -199,6 +199,41 @@ function NewEventPage() {
     }));
   };
 
+  const saveDraft = () => {
+    const saved = persistDraft();
+    if (!saved) { toast.error("Add a title first so the draft has a name"); return; }
+    toast.success("Saved to drafts in Organizer Studio");
+    createdRef.current = true; // already persisted, don't double-save on unmount
+    navigate({ to: "/organizer-studio" });
+  };
+
+  // Save the work, then hand the organizer to the secure payout form. When they
+  // finish, Stripe returns them to the studio.
+  const connectStripe = async () => {
+    persistDraft();
+    const pre = openExternalWindow();
+    setConnecting(true);
+    try {
+      const account = await ensureFn();
+      if (!account.ok) {
+        closeExternalWindow(pre);
+        toast.error(account.message);
+        setConnecting(false);
+        return;
+      }
+      const { url } = await linkFn({ data: {
+        returnUrl: `${window.location.origin}/organizer-studio?stripe=ok`,
+        refreshUrl: `${window.location.origin}/organizer-studio?stripe=refresh`,
+      }});
+      createdRef.current = true; // draft already stored above
+      navigateExternal(url, pre);
+    } catch (e) {
+      closeExternalWindow(pre);
+      toast.error(e instanceof Error ? e.message : "Could not start payout setup");
+      setConnecting(false);
+    }
+  };
+
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!canSubmit) {
@@ -207,6 +242,10 @@ function NewEventPage() {
           ? "Neighborhood is required (or mark the event as online)"
           : "Title and start date are required",
       );
+      return;
+    }
+    if (needsStripe) {
+      toast.error("Connect your Stripe account before creating paid tickets");
       return;
     }
 
@@ -241,13 +280,19 @@ function NewEventPage() {
           : error.message);
         return;
       }
-      toast.success("Event created. Now set up your ticket types.");
-      // Organizers land in the studio so they can set up ticket types right away.
-      navigate({ to: "/organizer-studio", search: { event: (data as { id: string }).id } });
+      createdRef.current = true;
+      deleteEventDraft(draftIdRef.current);
+      setCreated(true);
+      const id = (data as { id: string }).id;
+      // Short, smooth confirmation before the studio opens.
+      window.setTimeout(() => {
+        navigate({ to: "/organizer-studio", search: { event: id } });
+      }, 1400);
     } finally {
       setSaving(false);
     }
   };
+
 
   return (
     <AppLayout>
