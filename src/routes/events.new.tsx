@@ -70,6 +70,38 @@ function NewEventPage() {
     capacity: "",
   });
 
+  // Resume a saved draft (for example after connecting payouts).
+  useEffect(() => {
+    if (!draftId) return;
+    const d = getEventDraft(draftId);
+    if (!d) return;
+    setForm(d.form);
+    setStartMode(d.startMode);
+    setIsOnline(d.isOnline);
+    setPricing(d.pricing);
+  }, [draftId]);
+
+  const snapshot = useCallback(() => ({
+    id: draftIdRef.current,
+    org: orgId,
+    kind,
+    startMode,
+    isOnline,
+    pricing,
+    form,
+  }), [orgId, kind, startMode, isOnline, pricing, form]);
+
+  const persistDraft = useCallback(() => {
+    const snap = snapshot();
+    if (!draftHasContent(snap)) return null;
+    return saveEventDraft(snap);
+  }, [snapshot]);
+
+  // Leaving before creating the event keeps the work safe in Drafts.
+  const latest = useRef(persistDraft);
+  latest.current = persistDraft;
+  useEffect(() => () => { if (!createdRef.current) latest.current(); }, []);
+
 
   useEffect(() => {
     (async () => {
