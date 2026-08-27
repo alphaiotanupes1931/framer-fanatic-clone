@@ -1,23 +1,29 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, CreditCard, ImagePlus, Loader2, Save, Video as VideoIcon, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { useServerFn } from "@tanstack/react-start";
+import { ensureConnectAccount, createConnectOnboardingLink } from "@/lib/stripe.functions";
+import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
+import { deleteEventDraft, draftHasContent, getEventDraft, saveEventDraft } from "@/lib/event-drafts";
 
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
   head: () => ({ meta: [{ title: "Create Event - Planet Baltimore" }] }),
-  validateSearch: (s: Record<string, unknown>): { org?: string; kind?: "exhibition" } => ({
+  validateSearch: (s: Record<string, unknown>): { org?: string; kind?: "exhibition"; draft?: string } => ({
     ...(typeof s.org === "string" ? { org: s.org } : {}),
     ...(s.kind === "exhibition" ? { kind: "exhibition" as const } : {}),
+    ...(typeof s.draft === "string" ? { draft: s.draft } : {}),
   }),
 });
+
 
 type Neighborhood = { id: string; name: string };
 
@@ -26,7 +32,7 @@ const CATEGORIES = ["community", "music", "art", "food", "wellness", "family", "
 function NewEventPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
-  const { org: orgId, kind } = Route.useSearch();
+  const { org: orgId, kind, draft: draftId } = Route.useSearch();
   const isExhibition = kind === "exhibition";
   const [orgName, setOrgName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -37,7 +43,18 @@ function NewEventPage() {
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
   const [isOnline, setIsOnline] = useState(false);
+  const [pricing, setPricing] = useState<"free" | "paid">("free");
+  const [connecting, setConnecting] = useState(false);
+  const [created, setCreated] = useState(false);
   const [venueBook, setVenueBook] = useState<Array<{ venue_name: string; address: string | null; neighborhood: string | null }>>([]);
+  const draftIdRef = useRef<string>(draftId ?? crypto.randomUUID());
+  const createdRef = useRef(false);
+
+  const ensureFn = useServerFn(ensureConnectAccount);
+  const linkFn = useServerFn(createConnectOnboardingLink);
+
+  const payoutsReady = !!me?.stripe_charges_enabled;
+  const needsStripe = pricing === "paid" && !!me && !payoutsReady;
 
   const [form, setForm] = useState({
     image_url: "",
@@ -52,6 +69,39 @@ function NewEventPage() {
     category: "community",
     capacity: "",
   });
+
+  // Resume a saved draft (for example after connecting payouts).
+  useEffect(() => {
+    if (!draftId) return;
+    const d = getEventDraft(draftId);
+    if (!d) return;
+    setForm(d.form);
+    setStartMode(d.startMode);
+    setIsOnline(d.isOnline);
+    setPricing(d.pricing);
+  }, [draftId]);
+
+  const snapshot = useCallback(() => ({
+    id: draftIdRef.current,
+    org: orgId,
+    kind,
+    startMode,
+    isOnline,
+    pricing,
+    form,
+  }), [orgId, kind, startMode, isOnline, pricing, form]);
+
+  const persistDraft = useCallback(() => {
+    const snap = snapshot();
+    if (!draftHasContent(snap)) return null;
+    return saveEventDraft(snap);
+  }, [snapshot]);
+
+  // Leaving before creating the event keeps the work safe in Drafts.
+  const latest = useRef(persistDraft);
+  latest.current = persistDraft;
+  useEffect(() => () => { if (!createdRef.current) latest.current(); }, []);
+
 
   useEffect(() => {
     (async () => {
@@ -149,6 +199,41 @@ function NewEventPage() {
     }));
   };
 
+  const saveDraft = () => {
+    const saved = persistDraft();
+    if (!saved) { toast.error("Add a title first so the draft has a name"); return; }
+    toast.success("Saved to drafts in Organizer Studio");
+    createdRef.current = true; // already persisted, don't double-save on unmount
+    navigate({ to: "/organizer-studio" });
+  };
+
+  // Save the work, then hand the organizer to the secure payout form. When they
+  // finish, Stripe returns them to the studio.
+  const connectStripe = async () => {
+    persistDraft();
+    const pre = openExternalWindow();
+    setConnecting(true);
+    try {
+      const account = await ensureFn();
+      if (!account.ok) {
+        closeExternalWindow(pre);
+        toast.error(account.message);
+        setConnecting(false);
+        return;
+      }
+      const { url } = await linkFn({ data: {
+        returnUrl: `${window.location.origin}/organizer-studio?stripe=ok`,
+        refreshUrl: `${window.location.origin}/organizer-studio?stripe=refresh`,
+      }});
+      createdRef.current = true; // draft already stored above
+      navigateExternal(url, pre);
+    } catch (e) {
+      closeExternalWindow(pre);
+      toast.error(e instanceof Error ? e.message : "Could not start payout setup");
+      setConnecting(false);
+    }
+  };
+
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!canSubmit) {
@@ -157,6 +242,10 @@ function NewEventPage() {
           ? "Neighborhood is required (or mark the event as online)"
           : "Title and start date are required",
       );
+      return;
+    }
+    if (needsStripe) {
+      toast.error("Connect your Stripe account before creating paid tickets");
       return;
     }
 
@@ -191,13 +280,19 @@ function NewEventPage() {
           : error.message);
         return;
       }
-      toast.success("Event created. Now set up your ticket types.");
-      // Organizers land in the studio so they can set up ticket types right away.
-      navigate({ to: "/organizer-studio", search: { event: (data as { id: string }).id } });
+      createdRef.current = true;
+      deleteEventDraft(draftIdRef.current);
+      setCreated(true);
+      const id = (data as { id: string }).id;
+      // Short, smooth confirmation before the studio opens.
+      window.setTimeout(() => {
+        navigate({ to: "/organizer-studio", search: { event: id } });
+      }, 1400);
     } finally {
       setSaving(false);
     }
   };
+
 
   return (
     <AppLayout>
@@ -210,13 +305,22 @@ function NewEventPage() {
           {orgName && (
             <span className="ml-2 hidden sm:inline text-xs font-medium text-neutral-500">for {orgName}</span>
           )}
-          <button
-            onClick={submit}
-            disabled={!canSubmit || saving}
-            className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
-          >
-            {saving ? "Creating…" : "Create"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={saveDraft}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3.5 py-2 text-sm font-semibold text-neutral-600 hover:border-[#d4580a]/50 hover:text-[#d4580a]"
+            >
+              <Save className="h-4 w-4" /> Draft
+            </button>
+            <button
+              onClick={submit}
+              disabled={!canSubmit || saving || needsStripe}
+              className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
+            >
+              {saving ? "Creating…" : "Create"}
+            </button>
+          </div>
+
         </div>
 
         <p className="text-xs text-neutral-500 mb-4">
@@ -351,13 +455,66 @@ function NewEventPage() {
             </select>
           </Field>
 
-          <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
-            <div className="text-sm font-semibold text-neutral-900">Tickets are set up next</div>
-            <p className="mt-1 text-[13px] text-neutral-600">
-              After you create this event you go straight to Organizer Studio, where you add your ticket types
-              (free RSVP, general admission, tiers, prices, and quantities).
-            </p>
-          </div>
+          <Field label="Is this event free or paid?" required>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { key: "free", title: "Free", sub: "RSVP only, no payment" },
+                { key: "paid", title: "Paid", sub: "Sell tickets and get paid" },
+              ] as const).map((o) => (
+                <button
+                  key={o.key}
+                  type="button"
+                  onClick={() => setPricing(o.key)}
+                  aria-pressed={pricing === o.key}
+                  className={`rounded-xl border px-4 py-3 text-left transition ${
+                    pricing === o.key
+                      ? "border-[#d4580a] bg-[#d4580a]/[0.06] ring-1 ring-[#d4580a]/30"
+                      : "border-neutral-200 bg-white hover:border-[#d4580a]/40"
+                  }`}
+                >
+                  <div className="text-sm font-semibold text-neutral-900">{o.title}</div>
+                  <div className="text-xs text-neutral-500">{o.sub}</div>
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          {needsStripe ? (
+            <div className="rounded-2xl border border-[#d4580a]/30 bg-gradient-to-br from-[#fff4ec] to-white p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#d4580a]/15 text-[#d4580a]">
+                  <CreditCard className="h-4.5 w-4.5" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-neutral-900">Connect your Stripe account to sell tickets</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-neutral-600">
+                    Paid tickets pay out straight to your bank, so you need a payout account first. It takes about
+                    3 minutes. Your event is saved to Drafts automatically, and you land back in Organizer Studio
+                    when you're done.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={connectStripe}
+                    disabled={connecting}
+                    className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+                  >
+                    {connecting ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening secure form…</> : <>Connect Stripe account</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
+              <div className="text-sm font-semibold text-neutral-900">
+                {pricing === "paid" ? "Payouts connected. Tickets are set up next" : "Tickets are set up next"}
+              </div>
+              <p className="mt-1 text-[13px] text-neutral-600">
+                After you create this event you go straight to Organizer Studio, where you add your ticket types
+                (free RSVP, general admission, tiers, prices, and quantities).
+              </p>
+            </div>
+          )}
+
 
 
           <Field label="Capacity" optional>
@@ -367,6 +524,21 @@ function NewEventPage() {
 
         <div className="h-12" />
       </div>
+
+      {created && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-white/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <CheckCircle2 className="h-10 w-10 text-[#d4580a]" />
+            <div className="text-base font-semibold text-neutral-900">Event has been created</div>
+            <div className="flex items-center gap-2 text-sm text-neutral-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {pricing === "paid" ? "Stripe is connecting…" : "Opening Organizer Studio…"}
+            </div>
+          </div>
+        </div>
+      )}
+
+
 
     </AppLayout>
   );
