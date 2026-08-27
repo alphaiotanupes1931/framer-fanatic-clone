@@ -455,13 +455,66 @@ function NewEventPage() {
             </select>
           </Field>
 
-          <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
-            <div className="text-sm font-semibold text-neutral-900">Tickets are set up next</div>
-            <p className="mt-1 text-[13px] text-neutral-600">
-              After you create this event you go straight to Organizer Studio, where you add your ticket types
-              (free RSVP, general admission, tiers, prices, and quantities).
-            </p>
-          </div>
+          <Field label="Is this event free or paid?" required>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { key: "free", title: "Free", sub: "RSVP only, no payment" },
+                { key: "paid", title: "Paid", sub: "Sell tickets and get paid" },
+              ] as const).map((o) => (
+                <button
+                  key={o.key}
+                  type="button"
+                  onClick={() => setPricing(o.key)}
+                  aria-pressed={pricing === o.key}
+                  className={`rounded-xl border px-4 py-3 text-left transition ${
+                    pricing === o.key
+                      ? "border-[#d4580a] bg-[#d4580a]/[0.06] ring-1 ring-[#d4580a]/30"
+                      : "border-neutral-200 bg-white hover:border-[#d4580a]/40"
+                  }`}
+                >
+                  <div className="text-sm font-semibold text-neutral-900">{o.title}</div>
+                  <div className="text-xs text-neutral-500">{o.sub}</div>
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          {needsStripe ? (
+            <div className="rounded-2xl border border-[#d4580a]/30 bg-gradient-to-br from-[#fff4ec] to-white p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#d4580a]/15 text-[#d4580a]">
+                  <CreditCard className="h-4.5 w-4.5" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-neutral-900">Connect your Stripe account to sell tickets</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-neutral-600">
+                    Paid tickets pay out straight to your bank, so you need a payout account first. It takes about
+                    3 minutes. Your event is saved to Drafts automatically, and you land back in Organizer Studio
+                    when you're done.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={connectStripe}
+                    disabled={connecting}
+                    className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+                  >
+                    {connecting ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening secure form…</> : <>Connect Stripe account</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
+              <div className="text-sm font-semibold text-neutral-900">
+                {pricing === "paid" ? "Payouts connected. Tickets are set up next" : "Tickets are set up next"}
+              </div>
+              <p className="mt-1 text-[13px] text-neutral-600">
+                After you create this event you go straight to Organizer Studio, where you add your ticket types
+                (free RSVP, general admission, tiers, prices, and quantities).
+              </p>
+            </div>
+          )}
+
 
 
           <Field label="Capacity" optional>
