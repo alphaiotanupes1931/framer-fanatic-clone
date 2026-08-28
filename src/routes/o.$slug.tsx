@@ -2423,27 +2423,16 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     )}
                     {canManage && (
                       <div className="flex flex-wrap gap-2">
-                        {p.source === "posts" ? (
-                          <Link to="/edit-post/$id" params={{ id: p.id }} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
-                            <Pencil className="h-3.5 w-3.5" /> Edit
-                          </Link>
-                        ) : (
-                          <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
-                            <Pencil className="h-3.5 w-3.5" /> Edit
-                          </button>
-                        )}
+                        <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
+                          <Pencil className="h-3.5 w-3.5" /> Edit
+                        </button>
                         <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">
                           <Trash2 className="h-3.5 w-3.5" /> Delete
                         </button>
                       </div>
                     )}
-                    {p.source === "posts" ? (
-                      <Link to="/posts/$postId" params={{ postId: p.id }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4580a] hover:underline">
-                        Open post to comment
-                      </Link>
-                    ) : (
-                      <OrgPostComments orgId={orgId} postId={p.id} />
-                    )}
+                    <OrgPostComments orgId={orgId} postId={p.id} />
+
                   </div>
                 </div>
               );
