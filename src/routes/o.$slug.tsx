@@ -2201,12 +2201,12 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
 
           {mode === "text" ? (
             <div className="space-y-3">
-<div className="mx-auto flex aspect-square w-full max-w-md overflow-y-auto rounded-2xl p-6 transition"
+<div className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-hidden rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}>
                 <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} rows={8}
                   placeholder="Share your thoughts... use @ to mention someone"
                   style={{ color: bg.fg, fontSize: FONT_SIZE_PX[fontSize], lineHeight: 1.25 }}
-                  className="m-auto w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus:outline-none" />
+                  className="w-full resize-none self-center overflow-hidden border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus:outline-none" />
               </div>
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600">Background</div>
