@@ -625,10 +625,11 @@ const CATEGORIES = [
   { key: "donation", label: "Donation", Icon: Tag },
 ] as const;
 
-function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
+function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { evt: MyEvent; soldCount: number; onDirtyChange?: (dirty: boolean) => void; saveSignal?: number; onSaved?: () => void; }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [cap, setCap] = useState<string>("");
+  const [originalCap, setOriginalCap] = useState<string>("");
   const [capLoaded, setCapLoaded] = useState(false);
   const [savingCap, setSavingCap] = useState(false);
 
@@ -636,10 +637,37 @@ function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
     supabase.from("events").select("max_tickets_per_buyer").eq("id", evt.id).maybeSingle()
       .then(({ data }) => {
         const v = (data as { max_tickets_per_buyer: number | null } | null)?.max_tickets_per_buyer;
-        setCap(v ? String(v) : "");
+        const str = v ? String(v) : "";
+        setCap(str);
+        setOriginalCap(str);
         setCapLoaded(true);
       });
   }, [evt.id]);
+
+  const capDirty = cap !== originalCap;
+  const isDirty = capDirty || showForm;
+  useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
+
+  const saveCap = async () => {
+    setSavingCap(true);
+    const value = cap.trim() ? Math.max(1, parseInt(cap, 10)) : null;
+    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value }).eq("id", evt.id);
+    if (error) { toast.error(error.message); setSavingCap(false); return false; }
+    const str = value ? String(value) : "";
+    setOriginalCap(str);
+    setCap(str);
+    setSavingCap(false);
+    toast.success(value ? `Limited to ${value} per person` : "Limit removed");
+    return true;
+  };
+
+  useEffect(() => {
+    if (saveSignal === undefined || saveSignal === 0) return;
+    (async () => {
+      if (capDirty) { const ok = await saveCap(); if (!ok) return; }
+      onSaved?.();
+    })();
+  }, [saveSignal]);
 
   const saveCap = async () => {
     setSavingCap(true);
