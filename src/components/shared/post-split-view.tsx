@@ -49,7 +49,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
     setPost({ ...post, is_pinned: next });
     const { error } = await supabase
       .from("posts")
-      .update({ is_pinned: next, pin_order: next ? Date.now() : null })
+      .update({ is_pinned: next, pin_order: next ? Math.floor(Date.now() / 1000) : null })
       .eq("id", post.id);
     if (error) { setPost({ ...post, is_pinned: !next }); toast.error(error.message); return; }
     onPinnedChange?.(post.id, next);
