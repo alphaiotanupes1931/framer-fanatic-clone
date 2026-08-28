@@ -170,7 +170,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
     <div className={`grid overflow-hidden bg-background ${isTextOnly ? "md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
       {isTextOnly && post.content && (
         <div
-          className="flex aspect-square w-full items-center justify-center overflow-y-auto overscroll-contain p-8 md:aspect-auto md:max-h-[85vh] md:min-h-[85vh]"
+          className="flex aspect-square w-full overflow-y-auto overscroll-contain p-8 md:aspect-auto md:max-h-[85vh] md:min-h-[85vh]"
           style={{ background: post.bg_color || "#111827", color: post.text_color || "#ffffff" }}
         >
           <div
