@@ -9,6 +9,7 @@ import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { isStaffAllowedPath, useStaffMode } from "@/lib/staff-mode";
+import { ensureLiveSession } from "@/lib/session-health";
 
 
 export type Profile = {
