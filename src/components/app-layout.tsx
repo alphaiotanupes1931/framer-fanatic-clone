@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSignedUrlCache } from "@/components/smart-image";
 import { clearDataCache } from "@/hooks/use-cached-fetch";
@@ -8,6 +8,7 @@ import { SidebarProvider, useSidebar } from "@/components/layout/sidebar-context
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { isStaffAllowedPath, useStaffMode } from "@/lib/staff-mode";
 
 
 export type Profile = {
@@ -179,6 +180,7 @@ export function AppLayout(props: {
 
 function Shell({ children }: { children: ReactNode }) {
   const { collapsed } = useSidebar();
+  useStaffRouteGuard();
   return (
     <div className="min-h-screen bg-background" style={{ minHeight: "100dvh" }}>
       <LeftSidebar />
@@ -195,6 +197,18 @@ function Shell({ children }: { children: ReactNode }) {
       <MobileNav />
     </div>
   );
+}
+
+/** Employees signed in through a staff login stay on their business page. */
+function useStaffRouteGuard() {
+  const staff = useStaffMode();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!staff) return;
+    if (isStaffAllowedPath(pathname, staff.slug)) return;
+    navigate({ to: "/o/$slug", params: { slug: staff.slug }, replace: true });
+  }, [staff, pathname, navigate]);
 }
 
 export function PlaceholderGrid({ label }: { label: string }) {

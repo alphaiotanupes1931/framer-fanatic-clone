@@ -183,6 +183,7 @@ function NewEventPage() {
   };
 
   const canSubmit =
+    form.image_url.trim().length > 0 &&
     form.title.trim().length > 0 &&
     (startMode === "now" || form.starts_at.length > 0) &&
     (isOnline || form.neighborhood.trim().length > 0);
@@ -238,9 +239,11 @@ function NewEventPage() {
     if (!me) { toast.error("Please sign in"); return; }
     if (!canSubmit) {
       toast.error(
-        !isOnline && !form.neighborhood.trim()
-          ? "Neighborhood is required (or mark the event as online)"
-          : "Title and start date are required",
+        !form.image_url
+          ? "Add a photo or flyer for your event"
+          : !isOnline && !form.neighborhood.trim()
+            ? "Neighborhood is required (or mark the event as online)"
+            : "Title and start date are required",
       );
       return;
     }
@@ -327,7 +330,7 @@ function NewEventPage() {
           Fields marked with <span className="text-[#d4580a]">*</span> are required. Everything else is optional.
         </p>
 
-        {/* Flyer (optional) */}
+        {/* Flyer (required) */}
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
@@ -338,7 +341,7 @@ function NewEventPage() {
           ) : uploading ? (
             <><Loader2 className="w-6 h-6 animate-spin mb-2" /><span className="text-sm">Uploading…</span></>
           ) : (
-            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Add Event flyer</span><span className="text-xs text-neutral-400 mt-0.5">Optional</span></>
+            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Add Event photo or flyer <span className="text-[#d4580a]">*</span></span><span className="text-xs text-neutral-400 mt-0.5">Required, shows on the event page and in shares</span></>
           )}
           <input
             ref={fileRef}

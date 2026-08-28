@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { FollowButton } from "@/components/shared/follow-button";
 import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark } from "lucide-react";
 import { toast } from "sonner";
@@ -374,10 +375,11 @@ function EventDetail() {
               <SmartAvatarImage src={host.avatar_url ?? undefined} />
               <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>{(host.display_name || host.username || "?").charAt(0)}</AvatarFallback>
             </Avatar>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-sm text-muted-foreground">Hosted by</p>
-              <p className="font-medium text-foreground transition-colors">{host.display_name || host.username || "Organizer"}</p>
+              <p className="truncate font-medium text-foreground transition-colors">{host.display_name || host.username || "Organizer"}</p>
             </div>
+            <FollowButton userId={host.id} currentUserId={me} className="flex-shrink-0" />
           </Link>
         )}
 

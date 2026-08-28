@@ -1,5 +1,6 @@
 import { OrgPostComments } from "@/components/org/org-post-comments";
 import { StaffLoginCard } from "@/components/org/staff-login-card";
+import { useStaffMode } from "@/lib/staff-mode";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -170,6 +171,7 @@ function OrgProfile() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { isAdmin } = useUserRole();
+  const staffMode = useStaffMode();
   const [me, setMe] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
   const [tab, setTab] = useState<Tab>("Posts");
@@ -328,8 +330,11 @@ function OrgProfile() {
   if (!org) return <PrivatePageGate slug={slug} onUnlock={(o) => { setOrg(o); setLoaded(true); }} />;
 
 
-  const isOwner = !!me && me === org.owner_id;
-  const canManage = isOwner || isAdmin;
+  // A staff session borrows the owner's account, so it must not expose
+  // owner-only controls (delete the page, hand out staff credentials).
+  const isStaffSession = !!staffMode && !!org && staffMode.slug === org.slug;
+  const isOwner = !!me && me === org.owner_id && !isStaffSession;
+  const canManage = isOwner || isAdmin || isStaffSession;
   const isAssoc = org.type === "community_assoc";
   const isGroup = org.type === "group";
   const isArtist = org.type === "artist";
@@ -685,7 +690,7 @@ function OrgProfile() {
 
         {/* Secondary admin actions */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {canManage && (
+          {canManage && !isStaffSession && (
             <button
               onClick={async () => {
                 if (!confirm("Delete this page?")) return;

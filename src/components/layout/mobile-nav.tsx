@@ -8,6 +8,9 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { navItems, utilItems, createItems, type NavItem } from "@/lib/nav-items";
+import { clearStaffMode, useStaffMode } from "@/lib/staff-mode";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useSignupGate } from "@/lib/auth-gate";
 
 type Primary = NavItem;
 
@@ -31,6 +34,31 @@ export function MobileNav() {
   const navigate = useNavigate();
   const { unreadMessages, unreadNotifications } = useUnreadCounts();
   const { isAdmin } = useUserRole();
+  const staff = useStaffMode();
+  const { user, loading: userLoading } = useCurrentUser();
+  const gateSignup = useSignupGate(!!user, userLoading);
+
+  if (staff) {
+    const signOut = async () => {
+      clearStaffMode();
+      try { await supabase.auth.signOut(); } catch { /* ignore */ }
+      try { localStorage.clear(); } catch { /* ignore */ }
+      if (typeof window !== "undefined") window.location.href = "/business-login";
+    };
+    return (
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-3 border-t border-border bg-card/95 px-4 py-3 backdrop-blur-md lg:hidden"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 10px)" }}
+      >
+        <Link to="/o/$slug" params={{ slug: staff.slug }} className="truncate text-sm font-semibold text-foreground">
+          {staff.name}
+        </Link>
+        <button onClick={signOut} className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+          <LogOut className="h-4 w-4" /> Sign out
+        </button>
+      </nav>
+    );
+  }
 
   return (
     <nav
@@ -42,7 +70,7 @@ export function MobileNav() {
       }}
     >
       <div className="grid grid-cols-5 items-center px-2 py-1.5">
-        {primaryItems.slice(0, 2).map((item) => renderPrimary(item, currentPath))}
+        {primaryItems.slice(0, 2).map((item) => renderPrimary(item, currentPath, gateSignup))}
 
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -68,7 +96,7 @@ export function MobileNav() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {primaryItems.slice(2).map((item) => renderPrimary(item, currentPath))}
+        {primaryItems.slice(2).map((item) => renderPrimary(item, currentPath, gateSignup))}
 
         <DropdownMenu>
           <DropdownMenuTrigger className="flex min-h-[44px] w-full flex-col items-center justify-center rounded-lg px-2 py-1 text-muted-foreground">
@@ -118,13 +146,14 @@ export function MobileNav() {
   );
 }
 
-function renderPrimary(item: Primary, currentPath: string) {
+function renderPrimary(item: Primary, currentPath: string, onNavClick?: (e: React.MouseEvent) => void) {
           const isActive = item.to === "/dashboard" ? currentPath === "/dashboard" : currentPath.startsWith(item.to);
           const Icon = item.icon;
   return (
             <Link
               key={item.label}
               to={item.to}
+              onClick={onNavClick}
               {...prefetchHandlers(item.to)}
               className={`relative flex min-h-[44px] w-full flex-col items-center justify-center rounded-lg px-2 py-1 transition-colors ${isActive ? "text-[#d4580a]" : "text-muted-foreground"}`}
             >

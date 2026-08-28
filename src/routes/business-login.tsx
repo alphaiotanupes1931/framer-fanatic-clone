@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { staffLogin } from "@/lib/staff-login.functions";
+import { setStaffMode } from "@/lib/staff-mode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +38,7 @@ function BusinessLoginPage() {
       const res = await staffLogin({ data: { username: username.trim(), password } });
       const { error } = await supabase.auth.verifyOtp({ token_hash: res.tokenHash, type: "email" });
       if (error) throw error;
+      setStaffMode({ slug: res.slug, name: res.name });
       toast.success(`Signed in to ${res.name}`);
       navigate({ to: "/o/$slug", params: { slug: res.slug } });
     } catch (err) {
