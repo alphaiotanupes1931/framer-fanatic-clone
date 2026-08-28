@@ -381,7 +381,7 @@ function OrganizerStudioPage() {
             className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
               ticketsDirty
                 ? "bg-[#d4580a] text-white shadow hover:brightness-110"
-                : "bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
+                : "text-neutral-600 hover:text-neutral-900"
             }`}
           >
             <Ticket className="h-4 w-4" /> Save Tickets
