@@ -669,15 +669,6 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
     })();
   }, [saveSignal]);
 
-  const saveCap = async () => {
-    setSavingCap(true);
-    const value = cap.trim() ? Math.max(1, parseInt(cap, 10)) : null;
-    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value }).eq("id", evt.id);
-    setSavingCap(false);
-    if (error) toast.error(error.message);
-    else toast.success(value ? `Limited to ${value} per person` : "Limit removed");
-  };
-
   const load = () => {
     supabase.from("ticket_types").select("*").eq("event_id", evt.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true })
       .then(({ data }) => setTypes((data as TicketType[] | null) ?? []));
