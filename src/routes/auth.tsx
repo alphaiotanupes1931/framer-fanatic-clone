@@ -62,8 +62,10 @@ function AuthPage() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      const uid = data.session?.user.id;
+    void (async () => {
+      // Validate against the server: a deleted account leaves a stale token in
+      // storage, and trusting it here caused an /auth <-> /dashboard loop.
+      const uid = await ensureLiveSession();
       if (!uid) return;
       // Confirmation links can land here on a different device, so trust the
       // server-side flag rather than anything saved locally at signup.
@@ -78,8 +80,9 @@ function AuthPage() {
       const dest = redirect || popPostAuthRedirect();
       if (dest) { window.location.replace(dest); return; }
       navigate({ to: "/dashboard" });
-    });
+    })();
   }, [navigate, redirect]);
+
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
