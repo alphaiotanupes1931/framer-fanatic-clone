@@ -1,4 +1,6 @@
 import { OrgPostComments } from "@/components/org/org-post-comments";
+import { PostSplitView } from "@/components/shared/post-split-view";
+
 import { StaffLoginCard } from "@/components/org/staff-login-card";
 import { useStaffMode } from "@/lib/staff-mode";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
@@ -1981,7 +1983,10 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<OrgPost | null>(null);
   const [mediaIdx, setMediaIdx] = useState(0);
+  const [meId, setMeId] = useState<string | null>(null);
+  useEffect(() => { supabase.auth.getSession().then(({ data }) => setMeId(data.session?.user.id ?? null)); }, []);
   useEffect(() => { setMediaIdx(0); }, [active?.id]);
+
   type Mode = "text" | "photo" | "video";
   const [mode, setMode] = useState<Mode>("text");
   const [form, setForm] = useState({ title: "", body: "" });
@@ -2331,8 +2336,28 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
               const idx = items.findIndex((it) => it.id === p.id);
               const goPrev = () => { if (idx > 0) setActive(items[idx - 1]); };
               const goNext = () => { if (idx > -1 && idx < items.length - 1) setActive(items[idx + 1]); };
+              if (p.source === "posts") {
+                return (
+                  <div className="relative">
+                    {idx > 0 && (
+                      <button type="button" onClick={goPrev} aria-label="Previous post"
+                        className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75">
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                    )}
+                    {idx > -1 && idx < items.length - 1 && (
+                      <button type="button" onClick={goNext} aria-label="Next post"
+                        className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75">
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    )}
+                    <PostSplitView postId={p.id} meId={meId} onDeleted={() => { setActive(null); setItems((prev) => prev.filter((it) => it.id !== p.id)); }} />
+                  </div>
+                );
+              }
               return (
                 <div className="relative grid md:grid-cols-[minmax(0,1.6fr)_minmax(320px,420px)]">
+
                   {idx > 0 && (
                     <button
                       type="button" onClick={goPrev} aria-label="Previous post"
@@ -2400,27 +2425,16 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     )}
                     {canManage && (
                       <div className="flex flex-wrap gap-2">
-                        {p.source === "posts" ? (
-                          <Link to="/edit-post/$id" params={{ id: p.id }} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
-                            <Pencil className="h-3.5 w-3.5" /> Edit
-                          </Link>
-                        ) : (
-                          <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
-                            <Pencil className="h-3.5 w-3.5" /> Edit
-                          </button>
-                        )}
+                        <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
+                          <Pencil className="h-3.5 w-3.5" /> Edit
+                        </button>
                         <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">
                           <Trash2 className="h-3.5 w-3.5" /> Delete
                         </button>
                       </div>
                     )}
-                    {p.source === "posts" ? (
-                      <Link to="/posts/$postId" params={{ postId: p.id }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4580a] hover:underline">
-                        Open post to comment
-                      </Link>
-                    ) : (
-                      <OrgPostComments orgId={orgId} postId={p.id} />
-                    )}
+                    <OrgPostComments orgId={orgId} postId={p.id} />
+
                   </div>
                 </div>
               );
