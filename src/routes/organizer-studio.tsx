@@ -704,8 +704,10 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
       });
   }, [evt.id]);
 
+  const [createdPending, setCreatedPending] = useState(false);
+
   const capDirty = cap !== originalCap;
-  const isDirty = capDirty || showForm;
+  const isDirty = capDirty || showForm || createdPending;
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
   const saveCap = async () => {
