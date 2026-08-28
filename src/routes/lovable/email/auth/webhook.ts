@@ -9,9 +9,9 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "Framer Clone Project"
+const SITE_NAME = "Planet Baltimore"
 const SENDER_DOMAIN = "notify.reeddigitalgroup.com"
-const ROOT_DOMAIN = "reeddigitalgroup.com"
+const ROOT_DOMAIN = "planetbaltimore.com"
 const FROM_DOMAIN = "reeddigitalgroup.com"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
