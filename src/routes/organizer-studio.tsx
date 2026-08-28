@@ -176,17 +176,38 @@ function OrganizerStudioPage() {
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-3 gap-2 rounded-full bg-neutral-100 p-1 text-sm">
+        <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm sm:grid-cols-4">
           <button onClick={() => { setTab("manage"); setSelected(null); }} className={`rounded-full py-2 font-semibold transition ${tab === "manage" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>Manage Events</button>
-          <Link to="/events/new" onClick={() => setTab("create")} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "create" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
-            <Plus className="h-4 w-4" /> Create Event
-          </Link>
+          <button
+            onClick={() => setTab("stripe")}
+            className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
+              tab === "stripe"
+                ? "bg-[#d4580a] text-white shadow"
+                : stripeReady === false
+                  ? "animate-pulse bg-red-50 text-red-600 shadow-[0_0_0_2px_rgba(220,38,38,0.55),0_0_16px_rgba(220,38,38,0.55)]"
+                  : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            <CreditCard className="h-4 w-4" /> Stripe
+          </button>
+          <button
+            onClick={() => {
+              if (selected) { navigate({ to: "/events/$eventId", params: { eventId: selected.id } }); return; }
+              toast.info("Pick an event first, then Save Tickets opens its page.");
+              setTab("manage");
+            }}
+            className="flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold text-neutral-600 transition hover:text-neutral-900"
+          >
+            <Ticket className="h-4 w-4" /> Save Tickets
+          </button>
           <button onClick={() => { setTab("campaign"); setSelected(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "campaign" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
             <Mail className="h-4 w-4" /> Campaign
           </button>
         </div>
 
-        {tab === "campaign" ? (
+        {tab === "stripe" ? (
+          <StripeTab onStatus={setStripeReady} />
+        ) : tab === "campaign" ? (
           <CampaignTab events={events ?? []} />
         ) : !selected ? (
           <>
