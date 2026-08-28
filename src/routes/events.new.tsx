@@ -593,10 +593,9 @@ function NewEventPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
-              <div className="text-sm font-semibold text-neutral-900">
-                Tickets are set up next
-              </div>
-              <p className="mt-1 text-[13px] text-neutral-600">
+              <p className="text-[13px] text-neutral-600">
+                <span className="font-semibold text-neutral-900">Tickets are set up next</span>
+                <br />
                 After you create this event you go straight to Organizer Studio, where you add your ticket types
                 (free RSVP, general admission, tiers, prices, and quantities).
               </p>
