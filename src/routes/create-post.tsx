@@ -14,9 +14,6 @@ import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/create-post")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    orgId: typeof search.orgId === "string" ? search.orgId : undefined,
-  }),
   component: CreatePostPage,
   head: () => ({
     meta: [
