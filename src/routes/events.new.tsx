@@ -395,7 +395,8 @@ function NewEventPage() {
               onClear={() => set("video_url", "")}
               inputRef={videoRef}
             />
-            
+            <p className="mt-1 text-[11px] text-neutral-500">Supported formats: MP4, MOV. Up to 200MB.</p>
+
           </Field>
 
           <Field label="Event Photos" optional>
