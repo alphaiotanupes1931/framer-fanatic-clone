@@ -276,9 +276,29 @@ function NewEventPage() {
       );
       return;
     }
-    if (needsStripe) {
-      toast.error("Connect your Stripe account before creating paid tickets");
-      return;
+    // Paid events need a live payout account. Re-check Stripe directly (the
+    // cached profile flag can lag the webhook) with a short loading animation
+    // so the organizer can see the check happening.
+    if (pricing === "paid" && !payoutsReady) {
+      setCheckingStripe(true);
+      const startedAt = Date.now();
+      try {
+        const res = await refreshStripeFn();
+        const elapsed = Date.now() - startedAt;
+        if (elapsed < 2200) await new Promise((r) => setTimeout(r, 2200 - elapsed));
+        if (res.chargesEnabled) {
+          setStripeVerified(true);
+        } else {
+          setCheckingStripe(false);
+          setStripeGate(true);
+          return;
+        }
+      } catch {
+        setCheckingStripe(false);
+        setStripeGate(true);
+        return;
+      }
+      setCheckingStripe(false);
     }
 
     setSaving(true);
