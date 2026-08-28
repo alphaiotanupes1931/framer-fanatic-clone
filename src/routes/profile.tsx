@@ -657,7 +657,7 @@ function ProfilePage() {
                               )
                             ) : (
                               <div
-                                className="flex h-full w-full items-center justify-center p-3 text-center text-[11px] font-medium leading-tight text-foreground"
+                                className="flex h-full w-full items-center justify-center p-3 text-center text-sm font-semibold leading-snug text-foreground sm:text-base"
                                 style={p.bg_color ? { background: p.bg_color, color: p.text_color || "#fff" } : undefined}
                               >
                                 <span className="line-clamp-6 whitespace-pre-wrap break-words">{p.content || "Post"}</span>
