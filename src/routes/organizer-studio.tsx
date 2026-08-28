@@ -768,7 +768,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
       </div>
 
       {showForm && (
-        <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); load(); }} />
+        <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); setCreatedPending(true); load(); }} />
       )}
 
       {capLoaded && (
