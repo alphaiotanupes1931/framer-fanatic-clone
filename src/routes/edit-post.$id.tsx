@@ -37,12 +37,14 @@ const BG_COLORS = [
   { name: "Violet",      bg: "#7C3AED",  fg: "#FFFFFF" },
   { name: "Cream",       bg: "#FDF6E3",  fg: "#0F172A" },
 ];
-const FONT_SIZES: { id: "sm" | "md" | "lg" | "xl"; label: string; cls: string }[] = [
-  { id: "sm", label: "SM", cls: "text-base" },
-  { id: "md", label: "MD", cls: "text-xl" },
-  { id: "lg", label: "LG", cls: "text-3xl" },
-  { id: "xl", label: "XL", cls: "text-5xl" },
+const FONT_SIZES: { id: "sm" | "md" | "lg" | "xl"; label: string }[] = [
+  { id: "sm", label: "SM" },
+  { id: "md", label: "MD" },
+  { id: "lg", label: "LG" },
+  { id: "xl", label: "XL" },
 ];
+// Same pixel scale as the create-post composer so edits match what was published.
+const FONT_SIZE_PX: Record<"sm" | "md" | "lg" | "xl", number> = { sm: 16, md: 20, lg: 26, xl: 34 };
 
 function EditPostPage() {
   const me = useCurrentProfile();
@@ -172,7 +174,7 @@ function EditPostPage() {
             <Label className="text-sm font-medium">Content</Label>
             {postType === "text" ? (
               <div
-                className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-y-auto rounded-2xl p-6 transition"
+                className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-hidden rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
               >
                 <Textarea
@@ -181,8 +183,8 @@ function EditPostPage() {
                   rows={5}
                   maxLength={2000}
                   placeholder="Share your thoughts..."
-                  style={{ color: bg.fg }}
-                  className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus-visible:ring-0 ${FONT_SIZES.find((f) => f.id === fontSize)!.cls}`}
+                  style={{ color: bg.fg, fontSize: FONT_SIZE_PX[fontSize], lineHeight: 1.25 }}
+                  className="w-full resize-none self-center overflow-hidden border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus-visible:ring-0"
                 />
               </div>
             ) : (
