@@ -62,7 +62,7 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
     z.object({ returnUrl: z.string().url(), refreshUrl: z.string().url() }).parse(d),
   )
   .handler(async ({ context, data }) => {
-    const { userId } = context;
+    const { userId, claims } = context;
     const { getStripe, getPayoutAccount } = await import("./stripe.server");
     const stripe = getStripe();
 
@@ -72,27 +72,60 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
       throw new Error("No Stripe account on file. Click Connect Stripe first.");
     }
 
+    let accountId = profile.stripe_account_id;
+
     // Already onboarded accounts should land in their Express dashboard to
     // update bank/payout details; onboarding links can be rejected for them.
     try {
-      const acct = await stripe.accounts.retrieve(profile.stripe_account_id);
+      const acct = await stripe.accounts.retrieve(accountId);
       if (acct.charges_enabled && acct.details_submitted) {
-        const loginLink = await stripe.accounts.createLoginLink(profile.stripe_account_id);
+        const loginLink = await stripe.accounts.createLoginLink(accountId);
         return { url: loginLink.url };
       }
     } catch (error) {
-      console.error("Payout dashboard link failed, falling back to onboarding", error);
+      const code = (error as { code?: string } | null)?.code;
+      console.error("Payout dashboard link failed", error);
+      if (code !== "resource_missing") {
+        const { logStripeError } = await import("./stripe-log.server");
+        await logStripeError("api", "connect.dashboard_link", error, { user_id: userId, account_id: accountId });
+      }
+      // Stale account id (e.g. the key/mode changed since it was created):
+      // clear it and mint a fresh account so the user is never stuck.
+      if (code === "resource_missing") {
+        const account = await stripe.accounts.create({
+          type: "express",
+          country: "US",
+          email: (claims as { email?: string })?.email ?? undefined,
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
+          },
+          business_profile: { mcc: "7929" },
+          settings: { payments: { statement_descriptor: "PLANETBALTIMORE" } },
+        });
+        accountId = account.id;
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await supabaseAdmin
+          .from("profiles")
+          .update({ stripe_account_id: accountId, stripe_account_status: "pending", stripe_charges_enabled: false })
+          .eq("id", userId);
+      }
     }
 
-    const link = await stripe.accountLinks.create({
-      account: profile.stripe_account_id,
-      return_url: data.returnUrl,
-      refresh_url: data.refreshUrl,
-      type: "account_onboarding",
-    });
-
-    return { url: link.url };
-
+    try {
+      const link = await stripe.accountLinks.create({
+        account: accountId,
+        return_url: data.returnUrl,
+        refresh_url: data.refreshUrl,
+        type: "account_onboarding",
+      });
+      return { url: link.url };
+    } catch (error) {
+      console.error("Payout onboarding link failed", error);
+      const { logStripeError } = await import("./stripe-log.server");
+      await logStripeError("api", "connect.onboarding_link", error, { user_id: userId, account_id: accountId });
+      throw new Error("Payout setup could not be opened right now. Please try again in a minute.");
+    }
   });
 
 /** Pull the latest Stripe account state and update the profile. */
