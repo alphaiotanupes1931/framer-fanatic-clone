@@ -217,12 +217,14 @@ function Dashboard() {
     // Discover
     const all: FeedItem[] = [
       ...filteredPosts.map((p) => ({ type: "post" as const, date: p.created_at, data: p, isNew: true })),
+      ...(orgPosts as any[]).map((p) => ({ type: "orgpost" as const, date: p.created_at, data: p, isNew: true })),
       ...(stories as any[]).map((s) => ({ type: "story" as const, date: s.created_at, data: s, isNew: true })),
       ...(events as any[]).map((e) => ({ type: "event" as const, date: e.created_at, data: e, isNew: true })),
     ];
     const dayOfYear = Math.floor(Date.now() / 86400000);
     return shuffleSeed(all, dayOfYear).slice(0, 40);
-  }, [activeFilter, posts, stories, events, follows, currentUser]);
+  }, [activeFilter, posts, orgPosts, stories, events, follows, currentUser]);
+
 
   const orderedFeedItems = useMemo(
     () => [...feedItems].sort((a, b) => +new Date(b.date) - +new Date(a.date)),
