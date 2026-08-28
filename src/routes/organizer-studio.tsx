@@ -218,6 +218,8 @@ function OrganizerStudioPage() {
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
   const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
+  const [ticketsDirty, setTicketsDirty] = useState(false);
+  const [saveTicketsSignal, setSaveTicketsSignal] = useState(0);
 
   const load = () => {
     if (!me) return;
