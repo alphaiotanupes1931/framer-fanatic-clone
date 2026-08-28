@@ -378,13 +378,10 @@ function OrganizerStudioPage() {
               if (ticketsDirty) { setSaveTicketsSignal((s) => s + 1); return; }
               navigate({ to: "/events/$eventId", params: { eventId: selected.id } });
             }}
-            disabled={!selected}
             className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
-              selected && ticketsDirty
+              ticketsDirty
                 ? "bg-[#d4580a] text-white shadow hover:brightness-110"
-                : selected
-                  ? "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
-                  : "bg-neutral-100 text-neutral-400"
+                : "bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
             }`}
           >
             <Ticket className="h-4 w-4" /> Save Tickets
