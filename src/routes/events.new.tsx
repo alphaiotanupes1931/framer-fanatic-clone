@@ -429,7 +429,7 @@ function NewEventPage() {
                 onChange={(e) => { const fs = Array.from(e.target.files ?? []); if (fs.length) void onPickGallery(fs); e.target.value = ""; }}
               />
             </div>
-            <p className="mt-1 text-[11px] text-neutral-500">Add as many photos as you like. They show near the bottom of the event page, just above the comments.</p>
+            <p className="mt-1 text-[11px] text-neutral-500">Supported formats: JPEG, JPG, PNG, WebP, GIF.</p>
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
