@@ -171,11 +171,18 @@ function Dashboard() {
           isNew: !followedIds.has(e.user_id),
         }));
 
+      const orgPostStream: FeedItem[] = (orgPosts as any[]).slice(0, 25).map((p) => ({
+        type: "orgpost" as const,
+        date: p.created_at,
+        data: p,
+      }));
+
       // Strict newest -> oldest across all content types.
-      const merged: FeedItem[] = [...storyStream, ...postStream, ...eventStream].sort(
+      const merged: FeedItem[] = [...storyStream, ...postStream, ...orgPostStream, ...eventStream].sort(
         (a, b) => +new Date(b.date) - +new Date(a.date),
       );
       return merged.slice(0, 60);
+
     }
 
     if (activeFilter === "Following") {
