@@ -95,7 +95,7 @@ export const createConnectOnboardingLink = createServerFn({ method: "POST" })
         const account = await stripe.accounts.create({
           type: "express",
           country: "US",
-          email: profile.email ?? (claims as { email?: string })?.email ?? undefined,
+          email: (claims as { email?: string })?.email ?? undefined,
           capabilities: {
             card_payments: { requested: true },
             transfers: { requested: true },
