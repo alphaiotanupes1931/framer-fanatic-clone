@@ -55,7 +55,7 @@ const FONT_SIZES: { id: "sm" | "md" | "lg" | "xl"; label: string; cls: string }[
 ];
 
 /** Pixel sizes keep the composer in sync with how posts render everywhere else. */
-export const FONT_SIZE_PX: Record<"sm" | "md" | "lg" | "xl", number> = { sm: 16, md: 20, lg: 30, xl: 48 };
+export const FONT_SIZE_PX: Record<"sm" | "md" | "lg" | "xl", number> = { sm: 16, md: 20, lg: 26, xl: 34 };
 
 function CreatePostPage() {
   const me = useCurrentProfile();
