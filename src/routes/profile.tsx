@@ -9,7 +9,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { FileUpload } from "@/components/shared/file-upload";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, PinOff, Gift, ChevronLeft, ChevronRight, X as XIcon, Play, Lock as LockIcon, Globe as GlobeIcon } from "lucide-react";
+import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, Gift, ChevronLeft, ChevronRight, X as XIcon, Play, Lock as LockIcon, Globe as GlobeIcon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
@@ -203,32 +203,12 @@ function ProfilePage() {
     setStats((s) => ({ ...s, posts: Math.max(0, s.posts - 1) }));
   };
 
-  const handleTogglePin = async (id: string, next: boolean) => {
-    if (next) {
-      const pinnedCount = myPosts.filter((p) => p.is_pinned).length;
-      if (pinnedCount >= 3) {
-        toast.error("You can only pin up to 3 posts. Unpin one first.");
-        return;
-      }
-      const nextOrder = pinnedCount;
-      setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: true, pin_order: nextOrder } : p))));
-      const { error } = await supabase.from("posts").update({ is_pinned: true, pin_order: nextOrder } as any).eq("id", id);
-      if (error) {
-        toast.error("Could not update pin");
-        setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: false, pin_order: null } : p))));
-      } else {
-        toast.success("Pinned to top");
-      }
-    } else {
-      setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: false, pin_order: null } : p))));
-      const { error } = await supabase.from("posts").update({ is_pinned: false, pin_order: null } as any).eq("id", id);
-      if (error) {
-        toast.error("Could not update pin");
-      } else {
-        toast.success("Unpinned");
-      }
-    }
+  // The pin control now lives inside the post view, which writes to the
+  // database itself; here we only mirror the change in the grid.
+  const applyPinToGrid = (id: string, next: boolean) => {
+    setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: next, pin_order: next ? Date.now() : null } : p))));
   };
+
 
   useEffect(() => {
     (async () => {
@@ -695,16 +675,9 @@ function ProfilePage() {
                                 </div>
                               </div>
                             )}
-                            {!publicPreview && (
-                              <span
-                                role="button"
-                                tabIndex={0}
-                                title={p.is_pinned ? "Unpin" : "Pin to top"}
-                                onClick={(e) => { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); }}
-                                onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); void handleTogglePin(p.id, !p.is_pinned); } }}
-                                className="absolute left-1.5 top-1.5 rounded-full bg-white/90 p-1 text-foreground shadow hover:bg-white"
-                              >
-                                {p.is_pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                            {p.is_pinned && (
+                              <span className="absolute left-1.5 top-1.5 rounded-full bg-white/90 p-1 text-[#d4580a] shadow" title="Pinned">
+                                <Pin className="h-3.5 w-3.5" />
                               </span>
                             )}
                           </button>
@@ -795,6 +768,7 @@ function ProfilePage() {
                 postId={myPosts[postViewerIdx].id}
                 meId={profile?.id}
                 onDeleted={() => { handleDeleteMyPost(myPosts[postViewerIdx].id); setPostViewerIdx(null); }}
+                onPinnedChange={applyPinToGrid}
               />
             </div>
           </div>

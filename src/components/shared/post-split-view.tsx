@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Send, Bookmark, Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, Trash2, Pencil, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
 import { ReportButton } from "@/components/shared/report-button";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
@@ -22,7 +22,7 @@ type Post = {
   link_url?: string | null; link_title?: string | null; link_description?: string | null;
   image_url: string | null; video_url: string | null;
   media_urls: string[] | null; music_url: string | null;
-  post_type: string | null; bg_color: string | null;
+  post_type: string | null; bg_color: string | null; is_pinned?: boolean | null; pin_order?: number | null;
   text_color: string | null; font_size: string | null;
   likes_count: number | null; comments_count: number | null;
   neighborhood: string | null; created_at: string;
@@ -30,7 +30,7 @@ type Post = {
 type Author = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
 type Comment = { id: string; user_id: string; body: string; created_at: string; author?: Author | null };
 
-export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meId?: string | null; onDeleted?: () => void }) {
+export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { postId: string; meId?: string | null; onDeleted?: () => void; onPinnedChange?: (id: string, pinned: boolean) => void }) {
   const navigate = useNavigate();
   const cacheKey = `post:${postId}`;
   const cached = readCache<{ post: Post; author: Author | null; comments: Comment[] }>(cacheKey);
@@ -42,6 +42,19 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
   const [loading, setLoading] = useState(!cached);
   const [shareOpen, setShareOpen] = useState(false);
   const [mediaIdx, setMediaIdx] = useState(0);
+
+  const togglePin = async () => {
+    if (!post) return;
+    const next = !post.is_pinned;
+    setPost({ ...post, is_pinned: next });
+    const { error } = await supabase
+      .from("posts")
+      .update({ is_pinned: next, pin_order: next ? Date.now() : null })
+      .eq("id", post.id);
+    if (error) { setPost({ ...post, is_pinned: !next }); toast.error(error.message); return; }
+    onPinnedChange?.(post.id, next);
+    toast.success(next ? "Pinned to top" : "Unpinned");
+  };
 
   const load = async () => {
     const { data: p } = await supabase.from("posts").select("*").eq("id", postId).maybeSingle();
@@ -224,6 +237,14 @@ export function PostSplitView({ postId, meId, onDeleted }: { postId: string; meI
           {!isOwner && <ReportButton contentType="post" contentId={post.id} className="shrink-0" />}
           {isOwner && (
             <div className="flex items-center gap-1">
+              <button
+                onClick={togglePin}
+                aria-label={post.is_pinned ? "Unpin post" : "Pin post to top"}
+                title={post.is_pinned ? "Unpin" : "Pin to top"}
+                className={`rounded-full p-1.5 hover:bg-accent ${post.is_pinned ? "text-[#d4580a]" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {post.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+              </button>
               <Link to="/edit-post/$id" params={{ id: post.id }} aria-label="Edit post" className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground">
                 <Pencil className="h-4 w-4" />
               </Link>

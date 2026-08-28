@@ -3,7 +3,7 @@ import {
   Home, Compass, MapPin, Calendar, Users, Palette, Landmark, Building2,
   MessageCircle, Bell, User, ChevronLeft, ChevronRight, Plus, Shield,
   BookOpen, Search, Ticket, LogOut, LogIn, Video, Trophy, Settings, Mic, ShoppingBag, Flag,
-  LayoutDashboard, Sparkles,
+  LayoutDashboard, Sparkles, Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FileText, PenLine, Palette as PaletteIcon, Building2 as BusinessIcon, Landmark as LandmarkIcon, Users as UsersIcon, Shield as ShieldIcon, Home as HomeIcon, Plane as PlaneIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { clearStaffMode, useStaffMode } from "@/lib/staff-mode";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useSignupGate } from "@/lib/auth-gate";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useSidebar } from "./sidebar-context";
 import pbLogo from "@/assets/pb-logo.png";
@@ -71,10 +73,52 @@ function SidebarCardCollapsed({ title, icon: Icon, children }: { title?: string;
 }
 
 export function LeftSidebar() {
+  const staff = useStaffMode();
+  if (staff) return <StaffSidebar slug={staff.slug} name={staff.name} />;
+  return <FullSidebar />;
+}
+
+/** Employees signed in with a staff login only see their business page. */
+function StaffSidebar({ slug, name }: { slug: string; name: string }) {
+  const navigate = useNavigate();
+  const signOut = async () => {
+    clearStaffMode();
+    try { await supabase.auth.signOut(); } catch (e) { console.error("signOut failed", e); }
+    try { localStorage.clear(); } catch {}
+    navigate({ to: "/business-login", replace: true });
+    setTimeout(() => { if (typeof window !== "undefined") window.location.href = "/business-login"; }, 50);
+  };
+  return (
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[288px] flex-col border-r border-slate-200 bg-slate-50 lg:flex">
+      <div className="flex h-16 items-center gap-2 px-5">
+        <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain" />
+        <span className="font-display text-sm font-extrabold uppercase tracking-wide text-slate-900">Planet Baltimore</span>
+      </div>
+      <div className="flex-1 space-y-3 px-3 pt-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Staff session</p>
+          <p className="mt-1 text-sm font-semibold text-slate-900">{name}</p>
+          <p className="mt-1 text-xs text-slate-600">You are signed in as staff, so personal areas are hidden.</p>
+        </div>
+        <Link to="/o/$slug" params={{ slug }} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100">
+          <Store className="h-5 w-5 text-slate-500" /> Business page
+        </Link>
+      </div>
+      <div className="px-3 pb-4">
+        <Button variant="outline" className="w-full" onClick={signOut}>
+          <LogOut className="mr-2 h-4 w-4" /> Sign out
+        </Button>
+      </div>
+    </aside>
+  );
+}
+
+function FullSidebar() {
   const { collapsed, setCollapsed } = useSidebar();
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const { unreadMessages, unreadNotifications } = useUnreadCounts();
-  const { user } = useCurrentUser();
+  const { user, loading: userLoading } = useCurrentUser();
+  const gateSignup = useSignupGate(!!user, userLoading);
   const { isAdmin } = useUserRole();
   const navigate = useNavigate();
 
@@ -105,6 +149,7 @@ export function LeftSidebar() {
       <Link
         key={item.label}
         to={item.to}
+        onClick={gateSignup}
         {...prefetchHandlers(item.to)}
         className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
       >

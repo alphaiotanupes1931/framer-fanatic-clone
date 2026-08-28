@@ -1,0 +1,28 @@
+/**
+ * Signed-out visitors land on shared links (an event, a story). The page
+ * itself stays readable, but the moment they reach for the navigation we send
+ * them to sign up and remember where they were so they come straight back.
+ */
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useCallback } from "react";
+
+export function useSignupGate(signedIn: boolean, loading: boolean) {
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  return useCallback(
+    (e: React.MouseEvent) => {
+      if (loading || signedIn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        const here = `${pathname}${typeof window !== "undefined" ? window.location.search : ""}`;
+        sessionStorage.setItem("n", here);
+      } catch {
+        /* storage unavailable is never fatal */
+      }
+      navigate({ to: "/auth", search: { mode: "signup" } });
+    },
+    [signedIn, loading, pathname, navigate],
+  );
+}

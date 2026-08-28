@@ -28,17 +28,19 @@ function popPostAuthRedirect(consume = true): string | null {
 }
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
-    typeof search.redirect === "string" && search.redirect.startsWith("/") && !search.redirect.startsWith("//")
+  validateSearch: (search: Record<string, unknown>): { redirect?: string; mode?: "signup" } => ({
+    ...(typeof search.redirect === "string" && search.redirect.startsWith("/") && !search.redirect.startsWith("//")
       ? { redirect: search.redirect }
-      : {},
+      : {}),
+    ...(search.mode === "signup" ? { mode: "signup" as const } : {}),
+  }),
   component: AuthPage,
   head: () => ({ meta: [{ title: "Sign in or create an account" }] }),
 });
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { redirect } = Route.useSearch();
+  const { redirect, mode } = Route.useSearch();
   const becomeArtistFn = useServerFn(becomeArtist);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -245,7 +247,7 @@ function AuthPage() {
               </button>
             </div>
           ) : (
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs defaultValue={mode === "signup" ? "signup" : "signin"} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>

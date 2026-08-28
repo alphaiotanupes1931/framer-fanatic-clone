@@ -1,5 +1,6 @@
 import { OrgPostComments } from "@/components/org/org-post-comments";
 import { StaffLoginCard } from "@/components/org/staff-login-card";
+import { useStaffMode } from "@/lib/staff-mode";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,6 +131,7 @@ type OrgPost = {
   bg_color?: string | null; text_color?: string | null; font_size?: string | null;
   availability?: string | null;
   created_at: string;
+  source?: "posts" | "org";
 };
 
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
@@ -170,6 +172,7 @@ function OrgProfile() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { isAdmin } = useUserRole();
+  const staffMode = useStaffMode();
   const [me, setMe] = useState<string | null>(null);
   const [org, setOrg] = useState<Org | null>(null);
   const [tab, setTab] = useState<Tab>("Posts");
@@ -328,8 +331,11 @@ function OrgProfile() {
   if (!org) return <PrivatePageGate slug={slug} onUnlock={(o) => { setOrg(o); setLoaded(true); }} />;
 
 
-  const isOwner = !!me && me === org.owner_id;
-  const canManage = isOwner || isAdmin;
+  // A staff session borrows the owner's account, so it must not expose
+  // owner-only controls (delete the page, hand out staff credentials).
+  const isStaffSession = !!staffMode && !!org && staffMode.slug === org.slug;
+  const isOwner = !!me && me === org.owner_id && !isStaffSession;
+  const canManage = isOwner || isAdmin || isStaffSession;
   const isAssoc = org.type === "community_assoc";
   const isGroup = org.type === "group";
   const isArtist = org.type === "artist";
@@ -685,7 +691,7 @@ function OrgProfile() {
 
         {/* Secondary admin actions */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {canManage && (
+          {canManage && !isStaffSession && (
             <button
               onClick={async () => {
                 if (!confirm("Delete this page?")) return;
@@ -2056,10 +2062,39 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     if (kind) q = q.eq("kind", kind);
     else q = q.or("kind.is.null,kind.neq.press");
     const { data } = await q;
-    setItems(((data ?? []) as unknown[]).map((r) => {
+    const orgRows = ((data ?? []) as unknown[]).map((r) => {
       const row = r as Record<string, unknown>;
-      return { ...(row as object), media_urls: Array.isArray(row.media_urls) ? (row.media_urls as string[]) : [] } as OrgPost;
-    }));
+      return { ...(row as object), media_urls: Array.isArray(row.media_urls) ? (row.media_urls as string[]) : [], source: "org" } as OrgPost;
+    });
+
+    // Posts created through the unified composer live in `posts` so they also
+    // show up in the On Planet home feed. Merge them into this page's feed.
+    let unified: OrgPost[] = [];
+    if (!kind) {
+      const { data: pRows } = await supabase
+        .from("posts")
+        .select("id, content, media_urls, image_url, video_url, bg_color, text_color, font_size, created_at")
+        .eq("organization_id", orgId)
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false });
+      unified = ((pRows ?? []) as Record<string, unknown>[]).map((r) => ({
+        id: r.id as string,
+        org_id: orgId,
+        kind: "update",
+        title: "",
+        body: (r.content as string) || null,
+        link_url: null,
+        media_url: (r.image_url as string) || null,
+        video_url: (r.video_url as string) || null,
+        media_urls: Array.isArray(r.media_urls) ? (r.media_urls as string[]) : [],
+        bg_color: (r.bg_color as string) || null,
+        text_color: (r.text_color as string) || null,
+        font_size: (r.font_size as string) || null,
+        created_at: r.created_at as string,
+        source: "posts",
+      }));
+    }
+    setItems([...orgRows, ...unified].sort((a, b) => (a.created_at < b.created_at ? 1 : -1)));
   };
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId, kind]);
 
@@ -2095,7 +2130,10 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
 
   const remove = async (id: string) => {
     if (!confirm("Delete this post?")) return;
-    const { error } = await supabase.from("organization_posts").delete().eq("id", id);
+    const target = items.find((p) => p.id === id);
+    const { error } = target?.source === "posts"
+      ? await supabase.from("posts").update({ is_deleted: true }).eq("id", id)
+      : await supabase.from("organization_posts").delete().eq("id", id);
     if (error) return toast.error(error.message);
     setItems((prev) => prev.filter((p) => p.id !== id));
   };
@@ -2104,9 +2142,21 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     <div className="space-y-4">
       {canManage && (
         <div className="flex justify-end">
-          <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-            <Plus className="h-4 w-4" /> {open ? "Close" : `New ${kind ?? "post"}`}
-          </button>
+          {kind ? (
+            <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
+              <Plus className="h-4 w-4" /> {open ? "Close" : `New ${kind}`}
+            </button>
+          ) : (
+            // Page posts use the same composer as Create > New Post so the
+            // experience (and the post itself) is identical everywhere.
+            <Link
+              to="/create-post"
+              search={{ orgId }}
+              className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+            >
+              <Plus className="h-4 w-4" /> New post
+            </Link>
+          )}
         </div>
       )}
       {open && canManage && (
@@ -2343,15 +2393,27 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     )}
                     {canManage && (
                       <div className="flex flex-wrap gap-2">
-                        <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
-                          <Pencil className="h-3.5 w-3.5" /> Edit
-                        </button>
+                        {p.source === "posts" ? (
+                          <Link to="/edit-post/$id" params={{ id: p.id }} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
+                            <Pencil className="h-3.5 w-3.5" /> Edit
+                          </Link>
+                        ) : (
+                          <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
+                            <Pencil className="h-3.5 w-3.5" /> Edit
+                          </button>
+                        )}
                         <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">
                           <Trash2 className="h-3.5 w-3.5" /> Delete
                         </button>
                       </div>
                     )}
-                    <OrgPostComments orgId={orgId} postId={p.id} />
+                    {p.source === "posts" ? (
+                      <Link to="/posts/$postId" params={{ postId: p.id }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4580a] hover:underline">
+                        Open post to comment
+                      </Link>
+                    ) : (
+                      <OrgPostComments orgId={orgId} postId={p.id} />
+                    )}
                   </div>
                 </div>
               );
