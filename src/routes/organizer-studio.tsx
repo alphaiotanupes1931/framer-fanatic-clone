@@ -1,5 +1,9 @@
 import { siteUrl } from "@/lib/utils";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
+import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
+import { sanitizeErrorMessage } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
