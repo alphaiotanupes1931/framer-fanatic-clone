@@ -170,11 +170,11 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
     <div className={`grid overflow-hidden bg-background ${isTextOnly ? "md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
       {isTextOnly && post.content && (
         <div
-          className="flex aspect-square w-full items-center justify-center overflow-y-auto overscroll-contain p-8 md:aspect-auto md:max-h-[85vh] md:min-h-[85vh]"
+          className="flex aspect-square w-full overflow-y-auto overscroll-contain p-8 md:aspect-auto md:max-h-[85vh] md:min-h-[85vh]"
           style={{ background: post.bg_color || "#111827", color: post.text_color || "#ffffff" }}
         >
           <div
-            className={`whitespace-pre-wrap break-words text-center font-semibold leading-snug ${
+            className={`m-auto whitespace-pre-wrap break-words text-center font-semibold leading-snug ${
               post.font_size === "sm" ? "text-lg" : post.font_size === "lg" ? "text-3xl" : post.font_size === "xl" ? "text-5xl" : "text-2xl"
             }`}
           >
@@ -272,10 +272,10 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
           )}
           {post.content && !isTextOnly && (
             (post.post_type === "text" && post.bg_color) ? (
-              <div className={`m-4 flex aspect-square items-center justify-center overflow-y-auto rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
+              <div className={`m-4 flex aspect-square overflow-y-auto rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words ${
                 post.font_size === "sm" ? "text-base" : post.font_size === "lg" ? "text-2xl" : post.font_size === "xl" ? "text-4xl" : "text-xl"
               }`} style={{ background: post.bg_color, color: post.text_color || "#fff" }}>
-                <MentionText text={post.content} />
+                <div className="m-auto"><MentionText text={post.content} /></div>
               </div>
             ) : (
               <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">

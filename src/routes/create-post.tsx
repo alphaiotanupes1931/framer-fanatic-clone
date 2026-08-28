@@ -234,7 +234,7 @@ function CreatePostPage() {
             <div className="space-y-3">
               {/* Square canvas: what you type here is exactly what gets published. */}
               <div
-                className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-y-auto rounded-2xl p-6 transition"
+                className="mx-auto flex aspect-square w-full max-w-md overflow-y-auto rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
               >
                 <MentionField
@@ -245,7 +245,7 @@ function CreatePostPage() {
                   maxLength={2000}
                   placeholder="Share your thoughts... use @ to mention someone"
                   style={{ color: bg.fg, fontSize: FONT_SIZE_PX[fontSize], lineHeight: 1.25 }}
-                  className="w-full resize-none border-0 bg-transparent text-center font-medium outline-none placeholder:opacity-60"
+                  className="m-auto w-full resize-none border-0 bg-transparent text-center font-medium outline-none placeholder:opacity-60"
                 />
               </div>
               <div>
