@@ -1981,7 +1981,10 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<OrgPost | null>(null);
   const [mediaIdx, setMediaIdx] = useState(0);
+  const [meId, setMeId] = useState<string | null>(null);
+  useEffect(() => { supabase.auth.getSession().then(({ data }) => setMeId(data.session?.user.id ?? null)); }, []);
   useEffect(() => { setMediaIdx(0); }, [active?.id]);
+
   type Mode = "text" | "photo" | "video";
   const [mode, setMode] = useState<Mode>("text");
   const [form, setForm] = useState({ title: "", body: "" });
