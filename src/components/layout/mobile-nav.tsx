@@ -1,7 +1,9 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { prefetchHandlers } from "@/lib/prefetch";
-import { Home, Search, Plus, User, Menu, LogOut } from "lucide-react";
+import { Home, Search, Plus, User, Menu, LogOut, Flag } from "lucide-react";
+import { useUnreadCounts } from "@/hooks/use-unread-counts";
+import { useUserRole } from "@/hooks/use-user-role";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -15,12 +17,20 @@ const primaryItems: Primary[] = [
   { icon: User, label: "Profile", to: "/profile" },
 ];
 
-const moreItems: Primary[] = [...navItems, ...utilItems];
+// Mobile "More" mirrors the desktop sidebar exactly: Home pinned, then the
+// rest alphabetical, with the same Account items.
+const moreItems: Primary[] = [...navItems, ...utilItems]
+  .filter((i) => i.to !== "/dashboard")
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const reportsItem: Primary = { icon: Flag, label: "Content Reports", to: "/reports" };
 
 
 export function MobileNav() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const { unreadMessages, unreadNotifications } = useUnreadCounts();
+  const { isAdmin } = useUserRole();
 
   return (
     <nav
@@ -66,14 +76,30 @@ export function MobileNav() {
             <span className="mt-0.5 text-[10px] font-medium">More</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="top" className="z-[1001] max-h-[70vh] w-56 overflow-y-auto">
-            {moreItems.map(({ icon: Icon, label, to }) => (
-              <DropdownMenuItem key={to + label} asChild>
-                <Link to={to} className="flex cursor-pointer items-center gap-2">
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                  {label}
+            {moreItems.map(({ icon: Icon, label, to }) => {
+              const badge = label === "Notifications" ? unreadNotifications : label === "Messages" ? unreadMessages : 0;
+              return (
+                <DropdownMenuItem key={to + label} asChild>
+                  <Link to={to} className="flex cursor-pointer items-center gap-2">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                    <span className="flex-1">{label}</span>
+                    {badge > 0 && (
+                      <span className="rounded-full bg-[#d4580a] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        {badge > 99 ? "99+" : badge}
+                      </span>
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+              );
+            })}
+            {isAdmin && (
+              <DropdownMenuItem asChild>
+                <Link to={reportsItem.to} className="flex cursor-pointer items-center gap-2">
+                  <Flag className="h-4 w-4 text-muted-foreground" />
+                  <span className="flex-1">{reportsItem.label}</span>
                 </Link>
               </DropdownMenuItem>
-            ))}
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={async () => {
