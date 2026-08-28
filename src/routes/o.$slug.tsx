@@ -1,4 +1,6 @@
 import { OrgPostComments } from "@/components/org/org-post-comments";
+import { PostSplitView } from "@/components/shared/post-split-view";
+
 import { StaffLoginCard } from "@/components/org/staff-login-card";
 import { useStaffMode } from "@/lib/staff-mode";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
