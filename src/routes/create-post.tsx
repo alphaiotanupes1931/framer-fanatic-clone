@@ -245,7 +245,7 @@ function CreatePostPage() {
                   maxLength={2000}
                   placeholder="Share your thoughts... use @ to mention someone"
                   style={{ color: bg.fg, fontSize: FONT_SIZE_PX[fontSize], lineHeight: 1.25 }}
-                  className="w-full resize-none border-0 bg-transparent text-center font-medium outline-none placeholder:opacity-60"
+                  className="m-auto w-full resize-none border-0 bg-transparent text-center font-medium outline-none placeholder:opacity-60"
                 />
               </div>
               <div>
