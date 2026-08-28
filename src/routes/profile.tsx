@@ -104,6 +104,9 @@ function ProfilePage() {
   const publicPreview = preview === "public";
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
   const category = (profile as { category?: string | null } | null)?.category ?? null;
+  // Banners are stored as signed storage URLs, which expire. Re-sign at render
+  // time so the banner never silently vanishes after a week.
+  const bannerSrc = useSmartImageUrl(profile?.banner_url ?? null, "avatars");
   const role = (profile as { role?: string | null } | null)?.role ?? null;
   // Creative interests such as Music do not turn a Resident page into an
   // Artist page. The user's explicit profile role decides the page type.
