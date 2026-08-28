@@ -502,6 +502,7 @@ export type Database = {
           created_at: string
           description: string | null
           ends_at: string | null
+          gallery_urls: string[]
           id: string
           image_url: string | null
           is_exhibition: boolean
@@ -528,6 +529,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ends_at?: string | null
+          gallery_urls?: string[]
           id?: string
           image_url?: string | null
           is_exhibition?: boolean
@@ -554,6 +556,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ends_at?: string | null
+          gallery_urls?: string[]
           id?: string
           image_url?: string | null
           is_exhibition?: boolean
