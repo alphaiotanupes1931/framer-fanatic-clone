@@ -106,18 +106,17 @@ export function CommunityAssociationsPage() {
                 params={{ slug: o.slug }}
                 className="group flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-orange-300 hover:shadow-sm"
               >
-                <div
-                  className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100"
-                  style={
-                    o.avatar_url || o.banner_url
-                      ? {
-                          backgroundImage: `url(${o.avatar_url ?? o.banner_url})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }
-                      : undefined
-                  }
-                />
+                <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100">
+                  {(o.avatar_url || o.banner_url) && (
+                    <Img
+                      src={(o.avatar_url ?? o.banner_url) as string}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="truncate text-[17px] font-bold text-neutral-900">{o.name}</div>
