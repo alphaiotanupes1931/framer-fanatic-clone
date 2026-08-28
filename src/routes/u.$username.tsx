@@ -27,6 +27,7 @@ import {
   ArtistEventsGrouped,
 } from "@/components/artist/artist-tab-sections";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { useSmartImageUrl } from "@/components/smart-image";
 import { PostSplitView } from "@/components/shared/post-split-view";
 import { RichHtml } from "@/components/rich-html";
 import { setMyProfileKind } from "@/lib/profile-kind";
@@ -80,6 +81,8 @@ function PublicProfilePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  // Stored banner URLs are signed and expire; re-sign at render time.
+  const bannerSrc = useSmartImageUrl(profile?.banner_url ?? null, "avatars");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
@@ -341,8 +344,8 @@ function PublicProfilePage() {
       <div
         className="relative h-36 overflow-hidden bg-neutral-200 sm:h-56"
         style={
-          profile.banner_url
-            ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+          bannerSrc
+            ? { backgroundImage: `url(${bannerSrc})`, backgroundSize: "cover", backgroundPosition: "center" }
             : { backgroundColor: "#e7e5e0" }
         }
       >
