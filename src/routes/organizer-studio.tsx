@@ -2,7 +2,6 @@ import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
-import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { sanitizeErrorMessage } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -42,7 +41,6 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
   }, [profile?.id, profile?.stripe_account_id]);
 
   const onboard = async () => {
-    const pre = openExternalWindow();
     setBusy(true);
     setErrorMsg(null);
     try {
@@ -50,7 +48,6 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
       if (!account.ok) {
         setErrorMsg(account.message);
         toast.error(account.message);
-        closeExternalWindow(pre);
         setBusy(false);
         return;
       }
@@ -58,9 +55,10 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
         returnUrl: `${window.location.origin}/organizer-studio?stripe=ok`,
         refreshUrl: `${window.location.origin}/organizer-studio?stripe=refresh`,
       }});
-      navigateExternal(url, pre);
+      // Keep this in the current tab. Preview browsers can leave a pre-opened
+      // popup stuck on about:blank while the secure link is generated.
+      window.location.assign(url);
     } catch (e) {
-      closeExternalWindow(pre);
       const message = sanitizeErrorMessage(e, "Could not open payout setup");
       setErrorMsg(message);
       toast.error(message);
