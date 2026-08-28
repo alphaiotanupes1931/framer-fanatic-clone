@@ -218,6 +218,8 @@ function OrganizerStudioPage() {
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
   const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
+  const [ticketsDirty, setTicketsDirty] = useState(false);
+  const [saveTicketsSignal, setSaveTicketsSignal] = useState(0);
 
   const load = () => {
     if (!me) return;
@@ -312,14 +314,17 @@ function OrganizerStudioPage() {
           </button>
           <button
             onClick={() => {
-              if (selected) { navigate({ to: "/events/$eventId", params: { eventId: selected.id } }); return; }
-              toast.info("Pick an event first, then Save Tickets opens its page.");
-              setTab("manage");
+              if (!selected) { toast.info("Pick an event first, then Save Tickets opens its page."); setTab("manage"); return; }
+              if (ticketsDirty) { setSaveTicketsSignal((s) => s + 1); return; }
+              navigate({ to: "/events/$eventId", params: { eventId: selected.id } });
             }}
+            disabled={!selected}
             className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
-              selected
-                ? "animate-pulse bg-[#d4580a] text-white shadow-[0_0_0_2px_rgba(212,88,10,0.6),0_0_18px_rgba(212,88,10,0.7)]"
-                : "bg-orange-50 text-[#d4580a] shadow-[0_0_0_2px_rgba(212,88,10,0.55),0_0_14px_rgba(212,88,10,0.45)] hover:bg-orange-100"
+              selected && ticketsDirty
+                ? "bg-[#d4580a] text-white shadow hover:brightness-110"
+                : selected
+                  ? "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
+                  : "bg-neutral-100 text-neutral-400"
             }`}
           >
             <Ticket className="h-4 w-4" /> Save Tickets
@@ -388,14 +393,21 @@ function OrganizerStudioPage() {
             )}
           </>
         ) : (
-          <EventDetail evt={selected} onBack={() => setSelected(null)} initialTab={focusEdit ? "details" : undefined} />
+          <EventDetail
+            evt={selected}
+            onBack={() => setSelected(null)}
+            initialTab={focusEdit ? "details" : undefined}
+            onTicketsDirtyChange={setTicketsDirty}
+            saveTicketsSignal={saveTicketsSignal}
+            onTicketsSaved={() => navigate({ to: "/events/$eventId", params: { eventId: selected.id } })}
+          />
         )}
       </div>
     </AppLayout>
   );
 }
 
-function EventDetail({ evt, onBack, initialTab }: { evt: MyEvent; onBack: () => void; initialTab?: "details" }) {
+function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicketsSignal, onTicketsSaved }: { evt: MyEvent; onBack: () => void; initialTab?: "details"; onTicketsDirtyChange?: (dirty: boolean) => void; saveTicketsSignal?: number; onTicketsSaved?: () => void; }) {
   const [tab, setTab] = useState<"details" | "tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">(initialTab ?? "tickets");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
@@ -556,7 +568,7 @@ function EventDetail({ evt, onBack, initialTab }: { evt: MyEvent; onBack: () => 
       )}
 
       {tab === "tickets" && (
-        <TicketsTab evt={evt} soldCount={paid.length} />
+        <TicketsTab evt={evt} soldCount={paid.length} onDirtyChange={onTicketsDirtyChange} saveSignal={saveTicketsSignal} onSaved={onTicketsSaved} />
       )}
 
       {tab === "checkin" && (
@@ -613,10 +625,11 @@ const CATEGORIES = [
   { key: "donation", label: "Donation", Icon: Tag },
 ] as const;
 
-function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
+function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { evt: MyEvent; soldCount: number; onDirtyChange?: (dirty: boolean) => void; saveSignal?: number; onSaved?: () => void; }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [cap, setCap] = useState<string>("");
+  const [originalCap, setOriginalCap] = useState<string>("");
   const [capLoaded, setCapLoaded] = useState(false);
   const [savingCap, setSavingCap] = useState(false);
 
@@ -624,19 +637,37 @@ function TicketsTab({ evt }: { evt: MyEvent; soldCount: number }) {
     supabase.from("events").select("max_tickets_per_buyer").eq("id", evt.id).maybeSingle()
       .then(({ data }) => {
         const v = (data as { max_tickets_per_buyer: number | null } | null)?.max_tickets_per_buyer;
-        setCap(v ? String(v) : "");
+        const str = v ? String(v) : "";
+        setCap(str);
+        setOriginalCap(str);
         setCapLoaded(true);
       });
   }, [evt.id]);
+
+  const capDirty = cap !== originalCap;
+  const isDirty = capDirty || showForm;
+  useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
   const saveCap = async () => {
     setSavingCap(true);
     const value = cap.trim() ? Math.max(1, parseInt(cap, 10)) : null;
     const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value }).eq("id", evt.id);
+    if (error) { toast.error(error.message); setSavingCap(false); return false; }
+    const str = value ? String(value) : "";
+    setOriginalCap(str);
+    setCap(str);
     setSavingCap(false);
-    if (error) toast.error(error.message);
-    else toast.success(value ? `Limited to ${value} per person` : "Limit removed");
+    toast.success(value ? `Limited to ${value} per person` : "Limit removed");
+    return true;
   };
+
+  useEffect(() => {
+    if (saveSignal === undefined || saveSignal === 0) return;
+    (async () => {
+      if (capDirty) { const ok = await saveCap(); if (!ok) return; }
+      onSaved?.();
+    })();
+  }, [saveSignal]);
 
   const load = () => {
     supabase.from("ticket_types").select("*").eq("event_id", evt.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true })
