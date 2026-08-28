@@ -94,7 +94,17 @@ function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
 function OrganizerStudioPage() {
   const me = useCurrentProfile();
   const { event: focusEventId, edit: focusEdit } = Route.useSearch();
-  const [tab, setTab] = useState<"manage" | "create" | "campaign">("manage");
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<"manage" | "stripe" | "campaign">("manage");
+  const [stripeReady, setStripeReady] = useState<boolean | null>(null);
+  const refreshStatusFn = useServerFn(refreshConnectStatus);
+  useEffect(() => {
+    if (!me) return;
+    if (!me.stripe_account_id) { setStripeReady(false); return; }
+    refreshStatusFn()
+      .then((s) => setStripeReady(!!s.chargesEnabled))
+      .catch(() => setStripeReady(!!me.stripe_charges_enabled));
+  }, [me?.id, me?.stripe_account_id]);
   const [events, setEvents] = useState<MyEvent[] | null>(null);
   const [selected, setSelected] = useState<MyEvent | null>(null);
   const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
