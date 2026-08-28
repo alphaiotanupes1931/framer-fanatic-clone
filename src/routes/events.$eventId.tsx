@@ -303,7 +303,7 @@ function EventDetail() {
     </AppLayout>
   );
 
-  const priced = (evt.price_cents ?? 0) > 0;
+  const priced = (evt.price_cents ?? 0) > 0 || tiers.some((t) => (t.price_cents ?? 0) > 0);
   const eventDate = evt.starts_at ? new Date(evt.starts_at) : null;
   const endsDate = evt.ends_at ? new Date(evt.ends_at) : null;
   const locationText = evt.address || evt.location;
@@ -332,7 +332,11 @@ function EventDetail() {
 
         <div>
           <div className="flex items-center gap-2 mb-2">
-            {!priced && <Badge className="bg-green-500/10 text-green-600 border-0">Free</Badge>}
+            {priced ? (
+              <Badge className="bg-[#d4580a]/10 text-[#d4580a] border-0">Paid</Badge>
+            ) : (
+              <Badge className="bg-green-500/10 text-green-600 border-0">Free</Badge>
+            )}
             {!evt.is_published && isOwner && (
               <Badge className="bg-muted text-muted-foreground border-0 flex items-center gap-1">
                 <EyeOff className="w-3 h-3" />Hidden from public
