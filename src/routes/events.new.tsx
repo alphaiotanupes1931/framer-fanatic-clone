@@ -10,7 +10,7 @@ import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { useServerFn } from "@tanstack/react-start";
-import { ensureConnectAccount, createConnectOnboardingLink } from "@/lib/stripe.functions";
+import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
 import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
 import { deleteEventDraft, draftHasContent, getEventDraft, saveEventDraft } from "@/lib/event-drafts";
 
@@ -48,14 +48,18 @@ function NewEventPage() {
   const [pricing, setPricing] = useState<"free" | "paid">("free");
   const [connecting, setConnecting] = useState(false);
   const [created, setCreated] = useState(false);
+  const [checkingStripe, setCheckingStripe] = useState(false);
+  const [stripeVerified, setStripeVerified] = useState(false);
+  const [stripeGate, setStripeGate] = useState(false);
   const [venueBook, setVenueBook] = useState<Array<{ venue_name: string; address: string | null; neighborhood: string | null }>>([]);
   const draftIdRef = useRef<string>(draftId ?? crypto.randomUUID());
   const createdRef = useRef(false);
 
   const ensureFn = useServerFn(ensureConnectAccount);
   const linkFn = useServerFn(createConnectOnboardingLink);
+  const refreshStripeFn = useServerFn(refreshConnectStatus);
 
-  const payoutsReady = !!me?.stripe_charges_enabled;
+  const payoutsReady = !!me?.stripe_charges_enabled || stripeVerified;
   const needsStripe = pricing === "paid" && !!me && !payoutsReady;
 
   const [form, setForm] = useState({
