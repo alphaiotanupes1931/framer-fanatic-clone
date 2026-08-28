@@ -28,16 +28,25 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ connected: boolean; chargesEnabled: boolean } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // Popup: "checking" shows a spinner while the status is fetched (min 2.2s
+  // so the animation is visible), then resolves to connected / not-connected.
+  const [checkPhase, setCheckPhase] = useState<"checking" | "connected" | "not-connected">("checking");
+  const [checkOpen, setCheckOpen] = useState(true);
 
   useEffect(() => {
     if (!profile) return;
-    if (!profile.stripe_account_id) { setStatus({ connected: false, chargesEnabled: false }); onStatus(false); return; }
-    refreshFn()
-      .then((s) => { setStatus(s); onStatus(!!s.chargesEnabled); })
-      .catch(() => {
-        setStatus({ connected: true, chargesEnabled: !!profile.stripe_charges_enabled });
-        onStatus(!!profile.stripe_charges_enabled);
-      });
+    let cancelled = false;
+    const minDelay = new Promise((r) => setTimeout(r, 2200));
+    const fetchStatus = profile.stripe_account_id
+      ? refreshFn().catch(() => ({ connected: true, chargesEnabled: !!profile.stripe_charges_enabled }))
+      : Promise.resolve({ connected: false, chargesEnabled: false });
+    Promise.all([fetchStatus, minDelay]).then(([s]) => {
+      if (cancelled) return;
+      setStatus(s);
+      onStatus(!!s.chargesEnabled);
+      setCheckPhase(s.chargesEnabled ? "connected" : "not-connected");
+    });
+    return () => { cancelled = true; };
   }, [profile?.id, profile?.stripe_account_id]);
 
   const onboard = async () => {
