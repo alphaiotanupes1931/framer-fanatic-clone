@@ -203,6 +203,12 @@ function ProfilePage() {
     setStats((s) => ({ ...s, posts: Math.max(0, s.posts - 1) }));
   };
 
+  // The pin control now lives inside the post view, which writes to the
+  // database itself; here we only mirror the change in the grid.
+  const applyPinToGrid = (id: string, next: boolean) => {
+    setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: next, pin_order: next ? Date.now() : null } : p))));
+  };
+
   const handleTogglePin = async (id: string, next: boolean) => {
     if (next) {
       const pinnedCount = myPosts.filter((p) => p.is_pinned).length;
@@ -788,7 +794,7 @@ function ProfilePage() {
                 postId={myPosts[postViewerIdx].id}
                 meId={profile?.id}
                 onDeleted={() => { handleDeleteMyPost(myPosts[postViewerIdx].id); setPostViewerIdx(null); }}
-                onPinnedChange={(id, pinned) => { void handleTogglePin(id, pinned, true); }}
+                onPinnedChange={applyPinToGrid}
               />
             </div>
           </div>
