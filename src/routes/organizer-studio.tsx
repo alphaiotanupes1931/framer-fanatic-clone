@@ -704,8 +704,10 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
       });
   }, [evt.id]);
 
+  const [createdPending, setCreatedPending] = useState(false);
+
   const capDirty = cap !== originalCap;
-  const isDirty = capDirty || showForm;
+  const isDirty = capDirty || showForm || createdPending;
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
   const saveCap = async () => {
@@ -725,6 +727,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
     if (saveSignal === undefined || saveSignal === 0) return;
     (async () => {
       if (capDirty) { const ok = await saveCap(); if (!ok) return; }
+      setCreatedPending(false);
       onSaved?.();
     })();
   }, [saveSignal]);
@@ -765,7 +768,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
       </div>
 
       {showForm && (
-        <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); load(); }} />
+        <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); setCreatedPending(true); load(); }} />
       )}
 
       {capLoaded && (
