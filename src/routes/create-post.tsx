@@ -1,5 +1,5 @@
 import { MentionText } from "@/components/shared/mention-text";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -57,6 +57,19 @@ const FONT_SIZES: { id: "sm" | "md" | "lg" | "xl"; label: string; cls: string }[
 function CreatePostPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as { orgId?: string };
+  const orgId = typeof search.orgId === "string" ? search.orgId : null;
+  const [org, setOrg] = useState<{ id: string; name: string; slug: string } | null>(null);
+
+  useEffect(() => {
+    if (!orgId) { setOrg(null); return; }
+    supabase
+      .from("organizations")
+      .select("id, name, slug")
+      .eq("id", orgId)
+      .maybeSingle()
+      .then(({ data }) => setOrg(data ?? null));
+  }, [orgId]);
   const imageRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
 
@@ -141,6 +154,7 @@ function CreatePostPage() {
     try {
       const { error } = await supabase.from("posts").insert({
         user_id: me.id,
+        organization_id: orgId,
         content: content.trim(),
         image_url: postType === "photo" ? (mediaUrls[0] || imagePath || null) : null,
         video_url: postType === "video" ? (mediaUrls.find((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) || videoPath || null) : null,
@@ -163,7 +177,8 @@ function CreatePostPage() {
       });
       if (error) throw error;
       toast.success("Posted");
-      navigate({ to: "/profile" });
+      if (org?.slug) navigate({ to: "/o/$slug", params: { slug: org.slug } });
+      else navigate({ to: "/profile" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not post");
     } finally {
@@ -187,7 +202,10 @@ function CreatePostPage() {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
-        <HeroBanner title="Create Post" subtitle="Share what's happening in Baltimore." />
+        <HeroBanner
+          title="Create Post"
+          subtitle={org ? `Posting to ${org.name}. It also appears in the On Planet feed.` : "Share what's happening in Baltimore."}
+        />
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           {/* Type tabs */}
           <div className="flex flex-wrap gap-2">
