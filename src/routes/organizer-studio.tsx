@@ -692,6 +692,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
   const [originalCap, setOriginalCap] = useState<string>("");
   const [capLoaded, setCapLoaded] = useState(false);
   const [savingCap, setSavingCap] = useState(false);
+  const [hasTicketEdits, setHasTicketEdits] = useState(false);
 
   useEffect(() => {
     supabase.from("events").select("max_tickets_per_buyer").eq("id", evt.id).maybeSingle()
@@ -707,8 +708,13 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
   const [createdPending, setCreatedPending] = useState(false);
 
   const capDirty = cap !== originalCap;
-  const isDirty = capDirty || showForm || createdPending;
+  const isDirty = capDirty || showForm || createdPending || hasTicketEdits;
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
+
+  useEffect(() => {
+    setHasTicketEdits(false);
+    setCreatedPending(false);
+  }, [evt.id]);
 
   const saveCap = async () => {
     setSavingCap(true);
@@ -727,7 +733,6 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
     if (saveSignal === undefined || saveSignal === 0) return;
     (async () => {
       if (capDirty) { const ok = await saveCap(); if (!ok) return; }
-      setCreatedPending(false);
       onSaved?.();
     })();
   }, [saveSignal]);
@@ -745,6 +750,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
     const next = types.slice();
     [next[index], next[target]] = [next[target], next[index]];
     setTypes(next);
+    setHasTicketEdits(true);
     const updates = next.map((t, i) =>
       supabase.from("ticket_types").update({ sort_order: i }).eq("id", t.id)
     );
@@ -768,7 +774,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
       </div>
 
       {showForm && (
-        <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); setCreatedPending(true); load(); }} />
+        <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); setCreatedPending(true); setHasTicketEdits(true); load(); }} />
       )}
 
       {capLoaded && (
@@ -782,7 +788,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
               type="number"
               min="1"
               value={cap}
-              onChange={(e) => setCap(e.target.value)}
+              onChange={(e) => { setCap(e.target.value); setHasTicketEdits(true); }}
               placeholder="No limit"
               className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
             />
@@ -830,7 +836,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
                     onClick={async () => {
                       if (!confirm("Delete this ticket type?")) return;
                       const { error } = await supabase.from("ticket_types").delete().eq("id", t.id);
-                      if (error) toast.error(error.message); else { toast.success("Deleted"); load(); }
+                       if (error) toast.error(error.message); else { toast.success("Deleted"); setHasTicketEdits(true); load(); }
                     }}
                     className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-red-600"
                   ><Trash2 className="h-4 w-4" /></button>
