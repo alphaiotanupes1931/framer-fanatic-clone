@@ -1,7 +1,7 @@
 import { siteUrl } from "@/lib/utils";
 import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
@@ -423,18 +423,35 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         </div>
 
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition ${
-                cat === c
-                  ? "bg-[#d4580a] text-white"
-                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
-              }`}
-            >
-              {c}
-            </button>
+          {CATEGORIES.map((c, i) => (
+            <Fragment key={c}>
+              {i === 1 && (
+                <>
+                  <Link
+                    to="/calendar"
+                    className="whitespace-nowrap rounded-full border border-neutral-200 bg-white px-5 py-2 text-sm font-semibold text-neutral-600 transition hover:border-orange-300"
+                  >
+                    Calendar
+                  </Link>
+                  <Link
+                    to="/festivals"
+                    className="whitespace-nowrap rounded-full border border-neutral-200 bg-white px-5 py-2 text-sm font-semibold text-neutral-600 transition hover:border-orange-300"
+                  >
+                    Festivals
+                  </Link>
+                </>
+              )}
+              <button
+                onClick={() => setCat(c)}
+                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition ${
+                  cat === c
+                    ? "bg-[#d4580a] text-white"
+                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                }`}
+              >
+                {c}
+              </button>
+            </Fragment>
           ))}
         </div>
 
