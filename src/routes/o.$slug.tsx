@@ -2007,7 +2007,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   ];
   // Same scale used by the main composer and the feed so posts look identical everywhere.
   const FONT_SIZE_CLASS: Record<string, string> = { sm: "text-base", md: "text-xl", lg: "text-3xl", xl: "text-5xl" };
-  const FONT_SIZE_PX: Record<string, number> = { sm: 16, md: 20, lg: 30, xl: 48 };
+  const FONT_SIZE_PX: Record<string, number> = { sm: 16, md: 20, lg: 26, xl: 34 };
 
   const resetForm = () => {
     setForm({ title: "", body: "" });
