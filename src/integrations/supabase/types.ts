@@ -2318,6 +2318,7 @@ export type Database = {
           media_urls: string[]
           music_url: string | null
           neighborhood: string | null
+          organization_id: string | null
           pin_order: number | null
           post_type: string
           tag: string | null
@@ -2348,6 +2349,7 @@ export type Database = {
           media_urls?: string[]
           music_url?: string | null
           neighborhood?: string | null
+          organization_id?: string | null
           pin_order?: number | null
           post_type?: string
           tag?: string | null
@@ -2378,6 +2380,7 @@ export type Database = {
           media_urls?: string[]
           music_url?: string | null
           neighborhood?: string | null
+          organization_id?: string | null
           pin_order?: number | null
           post_type?: string
           tag?: string | null
@@ -2386,7 +2389,15 @@ export type Database = {
           video_url?: string | null
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_orders: {
         Row: {
