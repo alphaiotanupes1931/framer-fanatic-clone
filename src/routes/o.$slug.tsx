@@ -2407,7 +2407,13 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                         </button>
                       </div>
                     )}
-                    <OrgPostComments orgId={orgId} postId={p.id} />
+                    {p.source === "posts" ? (
+                      <Link to="/posts/$postId" params={{ postId: p.id }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4580a] hover:underline">
+                        Open post to comment
+                      </Link>
+                    ) : (
+                      <OrgPostComments orgId={orgId} postId={p.id} />
+                    )}
                   </div>
                 </div>
               );
