@@ -2203,8 +2203,8 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}>
                 <textarea value={form.body} onChange={(e) => setForm({...form, body: e.target.value})} rows={8}
                   placeholder="Share your thoughts... use @ to mention someone"
-                  style={{ color: bg.fg }}
-                  className={`w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus:outline-none ${FONT_SIZE_CLASS[fontSize]}`} />
+                  style={{ color: bg.fg, fontSize: FONT_SIZE_PX[fontSize], lineHeight: 1.25 }}
+                  className="w-full resize-none border-0 bg-transparent text-center font-medium placeholder:opacity-60 focus:outline-none" />
               </div>
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600">Background</div>
