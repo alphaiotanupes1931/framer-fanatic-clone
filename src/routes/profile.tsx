@@ -657,8 +657,11 @@ function ProfilePage() {
                               )
                             ) : (
                               <div
-                                className="flex h-full w-full items-center justify-center p-3 text-center text-sm font-semibold leading-snug text-foreground sm:text-base"
-                                style={p.bg_color ? { background: p.bg_color, color: p.text_color || "#fff" } : undefined}
+                                className="flex h-full w-full items-center justify-center p-3 text-center font-semibold leading-snug text-foreground"
+                                style={{
+                                  ...(p.bg_color ? { background: p.bg_color, color: p.text_color || "#fff" } : undefined),
+                                  fontSize: (p as any).font_size === "sm" ? 16 : (p as any).font_size === "lg" ? 28 : (p as any).font_size === "xl" ? 36 : 20,
+                                }}
                               >
                                 <span className="line-clamp-6 whitespace-pre-wrap break-words">{p.content || "Post"}</span>
                               </div>
