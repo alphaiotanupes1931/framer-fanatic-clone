@@ -140,13 +140,16 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
           <div className="text-sm font-bold text-neutral-900">
             {priced ? `From $${((e.price_cents ?? 0) / 100).toFixed(2)}` : "Free"}
           </div>
-          <button
-            onClick={() => onBuy(e.id)}
-            disabled={buying}
-            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-500 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-600 disabled:opacity-60"
-          >
-            <Ticket className="h-3.5 w-3.5" /> {priced ? "Get Tickets" : "RSVP"}
-          </button>
+          {!priced && (
+            <button
+              onClick={() => onBuy(e.id)}
+              disabled={buying}
+              className="inline-flex items-center gap-1.5 rounded-full bg-neutral-500 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-600 disabled:opacity-60"
+            >
+              <Ticket className="h-3.5 w-3.5" /> Tickets
+            </button>
+          )}
+
         </div>
         <div className="flex items-center justify-end gap-4 border-t border-neutral-100 pt-3 text-sm text-neutral-500">
           <button type="button" onClick={toggleSave} className={`inline-flex items-center gap-1 transition ${saved ? "text-[#d4580a]" : "hover:text-neutral-800"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
@@ -188,8 +191,28 @@ function EventsPage() {
         .from("events").select("*")
         .gte("starts_at", cutoff.toISOString())
         .order("starts_at", { ascending: true }).limit(24);
-      return (data as EventRow[] | null) ?? [];
+      const rows = (data as EventRow[] | null) ?? [];
+      if (rows.length === 0) return rows;
+      // Prices live on ticket_types, so fold the cheapest paid tier back onto
+      // each event; otherwise paid events render as "Free".
+      const { data: tiers } = await supabase
+        .from("ticket_types")
+        .select("event_id, price_cents, is_active")
+        .in("event_id", rows.map((r) => r.id));
+      const minByEvent = new Map<string, number>();
+      for (const t of (tiers as { event_id: string; price_cents: number | null; is_active?: boolean | null }[] | null) ?? []) {
+        if (t.is_active === false) continue;
+        const cents = t.price_cents ?? 0;
+        if (cents <= 0) continue;
+        const prev = minByEvent.get(t.event_id);
+        if (prev === undefined || cents < prev) minByEvent.set(t.event_id, cents);
+      }
+      return rows.map((r) => {
+        const min = minByEvent.get(r.id);
+        return (r.price_cents ?? 0) > 0 || min === undefined ? r : { ...r, price_cents: min };
+      });
     },
+
   );
   const events = cachedEvents ?? [];
 
