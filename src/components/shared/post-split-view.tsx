@@ -174,7 +174,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
           style={{ background: post.bg_color || "#111827", color: post.text_color || "#ffffff" }}
         >
           <div
-            className={`whitespace-pre-wrap break-words text-center font-semibold leading-snug ${
+            className={`m-auto whitespace-pre-wrap break-words text-center font-semibold leading-snug ${
               post.font_size === "sm" ? "text-lg" : post.font_size === "lg" ? "text-3xl" : post.font_size === "xl" ? "text-5xl" : "text-2xl"
             }`}
           >
