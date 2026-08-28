@@ -314,14 +314,17 @@ function OrganizerStudioPage() {
           </button>
           <button
             onClick={() => {
-              if (selected) { navigate({ to: "/events/$eventId", params: { eventId: selected.id } }); return; }
-              toast.info("Pick an event first, then Save Tickets opens its page.");
-              setTab("manage");
+              if (!selected) { toast.info("Pick an event first, then Save Tickets opens its page."); setTab("manage"); return; }
+              if (ticketsDirty) { setSaveTicketsSignal((s) => s + 1); return; }
+              navigate({ to: "/events/$eventId", params: { eventId: selected.id } });
             }}
+            disabled={!selected}
             className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
-              selected
-                ? "animate-pulse bg-[#d4580a] text-white shadow-[0_0_0_2px_rgba(212,88,10,0.6),0_0_18px_rgba(212,88,10,0.7)]"
-                : "bg-orange-50 text-[#d4580a] shadow-[0_0_0_2px_rgba(212,88,10,0.55),0_0_14px_rgba(212,88,10,0.45)] hover:bg-orange-100"
+              selected && ticketsDirty
+                ? "bg-[#d4580a] text-white shadow hover:brightness-110"
+                : selected
+                  ? "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
+                  : "bg-neutral-100 text-neutral-400"
             }`}
           >
             <Ticket className="h-4 w-4" /> Save Tickets
