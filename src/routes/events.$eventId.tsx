@@ -303,7 +303,7 @@ function EventDetail() {
     </AppLayout>
   );
 
-  const priced = (evt.price_cents ?? 0) > 0;
+  const priced = (evt.price_cents ?? 0) > 0 || tiers.some((t) => (t.price_cents ?? 0) > 0);
   const eventDate = evt.starts_at ? new Date(evt.starts_at) : null;
   const endsDate = evt.ends_at ? new Date(evt.ends_at) : null;
   const locationText = evt.address || evt.location;
