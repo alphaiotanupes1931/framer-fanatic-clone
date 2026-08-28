@@ -393,7 +393,14 @@ function OrganizerStudioPage() {
             )}
           </>
         ) : (
-          <EventDetail evt={selected} onBack={() => setSelected(null)} initialTab={focusEdit ? "details" : undefined} />
+          <EventDetail
+            evt={selected}
+            onBack={() => setSelected(null)}
+            initialTab={focusEdit ? "details" : undefined}
+            onTicketsDirtyChange={setTicketsDirty}
+            saveTicketsSignal={saveTicketsSignal}
+            onTicketsSaved={() => navigate({ to: "/events/$eventId", params: { eventId: selected.id } })}
+          />
         )}
       </div>
     </AppLayout>
