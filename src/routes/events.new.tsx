@@ -37,8 +37,10 @@ function NewEventPage() {
   const [orgName, setOrgName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
@@ -68,6 +70,7 @@ function NewEventPage() {
     neighborhood: "",
     category: "community",
     capacity: "",
+    gallery_urls: [] as string[],
   });
 
   // Resume a saved draft (for example after connecting payouts).
@@ -75,7 +78,7 @@ function NewEventPage() {
     if (!draftId) return;
     const d = getEventDraft(draftId);
     if (!d) return;
-    setForm(d.form);
+    setForm({ gallery_urls: [], ...d.form });
     setStartMode(d.startMode);
     setIsOnline(d.isOnline);
     setPricing(d.pricing);
@@ -157,6 +160,28 @@ function NewEventPage() {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const onPickGallery = async (files: File[]) => {
+    if (!me || files.length === 0) return;
+    setUploadingGallery(true);
+    try {
+      const paths: string[] = [];
+      for (const raw of files) {
+        const file = await compressImage(raw);
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
+        if (error) throw error;
+        paths.push(path);
+      }
+      setForm((f) => ({ ...f, gallery_urls: [...f.gallery_urls, ...paths] }));
+      toast.success(paths.length > 1 ? `${paths.length} photos added` : "Photo added");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploadingGallery(false);
     }
   };
 
@@ -266,6 +291,7 @@ function NewEventPage() {
         description: form.description.trim() || null,
         image_url: form.image_url || null,
         video_url: form.video_url || null,
+        gallery_urls: form.gallery_urls,
         starts_at: starts,
         ends_at: ends,
         venue_name: isOnline ? null : form.venue_name.trim() || null,
@@ -370,6 +396,40 @@ function NewEventPage() {
               inputRef={videoRef}
             />
             <p className="mt-1 text-[11px] text-neutral-500">Shows below the event description. MP4 / MOV up to 200MB.</p>
+          </Field>
+
+          <Field label="Event Photos" optional>
+            <div className="grid grid-cols-3 gap-2">
+              {form.gallery_urls.map((p) => (
+                <div key={p} className="relative overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
+                  <EventImage src={p} alt="Event photo" className="h-24 w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, gallery_urls: f.gallery_urls.filter((x) => x !== p) }))}
+                    className="absolute top-1 right-1 rounded-full bg-black/70 p-1 text-white hover:bg-black"
+                    aria-label="Remove photo"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => galleryRef.current?.click()}
+                className="h-24 rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 hover:border-[#d4580a]/40 flex flex-col items-center justify-center text-neutral-500"
+              >
+                {uploadingGallery ? <Loader2 className="w-5 h-5 animate-spin" /> : <><ImagePlus className="w-5 h-5 mb-1" /><span className="text-[11px] font-medium">Add photos</span></>}
+              </button>
+              <input
+                ref={galleryRef}
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                onChange={(e) => { const fs = Array.from(e.target.files ?? []); if (fs.length) void onPickGallery(fs); e.target.value = ""; }}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-neutral-500">Add as many photos as you like. They show near the bottom of the event page, just above the comments.</p>
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">

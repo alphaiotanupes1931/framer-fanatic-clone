@@ -27,7 +27,7 @@ type EventRow = {
   venue_name: string | null; address: string | null; location: string | null;
   image_url: string | null; starts_at: string; ends_at: string | null;
   price_cents: number | null; status: string; is_published: boolean;
-  neighborhood: string | null; video_url: string | null;
+  neighborhood: string | null; video_url: string | null; gallery_urls: string[] | null;
 };
 
 type TicketTier = {
@@ -515,6 +515,19 @@ function EventDetail() {
           </div>
           </div>
         </div>
+
+        {evt.gallery_urls && evt.gallery_urls.length > 0 && (
+          <div>
+            <h2 className="font-semibold text-foreground mb-2">Photos</h2>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {evt.gallery_urls.map((p) => (
+                <div key={p} className="overflow-hidden rounded-2xl border border-border bg-card">
+                  <EventImage src={p} alt="Event photo" className="h-40 w-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <EventSocial eventId={evt.id} hostId={evt.user_id} />
 
