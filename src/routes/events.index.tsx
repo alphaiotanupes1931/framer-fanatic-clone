@@ -140,13 +140,16 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
           <div className="text-sm font-bold text-neutral-900">
             {priced ? `From $${((e.price_cents ?? 0) / 100).toFixed(2)}` : "Free"}
           </div>
-          <button
-            onClick={() => onBuy(e.id)}
-            disabled={buying}
-            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-500 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-600 disabled:opacity-60"
-          >
-            <Ticket className="h-3.5 w-3.5" /> {priced ? "Get Tickets" : "RSVP"}
-          </button>
+          {!priced && (
+            <button
+              onClick={() => onBuy(e.id)}
+              disabled={buying}
+              className="inline-flex items-center gap-1.5 rounded-full bg-neutral-500 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-600 disabled:opacity-60"
+            >
+              <Ticket className="h-3.5 w-3.5" /> Tickets
+            </button>
+          )}
+
         </div>
         <div className="flex items-center justify-end gap-4 border-t border-neutral-100 pt-3 text-sm text-neutral-500">
           <button type="button" onClick={toggleSave} className={`inline-flex items-center gap-1 transition ${saved ? "text-[#d4580a]" : "hover:text-neutral-800"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
