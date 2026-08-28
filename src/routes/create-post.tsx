@@ -234,7 +234,7 @@ function CreatePostPage() {
             <div className="space-y-3">
               {/* Square canvas: what you type here is exactly what gets published. */}
               <div
-                className="mx-auto flex aspect-square w-full max-w-md items-center justify-center overflow-y-auto rounded-2xl p-6 transition"
+                className="mx-auto flex aspect-square w-full max-w-md overflow-y-auto rounded-2xl p-6 transition"
                 style={{ background: bg.bg || "#F5F5F4", color: bg.fg }}
               >
                 <MentionField
