@@ -54,6 +54,9 @@ const FONT_SIZES: { id: "sm" | "md" | "lg" | "xl"; label: string; cls: string }[
   { id: "xl", label: "XL", cls: "text-5xl" },
 ];
 
+/** Pixel sizes keep the composer in sync with how posts render everywhere else. */
+export const FONT_SIZE_PX: Record<"sm" | "md" | "lg" | "xl", number> = { sm: 16, md: 20, lg: 30, xl: 48 };
+
 function CreatePostPage() {
   const me = useCurrentProfile();
   const navigate = useNavigate();
@@ -241,8 +244,8 @@ function CreatePostPage() {
                   rows={8}
                   maxLength={2000}
                   placeholder="Share your thoughts... use @ to mention someone"
-                  style={{ color: bg.fg }}
-                  className={`w-full resize-none border-0 bg-transparent text-center font-medium outline-none placeholder:opacity-60 ${FONT_SIZES.find((f) => f.id === fontSize)!.cls}`}
+                  style={{ color: bg.fg, fontSize: FONT_SIZE_PX[fontSize], lineHeight: 1.25 }}
+                  className="w-full resize-none border-0 bg-transparent text-center font-medium outline-none placeholder:opacity-60"
                 />
               </div>
               <div>
