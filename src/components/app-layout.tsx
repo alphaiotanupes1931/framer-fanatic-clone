@@ -9,6 +9,7 @@ import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { isStaffAllowedPath, useStaffMode } from "@/lib/staff-mode";
+import { ensureLiveSession } from "@/lib/session-health";
 
 
 export type Profile = {
@@ -65,8 +66,10 @@ function publishProfile(p: Profile | null) {
 function loadProfile(): Promise<Profile | null> {
   if (!profileRequest) {
     profileRequest = (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
+      // Validate the session with the server: a deleted or revoked account
+      // still leaves a token in storage, and trusting it looped the app.
+      const uid = await ensureLiveSession();
+      if (!uid) {
         // No session: drop any optimistically restored profile so guards and
         // the sidebar reflect the real signed-out state.
         profileCache = null;
@@ -84,6 +87,7 @@ function loadProfile(): Promise<Profile | null> {
   }
   return profileRequest;
 }
+
 
 /** Drop the cached profile so the next read refetches (after edits/sign-out). */
 export function invalidateCurrentProfile() {
