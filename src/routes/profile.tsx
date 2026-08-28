@@ -4,7 +4,7 @@ import { emailMyCancellation } from "@/lib/tickets.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { SmartImage } from "@/components/smart-image";
+import { SmartImage, useSmartImageUrl } from "@/components/smart-image";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { FileUpload } from "@/components/shared/file-upload";
@@ -349,7 +349,7 @@ function ProfilePage() {
       <div className="rounded-2xl border border-border bg-card overflow-hidden sm:rounded-3xl">
         <div
           className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
-          style={profile?.banner_url ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+          style={bannerSrc ? { backgroundImage: `url(${bannerSrc})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         >
           <div className="absolute left-3 top-3 z-10 flex items-center gap-2 sm:left-4 sm:top-4">
             {isArtist ? (
