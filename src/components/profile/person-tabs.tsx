@@ -183,7 +183,7 @@ export function PersonSavedTab({ userId, isSelf }: { userId: string; isSelf: boo
               <SmartImage src={media} alt={p.content ?? "Saved post"} bucket="post-media" className="aspect-square w-full object-cover" />
             ) : (
               <div className="flex aspect-square w-full items-center justify-center p-4 text-center text-sm text-muted-foreground">
-                <span className="line-clamp-5">{p.content}</span>
+                <span className="line-clamp-5 whitespace-pre-wrap break-words">{p.content}</span>
               </div>
             )}
           </Link>

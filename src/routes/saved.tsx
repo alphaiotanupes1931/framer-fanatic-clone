@@ -358,7 +358,7 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
             <ImageIcon className="h-3.5 w-3.5" />
             <span className="text-[10px] uppercase tracking-wider">Text post</span>
           </div>
-          <p className={`line-clamp-6 text-[12.5px] leading-snug ${post.bg_color ? "" : "text-foreground"}`}>{post.content}</p>
+          <p className={`line-clamp-6 whitespace-pre-wrap break-words text-[12.5px] leading-snug ${post.bg_color ? "" : "text-foreground"}`}>{post.content}</p>
           <div className="flex items-center gap-2">
             <Avatar className="h-5 w-5">
               {post.author?.avatar_url && <SmartAvatarImage src={post.author.avatar_url} />}

@@ -41,7 +41,7 @@ export function ArtistPostsGrid({ posts }: { posts: any[] }) {
             </div>
           )}
           <div className="mt-2 px-1">
-            {p.content && <div className="text-sm font-semibold text-neutral-800 line-clamp-2">{p.content}</div>}
+            {p.content && <div className="text-sm font-semibold text-neutral-800 line-clamp-2 whitespace-pre-wrap break-words">{p.content}</div>}
             {p.tag && <div className="mt-0.5 text-xs uppercase tracking-wider text-neutral-500">{p.tag}</div>}
           </div>
         </Link>
