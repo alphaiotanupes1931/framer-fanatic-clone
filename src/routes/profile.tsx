@@ -206,7 +206,7 @@ function ProfilePage() {
   // The pin control now lives inside the post view, which writes to the
   // database itself; here we only mirror the change in the grid.
   const applyPinToGrid = (id: string, next: boolean) => {
-    setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: next, pin_order: next ? Date.now() : null } : p))));
+    setMyPosts((prev) => sortPosts(prev.map((p) => (p.id === id ? { ...p, is_pinned: next, pin_order: next ? Math.floor(Date.now() / 1000) : null } : p))));
   };
 
 
