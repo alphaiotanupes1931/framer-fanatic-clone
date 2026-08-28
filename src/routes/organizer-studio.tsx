@@ -568,7 +568,7 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
       )}
 
       {tab === "tickets" && (
-        <TicketsTab evt={evt} soldCount={paid.length} />
+        <TicketsTab evt={evt} soldCount={paid.length} onDirtyChange={onTicketsDirtyChange} saveSignal={saveTicketsSignal} onSaved={onTicketsSaved} />
       )}
 
       {tab === "checkin" && (
