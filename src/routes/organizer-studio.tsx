@@ -28,16 +28,25 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ connected: boolean; chargesEnabled: boolean } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // Popup: "checking" shows a spinner while the status is fetched (min 2.2s
+  // so the animation is visible), then resolves to connected / not-connected.
+  const [checkPhase, setCheckPhase] = useState<"checking" | "connected" | "not-connected">("checking");
+  const [checkOpen, setCheckOpen] = useState(true);
 
   useEffect(() => {
     if (!profile) return;
-    if (!profile.stripe_account_id) { setStatus({ connected: false, chargesEnabled: false }); onStatus(false); return; }
-    refreshFn()
-      .then((s) => { setStatus(s); onStatus(!!s.chargesEnabled); })
-      .catch(() => {
-        setStatus({ connected: true, chargesEnabled: !!profile.stripe_charges_enabled });
-        onStatus(!!profile.stripe_charges_enabled);
-      });
+    let cancelled = false;
+    const minDelay = new Promise((r) => setTimeout(r, 2200));
+    const fetchStatus = profile.stripe_account_id
+      ? refreshFn().catch(() => ({ connected: true, chargesEnabled: !!profile.stripe_charges_enabled }))
+      : Promise.resolve({ connected: false, chargesEnabled: false });
+    Promise.all([fetchStatus, minDelay]).then(([s]) => {
+      if (cancelled) return;
+      setStatus(s);
+      onStatus(!!s.chargesEnabled);
+      setCheckPhase(s.chargesEnabled ? "connected" : "not-connected");
+    });
+    return () => { cancelled = true; };
   }, [profile?.id, profile?.stripe_account_id]);
 
   const onboard = async () => {
@@ -122,6 +131,57 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
           <li>Pick an event under Manage Events, add ticket types, then use Save Tickets to view the live event page.</li>
         </ol>
       </div>
+
+      {checkOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl animate-scale-in">
+            {checkPhase === "checking" ? (
+              <div className="py-4">
+                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-[#d4580a]" />
+                <div className="mt-4 text-sm font-semibold text-neutral-900">Checking your Stripe connection…</div>
+                <p className="mt-1 text-xs text-neutral-500">This takes a moment.</p>
+              </div>
+            ) : checkPhase === "connected" ? (
+              <div className="py-2">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 animate-scale-in">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                </div>
+                <div className="mt-4 text-base font-semibold text-neutral-900">Stripe has been connected</div>
+                <p className="mt-1 text-sm text-neutral-600">You can sell paid tickets right away.</p>
+                <button
+                  onClick={() => setCheckOpen(false)}
+                  className="mt-5 w-full rounded-full bg-[#d4580a] py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Continue
+                </button>
+              </div>
+            ) : (
+              <div className="py-2">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 animate-scale-in">
+                  <AlertCircle className="h-8 w-8 text-red-600" />
+                </div>
+                <div className="mt-4 text-base font-semibold text-neutral-900">Your Stripe account has not been set up</div>
+                <p className="mt-1 text-sm text-neutral-600">Set up payouts before selling paid tickets.</p>
+                <div className="mt-5 space-y-2">
+                  <button
+                    onClick={() => { setCheckOpen(false); onboard(); }}
+                    disabled={busy}
+                    className="w-full rounded-full bg-[#d4580a] py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+                  >
+                    {busy ? "Opening secure form…" : "Set up my Stripe account"}
+                  </button>
+                  <button
+                    onClick={() => setCheckOpen(false)}
+                    className="w-full rounded-full bg-neutral-100 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-200"
+                  >
+                    Not now
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
