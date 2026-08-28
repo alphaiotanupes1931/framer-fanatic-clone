@@ -8,6 +8,7 @@ import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
+import { Img } from "@/components/shared/smart-img";
 import { COMMUNITY_ASSOC_SUBTYPES } from "@/lib/categories";
 
 type Org = {
