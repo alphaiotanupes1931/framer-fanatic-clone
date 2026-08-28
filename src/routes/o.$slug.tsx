@@ -36,6 +36,7 @@ import { TextDocTab } from "@/components/org/text-doc-tab";
 import { CvBioTab } from "@/components/org/cv-bio-tab";
 import { ContactTab } from "@/components/org/contact-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
+import { ExhibitionsTab } from "@/components/org/exhibitions-tab";
 import { MusicTab } from "@/components/org/music-tab";
 import { OrgVideosTab } from "@/components/org/org-videos-tab";
 import { EpkTab } from "@/components/org/epk-tab";
@@ -1210,78 +1211,6 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
 
 function OrgEventCard({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url?: string | null } }) {
   return <OrgEventCardInternal e={e} />;
-}
-
-function ExhibitionsTab({ orgId, canManage: _canManage }: { orgId: string; canManage: boolean }) {
-  type OrgEvent = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url: string | null };
-  const [events, setEvents] = useState<OrgEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("events")
-        .select("id,title,starts_at,venue_name,image_url,video_url")
-        .eq("organization_id", orgId)
-        .eq("is_exhibition", true)
-        .order("starts_at", { ascending: false })
-        .limit(50);
-      const rows = (data ?? []) as OrgEvent[];
-      const seen = new Set<string>();
-      setEvents(rows.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true))));
-      setLoading(false);
-    })();
-  }, [orgId]);
-
-  const now = Date.now();
-  const current = events.filter((e) => new Date(e.starts_at).getTime() >= now).sort((a, b) => +new Date(a.starts_at) - +new Date(b.starts_at));
-  const past = events.filter((e) => new Date(e.starts_at).getTime() < now);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <a
-          href={`/events/new?org=${encodeURIComponent(orgId)}&kind=exhibition`}
-          className="inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-[#d4580a] hover:text-[#d4580a]"
-        >
-          <Plus className="h-4 w-4" /> Create Event
-        </a>
-        <a
-          href="/organizer-studio"
-          className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
-        >
-          <CalendarIcon className="h-4 w-4" /> Organizer Studio
-          <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-        </a>
-      </div>
-
-      {loading ? (
-        <div className="py-8 text-center text-sm text-neutral-500">Loading exhibitions…</div>
-      ) : events.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-neutral-200 bg-card py-12 text-center text-sm text-neutral-500">
-          No exhibitions yet. Click Create Event to add the first one.
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {current.length > 0 && (
-            <section>
-              <h3 className="mb-3 text-sm font-semibold text-neutral-900">Current &amp; Upcoming</h3>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {current.map((e) => <OrgEventCardInternal key={e.id} e={e} />)}
-              </div>
-            </section>
-          )}
-          {past.length > 0 && (
-            <section>
-              <h3 className="mb-3 text-sm font-semibold text-neutral-500">Past</h3>
-              <div className="grid gap-4 sm:grid-cols-2 opacity-70">
-                {past.map((e) => <OrgEventCardInternal key={e.id} e={e} />)}
-              </div>
-            </section>
-          )}
-        </div>
-      )}
-    </div>
-  );
 }
 
 function OrgEventCardInternal({ e }: { e: { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null; video_url?: string | null } }) {

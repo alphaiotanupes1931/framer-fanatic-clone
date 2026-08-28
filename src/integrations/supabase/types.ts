@@ -1272,6 +1272,122 @@ export type Database = {
           },
         ]
       }
+      organization_exhibition_images: {
+        Row: {
+          caption: string | null
+          created_at: string
+          dimensions: string | null
+          exhibition_id: string
+          id: string
+          media_url: string
+          medium: string | null
+          order_index: number
+          org_id: string
+          title: string | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          dimensions?: string | null
+          exhibition_id: string
+          id?: string
+          media_url: string
+          medium?: string | null
+          order_index?: number
+          org_id: string
+          title?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          dimensions?: string | null
+          exhibition_id?: string
+          id?: string
+          media_url?: string
+          medium?: string | null
+          order_index?: number
+          org_id?: string
+          title?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_exhibition_images_exhibition_id_fkey"
+            columns: ["exhibition_id"]
+            isOneToOne: false
+            referencedRelation: "organization_exhibitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_exhibition_images_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_exhibitions: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          id: string
+          location: string | null
+          order_index: number
+          org_id: string
+          statement: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+          venue: string | null
+          year_end: number | null
+          year_start: number | null
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          order_index?: number
+          org_id: string
+          statement?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+          venue?: string | null
+          year_end?: number | null
+          year_start?: number | null
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          order_index?: number
+          org_id?: string
+          statement?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          venue?: string | null
+          year_end?: number | null
+          year_start?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_exhibitions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_followers: {
         Row: {
           created_at: string
