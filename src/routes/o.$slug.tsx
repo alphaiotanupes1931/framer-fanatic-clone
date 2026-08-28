@@ -2005,7 +2005,9 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
     { name: "Violet",    bg: "#7C3AED", fg: "#FFFFFF" },
     { name: "Cream",     bg: "#FDF6E3", fg: "#0F172A" },
   ];
-  const FONT_SIZE_CLASS: Record<string, string> = { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-2xl" };
+  // Same scale used by the main composer and the feed so posts look identical everywhere.
+  const FONT_SIZE_CLASS: Record<string, string> = { sm: "text-base", md: "text-xl", lg: "text-3xl", xl: "text-5xl" };
+  const FONT_SIZE_PX: Record<string, number> = { sm: 16, md: 20, lg: 30, xl: 48 };
 
   const resetForm = () => {
     setForm({ title: "", body: "" });
