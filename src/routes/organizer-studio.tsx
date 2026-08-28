@@ -727,6 +727,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
     if (saveSignal === undefined || saveSignal === 0) return;
     (async () => {
       if (capDirty) { const ok = await saveCap(); if (!ok) return; }
+      setCreatedPending(false);
       onSaved?.();
     })();
   }, [saveSignal]);
