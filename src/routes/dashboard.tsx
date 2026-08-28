@@ -89,6 +89,16 @@ function Dashboard() {
     staleTime: 60_000,
   });
 
+  // Posts made from a page (artist/business/org/group) live in a separate
+  // table, so they need their own read to reach the home feed.
+  const { data: orgPosts = [] } = useQuery({
+    queryKey: ["home-org-posts"],
+    queryFn: () => OrgPost.recent(30),
+    staleTime: 60_000,
+  });
+
+
+
   const { data: stories = [], isLoading: loadingStories } = useQuery({
     queryKey: ["home-stories"],
     queryFn: () => Story.filter({ status: "published" }, "-created_at", 15),
