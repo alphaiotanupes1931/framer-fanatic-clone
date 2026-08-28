@@ -2381,12 +2381,13 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     <div className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</div>
                     {p.body && (
                       p.bg_color && media.length === 0 ? (
-                        <div className={`rounded-xl p-4 text-center font-medium whitespace-pre-wrap ${sizeClass}`}
+                        <div className={`max-h-[60vh] overflow-y-auto overscroll-contain rounded-xl p-4 text-center font-medium whitespace-pre-wrap break-words ${sizeClass}`}
                           style={{ background: p.bg_color, color: p.text_color || "#fff" }}>{p.body}</div>
                       ) : (
-                        <p className={`whitespace-pre-wrap break-words text-neutral-700 ${sizeClass}`}>{p.body}</p>
+                        <p className={`max-h-[60vh] overflow-y-auto overscroll-contain whitespace-pre-wrap break-words text-neutral-700 ${sizeClass}`}>{p.body}</p>
                       )
                     )}
+
                     {p.link_url && (
                       <SmartFileLink href={p.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
                         Download attachment
