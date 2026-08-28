@@ -407,7 +407,7 @@ function OrganizerStudioPage() {
   );
 }
 
-function EventDetail({ evt, onBack, initialTab }: { evt: MyEvent; onBack: () => void; initialTab?: "details" }) {
+function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicketsSignal, onTicketsSaved }: { evt: MyEvent; onBack: () => void; initialTab?: "details"; onTicketsDirtyChange?: (dirty: boolean) => void; saveTicketsSignal?: number; onTicketsSaved?: () => void; }) {
   const [tab, setTab] = useState<"details" | "tickets" | "attendees" | "checkin" | "message" | "promoters" | "payouts" | "analytics">(initialTab ?? "tickets");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [buyers, setBuyers] = useState<Record<string, { name: string | null; email: string | null; avatar_url: string | null }>>({});
