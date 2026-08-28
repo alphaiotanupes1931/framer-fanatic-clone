@@ -51,5 +51,7 @@ export function MentionText({ text, className = "" }: { text: string; className?
     TOKEN_RE.lastIndex = last;
   }
   if (last < text.length) parts.push(<Fragment key={`t${last}`}>{text.slice(last)}</Fragment>);
-  return <span className={className}>{parts}</span>;
+  // Posts are written with line breaks and blank lines; preserve them everywhere
+  // so text looks identical on every page that renders it.
+  return <span className={`whitespace-pre-wrap break-words ${className}`}>{parts}</span>;
 }
