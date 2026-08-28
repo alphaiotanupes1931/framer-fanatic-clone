@@ -13,7 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Users, Compass, MapPin, Loader2, Globe2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { prefetchImageUrls } from "@/components/smart-image";
-import { Post, Story, Event, Follow } from "@/lib/entities";
+import { Post, Story, Event, Follow, OrgPost } from "@/lib/entities";
+import { OrgPostCard } from "@/components/shared/org-post-card";
+
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
