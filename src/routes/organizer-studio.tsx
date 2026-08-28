@@ -18,7 +18,115 @@ import { EventEditForm } from "@/components/organizer/event-edit-form";
 import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
 import { deleteEventDraft, listEventDrafts, type EventDraft } from "@/lib/event-drafts";
-import { FileText } from "lucide-react";
+import { FileText, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
+
+/** Stripe payout connection panel shown inside Organizer Studio. */
+function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
+  const profile = useCurrentProfile();
+  const ensureFn = useServerFn(ensureConnectAccount);
+  const linkFn = useServerFn(createConnectOnboardingLink);
+  const refreshFn = useServerFn(refreshConnectStatus);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<{ connected: boolean; chargesEnabled: boolean } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!profile) return;
+    if (!profile.stripe_account_id) { setStatus({ connected: false, chargesEnabled: false }); onStatus(false); return; }
+    refreshFn()
+      .then((s) => { setStatus(s); onStatus(!!s.chargesEnabled); })
+      .catch(() => {
+        setStatus({ connected: true, chargesEnabled: !!profile.stripe_charges_enabled });
+        onStatus(!!profile.stripe_charges_enabled);
+      });
+  }, [profile?.id, profile?.stripe_account_id]);
+
+  const onboard = async () => {
+    const pre = openExternalWindow();
+    setBusy(true);
+    setErrorMsg(null);
+    try {
+      const account = await ensureFn();
+      if (!account.ok) {
+        setErrorMsg(account.message);
+        toast.error(account.message);
+        closeExternalWindow(pre);
+        setBusy(false);
+        return;
+      }
+      const { url } = await linkFn({ data: {
+        returnUrl: `${window.location.origin}/organizer-studio?stripe=ok`,
+        refreshUrl: `${window.location.origin}/organizer-studio?stripe=refresh`,
+      }});
+      navigateExternal(url, pre);
+    } catch (e) {
+      closeExternalWindow(pre);
+      const message = sanitizeErrorMessage(e, "Could not open payout setup");
+      setErrorMsg(message);
+      toast.error(message);
+      setBusy(false);
+    }
+  };
+
+  const ready = !!status?.chargesEnabled;
+
+  return (
+    <div className="space-y-5">
+      <div
+        className={`rounded-2xl border p-5 ${
+          status && !ready
+            ? "border-red-400 bg-red-50/60 shadow-[0_0_18px_rgba(220,38,38,0.35)]"
+            : "border-neutral-200 bg-white"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <CreditCard className={`mt-0.5 h-5 w-5 ${ready ? "text-[#d4580a]" : "text-red-600"}`} />
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-neutral-900">Your payout account</div>
+            <p className="mt-1 text-sm text-neutral-600">
+              Connect payouts so you can sell paid tickets. Money lands in your own bank account.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {ready ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Connected &amp; active
+                </span>
+              ) : status?.connected ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                  <AlertCircle className="h-3.5 w-3.5" /> Onboarding incomplete
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                  <AlertCircle className="h-3.5 w-3.5" /> Not connected
+                </span>
+              )}
+              <button
+                onClick={onboard}
+                disabled={busy}
+                className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+              >
+                {busy ? "Opening secure form…" : ready ? "Manage payouts" : "Set up payouts"}
+                <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            {errorMsg ? (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{errorMsg}</div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5 text-sm leading-relaxed text-neutral-700">
+        <h4 className="mb-2 text-base font-semibold text-neutral-900">What happens next</h4>
+        <ol className="list-decimal space-y-2 pl-5 text-neutral-600">
+          <li>Verify your identity and add a bank account in the secure form.</li>
+          <li>Come back here. The badge turns green when you can sell paid tickets.</li>
+          <li>Pick an event under Manage Events, add ticket types, then use Save Tickets to view the live event page.</li>
+        </ol>
+      </div>
+    </div>
+  );
+}
 
 /** Unfinished events saved locally from the create-event page. */
 function DraftsSection() {
