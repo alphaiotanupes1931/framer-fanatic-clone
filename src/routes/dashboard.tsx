@@ -27,8 +27,10 @@ type Filter = (typeof FILTERS)[number];
 
 type FeedItem =
   | { type: "post"; date: string; data: any; isNew?: boolean; reason?: string }
+  | { type: "orgpost"; date: string; data: any; isNew?: boolean; reason?: string }
   | { type: "story"; date: string; data: any; isNew?: boolean; reason?: string }
   | { type: "event"; date: string; data: any; isNew?: boolean; reason?: string };
+
 
 function shuffleSeed<T>(arr: T[], seed: number): T[] {
   const a = [...arr];
