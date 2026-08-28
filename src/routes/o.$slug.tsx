@@ -2296,11 +2296,12 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     : <Img src={first} alt={p.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <div
-                    className="flex h-full w-full items-center justify-center p-3 text-center text-[12px] font-medium leading-tight"
+                    className="flex h-full w-full items-center justify-center overflow-hidden p-3 text-center text-[12px] font-medium leading-tight"
                     style={p.bg_color ? { background: p.bg_color, color: p.text_color || "#fff" } : undefined}
                   >
-                    <span className="line-clamp-6">{p.body || p.title}</span>
+                    <span className="line-clamp-6 whitespace-pre-wrap break-words">{p.body || p.title}</span>
                   </div>
+
                 )}
                 {media.length > 1 && (
                   <div className="absolute right-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">1/{media.length}</div>
@@ -2380,12 +2381,13 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     <div className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</div>
                     {p.body && (
                       p.bg_color && media.length === 0 ? (
-                        <div className={`rounded-xl p-4 text-center font-medium whitespace-pre-wrap ${sizeClass}`}
+                        <div className={`max-h-[60vh] overflow-y-auto overscroll-contain rounded-xl p-4 text-center font-medium whitespace-pre-wrap break-words ${sizeClass}`}
                           style={{ background: p.bg_color, color: p.text_color || "#fff" }}>{p.body}</div>
                       ) : (
-                        <p className={`whitespace-pre-wrap break-words text-neutral-700 ${sizeClass}`}>{p.body}</p>
+                        <p className={`max-h-[60vh] overflow-y-auto overscroll-contain whitespace-pre-wrap break-words text-neutral-700 ${sizeClass}`}>{p.body}</p>
                       )
                     )}
+
                     {p.link_url && (
                       <SmartFileLink href={p.link_url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 text-xs font-semibold text-[#d4580a] hover:underline">
                         Download attachment
