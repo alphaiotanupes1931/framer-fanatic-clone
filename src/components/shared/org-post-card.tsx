@@ -51,7 +51,7 @@ export function OrgPostCard({ post }: { post: OrgFeedPost }) {
 
       <div className="px-5 pb-5 sm:px-7">
         {post.title && <h3 className="mb-1 text-base font-semibold">{post.title}</h3>}
-        {post.body && <p className="whitespace-pre-wrap text-sm text-foreground/90">{post.body}</p>}
+        {post.body && <p className="max-h-[60vh] overflow-y-auto overscroll-contain whitespace-pre-wrap break-words text-sm text-foreground/90">{post.body}</p>}
         <Link {...orgPath} className="mt-3 inline-block text-xs font-semibold text-[#d4580a] hover:underline">
           View on {post.org_name}
         </Link>
