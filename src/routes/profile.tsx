@@ -9,7 +9,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { FileUpload } from "@/components/shared/file-upload";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Pin, Gift, ChevronLeft, ChevronRight, X as XIcon, Play, Lock as LockIcon, Globe as GlobeIcon } from "lucide-react";
+import { Camera, MapPin, Pencil, UserPlus, MessageCircle, BookOpen, CreditCard, ExternalLink, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Mic2, Users, LayoutGrid, Rss, Bookmark, Calendar, CalendarCheck, Ticket, Shield, BarChart3, Mail, Palette, Layers, Image as ImageIcon, MessageSquare, FileText, Send, Gift, ChevronLeft, ChevronRight, X as XIcon, Play, Lock as LockIcon, Globe as GlobeIcon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { MessageFollowersModal } from "@/components/message-followers-modal";
 import { Badge } from "@/components/ui/badge";
@@ -674,11 +674,6 @@ function ProfilePage() {
                                   <Play className="h-5 w-5 fill-current" />
                                 </div>
                               </div>
-                            )}
-                            {p.is_pinned && (
-                              <span className="absolute left-1.5 top-1.5 rounded-full bg-white/90 p-1 text-[#d4580a] shadow" title="Pinned">
-                                <Pin className="h-3.5 w-3.5" />
-                              </span>
                             )}
                           </button>
                         );
