@@ -3,14 +3,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, CreditCard, ImagePlus, Loader2, Save, Video as VideoIcon, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, CreditCard, ImagePlus, Loader2, Save, Video as VideoIcon, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { useServerFn } from "@tanstack/react-start";
-import { ensureConnectAccount, createConnectOnboardingLink } from "@/lib/stripe.functions";
+import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
 import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
 import { deleteEventDraft, draftHasContent, getEventDraft, saveEventDraft } from "@/lib/event-drafts";
 
@@ -48,14 +48,18 @@ function NewEventPage() {
   const [pricing, setPricing] = useState<"free" | "paid">("free");
   const [connecting, setConnecting] = useState(false);
   const [created, setCreated] = useState(false);
+  const [checkingStripe, setCheckingStripe] = useState(false);
+  const [stripeVerified, setStripeVerified] = useState(false);
+  const [stripeGate, setStripeGate] = useState(false);
   const [venueBook, setVenueBook] = useState<Array<{ venue_name: string; address: string | null; neighborhood: string | null }>>([]);
   const draftIdRef = useRef<string>(draftId ?? crypto.randomUUID());
   const createdRef = useRef(false);
 
   const ensureFn = useServerFn(ensureConnectAccount);
   const linkFn = useServerFn(createConnectOnboardingLink);
+  const refreshStripeFn = useServerFn(refreshConnectStatus);
 
-  const payoutsReady = !!me?.stripe_charges_enabled;
+  const payoutsReady = !!me?.stripe_charges_enabled || stripeVerified;
   const needsStripe = pricing === "paid" && !!me && !payoutsReady;
 
   const [form, setForm] = useState({
@@ -272,9 +276,29 @@ function NewEventPage() {
       );
       return;
     }
-    if (needsStripe) {
-      toast.error("Connect your Stripe account before creating paid tickets");
-      return;
+    // Paid events need a live payout account. Re-check Stripe directly (the
+    // cached profile flag can lag the webhook) with a short loading animation
+    // so the organizer can see the check happening.
+    if (pricing === "paid" && !payoutsReady) {
+      setCheckingStripe(true);
+      const startedAt = Date.now();
+      try {
+        const res = await refreshStripeFn();
+        const elapsed = Date.now() - startedAt;
+        if (elapsed < 2200) await new Promise((r) => setTimeout(r, 2200 - elapsed));
+        if (res.chargesEnabled) {
+          setStripeVerified(true);
+        } else {
+          setCheckingStripe(false);
+          setStripeGate(true);
+          return;
+        }
+      } catch {
+        setCheckingStripe(false);
+        setStripeGate(true);
+        return;
+      }
+      setCheckingStripe(false);
     }
 
     setSaving(true);
@@ -598,6 +622,45 @@ function NewEventPage() {
               <Loader2 className="h-4 w-4 animate-spin" />
               {pricing === "paid" ? "Stripe is connecting…" : "Opening Organizer Studio…"}
             </div>
+          </div>
+        </div>
+      )}
+
+      {checkingStripe && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-white/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-[#d4580a]" />
+            <div className="text-base font-semibold text-neutral-900">Checking your Stripe connection…</div>
+            <div className="text-sm text-neutral-500">Making sure payouts are ready for paid tickets</div>
+          </div>
+        </div>
+      )}
+
+      {stripeGate && !checkingStripe && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl text-center animate-in zoom-in-95 duration-200">
+            <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-red-50">
+              <AlertTriangle className="h-6 w-6 text-red-500" />
+            </div>
+            <div className="text-base font-semibold text-neutral-900">Your Stripe account has not been set up</div>
+            <p className="mt-1.5 text-sm text-neutral-500">
+              Connect Stripe before creating a paid event so you can receive ticket payouts. Your event is saved as a draft, so you won't lose any progress.
+            </p>
+            <button
+              type="button"
+              onClick={() => { setStripeGate(false); connectStripe(); }}
+              disabled={connecting}
+              className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#d4580a] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+            >
+              {connecting ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening secure form…</> : "Connect Stripe account"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setStripeGate(false)}
+              className="mt-2 w-full rounded-full px-4 py-2 text-sm font-medium text-neutral-500 hover:bg-neutral-100"
+            >
+              Not now
+            </button>
           </div>
         </div>
       )}
