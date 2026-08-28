@@ -13,7 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Users, Compass, MapPin, Loader2, Globe2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { prefetchImageUrls } from "@/components/smart-image";
-import { Post, Story, Event, Follow } from "@/lib/entities";
+import { Post, Story, Event, Follow, OrgPost } from "@/lib/entities";
+import { OrgPostCard } from "@/components/shared/org-post-card";
+
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -25,8 +27,10 @@ type Filter = (typeof FILTERS)[number];
 
 type FeedItem =
   | { type: "post"; date: string; data: any; isNew?: boolean; reason?: string }
+  | { type: "orgpost"; date: string; data: any; isNew?: boolean; reason?: string }
   | { type: "story"; date: string; data: any; isNew?: boolean; reason?: string }
   | { type: "event"; date: string; data: any; isNew?: boolean; reason?: string };
+
 
 function shuffleSeed<T>(arr: T[], seed: number): T[] {
   const a = [...arr];
@@ -84,6 +88,16 @@ function Dashboard() {
     queryFn: () => Post.list("-created_at", 50),
     staleTime: 60_000,
   });
+
+  // Posts made from a page (artist/business/org/group) live in a separate
+  // table, so they need their own read to reach the home feed.
+  const { data: orgPosts = [] } = useQuery({
+    queryKey: ["home-org-posts"],
+    queryFn: () => OrgPost.recent(30),
+    staleTime: 60_000,
+  });
+
+
 
   const { data: stories = [], isLoading: loadingStories } = useQuery({
     queryKey: ["home-stories"],
@@ -157,11 +171,18 @@ function Dashboard() {
           isNew: !followedIds.has(e.user_id),
         }));
 
+      const orgPostStream: FeedItem[] = (orgPosts as any[]).slice(0, 25).map((p) => ({
+        type: "orgpost" as const,
+        date: p.created_at,
+        data: p,
+      }));
+
       // Strict newest -> oldest across all content types.
-      const merged: FeedItem[] = [...storyStream, ...postStream, ...eventStream].sort(
+      const merged: FeedItem[] = [...storyStream, ...postStream, ...orgPostStream, ...eventStream].sort(
         (a, b) => +new Date(b.date) - +new Date(a.date),
       );
       return merged.slice(0, 60);
+
     }
 
     if (activeFilter === "Following") {
@@ -196,12 +217,14 @@ function Dashboard() {
     // Discover
     const all: FeedItem[] = [
       ...filteredPosts.map((p) => ({ type: "post" as const, date: p.created_at, data: p, isNew: true })),
+      ...(orgPosts as any[]).map((p) => ({ type: "orgpost" as const, date: p.created_at, data: p, isNew: true })),
       ...(stories as any[]).map((s) => ({ type: "story" as const, date: s.created_at, data: s, isNew: true })),
       ...(events as any[]).map((e) => ({ type: "event" as const, date: e.created_at, data: e, isNew: true })),
     ];
     const dayOfYear = Math.floor(Date.now() / 86400000);
     return shuffleSeed(all, dayOfYear).slice(0, 40);
-  }, [activeFilter, posts, stories, events, follows, currentUser]);
+  }, [activeFilter, posts, orgPosts, stories, events, follows, currentUser]);
+
 
   const orderedFeedItems = useMemo(
     () => [...feedItems].sort((a, b) => +new Date(b.date) - +new Date(a.date)),
@@ -321,6 +344,8 @@ function Dashboard() {
             {visibleItems.map((item, idx) => {
               const inner = (() => {
                 if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} onPinnedChange={(id, pinned, pinnedAt) => qc.setQueryData<any[]>(["home-posts"], (old = []) => old.map((post) => post.id === id ? { ...post, featured: pinned, featured_at: pinnedAt } : post))} reason={item.reason} />;
+                if (item.type === "orgpost") return <OrgPostCard post={item.data} />;
+
                 if (item.type === "story") return (
                   <div className="space-y-0">
                     <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Story</span>

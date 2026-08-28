@@ -101,6 +101,44 @@ export const Post = {
   },
 };
 
+// Posts made from a page (artist, business, arts org, group). These live in
+// organization_posts, so the home feed has to read them separately or page
+// posts never reach "On Planet".
+export const OrgPost = {
+  async recent(limit = 30) {
+    const { data, error } = await supabase
+      .from("organization_posts")
+      .select("id, org_id, title, body, media_url, media_urls, video_url, created_at")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    const rows = data ?? [];
+    const orgIds = Array.from(new Set(rows.map((r) => r.org_id)));
+    if (!orgIds.length) return [];
+    const { data: orgs } = await supabase
+      .from("organizations")
+      .select("id, name, slug, avatar_url")
+      .in("id", orgIds);
+    const byId = new Map((orgs ?? []).map((o) => [o.id, o]));
+    return rows
+      .map((r) => {
+        const o = byId.get(r.org_id);
+        if (!o?.slug) return null;
+        return {
+          ...r,
+          org_name: o.name ?? "Page",
+          org_slug: o.slug,
+          org_avatar: o.avatar_url ?? null,
+        };
+      })
+      .filter(Boolean) as Array<
+        (typeof rows)[number] & { org_name: string; org_slug: string; org_avatar: string | null }
+      >;
+  },
+};
+
+
+
 export const Story = {
   async filter(where: Record<string, unknown>, order?: string, limit = 15) {
     const { column, ascending } = parseOrder(order);
