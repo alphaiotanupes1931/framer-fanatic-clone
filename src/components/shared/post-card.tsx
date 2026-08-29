@@ -371,9 +371,19 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
       )}
       <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
-        <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
-          <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
-        </button>
+        <div className="flex items-center gap-1">
+          <button onClick={toggleLike} className={`flex items-center transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={liked ? "Unlike" : "Like"}>
+            <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+          </button>
+          <button
+            onClick={() => likes > 0 && setLikesOpen(true)}
+            className="transition hover:text-foreground hover:underline"
+            title="See who liked this"
+          >
+            {likes}
+          </button>
+        </div>
+
         <button onClick={openComments} className="flex items-center gap-1.5 transition hover:text-foreground">
           <MessageCircle className="h-4 w-4" /> {commentCount}
         </button>
