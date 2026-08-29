@@ -598,6 +598,51 @@ function CreatePostPage() {
           </div>
         </div>
       </div>
+
+      {/* Photo editor: pick a shape, zoom and drag so nothing important gets cut off. */}
+      {cropFile && (
+        <div className="fixed inset-x-0 bottom-24 z-[60] flex justify-center px-4">
+          <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-3 py-2 shadow-lg">
+            <span className="text-xs font-semibold text-neutral-600">Shape</span>
+            {[
+              { label: "1:1", value: 1 },
+              { label: "4:5", value: 4 / 5 },
+              { label: "16:9", value: 16 / 9 },
+            ].map((opt) => (
+              <button
+                key={opt.label}
+                type="button"
+                onClick={() => setCropAspect(opt.value)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  Math.abs(cropAspect - opt.value) < 0.01 ? "bg-[#d4580a] text-white" : "bg-neutral-100 text-neutral-700"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <ImageCropDialog
+        file={cropFile}
+        aspect={cropAspect}
+        maxEdge={1440}
+        title="Crop your photo"
+        open={!!cropFile}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCropFile(null);
+            setCropIndex(null);
+            setCropQueue((queue) => {
+              if (!queue.length) return queue;
+              setCropFile(queue[0]);
+              return queue.slice(1);
+            });
+          }
+        }}
+        onCropped={(file) => void handleCropped(file)}
+      />
     </AppLayout>
+
   );
 }
