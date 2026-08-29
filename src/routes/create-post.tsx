@@ -12,6 +12,7 @@ import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Glo
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 
 export const Route = createFileRoute("/create-post")({
   component: CreatePostPage,
@@ -93,6 +94,13 @@ function CreatePostPage() {
   const [excluded, setExcluded] = useState<{ id: string; display_name: string | null; username: string | null }[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Photo editing: every selected image goes through the crop dialog first, and
+  // originals are kept so a photo can be re-cropped after it is added.
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropAspect, setCropAspect] = useState(1);
+  const [cropIndex, setCropIndex] = useState<number | null>(null);
+  const originalsRef = useRef<Record<string, File>>({});
 
   const contentValid = content.trim().length === 0 || content.trim().length <= 2000;
   const hasMedia =
@@ -147,6 +155,60 @@ function CreatePostPage() {
       return null;
     } finally {
       setUploading(false);
+    }
+  };
+
+  /** Push freshly picked files into the crop queue (images) or upload directly (videos). */
+  const handleFiles = async (files: File[]) => {
+    const images = files.filter((f) => !f.type.startsWith("video/"));
+    const videos = files.filter((f) => f.type.startsWith("video/"));
+    for (const v of videos) {
+      const url = await uploadTo("post-media", v, "video");
+      if (url) setMediaUrls((prev) => [...prev, url]);
+    }
+    if (images.length) {
+      setCropIndex(null);
+      setCropFile(images[0]);
+      setCropQueue(images.slice(1));
+    }
+  };
+
+  /** Crop finished: upload the edited photo and move on to the next one. */
+  const handleCropped = async (file: File) => {
+    const url = await uploadTo("post-media", file, "image");
+    if (url) {
+      originalsRef.current[url] = file;
+      setMediaUrls((prev) => {
+        if (cropIndex === null) return [...prev, url];
+        const next = [...prev];
+        next[cropIndex] = url;
+        return next;
+      });
+    }
+    setCropIndex(null);
+    setCropFile(null);
+    setCropQueue((queue) => {
+      if (!queue.length) return queue;
+      setCropFile(queue[0]);
+      return queue.slice(1);
+    });
+  };
+
+  /** Re-open the editor for a photo that was already added. */
+  const editExisting = async (url: string, index: number) => {
+    const cached = originalsRef.current[url];
+    if (cached) {
+      setCropIndex(index);
+      setCropFile(cached);
+      return;
+    }
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      setCropIndex(index);
+      setCropFile(new File([blob], "photo.jpg", { type: blob.type || "image/jpeg" }));
+    } catch {
+      toast.error("Could not open that photo for editing");
     }
   };
 
@@ -314,13 +376,9 @@ function CreatePostPage() {
             <div className="space-y-1.5">
               <input ref={imageRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={async (e) => {
                 const files = Array.from(e.target.files ?? []);
-                if (!files.length) return;
-                for (const f of files) {
-                  const kind: "image" | "video" = f.type.startsWith("video/") ? "video" : "image";
-                  const p = await uploadTo("post-media", f, kind);
-                  if (p) setMediaUrls((prev) => [...prev, p]);
-                }
                 if (imageRef.current) imageRef.current.value = "";
+                if (!files.length) return;
+                await handleFiles(files);
               }} />
               {mediaUrls.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
@@ -329,9 +387,18 @@ function CreatePostPage() {
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                         {isVideo ? (
-                          <SmartVideo src={u} className="h-32 w-full object-cover" />
+                          <SmartVideo src={u} className="h-32 w-full bg-black object-contain" />
                         ) : (
                           <Img src={u} alt="" className="h-32 w-full object-cover" />
+                        )}
+                        {!isVideo && (
+                          <button
+                            type="button"
+                            onClick={() => void editExisting(u, i)}
+                            className="absolute bottom-1 left-1 rounded-full bg-black/60 px-2 py-1 text-[11px] font-semibold text-white opacity-0 transition group-hover:opacity-100"
+                          >
+                            Crop
+                          </button>
                         )}
                         <button
                           type="button"
@@ -358,13 +425,9 @@ function CreatePostPage() {
             <div className="space-y-1.5">
               <input ref={videoRef} type="file" accept="video/*,image/*" multiple className="hidden" onChange={async (e) => {
                 const files = Array.from(e.target.files ?? []);
-                if (!files.length) return;
-                for (const f of files) {
-                  const kind: "image" | "video" = f.type.startsWith("video/") ? "video" : "image";
-                  const p = await uploadTo("post-media", f, kind);
-                  if (p) setMediaUrls((prev) => [...prev, p]);
-                }
                 if (videoRef.current) videoRef.current.value = "";
+                if (!files.length) return;
+                await handleFiles(files);
               }} />
               {mediaUrls.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
@@ -373,9 +436,18 @@ function CreatePostPage() {
                     return (
                       <div key={u} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                         {isVideo ? (
-                          <SmartVideo src={u} className="h-32 w-full object-cover" />
+                          <SmartVideo src={u} className="h-32 w-full bg-black object-contain" />
                         ) : (
                           <Img src={u} alt="" className="h-32 w-full object-cover" />
+                        )}
+                        {!isVideo && (
+                          <button
+                            type="button"
+                            onClick={() => void editExisting(u, i)}
+                            className="absolute bottom-1 left-1 rounded-full bg-black/60 px-2 py-1 text-[11px] font-semibold text-white opacity-0 transition group-hover:opacity-100"
+                          >
+                            Crop
+                          </button>
                         )}
                         <button
                           type="button"
@@ -526,6 +598,49 @@ function CreatePostPage() {
           </div>
         </div>
       </div>
+
+      <ImageCropDialog
+        file={cropFile}
+        aspect={cropAspect}
+        maxEdge={1440}
+        title="Crop your photo"
+        open={!!cropFile}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCropFile(null);
+            setCropIndex(null);
+            setCropQueue((queue) => {
+              if (!queue.length) return queue;
+              setCropFile(queue[0]);
+              return queue.slice(1);
+            });
+          }
+        }}
+        onCropped={(file) => void handleCropped(file)}
+        circleGuide={false}
+        extraControls={
+          <div className="flex w-full items-center justify-center gap-2">
+            <span className="text-xs text-muted-foreground">Shape</span>
+            {[
+              { label: "1:1", value: 1 },
+              { label: "4:5", value: 4 / 5 },
+              { label: "16:9", value: 16 / 9 },
+            ].map((opt) => (
+              <button
+                key={opt.label}
+                type="button"
+                onClick={() => setCropAspect(opt.value)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  Math.abs(cropAspect - opt.value) < 0.01 ? "bg-[#d4580a] text-white" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
     </AppLayout>
+
   );
 }

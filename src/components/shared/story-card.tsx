@@ -2,6 +2,7 @@ import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ReportButton } from "@/components/shared/report-button";
+import { LikesListDialog } from "@/components/likes-list-dialog";
 import { Clock, Heart, MessageCircle, Bookmark, Trash2, Send, Star, MoreHorizontal, Pencil } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
   const authorHandle = story.author_username || null;
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(story.likes_count || 0);
+  const [likesOpen, setLikesOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -245,9 +247,14 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         )}
       </Link>
       <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 text-sm text-muted-foreground sm:px-6 sm:py-3">
-        <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Like">
-          <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button onClick={toggleLike} className={`transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Like">
+            <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+          </button>
+          <button onClick={() => likes > 0 && setLikesOpen(true)} className="transition hover:text-foreground hover:underline" title="See who liked this">
+            {likes}
+          </button>
+        </div>
         <Link
           to="/stories/$storyId"
           params={{ storyId: story.id }}
@@ -291,6 +298,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           author: story.author_name || null,
         }}
       />
+      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={story.id} kind="story" />
     </article>
   );
 }

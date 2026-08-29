@@ -15,6 +15,10 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCropped: (file: File) => void;
+  /** Show the round avatar guide (defaults to on for square crops). */
+  circleGuide?: boolean;
+  /** Extra controls rendered under the zoom slider, e.g. aspect ratio chips. */
+  extraControls?: React.ReactNode;
 };
 
 const FRAME = 288;
@@ -27,6 +31,8 @@ export function ImageCropDialog({
   open,
   onOpenChange,
   onCropped,
+  circleGuide,
+  extraControls,
 }: Props) {
   const [img, setImg] = useState<HTMLImageElement | ImageBitmap | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -162,12 +168,13 @@ export function ImageCropDialog({
                 className="cursor-grab active:cursor-grabbing"
               />
             )}
-            {aspect === 1 && <div className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-white/80" />}
+            {(circleGuide ?? aspect === 1) && <div className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-white/80" />}
           </div>
           <div className="flex w-full items-center gap-3">
             <span className="text-xs text-muted-foreground">Zoom</span>
             <Slider value={[zoom]} min={1} max={4} step={0.01} onValueChange={(v) => setZoom(v[0])} className="flex-1" />
           </div>
+          {extraControls}
           <p className="text-center text-xs text-muted-foreground">Drag the photo to reposition it.</p>
         </div>
         <DialogFooter>
