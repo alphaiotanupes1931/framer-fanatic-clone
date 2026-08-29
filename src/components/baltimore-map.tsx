@@ -54,8 +54,11 @@ export function BaltimoreMap({
       const [{ data: evData }, { data: nData }] = await Promise.all([
         supabase
           .from("events")
-          .select("id, title, starts_at, location, image_url, description, latitude, longitude, neighborhood")
-          .order("starts_at", { ascending: false }),
+          .select("id, title, starts_at, ends_at, location, image_url, description, latitude, longitude, neighborhood")
+          // Only events that have not finished yet stay on the map.
+          .or(`ends_at.gte.${new Date().toISOString()},and(ends_at.is.null,starts_at.gte.${new Date().toISOString()})`)
+          .order("starts_at", { ascending: true }),
+
         supabase
           .from("neighborhoods")
           .select("name, latitude, longitude")
