@@ -16,6 +16,7 @@ import { useReaction } from "@/hooks/use-reaction";
 import { FollowButton } from "@/components/shared/follow-button";
 import { MentionText } from "@/components/shared/mention-text";
 import { MentionField } from "@/components/shared/mention-input";
+import { LikesListDialog } from "@/components/likes-list-dialog";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -41,6 +42,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(!cached);
   const [shareOpen, setShareOpen] = useState(false);
+  const [likesOpen, setLikesOpen] = useState(false);
   const [mediaIdx, setMediaIdx] = useState(0);
 
   const togglePin = async () => {
@@ -311,9 +313,18 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
 
         <div className="border-t border-border">
           <div className="flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground">
-            <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
-              <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {post.likes_count ?? 0}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button onClick={toggleLike} className={`transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={liked ? "Unlike" : "Like"}>
+                <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
+              </button>
+              <button
+                onClick={() => (post.likes_count ?? 0) > 0 && setLikesOpen(true)}
+                className="transition hover:text-foreground hover:underline"
+                title="See who liked this"
+              >
+                {post.likes_count ?? 0}
+              </button>
+            </div>
             <div className="flex items-center gap-1.5"><MessageCircle className="h-5 w-5" /> {comments.length}</div>
             <button onClick={() => setShareOpen(true)} aria-label="Share" title="Share" className="hover:text-foreground">
               <Send className="h-5 w-5 -rotate-45" />
@@ -340,6 +351,8 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
           )}
         </div>
       </div>
+
+      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={post.id} kind="post" />
 
       <ShareToUsersDialog
         open={shareOpen}
