@@ -14,6 +14,13 @@ import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus
 import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
 import { deleteEventDraft, draftHasContent, getEventDraft, saveEventDraft } from "@/lib/event-drafts";
 
+/** `datetime-local` value for "now" in the user's own timezone. */
+function localNowValue(offsetMinutes = 0) {
+  const d = new Date(Date.now() + offsetMinutes * 60000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export const Route = createFileRoute("/events/new")({
   component: NewEventPage,
   head: () => ({ meta: [{ title: "Create Event - Planet Baltimore" }] }),
@@ -301,6 +308,23 @@ function NewEventPage() {
       setCheckingStripe(false);
     }
 
+    // Events cannot be scheduled in the past.
+    if (startMode === "set") {
+      const startsDate = new Date(form.starts_at);
+      if (Number.isNaN(startsDate.getTime())) { toast.error("Pick a valid start date and time"); return; }
+      if (startsDate.getTime() < Date.now() - 60000) {
+        toast.error("Start date and time cannot be in the past");
+        return;
+      }
+    }
+    if (form.ends_at) {
+      const endsDate = new Date(form.ends_at);
+      const startsRef = startMode === "now" ? new Date() : new Date(form.starts_at);
+      if (Number.isNaN(endsDate.getTime())) { toast.error("Pick a valid end date and time"); return; }
+      if (endsDate.getTime() < Date.now() - 60000) { toast.error("End date and time cannot be in the past"); return; }
+      if (endsDate.getTime() <= startsRef.getTime()) { toast.error("End time must be after the start time"); return; }
+    }
+
     setSaving(true);
     try {
       const starts = startMode === "now" ? new Date().toISOString() : new Date(form.starts_at).toISOString();
@@ -466,13 +490,13 @@ function NewEventPage() {
                   className={`px-4 py-1.5 rounded-md text-sm font-medium ${startMode === "now" ? "bg-neutral-700 text-white" : "bg-neutral-100 text-neutral-600"}`}>Immediately</button>
               </div>
               {startMode === "set" && (
-                <input type="datetime-local" className={inputCls} value={form.starts_at} onChange={(e) => set("starts_at", e.target.value)} />
+                <input type="datetime-local" min={localNowValue()} className={inputCls} value={form.starts_at} onChange={(e) => set("starts_at", e.target.value)} />
               )}
             </Field>
 
             <Field label="End Date & Time" optional>
               <div className="h-[34px] mb-2" />
-              <input type="datetime-local" className={inputCls} value={form.ends_at} onChange={(e) => set("ends_at", e.target.value)} />
+              <input type="datetime-local" min={form.starts_at || localNowValue()} className={inputCls} value={form.ends_at} onChange={(e) => set("ends_at", e.target.value)} />
             </Field>
           </div>
 
