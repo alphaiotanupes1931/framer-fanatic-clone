@@ -125,7 +125,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
     <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
       <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
         {showImage ? (
-        <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+        <div className="relative aspect-[16/7] overflow-hidden bg-muted">
           <Img
             src={resolvedImage}
             alt={event.title}
@@ -155,34 +155,34 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
             )}
           </div>
         )}
-        <div className="p-4 sm:p-5">
-        <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
+        <div className="p-3.5 sm:p-4">
+        <div className="mb-1.5 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
           <Clock className="h-3.5 w-3.5" />
           <span className="truncate">{eventDate ? format(eventDate, "EEE, MMM d · h:mm a") : "Date TBD"}</span>
         </div>
         <h3 className="line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{event.title}</h3>
         {previewText && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">{previewText}</p>}
-        <div className="mt-3 flex items-center gap-1 text-[11px] text-muted-foreground sm:text-xs">
+        <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground sm:text-xs">
           <MapPin className="h-3 w-3" />
           <span className="truncate">{event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore"}</span>
         </div>
         </div>
       </Link>
-      <div className="flex items-center gap-5 border-t border-border/50 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-5">
-        <button type="button" onClick={toggleSave} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
-          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+      <div className="flex items-center gap-4 border-t border-border/50 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-5">
+        <button type="button" onClick={toggleSave} className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
+          <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
           {saved ? "Saved" : "Save"}
         </button>
-        <button type="button" onClick={openShare} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
-          <Send className="h-5 w-5 -rotate-45" />
+        <button type="button" onClick={openShare} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
+          <Send className="h-4 w-4 -rotate-45" />
         </button>
-        <button type="button" onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
-          <Share2 className="h-5 w-5" />
+        <button type="button" onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+          <Share2 className="h-4 w-4" />
         </button>
         <ReportButton contentType="event" contentId={event.id} className="ml-auto" />
         {canDelete && (
           <button type="button" onClick={handleDelete} disabled={deleting} className="flex items-center text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-4 w-4" />
           </button>
         )}
       </div>

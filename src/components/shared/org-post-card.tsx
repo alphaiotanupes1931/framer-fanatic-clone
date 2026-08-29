@@ -27,18 +27,18 @@ export function OrgPostCard({ post }: { post: OrgFeedPost }) {
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
       {post.video_url ? (
-        <SmartVideo src={post.video_url} className="max-h-[560px] w-full bg-black object-contain" controls />
+        <SmartVideo src={post.video_url} className="max-h-[320px] w-full bg-black object-contain" controls />
       ) : first ? (
         <Link {...orgPath}>
-          <Img src={first} alt={post.title || post.org_name} className="max-h-[560px] w-full object-cover" />
+          <Img src={first} alt={post.title || post.org_name} className="max-h-[320px] w-full object-cover" />
         </Link>
       ) : null}
 
-      <header className="mx-4 mb-1 mt-3 flex items-center gap-3 rounded-2xl bg-muted/40 px-4 py-3 sm:mx-6">
+      <header className="mx-3 mb-1 mt-2 flex items-center gap-2.5 rounded-xl bg-muted/40 px-3 py-2 sm:mx-5">
         <Link {...orgPath} className="shrink-0">
-          <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
+          <Avatar className="h-9 w-9 sm:h-10 sm:w-10">
             {post.org_avatar && <SmartAvatarImage src={post.org_avatar} />}
-            <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
+            <AvatarFallback className="bg-muted text-xs text-muted-foreground">{initial}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="min-w-0">
@@ -49,10 +49,10 @@ export function OrgPostCard({ post }: { post: OrgFeedPost }) {
         </div>
       </header>
 
-      <div className="px-5 pb-5 sm:px-7">
-        {post.title && <h3 className="mb-1 text-base font-semibold">{post.title}</h3>}
-        {post.body && <p className="max-h-[60vh] overflow-y-auto overscroll-contain whitespace-pre-wrap break-words text-sm text-foreground/90">{post.body}</p>}
-        <Link {...orgPath} className="mt-3 inline-block text-xs font-semibold text-[#d4580a] hover:underline">
+      <div className="px-4 pb-4 sm:px-6">
+        {post.title && <h3 className="mb-1 text-sm font-semibold">{post.title}</h3>}
+        {post.body && <p className="max-h-[180px] overflow-y-auto overscroll-contain whitespace-pre-wrap break-words text-sm text-foreground/90">{post.body}</p>}
+        <Link {...orgPath} className="mt-2 inline-block text-xs font-semibold text-[#d4580a] hover:underline">
           View on {post.org_name}
         </Link>
       </div>

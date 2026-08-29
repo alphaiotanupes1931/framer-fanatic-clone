@@ -166,7 +166,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         </div>
         <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         {story.cover_url && (
-          <div className="relative mt-3 aspect-[2/1] overflow-hidden bg-muted">
+          <div className="relative mt-3 aspect-[16/7] overflow-hidden bg-muted">
             <Img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
             {isAdmin && (
               <button onClick={toggleFeatured} disabled={featuring} className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${isFeatured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}>
@@ -175,10 +175,10 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
             )}
           </div>
         )}
-        <div className="p-5">
-          <h2 className="line-clamp-2 font-serif text-xl font-bold text-foreground transition-colors group-hover:text-[#d4580a] break-words">{story.title}</h2>
-          {cleanExcerpt && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground break-words">{cleanExcerpt}</p>}
-          <div className="mt-3 text-[11px] text-slate-500">
+        <div className="p-4">
+          <h2 className="line-clamp-2 font-serif text-lg font-bold text-foreground transition-colors group-hover:text-[#d4580a] break-words">{story.title}</h2>
+          {cleanExcerpt && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground break-words">{cleanExcerpt}</p>}
+          <div className="mt-2 text-[11px] text-slate-500">
             {story.read_minutes || 5} min read
           </div>
         </div>
@@ -190,16 +190,16 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-200 hover:shadow-md">
-      <div className="flex items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+      <div className="flex items-center gap-3 px-4 pt-3 sm:px-6 sm:pt-4">
         <AuthorLink handle={authorHandle} className="flex min-w-0 flex-1 items-center gap-3">
-          <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
+          <Avatar className="h-9 w-9 shrink-0 sm:h-10 sm:w-10">
             <SmartAvatarImage src={story.author_avatar ?? undefined} />
-            <AvatarFallback className="bg-muted text-sm text-muted-foreground">
+            <AvatarFallback className="bg-muted text-xs text-muted-foreground">
               {story.author_name?.charAt(0) ?? "?"}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground sm:text-base">
+          <div className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-foreground">
             <span className="truncate hover:text-[#d4580a]">{story.author_name || "Someone"}</span>
             {story.category && (
               <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">
@@ -208,7 +208,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
             )}
             {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
           </div>
-          <div className="text-[12px] text-muted-foreground sm:text-[13px]">
+          <div className="text-[11px] text-muted-foreground sm:text-xs">
             {story.created_at ? timeAgo(story.created_at) : ""}
           </div>
           </div>
@@ -219,7 +219,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         <Link
           to="/stories/$storyId"
           params={{ storyId: story.id }}
-          className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-muted"
+          className="mt-2 block aspect-[16/7] w-full overflow-hidden bg-muted"
         >
           <Img
             src={story.cover_url}
@@ -233,20 +233,20 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
       <Link
         to="/stories/$storyId"
         params={{ storyId: story.id }}
-        className="flex flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4"
+        className="flex flex-1 flex-col px-4 py-2.5 sm:px-6 sm:py-3"
       >
-        <h3 className="line-clamp-2 font-serif text-[17px] font-bold leading-snug text-foreground transition-colors group-hover:text-[#d4580a] break-words sm:text-lg">
+        <h3 className="line-clamp-2 font-serif text-base font-bold leading-snug text-foreground transition-colors group-hover:text-[#d4580a] break-words sm:text-[17px]">
           {story.title}
         </h3>
         {cleanExcerpt && (
-          <p className="mt-1.5 line-clamp-2 text-[15px] leading-relaxed text-muted-foreground break-words sm:text-[15px]">
+          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground break-words">
             {cleanExcerpt}
           </p>
         )}
       </Link>
-      <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm text-muted-foreground sm:px-6 sm:py-4">
+      <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 text-sm text-muted-foreground sm:px-6 sm:py-3">
         <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label="Like">
-          <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
+          <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
         <Link
           to="/stories/$storyId"
@@ -254,25 +254,25 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           hash="comments"
           className="flex items-center gap-1.5 transition hover:text-foreground"
         >
-          <MessageCircle className="h-5 w-5" /> {story.comments_count || 0}
+          <MessageCircle className="h-4 w-4" /> {story.comments_count || 0}
         </Link>
         <span className="flex items-center gap-1.5 text-muted-foreground/80">
-          <Clock className="h-5 w-5" />{story.read_minutes || 5}m
+          <Clock className="h-4 w-4" />{story.read_minutes || 5}m
         </span>
         <button onClick={openShare} className="flex items-center transition hover:text-foreground" aria-label="Share" title="Share">
-          <Send className="h-5 w-5 -rotate-45" />
+          <Send className="h-4 w-4 -rotate-45" />
         </button>
         <button onClick={toggleSave} className={`flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
-          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
+          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
         </button>
         {canDelete && (
           <button onClick={handleDelete} disabled={deleting} className="flex items-center text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-4 w-4" />
           </button>
         )}
         {isAdmin && (
-          <button onClick={toggleFeatured} disabled={featuring} className={`ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
-            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
+          <button onClick={toggleFeatured} disabled={featuring} className={`ml-auto flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
+            <Star className={`h-3.5 w-3.5 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
           </button>
         )}
       </footer>
