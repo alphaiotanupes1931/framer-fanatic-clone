@@ -185,37 +185,37 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           </span>
         </div>
       )}
-      <header className="order-4 mx-4 mb-1 mt-1 flex items-center gap-3 rounded-2xl bg-muted/40 px-4 py-3 sm:mx-6">
+      <header className="order-4 mx-3 mb-1 mt-1 flex items-center gap-2.5 rounded-xl bg-muted/40 px-3 py-2 sm:mx-5">
         {authorProfilePath ? (
           <Link {...authorProfilePath} className="shrink-0">
-            <Avatar className="h-11 w-11 sm:h-12 sm:w-12">
+            <Avatar className="h-9 w-9 sm:h-10 sm:w-10">
               {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
-              <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-xs text-muted-foreground">{initial}</AvatarFallback>
             </Avatar>
           </Link>
         ) : (
-          <Avatar className="h-11 w-11 shrink-0 sm:h-12 sm:w-12">
+          <Avatar className="h-9 w-9 shrink-0 sm:h-10 sm:w-10">
             {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
-            <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initial}</AvatarFallback>
+            <AvatarFallback className="bg-muted text-xs text-muted-foreground">{initial}</AvatarFallback>
           </Avatar>
         )}
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground sm:text-base">
+          <div className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-foreground">
             {authorProfilePath ? (
               <Link {...authorProfilePath} className="truncate hover:text-[#d4580a]">{authorName}</Link>
             ) : (
               <span className="truncate">{authorName}</span>
             )}
             {post.is_founder && (
-              <span title="Founding Member" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
-                <Star className="h-3 w-3" strokeWidth={2} /> Founding Member
+              <span title="Founding Member" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                <Star className="h-2.5 w-2.5" strokeWidth={2} /> Founding Member
               </span>
             )}
             {isFeatured && (
               <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>
             )}
           </div>
-          <div className="text-[12px] text-muted-foreground sm:text-[13px]">
+          <div className="text-[11px] text-muted-foreground sm:text-xs">
             {post.neighborhood_name || post.neighborhood || "Baltimore"} · {timeAgo(post.created_at)}
           </div>
         </div>
@@ -253,7 +253,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </DropdownMenu>
       </header>
       {current && (
-        <div className="relative order-2 mt-3 w-full overflow-hidden rounded-2xl px-0">
+        <div className="relative order-2 mt-2 w-full overflow-hidden rounded-xl px-0">
           {current.kind === "image" ? (
             <Link
               to="/posts/$postId"
@@ -263,7 +263,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               <Img
                 src={current.url}
                 alt=""
-                className="w-full cursor-pointer"
+                className="max-h-[320px] w-full cursor-pointer object-cover"
                 loading="lazy"
                 decoding="async"
                 referrerPolicy="no-referrer"
@@ -277,7 +277,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               controls
               playsInline
               preload="metadata"
-              className="w-full max-h-[70vh] bg-white"
+              className="w-full max-h-[320px] bg-white"
             />
           )}
           {mediaList.length > 1 && (
@@ -313,13 +313,13 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           target="_blank"
           rel="noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="order-3 mx-4 my-3 block rounded-2xl border border-border bg-muted/40 p-4 transition hover:border-[#d4580a] sm:mx-6"
+          className="order-3 mx-3 my-2 block rounded-xl border border-border bg-muted/40 p-3 transition hover:border-[#d4580a] sm:mx-5"
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-            <LinkIcon className="h-3.5 w-3.5" /> {safeHost(post.link_url)}
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            <LinkIcon className="h-3 w-3" /> {safeHost(post.link_url)}
           </div>
-          <div className="mt-1 font-semibold text-foreground break-words">{post.link_title || post.link_url}</div>
-          {post.link_description && <div className="mt-0.5 text-sm text-muted-foreground break-words">{post.link_description}</div>}
+          <div className="mt-1 text-sm font-semibold text-foreground break-words">{post.link_title || post.link_url}</div>
+          {post.link_description && <div className="mt-0.5 text-xs text-muted-foreground break-words">{post.link_description}</div>}
         </a>
       )}
       {post.content && (
@@ -329,11 +329,11 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
             tabIndex={0}
             onClick={() => navigate({ to: "/posts/$postId", params: { postId: post.id } })}
             onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/posts/$postId", params: { postId: post.id } }); }}
-            className={`order-3 mx-4 my-3 flex aspect-square cursor-pointer items-center justify-center overflow-y-auto rounded-2xl p-6 text-center font-medium whitespace-pre-wrap break-words sm:mx-6 ${
-              post.font_size === "sm" ? "text-base" :
-              post.font_size === "lg" ? "text-3xl" :
-              post.font_size === "xl" ? "text-5xl" :
-              "text-xl"
+            className={`order-3 mx-3 my-2 flex max-h-[220px] cursor-pointer items-center justify-center overflow-hidden rounded-xl p-5 text-center font-medium whitespace-pre-wrap break-words sm:mx-5 ${
+              post.font_size === "sm" ? "text-sm" :
+              post.font_size === "lg" ? "text-2xl" :
+              post.font_size === "xl" ? "text-3xl" :
+              "text-lg"
             }`}
             style={{ background: post.bg_color, color: post.text_color || "#fff" }}
           >
@@ -345,50 +345,50 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
             tabIndex={0}
             onClick={() => navigate({ to: "/posts/$postId", params: { postId: post.id } })}
             onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/posts/$postId", params: { postId: post.id } }); }}
-            className="order-3 block cursor-pointer px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-4 sm:text-[17px]"
+            className="order-3 block cursor-pointer px-4 py-2.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-3"
           >
             <MentionText text={post.content} />
           </div>
         )
       )}
       {post.tag && (
-        <div className="order-3 px-4 pb-2 sm:px-6">
-          <span className="inline-flex items-center rounded-full bg-[#d4580a]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#d4580a]">
+        <div className="order-3 px-4 pb-1.5 sm:px-6">
+          <span className="inline-flex items-center rounded-full bg-[#d4580a]/10 px-2 py-0.5 text-[10px] font-semibold text-[#d4580a]">
             #{post.tag}
           </span>
         </div>
       )}
       {post.music_url && (
-        <div className="order-3 px-4 pb-3 sm:px-6">
+        <div className="order-3 px-4 pb-2.5 sm:px-6">
           <a
             href={post.music_url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm text-neutral-700 hover:border-orange-300"
+            className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-700 hover:border-orange-300"
           >
             🎵 Listen
           </a>
         </div>
       )}
-      <footer className="order-5 flex items-center gap-5 px-4 py-3 text-sm text-muted-foreground sm:gap-7 sm:px-6 sm:py-4">
-        <button onClick={toggleLike} className={`flex items-center gap-2 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
-          <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likes}
+      <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
+        <button onClick={toggleLike} className={`flex items-center gap-1.5 transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`}>
+          <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
         </button>
-        <button onClick={openComments} className="flex items-center gap-2 transition hover:text-foreground">
-          <MessageCircle className="h-5 w-5" /> {commentCount}
+        <button onClick={openComments} className="flex items-center gap-1.5 transition hover:text-foreground">
+          <MessageCircle className="h-4 w-4" /> {commentCount}
         </button>
-        <button onClick={share} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
-          <Send className="h-5 w-5 -rotate-45" />
+        <button onClick={share} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
+          <Send className="h-4 w-4 -rotate-45" />
         </button>
-        <button onClick={sendExternal} className="flex items-center gap-2 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
-          <Share2 className="h-5 w-5" />
+        <button onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
+          <Share2 className="h-4 w-4" />
         </button>
         <button onClick={toggleSave} className={`ml-auto flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
-          <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} />
+          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
         </button>
         {isAdmin && (
-          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
-            <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
+          <button onClick={toggleFeatured} disabled={featuring} className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold transition ${isFeatured ? "border-yellow-500 bg-yellow-100 text-yellow-800" : "border-border hover:border-yellow-500 hover:text-yellow-700"}`} title={isFeatured ? "Unfeature" : "Feature"}>
+            <Star className={`h-3.5 w-3.5 ${isFeatured ? "fill-yellow-500" : ""}`} /> {isFeatured ? "Featured" : "Feature"}
           </button>
         )}
       </footer>
