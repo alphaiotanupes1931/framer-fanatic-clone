@@ -20,6 +20,13 @@ function toLocalInput(iso: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** `datetime-local` value for "now" in the user's own timezone. */
+function localNowValue() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string; onSaved?: () => void; onCancel?: () => void }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
@@ -134,6 +141,17 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!canSubmit) { toast.error("Title and start date are required"); return; }
+    // Rescheduling into the past is not allowed.
+    const startsDate = new Date(form.starts_at);
+    if (Number.isNaN(startsDate.getTime())) { toast.error("Pick a valid start date and time"); return; }
+    if (startsDate.getTime() < Date.now() - 60000) { toast.error("Start date and time cannot be in the past"); return; }
+    if (form.ends_at) {
+      const endsDate = new Date(form.ends_at);
+      if (Number.isNaN(endsDate.getTime()) || endsDate.getTime() <= startsDate.getTime()) {
+        toast.error("End time must be after the start time");
+        return;
+      }
+    }
 
     setSaving(true);
     try {
@@ -227,10 +245,10 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Start Date & Time" required>
-              <input type="datetime-local" className={inputCls} value={form.starts_at} onChange={(e) => set("starts_at", e.target.value)} />
+              <input type="datetime-local" min={localNowValue()} className={inputCls} value={form.starts_at} onChange={(e) => set("starts_at", e.target.value)} />
             </Field>
             <Field label="End Date & Time" optional>
-              <input type="datetime-local" className={inputCls} value={form.ends_at} onChange={(e) => set("ends_at", e.target.value)} />
+              <input type="datetime-local" min={form.starts_at || localNowValue()} className={inputCls} value={form.ends_at} onChange={(e) => set("ends_at", e.target.value)} />
             </Field>
           </div>
 
