@@ -266,14 +266,14 @@ function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="w-full space-y-5 sm:space-y-[22px]">
+      <div className="w-full space-y-4 sm:space-y-5">
         <HeroBanner
           title="Planet Baltimore"
           subtitle="Baltimore. Your community. Your feed."
         />
 
         {/* Filters */}
-        <div className="scrollbar-hide flex flex-wrap gap-2 overflow-x-auto pb-5 pt-0">
+        <div className="scrollbar-hide flex flex-wrap gap-2 overflow-x-auto pb-3 pt-0 sm:pb-4">
           {FILTERS.map((filter) => (
             <button
               key={filter}
@@ -300,7 +300,7 @@ function Dashboard() {
         )}
 
         {/* Feed */}
-        <div className="mx-auto w-full max-w-4xl space-y-5 pt-1">
+        <div className="mx-auto w-full max-w-3xl space-y-4 pt-1 sm:space-y-5">
           {isLoading ? (
             <FeedSkeleton />
           ) : isEmpty ? (
