@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { X } from "lucide-react";
 import { ReportDialog } from "@/components/report-dialog";
+import { LikesListDialog } from "@/components/likes-list-dialog";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -68,6 +69,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const [newComment, setNewComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
   const [reportOpen, setReportOpen] = useState(false);
+  const [likesOpen, setLikesOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [mediaIdx, setMediaIdx] = useState(0);
   const isAdmin = useIsAdmin();
@@ -455,6 +457,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           </div>
         </div>
       )}
+      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={post.id} kind="post" />
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
       <ShareToUsersDialog
         open={shareOpen}
