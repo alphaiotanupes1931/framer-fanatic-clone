@@ -281,6 +281,40 @@ function OrganizerStudioPage() {
   const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
   const [ticketsDirty, setTicketsDirty] = useState(false);
   const [saveTicketsSignal, setSaveTicketsSignal] = useState(0);
+  const [publishChecking, setPublishChecking] = useState(false);
+  const [publishStripeError, setPublishStripeError] = useState<string | null>(null);
+
+  // Publishing a paid/donation event requires a live Stripe account.
+  const saveTickets = async () => {
+    if (!selected) { toast.info("Pick an event first, then Save Tickets opens its page."); setTab("manage"); return; }
+    setPublishStripeError(null);
+    setPublishChecking(true);
+    try {
+      const [{ data: paidTiers }, { data: evtRow }] = await Promise.all([
+        supabase.from("ticket_types").select("id").eq("event_id", selected.id).gt("price_cents", 0).limit(1),
+        supabase.from("events").select("donations_enabled").eq("id", selected.id).maybeSingle(),
+      ]);
+      const needsStripe = (paidTiers?.length ?? 0) > 0 || !!(evtRow as { donations_enabled?: boolean | null } | null)?.donations_enabled;
+      if (needsStripe) {
+        let ready = false;
+        try {
+          const status = await refreshStatusFn();
+          ready = !!status.chargesEnabled;
+        } catch {
+          ready = !!me?.stripe_charges_enabled;
+        }
+        if (!ready) {
+          setPublishStripeError("This event has paid tickets or donations. You will need to set up a Stripe account before you can publish it.");
+          setTab("manage");
+          return;
+        }
+      }
+      if (ticketsDirty) { setSaveTicketsSignal((s) => s + 1); return; }
+      navigate({ to: "/events/$eventId", params: { eventId: selected.id } });
+    } finally {
+      setPublishChecking(false);
+    }
+  };
 
   const load = () => {
     if (!me) return;
