@@ -176,12 +176,22 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
 
     const { data: event, error: evErr } = await supabase
       .from("events")
-      .select("id, title, user_id, price_cents, image_url, is_published, max_tickets_per_buyer")
+      .select("id, title, user_id, price_cents, image_url, is_published, max_tickets_per_buyer, capacity")
       .eq("id", data.eventId)
       .maybeSingle();
 
     if (evErr || !event) throw new Error("Event not found");
     if (event.is_published === false) throw new Error("Event is not on sale");
+
+    // Overall event capacity: total tickets that can exist before the event sells out.
+    if (event.capacity && event.capacity > 0) {
+      const { data: cap } = await supabase.rpc("event_capacity_status", { _event_id: event.id });
+      const remaining = Array.isArray(cap) ? (cap[0]?.remaining ?? null) : null;
+      if (remaining !== null) {
+        if (remaining <= 0) throw new Error("This event is sold out.");
+        if (remaining < data.quantity) throw new Error(`Only ${remaining} ticket(s) left for this event.`);
+      }
+    }
 
     // Events can sell several tiers. When a tier is chosen it defines price and limits.
     let tier: { id: string; name: string; price_cents: number; quantity: number | null; max_per_buyer: number | null; sale_starts_at: string | null; sale_ends_at: string | null } | null = null;
