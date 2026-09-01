@@ -147,6 +147,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
     }
 
     setSaving(true);
+    const savingToast = toast.loading("Saving your event…");
     try {
       const starts = new Date(form.starts_at).toISOString();
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
@@ -169,11 +170,19 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         capacity,
       }).eq("id", eventId);
 
-      if (error) { toast.error(error.message); return; }
-      toast.success("Event updated");
+      if (error) {
+        toast.error(`We could not save your event. ${error.message}`, {
+          description: "Your changes are still on screen, so you can fix the issue and save again.",
+        });
+        return;
+      }
+      toast.success("Event updated", { id: savingToast });
       if (onSaved) onSaved();
       else navigate({ to: "/events/$eventId", params: { eventId } });
+    } catch (e) {
+      toast.error(`We could not save your event. ${e instanceof Error ? e.message : "Please try again."}`);
     } finally {
+      toast.dismiss(savingToast);
       setSaving(false);
     }
   };

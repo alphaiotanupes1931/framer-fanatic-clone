@@ -283,7 +283,10 @@ function EventDetail() {
       const n = result?.quantity ?? qty;
       setRsvped(true);
       toast.success(n > 1 ? `${n} tickets reserved. Check your email for your tickets.` : "You're going! Check your email for your ticket.");
-      void emailMyTickets({ data: { eventId: evt.id } }).catch((err) => console.error("ticket email failed", err));
+      void emailMyTickets({ data: { eventId: evt.id } }).catch((err) => {
+        console.error("ticket email failed", err);
+        toast.error("Your ticket is saved, but we could not email it just now. Open My Tickets to download it.");
+      });
     } catch (e) {
       const msg = (e as { message?: string } | null)?.message;
       toast.error(msg || "Planet Baltimore could not complete your RSVP. Please try again.");
