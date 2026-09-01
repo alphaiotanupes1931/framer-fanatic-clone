@@ -8,6 +8,13 @@
       "when": 1787938944772,
       "tag": "0000_add_event_gallery_urls",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788233772071,
+      "tag": "0001_fix_missing_columns_and_profile_grants",
+      "breakpoints": true
     }
   ]
 }
