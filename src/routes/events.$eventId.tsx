@@ -276,7 +276,11 @@ function EventDetail() {
   };
   // The organizer decides the per-person limit. No cap set means a generous default.
   const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
-  const maxQty = Math.max(1, Math.min(selectedTier?.max_per_buyer ?? eventCap ?? 20, remaining ?? 9999));
+  const perPersonCap = selectedTier?.max_per_buyer ?? eventCap ?? null;
+  // How many more this guest may still claim, once their existing tickets are counted.
+  const perPersonLeft = perPersonCap !== null ? Math.max(0, perPersonCap - ownedCount) : null;
+  const limitReached = perPersonLeft !== null && perPersonLeft <= 0;
+  const maxQty = Math.max(1, Math.min(perPersonLeft ?? 20, remaining ?? 9999));
 
   const rsvp = async () => {
     if (!evt) return;
