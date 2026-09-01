@@ -281,6 +281,40 @@ function OrganizerStudioPage() {
   const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
   const [ticketsDirty, setTicketsDirty] = useState(false);
   const [saveTicketsSignal, setSaveTicketsSignal] = useState(0);
+  const [publishChecking, setPublishChecking] = useState(false);
+  const [publishStripeError, setPublishStripeError] = useState<string | null>(null);
+
+  // Publishing a paid/donation event requires a live Stripe account.
+  const saveTickets = async () => {
+    if (!selected) { toast.info("Pick an event first, then Save Tickets opens its page."); setTab("manage"); return; }
+    setPublishStripeError(null);
+    setPublishChecking(true);
+    try {
+      const [{ data: paidTiers }, { data: evtRow }] = await Promise.all([
+        supabase.from("ticket_types").select("id").eq("event_id", selected.id).gt("price_cents", 0).limit(1),
+        supabase.from("events").select("donations_enabled").eq("id", selected.id).maybeSingle(),
+      ]);
+      const needsStripe = (paidTiers?.length ?? 0) > 0 || !!(evtRow as { donations_enabled?: boolean | null } | null)?.donations_enabled;
+      if (needsStripe) {
+        let ready = false;
+        try {
+          const status = await refreshStatusFn();
+          ready = !!status.chargesEnabled;
+        } catch {
+          ready = !!me?.stripe_charges_enabled;
+        }
+        if (!ready) {
+          setPublishStripeError("This event has paid tickets or donations. You will need to set up a Stripe account before you can publish it.");
+          setTab("manage");
+          return;
+        }
+      }
+      if (ticketsDirty) { setSaveTicketsSignal((s) => s + 1); return; }
+      navigate({ to: "/events/$eventId", params: { eventId: selected.id } });
+    } finally {
+      setPublishChecking(false);
+    }
+  };
 
   const load = () => {
     if (!me) return;
@@ -374,23 +408,32 @@ function OrganizerStudioPage() {
             <CreditCard className="h-4 w-4" /> Stripe
           </button>
           <button
-            onClick={() => {
-              if (!selected) { toast.info("Pick an event first, then Save Tickets opens its page."); setTab("manage"); return; }
-              if (ticketsDirty) { setSaveTicketsSignal((s) => s + 1); return; }
-              navigate({ to: "/events/$eventId", params: { eventId: selected.id } });
-            }}
-            className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
+            onClick={() => { void saveTickets(); }}
+            disabled={publishChecking}
+            className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition disabled:opacity-60 ${
               ticketsDirty
                 ? "bg-[#d4580a] text-white shadow hover:brightness-110"
                 : "text-neutral-600 hover:text-neutral-900"
             }`}
           >
-            <Ticket className="h-4 w-4" /> Save Tickets
+            <Ticket className="h-4 w-4" /> {publishChecking ? "Checking Stripe…" : "Save Tickets"}
           </button>
           <button onClick={() => { setTab("campaign"); setSelected(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "campaign" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
             <Mail className="h-4 w-4" /> Campaign
           </button>
         </div>
+
+        {publishStripeError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+            <div className="text-sm font-semibold text-red-700">{publishStripeError}</div>
+            <button
+              onClick={() => { setPublishStripeError(null); setTab("stripe"); }}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110"
+            >
+              <CreditCard className="h-4 w-4" /> Click here to set up your account
+            </button>
+          </div>
+        )}
 
         {tab === "stripe" ? (
           <StripeTab onStatus={setStripeReady} />

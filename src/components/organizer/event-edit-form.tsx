@@ -33,6 +33,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [capErrors, setCapErrors] = useState<CapacityErrors>({});
+  const origStartsRef = useRef<string>("");
 
   const [form, setForm] = useState({
     image_url: "",
@@ -75,6 +76,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         return;
       }
       const priceCents = (e.price_cents as number | null) ?? 0;
+      origStartsRef.current = toLocalInput(e.starts_at as string | null);
       setForm({
         image_url: (e.image_url as string | null) ?? "",
         video_url: (e.video_url as string | null) ?? "",
@@ -139,9 +141,15 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!canSubmit) { toast.error("Title and start date are required"); return; }
-    // Rescheduling into the past is not allowed.
+    // Rescheduling into the past is not allowed. An event that already started
+    // may keep its original date so other details can still be edited.
     const startsDate = new Date(form.starts_at);
     if (Number.isNaN(startsDate.getTime())) { toast.error("Pick a valid start date and time"); return; }
+    const dateChanged = form.starts_at !== origStartsRef.current;
+    if (dateChanged && startsDate.getTime() < Date.now() - 60000) {
+      toast.error("Start date and time cannot be in the past");
+      return;
+    }
     if (form.ends_at) {
       const endsDate = new Date(form.ends_at);
       if (Number.isNaN(endsDate.getTime()) || endsDate.getTime() <= startsDate.getTime()) {
