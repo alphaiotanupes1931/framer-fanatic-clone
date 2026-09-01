@@ -423,6 +423,18 @@ function OrganizerStudioPage() {
           </button>
         </div>
 
+        {publishStripeError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+            <div className="text-sm font-semibold text-red-700">{publishStripeError}</div>
+            <button
+              onClick={() => { setPublishStripeError(null); setTab("stripe"); }}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110"
+            >
+              <CreditCard className="h-4 w-4" /> Click here to set up your account
+            </button>
+          </div>
+        )}
+
         {tab === "stripe" ? (
           <StripeTab onStatus={setStripeReady} />
         ) : tab === "campaign" ? (
