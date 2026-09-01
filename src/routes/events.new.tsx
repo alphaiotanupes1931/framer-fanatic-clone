@@ -83,6 +83,7 @@ function NewEventPage() {
     neighborhood: "",
     category: "community",
     capacity: "",
+    per_person: "",
     gallery_urls: [] as string[],
   });
 
@@ -334,6 +335,7 @@ function NewEventPage() {
       const starts = startMode === "now" ? new Date().toISOString() : new Date(form.starts_at).toISOString();
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
       const capacity = form.capacity ? Math.max(0, parseInt(form.capacity, 10)) : null;
+      const maxPerBuyer = form.per_person ? Math.max(1, parseInt(form.per_person, 10)) : null;
 
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
@@ -355,6 +357,7 @@ function NewEventPage() {
         pricing_mode: pricing,
         donations_enabled: donation,
         capacity,
+        max_tickets_per_buyer: maxPerBuyer,
       }).select("id").single();
 
       if (error) {
@@ -649,9 +652,14 @@ function NewEventPage() {
 
 
 
-          <Field label="Capacity" optional>
-            <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Capacity" optional hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
+              <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
+            </Field>
+            <Field label="Tickets per person" optional hint="The most tickets one guest can get. Leave blank for no limit.">
+              <input type="number" min="1" className={inputCls} placeholder="No limit" value={form.per_person} onChange={(e) => set("per_person", e.target.value)} />
+            </Field>
+          </div>
         </div>
 
         <div className="h-12" />
