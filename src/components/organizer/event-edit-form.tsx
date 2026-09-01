@@ -170,6 +170,33 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
       return;
     }
 
+    // Paid tickets require a connected Stripe payout account. Verify live so a
+    // stale profile flag cannot be used to bypass this check.
+    const gatePriceCents = form.ticketing === "paid" ? Math.max(0, Math.round(parseFloat(form.price || "0") * 100)) : 0;
+    if (gatePriceCents > 0) {
+      setStripeBlocked(false);
+      if (!me.stripe_charges_enabled) {
+        setCheckingStripe(true);
+        try {
+          const res = (await refreshStripeFn()) as { charges_enabled?: boolean } | null;
+          if (res?.charges_enabled) {
+            await supabase.from("profiles").update({ stripe_charges_enabled: true, stripe_onboarding_complete: true }).eq("id", me.id);
+          } else {
+            setCheckingStripe(false);
+            setStripeBlocked(true);
+            toast.error("Connect your Stripe account to sell tickets.");
+            return;
+          }
+        } catch {
+          setCheckingStripe(false);
+          setStripeBlocked(true);
+          toast.error("We could not verify your Stripe account. Please try again.");
+          return;
+        }
+        setCheckingStripe(false);
+      }
+    }
+
     setSaving(true);
     const savingToast = toast.loading("Saving your event…");
     try {
