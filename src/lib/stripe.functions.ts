@@ -871,3 +871,88 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
 });
 
 
+
+/**
+ * Checkout for a tip/donation on an event. Works for free events: the event just
+ * needs `donations_enabled` and an organizer with payouts active.
+ */
+export const createEventDonationCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      eventId: z.string().uuid(),
+      amountCents: z.number().int().min(100).max(5_000_000),
+      returnOrigin: z.string().url(),
+      note: z.string().max(280).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { getStripe, getPayoutAccount, priceBreakdown, checkoutLineItems, CHECKOUT_BRANDING, refreshChargesEnabled } =
+      await import("./stripe.server");
+    const stripe = getStripe();
+
+    const { data: event } = await supabase
+      .from("events")
+      .select("id, title, user_id, image_url, donations_enabled")
+      .eq("id", data.eventId)
+      .maybeSingle();
+    if (!event) throw new Error("Event not found");
+    if (!event.donations_enabled) throw new Error("This event is not taking donations.");
+
+    const organizer = await getPayoutAccount(event.user_id);
+    if (!organizer?.stripe_account_id) throw new Error("This organizer hasn't set up payments yet.");
+    if (!organizer.stripe_charges_enabled && !(await refreshChargesEnabled(event.user_id, organizer.stripe_account_id))) {
+      throw new Error("This organizer hasn't finished setting up payments yet.");
+    }
+
+    const breakdown = priceBreakdown(data.amountCents);
+    const metadata = {
+      kind: "donation",
+      event_id: event.id,
+      donor_id: userId,
+      owner_id: event.user_id,
+      amount_cents: String(data.amountCents),
+    };
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      success_url: `${data.returnOrigin}/events/${event.id}?donation=success`,
+      cancel_url: `${data.returnOrigin}/events/${event.id}?donation=cancelled`,
+      customer_email: (context.claims as { email?: string } | null)?.email,
+      branding_settings: CHECKOUT_BRANDING,
+      line_items: checkoutLineItems(breakdown, {
+        name: `Donation to ${event.title}`,
+        description: data.note?.trim() ? data.note.trim().slice(0, 200) : undefined,
+        images: event.image_url ? [event.image_url] : undefined,
+      }),
+      payment_intent_data: {
+        application_fee_amount: breakdown.platformFeeCents,
+        on_behalf_of: organizer.stripe_account_id,
+        transfer_data: { destination: organizer.stripe_account_id },
+        description: `Donation - ${event.title}`,
+      },
+      metadata,
+    });
+
+    return { url: session.url };
+  });
+
+/** Public: can this event currently take donations? Used to show the Donate button. */
+export const getEventDonationStatus = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ eventId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: event } = await supabaseAdmin
+      .from("events")
+      .select("id, user_id, donations_enabled")
+      .eq("id", data.eventId)
+      .maybeSingle();
+    if (!event?.donations_enabled) return { enabled: false };
+    const { data: owner } = await supabaseAdmin
+      .from("profiles")
+      .select("stripe_account_id, stripe_charges_enabled")
+      .eq("id", event.user_id)
+      .maybeSingle();
+    return { enabled: !!owner?.stripe_account_id && !!owner.stripe_charges_enabled };
+  });
