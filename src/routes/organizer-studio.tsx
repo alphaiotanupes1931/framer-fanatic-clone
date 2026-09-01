@@ -786,42 +786,23 @@ function InfoHint({ text }: { text: string }) {
 function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { evt: MyEvent; soldCount: number; onDirtyChange?: (dirty: boolean) => void; saveSignal?: number; onSaved?: () => void; }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [cap, setCap] = useState<string>("");
-  const [originalCap, setOriginalCap] = useState<string>("");
-  const [capacity, setCapacity] = useState<string>("");
-  const [originalCapacity, setOriginalCapacity] = useState<string>("");
-  const [soldTotal, setSoldTotal] = useState<number>(0);
   const [capLoaded, setCapLoaded] = useState(false);
-  const [savingCap, setSavingCap] = useState(false);
   const [hasTicketEdits, setHasTicketEdits] = useState(false);
   const [donations, setDonations] = useState(false);
   const [donationError, setDonationError] = useState<string | null>(null);
   const gate = useStripeGate();
 
   useEffect(() => {
-    supabase.from("events").select("max_tickets_per_buyer, donations_enabled, capacity").eq("id", evt.id).maybeSingle()
+    supabase.from("events").select("donations_enabled").eq("id", evt.id).maybeSingle()
       .then(({ data }) => {
-        const row = data as { max_tickets_per_buyer: number | null; donations_enabled?: boolean | null; capacity?: number | null } | null;
-        setDonations(!!row?.donations_enabled);
-        const str = row?.max_tickets_per_buyer ? String(row.max_tickets_per_buyer) : "";
-        setCap(str);
-        setOriginalCap(str);
-        const capStr = row?.capacity ? String(row.capacity) : "";
-        setCapacity(capStr);
-        setOriginalCapacity(capStr);
+        setDonations(!!(data as { donations_enabled?: boolean | null } | null)?.donations_enabled);
         setCapLoaded(true);
-      });
-    supabase.rpc("event_capacity_status", { _event_id: evt.id })
-      .then(({ data }) => {
-        const row = Array.isArray(data) ? data[0] : null;
-        setSoldTotal(row?.sold ?? 0);
       });
   }, [evt.id]);
 
   const [createdPending, setCreatedPending] = useState(false);
 
-  const capDirty = cap !== originalCap || capacity !== originalCapacity;
-  const isDirty = capDirty || showForm || createdPending || hasTicketEdits;
+  const isDirty = showForm || createdPending || hasTicketEdits;
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
   useEffect(() => {
@@ -829,32 +810,9 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
     setCreatedPending(false);
   }, [evt.id]);
 
-  const saveCap = async () => {
-    setSavingCap(true);
-    const value = cap.trim() ? Math.max(1, parseInt(cap, 10)) : null;
-    const capacityValue = capacity.trim() ? Math.max(1, parseInt(capacity, 10)) : null;
-    if (capacityValue !== null && capacityValue < soldTotal) {
-      setSavingCap(false);
-      toast.error(`You have already issued ${soldTotal} ticket(s). Capacity cannot be lower than that.`);
-      return;
-    }
-    setOriginalCapacity(capacityValue ? String(capacityValue) : "");
-    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value, capacity: capacityValue }).eq("id", evt.id);
-    if (error) { toast.error(error.message); setSavingCap(false); return false; }
-    const str = value ? String(value) : "";
-    setOriginalCap(str);
-    setCap(str);
-    setSavingCap(false);
-    toast.success(value ? `Limited to ${value} per person` : "Limit removed");
-    return true;
-  };
-
   useEffect(() => {
     if (saveSignal === undefined || saveSignal === 0) return;
-    (async () => {
-      if (capDirty) { const ok = await saveCap(); if (!ok) return; }
-      onSaved?.();
-    })();
+    onSaved?.();
   }, [saveSignal]);
 
   const load = () => {
