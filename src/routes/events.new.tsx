@@ -13,6 +13,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
 import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
 import { deleteEventDraft, draftHasContent, getEventDraft, saveEventDraft } from "@/lib/event-drafts";
+import { hasCapacityErrors, parseLimit, validateCapacityFields, type CapacityErrors } from "@/lib/capacity-limits";
 
 /** `datetime-local` value for "now" in the user's own timezone. */
 function localNowValue(offsetMinutes = 0) {
@@ -49,6 +50,7 @@ function NewEventPage() {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [capErrors, setCapErrors] = useState<CapacityErrors>({});
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
   const [isOnline, setIsOnline] = useState(false);
