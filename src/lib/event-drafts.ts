@@ -22,6 +22,7 @@ export type EventDraft = {
     neighborhood: string;
     category: string;
     capacity: string;
+    per_person: string;
     gallery_urls?: string[];
   };
 };

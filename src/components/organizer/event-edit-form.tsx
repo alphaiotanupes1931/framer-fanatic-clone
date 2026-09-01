@@ -46,6 +46,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
     ticketing: "rsvp" as "rsvp" | "paid",
     price: "",
     capacity: "",
+    per_person: "",
   });
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         ticketing: priceCents > 0 ? "paid" : "rsvp",
         price: priceCents > 0 ? (priceCents / 100).toFixed(2) : "",
         capacity: e.capacity != null ? String(e.capacity) : "",
+        per_person: e.max_tickets_per_buyer != null ? String(e.max_tickets_per_buyer) : "",
       });
       setLoading(false);
     })();
@@ -153,6 +155,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
       const priceCents = form.ticketing === "paid" ? Math.max(0, Math.round(parseFloat(form.price || "0") * 100)) : 0;
       const capacity = form.capacity ? Math.max(0, parseInt(form.capacity, 10)) : null;
+      const maxPerBuyer = form.per_person ? Math.max(1, parseInt(form.per_person, 10)) : null;
 
       const { error } = await supabase.from("events").update({
         title: form.title.trim(),
@@ -168,6 +171,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         category: form.category || null,
         price_cents: priceCents,
         capacity,
+        max_tickets_per_buyer: maxPerBuyer,
       }).eq("id", eventId);
 
       if (error) {
@@ -289,9 +293,14 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
             </Field>
           )}
 
-          <Field label="Capacity" optional>
-            <input type="number" min="0" className={inputCls} value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Capacity" optional hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
+              <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
+            </Field>
+            <Field label="Tickets per person" optional hint="The most tickets one guest can get. Leave blank for no limit.">
+              <input type="number" min="1" className={inputCls} placeholder="No limit" value={form.per_person} onChange={(e) => set("per_person", e.target.value)} />
+            </Field>
+          </div>
         </div>
 
         <div className="h-12" />
@@ -302,7 +311,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
 
 const inputCls = "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30";
 
-function Field({ label, children, required, optional }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean }) {
+function Field({ label, children, required, optional, hint }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean; hint?: string }) {
   return (
     <div>
       <label className="block text-sm font-semibold mb-2">
@@ -311,6 +320,7 @@ function Field({ label, children, required, optional }: { label: string; childre
         {optional && <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span>}
       </label>
       {children}
+      {hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>}
     </div>
   );
 }
