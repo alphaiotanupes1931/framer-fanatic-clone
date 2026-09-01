@@ -255,10 +255,10 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
           <h1 className="text-xl font-bold">Edit Event</h1>
           <button
             onClick={submit}
-            disabled={!canSubmit || saving}
+            disabled={!canSubmit || saving || checkingStripe}
             className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving…" : "Save"}
+            {checkingStripe ? "Checking Stripe…" : saving ? "Saving…" : "Save"}
           </button>
         </div>
 
