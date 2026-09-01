@@ -21,6 +21,7 @@ import { EventSocial } from "@/components/event-social";
 import { RichHtml } from "@/components/rich-html";
 import { getPublicEvent } from "@/lib/events.functions";
 import { emailMyTickets } from "@/lib/tickets.functions";
+import { isPaidEvent } from "@/lib/event-pricing";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -28,6 +29,7 @@ type EventRow = {
   image_url: string | null; starts_at: string; ends_at: string | null;
   price_cents: number | null; status: string; is_published: boolean;
   neighborhood: string | null; video_url: string | null; gallery_urls: string[] | null;
+  pricing_mode?: string | null; donations_enabled?: boolean | null;
 };
 
 type TicketTier = {
@@ -336,7 +338,7 @@ function EventDetail() {
     </AppLayout>
   );
 
-  const priced = (evt.price_cents ?? 0) > 0 || tiers.some((t) => (t.price_cents ?? 0) > 0);
+  const priced = isPaidEvent(evt, tiers.map((t) => t.price_cents));
   const eventDate = evt.starts_at ? new Date(evt.starts_at) : null;
   const endsDate = evt.ends_at ? new Date(evt.ends_at) : null;
   const locationText = evt.address || evt.location;

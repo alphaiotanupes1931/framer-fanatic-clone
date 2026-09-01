@@ -7,3 +7,4 @@
 - [x] "Connect your Stripe account to sell tickets or take donations" wording
 - [x] Separate "Event capacity" and "Tickets per person" controls with info tips, enforced end to end
 - [x] Clearer toasts and loading phases for saving an event, loading opportunities, ticket emails
+- [x] Free, RSVP, and donation-enabled events display Free everywhere; only positive-price tickets display Paid
