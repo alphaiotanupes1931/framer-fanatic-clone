@@ -745,8 +745,9 @@ function NewEventPage() {
 }
 
 const inputCls = "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30";
+const inputErrCls = "w-full rounded-lg border border-red-500 bg-white px-3 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-300";
 
-function Field({ label, children, required, optional, hint }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean; hint?: string }) {
+function Field({ label, children, required, optional, hint, error }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean; hint?: string; error?: string }) {
   return (
     <div>
       <label className="block text-sm font-semibold mb-2">
@@ -755,7 +756,11 @@ function Field({ label, children, required, optional, hint }: { label: string; c
         {optional && <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span>}
       </label>
       {children}
-      {hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>}
+      {error ? (
+        <p className="mt-1 text-[11px] font-medium text-red-600">{error}</p>
+      ) : (
+        hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>
+      )}
     </div>
   );
 }
