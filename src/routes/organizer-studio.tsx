@@ -899,51 +899,6 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
 
       {gate.checking && <StripeCheckingOverlay label="Checking your Stripe account…" />}
 
-      {capLoaded && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-5">
-          <div className="text-sm font-semibold text-neutral-900">Capacity and limits</div>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900">
-                Event capacity
-                <InfoHint text="The total number of tickets this event can sell. Once that many tickets are issued, the event shows as Sold out and no one else can buy or RSVP. Leave blank for unlimited." />
-              </div>
-              <input
-                type="number"
-                min="1"
-                value={capacity}
-                onChange={(e) => { setCapacity(e.target.value); setHasTicketEdits(true); }}
-                placeholder="Unlimited"
-                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
-              />
-              <p className="mt-1 text-[11px] text-neutral-500">{soldTotal} issued so far.</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900">
-                Tickets per person
-                <InfoHint text="The most tickets one guest can get for this event. It does not change the total capacity. Leave blank for no limit. A ticket type can set its own tighter limit." />
-              </div>
-              <input
-                type="number"
-                min="1"
-                value={cap}
-                onChange={(e) => { setCap(e.target.value); setHasTicketEdits(true); }}
-                placeholder="No limit"
-                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
-              />
-              <p className="mt-1 text-[11px] text-neutral-500">Applies to each guest.</p>
-            </div>
-          </div>
-          <button
-            onClick={saveCap}
-            disabled={savingCap}
-            className="mt-3 rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-60"
-          >
-            {savingCap ? "Saving…" : "Save capacity and limits"}
-          </button>
-        </div>
-      )}
-
       {types && types.length > 0 ? (
         <div className="space-y-2">
           {types.map((t, i) => (
