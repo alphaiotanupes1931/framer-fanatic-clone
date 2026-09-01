@@ -599,7 +599,7 @@ function NewEventPage() {
                   <CreditCard className="h-4.5 w-4.5" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-neutral-900">Connect your Stripe account to sell tickets</div>
+                  <div className="text-sm font-semibold text-neutral-900">Connect your Stripe account to sell tickets or take donations</div>
                   <p className="mt-1 text-[13px] leading-relaxed text-neutral-600">
                     Paid tickets pay out straight to your bank, so you need a payout account first. It takes about
                     3 minutes. Your event is saved to Drafts automatically, and you land back in Organizer Studio
