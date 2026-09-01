@@ -328,7 +328,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
           </Field>
 
           <Field label="Ticketing Mode" required>
-            <select className={inputCls} value={form.ticketing} onChange={(e) => set("ticketing", e.target.value as "rsvp" | "paid")}>
+            <select className={inputCls} value={form.ticketing} onChange={(e) => { set("ticketing", e.target.value as "rsvp" | "paid"); setStripeBlocked(false); }}>
               <option value="rsvp">RSVP Only</option>
               <option value="paid">Paid Tickets</option>
             </select>
@@ -338,6 +338,19 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
             <Field label="Ticket Price (USD you net)" required>
               <input type="number" step="0.01" min="0" className={inputCls} value={form.price} onChange={(e) => set("price", e.target.value)} />
             </Field>
+          )}
+
+          {stripeBlocked && form.ticketing === "paid" && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <p className="font-semibold">You will need to set up a Stripe account to sell tickets.</p>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/organizer-studio", search: { tab: "stripe" } })}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <CreditCard className="w-3.5 h-3.5" /> Click here to set up your account
+              </button>
+            </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
