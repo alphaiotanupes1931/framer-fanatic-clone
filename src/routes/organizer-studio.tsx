@@ -285,7 +285,7 @@ function OrganizerStudioPage() {
   const load = () => {
     if (!me) return;
     supabase.from("events")
-      .select("id,title,starts_at,venue_name,location,price_cents,is_published")
+      .select("id,title,starts_at,venue_name,location,price_cents,pricing_mode,is_published")
       .eq("user_id", me.id)
       .order("starts_at", { ascending: false })
       .then(({ data }) => setEvents((data as MyEvent[] | null) ?? []));

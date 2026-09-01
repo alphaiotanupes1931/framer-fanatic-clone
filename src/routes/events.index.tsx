@@ -18,12 +18,14 @@ import { pageHead } from "@/lib/seo";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { emailMyTickets } from "@/lib/tickets.functions";
+import { isPaidEvent } from "@/lib/event-pricing";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
   location: string | null; image_url: string | null; starts_at: string;
   price_cents?: number | null;
   pricing_mode?: string | null;
+  donations_enabled?: boolean | null;
   category?: string | null;
 };
 
@@ -38,7 +40,7 @@ function fmtDate(iso: string) {
 }
 
 function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: string) => void; variant?: "light" | "dark" }) {
-  const priced = (e.price_cents ?? 0) > 0;
+  const priced = isPaidEvent(e);
   const dark = variant === "dark";
   const wrap = dark ? "border-paper/10 bg-paper/5" : "border-border bg-card text-card-foreground";
   const imgBg = dark ? "bg-paper/10 text-paper/30" : "bg-muted text-muted-foreground";
@@ -58,7 +60,7 @@ function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: 
         {e.description && <p className={`text-sm mt-2 line-clamp-2 ${body}`}>{e.description}</p>}
         <div className="mt-3 flex items-center justify-between">
           <div className="text-sm font-semibold">
-            {priced ? `$${((e.price_cents ?? 0)/100).toFixed(2)}` : e.pricing_mode === "paid" ? "Paid" : "Free"}
+            {priced ? (e.price_cents ?? 0) > 0 ? `$${((e.price_cents ?? 0)/100).toFixed(2)}` : "Paid" : "Free"}
           </div>
           {priced && onBuy && (
             <button
@@ -84,7 +86,7 @@ function fmtDateLong(iso: string) {
 const CATEGORIES = ["All", "Music", "Art", "Community", "Family", "Nightlife", "Food", "Wellness", "Education", "Sports", "Networking", "Festival"] as const;
 
 function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) => void; buying: boolean }) {
-  const priced = (e.price_cents ?? 0) > 0;
+  const priced = isPaidEvent(e);
   const [shareOpen, setShareOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const shareUrl = siteUrl(`/events/${e.id}`);
@@ -139,7 +141,7 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
         )}
         <div className="flex items-center justify-between pt-1">
           <div className="text-sm font-bold text-neutral-900">
-            {priced ? `From $${((e.price_cents ?? 0) / 100).toFixed(2)}` : e.pricing_mode === "paid" ? "Paid" : "Free"}
+            {priced ? (e.price_cents ?? 0) > 0 ? `From $${((e.price_cents ?? 0) / 100).toFixed(2)}` : "Paid" : "Free"}
           </div>
           {!priced && (
             <button
@@ -209,6 +211,7 @@ function EventsPage() {
       }
       return rows.map((r) => {
         const min = minByEvent.get(r.id);
+        if (r.pricing_mode === "free" || r.donations_enabled) return r;
         return (r.price_cents ?? 0) > 0 || min === undefined ? r : { ...r, price_cents: min };
       });
     },
@@ -315,7 +318,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
     setBuying(eventId);
     try {
       const ev = events.find((e) => e.id === eventId);
-      const isFree = !ev || (ev.price_cents ?? 0) <= 0;
+      const isFree = !ev || !isPaidEvent(ev);
       if (isFree) {
         const { error } = await supabase.rpc("rsvp_free_event", { _event_id: eventId, _quantity: 1 });
         if (error) throw error;

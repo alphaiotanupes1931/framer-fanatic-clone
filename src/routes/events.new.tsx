@@ -68,7 +68,8 @@ function NewEventPage() {
   const refreshStripeFn = useServerFn(refreshConnectStatus);
 
   const payoutsReady = !!me?.stripe_charges_enabled || stripeVerified;
-  const needsStripe = pricing === "paid" && !!me && !payoutsReady;
+  const requiresStripe = pricing === "paid" || donation;
+  const needsStripe = requiresStripe && !!me && !payoutsReady;
 
   const [form, setForm] = useState({
     image_url: "",
@@ -289,7 +290,7 @@ function NewEventPage() {
     // Paid events need a live payout account. Re-check Stripe directly (the
     // cached profile flag can lag the webhook) with a short loading animation
     // so the organizer can see the check happening.
-    if (pricing === "paid" && !payoutsReady) {
+    if (requiresStripe && !payoutsReady) {
       setCheckingStripe(true);
       const startedAt = Date.now();
       try {
@@ -581,7 +582,7 @@ function NewEventPage() {
                 <button
                   key={o.key}
                   type="button"
-                  onClick={() => { setPricing(o.key); if (o.key === "free") setDonation(false); }}
+                  onClick={() => { setPricing(o.key); setDonation(false); }}
                   aria-pressed={pricing === o.key}
                   className={`rounded-xl border px-4 py-3 text-left transition ${
                     pricing === o.key
@@ -605,7 +606,7 @@ function NewEventPage() {
                 <div className="flex-1">
                   <div className="text-sm font-semibold text-neutral-900">Connect your Stripe account to sell tickets and receive donations</div>
                   <p className="mt-1 text-[13px] leading-relaxed text-neutral-600">
-                    Paid tickets pay out straight to your bank, so you need a payout account first. It takes about
+                     Ticket sales and donations pay out straight to your bank, so you need a payout account first. It takes about
                     3 minutes. Your event is saved to Drafts automatically, and you land back in Organizer Studio
                     when you're done.
                   </p>
@@ -620,7 +621,7 @@ function NewEventPage() {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : pricing === "free" && !donation ? (
             <div className="rounded-xl border border-neutral-200 bg-white p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-[13px] text-neutral-600">
@@ -630,14 +631,21 @@ function NewEventPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => { setDonation(true); setPricing("paid"); }}
+                  onClick={() => setDonation(true)}
                   className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
                 >
                   <CreditCard className="h-4 w-4" /> Add a donation button
                 </button>
               </div>
             </div>
-          )}
+          ) : donation ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                <CheckCircle2 className="h-4 w-4" /> Donation button added
+              </div>
+              <p className="mt-1 text-xs text-emerald-700">This remains a free event. Guests can optionally donate after choosing their free ticket.</p>
+            </div>
+          ) : null}
 
 
 
