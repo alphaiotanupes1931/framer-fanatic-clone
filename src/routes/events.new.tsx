@@ -662,11 +662,23 @@ function NewEventPage() {
 
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Capacity" optional hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
-              <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
+            <Field label="Capacity" optional error={capErrors.capacity} hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
+              <input
+                type="number" min="1" step="1"
+                className={capErrors.capacity ? inputErrCls : inputCls}
+                placeholder="Leave blank for unlimited"
+                value={form.capacity}
+                onChange={(e) => { set("capacity", e.target.value); setCapErrors(validateCapacityFields(e.target.value, form.per_person)); }}
+              />
             </Field>
-            <Field label="Tickets per person" optional hint="The most tickets one guest can get. Leave blank for no limit.">
-              <input type="number" min="1" className={inputCls} placeholder="No limit" value={form.per_person} onChange={(e) => set("per_person", e.target.value)} />
+            <Field label="Tickets per person" optional error={capErrors.per_person} hint="The most tickets one guest can get. Leave blank for no limit.">
+              <input
+                type="number" min="1" step="1"
+                className={capErrors.per_person ? inputErrCls : inputCls}
+                placeholder="No limit"
+                value={form.per_person}
+                onChange={(e) => { set("per_person", e.target.value); setCapErrors(validateCapacityFields(form.capacity, e.target.value)); }}
+              />
             </Field>
           </div>
         </div>
