@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowLeft, CheckCircle2, CreditCard, ImagePlus, Loader2, Save, Video as VideoIcon, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, CreditCard, ImagePlus, Info, Loader2, Save, Video as VideoIcon, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
@@ -672,7 +672,7 @@ function NewEventPage() {
                 onChange={(e) => { set("capacity", e.target.value); setCapErrors(validateCapacityFields(e.target.value, form.per_person)); }}
               />
             </Field>
-            <Field label="Tickets per person" optional error={capErrors.per_person} hint="The most tickets one guest can get. Leave blank for no limit.">
+            <Field label="Order limit" optional error={capErrors.per_person} hint="Most tickets one guest can buy in one order. Leave blank for no limit.">
               <input
                 type="number" min="1" step="1"
                 className={capErrors.per_person ? inputErrCls : inputCls}
@@ -760,7 +760,7 @@ function Field({ label, children, required, optional, hint, error }: { label: st
       {error ? (
         <p className="mt-1 text-[11px] font-medium text-red-600">{error}</p>
       ) : (
-        hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>
+        hint && <p className="mt-1 flex items-center gap-1 text-[11px] font-normal text-neutral-500"><Info className="h-3 w-3 shrink-0" />{hint}</p>
       )}
     </div>
   );
