@@ -767,10 +767,14 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
   const [capLoaded, setCapLoaded] = useState(false);
   const [savingCap, setSavingCap] = useState(false);
   const [hasTicketEdits, setHasTicketEdits] = useState(false);
+  const [donations, setDonations] = useState(false);
+  const [donationError, setDonationError] = useState<string | null>(null);
+  const gate = useStripeGate();
 
   useEffect(() => {
-    supabase.from("events").select("max_tickets_per_buyer").eq("id", evt.id).maybeSingle()
+    supabase.from("events").select("max_tickets_per_buyer, donations_enabled").eq("id", evt.id).maybeSingle()
       .then(({ data }) => {
+        setDonations(!!(data as { donations_enabled?: boolean | null } | null)?.donations_enabled);
         const v = (data as { max_tickets_per_buyer: number | null } | null)?.max_tickets_per_buyer;
         const str = v ? String(v) : "";
         setCap(str);
@@ -850,6 +854,50 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
       {showForm && (
         <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); setCreatedPending(true); setHasTicketEdits(true); load(); }} />
       )}
+
+      {capLoaded && (
+        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+          <div className="text-sm font-semibold text-neutral-900">Donate button</div>
+          <p className="mt-0.5 text-xs text-neutral-500">
+            Free events can still take support. Turn this on and guests see a Donate button next to their free ticket.
+            Donations need a connected Stripe account.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={async () => {
+                setDonationError(null);
+                const next = !donations;
+                if (next) {
+                  const ready = await gate.check();
+                  if (!ready) {
+                    setDonationError("You will need to set up a Stripe account before you can take donations.");
+                    return;
+                  }
+                }
+                const { error } = await supabase.from("events").update({ donations_enabled: next }).eq("id", evt.id);
+                if (error) { toast.error(error.message); return; }
+                setDonations(next);
+                toast.success(next ? "Donate button is on" : "Donate button is off");
+              }}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
+                donations ? "bg-emerald-600 text-white" : "bg-neutral-900 text-white"
+              } hover:brightness-110`}
+            >
+              {donations ? <CheckCircle2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {donations ? "Donate button is on" : "Add a donate button"}
+            </button>
+            {donations && <span className="text-xs text-neutral-500">Guests can give any amount from $1.</span>}
+          </div>
+          {donationError && (
+            <div className="mt-3">
+              <StripeRequiredNotice message={donationError} onSetup={gate.startSetup} busy={gate.opening} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {gate.checking && <StripeCheckingOverlay label="Checking your Stripe account…" />}
 
       {capLoaded && (
         <div className="rounded-xl border border-neutral-200 bg-white p-5">
@@ -946,13 +994,29 @@ function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; 
   const [description, setDescription] = useState("");
   const [perks, setPerks] = useState("");
   const [saving, setSaving] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const gate = useStripeGate();
 
-  const canSubmit = name.trim().length > 0 && !saving;
+  const canSubmit = name.trim().length > 0 && !saving && !gate.checking;
 
   const submit = async () => {
     if (!canSubmit) return;
-    setSaving(true);
     const priceCents = Math.max(0, Math.round(parseFloat(price || "0") * 100));
+    // Paid tiers and donations move money, so confirm payouts are live first.
+    const needsStripe = category === "donation" || (category !== "free_rsvp" && priceCents > 0);
+    setStripeError(null);
+    if (needsStripe) {
+      const ready = await gate.check();
+      if (!ready) {
+        setStripeError(
+          category === "donation"
+            ? "You will need to set up a Stripe account before you can take donations."
+            : "You will need to set up a Stripe account before you can sell paid tickets.",
+        );
+        return;
+      }
+    }
+    setSaving(true);
     const { error } = await supabase.from("ticket_types").insert({
       event_id: eventId,
       category,
@@ -1050,12 +1114,15 @@ function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; 
           <input value={perks} onChange={e => setPerks(e.target.value)} className={input} placeholder="Early Entry, Meet & Greet, Open Bar, Backstage Access..." />
         </div>
 
+        {stripeError && <StripeRequiredNotice message={stripeError} onSetup={gate.startSetup} busy={gate.opening} />}
+        {gate.checking && <StripeCheckingOverlay label="Checking your Stripe account…" />}
+
         <div className="flex gap-2 pt-2">
           <button
             onClick={submit}
             disabled={!canSubmit}
             className="flex-1 rounded-lg bg-[#d4580a] py-3 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:bg-neutral-300"
-          >{saving ? "Creating..." : "Create Ticket Type"}</button>
+          >{gate.checking ? "Checking your Stripe account…" : saving ? "Creating..." : "Create Ticket Type"}</button>
           <button onClick={onCancel} className="rounded-lg border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">Cancel</button>
         </div>
       </div>
