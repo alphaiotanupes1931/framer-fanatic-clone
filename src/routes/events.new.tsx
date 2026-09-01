@@ -348,6 +348,7 @@ function NewEventPage() {
         neighborhood: isOnline ? "Online" : form.neighborhood || null,
         category: form.category || null,
         price_cents: 0,
+        pricing_mode: pricing,
         capacity,
       }).select("id").single();
 

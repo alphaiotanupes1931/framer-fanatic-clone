@@ -23,6 +23,7 @@ type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
   location: string | null; image_url: string | null; starts_at: string;
   price_cents?: number | null;
+  pricing_mode?: string | null;
   category?: string | null;
 };
 
@@ -57,7 +58,7 @@ function EventCard({ e, onBuy, variant = "light" }: { e: EventRow; onBuy?: (id: 
         {e.description && <p className={`text-sm mt-2 line-clamp-2 ${body}`}>{e.description}</p>}
         <div className="mt-3 flex items-center justify-between">
           <div className="text-sm font-semibold">
-            {priced ? `$${((e.price_cents ?? 0)/100).toFixed(2)}` : "Free"}
+            {priced ? `$${((e.price_cents ?? 0)/100).toFixed(2)}` : e.pricing_mode === "paid" ? "Paid" : "Free"}
           </div>
           {priced && onBuy && (
             <button
@@ -138,7 +139,7 @@ function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) =
         )}
         <div className="flex items-center justify-between pt-1">
           <div className="text-sm font-bold text-neutral-900">
-            {priced ? `From $${((e.price_cents ?? 0) / 100).toFixed(2)}` : "Free"}
+            {priced ? `From $${((e.price_cents ?? 0) / 100).toFixed(2)}` : e.pricing_mode === "paid" ? "Paid" : "Free"}
           </div>
           {!priced && (
             <button
@@ -197,11 +198,10 @@ function EventsPage() {
       // each event; otherwise paid events render as "Free".
       const { data: tiers } = await supabase
         .from("ticket_types")
-        .select("event_id, price_cents, is_active")
+        .select("event_id, price_cents")
         .in("event_id", rows.map((r) => r.id));
       const minByEvent = new Map<string, number>();
-      for (const t of (tiers as { event_id: string; price_cents: number | null; is_active?: boolean | null }[] | null) ?? []) {
-        if (t.is_active === false) continue;
+      for (const t of (tiers as { event_id: string; price_cents: number | null }[] | null) ?? []) {
         const cents = t.price_cents ?? 0;
         if (cents <= 0) continue;
         const prev = minByEvent.get(t.event_id);
