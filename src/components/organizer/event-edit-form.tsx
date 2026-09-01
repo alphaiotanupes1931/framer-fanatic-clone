@@ -8,6 +8,7 @@ import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { hasCapacityErrors, parseLimit, validateCapacityFields, type CapacityErrors } from "@/lib/capacity-limits";
 
 type Neighborhood = { id: string; name: string };
 
@@ -31,6 +32,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
+  const [capErrors, setCapErrors] = useState<CapacityErrors>({});
 
   const [form, setForm] = useState({
     image_url: "",
@@ -148,14 +150,21 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
       }
     }
 
+    const limitErrors = validateCapacityFields(form.capacity, form.per_person);
+    setCapErrors(limitErrors);
+    if (hasCapacityErrors(limitErrors)) {
+      toast.error("Please fix the ticket limits before you save this event.");
+      return;
+    }
+
     setSaving(true);
     const savingToast = toast.loading("Saving your event…");
     try {
       const starts = new Date(form.starts_at).toISOString();
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
       const priceCents = form.ticketing === "paid" ? Math.max(0, Math.round(parseFloat(form.price || "0") * 100)) : 0;
-      const capacity = form.capacity ? Math.max(0, parseInt(form.capacity, 10)) : null;
-      const maxPerBuyer = form.per_person ? Math.max(1, parseInt(form.per_person, 10)) : null;
+      const capacity = parseLimit(form.capacity);
+      const maxPerBuyer = parseLimit(form.per_person);
 
       const { error } = await supabase.from("events").update({
         title: form.title.trim(),
@@ -294,11 +303,23 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Capacity" optional hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
-              <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
+            <Field label="Capacity" optional error={capErrors.capacity} hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
+              <input
+                type="number" min="1" step="1"
+                className={capErrors.capacity ? inputErrCls : inputCls}
+                placeholder="Leave blank for unlimited"
+                value={form.capacity}
+                onChange={(e) => { set("capacity", e.target.value); setCapErrors(validateCapacityFields(e.target.value, form.per_person)); }}
+              />
             </Field>
-            <Field label="Tickets per person" optional hint="The most tickets one guest can get. Leave blank for no limit.">
-              <input type="number" min="1" className={inputCls} placeholder="No limit" value={form.per_person} onChange={(e) => set("per_person", e.target.value)} />
+            <Field label="Tickets per person" optional error={capErrors.per_person} hint="The most tickets one guest can get. Leave blank for no limit.">
+              <input
+                type="number" min="1" step="1"
+                className={capErrors.per_person ? inputErrCls : inputCls}
+                placeholder="No limit"
+                value={form.per_person}
+                onChange={(e) => { set("per_person", e.target.value); setCapErrors(validateCapacityFields(form.capacity, e.target.value)); }}
+              />
             </Field>
           </div>
         </div>
@@ -309,9 +330,10 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   );
 }
 
+const inputErrCls = "w-full rounded-lg border border-red-500 bg-white px-3 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-300";
 const inputCls = "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30";
 
-function Field({ label, children, required, optional, hint }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean; hint?: string }) {
+function Field({ label, children, required, optional, hint, error }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean; hint?: string; error?: string }) {
   return (
     <div>
       <label className="block text-sm font-semibold mb-2">
@@ -320,7 +342,11 @@ function Field({ label, children, required, optional, hint }: { label: string; c
         {optional && <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span>}
       </label>
       {children}
-      {hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>}
+      {error ? (
+        <p className="mt-1 text-[11px] font-medium text-red-600">{error}</p>
+      ) : (
+        hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>
+      )}
     </div>
   );
 }

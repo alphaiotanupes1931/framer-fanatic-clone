@@ -619,11 +619,10 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
         </div>
       )}
 
-      {tab === "details" && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-5">
-          <EventEditForm eventId={evt.id} onSaved={onBack} onCancel={() => setTab("tickets")} />
-        </div>
-      )}
+      {/* Kept mounted so in-progress edits survive a trip to another tab. */}
+      <div className={tab === "details" ? "rounded-xl border border-neutral-200 bg-white p-5" : "hidden"}>
+        <EventEditForm eventId={evt.id} onSaved={onBack} onCancel={() => setTab("tickets")} />
+      </div>
 
       {tab === "tickets" && (
         <TicketsTab evt={evt} soldCount={paid.length} onDirtyChange={onTicketsDirtyChange} saveSignal={saveTicketsSignal} onSaved={onTicketsSaved} />

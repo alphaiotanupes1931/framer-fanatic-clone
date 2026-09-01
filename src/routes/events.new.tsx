@@ -13,6 +13,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
 import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
 import { deleteEventDraft, draftHasContent, getEventDraft, saveEventDraft } from "@/lib/event-drafts";
+import { hasCapacityErrors, parseLimit, validateCapacityFields, type CapacityErrors } from "@/lib/capacity-limits";
 
 /** `datetime-local` value for "now" in the user's own timezone. */
 function localNowValue(offsetMinutes = 0) {
@@ -49,6 +50,7 @@ function NewEventPage() {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [capErrors, setCapErrors] = useState<CapacityErrors>({});
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [startMode, setStartMode] = useState<"set" | "now">("set");
   const [isOnline, setIsOnline] = useState(false);
@@ -92,7 +94,8 @@ function NewEventPage() {
     if (!draftId) return;
     const d = getEventDraft(draftId);
     if (!d) return;
-    setForm({ gallery_urls: [], ...d.form });
+    // Older drafts may predate some fields, so keep safe defaults for them.
+    setForm({ ...d.form, gallery_urls: d.form.gallery_urls ?? [], capacity: d.form.capacity ?? "", per_person: d.form.per_person ?? "" });
     setStartMode(d.startMode);
     setIsOnline(d.isOnline);
     setPricing(d.pricing);
@@ -330,12 +333,19 @@ function NewEventPage() {
       if (endsDate.getTime() <= startsRef.getTime()) { toast.error("End time must be after the start time"); return; }
     }
 
+    const limitErrors = validateCapacityFields(form.capacity, form.per_person);
+    setCapErrors(limitErrors);
+    if (hasCapacityErrors(limitErrors)) {
+      toast.error("Please fix the ticket limits before you publish this event.");
+      return;
+    }
+
     setSaving(true);
     try {
       const starts = startMode === "now" ? new Date().toISOString() : new Date(form.starts_at).toISOString();
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
-      const capacity = form.capacity ? Math.max(0, parseInt(form.capacity, 10)) : null;
-      const maxPerBuyer = form.per_person ? Math.max(1, parseInt(form.per_person, 10)) : null;
+      const capacity = parseLimit(form.capacity);
+      const maxPerBuyer = parseLimit(form.per_person);
 
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
@@ -653,11 +663,23 @@ function NewEventPage() {
 
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Capacity" optional hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
-              <input type="number" min="0" className={inputCls} placeholder="Leave blank for unlimited" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} />
+            <Field label="Capacity" optional error={capErrors.capacity} hint="Total tickets this event can sell before it shows Sold out. Leave blank for unlimited.">
+              <input
+                type="number" min="1" step="1"
+                className={capErrors.capacity ? inputErrCls : inputCls}
+                placeholder="Leave blank for unlimited"
+                value={form.capacity}
+                onChange={(e) => { set("capacity", e.target.value); setCapErrors(validateCapacityFields(e.target.value, form.per_person)); }}
+              />
             </Field>
-            <Field label="Tickets per person" optional hint="The most tickets one guest can get. Leave blank for no limit.">
-              <input type="number" min="1" className={inputCls} placeholder="No limit" value={form.per_person} onChange={(e) => set("per_person", e.target.value)} />
+            <Field label="Tickets per person" optional error={capErrors.per_person} hint="The most tickets one guest can get. Leave blank for no limit.">
+              <input
+                type="number" min="1" step="1"
+                className={capErrors.per_person ? inputErrCls : inputCls}
+                placeholder="No limit"
+                value={form.per_person}
+                onChange={(e) => { set("per_person", e.target.value); setCapErrors(validateCapacityFields(form.capacity, e.target.value)); }}
+              />
             </Field>
           </div>
         </div>
@@ -724,8 +746,9 @@ function NewEventPage() {
 }
 
 const inputCls = "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30";
+const inputErrCls = "w-full rounded-lg border border-red-500 bg-white px-3 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-300";
 
-function Field({ label, children, required, optional, hint }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean; hint?: string }) {
+function Field({ label, children, required, optional, hint, error }: { label: string; children: React.ReactNode; required?: boolean; optional?: boolean; hint?: string; error?: string }) {
   return (
     <div>
       <label className="block text-sm font-semibold mb-2">
@@ -734,7 +757,11 @@ function Field({ label, children, required, optional, hint }: { label: string; c
         {optional && <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span>}
       </label>
       {children}
-      {hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>}
+      {error ? (
+        <p className="mt-1 text-[11px] font-medium text-red-600">{error}</p>
+      ) : (
+        hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>
+      )}
     </div>
   );
 }
