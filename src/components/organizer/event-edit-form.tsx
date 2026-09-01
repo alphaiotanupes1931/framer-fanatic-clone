@@ -20,12 +20,6 @@ function toLocalInput(iso: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/** `datetime-local` value for "now" in the user's own timezone. */
-function localNowValue() {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string; onSaved?: () => void; onCancel?: () => void }) {
   const me = useCurrentProfile();
