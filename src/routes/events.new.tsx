@@ -332,12 +332,19 @@ function NewEventPage() {
       if (endsDate.getTime() <= startsRef.getTime()) { toast.error("End time must be after the start time"); return; }
     }
 
+    const limitErrors = validateCapacityFields(form.capacity, form.per_person);
+    setCapErrors(limitErrors);
+    if (hasCapacityErrors(limitErrors)) {
+      toast.error("Please fix the ticket limits before you publish this event.");
+      return;
+    }
+
     setSaving(true);
     try {
       const starts = startMode === "now" ? new Date().toISOString() : new Date(form.starts_at).toISOString();
       const ends = form.ends_at ? new Date(form.ends_at).toISOString() : null;
-      const capacity = form.capacity ? Math.max(0, parseInt(form.capacity, 10)) : null;
-      const maxPerBuyer = form.per_person ? Math.max(1, parseInt(form.per_person, 10)) : null;
+      const capacity = parseLimit(form.capacity);
+      const maxPerBuyer = parseLimit(form.per_person);
 
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
