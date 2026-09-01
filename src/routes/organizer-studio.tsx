@@ -408,18 +408,15 @@ function OrganizerStudioPage() {
             <CreditCard className="h-4 w-4" /> Stripe
           </button>
           <button
-            onClick={() => {
-              if (!selected) { toast.info("Pick an event first, then Save Tickets opens its page."); setTab("manage"); return; }
-              if (ticketsDirty) { setSaveTicketsSignal((s) => s + 1); return; }
-              navigate({ to: "/events/$eventId", params: { eventId: selected.id } });
-            }}
-            className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
+            onClick={() => { void saveTickets(); }}
+            disabled={publishChecking}
+            className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition disabled:opacity-60 ${
               ticketsDirty
                 ? "bg-[#d4580a] text-white shadow hover:brightness-110"
                 : "text-neutral-600 hover:text-neutral-900"
             }`}
           >
-            <Ticket className="h-4 w-4" /> Save Tickets
+            <Ticket className="h-4 w-4" /> {publishChecking ? "Checking Stripe…" : "Save Tickets"}
           </button>
           <button onClick={() => { setTab("campaign"); setSelected(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "campaign" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
             <Mail className="h-4 w-4" /> Campaign
