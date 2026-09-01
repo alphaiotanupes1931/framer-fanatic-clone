@@ -51,17 +51,27 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             if (isDonation) {
               const ownerId = session.metadata?.owner_id ?? null;
               const donorId = session.metadata?.donor_id ?? null;
-              const orgId = session.metadata?.org_id ?? null;
+              const orgId = session.metadata?.org_id || null;
+              const donationEventId = session.metadata?.event_id || null;
+              // Donations come from an organization page or from an event page.
+              const targetType = donationEventId ? "event" : "organization";
+              const targetId = donationEventId ?? orgId;
               const amountCents = Number(session.metadata?.amount_cents ?? "0") || 0;
+              const meta = {
+                org_id: orgId,
+                event_id: donationEventId,
+                amount_cents: amountCents,
+                payment_intent: paymentIntentId,
+              };
               if (ownerId) {
                 await supabaseAdmin.from("notifications").insert({
                   user_id: ownerId,
                   actor_id: donorId,
                   type: "donation_received",
-                  target_type: "organization",
-                  target_id: orgId,
+                  target_type: targetType,
+                  target_id: targetId,
                   message: `You received a $${(amountCents / 100).toFixed(2)} donation.`,
-                  metadata: { org_id: orgId, amount_cents: amountCents, payment_intent: paymentIntentId },
+                  metadata: meta,
                 });
               }
               if (donorId) {
@@ -69,10 +79,10 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   user_id: donorId,
                   actor_id: null,
                   type: "donation_sent",
-                  target_type: "organization",
-                  target_id: orgId,
+                  target_type: targetType,
+                  target_id: targetId,
                   message: "Thank you! Your donation is confirmed.",
-                  metadata: { org_id: orgId, amount_cents: amountCents, payment_intent: paymentIntentId },
+                  metadata: meta,
                 });
               }
               return ack();
