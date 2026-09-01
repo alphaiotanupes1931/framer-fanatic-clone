@@ -452,7 +452,14 @@ function EventDetail() {
           {soldOut ? (
             <div className="rounded-2xl border border-border bg-muted/50 p-5 text-center">
               <div className="text-base font-bold text-foreground">Sold out</div>
-              <p className="mt-1 text-xs text-muted-foreground">Every ticket for this event has been claimed.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Every ticket for this event has been claimed, so checkout is closed.</p>
+            </div>
+          ) : limitReached ? (
+            <div className="rounded-2xl border border-border bg-muted/50 p-5 text-center">
+              <div className="text-base font-bold text-foreground">You have all your tickets</div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                The organizer limits this event to {perPersonCap} {perPersonCap === 1 ? "ticket" : "tickets"} per person, and you already have {ownedCount}. Checkout is closed for you.
+              </p>
             </div>
           ) : tiers.length > 0 ? (
             <>
