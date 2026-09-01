@@ -760,28 +760,6 @@ function StripeCheckingOverlay({ label }: { label: string }) {
   );
 }
 
-/** Small "i" bubble that explains a setting on hover or tap. */
-function InfoHint({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <span className="relative inline-flex">
-      <button
-        type="button"
-        aria-label="More information"
-        onClick={() => setOpen((v) => !v)}
-        onBlur={() => setOpen(false)}
-        className="flex h-4 w-4 items-center justify-center rounded-full border border-neutral-300 text-[10px] font-bold text-neutral-500 hover:border-neutral-500 hover:text-neutral-800"
-      >
-        i
-      </button>
-      {open && (
-        <span className="absolute left-1/2 top-6 z-20 w-60 -translate-x-1/2 rounded-lg bg-neutral-900 px-3 py-2 text-[11px] font-normal leading-relaxed text-white shadow-lg">
-          {text}
-        </span>
-      )}
-    </span>
-  );
-}
 
 function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { evt: MyEvent; soldCount: number; onDirtyChange?: (dirty: boolean) => void; saveSignal?: number; onSaved?: () => void; }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
