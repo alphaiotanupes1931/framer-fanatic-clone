@@ -94,6 +94,7 @@ function NewEventPage() {
     setStartMode(d.startMode);
     setIsOnline(d.isOnline);
     setPricing(d.pricing);
+    setDonation(!!d.donation);
   }, [draftId]);
 
   const snapshot = useCallback(() => ({
@@ -103,8 +104,9 @@ function NewEventPage() {
     startMode,
     isOnline,
     pricing,
+    donation,
     form,
-  }), [orgId, kind, startMode, isOnline, pricing, form]);
+  }), [orgId, kind, startMode, isOnline, pricing, donation, form]);
 
   const persistDraft = useCallback(() => {
     const snap = snapshot();
@@ -350,6 +352,7 @@ function NewEventPage() {
         category: form.category || null,
         price_cents: 0,
         pricing_mode: pricing,
+        donations_enabled: donation,
         capacity,
       }).select("id").single();
 
@@ -578,7 +581,7 @@ function NewEventPage() {
                 <button
                   key={o.key}
                   type="button"
-                  onClick={() => setPricing(o.key)}
+                  onClick={() => { setPricing(o.key); if (o.key === "free") setDonation(false); }}
                   aria-pressed={pricing === o.key}
                   className={`rounded-xl border px-4 py-3 text-left transition ${
                     pricing === o.key
@@ -600,7 +603,7 @@ function NewEventPage() {
                   <CreditCard className="h-4.5 w-4.5" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-neutral-900">Connect your Stripe account to sell tickets or take donations</div>
+                  <div className="text-sm font-semibold text-neutral-900">Connect your Stripe account to sell tickets and receive donations</div>
                   <p className="mt-1 text-[13px] leading-relaxed text-neutral-600">
                     Paid tickets pay out straight to your bank, so you need a payout account first. It takes about
                     3 minutes. Your event is saved to Drafts automatically, and you land back in Organizer Studio
@@ -618,13 +621,21 @@ function NewEventPage() {
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-[#d4580a]/25 bg-[#d4580a]/[0.06] p-4">
-              <p className="text-[13px] text-neutral-600">
-                <span className="font-semibold text-neutral-900">Tickets are set up next</span>
-                <br />
-                After you create this event you go straight to Organizer Studio, where you add your ticket types
-                (free RSVP, general admission, tiers, prices, and quantities).
-              </p>
+            <div className="rounded-xl border border-neutral-200 bg-white p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-[13px] text-neutral-600">
+                  <span className="font-semibold text-neutral-900">Free event, but want support?</span>
+                  <br />
+                  Guests can give any amount from $1 alongside their free ticket.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setDonation(true); setPricing("paid"); }}
+                  className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+                >
+                  <CreditCard className="h-4 w-4" /> Add a donation button
+                </button>
+              </div>
             </div>
           )}
 
