@@ -320,7 +320,10 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
         const { error } = await supabase.rpc("rsvp_free_event", { _event_id: eventId, _quantity: 1 });
         if (error) throw error;
         toast.success("You're going! Check your email for your ticket.");
-        void emailMyTickets({ data: { eventId } }).catch((err) => console.error("ticket email failed", err));
+        void emailMyTickets({ data: { eventId } }).catch((err) => {
+        console.error("ticket email failed", err);
+        toast.error("Your ticket is saved, but we could not email it just now. Open My Tickets to download it.");
+      });
         return;
       }
       // Paid: ask how many tickets first, in a sleek sheet, then go to checkout.

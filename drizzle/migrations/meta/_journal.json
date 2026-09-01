@@ -15,6 +15,20 @@
       "when": 1788233772071,
       "tag": "0001_fix_missing_columns_and_profile_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788234134333,
+      "tag": "0002_add_event_donations_enabled",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788234347787,
+      "tag": "0003_enforce_event_capacity",
+      "breakpoints": true
     }
   ]
 }

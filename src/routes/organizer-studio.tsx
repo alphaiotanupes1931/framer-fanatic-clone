@@ -682,29 +682,144 @@ const CATEGORIES = [
   { key: "donation", label: "Donation", Icon: Tag },
 ] as const;
 
+/**
+ * Shared payout gate. Paid tickets and donations both need an active Stripe
+ * account, so they check the live status before saving and offer a one-click
+ * path into the secure setup form.
+ */
+function useStripeGate() {
+  const refreshFn = useServerFn(refreshConnectStatus);
+  const ensureFn = useServerFn(ensureConnectAccount);
+  const linkFn = useServerFn(createConnectOnboardingLink);
+  const [checking, setChecking] = useState(false);
+  const [opening, setOpening] = useState(false);
+
+  /** Live check with Stripe. Can take a few seconds. */
+  const check = async () => {
+    setChecking(true);
+    try {
+      const status = await refreshFn();
+      return !!status.chargesEnabled;
+    } catch {
+      return false;
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const startSetup = async () => {
+    setOpening(true);
+    try {
+      const account = await ensureFn();
+      if (!account.ok) { toast.error(account.message); setOpening(false); return; }
+      const { url } = await linkFn({ data: {
+        returnUrl: `${window.location.origin}/organizer-studio?stripe=ok`,
+        refreshUrl: `${window.location.origin}/organizer-studio?stripe=refresh`,
+      }});
+      window.location.assign(url);
+    } catch (e) {
+      toast.error(sanitizeErrorMessage(e, "Could not open payout setup"));
+      setOpening(false);
+    }
+  };
+
+  return { checking, opening, check, startSetup };
+}
+
+/** Red callout shown when money features are blocked by a missing Stripe account. */
+function StripeRequiredNotice({ message, onSetup, busy }: { message: string; onSetup: () => void; busy?: boolean }) {
+  return (
+    <div className="rounded-xl border border-red-300 bg-red-50 p-4">
+      <div className="flex items-start gap-2 text-sm font-semibold text-red-700">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {message}
+      </div>
+      <button
+        type="button"
+        onClick={onSetup}
+        disabled={busy}
+        className="mt-3 inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+      >
+        {busy ? "Opening secure form…" : "Click here to set up your Stripe account"}
+        <ExternalLink className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+/** Full-screen progress while Stripe is checked, so the wait is explained. */
+function StripeCheckingOverlay({ label }: { label: string }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl animate-scale-in">
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-[#d4580a]" />
+        <div className="mt-4 text-sm font-semibold text-neutral-900">{label}</div>
+        <p className="mt-1 text-xs text-neutral-500">This can take a few seconds. Please keep this window open.</p>
+      </div>
+    </div>
+  );
+}
+
+/** Small "i" bubble that explains a setting on hover or tap. */
+function InfoHint({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        aria-label="More information"
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setOpen(false)}
+        className="flex h-4 w-4 items-center justify-center rounded-full border border-neutral-300 text-[10px] font-bold text-neutral-500 hover:border-neutral-500 hover:text-neutral-800"
+      >
+        i
+      </button>
+      {open && (
+        <span className="absolute left-1/2 top-6 z-20 w-60 -translate-x-1/2 rounded-lg bg-neutral-900 px-3 py-2 text-[11px] font-normal leading-relaxed text-white shadow-lg">
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { evt: MyEvent; soldCount: number; onDirtyChange?: (dirty: boolean) => void; saveSignal?: number; onSaved?: () => void; }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [cap, setCap] = useState<string>("");
   const [originalCap, setOriginalCap] = useState<string>("");
+  const [capacity, setCapacity] = useState<string>("");
+  const [originalCapacity, setOriginalCapacity] = useState<string>("");
+  const [soldTotal, setSoldTotal] = useState<number>(0);
   const [capLoaded, setCapLoaded] = useState(false);
   const [savingCap, setSavingCap] = useState(false);
   const [hasTicketEdits, setHasTicketEdits] = useState(false);
+  const [donations, setDonations] = useState(false);
+  const [donationError, setDonationError] = useState<string | null>(null);
+  const gate = useStripeGate();
 
   useEffect(() => {
-    supabase.from("events").select("max_tickets_per_buyer").eq("id", evt.id).maybeSingle()
+    supabase.from("events").select("max_tickets_per_buyer, donations_enabled, capacity").eq("id", evt.id).maybeSingle()
       .then(({ data }) => {
-        const v = (data as { max_tickets_per_buyer: number | null } | null)?.max_tickets_per_buyer;
-        const str = v ? String(v) : "";
+        const row = data as { max_tickets_per_buyer: number | null; donations_enabled?: boolean | null; capacity?: number | null } | null;
+        setDonations(!!row?.donations_enabled);
+        const str = row?.max_tickets_per_buyer ? String(row.max_tickets_per_buyer) : "";
         setCap(str);
         setOriginalCap(str);
+        const capStr = row?.capacity ? String(row.capacity) : "";
+        setCapacity(capStr);
+        setOriginalCapacity(capStr);
         setCapLoaded(true);
+      });
+    supabase.rpc("event_capacity_status", { _event_id: evt.id })
+      .then(({ data }) => {
+        const row = Array.isArray(data) ? data[0] : null;
+        setSoldTotal(row?.sold ?? 0);
       });
   }, [evt.id]);
 
   const [createdPending, setCreatedPending] = useState(false);
 
-  const capDirty = cap !== originalCap;
+  const capDirty = cap !== originalCap || capacity !== originalCapacity;
   const isDirty = capDirty || showForm || createdPending || hasTicketEdits;
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
@@ -716,7 +831,14 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
   const saveCap = async () => {
     setSavingCap(true);
     const value = cap.trim() ? Math.max(1, parseInt(cap, 10)) : null;
-    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value }).eq("id", evt.id);
+    const capacityValue = capacity.trim() ? Math.max(1, parseInt(capacity, 10)) : null;
+    if (capacityValue !== null && capacityValue < soldTotal) {
+      setSavingCap(false);
+      toast.error(`You have already issued ${soldTotal} ticket(s). Capacity cannot be lower than that.`);
+      return;
+    }
+    setOriginalCapacity(capacityValue ? String(capacityValue) : "");
+    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value, capacity: capacityValue }).eq("id", evt.id);
     if (error) { toast.error(error.message); setSavingCap(false); return false; }
     const str = value ? String(value) : "";
     setOriginalCap(str);
@@ -776,27 +898,90 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
 
       {capLoaded && (
         <div className="rounded-xl border border-neutral-200 bg-white p-5">
-          <div className="text-sm font-semibold text-neutral-900">Limit per person</div>
+          <div className="text-sm font-semibold text-neutral-900">Donate button</div>
           <p className="mt-0.5 text-xs text-neutral-500">
-            You decide how many tickets one person can get for this event. Leave blank for no limit. Ticket types can set their own limit too.
+            Free events can still take support. Turn this on and guests see a Donate button next to their free ticket.
+            Donations need a connected Stripe account.
           </p>
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              type="number"
-              min="1"
-              value={cap}
-              onChange={(e) => { setCap(e.target.value); setHasTicketEdits(true); }}
-              placeholder="No limit"
-              className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
-            />
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
-              onClick={saveCap}
-              disabled={savingCap}
-              className="rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-60"
+              type="button"
+              onClick={async () => {
+                setDonationError(null);
+                const next = !donations;
+                if (next) {
+                  const ready = await gate.check();
+                  if (!ready) {
+                    setDonationError("You will need to set up a Stripe account before you can take donations.");
+                    return;
+                  }
+                }
+                const { error } = await supabase.from("events").update({ donations_enabled: next }).eq("id", evt.id);
+                if (error) { toast.error(error.message); return; }
+                setDonations(next);
+                toast.success(next ? "Donate button is on" : "Donate button is off");
+              }}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
+                donations ? "bg-emerald-600 text-white" : "bg-neutral-900 text-white"
+              } hover:brightness-110`}
             >
-              {savingCap ? "Saving…" : "Save limit"}
+              {donations ? <CheckCircle2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {donations ? "Donate button is on" : "Add a donate button"}
             </button>
+            {donations && <span className="text-xs text-neutral-500">Guests can give any amount from $1.</span>}
           </div>
+          {donationError && (
+            <div className="mt-3">
+              <StripeRequiredNotice message={donationError} onSetup={gate.startSetup} busy={gate.opening} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {gate.checking && <StripeCheckingOverlay label="Checking your Stripe account…" />}
+
+      {capLoaded && (
+        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+          <div className="text-sm font-semibold text-neutral-900">Capacity and limits</div>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900">
+                Event capacity
+                <InfoHint text="The total number of tickets this event can sell. Once that many tickets are issued, the event shows as Sold out and no one else can buy or RSVP. Leave blank for unlimited." />
+              </div>
+              <input
+                type="number"
+                min="1"
+                value={capacity}
+                onChange={(e) => { setCapacity(e.target.value); setHasTicketEdits(true); }}
+                placeholder="Unlimited"
+                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+              />
+              <p className="mt-1 text-[11px] text-neutral-500">{soldTotal} issued so far.</p>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900">
+                Tickets per person
+                <InfoHint text="The most tickets one guest can get for this event. It does not change the total capacity. Leave blank for no limit. A ticket type can set its own tighter limit." />
+              </div>
+              <input
+                type="number"
+                min="1"
+                value={cap}
+                onChange={(e) => { setCap(e.target.value); setHasTicketEdits(true); }}
+                placeholder="No limit"
+                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+              />
+              <p className="mt-1 text-[11px] text-neutral-500">Applies to each guest.</p>
+            </div>
+          </div>
+          <button
+            onClick={saveCap}
+            disabled={savingCap}
+            className="mt-3 rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-60"
+          >
+            {savingCap ? "Saving…" : "Save capacity and limits"}
+          </button>
         </div>
       )}
 
@@ -869,13 +1054,29 @@ function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; 
   const [description, setDescription] = useState("");
   const [perks, setPerks] = useState("");
   const [saving, setSaving] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const gate = useStripeGate();
 
-  const canSubmit = name.trim().length > 0 && !saving;
+  const canSubmit = name.trim().length > 0 && !saving && !gate.checking;
 
   const submit = async () => {
     if (!canSubmit) return;
-    setSaving(true);
     const priceCents = Math.max(0, Math.round(parseFloat(price || "0") * 100));
+    // Paid tiers and donations move money, so confirm payouts are live first.
+    const needsStripe = category === "donation" || (category !== "free_rsvp" && priceCents > 0);
+    setStripeError(null);
+    if (needsStripe) {
+      const ready = await gate.check();
+      if (!ready) {
+        setStripeError(
+          category === "donation"
+            ? "You will need to set up a Stripe account before you can take donations."
+            : "You will need to set up a Stripe account before you can sell paid tickets.",
+        );
+        return;
+      }
+    }
+    setSaving(true);
     const { error } = await supabase.from("ticket_types").insert({
       event_id: eventId,
       category,
@@ -973,12 +1174,15 @@ function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; 
           <input value={perks} onChange={e => setPerks(e.target.value)} className={input} placeholder="Early Entry, Meet & Greet, Open Bar, Backstage Access..." />
         </div>
 
+        {stripeError && <StripeRequiredNotice message={stripeError} onSetup={gate.startSetup} busy={gate.opening} />}
+        {gate.checking && <StripeCheckingOverlay label="Checking your Stripe account…" />}
+
         <div className="flex gap-2 pt-2">
           <button
             onClick={submit}
             disabled={!canSubmit}
             className="flex-1 rounded-lg bg-[#d4580a] py-3 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:bg-neutral-300"
-          >{saving ? "Creating..." : "Create Ticket Type"}</button>
+          >{gate.checking ? "Checking your Stripe account…" : saving ? "Creating..." : "Create Ticket Type"}</button>
           <button onClick={onCancel} className="rounded-lg border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">Cancel</button>
         </div>
       </div>

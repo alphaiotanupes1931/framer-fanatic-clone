@@ -19,18 +19,30 @@ export function OpportunitiesTab({ orgId, canManage }: { orgId: string; canManag
   const [items, setItems] = useState<Opportunity[]>([]);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", opportunity_type: TYPES[0], deadline: "", body: "", link_url: "" });
 
   const reset = () => setForm({ title: "", opportunity_type: TYPES[0], deadline: "", body: "", link_url: "" });
 
   const load = async () => {
-    const { data } = await supabase
+    setLoading(true);
+    setLoadError(null);
+    const { data, error } = await supabase
       .from("organization_posts")
       .select("id, title, body, link_url, opportunity_type, deadline, created_at")
       .eq("org_id", orgId)
       .eq("kind", "opportunity")
       .order("created_at", { ascending: false });
+    if (error) {
+      const msg = `We could not load opportunities for this page. ${error.message}`;
+      setLoadError(msg);
+      toast.error(msg);
+      setLoading(false);
+      return;
+    }
     setItems((data ?? []) as unknown as Opportunity[]);
+    setLoading(false);
   };
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId]);
 
@@ -51,7 +63,7 @@ export function OpportunitiesTab({ orgId, canManage }: { orgId: string; canManag
       deadline: form.deadline || null,
     } as never);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(`We could not post this opportunity. ${error.message}`);
     setOpen(false); reset(); void load();
     toast.success("Opportunity posted");
   };
@@ -59,14 +71,28 @@ export function OpportunitiesTab({ orgId, canManage }: { orgId: string; canManag
   const remove = async (id: string) => {
     if (!confirm("Delete this opportunity?")) return;
     const { error } = await supabase.from("organization_posts").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(`We could not delete this opportunity. ${error.message}`);
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   const fmt = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading opportunities…
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
+      {loadError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {loadError}
+          <button onClick={() => void load()} className="ml-2 font-semibold underline">Try again</button>
+        </div>
+      )}
       {canManage && !open && (
         <div className="flex justify-end">
           <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">

@@ -1,0 +1,1 @@
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS donations_enabled boolean NOT NULL DEFAULT false;

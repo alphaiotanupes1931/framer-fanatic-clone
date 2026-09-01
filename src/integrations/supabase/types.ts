@@ -501,6 +501,7 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          donations_enabled: boolean
           ends_at: string | null
           gallery_urls: string[]
           id: string
@@ -529,6 +530,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          donations_enabled?: boolean
           ends_at?: string | null
           gallery_urls?: string[]
           id?: string
@@ -557,6 +559,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          donations_enabled?: boolean
           ends_at?: string | null
           gallery_urls?: string[]
           id?: string
@@ -3470,6 +3473,14 @@ export type Database = {
           email: string
           id: string
           username: string
+        }[]
+      }
+      event_capacity_status: {
+        Args: { _event_id: string }
+        Returns: {
+          capacity: number
+          remaining: number
+          sold: number
         }[]
       }
       generate_unique_username: {
