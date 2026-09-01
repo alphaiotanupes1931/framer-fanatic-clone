@@ -278,7 +278,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                   error_message: errorMsg.slice(0, 1000),
                 })
 
-                const retryAfterSecs = getRetryAfterSeconds(error)
+                const retryAfterSecs = Math.min(getRetryAfterSeconds(error), MAX_COOLDOWN_SECONDS)
                 await supabase
                   .from('email_send_state')
                   .update({
