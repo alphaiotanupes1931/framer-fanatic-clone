@@ -211,7 +211,6 @@ function EventsPage() {
       }
       return rows.map((r) => {
         const min = minByEvent.get(r.id);
-        if (r.pricing_mode === "free" || r.donations_enabled) return r;
         return (r.price_cents ?? 0) > 0 || min === undefined ? r : { ...r, price_cents: min };
       });
     },
