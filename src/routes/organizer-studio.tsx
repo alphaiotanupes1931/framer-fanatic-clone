@@ -265,9 +265,9 @@ function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
 
 function OrganizerStudioPage() {
   const me = useCurrentProfile();
-  const { event: focusEventId, edit: focusEdit } = Route.useSearch();
+  const { event: focusEventId, edit: focusEdit, tab: focusTab } = Route.useSearch();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"manage" | "stripe" | "campaign">("manage");
+  const [tab, setTab] = useState<"manage" | "stripe" | "campaign">(focusTab === "stripe" || focusTab === "campaign" ? focusTab : "manage");
   const [stripeReady, setStripeReady] = useState<boolean | null>(null);
   const refreshStatusFn = useServerFn(refreshConnectStatus);
   useEffect(() => {
