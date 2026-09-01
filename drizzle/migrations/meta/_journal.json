@@ -29,6 +29,13 @@
       "when": 1788234347787,
       "tag": "0003_enforce_event_capacity",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788235847081,
+      "tag": "0004_normalize_free_event_donations",
+      "breakpoints": true
     }
   ]
 }
