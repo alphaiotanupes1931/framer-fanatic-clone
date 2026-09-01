@@ -682,6 +682,83 @@ const CATEGORIES = [
   { key: "donation", label: "Donation", Icon: Tag },
 ] as const;
 
+/**
+ * Shared payout gate. Paid tickets and donations both need an active Stripe
+ * account, so they check the live status before saving and offer a one-click
+ * path into the secure setup form.
+ */
+function useStripeGate() {
+  const refreshFn = useServerFn(refreshConnectStatus);
+  const ensureFn = useServerFn(ensureConnectAccount);
+  const linkFn = useServerFn(createConnectOnboardingLink);
+  const [checking, setChecking] = useState(false);
+  const [opening, setOpening] = useState(false);
+
+  /** Live check with Stripe. Can take a few seconds. */
+  const check = async () => {
+    setChecking(true);
+    try {
+      const status = await refreshFn();
+      return !!status.chargesEnabled;
+    } catch {
+      return false;
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const startSetup = async () => {
+    setOpening(true);
+    try {
+      const account = await ensureFn();
+      if (!account.ok) { toast.error(account.message); setOpening(false); return; }
+      const { url } = await linkFn({ data: {
+        returnUrl: `${window.location.origin}/organizer-studio?stripe=ok`,
+        refreshUrl: `${window.location.origin}/organizer-studio?stripe=refresh`,
+      }});
+      window.location.assign(url);
+    } catch (e) {
+      toast.error(sanitizeErrorMessage(e, "Could not open payout setup"));
+      setOpening(false);
+    }
+  };
+
+  return { checking, opening, check, startSetup };
+}
+
+/** Red callout shown when money features are blocked by a missing Stripe account. */
+function StripeRequiredNotice({ message, onSetup, busy }: { message: string; onSetup: () => void; busy?: boolean }) {
+  return (
+    <div className="rounded-xl border border-red-300 bg-red-50 p-4">
+      <div className="flex items-start gap-2 text-sm font-semibold text-red-700">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {message}
+      </div>
+      <button
+        type="button"
+        onClick={onSetup}
+        disabled={busy}
+        className="mt-3 inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+      >
+        {busy ? "Opening secure form…" : "Click here to set up your Stripe account"}
+        <ExternalLink className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+/** Full-screen progress while Stripe is checked, so the wait is explained. */
+function StripeCheckingOverlay({ label }: { label: string }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl animate-scale-in">
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-[#d4580a]" />
+        <div className="mt-4 text-sm font-semibold text-neutral-900">{label}</div>
+        <p className="mt-1 text-xs text-neutral-500">This can take a few seconds. Please keep this window open.</p>
+      </div>
+    </div>
+  );
+}
+
 function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { evt: MyEvent; soldCount: number; onDirtyChange?: (dirty: boolean) => void; saveSignal?: number; onSaved?: () => void; }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
   const [showForm, setShowForm] = useState(false);
