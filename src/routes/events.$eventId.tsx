@@ -543,6 +543,16 @@ function EventDetail() {
               />
             </>
           )}
+          {!soldOut && !limitReached && (remaining !== null || perPersonLeft !== null) && (
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-[11px] text-muted-foreground">
+              {remaining !== null && (
+                <span>{remaining} {remaining === 1 ? "ticket" : "tickets"} left for this event</span>
+              )}
+              {perPersonLeft !== null && (
+                <span>You can still get {perPersonLeft} {perPersonLeft === 1 ? "ticket" : "tickets"} (limit {perPersonCap} per person)</span>
+              )}
+            </div>
+          )}
           {donationsOn && (
             <div className="rounded-2xl border border-[#d4580a]/30 bg-[#fff7f1] p-4">
               <div className="text-sm font-semibold text-foreground">Support this event</div>
