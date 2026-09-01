@@ -759,11 +759,37 @@ function StripeCheckingOverlay({ label }: { label: string }) {
   );
 }
 
+/** Small "i" bubble that explains a setting on hover or tap. */
+function InfoHint({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        aria-label="More information"
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setOpen(false)}
+        className="flex h-4 w-4 items-center justify-center rounded-full border border-neutral-300 text-[10px] font-bold text-neutral-500 hover:border-neutral-500 hover:text-neutral-800"
+      >
+        i
+      </button>
+      {open && (
+        <span className="absolute left-1/2 top-6 z-20 w-60 -translate-x-1/2 rounded-lg bg-neutral-900 px-3 py-2 text-[11px] font-normal leading-relaxed text-white shadow-lg">
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { evt: MyEvent; soldCount: number; onDirtyChange?: (dirty: boolean) => void; saveSignal?: number; onSaved?: () => void; }) {
   const [types, setTypes] = useState<TicketType[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [cap, setCap] = useState<string>("");
   const [originalCap, setOriginalCap] = useState<string>("");
+  const [capacity, setCapacity] = useState<string>("");
+  const [originalCapacity, setOriginalCapacity] = useState<string>("");
+  const [soldTotal, setSoldTotal] = useState<number>(0);
   const [capLoaded, setCapLoaded] = useState(false);
   const [savingCap, setSavingCap] = useState(false);
   const [hasTicketEdits, setHasTicketEdits] = useState(false);
@@ -772,20 +798,28 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
   const gate = useStripeGate();
 
   useEffect(() => {
-    supabase.from("events").select("max_tickets_per_buyer, donations_enabled").eq("id", evt.id).maybeSingle()
+    supabase.from("events").select("max_tickets_per_buyer, donations_enabled, capacity").eq("id", evt.id).maybeSingle()
       .then(({ data }) => {
-        setDonations(!!(data as { donations_enabled?: boolean | null } | null)?.donations_enabled);
-        const v = (data as { max_tickets_per_buyer: number | null } | null)?.max_tickets_per_buyer;
-        const str = v ? String(v) : "";
+        const row = data as { max_tickets_per_buyer: number | null; donations_enabled?: boolean | null; capacity?: number | null } | null;
+        setDonations(!!row?.donations_enabled);
+        const str = row?.max_tickets_per_buyer ? String(row.max_tickets_per_buyer) : "";
         setCap(str);
         setOriginalCap(str);
+        const capStr = row?.capacity ? String(row.capacity) : "";
+        setCapacity(capStr);
+        setOriginalCapacity(capStr);
         setCapLoaded(true);
+      });
+    supabase.rpc("event_capacity_status", { _event_id: evt.id })
+      .then(({ data }) => {
+        const row = Array.isArray(data) ? data[0] : null;
+        setSoldTotal(row?.sold ?? 0);
       });
   }, [evt.id]);
 
   const [createdPending, setCreatedPending] = useState(false);
 
-  const capDirty = cap !== originalCap;
+  const capDirty = cap !== originalCap || capacity !== originalCapacity;
   const isDirty = capDirty || showForm || createdPending || hasTicketEdits;
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
@@ -797,7 +831,14 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
   const saveCap = async () => {
     setSavingCap(true);
     const value = cap.trim() ? Math.max(1, parseInt(cap, 10)) : null;
-    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value }).eq("id", evt.id);
+    const capacityValue = capacity.trim() ? Math.max(1, parseInt(capacity, 10)) : null;
+    if (capacityValue !== null && capacityValue < soldTotal) {
+      setSavingCap(false);
+      toast.error(`You have already issued ${soldTotal} ticket(s). Capacity cannot be lower than that.`);
+      return;
+    }
+    setOriginalCapacity(capacityValue ? String(capacityValue) : "");
+    const { error } = await supabase.from("events").update({ max_tickets_per_buyer: value, capacity: capacityValue }).eq("id", evt.id);
     if (error) { toast.error(error.message); setSavingCap(false); return false; }
     const str = value ? String(value) : "";
     setOriginalCap(str);
@@ -901,27 +942,46 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
 
       {capLoaded && (
         <div className="rounded-xl border border-neutral-200 bg-white p-5">
-          <div className="text-sm font-semibold text-neutral-900">Limit per person</div>
-          <p className="mt-0.5 text-xs text-neutral-500">
-            You decide how many tickets one person can get for this event. Leave blank for no limit. Ticket types can set their own limit too.
-          </p>
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              type="number"
-              min="1"
-              value={cap}
-              onChange={(e) => { setCap(e.target.value); setHasTicketEdits(true); }}
-              placeholder="No limit"
-              className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
-            />
-            <button
-              onClick={saveCap}
-              disabled={savingCap}
-              className="rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-60"
-            >
-              {savingCap ? "Saving…" : "Save limit"}
-            </button>
+          <div className="text-sm font-semibold text-neutral-900">Capacity and limits</div>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900">
+                Event capacity
+                <InfoHint text="The total number of tickets this event can sell. Once that many tickets are issued, the event shows as Sold out and no one else can buy or RSVP. Leave blank for unlimited." />
+              </div>
+              <input
+                type="number"
+                min="1"
+                value={capacity}
+                onChange={(e) => { setCapacity(e.target.value); setHasTicketEdits(true); }}
+                placeholder="Unlimited"
+                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+              />
+              <p className="mt-1 text-[11px] text-neutral-500">{soldTotal} issued so far.</p>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900">
+                Tickets per person
+                <InfoHint text="The most tickets one guest can get for this event. It does not change the total capacity. Leave blank for no limit. A ticket type can set its own tighter limit." />
+              </div>
+              <input
+                type="number"
+                min="1"
+                value={cap}
+                onChange={(e) => { setCap(e.target.value); setHasTicketEdits(true); }}
+                placeholder="No limit"
+                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+              />
+              <p className="mt-1 text-[11px] text-neutral-500">Applies to each guest.</p>
+            </div>
           </div>
+          <button
+            onClick={saveCap}
+            disabled={savingCap}
+            className="mt-3 rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-60"
+          >
+            {savingCap ? "Saving…" : "Save capacity and limits"}
+          </button>
         </div>
       )}
 
