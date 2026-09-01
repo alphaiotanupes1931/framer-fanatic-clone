@@ -53,6 +53,7 @@ function NewEventPage() {
   const [startMode, setStartMode] = useState<"set" | "now">("set");
   const [isOnline, setIsOnline] = useState(false);
   const [pricing, setPricing] = useState<"free" | "paid">("free");
+  const [donation, setDonation] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [created, setCreated] = useState(false);
   const [checkingStripe, setCheckingStripe] = useState(false);

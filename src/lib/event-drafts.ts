@@ -9,6 +9,7 @@ export type EventDraft = {
   startMode: "set" | "now";
   isOnline: boolean;
   pricing: "free" | "paid";
+  donation?: boolean;
   form: {
     image_url: string;
     video_url: string;
