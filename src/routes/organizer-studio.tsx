@@ -236,9 +236,10 @@ function DraftsSection() {
 
 export const Route = createFileRoute("/organizer-studio")({
   component: OrganizerStudioPage,
-  validateSearch: (search: Record<string, unknown>): { event?: string; edit?: boolean } => ({
+  validateSearch: (search: Record<string, unknown>): { event?: string; edit?: boolean; tab?: string } => ({
     ...(typeof search['event'] === "string" ? { event: search['event'] as string } : {}),
     ...(search['edit'] === true || search['edit'] === "true" || search['edit'] === "1" ? { edit: true } : {}),
+    ...(typeof search['tab'] === "string" ? { tab: search['tab'] as string } : {}),
   }),
   head: () => ({
     meta: [
