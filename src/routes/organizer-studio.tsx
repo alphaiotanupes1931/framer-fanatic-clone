@@ -252,6 +252,7 @@ export const Route = createFileRoute("/organizer-studio")({
 type MyEvent = {
   id: string; title: string; starts_at: string; venue_name: string | null;
   location: string | null; price_cents: number | null; is_published: boolean;
+  pricing_mode?: string | null;
 };
 
 type Ticket = {
@@ -896,7 +897,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
         <NewTicketTypeForm eventId={evt.id} onCancel={() => setShowForm(false)} onCreated={() => { setShowForm(false); setCreatedPending(true); setHasTicketEdits(true); load(); }} />
       )}
 
-      {capLoaded && (
+      {capLoaded && evt.pricing_mode !== "paid" && (
         <div className="rounded-xl border border-neutral-200 bg-white p-5">
           <div className="text-sm font-semibold text-neutral-900">Donate button</div>
           <p className="mt-0.5 text-xs text-neutral-500">
