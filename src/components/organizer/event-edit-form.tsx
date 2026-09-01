@@ -176,7 +176,8 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         });
         return;
       }
-      toast.success("Event updated", { id: savingToast });
+      toast.dismiss(savingToast);
+      toast.success("Event updated");
       if (onSaved) onSaved();
       else navigate({ to: "/events/$eventId", params: { eventId } });
     } catch (e) {
