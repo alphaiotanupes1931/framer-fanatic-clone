@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CreditCard, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
+import { CreditCard, ImagePlus, Info, Loader2, Video as VideoIcon, X } from "lucide-react";
 import { refreshConnectStatus } from "@/lib/stripe.functions";
 import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
@@ -396,7 +396,7 @@ function Field({ label, children, required, optional, hint, error }: { label: st
       {error ? (
         <p className="mt-1 text-[11px] font-medium text-red-600">{error}</p>
       ) : (
-        hint && <p className="mt-1 text-[11px] font-normal text-neutral-500">{hint}</p>
+        hint && <p className="mt-1 flex items-center gap-1 text-[11px] font-normal text-neutral-500"><Info className="h-3 w-3 shrink-0" />{hint}</p>
       )}
     </div>
   );
