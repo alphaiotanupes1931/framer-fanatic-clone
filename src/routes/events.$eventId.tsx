@@ -170,6 +170,7 @@ function EventDetail() {
   const [donating, setDonating] = useState(false);
   const [donationsOn, setDonationsOn] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [ownedCount, setOwnedCount] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -189,6 +190,13 @@ function EventDetail() {
         if (uid) {
           const { data: sv } = await supabase.from("event_saves").select("event_id").eq("event_id", eventId).eq("user_id", uid).maybeSingle();
           setSaved(!!sv);
+          const { count: owned } = await supabase
+            .from("tickets")
+            .select("id", { count: "exact", head: true })
+            .eq("event_id", eventId)
+            .eq("buyer_id", uid)
+            .neq("status", "cancelled");
+          setOwnedCount(owned ?? 0);
         }
       }
       const { data: tt } = await supabase
