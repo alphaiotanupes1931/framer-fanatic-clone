@@ -95,7 +95,7 @@ function NewEventPage() {
     const d = getEventDraft(draftId);
     if (!d) return;
     // Older drafts may predate some fields, so keep safe defaults for them.
-    setForm({ gallery_urls: [], capacity: "", per_person: "", ...d.form });
+    setForm({ ...d.form, gallery_urls: d.form.gallery_urls ?? [], capacity: d.form.capacity ?? "", per_person: d.form.per_person ?? "" });
     setStartMode(d.startMode);
     setIsOnline(d.isOnline);
     setPricing(d.pricing);
