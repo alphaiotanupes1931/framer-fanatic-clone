@@ -26,7 +26,7 @@ function toLocalInput(iso: string | null): string {
 
 export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string; onSaved?: () => void; onCancel?: () => void }) {
   const me = useCurrentProfile();
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/organizer-studio" });
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
