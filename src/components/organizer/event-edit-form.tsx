@@ -178,8 +178,8 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
       if (!me.stripe_charges_enabled) {
         setCheckingStripe(true);
         try {
-          const res = (await refreshStripeFn()) as { charges_enabled?: boolean } | null;
-          if (!res?.charges_enabled) {
+          const res = (await refreshStripeFn()) as { chargesEnabled?: boolean } | null;
+          if (!res?.chargesEnabled) {
             setCheckingStripe(false);
             setStripeBlocked(true);
             toast.error("Connect your Stripe account to sell tickets.");
