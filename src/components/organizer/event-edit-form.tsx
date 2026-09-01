@@ -1,9 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
+import { CreditCard, ImagePlus, Loader2, Video as VideoIcon, X } from "lucide-react";
+import { refreshConnectStatus } from "@/lib/stripe.functions";
 import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
@@ -33,6 +35,9 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [capErrors, setCapErrors] = useState<CapacityErrors>({});
+  const [checkingStripe, setCheckingStripe] = useState(false);
+  const [stripeBlocked, setStripeBlocked] = useState(false);
+  const refreshStripeFn = useServerFn(refreshConnectStatus);
   const origStartsRef = useRef<string>("");
 
   const [form, setForm] = useState({
@@ -165,6 +170,31 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
       return;
     }
 
+    // Paid tickets require a connected Stripe payout account. Verify live so a
+    // stale profile flag cannot be used to bypass this check.
+    const gatePriceCents = form.ticketing === "paid" ? Math.max(0, Math.round(parseFloat(form.price || "0") * 100)) : 0;
+    if (gatePriceCents > 0) {
+      setStripeBlocked(false);
+      if (!me.stripe_charges_enabled) {
+        setCheckingStripe(true);
+        try {
+          const res = (await refreshStripeFn()) as { charges_enabled?: boolean } | null;
+          if (!res?.charges_enabled) {
+            setCheckingStripe(false);
+            setStripeBlocked(true);
+            toast.error("Connect your Stripe account to sell tickets.");
+            return;
+          }
+        } catch {
+          setCheckingStripe(false);
+          setStripeBlocked(true);
+          toast.error("We could not verify your Stripe account. Please try again.");
+          return;
+        }
+        setCheckingStripe(false);
+      }
+    }
+
     setSaving(true);
     const savingToast = toast.loading("Saving your event…");
     try {
@@ -225,10 +255,10 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
           <h1 className="text-xl font-bold">Edit Event</h1>
           <button
             onClick={submit}
-            disabled={!canSubmit || saving}
+            disabled={!canSubmit || saving || checkingStripe}
             className="rounded-full px-5 py-2 text-sm font-semibold disabled:bg-neutral-200 disabled:text-neutral-500 bg-[#d4580a] text-white hover:brightness-110 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving…" : "Save"}
+            {checkingStripe ? "Checking Stripe…" : saving ? "Saving…" : "Save"}
           </button>
         </div>
 
@@ -298,7 +328,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
           </Field>
 
           <Field label="Ticketing Mode" required>
-            <select className={inputCls} value={form.ticketing} onChange={(e) => set("ticketing", e.target.value as "rsvp" | "paid")}>
+            <select className={inputCls} value={form.ticketing} onChange={(e) => { set("ticketing", e.target.value as "rsvp" | "paid"); setStripeBlocked(false); }}>
               <option value="rsvp">RSVP Only</option>
               <option value="paid">Paid Tickets</option>
             </select>
@@ -308,6 +338,19 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
             <Field label="Ticket Price (USD you net)" required>
               <input type="number" step="0.01" min="0" className={inputCls} value={form.price} onChange={(e) => set("price", e.target.value)} />
             </Field>
+          )}
+
+          {stripeBlocked && form.ticketing === "paid" && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <p className="font-semibold">You will need to set up a Stripe account to sell tickets.</p>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/organizer-studio", search: { tab: "stripe" } })}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <CreditCard className="w-3.5 h-3.5" /> Click here to set up your account
+              </button>
+            </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">

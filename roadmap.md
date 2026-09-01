@@ -1,12 +1,4 @@
-# Roadmap
+# Tasks
 
-## Done
-- [x] Free events can enable a Donate button (Organizer Studio) with live Stripe check
-- [x] Paid tickets / donations blocked in red until Stripe payouts are active, with setup button
-- [x] Buyer-side Donate button on free events
-- [x] "Connect your Stripe account to sell tickets or take donations" wording
-- [x] Separate "Event capacity" and "Tickets per person" controls with info tips, enforced end to end
-- [x] Clearer toasts and loading phases for saving an event, loading opportunities, ticket emails
-- [x] Free, RSVP, and donation-enabled events display Free everywhere; only positive-price tickets display Paid
-- [x] Block publishing paid-ticket events without a live Stripe account (Save Tickets gate)
-- [x] Prevent creating/setting an event date/time in the past (create + edit)
+- [x] Gate paid-ticket publishing on connected Stripe (create, edit details, Save Tickets)
+- [x] Events page card button: RSVP for free, Tickets for paid, links into event
