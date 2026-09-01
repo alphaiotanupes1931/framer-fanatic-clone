@@ -3475,6 +3475,14 @@ export type Database = {
           username: string
         }[]
       }
+      event_capacity_status: {
+        Args: { _event_id: string }
+        Returns: {
+          capacity: number
+          remaining: number
+          sold: number
+        }[]
+      }
       generate_unique_username: {
         Args: { _base: string; _self: string }
         Returns: string
