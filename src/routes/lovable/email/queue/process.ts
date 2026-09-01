@@ -5,8 +5,11 @@ import { createFileRoute } from '@tanstack/react-router'
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
 const DEFAULT_SEND_DELAY_MS = 200
-const DEFAULT_AUTH_TTL_MINUTES = 15
-const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
+const DEFAULT_AUTH_TTL_MINUTES = 60
+const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 360
+// Never pause the worker longer than this, even if the provider asks for more.
+// A long cooldown would otherwise outlive message TTLs and silently drop mail.
+const MAX_COOLDOWN_SECONDS = 600
 
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
@@ -275,7 +278,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                   error_message: errorMsg.slice(0, 1000),
                 })
 
-                const retryAfterSecs = getRetryAfterSeconds(error)
+                const retryAfterSecs = Math.min(getRetryAfterSeconds(error), MAX_COOLDOWN_SECONDS)
                 await supabase
                   .from('email_send_state')
                   .update({
