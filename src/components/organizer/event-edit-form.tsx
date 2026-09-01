@@ -180,7 +180,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         try {
           const res = (await refreshStripeFn()) as { charges_enabled?: boolean } | null;
           if (res?.charges_enabled) {
-            await supabase.from("profiles").update({ stripe_charges_enabled: true, stripe_onboarding_complete: true }).eq("id", me.id);
+            // refreshConnectStatus already persisted the enabled flag.
           } else {
             setCheckingStripe(false);
             setStripeBlocked(true);
