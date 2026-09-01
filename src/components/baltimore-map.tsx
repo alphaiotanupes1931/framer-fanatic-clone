@@ -56,7 +56,7 @@ export function BaltimoreMap({
           .from("events")
           .select("id, title, starts_at, ends_at, location, image_url, description, latitude, longitude, neighborhood")
           // Only events that have not finished yet stay on the map.
-          .or(`ends_at.gte.${new Date().toISOString()},and(ends_at.is.null,starts_at.gte.${new Date().toISOString()})`)
+          .or(`ends_at.gte.${new Date().toISOString()},and(ends_at.is.null,starts_at.gte.${new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()})`)
           .order("starts_at", { ascending: true }),
 
         supabase

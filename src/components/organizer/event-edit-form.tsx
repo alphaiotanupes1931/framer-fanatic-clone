@@ -144,7 +144,6 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
     // Rescheduling into the past is not allowed.
     const startsDate = new Date(form.starts_at);
     if (Number.isNaN(startsDate.getTime())) { toast.error("Pick a valid start date and time"); return; }
-    if (startsDate.getTime() < Date.now() - 60000) { toast.error("Start date and time cannot be in the past"); return; }
     if (form.ends_at) {
       const endsDate = new Date(form.ends_at);
       if (Number.isNaN(endsDate.getTime()) || endsDate.getTime() <= startsDate.getTime()) {
@@ -245,10 +244,10 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Start Date & Time" required>
-              <input type="datetime-local" min={localNowValue()} className={inputCls} value={form.starts_at} onChange={(e) => set("starts_at", e.target.value)} />
+              <input type="datetime-local" className={inputCls} value={form.starts_at} onChange={(e) => set("starts_at", e.target.value)} />
             </Field>
             <Field label="End Date & Time" optional>
-              <input type="datetime-local" min={form.starts_at || localNowValue()} className={inputCls} value={form.ends_at} onChange={(e) => set("ends_at", e.target.value)} />
+              <input type="datetime-local" min={form.starts_at || undefined} className={inputCls} value={form.ends_at} onChange={(e) => set("ends_at", e.target.value)} />
             </Field>
           </div>
 
