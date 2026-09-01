@@ -8,3 +8,5 @@
 - [x] Separate "Event capacity" and "Tickets per person" controls with info tips, enforced end to end
 - [x] Clearer toasts and loading phases for saving an event, loading opportunities, ticket emails
 - [x] Free, RSVP, and donation-enabled events display Free everywhere; only positive-price tickets display Paid
+- [~] Block publishing paid-ticket events without a live Stripe account (Save Tickets gate)
+- [ ] Prevent creating/setting an event date/time in the past (create + edit)
