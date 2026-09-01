@@ -7,7 +7,7 @@ import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { createTicketCheckout } from "@/lib/stripe.functions";
+import { createTicketCheckout, createEventDonationCheckout } from "@/lib/stripe.functions";
 import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -162,6 +162,12 @@ function EventDetail() {
   const [qty, setQty] = useState(1);
   const [tiers, setTiers] = useState<TicketTier[]>([]);
   const [tierId, setTierId] = useState<string | null>(null);
+  const donateFn = useServerFn(createEventDonationCheckout);
+  const [donateOpen, setDonateOpen] = useState(false);
+  const [donateAmount, setDonateAmount] = useState("10");
+  const [donating, setDonating] = useState(false);
+  const [donationsOn, setDonationsOn] = useState(false);
+  const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -175,6 +181,7 @@ function EventDetail() {
       const { data } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
       if (data) {
         setEvt(data as EventRow);
+        setDonationsOn(!!(data as { donations_enabled?: boolean | null }).donations_enabled);
         const { data: h } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").eq("id", (data as EventRow).user_id).maybeSingle();
         setHost((h as Host) || null);
         if (uid) {
@@ -191,6 +198,10 @@ function EventDetail() {
       const list = (tt as TicketTier[] | null) ?? [];
       setTiers(list);
       if (list.length) setTierId(list[0].id);
+      // Capacity: null means unlimited, 0 means sold out.
+      const { data: capRow } = await supabase.rpc("event_capacity_status", { _event_id: eventId });
+      const cap = Array.isArray(capRow) ? capRow[0] : null;
+      setRemaining(cap?.remaining ?? null);
       setLoading(false);
     })();
   }, [eventId]);
@@ -227,6 +238,25 @@ function EventDetail() {
     }
   };
 
+  const donate = async () => {
+    if (!evt) return;
+    if (!me) { sendToSignUp(); return; }
+    const dollars = parseFloat(donateAmount || "0");
+    if (!Number.isFinite(dollars) || dollars < 1) { toast.error("Please enter at least $1."); return; }
+    setDonating(true);
+    const pre = openExternalWindow();
+    try {
+      const { url } = await donateFn({ data: { eventId: evt.id, amountCents: Math.round(dollars * 100), returnOrigin: window.location.origin } });
+      if (url) navigateExternal(url, pre); else closeExternalWindow(pre);
+    } catch (e) {
+      closeExternalWindow(pre);
+      toast.error(e instanceof Error ? e.message : "Could not start your donation. Please try again.");
+    } finally {
+      setDonating(false);
+    }
+  };
+
+  const soldOut = remaining !== null && remaining <= 0;
   const selectedTier = tiers.find((t) => t.id === tierId) ?? null;
   const tierOnSale = (t: TicketTier) => {
     const now = Date.now();
@@ -236,7 +266,7 @@ function EventDetail() {
   };
   // The organizer decides the per-person limit. No cap set means a generous default.
   const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
-  const maxQty = selectedTier?.max_per_buyer ?? eventCap ?? 20;
+  const maxQty = Math.max(1, Math.min(selectedTier?.max_per_buyer ?? eventCap ?? 20, remaining ?? 9999));
 
   const rsvp = async () => {
     if (!evt) return;
@@ -402,7 +432,12 @@ function EventDetail() {
 
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
           <div className="flex flex-col gap-4 p-4 sm:p-5">
-          {tiers.length > 0 ? (
+          {soldOut ? (
+            <div className="rounded-2xl border border-border bg-muted/50 p-5 text-center">
+              <div className="text-base font-bold text-foreground">Sold out</div>
+              <p className="mt-1 text-xs text-muted-foreground">Every ticket for this event has been claimed.</p>
+            </div>
+          ) : tiers.length > 0 ? (
             <>
               <div className="space-y-2">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Choose your ticket</span>
@@ -483,6 +518,31 @@ function EventDetail() {
                 label={rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
               />
             </>
+          )}
+          {donationsOn && (
+            <div className="rounded-2xl border border-[#d4580a]/30 bg-[#fff7f1] p-4">
+              <div className="text-sm font-semibold text-foreground">Support this event</div>
+              <p className="mt-0.5 text-xs text-muted-foreground">Giving is optional. Any amount goes straight to the organizer.</p>
+              {donateOpen ? (
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="flex items-center rounded-full border border-border bg-background px-3">
+                    <span className="text-sm text-muted-foreground">$</span>
+                    <input
+                      type="number" min="1" step="1" value={donateAmount}
+                      onChange={(e) => setDonateAmount(e.target.value)}
+                      className="w-20 bg-transparent px-1 py-2 text-sm font-semibold outline-none"
+                    />
+                  </div>
+                  <Button onClick={donate} disabled={donating} className="h-10 flex-1 rounded-full bg-[#d4580a] font-semibold text-white hover:brightness-110">
+                    {donating ? "Opening secure checkout…" : "Donate"}
+                  </Button>
+                </div>
+              ) : (
+                <Button onClick={() => setDonateOpen(true)} variant="outline" className="mt-3 h-10 w-full rounded-full font-semibold">
+                  Donate
+                </Button>
+              )}
+            </div>
           )}
           {(priced || tiers.some((t) => t.price_cents > 0)) && (
             <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
