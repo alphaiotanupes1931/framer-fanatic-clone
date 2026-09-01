@@ -35,6 +35,9 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
   const [capErrors, setCapErrors] = useState<CapacityErrors>({});
+  const [checkingStripe, setCheckingStripe] = useState(false);
+  const [stripeBlocked, setStripeBlocked] = useState(false);
+  const refreshStripeFn = useServerFn(refreshConnectStatus);
   const origStartsRef = useRef<string>("");
 
   const [form, setForm] = useState({
