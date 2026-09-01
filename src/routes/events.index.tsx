@@ -85,7 +85,7 @@ function fmtDateLong(iso: string) {
 
 const CATEGORIES = ["All", "Music", "Art", "Community", "Family", "Nightlife", "Food", "Wellness", "Education", "Sports", "Networking", "Festival"] as const;
 
-function BigEventCard({ e, onBuy, buying }: { e: EventRow; onBuy: (id: string) => void; buying: boolean }) {
+function BigEventCard({ e, onBuy }: { e: EventRow; onBuy: (id: string) => void }) {
   const priced = isPaidEvent(e);
   const [shareOpen, setShareOpen] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -499,7 +499,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {filtered.map((e) => (
               <div key={e.id} className={buying === e.id ? "pointer-events-none opacity-60" : ""}>
-                <BigEventCard e={e} onBuy={buy} buying={buying === e.id} />
+                <BigEventCard e={e} onBuy={buy} />
               </div>
             ))}
           </div>
