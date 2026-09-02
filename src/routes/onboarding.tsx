@@ -97,14 +97,11 @@ function Onboarding() {
   const navigate = useNavigate();
   const { preview: previewMode } = Route.useSearch();
   const draft = useRef<Partial<OnboardingDraft>>(loadDraft()).current;
-  // 0 = resident or visitor, 1 = how you want to join, 2 = photo + location, 3 = page setup
+  // 1 = how you want to join (Personal, Artist, Arts Org, Business or Visitor), 2 = photo + location, 3 = page setup
   // The photo cannot be restored, so never resume past the photo step.
-  // Visitors have no page-type step, so a saved step 1 resumes at the photo step.
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(() => {
-    if (draft.step == null) return 0;
-    const resumed = Math.min(draft.step, 2) as 0 | 1 | 2;
-    if (draft.audience === "visitor" && resumed === 1) return 2;
-    return resumed;
+  const [step, setStep] = useState<1 | 2 | 3>(() => {
+    if (draft.step == null || draft.step < 1) return 1;
+    return Math.min(draft.step, 2) as 1 | 2;
   });
 
   const [userId, setUserId] = useState<string | null>(null);
