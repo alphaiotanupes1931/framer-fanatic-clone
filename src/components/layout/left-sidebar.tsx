@@ -192,19 +192,24 @@ function FullSidebar() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[78px]" : "w-[288px]"}`}>
-        <div className={`flex h-16 items-center px-4 sm:px-5 ${collapsed ? "justify-center" : ""}`}>
+      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[72px]" : "w-[240px]"}`}>
+        <div className={`flex h-16 items-center px-3 sm:px-4 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
             <Link to="/dashboard" className="flex items-center gap-2">
               <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
               <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
             </Link>
           ) : (
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
-              <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
-              <span className="font-display text-sm font-extrabold uppercase tracking-wide text-slate-900">Planet Baltimore</span>
-            </Link>
+            <>
+              <Link to="/dashboard" className="flex flex-1 items-center gap-2 min-w-0">
+                <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 shrink-0 object-contain dark:hidden" />
+                <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 shrink-0 object-contain dark:block" />
+                <span className="truncate font-display text-sm font-extrabold uppercase tracking-wide text-slate-900">Planet Baltimore</span>
+              </Link>
+              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="ml-1 flex shrink-0 items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            </>
           )}
         </div>
 
