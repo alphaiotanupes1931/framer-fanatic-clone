@@ -129,8 +129,8 @@ function Onboarding() {
   const selected = JOIN_OPTIONS.find((o) => o.value === kind);
   const pageLabel = isVisitor ? "Visitor" : selected?.label ?? "page";
   const nameLabel = isVisitor ? "Your name" : selected?.nameLabel ?? "Name";
-  const totalSteps = isVisitor ? 3 : 4;
-  const stepIndex = isVisitor && step > 1 ? step - 1 : step + 1;
+  const totalSteps = 3;
+  const stepIndex = step;
 
 
 
