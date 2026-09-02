@@ -18,7 +18,8 @@ export async function purgeDeadSession() {
     for (const key of Object.keys(window.localStorage)) {
       if (key.startsWith("pb:") || key.startsWith("sb-")) window.localStorage.removeItem(key);
     }
-    window.sessionStorage.removeItem("pb_post_auth_redirect");
+    // Keep the intended destination if a stale deleted-account token is found
+    // after a guest has already selected an event to attend.
   } catch {
     /* storage being unavailable is never fatal */
   }

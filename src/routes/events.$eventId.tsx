@@ -22,6 +22,7 @@ import { RichHtml } from "@/components/rich-html";
 import { getPublicEvent } from "@/lib/events.functions";
 import { emailMyTickets } from "@/lib/tickets.functions";
 import { isPaidEvent } from "@/lib/event-pricing";
+import { setPostAuthRedirect } from "@/lib/pending-join";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -219,7 +220,7 @@ function EventDetail() {
   // Guests who tap a ticket action get sent to sign up, then straight back here.
   const sendToSignUp = () => {
     const dest = `/events/${eventId}`;
-    try { sessionStorage.setItem("pb_post_auth_redirect", dest); } catch { /* ignore */ }
+    setPostAuthRedirect(dest);
     toast.message("Create a free account to get your ticket");
     navigate({ to: "/auth", search: { redirect: dest } });
   };

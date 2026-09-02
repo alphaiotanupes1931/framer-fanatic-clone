@@ -9,6 +9,7 @@ import { Check, MapPin, Search, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { invalidateConnections } from "@/lib/connections";
+import { popPostAuthRedirect } from "@/lib/pending-join";
 
 const CREATOR_GOAL = 5;
 const HOOD_GOAL = 1;
@@ -70,12 +71,7 @@ function Welcome() {
   const ready = creatorsLeft === 0 && hoodsLeft === 0;
 
   const goNext = () => {
-    let dest: string | null = null;
-    try {
-      const v = sessionStorage.getItem("pb_post_auth_redirect");
-      if (v && v.startsWith("/") && !v.startsWith("//")) dest = v;
-      sessionStorage.removeItem("pb_post_auth_redirect");
-    } catch { /* ignore */ }
+    const dest = popPostAuthRedirect();
     if (dest) { window.location.replace(dest); return; }
     navigate({ to: "/dashboard" });
   };

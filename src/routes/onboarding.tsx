@@ -21,6 +21,7 @@ import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { setMyProfileKind } from "@/lib/profile-kind";
+import { popPostAuthRedirect } from "@/lib/pending-join";
 
 export const Route = createFileRoute("/onboarding")({
   validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
@@ -299,12 +300,7 @@ function Onboarding() {
 
       if (isVisitor || kind === "resident") {
         clearDraft();
-        let dest: string | null = null;
-        try {
-          const v = sessionStorage.getItem("pb_post_auth_redirect");
-          if (v && v.startsWith("/") && !v.startsWith("//")) dest = v;
-          sessionStorage.removeItem("pb_post_auth_redirect");
-        } catch { /* ignore */ }
+        const dest = popPostAuthRedirect();
         if (dest) { window.location.replace(dest); return; }
         await navigate({ to: "/profile" });
         return;
@@ -325,12 +321,7 @@ function Onboarding() {
       clearDraft();
 
 
-      let dest: string | null = null;
-      try {
-        const v = sessionStorage.getItem("pb_post_auth_redirect");
-        if (v && v.startsWith("/") && !v.startsWith("//")) dest = v;
-        sessionStorage.removeItem("pb_post_auth_redirect");
-      } catch { /* ignore */ }
+      const dest = popPostAuthRedirect();
       if (dest) { window.location.replace(dest); return; }
       await navigate({ to: "/o/$slug", params: { slug: org.slug } });
     } catch (e: unknown) {

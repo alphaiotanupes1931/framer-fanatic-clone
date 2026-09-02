@@ -16,14 +16,15 @@ import { Eye, EyeOff } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
 import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
+import { popPostAuthRedirect as popStoredRedirect, setPostAuthRedirect } from "@/lib/pending-join";
 
 function popPostAuthRedirect(consume = true): string | null {
   if (typeof window === "undefined") return null;
   try {
     const fromUrl = new URLSearchParams(window.location.search).get("redirect");
-    const stored = sessionStorage.getItem("pb_post_auth_redirect");
+    const stored = popStoredRedirect(consume);
     const v = fromUrl || stored;
-    if (v && consume) sessionStorage.removeItem("pb_post_auth_redirect");
+    if (fromUrl && consume) popStoredRedirect(true);
     return v?.startsWith("/") && !v.startsWith("//") ? v : null;
   } catch { return null; }
 }
@@ -74,7 +75,7 @@ function AuthPage() {
       if (profileNeedsOnboarding(p as any)) {
         // Keep the destination stored so onboarding can finish the trip.
         const pending = popPostAuthRedirect(false);
-        if (pending) { try { sessionStorage.setItem("pb_post_auth_redirect", pending); } catch { /* ignore */ } }
+        if (pending) setPostAuthRedirect(pending);
         navigate({ to: "/onboarding" });
         return;
       }
@@ -120,7 +121,7 @@ function AuthPage() {
       const needsOnboarding = profileNeedsOnboarding(p as any);
       if (needsOnboarding) {
         const pending = redirect || popPostAuthRedirect(false);
-        if (pending) { try { sessionStorage.setItem("pb_post_auth_redirect", pending); } catch { /* ignore */ } }
+        if (pending) setPostAuthRedirect(pending);
         navigate({ to: "/onboarding" });
         return;
       }
