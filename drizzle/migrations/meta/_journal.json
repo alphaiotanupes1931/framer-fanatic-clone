@@ -50,6 +50,13 @@
       "when": 1788310555323,
       "tag": "0006_public_org_stats",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788310823296,
+      "tag": "0007_org_stats_include_owner_follows",
+      "breakpoints": true
     }
   ]
 }
