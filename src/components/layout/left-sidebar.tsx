@@ -135,11 +135,10 @@ function FullSidebar() {
   const homeItem = navItems.find((item) => item.to === "/dashboard")!;
   // Profile/Settings live inside the Account dropdown, so hide them from the main list.
   const otherNavItems = navItems
-    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.to !== "/profile" && item.label !== "Saved")
+    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.label !== "Saved")
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const settingsItem: NavItem = { icon: Settings, label: "Settings", to: "/settings" };
-  const profileItem: NavItem = { icon: User, label: "Profile", to: "/profile" };
   const reportsItem: NavItem = { icon: Flag, label: "Content Reports", to: "/reports" };
 
   const renderNavLink = (item: NavItem) => {
@@ -190,14 +189,13 @@ function FullSidebar() {
     );
   };
 
-  const accountActive = isActive("/profile") || isActive("/settings") || isActive("/reports");
+  const accountActive = isActive("/settings") || isActive("/reports");
   const [accountOpen, setAccountOpen] = useState(accountActive);
 
   // Account is its own separated card. In expanded mode it behaves like an
   // accordion so Profile/Settings appear below it at the same size.
   const renderAccountSection = () => {
     const subItems = [
-      profileItem,
       settingsItem,
       ...(isAdmin ? [reportsItem] : []),
     ];
@@ -249,12 +247,6 @@ function FullSidebar() {
         <DropdownMenuContent align="start" side="right" className="z-[1001] w-56">
           <DropdownMenuLabel>Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link to={profileItem.to} className="flex cursor-pointer items-center gap-2">
-              <profileItem.icon className="h-4 w-4 text-muted-foreground" />
-              {profileItem.label}
-            </Link>
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link to={settingsItem.to} className="flex cursor-pointer items-center gap-2">
               <settingsItem.icon className="h-4 w-4 text-muted-foreground" />
