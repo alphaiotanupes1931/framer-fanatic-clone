@@ -267,6 +267,7 @@ function FullSidebar() {
               </SidebarCardCollapsed>
               <SidebarCardCollapsed>
                 {otherNavItems.map((item) => renderCollapsedNavLink(item))}
+                {renderCollapsedAccountMenu()}
               </SidebarCardCollapsed>
             </>
           ) : (
@@ -275,7 +276,10 @@ function FullSidebar() {
                 <nav className="space-y-0.5">{renderNavLink(homeItem)}</nav>
               </SidebarCard>
               <SidebarCard>
-                <nav className="space-y-0.5">{otherNavItems.map((item) => renderNavLink(item))}</nav>
+                <nav className="space-y-0.5">
+                  {otherNavItems.map((item) => renderNavLink(item))}
+                  {renderAccountMenu()}
+                </nav>
               </SidebarCard>
             </>
           )}
