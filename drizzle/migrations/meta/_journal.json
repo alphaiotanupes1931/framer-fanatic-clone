@@ -43,6 +43,13 @@
       "when": 1788310521211,
       "tag": "0005_artists_sort_by_followers_activity",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788310555323,
+      "tag": "0006_public_org_stats",
+      "breakpoints": true
     }
   ]
 }

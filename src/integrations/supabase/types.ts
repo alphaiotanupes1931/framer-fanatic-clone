@@ -3582,6 +3582,14 @@ export type Database = {
           username: string
         }[]
       }
+      public_org_stats: {
+        Args: { _type?: string }
+        Returns: {
+          follower_count: number
+          last_active_at: string
+          org_id: string
+        }[]
+      }
       public_profile_by_username: {
         Args: { _username: string }
         Returns: {
