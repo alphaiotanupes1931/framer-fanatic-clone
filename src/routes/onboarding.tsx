@@ -212,24 +212,22 @@ function Onboarding() {
 
   const step3Ready = pageName.trim().length > 1 && (isVisitor || kind !== "artist" || !!category);
 
-  const startAudience = (choice: "resident" | "visitor") => {
-    setAudience(choice);
-    if (choice === "visitor") {
-      setKind("");
-      setStep(2);
-    } else {
-      setStep(1);
-    }
-  };
-
   // Personal, Arts Organization and Business pages have no artist category.
-  const chooseKind = (value: JoinKind) => {
+  // "visitor" is a pseudo-option on the same screen, not a page type.
+  const chooseKind = (value: JoinKind | "visitor") => {
+    if (value === "visitor") {
+      setAudience("visitor");
+      setKind("");
+      setCategory("");
+      return;
+    }
+    setAudience("resident");
     setKind(value);
     if (value !== "artist") setCategory("");
   };
 
   const continueFromKind = () => {
-    if (!kind) {
+    if (!isVisitor && !kind) {
       toast.error("Choose how you want to join.");
       return;
     }
