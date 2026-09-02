@@ -139,7 +139,6 @@ function FullSidebar() {
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const settingsItem: NavItem = { icon: Settings, label: "Settings", to: "/settings" };
-  const profileItem: NavItem = { icon: User, label: "Profile", to: "/profile" };
   const reportsItem: NavItem = { icon: Flag, label: "Content Reports", to: "/reports" };
 
   const renderNavLink = (item: NavItem) => {
@@ -190,7 +189,7 @@ function FullSidebar() {
     );
   };
 
-  const accountActive = isActive("/profile") || isActive("/settings") || isActive("/reports");
+  const accountActive = isActive("/settings") || isActive("/reports");
   const [accountOpen, setAccountOpen] = useState(accountActive);
 
   // Account is its own separated card. In expanded mode it behaves like an
