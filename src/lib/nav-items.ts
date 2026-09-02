@@ -1,7 +1,7 @@
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
   BookOpen, MessageCircle, Bell, User, Ticket, FileText, PenLine, Plane,
-  Settings, Video, Trophy, Search, Activity,
+  Settings, Video, Trophy, Search,
 } from "lucide-react";
 
 export type NavItem = { icon: typeof Home; label: string; to: string };
@@ -9,7 +9,6 @@ export type NavItem = { icon: typeof Home; label: string; to: string };
 /** Main navigation: Home is pinned first, then alphabetical. Shared by desktop menu and mobile "More". */
 export const navItems: NavItem[] = [
   { icon: Home, label: "Home", to: "/dashboard" },
-  { icon: Activity, label: "Activity", to: "/activity" },
   { icon: Palette, label: "Artists", to: "/artists" },
   { icon: Landmark, label: "Arts Orgs", to: "/arts-orgs" },
   { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
