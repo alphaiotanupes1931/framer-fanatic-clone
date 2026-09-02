@@ -342,19 +342,15 @@ function Onboarding() {
   };
 
   const title =
-    step === 0
-      ? "Do you live in Baltimore?"
-      : step === 1
+    step === 1
       ? "Choose how you want to join"
       : step === 2
       ? "Your photo and location"
       : `Set up your ${pageLabel} page`;
 
   const description =
-    step === 0
-      ? "This tells us whether to set you up as a resident or a visitor."
-      : step === 1
-      ? "Pick the page that best describes you. You can add more pages later."
+    step === 1
+      ? "Pick the page that best describes you. Live somewhere else? Choose Visitor. You can add more pages later."
       : step === 2
       ? isVisitor
         ? "Add a profile photo, then tell us the city and state you are coming from."
