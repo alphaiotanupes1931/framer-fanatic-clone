@@ -133,12 +133,13 @@ function FullSidebar() {
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
   const homeItem = navItems.find((item) => item.to === "/dashboard")!;
-  // Settings and Content Reports live under the Account section.
+  // Profile/Settings live inside the Account dropdown, so hide them from the main list.
   const otherNavItems = navItems
-    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.label !== "Saved")
+    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.to !== "/profile" && item.label !== "Saved")
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const settingsItem: NavItem = { icon: Settings, label: "Settings", to: "/settings" };
+  const profileItem: NavItem = { icon: User, label: "Profile", to: "/profile" };
   const reportsItem: NavItem = { icon: Flag, label: "Content Reports", to: "/reports" };
 
   const renderNavLink = (item: NavItem) => {
