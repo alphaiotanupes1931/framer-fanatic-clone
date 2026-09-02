@@ -22,6 +22,7 @@ import { RichHtml } from "@/components/rich-html";
 import { getPublicEvent } from "@/lib/events.functions";
 import { emailMyTickets } from "@/lib/tickets.functions";
 import { isPaidEvent } from "@/lib/event-pricing";
+import { ensureLiveSession } from "@/lib/session-health";
 import { setPostAuthRedirect } from "@/lib/pending-join";
 
 type EventRow = {
@@ -175,8 +176,10 @@ function EventDetail() {
 
   useEffect(() => {
     (async () => {
-      const { data: s } = await supabase.auth.getSession();
-      const uid = s.session?.user.id ?? null;
+      // A stale token left in storage still "looks" signed in, which is how
+      // guests ended up calling ticket RPCs and seeing permission errors.
+      // ensureLiveSession revalidates with the auth server first.
+      const uid = await ensureLiveSession();
       setMe(uid);
       if (uid) {
         const { data: r } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle();
@@ -222,12 +225,20 @@ function EventDetail() {
     const dest = `/events/${eventId}`;
     setPostAuthRedirect(dest);
     toast.message("Create a free account to get your ticket");
-    navigate({ to: "/auth", search: { redirect: dest } });
+    navigate({ to: "/auth", search: { mode: "signup", redirect: dest } });
+  };
+
+  // Re-check the session at action time: tokens expire while a page sits open.
+  const requireUser = async () => {
+    const uid = await ensureLiveSession();
+    setMe(uid);
+    if (!uid) { sendToSignUp(); return null; }
+    return uid;
   };
 
   const buy = async () => {
     if (!evt) return;
-    if (!me) { sendToSignUp(); return; }
+    if (!(await requireUser())) return;
     setBuying(true);
     const pre = openExternalWindow();
     try {
@@ -285,7 +296,7 @@ function EventDetail() {
 
   const rsvp = async () => {
     if (!evt) return;
-    if (!me) { sendToSignUp(); return; }
+    if (!(await requireUser())) return;
     setRsvping(true);
     try {
       const { data, error } = await supabase.rpc("rsvp_free_event", {
