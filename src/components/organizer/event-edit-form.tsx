@@ -363,7 +363,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
                 onChange={(e) => { set("capacity", e.target.value); setCapErrors(validateCapacityFields(e.target.value, form.per_person)); }}
               />
             </Field>
-            <Field label="Order limit" optional error={capErrors.per_person} hint="Most tickets one guest can buy in one order. Leave blank for no limit.">
+            <Field label="Order limit" optional error={capErrors.per_person} hint="Max number of tickets one guest can buy in one order. Leave blank for no limit.">
               <input
                 type="number" min="1" step="1"
                 className={capErrors.per_person ? inputErrCls : inputCls}
