@@ -190,6 +190,110 @@ function FullSidebar() {
     );
   };
 
+  const accountActive = isActive("/profile") || isActive("/settings") || isActive("/reports");
+
+  const renderAccountMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${accountActive ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+        >
+          <User className={`h-5 w-5 flex-shrink-0 transition-transform duration-150 ${accountActive ? "scale-110 text-slate-900" : "text-slate-500"}`} />
+          <span className="flex-1 truncate text-left">Account</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="z-[1001] w-56">
+        <DropdownMenuLabel>Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to={profileItem.to} className="flex cursor-pointer items-center gap-2">
+            <profileItem.icon className="h-4 w-4 text-muted-foreground" />
+            {profileItem.label}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={settingsItem.to} className="flex cursor-pointer items-center gap-2">
+            <settingsItem.icon className="h-4 w-4 text-muted-foreground" />
+            {settingsItem.label}
+          </Link>
+        </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to={reportsItem.to} className="flex cursor-pointer items-center gap-2">
+              <reportsItem.icon className="h-4 w-4 text-muted-foreground" />
+              {reportsItem.label}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {user ? (
+          <DropdownMenuItem onSelect={handleLogout} className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive">
+            <LogOut className="h-4 w-4" />
+            Log out
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link to="/auth" className="flex cursor-pointer items-center gap-2">
+              <LogIn className="h-4 w-4 text-muted-foreground" />
+              Log in
+            </Link>
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const renderCollapsedAccountMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={`relative flex w-10 items-center justify-center rounded-lg py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${accountActive ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
+          aria-label="Account"
+        >
+          <User className="h-5 w-5" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="right" className="z-[1001] w-56">
+        <DropdownMenuLabel>Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to={profileItem.to} className="flex cursor-pointer items-center gap-2">
+            <profileItem.icon className="h-4 w-4 text-muted-foreground" />
+            {profileItem.label}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={settingsItem.to} className="flex cursor-pointer items-center gap-2">
+            <settingsItem.icon className="h-4 w-4 text-muted-foreground" />
+            {settingsItem.label}
+          </Link>
+        </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to={reportsItem.to} className="flex cursor-pointer items-center gap-2">
+              <reportsItem.icon className="h-4 w-4 text-muted-foreground" />
+              {reportsItem.label}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {user ? (
+          <DropdownMenuItem onSelect={handleLogout} className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive">
+            <LogOut className="h-4 w-4" />
+            Log out
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link to="/auth" className="flex cursor-pointer items-center gap-2">
+              <LogIn className="h-4 w-4 text-muted-foreground" />
+              Log in
+            </Link>
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <TooltipProvider delayDuration={0}>
       <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[72px]" : "w-[240px]"}`}>
