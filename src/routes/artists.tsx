@@ -84,7 +84,7 @@ function FindCreatorPage() {
   const { data, loading, setData } = useCachedFetch<Creator[]>(
     `artists:${sort}:${q}`,
     async () => {
-      const [profilesRes, pagesRes] = await Promise.all([
+      const [profilesRes, pagesRes, statsRes] = await Promise.all([
         supabase.rpc("public_artists", { lim: 96, search: q || undefined, sort_by: sort }),
         supabase
           .from("organizations")
@@ -93,12 +93,17 @@ function FindCreatorPage() {
           .eq("hidden_from_showcase", false)
           .order("created_at", { ascending: false })
           .limit(96),
+        supabase.rpc("public_org_stats", { _type: "artist" }),
       ]);
       const profileArtists = ((profilesRes.data as (Creator & { created_at: string })[]) ?? []) as Creator[];
+      const statsMap = new Map<string, { follower_count: number; last_active_at: string | null }>(
+        (((statsRes.data as { org_id: string; follower_count: number; last_active_at: string | null }[]) ?? [])
+          .map((s) => [s.org_id, { follower_count: Number(s.follower_count ?? 0), last_active_at: s.last_active_at }])),
+      );
       const needle = q.trim().toLowerCase();
       const pageArtists: Creator[] = ((pagesRes.data as {
         id: string; name: string; slug: string; avatar_url: string | null;
-        neighborhood: string | null; bio: string | null; subtype: string | null;
+        neighborhood: string | null; bio: string | null; subtype: string | null; created_at: string;
       }[]) ?? [])
         .filter((o) =>
           !needle ||
@@ -115,8 +120,20 @@ function FindCreatorPage() {
           in_baltimore: true,
           category: o.subtype,
           page_slug: o.slug,
+          created_at: o.created_at,
+          follower_count: statsMap.get(o.id)?.follower_count ?? 0,
+          last_active_at: statsMap.get(o.id)?.last_active_at ?? o.created_at,
         }));
-      return [...pageArtists, ...profileArtists];
+      // Merge profile artists and artist pages into one list, then apply the
+      // selected sort across both so the filters actually change the order.
+      const time = (v?: string | null) => (v ? new Date(v).getTime() : 0);
+      const merged = [...pageArtists, ...profileArtists];
+      merged.sort((a, b) => {
+        if (sort === "followed") return (b.follower_count ?? 0) - (a.follower_count ?? 0);
+        if (sort === "active") return time(b.last_active_at ?? b.created_at) - time(a.last_active_at ?? a.created_at);
+        return time(b.created_at) - time(a.created_at);
+      });
+      return merged;
     },
     { debounceMs: 200 },
   );
