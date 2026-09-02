@@ -19,6 +19,8 @@ import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { emailMyTickets } from "@/lib/tickets.functions";
 import { isPaidEvent } from "@/lib/event-pricing";
+import { ensureLiveSession } from "@/lib/session-health";
+import { setPostAuthRedirect } from "@/lib/pending-join";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
