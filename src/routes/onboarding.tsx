@@ -400,29 +400,6 @@ function Onboarding() {
 
         </CardHeader>
         <CardContent className="space-y-6">
-          {step === 0 && (
-            <>
-              <div className="grid gap-3">
-                <button
-                  type="button"
-                  onClick={() => startAudience("resident")}
-                  className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
-                >
-                  <p className="font-semibold text-neutral-900">Resident</p>
-                  <p className="text-xs text-neutral-500">I live in Baltimore. Next you pick Personal, Artist, Arts Organization or Business.</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => startAudience("visitor")}
-                  className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
-                >
-                  <p className="font-semibold text-neutral-900">Visitor</p>
-                  <p className="text-xs text-neutral-500">I am from somewhere else. Set me up with a visitor page.</p>
-                </button>
-              </div>
-            </>
-          )}
-
           {step === 1 && (
             <>
               <div className="space-y-3">
@@ -445,13 +422,24 @@ function Onboarding() {
                       <p className="text-xs text-neutral-500">{o.blurb}</p>
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => chooseKind("visitor")}
+                    className={`rounded-xl border p-4 text-left transition ${
+                      isVisitor
+                        ? "border-orange-500 bg-orange-50"
+                        : "border-neutral-200 hover:border-orange-400 hover:bg-orange-50"
+                    }`}
+                  >
+                    <p className={`font-semibold ${isVisitor ? "text-orange-700" : "text-neutral-900"}`}>
+                      Visitor
+                    </p>
+                    <p className="text-xs text-neutral-500">I am from somewhere else. Set me up with a visitor page.</p>
+                  </button>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </Button>
-                <Button onClick={continueFromKind} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+                <Button onClick={continueFromKind} disabled={!isVisitor && !kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
                   Continue
                 </Button>
 
