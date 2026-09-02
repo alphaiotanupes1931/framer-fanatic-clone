@@ -175,8 +175,10 @@ function EventDetail() {
 
   useEffect(() => {
     (async () => {
-      const { data: s } = await supabase.auth.getSession();
-      const uid = s.session?.user.id ?? null;
+      // A stale token left in storage still "looks" signed in, which is how
+      // guests ended up calling ticket RPCs and seeing permission errors.
+      // ensureLiveSession revalidates with the auth server first.
+      const uid = await ensureLiveSession();
       setMe(uid);
       if (uid) {
         const { data: r } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle();
