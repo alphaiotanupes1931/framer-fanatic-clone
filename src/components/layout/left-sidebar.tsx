@@ -135,7 +135,7 @@ function FullSidebar() {
   const homeItem = navItems.find((item) => item.to === "/dashboard")!;
   // Profile/Settings live inside the Account dropdown, so hide them from the main list.
   const otherNavItems = navItems
-    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.to !== "/profile" && item.label !== "Saved")
+    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.label !== "Saved")
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const settingsItem: NavItem = { icon: Settings, label: "Settings", to: "/settings" };
@@ -197,7 +197,6 @@ function FullSidebar() {
   // accordion so Profile/Settings appear below it at the same size.
   const renderAccountSection = () => {
     const subItems = [
-      profileItem,
       settingsItem,
       ...(isAdmin ? [reportsItem] : []),
     ];
