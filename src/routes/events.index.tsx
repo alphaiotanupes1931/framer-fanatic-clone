@@ -4,7 +4,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
-import { PublicShell, PreviewGrid, useAuthState } from "@/components/public-preview";
+import { useAuthState } from "@/components/public-preview";
 import { Calendar, MapPin, Plus, X, Ticket, ImagePlus, Loader2, Search, Clock, TrendingUp, Megaphone, Send, Bookmark } from "lucide-react";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { toast } from "sonner";
@@ -178,7 +178,7 @@ function BigEventCard({ e, onBuy }: { e: EventRow; onBuy: (id: string) => void }
 }
 
 function EventsPage() {
-  const { loading, signedIn } = useAuthState();
+  const { loading } = useAuthState();
   // Cached so returning to Events paints the previous list instantly while
   // fresh data revalidates behind it.
   const { data: cachedEvents, loading: dataLoading, refetch } = useCachedFetch<EventRow[]>(
