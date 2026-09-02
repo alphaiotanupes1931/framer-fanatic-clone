@@ -157,7 +157,10 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: siteUrl("/"),
+        // Land confirmations on /auth: it preserves any stored post-auth
+        // destination (e.g. the event they were buying tickets for) and
+        // routes the fresh session there after onboarding.
+        emailRedirectTo: siteUrl("/auth"),
         data: {
           display_name: displayName || email.split("@")[0],
           role: finalRole,
