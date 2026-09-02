@@ -360,13 +360,37 @@ function NotificationsPage() {
   );
 }
 
-function defaultText(type: string): string {
-  switch (type) {
-    case "like": return "liked your post";
-    case "comment": return "commented on your post";
+function describe(n: Notif): string {
+  const what = n.context?.label;
+  switch (n.type) {
+    case "post_like":
+    case "like":
+      return `liked ${what ?? "your post"}`;
+    case "post_comment":
+    case "comment":
+      return `commented on ${what ?? "your post"}`;
+    case "story_like": return `liked ${what ? `your story "${what}"` : "your story"}`;
+    case "story_comment": return `commented on ${what ? `your story "${what}"` : "your story"}`;
+    case "mention": return "mentioned you in a post";
     case "follow": return "started following you";
-    case "event": return "posted a new event";
     case "message": return "sent you a message";
-    default: return "sent you an update";
+    case "group_join_request": return `asked to join ${what ?? "your group"}`;
+    case "ticket_sold": return n.message || `bought a ticket to ${what ?? "your event"}`;
+    case "ticket_purchased": return n.message || "confirmed your ticket";
+    case "donation_received": return n.message || "sent you a donation";
+    case "donation_sent": return n.message || "confirmed your donation";
+    case "event": return `posted the event ${what ?? ""}`.trim();
+    default: return n.message || "sent you an update";
   }
+}
+
+function actionHint(type: string): string {
+  if (type === "message") return "Tap to open the conversation";
+  if (type.startsWith("post_") || type === "mention") return "Tap to view the post";
+  if (type.startsWith("story_")) return "Tap to view the story";
+  if (type === "follow") return "Tap to view their profile";
+  if (type === "group_join_request") return "Tap to open the group";
+  if (type === "ticket_purchased") return "Tap to view your ticket";
+  if (type.includes("ticket") || type.includes("donation") || type === "event") return "Tap to open the event";
+  return "Tap to view";
 }
