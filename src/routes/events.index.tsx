@@ -270,6 +270,15 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
   const buy = async (eventId: string) => {
     setBuying(eventId);
     try {
+      // Guests hit "permission denied" from the database otherwise: send them
+      // to sign up and bring them back to the event they wanted.
+      const uid = await ensureLiveSession();
+      if (!uid) {
+        const dest = `/events/${eventId}`;
+        setPostAuthRedirect(dest);
+        navigate({ to: "/auth", search: { mode: "signup", redirect: dest } });
+        return;
+      }
       const ev = events.find((e) => e.id === eventId);
       const isFree = !ev || !isPaidEvent(ev);
       if (isFree) {
