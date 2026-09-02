@@ -29,15 +29,23 @@ export function AdminShell({
             Planet Baltimore Admin
           </Link>
           {unlocked && (
-            <button
-              onClick={async () => {
-                await lockAdmin();
-                window.location.href = "/admin/login";
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Sign out
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/admin/activity"
+                className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+              >
+                Activity
+              </Link>
+              <button
+                onClick={async () => {
+                  await lockAdmin();
+                  window.location.href = "/admin/login";
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Sign out
+              </button>
+            </div>
           )}
         </div>
       </header>

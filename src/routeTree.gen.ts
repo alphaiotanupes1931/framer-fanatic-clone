@@ -58,7 +58,6 @@ import { Route as BusinessLoginRouteImport } from './routes/business-login'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtsOrgsRouteImport } from './routes/arts-orgs'
 import { Route as ArtistsRouteImport } from './routes/artists'
-import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VideosIndexRouteImport } from './routes/videos.index'
@@ -83,6 +82,7 @@ import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -339,11 +339,6 @@ const ArtistsRoute = ArtistsRouteImport.update({
   path: '/artists',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ActivityRoute = ActivityRouteImport.update({
-  id: '/activity',
-  path: '/activity',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -464,6 +459,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
   path: '/admin/content',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminActivityRoute = AdminActivityRouteImport.update({
+  id: '/admin/activity',
+  path: '/admin/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OSlugDonateRoute = OSlugDonateRouteImport.update({
   id: '/o/$slug_/donate',
   path: '/o/$slug/donate',
@@ -517,7 +517,6 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/activity': typeof ActivityRoute
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -567,6 +566,7 @@ export interface FileRoutesByFullPath {
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -602,7 +602,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/activity': typeof ActivityRoute
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -652,6 +651,7 @@ export interface FileRoutesByTo {
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -688,7 +688,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/activity': typeof ActivityRoute
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -738,6 +737,7 @@ export interface FileRoutesById {
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
@@ -775,7 +775,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/activity'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -825,6 +824,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/unsubscribe'
     | '/welcome'
+    | '/admin/activity'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -860,7 +860,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/activity'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -910,6 +909,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/unsubscribe'
     | '/welcome'
+    | '/admin/activity'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -945,7 +945,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/activity'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -995,6 +994,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/unsubscribe'
     | '/welcome'
+    | '/admin/activity'
     | '/admin/content'
     | '/admin/login'
     | '/admin/stripe-logs'
@@ -1031,7 +1031,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  ActivityRoute: typeof ActivityRoute
   ArtistsRoute: typeof ArtistsRoute
   ArtsOrgsRoute: typeof ArtsOrgsRoute
   AuthRoute: typeof AuthRoute
@@ -1081,6 +1080,7 @@ export interface RootRouteChildren {
   TicketingRoute: typeof TicketingRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   WelcomeRoute: typeof WelcomeRoute
+  AdminActivityRoute: typeof AdminActivityRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
@@ -1458,13 +1458,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/activity': {
-      id: '/activity'
-      path: '/activity'
-      fullPath: '/activity'
-      preLoaderRoute: typeof ActivityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -1633,6 +1626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/activity': {
+      id: '/admin/activity'
+      path: '/admin/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/o/$slug_/donate': {
       id: '/o/$slug_/donate'
       path: '/o/$slug/donate'
@@ -1714,7 +1714,6 @@ const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  ActivityRoute: ActivityRoute,
   ArtistsRoute: ArtistsRoute,
   ArtsOrgsRoute: ArtsOrgsRoute,
   AuthRoute: AuthRoute,
@@ -1764,6 +1763,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketingRoute: TicketingRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   WelcomeRoute: WelcomeRoute,
+  AdminActivityRoute: AdminActivityRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
