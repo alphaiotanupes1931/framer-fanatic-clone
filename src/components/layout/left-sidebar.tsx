@@ -389,62 +389,17 @@ function FullSidebar() {
           )}
         </div>
 
-        {/* Footer */}
-        <div className={`space-y-3 px-3 pb-3 ${collapsed ? "px-2" : ""}`}>
-          {collapsed ? (
-            <>
-            <SidebarCardCollapsed title="Account" icon={User}>
-              {renderCollapsedNavLink(settingsItem)}
-              {isAdmin && renderCollapsedNavLink(reportsItem)}
-              {user ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={handleLogout} className="flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                      <LogOut className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Logout</TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/auth" className="flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                      <LogIn className="h-5 w-5" />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Login</TooltipContent>
-                </Tooltip>
-              )}
-              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </button>
-            </SidebarCardCollapsed>
-            </>
-          ) : (
-            <>
-            <SidebarCard title="Account" icon={User} action={
-              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </button>
-            }>
-              <div className="space-y-0.5">
-                {renderNavLink(settingsItem)}
-                {isAdmin && renderNavLink(reportsItem)}
-                {user ? (
-                  <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]">
-                    <LogOut className="h-5 w-5 flex-shrink-0 text-slate-500" />
-                    <span className="truncate">Logout</span>
-                  </button>
-                ) : (
-                  <Link to="/auth" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]">
-                    <LogIn className="h-5 w-5 flex-shrink-0 text-slate-500" />
-                    <span className="truncate">Login</span>
-                  </Link>
-                )}
-              </div>
-            </SidebarCard>
-            </>
-          )}
+        {/* Footer: only the collapse/expand toggle remains */}
+        <div className={`px-3 pb-3 ${collapsed ? "px-2" : ""}`}>
+          <div className={`flex items-center ${collapsed ? "justify-center" : "justify-end"}`}>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="flex items-center justify-center rounded-lg p-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900"
+            >
+              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
       </aside>
     </TooltipProvider>
