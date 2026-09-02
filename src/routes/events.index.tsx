@@ -218,52 +218,8 @@ function EventsPage() {
 
   if (loading) return null;
 
-  if (!signedIn) {
-    const next = events[0];
-    return (
-      <PublicShell title="What's happening next" subtitle="Tickets for the best events in Baltimore." signedIn={false}>
-        {dataLoading ? (
-          <div className="text-paper/60 text-sm">Loading events…</div>
-        ) : events.length === 0 ? (
-          <div className="text-paper/60 text-sm">No upcoming events yet. Sign up to be the first to post one.</div>
-        ) : (
-          <>
-            {next && (
-              <div className="mb-10">
-                <div className="text-xs uppercase tracking-wider text-paper/60 mb-3">Up next</div>
-                <div className="rounded-3xl overflow-hidden border border-paper/15 bg-paper/5 md:grid md:grid-cols-2">
-                  <div className="aspect-[16/10] md:aspect-auto bg-paper/10 overflow-hidden">
-                    {next.image_url
-                      ? <EventImage src={next.image_url} alt={next.title} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center text-paper/30"><Calendar className="w-16 h-16" /></div>}
-                  </div>
-                  <div className="p-6 md:p-10 flex flex-col justify-center">
-                    <div className="text-sm text-paper/70 flex items-center gap-2"><Calendar className="w-4 h-4" /> {fmtDate(next.starts_at)}</div>
-                    <h2 className="font-display text-2xl md:text-3xl font-extrabold mt-2">{next.title}</h2>
-                    {next.location && <div className="text-sm text-paper/70 mt-2 flex items-center gap-2"><MapPin className="w-4 h-4" /> {next.location}</div>}
-                    {next.description && <p className="text-paper/80 mt-4 line-clamp-4">{next.description}</p>}
-                  </div>
-                </div>
-              </div>
-            )}
-            {events.length > 1 && (
-              <>
-                <div className="text-xs uppercase tracking-wider text-paper/60 mb-3">More events</div>
-                <PreviewGrid
-                  items={events.slice(1)}
-                  unlockedCount={5}
-                  signedIn={false}
-                  thing="event"
-              render={(e) => <EventCard e={e as EventRow} variant="dark" />}
-                />
-              </>
-            )}
-          </>
-        )}
-      </PublicShell>
-    );
-  }
-
+  // Everyone, signed in or not, sees the same Events page. Guests get prompted
+  // to sign up only when they reach for an action.
   return <SignedInEvents events={events} dataLoading={dataLoading} reload={refetch} />;
 }
 
