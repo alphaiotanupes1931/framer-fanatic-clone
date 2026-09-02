@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -338,7 +338,7 @@ function ActivityFeedPage() {
               );
               const cls = "flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3 transition hover:border-orange-300";
               return i.to ? (
-                <Link key={i.id} to={i.to} className={cls}>{body}</Link>
+                <a key={i.id} href={i.to} className={cls}>{body}</a>
               ) : (
                 <div key={i.id} className={cls}>{body}</div>
               );

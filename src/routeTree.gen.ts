@@ -58,6 +58,7 @@ import { Route as BusinessLoginRouteImport } from './routes/business-login'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtsOrgsRouteImport } from './routes/arts-orgs'
 import { Route as ArtistsRouteImport } from './routes/artists'
+import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VideosIndexRouteImport } from './routes/videos.index'
@@ -338,6 +339,11 @@ const ArtistsRoute = ArtistsRouteImport.update({
   path: '/artists',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivityRoute = ActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -511,6 +517,7 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/activity': typeof ActivityRoute
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -595,6 +602,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/activity': typeof ActivityRoute
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -680,6 +688,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/activity': typeof ActivityRoute
   '/artists': typeof ArtistsRoute
   '/arts-orgs': typeof ArtsOrgsRoute
   '/auth': typeof AuthRoute
@@ -766,6 +775,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/activity'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -850,6 +860,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/activity'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -934,6 +945,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/activity'
     | '/artists'
     | '/arts-orgs'
     | '/auth'
@@ -1019,6 +1031,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ActivityRoute: typeof ActivityRoute
   ArtistsRoute: typeof ArtistsRoute
   ArtsOrgsRoute: typeof ArtsOrgsRoute
   AuthRoute: typeof AuthRoute
@@ -1445,6 +1458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activity': {
+      id: '/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof ActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -1694,6 +1714,7 @@ const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ActivityRoute: ActivityRoute,
   ArtistsRoute: ArtistsRoute,
   ArtsOrgsRoute: ArtsOrgsRoute,
   AuthRoute: AuthRoute,
