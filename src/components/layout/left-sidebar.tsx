@@ -249,12 +249,6 @@ function FullSidebar() {
           <DropdownMenuLabel>Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link to={profileItem.to} className="flex cursor-pointer items-center gap-2">
-              <profileItem.icon className="h-4 w-4 text-muted-foreground" />
-              {profileItem.label}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
             <Link to={settingsItem.to} className="flex cursor-pointer items-center gap-2">
               <settingsItem.icon className="h-4 w-4 text-muted-foreground" />
               {settingsItem.label}
