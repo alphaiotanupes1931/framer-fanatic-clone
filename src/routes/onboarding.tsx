@@ -253,7 +253,7 @@ function Onboarding() {
     setStep(3);
   };
 
-  const backFromLocation = () => setStep(isVisitor ? 0 : 1);
+  const backFromLocation = () => setStep(1);
 
   const finish = async () => {
     if (!isVisitor && !kind) { toast.error("Choose how you want to join."); return; }
