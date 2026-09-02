@@ -6,11 +6,17 @@ const REDIRECT_KEY = "pb_post_auth_redirect";
 
 export const groupInvitePath = (slug: string) => `/o/${slug}?join=1`;
 
+export function setPostAuthRedirect(path: string) {
+  if (typeof window === "undefined" || !path.startsWith("/") || path.startsWith("//")) return;
+  try { sessionStorage.setItem(REDIRECT_KEY, path); } catch { /* storage blocked */ }
+  try { localStorage.setItem(REDIRECT_KEY, path); } catch { /* storage blocked */ }
+}
+
 export function setPendingGroup(slug: string) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(KEY, slug);
-    sessionStorage.setItem(REDIRECT_KEY, groupInvitePath(slug));
+    setPostAuthRedirect(groupInvitePath(slug));
   } catch { /* storage blocked */ }
 }
 
@@ -20,8 +26,11 @@ export function setPendingGroup(slug: string) {
 export function popPostAuthRedirect(consume = true): string | null {
   if (typeof window === "undefined") return null;
   try {
-    const v = sessionStorage.getItem(REDIRECT_KEY);
-    if (consume) sessionStorage.removeItem(REDIRECT_KEY);
+    const v = sessionStorage.getItem(REDIRECT_KEY) || localStorage.getItem(REDIRECT_KEY);
+    if (consume) {
+      sessionStorage.removeItem(REDIRECT_KEY);
+      localStorage.removeItem(REDIRECT_KEY);
+    }
     if (v && v.startsWith("/") && !v.startsWith("//")) return v;
     return null;
   } catch {

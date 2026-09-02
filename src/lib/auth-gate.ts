@@ -5,6 +5,7 @@
  */
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useCallback } from "react";
+import { setPostAuthRedirect } from "@/lib/pending-join";
 
 export function useSignupGate(signedIn: boolean, loading: boolean) {
   const navigate = useNavigate();
@@ -15,13 +16,9 @@ export function useSignupGate(signedIn: boolean, loading: boolean) {
       if (loading || signedIn) return;
       e.preventDefault();
       e.stopPropagation();
-      try {
-        const here = `${pathname}${typeof window !== "undefined" ? window.location.search : ""}`;
-        sessionStorage.setItem("n", here);
-      } catch {
-        /* storage unavailable is never fatal */
-      }
-      navigate({ to: "/auth", search: { mode: "signup" } });
+      const here = `${pathname}${typeof window !== "undefined" ? window.location.search : ""}`;
+      setPostAuthRedirect(here);
+      navigate({ to: "/auth", search: { mode: "signup", redirect: here } });
     },
     [signedIn, loading, pathname, navigate],
   );
