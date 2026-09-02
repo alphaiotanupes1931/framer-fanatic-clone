@@ -320,11 +320,21 @@ function NotificationsPage() {
                           onClick={() => onClick(n)}
                           className="text-left text-muted-foreground hover:text-foreground"
                         >
-                          {n.message || defaultText(n.type)}
+                          {describe(n)}
                         </button>
                       </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{relTime(n.created_at)}</p>
+                      {n.context?.excerpt && (
+                        <button
+                          type="button"
+                          onClick={() => onClick(n)}
+                          className="mt-1 block w-full truncate rounded-md bg-secondary/60 px-2 py-1 text-left text-xs italic text-muted-foreground hover:text-foreground"
+                        >
+                          "{n.context.excerpt}"
+                        </button>
+                      )}
+                      <p className="mt-0.5 text-xs text-muted-foreground">{relTime(n.created_at)} · {actionHint(n.type)}</p>
                     </div>
+
                     {!n.is_read && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: "#d4580a" }} />}
                     <button
                       type="button"
