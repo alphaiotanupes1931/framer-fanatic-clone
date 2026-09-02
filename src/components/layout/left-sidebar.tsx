@@ -299,10 +299,15 @@ function FullSidebar() {
       <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[72px]" : "w-[240px]"}`}>
         <div className={`flex h-16 items-center px-3 sm:px-4 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
-              <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
-            </Link>
+            <div className="flex flex-col items-center gap-1">
+              <Link to="/dashboard" className="flex items-center gap-2">
+                <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
+                <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
+              </Link>
+              <button onClick={() => setCollapsed(!collapsed)} aria-label="Expand sidebar" className="flex items-center justify-center rounded-lg p-1 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
           ) : (
             <>
               <Link to="/dashboard" className="flex flex-1 items-center gap-2 min-w-0">
