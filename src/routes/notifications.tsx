@@ -106,7 +106,7 @@ function NotificationsPage() {
     setUid(id);
     const { data } = await supabase
       .from("notifications")
-      .select("id, user_id, actor_id, type, target_type, target_id, message, is_read, created_at")
+      .select("id, user_id, actor_id, type, target_type, target_id, message, is_read, created_at, metadata")
       .eq("user_id", id)
       .order("created_at", { ascending: false })
       .limit(100);
@@ -117,8 +117,51 @@ function NotificationsPage() {
       const byId = new Map((ps || []).map((p: any) => [p.id, p]));
       list.forEach((n) => { if (n.actor_id) n.actor = byId.get(n.actor_id) as Notif["actor"] ?? null; });
     }
+
+    // Enrich with what the notification is actually about.
+    const idsOf = (pred: (t: string) => boolean) =>
+      Array.from(new Set(list.filter((n) => pred(n.type) && n.target_id).map((n) => n.target_id as string)));
+    const postIds = idsOf((t) => t.startsWith("post_") || t === "mention");
+    const storyIds = idsOf((t) => t.startsWith("story_"));
+    const orgIds = idsOf((t) => t === "group_join_request");
+    const eventIds = Array.from(new Set(list
+      .map((n) => (n.metadata as { event_id?: string } | null)?.event_id
+        ?? (n.target_type === "event" ? n.target_id : null))
+      .filter(Boolean) as string[]));
+
+    const [posts, stories, orgs, events] = await Promise.all([
+      postIds.length ? supabase.from("posts").select("id, content").in("id", postIds) : Promise.resolve({ data: [] }),
+      storyIds.length ? supabase.from("stories").select("id, title, excerpt").in("id", storyIds) : Promise.resolve({ data: [] }),
+      orgIds.length ? supabase.from("organizations").select("id, name, slug").in("id", orgIds) : Promise.resolve({ data: [] }),
+      eventIds.length ? supabase.from("events").select("id, title").in("id", eventIds) : Promise.resolve({ data: [] }),
+    ]);
+    const postMap = new Map((posts.data || []).map((p: any) => [p.id, p]));
+    const storyMap = new Map((stories.data || []).map((s: any) => [s.id, s]));
+    const orgMap = new Map((orgs.data || []).map((o: any) => [o.id, o]));
+    const eventMap = new Map((events.data || []).map((e: any) => [e.id, e]));
+
+    list.forEach((n) => {
+      const evId = (n.metadata as { event_id?: string } | null)?.event_id
+        ?? (n.target_type === "event" ? n.target_id : null);
+      if (n.type.startsWith("post_") || n.type === "mention") {
+        const p = postMap.get(n.target_id ?? "");
+        if (p) n.context = { label: "your post", excerpt: clip(p.content) };
+      } else if (n.type.startsWith("story_")) {
+        const s = storyMap.get(n.target_id ?? "");
+        if (s) n.context = { label: "your story", excerpt: clip(s.title || s.excerpt) };
+      } else if (n.type === "group_join_request") {
+        const o = orgMap.get(n.target_id ?? "");
+        if (o) n.context = { label: o.name, excerpt: null };
+        (n as any)._slug = o?.slug ?? null;
+      } else if (evId) {
+        const e = eventMap.get(evId);
+        if (e) n.context = { label: e.title, excerpt: null };
+      }
+    });
+
     setItems(list);
     setLoading(false);
+
   };
 
   useEffect(() => { void load(); }, []);
