@@ -133,12 +133,13 @@ function FullSidebar() {
   const isActive = (path: string) => currentPath === path || (path !== "/dashboard" && currentPath.startsWith(path));
 
   const homeItem = navItems.find((item) => item.to === "/dashboard")!;
-  // Settings and Content Reports live under the Account section.
+  // Profile/Settings live inside the Account dropdown, so hide them from the main list.
   const otherNavItems = navItems
-    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.label !== "Saved")
+    .filter((item) => item.to !== "/dashboard" && item.to !== "/saved" && item.to !== "/settings" && item.to !== "/profile" && item.label !== "Saved")
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const settingsItem: NavItem = { icon: Settings, label: "Settings", to: "/settings" };
+  const profileItem: NavItem = { icon: User, label: "Profile", to: "/profile" };
   const reportsItem: NavItem = { icon: Flag, label: "Content Reports", to: "/reports" };
 
   const renderNavLink = (item: NavItem) => {
@@ -189,21 +190,135 @@ function FullSidebar() {
     );
   };
 
+  const accountActive = isActive("/profile") || isActive("/settings") || isActive("/reports");
+
+  const renderAccountMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${accountActive ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+        >
+          <User className={`h-5 w-5 flex-shrink-0 transition-transform duration-150 ${accountActive ? "scale-110 text-slate-900" : "text-slate-500"}`} />
+          <span className="flex-1 truncate text-left">Account</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="z-[1001] w-56">
+        <DropdownMenuLabel>Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to={profileItem.to} className="flex cursor-pointer items-center gap-2">
+            <profileItem.icon className="h-4 w-4 text-muted-foreground" />
+            {profileItem.label}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={settingsItem.to} className="flex cursor-pointer items-center gap-2">
+            <settingsItem.icon className="h-4 w-4 text-muted-foreground" />
+            {settingsItem.label}
+          </Link>
+        </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to={reportsItem.to} className="flex cursor-pointer items-center gap-2">
+              <reportsItem.icon className="h-4 w-4 text-muted-foreground" />
+              {reportsItem.label}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {user ? (
+          <DropdownMenuItem onSelect={handleLogout} className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive">
+            <LogOut className="h-4 w-4" />
+            Log out
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link to="/auth" className="flex cursor-pointer items-center gap-2">
+              <LogIn className="h-4 w-4 text-muted-foreground" />
+              Log in
+            </Link>
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const renderCollapsedAccountMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={`relative flex w-10 items-center justify-center rounded-lg py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${accountActive ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
+          aria-label="Account"
+        >
+          <User className="h-5 w-5" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="right" className="z-[1001] w-56">
+        <DropdownMenuLabel>Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to={profileItem.to} className="flex cursor-pointer items-center gap-2">
+            <profileItem.icon className="h-4 w-4 text-muted-foreground" />
+            {profileItem.label}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={settingsItem.to} className="flex cursor-pointer items-center gap-2">
+            <settingsItem.icon className="h-4 w-4 text-muted-foreground" />
+            {settingsItem.label}
+          </Link>
+        </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to={reportsItem.to} className="flex cursor-pointer items-center gap-2">
+              <reportsItem.icon className="h-4 w-4 text-muted-foreground" />
+              {reportsItem.label}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {user ? (
+          <DropdownMenuItem onSelect={handleLogout} className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive">
+            <LogOut className="h-4 w-4" />
+            Log out
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link to="/auth" className="flex cursor-pointer items-center gap-2">
+              <LogIn className="h-4 w-4 text-muted-foreground" />
+              Log in
+            </Link>
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <TooltipProvider delayDuration={0}>
-      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[78px]" : "w-[288px]"}`}>
-        <div className={`flex h-16 items-center px-4 sm:px-5 ${collapsed ? "justify-center" : ""}`}>
+      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[72px]" : "w-[240px]"}`}>
+        <div className={`flex h-16 items-center px-3 sm:px-4 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
-              <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
-            </Link>
+            <div className="flex flex-col items-center gap-1">
+              <Link to="/dashboard" className="flex items-center gap-2">
+                <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
+                <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
+              </Link>
+              <button onClick={() => setCollapsed(!collapsed)} aria-label="Expand sidebar" className="flex items-center justify-center rounded-lg p-1 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
           ) : (
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
-              <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
-              <span className="font-display text-sm font-extrabold uppercase tracking-wide text-slate-900">Planet Baltimore</span>
-            </Link>
+            <>
+              <Link to="/dashboard" className="flex flex-1 items-center gap-2 min-w-0">
+                <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 shrink-0 object-contain dark:hidden" />
+                <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 shrink-0 object-contain dark:block" />
+                <span className="truncate font-display text-sm font-extrabold uppercase tracking-wide text-slate-900">Planet Baltimore</span>
+              </Link>
+              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="ml-1 flex shrink-0 items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            </>
           )}
         </div>
 
@@ -261,6 +376,7 @@ function FullSidebar() {
               </SidebarCardCollapsed>
               <SidebarCardCollapsed>
                 {otherNavItems.map((item) => renderCollapsedNavLink(item))}
+                {renderCollapsedAccountMenu()}
               </SidebarCardCollapsed>
             </>
           ) : (
@@ -269,68 +385,26 @@ function FullSidebar() {
                 <nav className="space-y-0.5">{renderNavLink(homeItem)}</nav>
               </SidebarCard>
               <SidebarCard>
-                <nav className="space-y-0.5">{otherNavItems.map((item) => renderNavLink(item))}</nav>
+                <nav className="space-y-0.5">
+                  {otherNavItems.map((item) => renderNavLink(item))}
+                  {renderAccountMenu()}
+                </nav>
               </SidebarCard>
             </>
           )}
         </div>
 
-        {/* Footer */}
-        <div className={`space-y-3 px-3 pb-3 ${collapsed ? "px-2" : ""}`}>
-          {collapsed ? (
-            <>
-            <SidebarCardCollapsed title="Account" icon={User}>
-              {renderCollapsedNavLink(settingsItem)}
-              {isAdmin && renderCollapsedNavLink(reportsItem)}
-              {user ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={handleLogout} className="flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                      <LogOut className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Logout</TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/auth" className="flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                      <LogIn className="h-5 w-5" />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Login</TooltipContent>
-                </Tooltip>
-              )}
-              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex w-10 items-center justify-center rounded-lg py-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </button>
-            </SidebarCardCollapsed>
-            </>
-          ) : (
-            <>
-            <SidebarCard title="Account" icon={User} action={
-              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
-                {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </button>
-            }>
-              <div className="space-y-0.5">
-                {renderNavLink(settingsItem)}
-                {isAdmin && renderNavLink(reportsItem)}
-                {user ? (
-                  <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]">
-                    <LogOut className="h-5 w-5 flex-shrink-0 text-slate-500" />
-                    <span className="truncate">Logout</span>
-                  </button>
-                ) : (
-                  <Link to="/auth" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]">
-                    <LogIn className="h-5 w-5 flex-shrink-0 text-slate-500" />
-                    <span className="truncate">Login</span>
-                  </Link>
-                )}
-              </div>
-            </SidebarCard>
-            </>
-          )}
+        {/* Footer: only the collapse/expand toggle remains */}
+        <div className={`px-3 pb-3 ${collapsed ? "px-2" : ""}`}>
+          <div className={`flex items-center ${collapsed ? "justify-center" : "justify-end"}`}>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="flex items-center justify-center rounded-lg p-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900"
+            >
+              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
       </aside>
     </TooltipProvider>
