@@ -290,7 +290,7 @@ function FullSidebar() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[72px]" : "w-[240px]"}`}>
+      <aside className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300 lg:flex ${collapsed ? "w-[78px]" : "w-[288px]"}`}>
         <div className={`flex h-16 items-center px-3 sm:px-4 ${collapsed ? "justify-center" : ""}`}>
           {collapsed ? (
             <div className="flex flex-col items-center gap-1">
