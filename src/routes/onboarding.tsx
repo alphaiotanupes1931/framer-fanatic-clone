@@ -97,14 +97,11 @@ function Onboarding() {
   const navigate = useNavigate();
   const { preview: previewMode } = Route.useSearch();
   const draft = useRef<Partial<OnboardingDraft>>(loadDraft()).current;
-  // 0 = resident or visitor, 1 = how you want to join, 2 = photo + location, 3 = page setup
+  // 1 = how you want to join (Personal, Artist, Arts Org, Business or Visitor), 2 = photo + location, 3 = page setup
   // The photo cannot be restored, so never resume past the photo step.
-  // Visitors have no page-type step, so a saved step 1 resumes at the photo step.
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(() => {
-    if (draft.step == null) return 0;
-    const resumed = Math.min(draft.step, 2) as 0 | 1 | 2;
-    if (draft.audience === "visitor" && resumed === 1) return 2;
-    return resumed;
+  const [step, setStep] = useState<1 | 2 | 3>(() => {
+    if (draft.step == null || draft.step < 1) return 1;
+    return Math.min(draft.step, 2) as 1 | 2;
   });
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -132,8 +129,8 @@ function Onboarding() {
   const selected = JOIN_OPTIONS.find((o) => o.value === kind);
   const pageLabel = isVisitor ? "Visitor" : selected?.label ?? "page";
   const nameLabel = isVisitor ? "Your name" : selected?.nameLabel ?? "Name";
-  const totalSteps = isVisitor ? 3 : 4;
-  const stepIndex = isVisitor && step > 1 ? step - 1 : step + 1;
+  const totalSteps = 3;
+  const stepIndex = step;
 
 
 
@@ -167,12 +164,10 @@ function Onboarding() {
     });
   }, [navigate, previewMode]);
 
-  // Visitors never see the page-type step, so bounce them forward if they land on it.
+  // Visitors have no page type, so clear it if they switch to Visitor.
   useEffect(() => {
-    if (!isVisitor) return;
-    if (kind) setKind("");
-    if (step === 1) setStep(2);
-  }, [isVisitor, kind, step]);
+    if (isVisitor && kind) setKind("");
+  }, [isVisitor, kind]);
 
 
   useEffect(() => {
@@ -217,24 +212,22 @@ function Onboarding() {
 
   const step3Ready = pageName.trim().length > 1 && (isVisitor || kind !== "artist" || !!category);
 
-  const startAudience = (choice: "resident" | "visitor") => {
-    setAudience(choice);
-    if (choice === "visitor") {
-      setKind("");
-      setStep(2);
-    } else {
-      setStep(1);
-    }
-  };
-
   // Personal, Arts Organization and Business pages have no artist category.
-  const chooseKind = (value: JoinKind) => {
+  // "visitor" is a pseudo-option on the same screen, not a page type.
+  const chooseKind = (value: JoinKind | "visitor") => {
+    if (value === "visitor") {
+      setAudience("visitor");
+      setKind("");
+      setCategory("");
+      return;
+    }
+    setAudience("resident");
     setKind(value);
     if (value !== "artist") setCategory("");
   };
 
   const continueFromKind = () => {
-    if (!kind) {
+    if (!isVisitor && !kind) {
       toast.error("Choose how you want to join.");
       return;
     }
@@ -260,7 +253,7 @@ function Onboarding() {
     setStep(3);
   };
 
-  const backFromLocation = () => setStep(isVisitor ? 0 : 1);
+  const backFromLocation = () => setStep(1);
 
   const finish = async () => {
     if (!isVisitor && !kind) { toast.error("Choose how you want to join."); return; }
@@ -349,19 +342,15 @@ function Onboarding() {
   };
 
   const title =
-    step === 0
-      ? "Do you live in Baltimore?"
-      : step === 1
+    step === 1
       ? "Choose how you want to join"
       : step === 2
       ? "Your photo and location"
       : `Set up your ${pageLabel} page`;
 
   const description =
-    step === 0
-      ? "This tells us whether to set you up as a resident or a visitor."
-      : step === 1
-      ? "Pick the page that best describes you. You can add more pages later."
+    step === 1
+      ? "Pick the page that best describes you. Live somewhere else? Choose Visitor. You can add more pages later."
       : step === 2
       ? isVisitor
         ? "Add a profile photo, then tell us the city and state you are coming from."
@@ -411,29 +400,6 @@ function Onboarding() {
 
         </CardHeader>
         <CardContent className="space-y-6">
-          {step === 0 && (
-            <>
-              <div className="grid gap-3">
-                <button
-                  type="button"
-                  onClick={() => startAudience("resident")}
-                  className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
-                >
-                  <p className="font-semibold text-neutral-900">Resident</p>
-                  <p className="text-xs text-neutral-500">I live in Baltimore. Next you pick Personal, Artist, Arts Organization or Business.</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => startAudience("visitor")}
-                  className="rounded-xl border border-neutral-200 p-4 text-left transition hover:border-orange-400 hover:bg-orange-50"
-                >
-                  <p className="font-semibold text-neutral-900">Visitor</p>
-                  <p className="text-xs text-neutral-500">I am from somewhere else. Set me up with a visitor page.</p>
-                </button>
-              </div>
-            </>
-          )}
-
           {step === 1 && (
             <>
               <div className="space-y-3">
@@ -456,13 +422,24 @@ function Onboarding() {
                       <p className="text-xs text-neutral-500">{o.blurb}</p>
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => chooseKind("visitor")}
+                    className={`rounded-xl border p-4 text-left transition ${
+                      isVisitor
+                        ? "border-orange-500 bg-orange-50"
+                        : "border-neutral-200 hover:border-orange-400 hover:bg-orange-50"
+                    }`}
+                  >
+                    <p className={`font-semibold ${isVisitor ? "text-orange-700" : "text-neutral-900"}`}>
+                      Visitor
+                    </p>
+                    <p className="text-xs text-neutral-500">I am from somewhere else. Set me up with a visitor page.</p>
+                  </button>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => setStep(0)} className="gap-1">
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </Button>
-                <Button onClick={continueFromKind} disabled={!kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+                <Button onClick={continueFromKind} disabled={!isVisitor && !kind} className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
                   Continue
                 </Button>
 
