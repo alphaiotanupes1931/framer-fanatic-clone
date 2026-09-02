@@ -3551,8 +3551,10 @@ export type Database = {
           category: string
           created_at: string
           display_name: string
+          follower_count: number
           id: string
           in_baltimore: boolean
+          last_active_at: string
           neighborhood: string
           role: string
           username: string
@@ -3578,6 +3580,14 @@ export type Database = {
           id: string
           role: string
           username: string
+        }[]
+      }
+      public_org_stats: {
+        Args: { _type?: string }
+        Returns: {
+          follower_count: number
+          last_active_at: string
+          org_id: string
         }[]
       }
       public_profile_by_username: {
