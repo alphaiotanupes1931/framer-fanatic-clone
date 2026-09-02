@@ -25,6 +25,9 @@ type Creator = {
   category?: string | null;
   /** Set when this card is a standalone artist page (organizations row). */
   page_slug?: string | null;
+  created_at?: string | null;
+  follower_count?: number;
+  last_active_at?: string | null;
 };
 
 const CATEGORIES = [
