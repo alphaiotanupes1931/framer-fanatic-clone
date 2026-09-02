@@ -3551,8 +3551,10 @@ export type Database = {
           category: string
           created_at: string
           display_name: string
+          follower_count: number
           id: string
           in_baltimore: boolean
+          last_active_at: string
           neighborhood: string
           role: string
           username: string
