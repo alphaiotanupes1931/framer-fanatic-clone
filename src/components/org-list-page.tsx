@@ -81,7 +81,7 @@ export function OrgListPage({
   const [q, setQ] = useState("");
   const [sub, setSub] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const [sort, setSort] = useState<"newest" | "followed">("newest");
+  const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
   const [view, setView] = useState<"list" | "map">("list");
 
   // One fetch per org type, cached across visits. Search, subtype and sort all
@@ -194,11 +194,12 @@ export function OrgListPage({
           {showSort && (
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value as "newest" | "followed")}
+              onChange={(e) => setSort(e.target.value as "newest" | "followed" | "active")}
               className="rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-700 focus:border-orange-400 focus:outline-none"
             >
               <option value="newest">Newest</option>
               <option value="followed">Most Followed</option>
+              <option value="active">Most Active</option>
             </select>
           )}
         </div>
