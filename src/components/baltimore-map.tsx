@@ -138,8 +138,8 @@ export function BaltimoreMap({
         style={{ height: "clamp(320px, 55vh, 560px)", width: "100%" }}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {/* Neighborhood dots are drawn first; event markers are rendered after
             them so the green event dots sit on top of the blue neighborhood dots. */}
