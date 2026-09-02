@@ -157,10 +157,12 @@ function AuthPage() {
       email,
       password,
       options: {
-        // Land confirmations on /auth: it preserves any stored post-auth
-        // destination (e.g. the event they were buying tickets for) and
-        // routes the fresh session there after onboarding.
-        emailRedirectTo: siteUrl("/auth"),
+        // Carry the destination inside the confirmation URL as well as browser
+        // storage. Session storage does not follow a user who opens the email
+        // on another device or browser, but the confirmation URL does.
+        emailRedirectTo: siteUrl(
+          redirect ? `/auth?redirect=${encodeURIComponent(redirect)}` : "/auth",
+        ),
         data: {
           display_name: displayName || email.split("@")[0],
           role: finalRole,
