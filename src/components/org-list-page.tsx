@@ -87,12 +87,23 @@ export function OrgListPage({
   // One fetch per org type, cached across visits. Search, subtype and sort all
   // filter that list in memory so typing and tab switching are instant.
   const { data: all, loading, setData, refetch } = useCachedFetch<Org[]>(`orglist:${type}`, async () => {
-    const { data } = await supabase
-      .from("organizations")
-      .select("*")
-      .eq("type", type)
-      .order("created_at", { ascending: false });
-    const list = (data ?? []) as Org[];
+    const [{ data }, statsRes] = await Promise.all([
+      supabase
+        .from("organizations")
+        .select("*")
+        .eq("type", type)
+        .order("created_at", { ascending: false }),
+      supabase.rpc("public_org_stats", { _type: type }),
+    ]);
+    const stats = new Map<string, { follower_count: number; last_active_at: string | null }>(
+      (((statsRes.data as { org_id: string; follower_count: number; last_active_at: string | null }[]) ?? [])
+        .map((s) => [s.org_id, { follower_count: Number(s.follower_count ?? 0), last_active_at: s.last_active_at }])),
+    );
+    const list = ((data ?? []) as Org[]).map((o) => ({
+      ...o,
+      follower_count: stats.get(o.id)?.follower_count ?? 0,
+      last_active_at: stats.get(o.id)?.last_active_at ?? (o as { created_at?: string }).created_at ?? null,
+    })) as Org[];
     prefetchImageUrls(list.slice(0, 12).flatMap((o) => [o.avatar_url, o.banner_url]));
     return list;
   });
@@ -109,11 +120,24 @@ export function OrgListPage({
           (o.neighborhood ?? "").toLowerCase().includes(needle),
       );
     }
-    // Prioritize orgs that have a picture (avatar or banner) so they surface first
+    const time = (v?: string | null) => (v ? new Date(v).getTime() : 0);
     return [...list].sort((a, b) => {
+      const an = a as Org & { follower_count?: number; created_at?: string; last_active_at?: string | null };
+      const bn = b as Org & { follower_count?: number; created_at?: string; last_active_at?: string | null };
+      if (sort === "followed") {
+        const diff = (bn.follower_count ?? 0) - (an.follower_count ?? 0);
+        if (diff !== 0) return diff;
+        return time(bn.created_at) - time(an.created_at);
+      }
+      if (sort === "active") {
+        const diff = time(bn.last_active_at ?? bn.created_at) - time(an.last_active_at ?? an.created_at);
+        if (diff !== 0) return diff;
+      }
+      // Newest first, but surface orgs that have a picture within the same tier.
       const ap = (a.avatar_url ? 2 : 0) + (a.banner_url ? 1 : 0);
       const bp = (b.avatar_url ? 2 : 0) + (b.banner_url ? 1 : 0);
-      return bp - ap;
+      if (sort === "newest" && bp !== ap) return bp - ap;
+      return time(bn.created_at) - time(an.created_at);
     });
   }, [all, sub, q, sort]);
 
