@@ -203,7 +203,7 @@ function FullSidebar() {
     ];
 
     return (
-      <SidebarCard title="Account" icon={User}>
+      <SidebarCard>
         <nav className="space-y-0.5">
           <button
             onClick={() => setAccountOpen((o) => !o)}
