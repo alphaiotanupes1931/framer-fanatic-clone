@@ -25,16 +25,29 @@ type Notif = {
   message: string | null;
   is_read: boolean;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
   actor?: { id: string; display_name: string | null; username: string | null; avatar_url: string | null } | null;
+  context?: { label: string; excerpt?: string | null } | null;
 };
 
 function iconFor(type: string) {
-  if (type === "like") return Heart;
-  if (type === "comment") return MessageCircle;
+  if (type.includes("like")) return Heart;
+  if (type.includes("comment") || type === "mention") return MessageCircle;
+  if (type === "message") return MessageCircle;
   if (type === "follow") return UserPlus;
-  if (type === "event") return Calendar;
+  if (type.includes("ticket") || type.includes("event")) return Calendar;
+  if (type.includes("donation")) return Calendar;
+  if (type === "group_join_request") return UserPlus;
   return Bell;
 }
+
+function clip(text: string | null | undefined, max = 90) {
+  if (!text) return null;
+  const plain = text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  if (!plain) return null;
+  return plain.length > max ? `${plain.slice(0, max)}...` : plain;
+}
+
 
 function relTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
