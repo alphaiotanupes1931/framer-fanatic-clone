@@ -209,10 +209,40 @@ function NotificationsPage() {
       await supabase.from("notifications").update({ is_read: true }).eq("id", n.id);
       setItems((prev) => prev.map((x) => x.id === n.id ? { ...x, is_read: true } : x));
     }
-    if (n.target_type === "post" && n.target_id) navigate({ to: "/dashboard" });
-    else if (n.target_type === "event" && n.target_id) navigate({ to: "/events/$eventId", params: { eventId: n.target_id } });
-    else if (n.target_type === "user" && n.actor?.username) navigate({ to: "/u/$username", params: { username: n.actor.username } });
+    const t = n.type;
+    const meta = (n.metadata || {}) as { event_id?: string; ticket_id?: string };
+    const evId = meta.event_id ?? (n.target_type === "event" ? n.target_id : null);
+
+    if (t === "message" && n.target_id) {
+      try { window.localStorage.setItem("pb_open_conversation", n.target_id); } catch { /* ignore */ }
+      navigate({ to: "/messages" });
+      return;
+    }
+    if ((t.startsWith("post_") || t === "mention" || n.target_type === "post") && n.target_id) {
+      navigate({ to: "/posts/$postId", params: { postId: n.target_id } });
+      return;
+    }
+    if (t.startsWith("story_") && n.target_id) {
+      navigate({ to: "/stories/$storyId", params: { storyId: n.target_id } });
+      return;
+    }
+    if (t === "group_join_request") {
+      const slug = (n as any)._slug as string | null;
+      if (slug) { navigate({ to: "/o/$slug", params: { slug } }); return; }
+      navigate({ to: "/groups" });
+      return;
+    }
+    if (t === "ticket_purchased" && meta.ticket_id) {
+      navigate({ to: "/tickets/$ticketId", params: { ticketId: meta.ticket_id } });
+      return;
+    }
+    if (evId) {
+      navigate({ to: "/events/$eventId", params: { eventId: evId } });
+      return;
+    }
+    if (n.actor?.username) navigate({ to: "/u/$username", params: { username: n.actor.username } });
   };
+
 
   return (
     <AppLayout>
