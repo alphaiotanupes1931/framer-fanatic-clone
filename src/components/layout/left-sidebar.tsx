@@ -28,7 +28,7 @@ import {
   utilItems as sharedUtilItems,
   createItems as sharedCreateItems,
 } from "@/lib/nav-items";
-import type { ReactNode, ComponentType } from "react";
+import { useState, type ReactNode, type ComponentType } from "react";
 
 // Desktop and mobile share one navigation config so both surfaces always
 // offer exactly the same destinations, in the same order.
