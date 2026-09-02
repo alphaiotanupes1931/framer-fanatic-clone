@@ -1,26 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AppLayout } from "@/components/app-layout";
-import { useAuthState } from "@/components/public-preview";
-import { HeroBanner } from "@/components/shared/hero-banner";
+import { AdminShell } from "@/components/admin-shell";
+import { refreshAdminUnlocked } from "@/lib/admin-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { pageHead } from "@/lib/seo";
 import { toast } from "sonner";
 import {
   Activity as ActivityIcon, Copy, Download, FileText, PenLine, Ticket, Video,
   Users, MessageCircle, UserPlus, ShoppingBag, Loader2,
 } from "lucide-react";
 
-export const Route = createFileRoute("/activity")({
+export const Route = createFileRoute("/admin/activity")({
   component: ActivityFeedPage,
-  head: () =>
-    pageHead({
-      path: "/activity",
-      title: "Activity Feed | Planet Baltimore",
-      description: "Everything happening on Planet Baltimore: posts, stories, events, videos, new members and more, filtered by day, week, month or a custom date range.",
-    }),
+  head: () => ({
+    meta: [
+      { title: "Activity Feed | Planet Baltimore Admin" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
 });
 
 type Kind = "post" | "story" | "event" | "video" | "page" | "comment" | "member" | "listing";
@@ -80,7 +78,9 @@ function fmt(at: string) {
 }
 
 function ActivityFeedPage() {
-  const auth = useAuthState();
+  const navigate = useNavigate();
+  const [unlocked, setUnlocked] = useState(false);
+  const [gateChecked, setGateChecked] = useState(false);
   const [rangeKey, setRangeKey] = useState<RangeKey>("week");
   const [fromStr, setFromStr] = useState("");
   const [toStr, setToStr] = useState("");
@@ -92,7 +92,16 @@ function ActivityFeedPage() {
   const { from, to } = useMemo(() => rangeFor(rangeKey, fromStr, toStr), [rangeKey, fromStr, toStr]);
 
   useEffect(() => {
-    if (!auth.signedIn) return;
+    (async () => {
+      const ok = await refreshAdminUnlocked();
+      setUnlocked(ok);
+      setGateChecked(true);
+      if (!ok) navigate({ to: "/admin/login" });
+    })();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!unlocked) return;
     let cancelled = false;
     const load = async () => {
       setLoading(true);
@@ -154,7 +163,7 @@ function ActivityFeedPage() {
       }
     });
     return () => { cancelled = true; };
-  }, [auth.signedIn, from, to]);
+  }, [unlocked, from, to]);
 
   const visible = kinds.length ? items.filter((i) => kinds.includes(i.kind)) : items;
 
@@ -233,14 +242,7 @@ function ActivityFeedPage() {
     }
   };
 
-  if (auth.loading) return null;
-  if (!auth.signedIn) {
-    if (typeof window !== "undefined") {
-      try { sessionStorage.setItem("pb_post_auth_redirect", "/activity"); } catch { /* ignore */ }
-      window.location.replace("/auth");
-    }
-    return null;
-  }
+  if (!gateChecked || !unlocked) return null;
 
   const rangeButtons: { key: RangeKey; label: string }[] = [
     { key: "today", label: "Daily" },
@@ -250,10 +252,7 @@ function ActivityFeedPage() {
   ];
 
   return (
-    <AppLayout>
-      <HeroBanner title="Activity" subtitle="Everything happening on Planet Baltimore, as it happens." />
-      <div className="h-6" />
-
+    <AdminShell title="Activity" subtitle="Everything happening on Planet Baltimore, as it happens.">
       <div className="space-y-4">
         <div className="rounded-2xl border border-neutral-200 bg-white p-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -346,6 +345,6 @@ function ActivityFeedPage() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </AdminShell>
   );
 }
