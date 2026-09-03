@@ -354,6 +354,36 @@ export function OrgCreateDialog({
               placeholder="Hours (e.g. Tue-Sun, 10am-5pm)"
               className={inputCls}
             />
+            {type === "business" && (
+              <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50/60 p-4">
+                <div className="mb-1 text-[15px] font-semibold text-neutral-900">Staff login (optional)</div>
+                <p className="mb-3 text-xs text-neutral-600">
+                  Create a separate staff email and password your employees can use to sign in and manage this business page,
+                  without ever using your own login. You can change or remove it later from the business page.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    type="email"
+                    value={staff.username}
+                    autoComplete="off"
+                    maxLength={80}
+                    placeholder="e.g. team@joescafe.com"
+                    onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
+                    className={inputCls}
+                  />
+                  <input
+                    type="password"
+                    value={staff.password}
+                    autoComplete="new-password"
+                    maxLength={72}
+                    placeholder="At least 8 characters"
+                    onChange={(e) => setStaff((s) => ({ ...s, password: e.target.value }))}
+                    className={inputCls}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-neutral-500">Employees sign in at planetbaltimore.com/business-login</p>
+              </div>
+            )}
             {showPricing && (
               <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 p-4">
                 <div className="mb-1 text-[15px] font-semibold text-neutral-900">Pricing</div>
