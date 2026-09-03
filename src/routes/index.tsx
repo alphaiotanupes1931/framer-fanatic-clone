@@ -598,7 +598,7 @@ function CreatorsFans() {
         >
           {[
             { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), tc: siteColor(content, "creators.card1.title"), bc: siteColor(content, "creators.card1.body"), cc: siteColor(content, "creators.card1.cta"), primary: true, destination: "/calendar" },
-            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: true, destination: "/discover", bg: "#d8542c" },
+            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: true, destination: "/discover" },
           ].map((c) => (
             <div
               key={c.t}
