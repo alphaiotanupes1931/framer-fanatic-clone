@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
+import { getStaffMode } from "@/lib/staff-mode";
 
 // Paths that must stay reachable even before onboarding is finished.
-const EXEMPT = ["/onboarding", "/auth", "/reset-password", "/admin", "/lovable", "/email"];
+const EXEMPT = ["/onboarding", "/auth", "/reset-password", "/admin", "/lovable", "/email", "/business-login"];
+
 
 /**
  * Email confirmation links can be opened on a different device than the one
