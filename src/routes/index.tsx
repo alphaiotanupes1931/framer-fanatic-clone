@@ -585,7 +585,7 @@ function CreatorsFans() {
       <div className="relative mx-auto max-w-[1280px]">
         <ScrollHeadline
           lines={[siteText(content, "creators.headline.line1"), siteText(content, "creators.headline.line2")]}
-          colors={["#FFFFFF", "#FFFFFF"]}
+          colors={[siteColor(content, "creators.headline.line1"), siteColor(content, "creators.headline.line2")]}
           className="font-display text-paper font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
         />
 
