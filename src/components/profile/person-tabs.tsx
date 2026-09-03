@@ -254,10 +254,23 @@ export function PersonMembershipsTab({ userId, isSelf = false }: { userId: strin
         .from("organizations")
         .select("id, name, slug, type, subtype, avatar_url, is_public")
         .in("id", ids);
+      // Groups / community associations this person owns also count as memberships.
+      const { data: owned } = await supabase
+        .from("organizations")
+        .select("id, name, slug, type, subtype, avatar_url, is_public")
+        .eq("owner_id", userId)
+        .in("type", ["group", "community_assoc"]);
       if (cancelled) return;
-      setRows((orgs ?? [])
-        .filter((o: any) => o.is_public !== false)
-        .map((o: any) => ({ ...o, membership_public: publicById.get(o.id) !== false })));
+      const merged = new Map<string, any>();
+      for (const o of orgs ?? []) {
+        if (o.is_public === false) continue;
+        merged.set(o.id, { ...o, membership_public: publicById.get(o.id) !== false });
+      }
+      for (const o of owned ?? []) {
+        if (o.is_public === false && !isSelf) continue;
+        if (!merged.has(o.id)) merged.set(o.id, { ...o, membership_public: true });
+      }
+      setRows(Array.from(merged.values()));
       setLoading(false);
     })();
     return () => { cancelled = true; };
