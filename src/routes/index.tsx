@@ -603,7 +603,7 @@ function CreatorsFans() {
           ].map((c) => (
             <div
               key={c.t}
-              className="group relative rounded-3xl border border-paper/10 bg-paper/[0.03] backdrop-blur-sm p-8 md:p-10 transition-colors hover:border-paper/25 hover:bg-paper/[0.05]"
+              className="group relative rounded-3xl border border-paper/10 bg-ink text-paper p-8 md:p-10 transition-colors hover:border-paper/25 hover:bg-ink/80"
             >
               <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight" style={c.tc ? { color: c.tc } : undefined}>{c.t}</h3>
               <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md" style={c.bc ? { color: c.bc } : undefined}>{c.b}</p>
