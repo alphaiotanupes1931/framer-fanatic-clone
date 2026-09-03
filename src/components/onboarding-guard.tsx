@@ -23,8 +23,12 @@ export function OnboardingGuard() {
 
   useEffect(() => {
     if (done.current || checking.current) return;
+    // A staff login is a business-page-only identity with no personal profile,
+    // so it must never be pushed through the personal onboarding wizard.
+    if (getStaffMode()) { done.current = true; return; }
     if (EXEMPT.some((p) => pathname === p || pathname.startsWith(p + "/"))) return;
     checking.current = true;
+
     void (async () => {
       try {
         const { data } = await supabase.auth.getSession();
