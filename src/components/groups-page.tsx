@@ -36,7 +36,7 @@ export function GroupsPage() {
   const { isArtist, isAdmin } = useUserRole();
   const canCreate = true;
   const [q, setQ] = useState("");
-  const [open, setOpen] = useState(false);
+  
   const [sort, setSort] = useState<"newest" | "members">("newest");
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("All");
 
