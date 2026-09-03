@@ -14,6 +14,14 @@ import { Img } from "@/components/shared/smart-img";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { prefetchImageUrls } from "@/components/smart-image";
 
+/** Every org type uses the same create page, no matter where you start from. */
+function CreatePageLink({ type, className, children }: { type: string; className: string; children: React.ReactNode }) {
+  if (type === "business") return <Link to="/create-business" className={className}>{children}</Link>;
+  if (type === "arts_org") return <Link to="/create-arts-org" className={className}>{children}</Link>;
+  if (type === "community_assoc") return <Link to="/create-community-association" className={className}>{children}</Link>;
+  return <Link to="/create-community" className={className}>{children}</Link>;
+}
+
 function prettyLabel(v: string) {
   return v
     .replace(/[_-]+/g, " ")
