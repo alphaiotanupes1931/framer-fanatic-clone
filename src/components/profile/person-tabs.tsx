@@ -246,15 +246,17 @@ export function PersonMembershipsTab({ userId, isSelf = false }: { userId: strin
       const visible = (mems ?? []).filter((m: any) => (!m.status || m.status === "approved") && (isSelf || m.is_public !== false));
       const publicById = new Map(visible.map((m: any) => [m.organization_id, m.is_public !== false]));
       const ids = visible.map((m: any) => m.organization_id);
-      if (ids.length === 0) {
-        if (!cancelled) { setRows([]); setLoading(false); }
-        return;
-      }
-      const { data: orgs } = await supabase
-        .from("organizations")
-        .select("id, name, slug, type, subtype, avatar_url, is_public")
-        .in("id", ids);
-      // Groups / community associations this person owns also count as memberships.
+
+      // Personal Pages such as Artist and Business are intentionally not
+      // memberships. Memberships are reserved for Groups and Community
+      // Associations, including ones the person owns.
+      const { data: orgs } = ids.length > 0
+        ? await supabase
+            .from("organizations")
+            .select("id, name, slug, type, subtype, avatar_url, is_public")
+            .in("id", ids)
+            .in("type", ["group", "community_assoc"])
+        : { data: [] };
       const { data: owned } = await supabase
         .from("organizations")
         .select("id, name, slug, type, subtype, avatar_url, is_public")
