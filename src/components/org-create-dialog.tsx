@@ -47,6 +47,7 @@ export function OrgCreateDialog({
     avatar_url: "",
     banner_url: "",
   });
+  const [staff, setStaff] = useState({ username: "", password: "" });
 
   useEffect(() => {
     if (!open) return;
