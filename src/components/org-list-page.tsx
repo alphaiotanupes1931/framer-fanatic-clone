@@ -87,7 +87,6 @@ export function OrgListPage({
   const subs = subtypesFor(type);
   const [q, setQ] = useState("");
   const [sub, setSub] = useState<string>("");
-  const [open, setOpen] = useState(false);
   const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
   const [view, setView] = useState<"list" | "map">("list");
 
@@ -176,13 +175,12 @@ export function OrgListPage({
                 </button>
               )}
               {canCreate && (
-                <button
-                  type="button"
-                  onClick={() => setOpen(true)}
+                <CreatePageLink
+                  type={type}
                   className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
                 >
                   <Plus className="h-4 w-4" /> Create {ORG_TYPE_LABEL[type]} Page
-                </button>
+                </CreatePageLink>
               )}
             </div>
           }
@@ -283,9 +281,9 @@ export function OrgListPage({
             title={`No ${title.toLowerCase()} found`}
             description={`Be the first to add a Baltimore ${ORG_TYPE_LABEL[type].toLowerCase()}.`}
             action={canCreate ? (
-              <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">
+              <CreatePageLink type={type} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">
                 <Plus className="h-4 w-4" /> Create page
-              </button>
+              </CreatePageLink>
             ) : undefined}
           />
         ) : (
@@ -326,7 +324,6 @@ export function OrgListPage({
           </div>
         )}
       </div>
-      <OrgCreateDialog type={type} open={open} onClose={() => { setOpen(false); refetch(); }} />
     </AppLayout>
   );
 }
