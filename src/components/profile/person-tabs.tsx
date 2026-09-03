@@ -247,28 +247,30 @@ export function PersonMembershipsTab({ userId, isSelf = false }: { userId: strin
       const publicById = new Map(visible.map((m: any) => [m.organization_id, m.is_public !== false]));
       const ids = visible.map((m: any) => m.organization_id);
 
-      // Personal Pages such as Artist and Business are intentionally not
-      // memberships. Memberships are reserved for Groups and Community
-      // Associations, including ones the person owns.
+      // Memberships are reserved for Groups and Community Associations only.
+      // Artist and Business pages belong under Pages, never here.
+      const MEMBERSHIP_TYPES = ["group", "community_assoc"];
       const { data: orgs } = ids.length > 0
         ? await supabase
             .from("organizations")
             .select("id, name, slug, type, subtype, avatar_url, is_public")
             .in("id", ids)
-            .in("type", ["group", "community_assoc"])
+            .in("type", MEMBERSHIP_TYPES)
         : { data: [] };
       const { data: owned } = await supabase
         .from("organizations")
         .select("id, name, slug, type, subtype, avatar_url, is_public")
         .eq("owner_id", userId)
-        .in("type", ["group", "community_assoc"]);
+        .in("type", MEMBERSHIP_TYPES);
       if (cancelled) return;
       const merged = new Map<string, any>();
       for (const o of orgs ?? []) {
+        if (!MEMBERSHIP_TYPES.includes(o.type)) continue;
         if (o.is_public === false) continue;
         merged.set(o.id, { ...o, membership_public: publicById.get(o.id) !== false });
       }
       for (const o of owned ?? []) {
+        if (!MEMBERSHIP_TYPES.includes(o.type)) continue;
         if (o.is_public === false && !isSelf) continue;
         if (!merged.has(o.id)) merged.set(o.id, { ...o, membership_public: true });
       }
