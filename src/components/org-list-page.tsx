@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ORG_TYPE_LABEL, subtypesFor } from "@/lib/categories";
-import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -14,6 +13,14 @@ import { EmptyState, CardGridSkeleton } from "@/components/shared/empty-state";
 import { Img } from "@/components/shared/smart-img";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { prefetchImageUrls } from "@/components/smart-image";
+
+/** Every org type uses the same create page, no matter where you start from. */
+function CreatePageLink({ type, className, children }: { type: string; className: string; children: React.ReactNode }) {
+  if (type === "business") return <Link to="/create-business" className={className}>{children}</Link>;
+  if (type === "arts_org") return <Link to="/create-arts-org" className={className}>{children}</Link>;
+  if (type === "community_assoc") return <Link to="/create-community-association" className={className}>{children}</Link>;
+  return <Link to="/create-community" className={className}>{children}</Link>;
+}
 
 function prettyLabel(v: string) {
   return v
@@ -80,7 +87,6 @@ export function OrgListPage({
   const subs = subtypesFor(type);
   const [q, setQ] = useState("");
   const [sub, setSub] = useState<string>("");
-  const [open, setOpen] = useState(false);
   const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
   const [view, setView] = useState<"list" | "map">("list");
 
@@ -169,13 +175,12 @@ export function OrgListPage({
                 </button>
               )}
               {canCreate && (
-                <button
-                  type="button"
-                  onClick={() => setOpen(true)}
+                <CreatePageLink
+                  type={type}
                   className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-4 py-2 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
                 >
                   <Plus className="h-4 w-4" /> Create {ORG_TYPE_LABEL[type]} Page
-                </button>
+                </CreatePageLink>
               )}
             </div>
           }
@@ -276,9 +281,9 @@ export function OrgListPage({
             title={`No ${title.toLowerCase()} found`}
             description={`Be the first to add a Baltimore ${ORG_TYPE_LABEL[type].toLowerCase()}.`}
             action={canCreate ? (
-              <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">
+              <CreatePageLink type={type} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">
                 <Plus className="h-4 w-4" /> Create page
-              </button>
+              </CreatePageLink>
             ) : undefined}
           />
         ) : (
@@ -319,7 +324,6 @@ export function OrgListPage({
           </div>
         )}
       </div>
-      <OrgCreateDialog type={type} open={open} onClose={() => { setOpen(false); refetch(); }} />
     </AppLayout>
   );
 }
