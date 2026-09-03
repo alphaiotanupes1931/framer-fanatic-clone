@@ -122,6 +122,11 @@ export function OrgCreateDialog({
     if (!form.name.trim()) return toast.error("Name is required");
     if (!form.subtype) return toast.error(type === "group" ? "Group type is required" : "Organization type is required");
     if (!form.neighborhood.trim()) return toast.error("Neighborhood is required");
+    if (type === "business" && (staff.username.trim() || staff.password)) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(staff.username.trim()) || staff.password.length < 8) {
+        return toast.error("Enter a valid staff email address and a password of 8+ characters");
+      }
+    }
     setBusy(true);
     try {
       const { data: sess } = await supabase.auth.getSession();
@@ -145,7 +150,7 @@ export function OrgCreateDialog({
         avatar_url: form.avatar_url.trim() || null,
         banner_url: form.banner_url.trim() || null,
         hours: form.hours.trim() ? { text: form.hours.trim() } : null,
-      }).select("slug").single();
+      }).select("id, slug").single();
       if (error) throw error;
       // Insert any pricing items the user pre-filled during setup
       const cleanItems = priceItems
@@ -168,6 +173,14 @@ export function OrgCreateDialog({
             };
           });
           await supabase.from("organization_price_items").insert(rows);
+        }
+      }
+      if (type === "business" && staff.username.trim() && staff.password && data) {
+        try {
+          await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
+          toast.success("Staff login created");
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "Business created, but the staff login could not be saved");
         }
       }
       toast.success(`${ORG_TYPE_LABEL[type]} created`);
