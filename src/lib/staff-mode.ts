@@ -48,13 +48,8 @@ export function clearStaffMode() {
 export function isStaffAllowedPath(pathname: string, slug: string): boolean {
   if (pathname === `/o/${slug}`) return true;
   if (pathname.startsWith(`/o/${slug}/`)) return true;
-  return (
-    pathname === "/" ||
-    pathname.startsWith("/events") ||
-    pathname.startsWith("/calendar") ||
-    pathname.startsWith("/search") ||
-    pathname.startsWith("/business-login")
-  );
+  // Employees get the business page and nothing else on the owner's account.
+  return pathname.startsWith("/business-login");
 }
 
 /** Reactive read of staff mode for components. */

@@ -64,6 +64,13 @@
       "when": 1788394237344,
       "tag": "0008_invites_accepted_at",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788396092346,
+      "tag": "0009_secure_business_staff_access",
+      "breakpoints": true
     }
   ]
 }

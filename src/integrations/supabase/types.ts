@@ -1838,6 +1838,7 @@ export type Database = {
           organization_id: string
           password_hash: string
           password_salt: string
+          staff_user_id: string | null
           updated_at: string
           username: string
         }
@@ -1849,6 +1850,7 @@ export type Database = {
           organization_id: string
           password_hash: string
           password_salt: string
+          staff_user_id?: string | null
           updated_at?: string
           username: string
         }
@@ -1860,6 +1862,7 @@ export type Database = {
           organization_id?: string
           password_hash?: string
           password_salt?: string
+          staff_user_id?: string | null
           updated_at?: string
           username?: string
         }
@@ -3516,6 +3519,7 @@ export type Database = {
       }
       is_founder_visible: { Args: { _user_id: string }; Returns: boolean }
       is_org_member: { Args: { _org: string; _uid: string }; Returns: boolean }
+      is_org_staff: { Args: { _organization_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -3547,6 +3551,10 @@ export type Database = {
           username: string
           website: string
         }[]
+      }
+      organization_owner_id: {
+        Args: { _organization_id: string }
+        Returns: string
       }
       payouts_ready: { Args: { _user_id: string }; Returns: boolean }
       public_artists: {

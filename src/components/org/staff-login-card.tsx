@@ -55,7 +55,7 @@ export function StaffLoginCard({ orgId }: { orgId: string }) {
           <KeyRound className="h-4 w-4 text-[#d4580a]" />
           <div>
             <p className="text-sm font-semibold text-neutral-900">Employee login</p>
-            <p className="text-xs text-neutral-600">A separate username and password for staff, so nobody needs your account.</p>
+            <p className="text-xs text-neutral-600">A staff email and password, so employees can manage this page without your account.</p>
           </div>
         </div>
         <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
@@ -82,8 +82,8 @@ export function StaffLoginCard({ orgId }: { orgId: string }) {
       {open && (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="staff-u">Username</Label>
-            <Input id="staff-u" value={username} autoComplete="off" onChange={(e) => setUsername(e.target.value)} />
+            <Label htmlFor="staff-u">Staff email</Label>
+            <Input id="staff-u" type="email" placeholder="staff@business.com" value={username} autoComplete="off" onChange={(e) => setUsername(e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="staff-p">Password</Label>
@@ -91,7 +91,7 @@ export function StaffLoginCard({ orgId }: { orgId: string }) {
           </div>
           <div className="sm:col-span-2 flex items-center justify-between">
             <p className="text-xs text-neutral-500">Staff sign in at /business-login</p>
-            <Button size="sm" onClick={save} disabled={busy || username.trim().length < 3 || password.length < 8}>
+            <Button size="sm" onClick={save} disabled={busy || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username.trim()) || password.length < 8}>
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save
             </Button>
           </div>
