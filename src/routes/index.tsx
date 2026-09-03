@@ -577,7 +577,8 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-blue-deep px-5 md:px-10 py-24 md:py-36"
+      className="relative overflow-hidden px-5 md:px-10 py-24 md:py-36"
+      style={{ backgroundColor: "#ed4204" }}
     >
       {/* Top hairline to bridge from hero */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -636,7 +637,7 @@ function Features() {
   const headingColor = siteColor(content, "features.heading");
   const subtitleColor = siteColor(content, "features.subtitle");
   return (
-    <section id="features" className="relative bg-blue px-5 md:px-10 py-24 md:py-32">
+    <section id="features" className="relative px-5 md:px-10 py-24 md:py-32" style={{ backgroundColor: "#ed4204" }}>
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <div className="mx-auto max-w-[1280px]">
         <motion.h2
