@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
-import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, Building2, Pin, PinOff } from "lucide-react";
 import { toast } from "sonner";
@@ -94,13 +93,12 @@ export function GroupsPage() {
           cta={
             <div className="flex flex-wrap items-center gap-2">
               {canCreate && (
-                <button
-                  type="button"
-                  onClick={() => setOpen(true)}
+                <Link
+                  to="/create-community"
                   className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
                 >
                   <Plus className="h-4 w-4" /> Create Group
-                </button>
+                </Link>
               )}
             </div>
           }
@@ -235,7 +233,6 @@ export function GroupsPage() {
           </div>
         )}
       </div>
-      <OrgCreateDialog type="group" open={open} onClose={() => { setOpen(false); void load(); }} />
     </AppLayout>
   );
 }

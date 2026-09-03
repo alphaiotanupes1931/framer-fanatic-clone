@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
-import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Plus, MapPin, Search, Users, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
@@ -23,7 +22,6 @@ export function CommunityAssociationsPage() {
   const canCreate = true;
   const [q, setQ] = useState("");
   const [subtype, setSubtype] = useState<string>("All");
-  const [open, setOpen] = useState(false);
 
   // One cached fetch of every association; search and type filters run locally
   // so switching filters or returning to this tab is instant.
@@ -56,13 +54,12 @@ export function CommunityAssociationsPage() {
           cta={
             <div className="flex flex-wrap items-center gap-2">
               {canCreate && (
-                <button
-                  type="button"
-                  onClick={() => setOpen(true)}
+                <Link
+                  to="/create-community-association"
                   className="inline-flex items-center gap-2 rounded-full border border-[#d4580a]/40 bg-white px-5 py-2.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
                 >
                   <Plus className="h-4 w-4" /> Create Community Association
-                </button>
+                </Link>
               )}
             </div>
           }
@@ -150,7 +147,6 @@ export function CommunityAssociationsPage() {
           </div>
         )}
       </div>
-      <OrgCreateDialog type="community_assoc" open={open} onClose={() => { setOpen(false); refetch(); }} />
     </AppLayout>
   );
 }
