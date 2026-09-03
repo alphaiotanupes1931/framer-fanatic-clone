@@ -28,6 +28,7 @@ export async function verifyPassword(password: string, salt: string, expected: s
   return diff === 0;
 }
 
-export function normalizeUsername(u: string) {
+/** Staff logins are email based; store them lowercased and trimmed. */
+export function normalizeEmail(u: string) {
   return u.trim().toLowerCase().replace(/\s+/g, "");
 }

@@ -11,9 +11,8 @@ export const setStaffLogin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { organizationId: string; username: string; password: string }) => {
     if (!input?.organizationId) throw new Error("organizationId is required");
-    const username = (input.username ?? "").trim();
-    if (username.length < 3) throw new Error("Username must be at least 3 characters");
-    if (!/^[a-zA-Z0-9._-]+$/.test(username)) throw new Error("Username can only use letters, numbers, dots, dashes and underscores");
+    const username = (input.username ?? "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) throw new Error("Enter a valid email address");
     if ((input.password ?? "").length < 8) throw new Error("Password must be at least 8 characters");
     return { organizationId: input.organizationId, username, password: input.password };
   })
@@ -30,10 +29,10 @@ export const setStaffLogin = createServerFn({ method: "POST" })
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
     if (org.owner_id !== userId && !isAdmin) throw new Error("Only the page owner can set staff logins");
 
-    const { hashPassword, newSalt, normalizeUsername } = await import("./staff-login.server");
+    const { hashPassword, newSalt, normalizeEmail } = await import("./staff-login.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const username = normalizeUsername(data.username);
+    const username = normalizeEmail(data.username);
     const salt = newSalt();
     const password_hash = await hashPassword(data.password, salt);
 
@@ -44,7 +43,7 @@ export const setStaffLogin = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (existing && existing.organization_id !== org.id) {
-      throw new Error("That username is already taken");
+      throw new Error("That email is already used for another page");
     }
 
     if (existing) {
@@ -93,21 +92,21 @@ export const deleteStaffLogin = createServerFn({ method: "POST" })
  *  exchanges for a session, plus the page to land on. */
 export const staffLogin = createServerFn({ method: "POST" })
   .inputValidator((input: { username: string; password: string }) => {
-    if (!input?.username || !input?.password) throw new Error("Enter your username and password");
+    if (!input?.username || !input?.password) throw new Error("Enter your email and password");
     return input;
   })
   .handler(async ({ data }) => {
-    const { verifyPassword, normalizeUsername } = await import("./staff-login.server");
+    const { verifyPassword, normalizeEmail } = await import("./staff-login.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const username = normalizeUsername(data.username);
+    const username = normalizeEmail(data.username);
     const { data: row } = await supabaseAdmin
       .from("organization_staff_logins")
       .select("id, organization_id, password_hash, password_salt")
       .ilike("username", username)
       .maybeSingle();
 
-    const invalid = new Error("Incorrect username or password");
+    const invalid = new Error("Incorrect email or password");
     if (!row) throw invalid;
     if (!(await verifyPassword(data.password, row.password_salt, row.password_hash))) throw invalid;
 
