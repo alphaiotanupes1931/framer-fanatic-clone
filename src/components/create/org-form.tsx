@@ -99,8 +99,8 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       const baseSlug = slugify(form.name);
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
       if (type === "business" && (staff.username.trim() || staff.password)) {
-        if (staff.username.trim().length < 3 || staff.password.length < 8) {
-          toast.error("Staff username needs 3+ characters and the password 8+ characters");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(staff.username.trim()) || staff.password.length < 8) {
+          toast.error("Enter a valid staff email address and a password of 8+ characters");
           setSaving(false);
           return;
         }
@@ -224,17 +224,18 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           <div>
             <h3 className="text-sm font-semibold text-neutral-900">Staff login (optional)</h3>
             <p className="mt-1 text-xs text-neutral-600">
-              Create a separate username and password your employees can use to sign in and manage this business page,
+              Create a separate staff email and password your employees can use to sign in and manage this business page,
               without ever using your own login. You can change or remove it later from the business page.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Staff username">
+            <Field label="Staff email">
               <Input
+                type="email"
                 value={staff.username}
                 autoComplete="off"
-                maxLength={40}
-                placeholder="e.g. joescafe-team"
+                maxLength={80}
+                placeholder="e.g. team@joescafe.com"
                 onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
               />
             </Field>
