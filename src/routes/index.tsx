@@ -1013,7 +1013,7 @@ function CTAInner() {
   const line2Color = siteColor(content, "cta.line2");
   const btnColor = siteColor(content, "cta.button");
   return (
-    <section className="relative overflow-hidden bg-blue px-5 md:px-10 py-24 md:py-36">
+    <section className="relative overflow-hidden px-5 md:px-10 py-24 md:py-36" style={{ backgroundColor: "#d8542c" }}>
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <motion.div
         initial={{ opacity: 0, y: 40 }}
