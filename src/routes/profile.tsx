@@ -317,15 +317,15 @@ function ProfilePage() {
       {profile && (
       <>
       {publicPreview && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d4580a]/30 bg-[#d4580a]/10 px-4 py-3">
-          <div className="text-sm font-semibold text-[#d4580a]">
-            Public preview: this is how other people see your profile.
+        <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-[#d4580a]/30 bg-[#d4580a]/10 px-3 py-1.5">
+          <div className="text-[10px] font-medium text-[#d4580a] leading-none">
+            Public preview
           </div>
           <Link
             to="/profile"
-            className="rounded-full bg-[#d4580a] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#b3480a]"
+            className="rounded-full bg-[#d4580a] px-2.5 py-1 text-[10px] font-semibold text-white leading-none hover:bg-[#b3480a]"
           >
-            Exit preview
+            Exit
           </Link>
         </div>
       )}
