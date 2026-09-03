@@ -577,7 +577,8 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden bg-blue-deep px-5 md:px-10 py-24 md:py-36"
+      className="relative overflow-hidden px-5 md:px-10 py-24 md:py-36"
+      style={{ backgroundColor: "#ed4204" }}
     >
       {/* Top hairline to bridge from hero */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -585,7 +586,7 @@ function CreatorsFans() {
       <div className="relative mx-auto max-w-[1280px]">
         <ScrollHeadline
           lines={[siteText(content, "creators.headline.line1"), siteText(content, "creators.headline.line2")]}
-          colors={[siteColor(content, "creators.headline.line1") || undefined, siteColor(content, "creators.headline.line2") || undefined]}
+          colors={["#FFFFFF", "#FFFFFF"]}
           className="font-display text-paper font-medium text-[clamp(2.25rem,6.5vw,6.5rem)] leading-[0.95] md:leading-[0.9] tracking-[-0.04em] md:tracking-[-0.05em] text-center max-w-5xl mx-auto"
         />
 
@@ -598,17 +599,11 @@ function CreatorsFans() {
         >
           {[
             { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), tc: siteColor(content, "creators.card1.title"), bc: siteColor(content, "creators.card1.body"), cc: siteColor(content, "creators.card1.cta"), primary: true, destination: "/calendar" },
-            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: false, destination: "/discover" },
+            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: true, destination: "/discover" },
           ].map((c) => (
             <div
               key={c.t}
-              className={
-                "group relative rounded-3xl border p-8 md:p-10 transition-colors " +
-                (c.primary
-                  ? "border-paper/10 bg-paper/[0.03] backdrop-blur-sm hover:border-paper/25 hover:bg-paper/[0.05]"
-                  : "border-paper/10 hover:border-paper/25")
-              }
-              style={c.primary ? undefined : { backgroundColor: "#ed4204" }}
+              className="group relative rounded-3xl border border-paper/10 bg-paper/[0.03] backdrop-blur-sm p-8 md:p-10 transition-colors hover:border-paper/25 hover:bg-paper/[0.05]"
             >
               <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight" style={c.tc ? { color: c.tc } : undefined}>{c.t}</h3>
               <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md" style={c.bc ? { color: c.bc } : undefined}>{c.b}</p>
