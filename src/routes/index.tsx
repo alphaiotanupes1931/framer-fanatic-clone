@@ -577,8 +577,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden px-5 md:px-10 py-24 md:py-36"
-      style={{ backgroundColor: "#ed4204" }}
+      className="relative overflow-hidden bg-blue-deep px-5 md:px-10 py-24 md:py-36"
     >
       {/* Top hairline to bridge from hero */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
@@ -603,7 +602,13 @@ function CreatorsFans() {
           ].map((c) => (
             <div
               key={c.t}
-              className="group relative rounded-3xl border border-paper/10 bg-paper/[0.03] backdrop-blur-sm p-8 md:p-10 hover:border-paper/25 hover:bg-paper/[0.05] transition-colors"
+              className={
+                "group relative rounded-3xl border p-8 md:p-10 transition-colors " +
+                (c.primary
+                  ? "border-paper/10 bg-paper/[0.03] backdrop-blur-sm hover:border-paper/25 hover:bg-paper/[0.05]"
+                  : "border-paper/10 hover:border-paper/25")
+              }
+              style={c.primary ? undefined : { backgroundColor: "#ed4204" }}
             >
               <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight" style={c.tc ? { color: c.tc } : undefined}>{c.t}</h3>
               <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md" style={c.bc ? { color: c.bc } : undefined}>{c.b}</p>
