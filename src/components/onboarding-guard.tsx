@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
+import { getStaffMode } from "@/lib/staff-mode";
 
 // Paths that must stay reachable even before onboarding is finished.
-const EXEMPT = ["/onboarding", "/auth", "/reset-password", "/admin", "/lovable", "/email"];
+const EXEMPT = ["/onboarding", "/auth", "/reset-password", "/admin", "/lovable", "/email", "/business-login"];
+
 
 /**
  * Email confirmation links can be opened on a different device than the one
@@ -21,8 +23,12 @@ export function OnboardingGuard() {
 
   useEffect(() => {
     if (done.current || checking.current) return;
+    // A staff login is a business-page-only identity with no personal profile,
+    // so it must never be pushed through the personal onboarding wizard.
+    if (getStaffMode()) { done.current = true; return; }
     if (EXEMPT.some((p) => pathname === p || pathname.startsWith(p + "/"))) return;
     checking.current = true;
+
     void (async () => {
       try {
         const { data } = await supabase.auth.getSession();
