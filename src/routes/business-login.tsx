@@ -36,7 +36,7 @@ function BusinessLoginPage() {
     setBusy(true);
     try {
       const res = await staffLogin({ data: { username: username.trim(), password } });
-      const { error } = await supabase.auth.verifyOtp({ token_hash: res.tokenHash, type: "email" });
+      const { error } = await supabase.auth.signInWithPassword({ email: res.email, password });
       if (error) throw error;
       setStaffMode({ slug: res.slug, name: res.name });
       toast.success(`Signed in to ${res.name}`);
