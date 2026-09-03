@@ -117,7 +117,7 @@ export const OrgPost = {
     if (!orgIds.length) return [];
     const { data: orgs } = await supabase
       .from("organizations")
-      .select("id, name, slug, avatar_url")
+      .select("id, name, slug, type, avatar_url")
       .in("id", orgIds);
     const byId = new Map((orgs ?? []).map((o) => [o.id, o]));
     return rows
@@ -128,11 +128,12 @@ export const OrgPost = {
           ...r,
           org_name: o.name ?? "Page",
           org_slug: o.slug,
+          org_type: o.type ?? null,
           org_avatar: o.avatar_url ?? null,
         };
       })
       .filter(Boolean) as Array<
-        (typeof rows)[number] & { org_name: string; org_slug: string; org_avatar: string | null }
+        (typeof rows)[number] & { org_name: string; org_slug: string; org_type: string | null; org_avatar: string | null }
       >;
   },
 };
