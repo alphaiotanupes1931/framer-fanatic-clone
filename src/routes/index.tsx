@@ -598,11 +598,12 @@ function CreatorsFans() {
         >
           {[
             { t: siteText(content, "creators.card1.title"), b: siteText(content, "creators.card1.body"), cta: siteText(content, "creators.card1.cta"), tc: siteColor(content, "creators.card1.title"), bc: siteColor(content, "creators.card1.body"), cc: siteColor(content, "creators.card1.cta"), primary: true, destination: "/calendar" },
-            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: true, destination: "/discover" },
+            { t: siteText(content, "creators.card2.title"), b: siteText(content, "creators.card2.body"), cta: siteText(content, "creators.card2.cta"), tc: siteColor(content, "creators.card2.title"), bc: siteColor(content, "creators.card2.body"), cc: siteColor(content, "creators.card2.cta"), primary: true, destination: "/discover", bg: "#d8542c" },
           ].map((c) => (
             <div
               key={c.t}
-              className="group relative rounded-3xl border border-paper/10 bg-ink text-paper p-8 md:p-10 transition-colors hover:border-paper/25 hover:bg-ink/80"
+              className="group relative rounded-3xl border border-paper/10 text-paper p-8 md:p-10 transition-colors hover:border-paper/25"
+              style={{ backgroundColor: (c as { bg?: string }).bg || "#1A1A1A" }}
             >
               <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-paper tracking-tight" style={c.tc ? { color: c.tc } : undefined}>{c.t}</h3>
               <p className="mt-4 text-paper/70 text-[15px] md:text-base leading-relaxed max-w-md" style={c.bc ? { color: c.bc } : undefined}>{c.b}</p>

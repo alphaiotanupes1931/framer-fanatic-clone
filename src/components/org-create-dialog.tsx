@@ -8,6 +8,7 @@ import { itemHintsFor } from "@/components/org/price-items-section";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { BANNER_SPEC } from "@/lib/media-guidelines";
+import { setStaffLogin } from "@/lib/staff-login.functions";
 
 type Neighborhood = { id: string; name: string };
 
@@ -46,6 +47,7 @@ export function OrgCreateDialog({
     avatar_url: "",
     banner_url: "",
   });
+  const [staff, setStaff] = useState({ username: "", password: "" });
 
   useEffect(() => {
     if (!open) return;
@@ -120,6 +122,11 @@ export function OrgCreateDialog({
     if (!form.name.trim()) return toast.error("Name is required");
     if (!form.subtype) return toast.error(type === "group" ? "Group type is required" : "Organization type is required");
     if (!form.neighborhood.trim()) return toast.error("Neighborhood is required");
+    if (type === "business" && (staff.username.trim() || staff.password)) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(staff.username.trim()) || staff.password.length < 8) {
+        return toast.error("Enter a valid staff email address and a password of 8+ characters");
+      }
+    }
     setBusy(true);
     try {
       const { data: sess } = await supabase.auth.getSession();
@@ -143,7 +150,7 @@ export function OrgCreateDialog({
         avatar_url: form.avatar_url.trim() || null,
         banner_url: form.banner_url.trim() || null,
         hours: form.hours.trim() ? { text: form.hours.trim() } : null,
-      }).select("slug").single();
+      }).select("id, slug").single();
       if (error) throw error;
       // Insert any pricing items the user pre-filled during setup
       const cleanItems = priceItems
@@ -166,6 +173,14 @@ export function OrgCreateDialog({
             };
           });
           await supabase.from("organization_price_items").insert(rows);
+        }
+      }
+      if (type === "business" && staff.username.trim() && staff.password && data) {
+        try {
+          await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
+          toast.success("Staff login created");
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "Business created, but the staff login could not be saved");
         }
       }
       toast.success(`${ORG_TYPE_LABEL[type]} created`);
@@ -339,6 +354,36 @@ export function OrgCreateDialog({
               placeholder="Hours (e.g. Tue-Sun, 10am-5pm)"
               className={inputCls}
             />
+            {type === "business" && (
+              <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50/60 p-4">
+                <div className="mb-1 text-[15px] font-semibold text-neutral-900">Staff login (optional)</div>
+                <p className="mb-3 text-xs text-neutral-600">
+                  Create a separate staff email and password your employees can use to sign in and manage this business page,
+                  without ever using your own login. You can change or remove it later from the business page.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    type="email"
+                    value={staff.username}
+                    autoComplete="off"
+                    maxLength={80}
+                    placeholder="e.g. team@joescafe.com"
+                    onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
+                    className={inputCls}
+                  />
+                  <input
+                    type="password"
+                    value={staff.password}
+                    autoComplete="new-password"
+                    maxLength={72}
+                    placeholder="At least 8 characters"
+                    onChange={(e) => setStaff((s) => ({ ...s, password: e.target.value }))}
+                    className={inputCls}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-neutral-500">Employees sign in at planetbaltimore.com/business-login</p>
+              </div>
+            )}
             {showPricing && (
               <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 p-4">
                 <div className="mb-1 text-[15px] font-semibold text-neutral-900">Pricing</div>
