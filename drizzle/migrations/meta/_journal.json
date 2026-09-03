@@ -57,6 +57,13 @@
       "when": 1788310823296,
       "tag": "0007_org_stats_include_owner_follows",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788394237344,
+      "tag": "0008_invites_accepted_at",
+      "breakpoints": true
     }
   ]
 }
