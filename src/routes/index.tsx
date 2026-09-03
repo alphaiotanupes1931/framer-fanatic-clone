@@ -631,7 +631,7 @@ function Features() {
   const headingColor = siteColor(content, "features.heading");
   const subtitleColor = siteColor(content, "features.subtitle");
   return (
-    <section id="features" className="relative bg-blue-deep px-5 md:px-10 py-24 md:py-32">
+    <section id="features" className="relative px-5 md:px-10 py-24 md:py-32" style={{ backgroundColor: "#d8542c" }}>
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
       <div className="mx-auto max-w-[1280px]">
         <motion.h2
