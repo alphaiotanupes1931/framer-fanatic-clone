@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ORG_TYPE_LABEL, subtypesFor } from "@/lib/categories";
-import { OrgCreateDialog } from "@/components/org-create-dialog";
 import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
