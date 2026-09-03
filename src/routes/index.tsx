@@ -577,8 +577,7 @@ function CreatorsFans() {
   return (
     <section
       id="creators"
-      className="relative overflow-hidden px-5 md:px-10 py-24 md:py-36"
-      style={{ backgroundColor: "#ed4204" }}
+      className="relative overflow-hidden bg-blue-deep px-5 md:px-10 py-24 md:py-36"
     >
       {/* Top hairline to bridge from hero */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-paper/10" />
