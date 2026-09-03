@@ -14,7 +14,7 @@ export const Route = createFileRoute("/business-login")({
   head: () => ({
     meta: [
       { title: "Business Staff Login | Planet Baltimore" },
-      { name: "description", content: "Employees can sign in to their business page on Planet Baltimore with the staff username and password from the owner." },
+      { name: "description", content: "Employees can sign in to their business page on Planet Baltimore with the staff email and password from the owner." },
       { property: "og:title", content: "Business Staff Login | Planet Baltimore" },
       { property: "og:description", content: "Sign in to manage your business page on Planet Baltimore." },
       { property: "og:type", content: "website" },
@@ -42,7 +42,7 @@ function BusinessLoginPage() {
       toast.success(`Signed in to ${res.name}`);
       navigate({ to: "/o/$slug", params: { slug: res.slug } });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Incorrect username or password");
+      toast.error(err instanceof Error ? err.message : "Incorrect email or password");
     } finally {
       setBusy(false);
     }
@@ -57,13 +57,13 @@ function BusinessLoginPage() {
           </div>
           <h1 className="text-xl font-bold text-foreground">Business staff login</h1>
           <p className="text-sm text-muted-foreground">
-            Use the staff username and password your business page owner gave you.
+            Use the staff email and password your business page owner gave you.
           </p>
         </div>
         <form className="space-y-4" onSubmit={submit}>
           <div className="space-y-1.5">
-            <Label htmlFor="staff-username">Username</Label>
-            <Input id="staff-username" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+            <Label htmlFor="staff-username">Staff email</Label>
+            <Input id="staff-username" type="email" placeholder="staff@business.com" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="staff-password">Password</Label>
