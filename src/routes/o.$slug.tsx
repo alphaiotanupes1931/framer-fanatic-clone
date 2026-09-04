@@ -2,6 +2,7 @@ import { OrgPostComments } from "@/components/org/org-post-comments";
 import { PostSplitView } from "@/components/shared/post-split-view";
 
 import { StaffLoginCard } from "@/components/org/staff-login-card";
+import { supportsStaffLoginType } from "@/lib/staff-login-copy";
 import { useStaffMode } from "@/lib/staff-mode";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -719,7 +720,7 @@ function OrgProfile() {
         </div>
 
         {/* Tabs */}
-        {isOwner && org.type === "business" && <StaffLoginCard orgId={org.id} />}
+        {isOwner && supportsStaffLoginType(org.type) && <StaffLoginCard orgId={org.id} orgType={org.type} />}
 
         <div className="scrollbar-hide mt-6 -mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 px-1 pb-1 md:flex-wrap md:overflow-x-visible">
           {VISIBLE_TABS.map((t) => {

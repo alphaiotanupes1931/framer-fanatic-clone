@@ -3,9 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Page types that can hand out separate staff/board logins. */
-export const STAFF_LOGIN_TYPES = ["business", "arts_org", "community_assoc"] as const;
-const ALLOWED = new Set<string>(STAFF_LOGIN_TYPES);
+const ALLOWED = new Set<string>(["business", "arts_org", "community_assoc"]);
 
 /**
  * Business staff logins use separate auth identities. Staff can manage only

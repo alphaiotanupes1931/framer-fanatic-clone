@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { deleteStaffLogin, listStaffLogins, setStaffLogin } from "@/lib/staff-login.functions";
+import { staffLoginCopy } from "@/lib/staff-login-copy";
 
 type Row = { id: string; username: string; last_login_at: string | null; created_at: string };
 
 /** Owner-only: manage the username/password employees use to sign in to this page. */
-export function StaffLoginCard({ orgId }: { orgId: string }) {
+export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string; orgType?: string }) {
+  const copy = staffLoginCopy(orgType);
   const [rows, setRows] = useState<Row[]>([]);
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
@@ -54,8 +56,8 @@ export function StaffLoginCard({ orgId }: { orgId: string }) {
         <div className="flex items-center gap-2">
           <KeyRound className="h-4 w-4 text-[#d4580a]" />
           <div>
-            <p className="text-sm font-semibold text-neutral-900">Employee login</p>
-            <p className="text-xs text-neutral-600">A staff email and password, so employees can manage this page without your account.</p>
+            <p className="text-sm font-semibold text-neutral-900">{copy.cardTitle}</p>
+            <p className="text-xs text-neutral-600">{copy.description}</p>
           </div>
         </div>
         <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
