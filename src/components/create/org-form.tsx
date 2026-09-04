@@ -11,6 +11,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { setStaffLogin } from "@/lib/staff-login.functions";
+import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "org";
@@ -44,6 +45,8 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     mission: "",
   });
   const [staff, setStaff] = useState({ username: "", password: "" });
+  const supportsStaffLogin = supportsStaffLoginType(type);
+  const staffCopy = staffLoginCopy(type);
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
