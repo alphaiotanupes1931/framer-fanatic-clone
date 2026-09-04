@@ -11,6 +11,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { setStaffLogin } from "@/lib/staff-login.functions";
+import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "org";
@@ -44,6 +45,8 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     mission: "",
   });
   const [staff, setStaff] = useState({ username: "", password: "" });
+  const supportsStaffLogin = supportsStaffLoginType(type);
+  const staffCopy = staffLoginCopy(type);
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
@@ -98,7 +101,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     try {
       const baseSlug = slugify(form.name);
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
-      if (type === "business" && (staff.username.trim() || staff.password)) {
+      if (supportsStaffLogin && (staff.username.trim() || staff.password)) {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(staff.username.trim()) || staff.password.length < 8) {
           toast.error("Enter a valid staff email address and a password of 8+ characters");
           setSaving(false);
@@ -122,7 +125,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         mission: form.mission.trim() || null,
       }).select("id, slug").single();
       if (error) throw error;
-      if (type === "business" && staff.username.trim() && staff.password) {
+      if (supportsStaffLogin && staff.username.trim() && staff.password) {
         try {
           await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
           toast.success("Staff login created");
@@ -219,27 +222,26 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           )}
         </Field>
       </div>
-      {type === "business" && (
+      {supportsStaffLogin && (
         <div className="space-y-4 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4">
           <div>
-            <h3 className="text-sm font-semibold text-neutral-900">Staff login (optional)</h3>
+            <h3 className="text-sm font-semibold text-neutral-900">{staffCopy.title}</h3>
             <p className="mt-1 text-xs text-neutral-600">
-              Create a separate staff email and password your employees can use to sign in and manage this business page,
-              without ever using your own login. You can change or remove it later from the business page.
+              {staffCopy.description}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Staff email">
+            <Field label={staffCopy.emailLabel}>
               <Input
                 type="email"
                 value={staff.username}
                 autoComplete="off"
                 maxLength={80}
-                placeholder="e.g. team@joescafe.com"
+                placeholder={staffCopy.placeholder}
                 onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
               />
             </Field>
-            <Field label="Staff password">
+            <Field label={staffCopy.passwordLabel}>
               <Input
                 type="password"
                 value={staff.password}
@@ -250,7 +252,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
               />
             </Field>
           </div>
-          <p className="text-xs text-neutral-500">Employees sign in at planetbaltimore.com/business-login</p>
+          <p className="text-xs text-neutral-500">{staffCopy.footer}</p>
         </div>
       )}
       <div className="flex justify-end">

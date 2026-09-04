@@ -13,10 +13,10 @@ export const Route = createFileRoute("/business-login")({
   component: BusinessLoginPage,
   head: () => ({
     meta: [
-      { title: "Business Staff Login | Planet Baltimore" },
-      { name: "description", content: "Employees can sign in to their business page on Planet Baltimore with the staff email and password from the owner." },
-      { property: "og:title", content: "Business Staff Login | Planet Baltimore" },
-      { property: "og:description", content: "Sign in to manage your business page on Planet Baltimore." },
+      { title: "Staff Login | Planet Baltimore" },
+      { name: "description", content: "Employees and board members can sign in to their page on Planet Baltimore with the email and password from the owner." },
+      { property: "og:title", content: "Staff Login | Planet Baltimore" },
+      { property: "og:description", content: "Sign in to manage your page on Planet Baltimore." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -55,9 +55,9 @@ function BusinessLoginPage() {
           <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-secondary">
             <Store className="h-5 w-5 text-orange" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">Business staff login</h1>
+          <h1 className="text-xl font-bold text-foreground">Staff login</h1>
           <p className="text-sm text-muted-foreground">
-            Use the staff email and password your business page owner gave you.
+            Use the staff or board email and password the page owner gave you.
           </p>
         </div>
         <form className="space-y-4" onSubmit={submit}>
@@ -71,7 +71,7 @@ function BusinessLoginPage() {
           </div>
           <Button type="submit" className="w-full" disabled={busy || !username.trim() || !password}>
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign in to the business page
+            Sign in to your page
           </Button>
         </form>
         <p className="text-center text-xs text-muted-foreground">

@@ -3,6 +3,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const ALLOWED = new Set<string>(["business", "arts_org", "community_assoc"]);
+
 /**
  * Business staff logins use separate auth identities. Staff can manage only
  * the business page they were assigned to, never the owner's account.
@@ -24,10 +26,12 @@ export const setStaffLogin = createServerFn({ method: "POST" })
       .select("id, owner_id, type")
       .eq("id", data.organizationId)
       .maybeSingle();
-    if (!org || org.type !== "business") throw new Error("Only business pages can have staff logins");
+    if (!org || !ALLOWED.has(org.type)) {
+      throw new Error("Only business, arts organization and community association pages can have staff logins");
+    }
 
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
-    if (org.owner_id !== userId && !isAdmin) throw new Error("Only the business owner can set staff logins");
+    if (org.owner_id !== userId && !isAdmin) throw new Error("Only the page owner can set staff logins");
 
     const { hashPassword, newSalt } = await import("./staff-login.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -41,7 +45,7 @@ export const setStaffLogin = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (existing && existing.organization_id !== org.id) {
-      throw new Error("That email is already used for another business page");
+      throw new Error("That email is already used for another page");
     }
 
     let staffUserId = existing?.staff_user_id ?? null;
@@ -153,7 +157,7 @@ export const staffLogin = createServerFn({ method: "POST" })
       .select("id, name, slug, owner_id, type")
       .eq("id", row.organization_id)
       .maybeSingle();
-    if (!org?.owner_id || org.type !== "business") throw invalid;
+    if (!org?.owner_id || !ALLOWED.has(org.type)) throw invalid;
 
     const { error } = await supabaseAdmin
       .from("organization_staff_logins")
@@ -161,5 +165,5 @@ export const staffLogin = createServerFn({ method: "POST" })
       .eq("id", row.id);
     if (error) console.error("Could not record staff login", error.message);
 
-    return { slug: org.slug, name: org.name, email: data.email };
+    return { slug: org.slug, name: org.name, type: org.type, email: data.email };
   });
