@@ -84,11 +84,11 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
       {open && (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="staff-u">Staff email</Label>
+            <Label htmlFor="staff-u">{copy.emailLabel}</Label>
             <Input id="staff-u" type="email" placeholder="staff@business.com" value={username} autoComplete="off" onChange={(e) => setUsername(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="staff-p">Password</Label>
+            <Label htmlFor="staff-p">{copy.passwordLabel}</Label>
             <Input id="staff-p" type="password" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
           </div>
           <div className="sm:col-span-2 flex items-center justify-between">
