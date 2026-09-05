@@ -216,6 +216,8 @@ function CreateStoryPage() {
             <div className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
               <Img src={form.cover_url} alt="Cover preview" className="max-h-80 w-full object-cover" />
               <div className="absolute right-3 top-3 flex items-center gap-2">
+                <button type="button" onClick={recropCover} disabled={uploading || !coverOriginalRef.current}
+                  className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow hover:bg-white disabled:opacity-50">Crop</button>
                 <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
                   className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow hover:bg-white">Replace</button>
                 <button type="button" onClick={() => set("cover_url", "")}
