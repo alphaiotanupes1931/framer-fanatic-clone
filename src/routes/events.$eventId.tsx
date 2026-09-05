@@ -610,6 +610,9 @@ function EventDetail() {
           <Button onClick={() => setShareOpen(true)} variant="outline" className="h-10 flex-1 rounded-full font-medium gap-2" aria-label="Share">
             <Send className="w-4 h-4 -rotate-45" />Share
           </Button>
+          <Button onClick={() => void repostToFeed()} variant="outline" className="h-10 flex-1 rounded-full font-medium gap-2" aria-label="Repost to your page">
+            <Repeat2 className="w-4 h-4" />Repost
+          </Button>
           <Button
             onClick={async () => {
               if (!me) { toast.error("Sign in to save"); return; }
