@@ -51,10 +51,54 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     mission: "",
   });
   const [staff, setStaff] = useState({ username: "", password: "" });
+  const [staffTouched, setStaffTouched] = useState(false);
   const [verify, setVerify] = useState<{ email: string; orgId: string; slug: string; name: string } | null>(null);
+  // Inline email verification, done before the page exists.
+  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
+  const [staffCode, setStaffCode] = useState("");
+  const [sendingCode, setSendingCode] = useState(false);
+  const [checkingCode, setCheckingCode] = useState(false);
   const supportsStaffLogin = supportsStaffLoginType(type);
   const staffCopy = staffLoginCopy(type);
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const staffEmail = staff.username.trim().toLowerCase();
+  const staffEmailError = staff.username.trim() ? staffEmailProblem(staff.username) : null;
+  const staffPasswordError = staff.password && staff.password.length < 8 ? `Password needs at least 8 characters (${staff.password.length} so far)` : null;
+  const staffFilled = !!staff.username.trim() || !!staff.password;
+  const staffValid = !staffEmailError && !!staffEmail && staff.password.length >= 8;
+  const isVerified = !!verifiedEmail && verifiedEmail === staffEmail;
+  const codePending = !!codeSentTo && codeSentTo === staffEmail && !isVerified;
+
+  const sendCode = async () => {
+    if (staffEmailError || !staffEmail || sendingCode) return;
+    setSendingCode(true);
+    try {
+      await startStaffEmailVerification({ data: { email: staffEmail, pageName: form.name.trim() } });
+      setCodeSentTo(staffEmail);
+      setStaffCode("");
+      toast.success(`Code sent to ${staffEmail}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not send the code");
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const checkCode = async () => {
+    if (checkingCode || staffCode.length !== 6) return;
+    setCheckingCode(true);
+    try {
+      await confirmStaffEmailVerification({ data: { email: staffEmail, code: staffCode } });
+      setVerifiedEmail(staffEmail);
+      toast.success("Staff email verified");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "That code did not work");
+    } finally {
+      setCheckingCode(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
