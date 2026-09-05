@@ -581,11 +581,19 @@ function Onboarding() {
               <button
                 type="button"
                 className="font-semibold text-orange-600 underline"
-                onClick={async () => {
-                  try { localStorage.removeItem("pb_pending_signup"); } catch { /* ignore */ }
+                onClick={() => {
+                  // Leave instantly: navigate away and clear local state right
+                  // now, then finish the server sign-out in the background.
+                  // Awaiting the network call first made this feel dead.
+                  try {
+                    localStorage.removeItem("pb_pending_signup");
+                    for (const key of Object.keys(localStorage)) {
+                      if (key.startsWith("pb:") || key.startsWith("sb-")) localStorage.removeItem(key);
+                    }
+                  } catch { /* ignore */ }
                   clearStaffMode();
-                  await supabase.auth.signOut();
                   navigate({ to: "/auth", replace: true });
+                  supabase.auth.signOut({ scope: "local" }).catch(() => { /* ignore */ });
                 }}
               >
                 Sign out
