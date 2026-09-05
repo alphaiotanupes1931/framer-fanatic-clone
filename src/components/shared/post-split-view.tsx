@@ -299,10 +299,15 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
               </div>
             )
           )}
-          <div className="px-4 pb-2 text-[11px] text-muted-foreground">{timeAgo(post.created_at)}</div>
+          <div className="px-4 pb-3 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
 
-          <ul className="space-y-3 border-t border-border px-4 py-4">
-            {comments.length === 0 && <li className="text-sm text-muted-foreground">Be the first to comment.</li>}
+          <ul className="space-y-3 px-4 pb-4 pt-1">
+            {comments.length === 0 && (
+              <li className="flex flex-col items-center gap-1.5 py-6 text-center">
+                <MessageCircle className="h-6 w-6 text-muted-foreground/40" />
+                <span className="text-xs text-muted-foreground/70">Be the first to comment</span>
+              </li>
+            )}
             {comments.map((c) => {
               const ci = (c.author?.display_name || c.author?.username || "U").slice(0, 2).toUpperCase();
               return (
