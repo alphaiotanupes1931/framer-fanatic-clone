@@ -326,6 +326,38 @@ function CreateStoryPage() {
           <p className="text-xs text-neutral-500">Tip: paste text with formatting, add images inline, and use the toolbar to style.</p>
         </div>
       </div>
+
+      <ImageCropDialog
+        file={cropFile}
+        aspect={cropAspect}
+        maxEdge={1600}
+        title="Crop your cover image"
+        open={!!cropFile}
+        onOpenChange={(open) => { if (!open) setCropFile(null); }}
+        onCropped={(file) => void onCoverCropped(file)}
+        circleGuide={false}
+        extraControls={
+          <div className="flex w-full items-center justify-center gap-2">
+            <span className="text-xs text-muted-foreground">Shape</span>
+            {[
+              { label: "1:1", value: 1 },
+              { label: "4:5", value: 4 / 5 },
+              { label: "16:9", value: 16 / 9 },
+            ].map((opt) => (
+              <button
+                key={opt.label}
+                type="button"
+                onClick={() => setCropAspect(opt.value)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  Math.abs(cropAspect - opt.value) < 0.01 ? "bg-[#d4580a] text-white" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
     </AppLayout>
   );
 }
