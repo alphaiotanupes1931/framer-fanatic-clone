@@ -575,6 +575,23 @@ function Onboarding() {
               </div>
             </>
           )}
+          {!previewMode && (
+            <p className="pt-2 text-center text-xs text-neutral-500">
+              Not you, or want a different account?{" "}
+              <button
+                type="button"
+                className="font-semibold text-orange-600 underline"
+                onClick={async () => {
+                  try { localStorage.removeItem("pb_pending_signup"); } catch { /* ignore */ }
+                  clearStaffMode();
+                  await supabase.auth.signOut();
+                  navigate({ to: "/auth", replace: true });
+                }}
+              >
+                Sign out
+              </button>
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
