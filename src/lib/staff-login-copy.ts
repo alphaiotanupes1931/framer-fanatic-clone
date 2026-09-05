@@ -63,3 +63,12 @@ export const STAFF_LOGIN_COPY: Record<StaffLoginType, StaffLoginCopy> = {
 export function staffLoginCopy(type: string): StaffLoginCopy {
   return supportsStaffLoginType(type) ? STAFF_LOGIN_COPY[type] : STAFF_LOGIN_COPY.business;
 }
+
+/** Path staff use to sign in to the one page they were given access to. */
+export const STAFF_LOGIN_PATH = "/business-login";
+
+/** Full, shareable sign-in link for staff. */
+export function staffLoginUrl(): string {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.planetbaltimore.com";
+  return `${origin}${STAFF_LOGIN_PATH}`;
+}
