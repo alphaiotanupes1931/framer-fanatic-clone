@@ -148,17 +148,16 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name is required" : "Name and neighborhood are required");
       return;
     }
+    if (supportsStaffLogin && staffFilled) {
+      setStaffTouched(true);
+      if (staffEmailError) { toast.error(`Staff email: ${staffEmailError}`); return; }
+      if (!staffEmail) { toast.error("Enter the staff email, or clear the staff password to skip the staff login"); return; }
+      if (staffPasswordError || !staff.password) { toast.error(staffPasswordError ?? "Enter a staff password of at least 8 characters"); return; }
+    }
     setSaving(true);
     try {
       const baseSlug = slugify(form.name);
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
-      if (supportsStaffLogin && (staff.username.trim() || staff.password)) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(staff.username.trim()) || staff.password.length < 8) {
-          toast.error("Enter a valid staff email address and a password of 8+ characters");
-          setSaving(false);
-          return;
-        }
-      }
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type,
@@ -176,11 +175,16 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         mission: form.mission.trim() || null,
       }).select("id, slug").single();
       if (error) throw error;
-      if (supportsStaffLogin && staff.username.trim() && staff.password) {
+      if (supportsStaffLogin && staffValid) {
         try {
-          await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
-          toast.success(`${kindLabel} created`);
-          setVerify({ email: staff.username.trim().toLowerCase(), orgId: data.id, slug: data.slug, name: form.name.trim() });
+          const res = await setStaffLogin({ data: { organizationId: data.id, username: staffEmail, password: staff.password } });
+          if (res.needsVerification) {
+            toast.success(`${kindLabel} created`);
+            setVerify({ email: staffEmail, orgId: data.id, slug: data.slug, name: form.name.trim() });
+            return;
+          }
+          toast.success(`${kindLabel} created. Staff login is verified and ready to use.`);
+          navigate({ to: "/o/$slug", params: { slug: data.slug } });
           return;
         } catch (e) {
           toast.error(e instanceof Error ? e.message : `${kindLabel} created, but the staff login could not be saved`);
