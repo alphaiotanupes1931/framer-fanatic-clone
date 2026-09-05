@@ -21,6 +21,97 @@ async function sendStaffCode(email: string, code: string, pageName: string) {
   }
 }
 
+/** Plain-language reason an email is not usable, or null when it looks fine. */
+export function staffEmailProblem(raw: string): string | null {
+  const email = (raw ?? "").trim();
+  if (!email) return "Enter the staff email address";
+  if (/\s/.test(email)) return "Email addresses cannot contain spaces";
+  const ats = (email.match(/@/g) ?? []).length;
+  if (ats === 0) return "An email needs an @ sign, like name@example.com";
+  if (ats > 1) return "An email can only have one @ sign. Did you mean " + email.replace(/@(?=.*@)/g, ".") + "?";
+  const [local, domain] = email.split("@");
+  if (!local) return "Add the part before the @ sign";
+  if (!domain || !domain.includes(".")) return "Add the domain after the @ sign, like gmail.com";
+  if (!EMAIL_RE.test(email)) return "That does not look like a valid email address";
+  return null;
+}
+
+const PRE_VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Owner-side: send a verification code to a staff email before the page is
+ * created, so the email can be confirmed right on the create form.
+ */
+export const startStaffEmailVerification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { email: string; pageName?: string }) => {
+    const email = (input?.email ?? "").trim().toLowerCase();
+    const problem = staffEmailProblem(email);
+    if (problem) throw new Error(problem);
+    return { email, pageName: (input.pageName ?? "").trim().slice(0, 120) };
+  })
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Fail early if this email is already a staff login somewhere else.
+    const { data: taken } = await supabaseAdmin
+      .from("organization_staff_logins")
+      .select("id, organization_id")
+      .ilike("username", data.email)
+      .maybeSingle();
+    if (taken) throw new Error("That email is already used as a staff login for another page. Use a different staff email.");
+
+    const code = newCode();
+    const now = new Date();
+    const expires = new Date(now.getTime() + 30 * 60 * 1000).toISOString();
+    const { data: existing } = await supabaseAdmin
+      .from("staff_email_verifications")
+      .select("id")
+      .eq("user_id", userId)
+      .ilike("email", data.email)
+      .maybeSingle();
+    const patch = { code, expires_at: expires, verified_at: null, updated_at: now.toISOString() };
+    const { error } = existing
+      ? await supabaseAdmin.from("staff_email_verifications").update(patch).eq("id", existing.id)
+      : await supabaseAdmin.from("staff_email_verifications").insert({ user_id: userId, email: data.email, ...patch });
+    if (error) throw new Error(error.message);
+    await sendStaffCode(data.email, code, data.pageName || "your page");
+    return { sent: true };
+  });
+
+/** Owner-side: confirm the code that was sent before the page exists. */
+export const confirmStaffEmailVerification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { email: string; code: string }) => {
+    const email = (input?.email ?? "").trim().toLowerCase();
+    const code = (input?.code ?? "").trim();
+    if (!EMAIL_RE.test(email)) throw new Error("Enter the staff email address");
+    if (!/^\d{6}$/.test(code)) throw new Error("Enter the 6 digit code from the email");
+    return { email, code };
+  })
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("staff_email_verifications")
+      .select("id, code, expires_at, verified_at")
+      .eq("user_id", context.userId)
+      .ilike("email", data.email)
+      .maybeSingle();
+    if (!row) throw new Error("Send the code first, then enter it here");
+    if (row.verified_at) return { verified: true };
+    if (!row.code || row.code !== data.code) throw new Error("That code is not correct");
+    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) {
+      throw new Error("That code has expired. Send a new one.");
+    }
+    const { error } = await supabaseAdmin
+      .from("staff_email_verifications")
+      .update({ verified_at: new Date().toISOString(), code: null, expires_at: null, updated_at: new Date().toISOString() })
+      .eq("id", row.id);
+    if (error) throw new Error(error.message);
+    return { verified: true };
+  });
+
 /**
  * Business staff logins use separate auth identities. Staff can manage only
  * the business page they were assigned to, never the owner's account.
@@ -30,7 +121,8 @@ export const setStaffLogin = createServerFn({ method: "POST" })
   .inputValidator((input: { organizationId: string; username: string; password: string }) => {
     if (!input?.organizationId) throw new Error("organizationId is required");
     const email = (input.username ?? "").trim().toLowerCase();
-    if (!EMAIL_RE.test(email)) throw new Error("Enter a valid email address");
+    const problem = staffEmailProblem(email);
+    if (problem) throw new Error(problem);
     if ((input.password ?? "").length < 8) throw new Error("Password must be at least 8 characters");
     return { organizationId: input.organizationId, email, password: input.password };
   })
@@ -53,8 +145,19 @@ export const setStaffLogin = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const salt = newSalt();
     const password_hash = await hashPassword(data.password, salt);
-    const code = newCode();
-    const expires = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+    // Was this email already confirmed on the create form (within the last day)?
+    const { data: pre } = await supabaseAdmin
+      .from("staff_email_verifications")
+      .select("id, verified_at")
+      .eq("user_id", userId)
+      .ilike("email", data.email)
+      .maybeSingle();
+    const preVerified = !!pre?.verified_at && Date.now() - new Date(pre.verified_at).getTime() < PRE_VERIFY_TTL_MS;
+
+    const code = preVerified ? null : newCode();
+    const expires = preVerified ? null : new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    const verifiedAt = preVerified ? new Date().toISOString() : null;
 
     const { data: existing } = await supabaseAdmin
       .from("organization_staff_logins")
@@ -96,8 +199,8 @@ export const setStaffLogin = createServerFn({ method: "POST" })
           password_salt: salt,
           username: data.email,
           staff_user_id: staffUserId,
-          email_verified: false,
-          verified_at: null,
+          email_verified: preVerified,
+          verified_at: verifiedAt,
           verification_code: code,
           verification_expires_at: expires,
         })
@@ -113,13 +216,18 @@ export const setStaffLogin = createServerFn({ method: "POST" })
           password_salt: salt,
           created_by: userId,
           staff_user_id: staffUserId,
-          email_verified: false,
+          email_verified: preVerified,
+          verified_at: verifiedAt,
           verification_code: code,
           verification_expires_at: expires,
         });
       if (error) throw new Error(error.message);
     }
-    await sendStaffCode(data.email, code, org.name ?? "your page");
+    if (preVerified) {
+      await supabaseAdmin.from("staff_email_verifications").delete().eq("id", pre!.id);
+      return { username: data.email, needsVerification: false };
+    }
+    await sendStaffCode(data.email, code!, org.name ?? "your page");
     return { username: data.email, needsVerification: true };
   });
 

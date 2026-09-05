@@ -7,10 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { CheckCircle2, ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
-import { setStaffLogin } from "@/lib/staff-login.functions";
+import {
+  confirmStaffEmailVerification,
+  setStaffLogin,
+  staffEmailProblem,
+  startStaffEmailVerification,
+} from "@/lib/staff-login.functions";
 import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
 import { StaffVerifyScreen } from "@/components/create/staff-verify-screen";
 
@@ -46,10 +51,54 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     mission: "",
   });
   const [staff, setStaff] = useState({ username: "", password: "" });
+  const [staffTouched, setStaffTouched] = useState(false);
   const [verify, setVerify] = useState<{ email: string; orgId: string; slug: string; name: string } | null>(null);
+  // Inline email verification, done before the page exists.
+  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
+  const [staffCode, setStaffCode] = useState("");
+  const [sendingCode, setSendingCode] = useState(false);
+  const [checkingCode, setCheckingCode] = useState(false);
   const supportsStaffLogin = supportsStaffLoginType(type);
   const staffCopy = staffLoginCopy(type);
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const staffEmail = staff.username.trim().toLowerCase();
+  const staffEmailError = staff.username.trim() ? staffEmailProblem(staff.username) : null;
+  const staffPasswordError = staff.password && staff.password.length < 8 ? `Password needs at least 8 characters (${staff.password.length} so far)` : null;
+  const staffFilled = !!staff.username.trim() || !!staff.password;
+  const staffValid = !staffEmailError && !!staffEmail && staff.password.length >= 8;
+  const isVerified = !!verifiedEmail && verifiedEmail === staffEmail;
+  const codePending = !!codeSentTo && codeSentTo === staffEmail && !isVerified;
+
+  const sendCode = async () => {
+    if (staffEmailError || !staffEmail || sendingCode) return;
+    setSendingCode(true);
+    try {
+      await startStaffEmailVerification({ data: { email: staffEmail, pageName: form.name.trim() } });
+      setCodeSentTo(staffEmail);
+      setStaffCode("");
+      toast.success(`Code sent to ${staffEmail}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not send the code");
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const checkCode = async () => {
+    if (checkingCode || staffCode.length !== 6) return;
+    setCheckingCode(true);
+    try {
+      await confirmStaffEmailVerification({ data: { email: staffEmail, code: staffCode } });
+      setVerifiedEmail(staffEmail);
+      toast.success("Staff email verified");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "That code did not work");
+    } finally {
+      setCheckingCode(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -99,17 +148,16 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name is required" : "Name and neighborhood are required");
       return;
     }
+    if (supportsStaffLogin && staffFilled) {
+      setStaffTouched(true);
+      if (staffEmailError) { toast.error(`Staff email: ${staffEmailError}`); return; }
+      if (!staffEmail) { toast.error("Enter the staff email, or clear the staff password to skip the staff login"); return; }
+      if (staffPasswordError || !staff.password) { toast.error(staffPasswordError ?? "Enter a staff password of at least 8 characters"); return; }
+    }
     setSaving(true);
     try {
       const baseSlug = slugify(form.name);
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
-      if (supportsStaffLogin && (staff.username.trim() || staff.password)) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(staff.username.trim()) || staff.password.length < 8) {
-          toast.error("Enter a valid staff email address and a password of 8+ characters");
-          setSaving(false);
-          return;
-        }
-      }
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type,
@@ -127,11 +175,16 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         mission: form.mission.trim() || null,
       }).select("id, slug").single();
       if (error) throw error;
-      if (supportsStaffLogin && staff.username.trim() && staff.password) {
+      if (supportsStaffLogin && staffValid) {
         try {
-          await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
-          toast.success(`${kindLabel} created`);
-          setVerify({ email: staff.username.trim().toLowerCase(), orgId: data.id, slug: data.slug, name: form.name.trim() });
+          const res = await setStaffLogin({ data: { organizationId: data.id, username: staffEmail, password: staff.password } });
+          if (res.needsVerification) {
+            toast.success(`${kindLabel} created`);
+            setVerify({ email: staffEmail, orgId: data.id, slug: data.slug, name: form.name.trim() });
+            return;
+          }
+          toast.success(`${kindLabel} created. Staff login is verified and ready to use.`);
+          navigate({ to: "/o/$slug", params: { slug: data.slug } });
           return;
         } catch (e) {
           toast.error(e instanceof Error ? e.message : `${kindLabel} created, but the staff login could not be saved`);
@@ -256,14 +309,41 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={staffCopy.emailLabel}>
-              <Input
-                type="email"
-                value={staff.username}
-                autoComplete="off"
-                maxLength={80}
-                placeholder={staffCopy.placeholder}
-                onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
-              />
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={staff.username}
+                  autoComplete="off"
+                  maxLength={80}
+                  placeholder={staffCopy.placeholder}
+                  aria-invalid={!!staffEmailError && staffTouched}
+                  className={staffEmailError && staffTouched ? "border-red-400 focus-visible:ring-red-300" : isVerified ? "border-green-500" : undefined}
+                  onBlur={() => setStaffTouched(true)}
+                  onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
+                />
+                {isVerified ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-green-50 px-2.5 text-xs font-semibold text-green-700">
+                    <CheckCircle2 className="h-4 w-4" /> Verified
+                  </span>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={sendCode}
+                    disabled={sendingCode || !staffEmail || !!staffEmailError}
+                  >
+                    {sendingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : codePending ? "Resend" : "Send code"}
+                  </Button>
+                )}
+              </div>
+              {staffEmailError && staffTouched ? (
+                <p className="text-xs text-red-600">{staffEmailError}</p>
+              ) : isVerified ? (
+                <p className="text-xs text-green-700">This email is verified. The staff login will work as soon as the page is created.</p>
+              ) : (
+                <p className="text-xs text-neutral-500">Tap Send code to verify this email now, or verify it after the page is created.</p>
+              )}
             </Field>
             <Field label={staffCopy.passwordLabel}>
               <Input
@@ -272,10 +352,37 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
                 autoComplete="new-password"
                 maxLength={72}
                 placeholder="At least 8 characters"
+                aria-invalid={!!staffPasswordError && staffTouched}
+                className={staffPasswordError && staffTouched ? "border-red-400 focus-visible:ring-red-300" : undefined}
+                onBlur={() => setStaffTouched(true)}
                 onChange={(e) => setStaff((s) => ({ ...s, password: e.target.value }))}
               />
+              {staffPasswordError && staffTouched && <p className="text-xs text-red-600">{staffPasswordError}</p>}
             </Field>
           </div>
+          {codePending && (
+            <div className="rounded-md border border-[#d4580a]/30 bg-white p-3">
+              <p className="text-xs text-neutral-700">
+                We sent a 6 digit code to <span className="font-semibold">{codeSentTo}</span>. Enter it here to verify.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <Input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={staffCode}
+                  onChange={(e) => setStaffCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void checkCode(); } }}
+                  className="max-w-[160px] text-center tracking-[0.35em]"
+                />
+                <Button type="button" onClick={checkCode} disabled={checkingCode || staffCode.length !== 6}>
+                  {checkingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Verify
+                </Button>
+              </div>
+            </div>
+          )}
           <p className="text-xs text-neutral-500">{staffCopy.footer}</p>
         </div>
       )}
