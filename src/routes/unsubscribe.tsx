@@ -35,7 +35,7 @@ function UnsubscribePage() {
         const body = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(body.error || "Invalid link");
         setEmail(body.email ?? null);
-        setState("ready");
+        setState(body.valid === false && body.reason === "already_unsubscribed" ? "done" : "ready");
       })
       .catch(() => setState("error"));
   }, []);
@@ -61,6 +61,9 @@ function UnsubscribePage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center">
+        <p className="mb-6 text-sm font-bold uppercase tracking-[0.2em] text-primary">
+          Planet Baltimore
+        </p>
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
           {state === "done" ? (
             <Check className="h-6 w-6 text-primary" />
@@ -101,6 +104,11 @@ function UnsubscribePage() {
             </p>
           </>
         )}
+        <p className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">
+          <a href="https://www.planetbaltimore.com" className="underline underline-offset-2">
+            planetbaltimore.com
+          </a>
+        </p>
       </div>
     </main>
   );
