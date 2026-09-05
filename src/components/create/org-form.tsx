@@ -7,10 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { CheckCircle2, ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
-import { setStaffLogin } from "@/lib/staff-login.functions";
+import {
+  confirmStaffEmailVerification,
+  setStaffLogin,
+  staffEmailProblem,
+  startStaffEmailVerification,
+} from "@/lib/staff-login.functions";
 import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
 import { StaffVerifyScreen } from "@/components/create/staff-verify-screen";
 
