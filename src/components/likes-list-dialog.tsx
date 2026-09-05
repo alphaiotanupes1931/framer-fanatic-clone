@@ -15,7 +15,7 @@ type Person = {
 
 type Kind = "post" | "story" | "event" | "repost-post" | "repost-event";
 
-const TABLES: Record<Kind, { table: "post_likes" | "story_likes" | "event_likes"; column: string }> = {
+const TABLES: Record<"post" | "story" | "event", { table: "post_likes" | "story_likes" | "event_likes"; column: string }> = {
   post: { table: "post_likes", column: "post_id" },
   story: { table: "story_likes", column: "story_id" },
   event: { table: "event_likes", column: "event_id" },

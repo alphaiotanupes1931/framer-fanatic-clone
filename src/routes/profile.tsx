@@ -26,6 +26,7 @@ import { tabsForCategory, PROFILE_TAGS } from "@/lib/categories";
 import { ProfileSectionTab } from "@/components/profile-sections";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
+import { RepostTile } from "@/components/shared/repost-tile";
 import { PostSplitView } from "@/components/shared/post-split-view";
 import { sanitizeErrorMessage, siteUrl } from "@/lib/utils";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
@@ -649,7 +650,9 @@ function ProfilePage() {
                             onClick={() => setPostViewerIdx(idx)}
                             className="relative aspect-square overflow-hidden rounded-md bg-neutral-100 group"
                           >
-                            {thumb ? (
+                            {((p as any).repost_of_post_id || (p as any).repost_of_event_id) ? (
+                              <RepostTile postId={(p as any).repost_of_post_id} eventId={(p as any).repost_of_event_id} />
+                            ) : thumb ? (
                               isVideo ? (
                                 <SmartVideo src={thumb} className="h-full w-full object-cover" muted playsInline preload="metadata" />
                               ) : (
@@ -663,11 +666,7 @@ function ProfilePage() {
                                   fontSize: (p as any).font_size === "sm" ? 16 : (p as any).font_size === "lg" ? 28 : (p as any).font_size === "xl" ? 36 : 20,
                                 }}
                               >
-                                <span className="line-clamp-6 whitespace-pre-wrap break-words">
-                                  {(p as any).repost_of_post_id || (p as any).repost_of_event_id
-                                    ? (p.content || ((p as any).repost_of_event_id ? "Reposted event" : "Reposted post"))
-                                    : (p.content || "Post")}
-                                </span>
+                                <span className="line-clamp-6 whitespace-pre-wrap break-words">{p.content || "Post"}</span>
                               </div>
                             )}
                             {media.length > 1 && (
