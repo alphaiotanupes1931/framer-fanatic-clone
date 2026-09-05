@@ -208,6 +208,11 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    // Supabase returns a fake success (user with no identities) when the email
+    // is already registered. Treat that as "already in use".
+    if (signUpData.user && (signUpData.user.identities?.length ?? 0) === 0) {
+      return toast.error("That email is already in use. Try signing in instead.");
+    }
     // With email confirmation on, there is no session until the user clicks the
     // link in their inbox. Stash their choices and show a "check your email" state.
     if (!signUpData.session) {
