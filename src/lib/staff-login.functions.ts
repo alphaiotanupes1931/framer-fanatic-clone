@@ -216,6 +216,10 @@ export const setStaffLogin = createServerFn({ method: "POST" })
     }
     const existing = byEmail ?? replacing;
 
+    // Block addresses that already belong to somebody's account.
+    const inUse = await emailInUseReason(data.email, existing?.staff_user_id ?? null);
+    if (inUse) throw new Error(inUse);
+
     let staffUserId = existing?.staff_user_id ?? null;
     if (staffUserId) {
       const { error } = await supabaseAdmin.auth.admin.updateUserById(staffUserId, {
