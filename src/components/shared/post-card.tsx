@@ -51,6 +51,8 @@ type Post = {
   category?: string | null;
   featured?: boolean | null;
   featured_at?: string | null;
+  repost_of_post_id?: string | null;
+  repost_of_event_id?: string | null;
 };
 
 export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason }: {
