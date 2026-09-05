@@ -293,13 +293,13 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
                 <div className="m-auto"><MentionText text={post.content} /></div>
               </div>
             ) : (
-              <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
+              <div className="px-4 py-4 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
                 <span className="mr-2 font-semibold">{author?.display_name || author?.username || "Someone"}</span>
                 <MentionText text={post.content} />
               </div>
             )
           )}
-          <div className="px-4 pb-3 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
+          <div className="px-4 pb-3 pt-4 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
 
           <ul className="space-y-3 px-4 pb-4 pt-1">
             {comments.length === 0 && (
