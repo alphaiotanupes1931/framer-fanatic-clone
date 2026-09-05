@@ -2808,6 +2808,39 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_email_verifications: {
+        Row: {
+          code: string | null
+          created_at: string
+          email: string
+          expires_at: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       stories: {
         Row: {
           comments_count: number
