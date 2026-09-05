@@ -5,6 +5,22 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const ALLOWED = new Set<string>(["business", "arts_org", "community_assoc"]);
 
+function newCode() {
+  const n = new Uint32Array(1);
+  crypto.getRandomValues(n);
+  return String(100000 + ((n[0] ?? 0) % 900000));
+}
+
+/** Sends the six digit verification code to a staff email. Never throws. */
+async function sendStaffCode(email: string, code: string, pageName: string) {
+  try {
+    const { sendTemplateEmail } = await import("./email-templates/send-email");
+    await sendTemplateEmail("staff-login-verify", email, { templateData: { code, pageName } });
+  } catch (e) {
+    console.error("Could not send staff verification email", e);
+  }
+}
+
 /**
  * Business staff logins use separate auth identities. Staff can manage only
  * the business page they were assigned to, never the owner's account.
@@ -23,7 +39,7 @@ export const setStaffLogin = createServerFn({ method: "POST" })
 
     const { data: org } = await supabase
       .from("organizations")
-      .select("id, owner_id, type")
+      .select("id, owner_id, type, name")
       .eq("id", data.organizationId)
       .maybeSingle();
     if (!org || !ALLOWED.has(org.type)) {
@@ -37,6 +53,8 @@ export const setStaffLogin = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const salt = newSalt();
     const password_hash = await hashPassword(data.password, salt);
+    const code = newCode();
+    const expires = new Date(Date.now() + 30 * 60 * 1000).toISOString();
 
     const { data: existing } = await supabaseAdmin
       .from("organization_staff_logins")
@@ -73,7 +91,16 @@ export const setStaffLogin = createServerFn({ method: "POST" })
     if (existing) {
       const { error } = await supabaseAdmin
         .from("organization_staff_logins")
-        .update({ password_hash, password_salt: salt, username: data.email, staff_user_id: staffUserId })
+        .update({
+          password_hash,
+          password_salt: salt,
+          username: data.email,
+          staff_user_id: staffUserId,
+          email_verified: false,
+          verified_at: null,
+          verification_code: code,
+          verification_expires_at: expires,
+        })
         .eq("id", existing.id);
       if (error) throw new Error(error.message);
     } else {
@@ -86,10 +113,14 @@ export const setStaffLogin = createServerFn({ method: "POST" })
           password_salt: salt,
           created_by: userId,
           staff_user_id: staffUserId,
+          email_verified: false,
+          verification_code: code,
+          verification_expires_at: expires,
         });
       if (error) throw new Error(error.message);
     }
-    return { username: data.email };
+    await sendStaffCode(data.email, code, org.name ?? "your page");
+    return { username: data.email, needsVerification: true };
   });
 
 export const listStaffLogins = createServerFn({ method: "POST" })
@@ -101,7 +132,7 @@ export const listStaffLogins = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
       .from("organization_staff_logins")
-      .select("id, username, last_login_at, created_at")
+      .select("id, username, last_login_at, created_at, email_verified")
       .eq("organization_id", data.organizationId)
       .order("created_at");
     return rows ?? [];
@@ -144,13 +175,16 @@ export const staffLogin = createServerFn({ method: "POST" })
 
     const { data: row } = await supabaseAdmin
       .from("organization_staff_logins")
-      .select("id, organization_id, password_hash, password_salt, staff_user_id")
+      .select("id, organization_id, password_hash, password_salt, staff_user_id, email_verified")
       .ilike("username", data.email)
       .maybeSingle();
 
     const invalid = new Error("Incorrect staff email or password");
     if (!row?.staff_user_id) throw invalid;
     if (!(await verifyPassword(data.password, row.password_salt, row.password_hash))) throw invalid;
+    if (!row.email_verified) {
+      throw new Error("This staff email is not verified yet. Check your inbox for the code, or ask the page owner to resend it.");
+    }
 
     const { data: org } = await supabaseAdmin
       .from("organizations")
@@ -166,4 +200,75 @@ export const staffLogin = createServerFn({ method: "POST" })
     if (error) console.error("Could not record staff login", error.message);
 
     return { slug: org.slug, name: org.name, type: org.type, email: data.email };
+  });
+
+
+/** Public: confirm a staff email with the emailed six digit code. */
+export const verifyStaffEmail = createServerFn({ method: "POST" })
+  .inputValidator((input: { email: string; code: string }) => {
+    const email = (input?.email ?? "").trim().toLowerCase();
+    const code = (input?.code ?? "").trim();
+    if (!EMAIL_RE.test(email)) throw new Error("Enter the staff email address");
+    if (!/^\d{6}$/.test(code)) throw new Error("Enter the 6 digit code from the email");
+    return { email, code };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("organization_staff_logins")
+      .select("id, verification_code, verification_expires_at, email_verified")
+      .ilike("username", data.email)
+      .maybeSingle();
+    if (!row) throw new Error("We could not find that staff email");
+    if (row.email_verified) return { verified: true };
+    if (!row.verification_code || row.verification_code !== data.code) throw new Error("That code is not correct");
+    if (row.verification_expires_at && new Date(row.verification_expires_at).getTime() < Date.now()) {
+      throw new Error("That code has expired. Ask for a new one.");
+    }
+    const { error } = await supabaseAdmin
+      .from("organization_staff_logins")
+      .update({ email_verified: true, verified_at: new Date().toISOString(), verification_code: null, verification_expires_at: null })
+      .eq("id", row.id);
+    if (error) throw new Error(error.message);
+    return { verified: true };
+  });
+
+/** Owner only: send a fresh verification code to a staff email. */
+export const resendStaffVerification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { organizationId: string; email: string }) => {
+    const email = (input?.email ?? "").trim().toLowerCase();
+    if (!input?.organizationId) throw new Error("organizationId is required");
+    if (!EMAIL_RE.test(email)) throw new Error("Enter the staff email address");
+    return { organizationId: input.organizationId, email };
+  })
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("id, owner_id, name")
+      .eq("id", data.organizationId)
+      .maybeSingle();
+    if (!org) throw new Error("Page not found");
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (org.owner_id !== userId && !isAdmin) throw new Error("Only the page owner can resend this");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("organization_staff_logins")
+      .select("id, email_verified")
+      .eq("organization_id", org.id)
+      .ilike("username", data.email)
+      .maybeSingle();
+    if (!row) throw new Error("We could not find that staff email");
+    if (row.email_verified) return { sent: false, alreadyVerified: true };
+
+    const code = newCode();
+    const { error } = await supabaseAdmin
+      .from("organization_staff_logins")
+      .update({ verification_code: code, verification_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString() })
+      .eq("id", row.id);
+    if (error) throw new Error(error.message);
+    await sendStaffCode(data.email, code, org.name ?? "your page");
+    return { sent: true, alreadyVerified: false };
   });
