@@ -177,7 +177,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       toast.success(now ? "Reposted to your page" : "Repost removed");
     } catch (e) {
       setReposted(!next);
-      toast.error(e instanceof Error ? e.message : "Could not repost");
+      toast.error(e instanceof Error ? e.message : ((e as any)?.message || "Could not repost"));
     } finally {
       setReposting(false);
     }

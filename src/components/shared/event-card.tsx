@@ -98,7 +98,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
       setReposted(now);
       toast.success(now ? "Reposted to your page" : "Repost removed");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not repost");
+      toast.error(err instanceof Error ? err.message : ((err as any)?.message || "Could not repost"));
     } finally {
       setReposting(false);
     }
