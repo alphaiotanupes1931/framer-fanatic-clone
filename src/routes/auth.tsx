@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import pbLogo from "@/assets/pb-logo.png";
 import { useServerFn } from "@tanstack/react-start";
 import { becomeArtist } from "@/lib/stripe.functions";
+import { signupEmailProblem } from "@/lib/staff-login.functions";
 import { Eye, EyeOff } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
