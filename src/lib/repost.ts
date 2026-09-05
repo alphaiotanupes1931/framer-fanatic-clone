@@ -42,7 +42,7 @@ export async function repostPost(originalPostId: string, note = "") {
     repost_of_post_id: targetEventId ? null : targetPostId,
     repost_of_event_id: targetEventId,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function repostEvent(eventId: string, note = "") {
@@ -66,7 +66,7 @@ export async function repostEvent(eventId: string, note = "") {
     media_urls: [],
     repost_of_event_id: eventId,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 
@@ -102,7 +102,7 @@ export async function toggleRepostPost(originalPostId: string): Promise<boolean>
   const existingId = await myRepostId({ postId: targetPostId, eventId: targetEventId });
   if (existingId) {
     const { error } = await supabase.from("posts").delete().eq("id", existingId);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return false;
   }
   await repostPost(originalPostId);
@@ -115,7 +115,7 @@ export async function toggleRepostEvent(eventId: string): Promise<boolean> {
   const existingId = await myRepostId({ eventId });
   if (existingId) {
     const { error } = await supabase.from("posts").delete().eq("id", existingId);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return false;
   }
   await repostEvent(eventId);
