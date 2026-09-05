@@ -2,6 +2,7 @@ import * as React from 'react'
 import { render } from '@react-email/render'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { withBrandedUnsubscribeHtml, withBrandedUnsubscribeText } from '@/lib/branded-unsubscribe'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
 // Configuration baked in at scaffold time
@@ -253,8 +254,11 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
 
         // 4. Render React Email template to HTML and plain text
         const element = React.createElement(template.component, templateData)
-        const html = await render(element)
-        const plainText = await render(element, { plainText: true })
+        const html = withBrandedUnsubscribeHtml(await render(element), unsubscribeToken)
+        const plainText = withBrandedUnsubscribeText(
+          await render(element, { plainText: true }),
+          unsubscribeToken
+        )
 
         // Resolve subject — supports static string or dynamic function
         const resolvedSubject =
@@ -286,7 +290,8 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             purpose: 'transactional',
             label: templateName,
             idempotency_key: idempotencyKey,
-            unsubscribe_token: unsubscribeToken,
+            // Branded footer is embedded in the HTML above; omitting the token keeps
+            // the provider from appending its own third-party unsubscribe link.
             queued_at: new Date().toISOString(),
           },
         })

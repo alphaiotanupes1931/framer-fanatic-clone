@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { render } from '@react-email/render'
 import { TEMPLATES } from '@/lib/email-templates/registry'
+import { withBrandedUnsubscribeHtml, withBrandedUnsubscribeText } from '@/lib/branded-unsubscribe'
 
 const SITE_NAME = 'Planet Baltimore'
 const SENDER_DOMAIN = 'notify.reeddigitalgroup.com'
@@ -66,8 +67,8 @@ export async function sendInternalEmail(args: {
   const messageId = crypto.randomUUID()
   const data = args.templateData ?? {}
   const element = React.createElement(template.component, data)
-  const html = await render(element)
-  const text = await render(element, { plainText: true })
+  const html = withBrandedUnsubscribeHtml(await render(element), unsubscribeToken)
+  const text = withBrandedUnsubscribeText(await render(element, { plainText: true }), unsubscribeToken)
   const subject = typeof template.subject === 'function' ? template.subject(data) : template.subject
 
   await supabaseAdmin.from('email_send_log').insert({
@@ -90,7 +91,8 @@ export async function sendInternalEmail(args: {
       purpose: 'transactional',
       label: args.templateName,
       idempotency_key: args.idempotencyKey || messageId,
-      unsubscribe_token: unsubscribeToken,
+      // Branded footer is embedded in the HTML above; omitting the token keeps
+      // the provider from appending its own third-party unsubscribe link.
       queued_at: new Date().toISOString(),
     },
   })
