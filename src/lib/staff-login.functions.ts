@@ -145,8 +145,19 @@ export const setStaffLogin = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const salt = newSalt();
     const password_hash = await hashPassword(data.password, salt);
-    const code = newCode();
-    const expires = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+    // Was this email already confirmed on the create form (within the last day)?
+    const { data: pre } = await supabaseAdmin
+      .from("staff_email_verifications")
+      .select("id, verified_at")
+      .eq("user_id", userId)
+      .ilike("email", data.email)
+      .maybeSingle();
+    const preVerified = !!pre?.verified_at && Date.now() - new Date(pre.verified_at).getTime() < PRE_VERIFY_TTL_MS;
+
+    const code = preVerified ? null : newCode();
+    const expires = preVerified ? null : new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    const verifiedAt = preVerified ? new Date().toISOString() : null;
 
     const { data: existing } = await supabaseAdmin
       .from("organization_staff_logins")
@@ -188,8 +199,8 @@ export const setStaffLogin = createServerFn({ method: "POST" })
           password_salt: salt,
           username: data.email,
           staff_user_id: staffUserId,
-          email_verified: false,
-          verified_at: null,
+          email_verified: preVerified,
+          verified_at: verifiedAt,
           verification_code: code,
           verification_expires_at: expires,
         })
@@ -205,13 +216,18 @@ export const setStaffLogin = createServerFn({ method: "POST" })
           password_salt: salt,
           created_by: userId,
           staff_user_id: staffUserId,
-          email_verified: false,
+          email_verified: preVerified,
+          verified_at: verifiedAt,
           verification_code: code,
           verification_expires_at: expires,
         });
       if (error) throw new Error(error.message);
     }
-    await sendStaffCode(data.email, code, org.name ?? "your page");
+    if (preVerified) {
+      await supabaseAdmin.from("staff_email_verifications").delete().eq("id", pre!.id);
+      return { username: data.email, needsVerification: false };
+    }
+    await sendStaffCode(data.email, code!, org.name ?? "your page");
     return { username: data.email, needsVerification: true };
   });
 
