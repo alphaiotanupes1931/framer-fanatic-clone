@@ -13,7 +13,7 @@ type Person = {
   neighborhood: string | null;
 };
 
-type Kind = "post" | "story" | "event";
+type Kind = "post" | "story" | "event" | "repost-post" | "repost-event";
 
 const TABLES: Record<Kind, { table: "post_likes" | "story_likes" | "event_likes"; column: string }> = {
   post: { table: "post_likes", column: "post_id" },
@@ -43,8 +43,15 @@ export function LikesListDialog({
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { table, column } = TABLES[kind];
-      const { data: rows, error } = await supabase.from(table).select("user_id").eq(column, targetId).limit(500);
+      const isRepost = kind === "repost-post" || kind === "repost-event";
+      const { data: rows, error } = isRepost
+        ? await supabase
+            .from("posts")
+            .select("user_id")
+            .eq(kind === "repost-event" ? "repost_of_event_id" : "repost_of_post_id", targetId)
+            .eq("is_deleted", false)
+            .limit(500)
+        : await supabase.from(TABLES[kind as "post" | "story" | "event"].table).select("user_id").eq(TABLES[kind as "post" | "story" | "event"].column, targetId).limit(500);
       if (cancelled) return;
       if (error) {
         setPeople([]);
@@ -72,13 +79,13 @@ export function LikesListDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] w-[calc(100%_-_2rem)] max-w-md overflow-hidden rounded-xl p-0">
         <DialogHeader className="border-b border-border px-5 py-4 text-left">
-          <DialogTitle>Likes</DialogTitle>
+          <DialogTitle>{kind === "repost-post" || kind === "repost-event" ? "Reposts" : "Likes"}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[65vh] overflow-y-auto p-2">
           {loading ? (
-            <p className="p-6 text-center text-sm text-muted-foreground">Loading likes...</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">Loading...</p>
           ) : people.length === 0 ? (
-            <p className="p-6 text-center text-sm text-muted-foreground">No likes yet.</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">{kind === "repost-post" || kind === "repost-event" ? "No reposts yet." : "No likes yet."}</p>
           ) : (
             people.map((person) => {
               const name = formatName(person.display_name || person.username || "User");
