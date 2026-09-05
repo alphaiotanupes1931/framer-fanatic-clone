@@ -92,6 +92,10 @@ export const startStaffEmailVerification = createServerFn({ method: "POST" })
       .maybeSingle();
     if (taken) throw new Error("That email is already used as a staff login for another page. Use a different staff email.");
 
+    // And it cannot belong to any existing account either.
+    const inUse = await emailInUseReason(data.email);
+    if (inUse) throw new Error(inUse);
+
     const code = newCode();
     const now = new Date();
     const expires = new Date(now.getTime() + 30 * 60 * 1000).toISOString();
