@@ -118,13 +118,13 @@ export const confirmStaffEmailVerification = createServerFn({ method: "POST" })
  */
 export const setStaffLogin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { organizationId: string; username: string; password: string }) => {
+  .inputValidator((input: { organizationId: string; username: string; password: string; replaceId?: string }) => {
     if (!input?.organizationId) throw new Error("organizationId is required");
     const email = (input.username ?? "").trim().toLowerCase();
     const problem = staffEmailProblem(email);
     if (problem) throw new Error(problem);
     if ((input.password ?? "").length < 8) throw new Error("Password must be at least 8 characters");
-    return { organizationId: input.organizationId, email, password: input.password };
+    return { organizationId: input.organizationId, email, password: input.password, replaceId: input.replaceId ?? null };
   })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -159,15 +159,28 @@ export const setStaffLogin = createServerFn({ method: "POST" })
     const expires = preVerified ? null : new Date(Date.now() + 30 * 60 * 1000).toISOString();
     const verifiedAt = preVerified ? new Date().toISOString() : null;
 
-    const { data: existing } = await supabaseAdmin
+    const { data: byEmail } = await supabaseAdmin
       .from("organization_staff_logins")
       .select("id, organization_id, staff_user_id")
       .ilike("username", data.email)
       .maybeSingle();
 
-    if (existing && existing.organization_id !== org.id) {
+    if (byEmail && byEmail.organization_id !== org.id) {
       throw new Error("That email is already used for another page");
     }
+
+    // Changing the email on an existing staff login: keep the same record so the
+    // old address stops working, and make the new address prove itself again.
+    let replacing: { id: string; organization_id: string; staff_user_id: string | null } | null = null;
+    if (!byEmail && data.replaceId) {
+      const { data: row } = await supabaseAdmin
+        .from("organization_staff_logins")
+        .select("id, organization_id, staff_user_id")
+        .eq("id", data.replaceId)
+        .maybeSingle();
+      if (row && row.organization_id === org.id) replacing = row;
+    }
+    const existing = byEmail ?? replacing;
 
     let staffUserId = existing?.staff_user_id ?? null;
     if (staffUserId) {
