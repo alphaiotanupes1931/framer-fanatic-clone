@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import pbLogo from "@/assets/pb-logo.png";
 import { useServerFn } from "@tanstack/react-start";
 import { becomeArtist } from "@/lib/stripe.functions";
+import { signupEmailProblem } from "@/lib/staff-login.functions";
 import { Eye, EyeOff } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
@@ -183,6 +184,11 @@ function AuthPage() {
     setLoading(true);
     let referredBy: string | null = null;
     try { referredBy = sessionStorage.getItem("pb_referred_by"); } catch { /* ignore */ }
+    // Reject emails already tied to an account or staff login before signUp.
+    try {
+      const problem = await signupEmailProblem({ data: { email } });
+      if (problem) { setLoading(false); return toast.error(problem); }
+    } catch { /* non-fatal: fall through and let signUp validate */ }
     const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
@@ -202,6 +208,11 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    // Supabase returns a fake success (user with no identities) when the email
+    // is already registered. Treat that as "already in use".
+    if (signUpData.user && (signUpData.user.identities?.length ?? 0) === 0) {
+      return toast.error("That email is already in use. Try signing in instead.");
+    }
     // With email confirmation on, there is no session until the user clicks the
     // link in their inbox. Stash their choices and show a "check your email" state.
     if (!signUpData.session) {
