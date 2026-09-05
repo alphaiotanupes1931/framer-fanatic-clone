@@ -38,6 +38,36 @@ export function staffEmailProblem(raw: string): string | null {
 
 const PRE_VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
 
+/** Looks an address up in the auth directory. Returns null when nothing matches. */
+async function authUserByEmail(email: string): Promise<{ id: string } | null> {
+  try {
+    const base = process.env["SUPABASE_URL"];
+    const key = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+    if (!base || !key) return null;
+    const res = await fetch(`${base}/auth/v1/admin/users?filter=${encodeURIComponent(email)}&per_page=20`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { users?: Array<{ id: string; email?: string }> };
+    const hit = (body.users ?? []).find((u) => (u.email ?? "").toLowerCase() === email.toLowerCase());
+    return hit ? { id: hit.id } : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Plain-language reason this address cannot be used for a staff login, or null.
+ * `allowUserId` is the auth account already attached to the login being edited.
+ */
+async function emailInUseReason(email: string, allowUserId?: string | null): Promise<string | null> {
+  const found = await authUserByEmail(email);
+  if (found && found.id !== allowUserId) {
+    return "That email is already used by an account on Planet Baltimore. Pick a different staff email.";
+  }
+  return null;
+}
+
 /**
  * Owner-side: send a verification code to a staff email before the page is
  * created, so the email can be confirmed right on the create form.
