@@ -184,6 +184,11 @@ function AuthPage() {
     setLoading(true);
     let referredBy: string | null = null;
     try { referredBy = sessionStorage.getItem("pb_referred_by"); } catch { /* ignore */ }
+    // Reject emails already tied to an account or staff login before signUp.
+    try {
+      const problem = await signupEmailProblem({ data: { email } });
+      if (problem) { setLoading(false); return toast.error(problem); }
+    } catch { /* non-fatal: fall through and let signUp validate */ }
     const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
