@@ -67,7 +67,9 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
 }) {
   const navigate = useNavigate();
   const [likes, setLikes] = useState(post.likes_count ?? 0);
-  const { liked, saved, setLiked, setSaved } = useReaction(post.id, currentUserId);
+  // On a repost card the like/repost numbers belong to the original post, not the wrapper.
+  const originalPostId = post.repost_of_post_id ?? post.id;
+  const { liked, saved, setLiked, setSaved } = useReaction(originalPostId, currentUserId);
   const [lightbox, setLightbox] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string }[]>([]);
@@ -130,8 +132,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     setLiked(!wasLiked);
     setLikes((n) => n + (wasLiked ? -1 : 1));
     const res = wasLiked
-      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", currentUserId)
-      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: currentUserId });
+      ? await supabase.from("post_likes").delete().eq("post_id", originalPostId).eq("user_id", currentUserId)
+      : await supabase.from("post_likes").insert({ post_id: originalPostId, user_id: currentUserId });
     if (res.error) {
       setLiked(wasLiked);
       setLikes((n) => n + (wasLiked ? 1 : -1));
@@ -143,16 +145,17 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     let cancelled = false;
     (async () => {
       const [likeRows, repostRows] = await Promise.all([
-        supabase.from("post_likes").select("user_id").eq("post_id", post.id).limit(3),
-        supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", post.id).eq("is_deleted", false).limit(3),
+        supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", originalPostId).limit(3),
+        supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", originalPostId).eq("is_deleted", false).limit(3),
       ]);
       if (cancelled) return;
       setLikerIds(((likeRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setReposterIds(((repostRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setRepostCount(repostRows.count ?? ((repostRows.data ?? []) as unknown[]).length);
+      if (post.repost_of_post_id) setLikes(likeRows.count ?? ((likeRows.data ?? []) as unknown[]).length);
     })();
     return () => { cancelled = true; };
-  }, [post.id, likes, reposted]);
+  }, [originalPostId, post.repost_of_post_id, likes, reposted]);
 
   // Instagram style toggle: highlighted while it is on your page, click to undo.
   useEffect(() => {
@@ -533,8 +536,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           </div>
         </div>
       )}
-      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={post.id} kind="post" />
-      <LikesListDialog open={repostsOpen} onOpenChange={setRepostsOpen} targetId={post.id} kind="repost-post" />
+      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={originalPostId} kind="post" />
+      <LikesListDialog open={repostsOpen} onOpenChange={setRepostsOpen} targetId={originalPostId} kind="repost-post" />
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
       <ShareToUsersDialog
         open={shareOpen}
