@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/shared/follow-button";
 import { AppLayout } from "@/components/app-layout";
-import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark } from "lucide-react";
+import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, createEventDonationCheckout } from "@/lib/stripe.functions";
