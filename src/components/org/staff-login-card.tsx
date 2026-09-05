@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { KeyRound, Loader2, Trash2 } from "lucide-react";
+import { Copy, ExternalLink, KeyRound, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { deleteStaffLogin, listStaffLogins, resendStaffVerification, setStaffLogin, verifyStaffEmail } from "@/lib/staff-login.functions";
-import { staffLoginCopy } from "@/lib/staff-login-copy";
+import { staffLoginCopy, staffLoginUrl } from "@/lib/staff-login-copy";
 
 type Row = { id: string; username: string; last_login_at: string | null; created_at: string; email_verified: boolean };
 
 /** Owner-only: manage the username/password employees use to sign in to this page. */
 export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string; orgType?: string }) {
   const copy = staffLoginCopy(orgType);
+  const loginUrl = staffLoginUrl();
   const [rows, setRows] = useState<Row[]>([]);
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
@@ -133,6 +134,31 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
         </ul>
       )}
 
+      {rows.length > 0 && (
+        <div className="mt-3 rounded-lg border border-[#ed4204]/30 bg-[#ed4204]/5 px-3 py-2.5">
+          <p className="text-xs font-medium text-neutral-700">Send them this sign-in link</p>
+          <div className="mt-1 flex items-center gap-2">
+            <a
+              href={loginUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 break-all text-sm font-semibold text-[#d4580a] underline underline-offset-2"
+            >
+              {loginUrl}
+              <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+            </a>
+            <button
+              type="button"
+              onClick={() => { void navigator.clipboard.writeText(loginUrl); toast.success("Link copied"); }}
+              className="shrink-0 rounded-md p-1 text-neutral-500 hover:text-[#d4580a]"
+              aria-label="Copy the staff sign-in link"
+            >
+              <Copy className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {codeFor && (
         <div className="mt-3 flex items-end gap-2 rounded-lg bg-neutral-50 p-3">
           <div className="flex-1 space-y-1.5">
@@ -156,7 +182,7 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
           </div>
           <div className="sm:col-span-2 flex items-center justify-between">
             <p className="text-xs text-neutral-500">
-              {replaceId ? "Changing the email means the new address has to be verified before it can sign in." : "Staff sign in at /business-login"}
+              {replaceId ? "Changing the email means the new address has to be verified before it can sign in." : `Staff sign in at ${loginUrl}`}
             </p>
             <Button size="sm" onClick={save} disabled={busy || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username.trim()) || password.length < 8}>
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save
