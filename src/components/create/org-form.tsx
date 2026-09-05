@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { setStaffLogin } from "@/lib/staff-login.functions";
 import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
+import { StaffVerifyScreen } from "@/components/create/staff-verify-screen";
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "org";
@@ -45,6 +46,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     mission: "",
   });
   const [staff, setStaff] = useState({ username: "", password: "" });
+  const [verify, setVerify] = useState<{ email: string; orgId: string; slug: string; name: string } | null>(null);
   const supportsStaffLogin = supportsStaffLoginType(type);
   const staffCopy = staffLoginCopy(type);
   const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -128,9 +130,11 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       if (supportsStaffLogin && staff.username.trim() && staff.password) {
         try {
           await setStaffLogin({ data: { organizationId: data.id, username: staff.username.trim(), password: staff.password } });
-          toast.success("Staff login created");
+          toast.success(`${kindLabel} created`);
+          setVerify({ email: staff.username.trim().toLowerCase(), orgId: data.id, slug: data.slug, name: form.name.trim() });
+          return;
         } catch (e) {
-          toast.error(e instanceof Error ? e.message : "Business created, but the staff login could not be saved");
+          toast.error(e instanceof Error ? e.message : `${kindLabel} created, but the staff login could not be saved`);
         }
       }
       toast.success(`${kindLabel} created`);
@@ -148,6 +152,26 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       setSaving(false);
     }
   };
+
+  if (verify) {
+    return (
+      <StaffVerifyScreen
+        email={verify.email}
+        organizationId={verify.orgId}
+        pageName={verify.name || kindLabel}
+        onVerified={() => {
+          toast.success("Staff login is set up and verified");
+          navigate({ to: "/o/$slug", params: { slug: verify.slug } });
+        }}
+        onSkip={() => {
+          toast.message("Staff login created, but not verified yet", {
+            description: "The email has to be verified before the staff login can be used to sign in.",
+          });
+          navigate({ to: "/o/$slug", params: { slug: verify.slug } });
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
