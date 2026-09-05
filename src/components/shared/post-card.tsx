@@ -139,20 +139,23 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   };
 
   // Who liked and who reposted, for the little photo stacks under the post.
+  // On a repost card the numbers belong to the original post, not the wrapper.
+  const originalPostId = post.repost_of_post_id ?? post.id;
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const [likeRows, repostRows] = await Promise.all([
-        supabase.from("post_likes").select("user_id").eq("post_id", post.id).limit(3),
-        supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", post.id).eq("is_deleted", false).limit(3),
+        supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", originalPostId).limit(3),
+        supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", originalPostId).eq("is_deleted", false).limit(3),
       ]);
       if (cancelled) return;
       setLikerIds(((likeRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setReposterIds(((repostRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setRepostCount(repostRows.count ?? ((repostRows.data ?? []) as unknown[]).length);
+      if (post.repost_of_post_id) setLikes(likeRows.count ?? ((likeRows.data ?? []) as unknown[]).length);
     })();
     return () => { cancelled = true; };
-  }, [post.id, likes, reposted]);
+  }, [originalPostId, post.repost_of_post_id, likes, reposted]);
 
   // Instagram style toggle: highlighted while it is on your page, click to undo.
   useEffect(() => {
