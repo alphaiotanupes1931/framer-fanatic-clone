@@ -75,7 +75,19 @@ function CreateStoryPage() {
     return signed.signedUrl;
   }, [me]);
 
-  const onPickCover = async (file: File) => {
+  // Cover cropping: every picked cover goes through the crop dialog first,
+  // and the original file is kept so the cover can be re-cropped.
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropAspect, setCropAspect] = useState(16 / 9);
+  const coverOriginalRef = useRef<File | null>(null);
+
+  const onPickCover = (file: File) => {
+    coverOriginalRef.current = file;
+    setCropFile(file);
+  };
+
+  const onCoverCropped = async (file: File) => {
+    setCropFile(null);
     setUploading(true);
     try {
       const url = await upload(file);
@@ -86,6 +98,10 @@ function CreateStoryPage() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const recropCover = () => {
+    if (coverOriginalRef.current) setCropFile(coverOriginalRef.current);
   };
 
   const exec = (cmd: string, value?: string) => {
