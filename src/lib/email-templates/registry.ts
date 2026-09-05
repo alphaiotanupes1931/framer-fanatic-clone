@@ -23,6 +23,7 @@ import { template as contentReportTemplate } from './content-report'
 import { template as ticketConfirmationTemplate } from './ticket-confirmation'
 import { template as ticketCancelledTemplate } from './ticket-cancelled'
 import { template as eventInvitationTemplate } from './event-invitation'
+import { template as staffLoginVerifyTemplate } from './staff-login-verify'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'referral-invite': referralInviteTemplate,
@@ -31,4 +32,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'ticket-confirmation': ticketConfirmationTemplate,
   'ticket-cancelled': ticketCancelledTemplate,
   'event-invitation': eventInvitationTemplate,
+  'staff-login-verify': staffLoginVerifyTemplate,
 }
