@@ -17,6 +17,7 @@ import { FollowButton } from "@/components/shared/follow-button";
 import { MentionText } from "@/components/shared/mention-text";
 import { MentionField } from "@/components/shared/mention-input";
 import { LikesListDialog } from "@/components/likes-list-dialog";
+import { RepostEmbed } from "@/components/shared/repost-embed";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -27,6 +28,7 @@ type Post = {
   text_color: string | null; font_size: string | null;
   likes_count: number | null; comments_count: number | null;
   neighborhood: string | null; created_at: string;
+  repost_of_post_id?: string | null; repost_of_event_id?: string | null;
 };
 type Author = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
 type Comment = { id: string; user_id: string; body: string; created_at: string; author?: Author | null };
@@ -165,12 +167,23 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
 
   const initials = (author?.display_name || author?.username || "U").slice(0, 2).toUpperCase();
   const isOwner = meId && meId === post.user_id;
+  const isRepost = !!(post.repost_of_post_id || post.repost_of_event_id);
   const isTextOnly = !hasMedia;
   const authorProfilePath = author?.username ? { to: "/u/$username" as const, params: { username: author.username } } : null;
 
   return (
     <div className={`grid overflow-hidden bg-background ${isTextOnly ? "md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>
-      {isTextOnly && post.content && (
+      {isRepost && (
+        <div className="flex w-full items-start overflow-y-auto overscroll-contain bg-muted/30 p-4 md:max-h-[85vh] md:min-h-[85vh]">
+          <div className="m-auto w-full max-w-xl">
+            {post.content ? (
+              <p className="mb-3 whitespace-pre-wrap break-words text-sm"><MentionText text={post.content} /></p>
+            ) : null}
+            <RepostEmbed postId={post.repost_of_post_id} eventId={post.repost_of_event_id} />
+          </div>
+        </div>
+      )}
+      {!isRepost && isTextOnly && post.content && (
         <div
           className="flex aspect-square w-full overflow-y-auto overscroll-contain p-8 md:aspect-auto md:max-h-[85vh] md:min-h-[85vh]"
           style={{ background: post.bg_color || "#111827", color: post.text_color || "#ffffff" }}

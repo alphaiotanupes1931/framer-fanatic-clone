@@ -68,3 +68,56 @@ export async function repostEvent(eventId: string, note = "") {
   });
   if (error) throw error;
 }
+
+
+/** The id of my repost row for a target, or null when I have not reposted it. */
+export async function myRepostId(target: { postId?: string | null; eventId?: string | null }): Promise<string | null> {
+  const uid = await currentUserId();
+  if (!uid) return null;
+  const col = target.eventId ? "repost_of_event_id" : "repost_of_post_id";
+  const value = target.eventId ?? target.postId;
+  if (!value) return null;
+  const { data } = await supabase
+    .from("posts")
+    .select("id")
+    .eq("user_id", uid)
+    .eq("is_deleted", false)
+    .eq(col, value)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+/** Instagram style: reposting again removes the repost. Returns the new state. */
+export async function toggleRepostPost(originalPostId: string): Promise<boolean> {
+  const uid = await currentUserId();
+  if (!uid) throw new Error("Sign in to repost");
+  const { data: original } = await supabase
+    .from("posts")
+    .select("id, repost_of_post_id, repost_of_event_id")
+    .eq("id", originalPostId)
+    .maybeSingle();
+  const targetEventId = original?.repost_of_post_id ? null : original?.repost_of_event_id ?? null;
+  const targetPostId = targetEventId ? null : original?.repost_of_post_id ?? originalPostId;
+
+  const existingId = await myRepostId({ postId: targetPostId, eventId: targetEventId });
+  if (existingId) {
+    const { error } = await supabase.from("posts").delete().eq("id", existingId);
+    if (error) throw error;
+    return false;
+  }
+  await repostPost(originalPostId);
+  return true;
+}
+
+export async function toggleRepostEvent(eventId: string): Promise<boolean> {
+  const uid = await currentUserId();
+  if (!uid) throw new Error("Sign in to repost");
+  const existingId = await myRepostId({ eventId });
+  if (existingId) {
+    const { error } = await supabase.from("posts").delete().eq("id", existingId);
+    if (error) throw error;
+    return false;
+  }
+  await repostEvent(eventId);
+  return true;
+}

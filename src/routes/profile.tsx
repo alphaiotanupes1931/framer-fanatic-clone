@@ -663,7 +663,11 @@ function ProfilePage() {
                                   fontSize: (p as any).font_size === "sm" ? 16 : (p as any).font_size === "lg" ? 28 : (p as any).font_size === "xl" ? 36 : 20,
                                 }}
                               >
-                                <span className="line-clamp-6 whitespace-pre-wrap break-words">{p.content || "Post"}</span>
+                                <span className="line-clamp-6 whitespace-pre-wrap break-words">
+                                  {(p as any).repost_of_post_id || (p as any).repost_of_event_id
+                                    ? (p.content || ((p as any).repost_of_event_id ? "Reposted event" : "Reposted post"))
+                                    : (p.content || "Post")}
+                                </span>
                               </div>
                             )}
                             {media.length > 1 && (
