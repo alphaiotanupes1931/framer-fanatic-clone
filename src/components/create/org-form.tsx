@@ -309,14 +309,41 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={staffCopy.emailLabel}>
-              <Input
-                type="email"
-                value={staff.username}
-                autoComplete="off"
-                maxLength={80}
-                placeholder={staffCopy.placeholder}
-                onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
-              />
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={staff.username}
+                  autoComplete="off"
+                  maxLength={80}
+                  placeholder={staffCopy.placeholder}
+                  aria-invalid={!!staffEmailError && staffTouched}
+                  className={staffEmailError && staffTouched ? "border-red-400 focus-visible:ring-red-300" : isVerified ? "border-green-500" : undefined}
+                  onBlur={() => setStaffTouched(true)}
+                  onChange={(e) => setStaff((s) => ({ ...s, username: e.target.value }))}
+                />
+                {isVerified ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-green-50 px-2.5 text-xs font-semibold text-green-700">
+                    <CheckCircle2 className="h-4 w-4" /> Verified
+                  </span>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={sendCode}
+                    disabled={sendingCode || !staffEmail || !!staffEmailError}
+                  >
+                    {sendingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : codePending ? "Resend" : "Send code"}
+                  </Button>
+                )}
+              </div>
+              {staffEmailError && staffTouched ? (
+                <p className="text-xs text-red-600">{staffEmailError}</p>
+              ) : isVerified ? (
+                <p className="text-xs text-green-700">This email is verified. The staff login will work as soon as the page is created.</p>
+              ) : (
+                <p className="text-xs text-neutral-500">Tap Send code to verify this email now, or verify it after the page is created.</p>
+              )}
             </Field>
             <Field label={staffCopy.passwordLabel}>
               <Input
@@ -325,10 +352,37 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
                 autoComplete="new-password"
                 maxLength={72}
                 placeholder="At least 8 characters"
+                aria-invalid={!!staffPasswordError && staffTouched}
+                className={staffPasswordError && staffTouched ? "border-red-400 focus-visible:ring-red-300" : undefined}
+                onBlur={() => setStaffTouched(true)}
                 onChange={(e) => setStaff((s) => ({ ...s, password: e.target.value }))}
               />
+              {staffPasswordError && staffTouched && <p className="text-xs text-red-600">{staffPasswordError}</p>}
             </Field>
           </div>
+          {codePending && (
+            <div className="rounded-md border border-[#d4580a]/30 bg-white p-3">
+              <p className="text-xs text-neutral-700">
+                We sent a 6 digit code to <span className="font-semibold">{codeSentTo}</span>. Enter it here to verify.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <Input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={staffCode}
+                  onChange={(e) => setStaffCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void checkCode(); } }}
+                  className="max-w-[160px] text-center tracking-[0.35em]"
+                />
+                <Button type="button" onClick={checkCode} disabled={checkingCode || staffCode.length !== 6}>
+                  {checkingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Verify
+                </Button>
+              </div>
+            </div>
+          )}
           <p className="text-xs text-neutral-500">{staffCopy.footer}</p>
         </div>
       )}
