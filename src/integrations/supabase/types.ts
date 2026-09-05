@@ -1833,6 +1833,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          email_verified: boolean
           id: string
           last_login_at: string | null
           organization_id: string
@@ -1841,10 +1842,14 @@ export type Database = {
           staff_user_id: string | null
           updated_at: string
           username: string
+          verification_code: string | null
+          verification_expires_at: string | null
+          verified_at: string | null
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          email_verified?: boolean
           id?: string
           last_login_at?: string | null
           organization_id: string
@@ -1853,10 +1858,14 @@ export type Database = {
           staff_user_id?: string | null
           updated_at?: string
           username: string
+          verification_code?: string | null
+          verification_expires_at?: string | null
+          verified_at?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          email_verified?: boolean
           id?: string
           last_login_at?: string | null
           organization_id?: string
@@ -1865,6 +1874,9 @@ export type Database = {
           staff_user_id?: string | null
           updated_at?: string
           username?: string
+          verification_code?: string | null
+          verification_expires_at?: string | null
+          verified_at?: string | null
         }
         Relationships: [
           {
