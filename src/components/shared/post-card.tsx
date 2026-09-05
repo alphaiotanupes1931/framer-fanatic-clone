@@ -23,7 +23,7 @@ import { FollowButton } from "@/components/shared/follow-button";
 import { MentionText } from "@/components/shared/mention-text";
 import { MentionField } from "@/components/shared/mention-input";
 import { RepostEmbed } from "@/components/shared/repost-embed";
-import { repostPost } from "@/lib/repost";
+import { myRepostId, toggleRepostPost } from "@/lib/repost";
 
 type Post = {
   id: string;
@@ -78,6 +78,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const [mediaIdx, setMediaIdx] = useState(0);
   const isAdmin = useIsAdmin();
   const [reposting, setReposting] = useState(false);
+  const [reposted, setReposted] = useState(false);
   const isRepost = !!(post.repost_of_post_id || post.repost_of_event_id);
   const [isFeatured, setIsFeatured] = useState(!!post.featured);
   const [featuring, setFeaturing] = useState(false);
@@ -132,14 +133,29 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     }
   };
 
+  // Instagram style toggle: highlighted while it is on your page, click to undo.
+  useEffect(() => {
+    let cancelled = false;
+    if (!currentUserId) { setReposted(false); return; }
+    const targetPost = post.repost_of_post_id ?? (post.repost_of_event_id ? null : post.id);
+    void myRepostId({ postId: targetPost, eventId: post.repost_of_event_id ?? null }).then((id) => {
+      if (!cancelled) setReposted(!!id);
+    });
+    return () => { cancelled = true; };
+  }, [currentUserId, post.id, post.repost_of_post_id, post.repost_of_event_id]);
+
   const doRepost = async () => {
     if (!currentUserId) { toast.error("Sign in to repost"); return; }
     if (reposting) return;
     setReposting(true);
+    const next = !reposted;
+    setReposted(next);
     try {
-      await repostPost(post.id);
-      toast.success("Reposted to your page");
+      const now = await toggleRepostPost(post.id);
+      setReposted(now);
+      toast.success(now ? "Reposted to your page" : "Repost removed");
     } catch (e) {
+      setReposted(!next);
       toast.error(e instanceof Error ? e.message : "Could not repost");
     } finally {
       setReposting(false);
@@ -425,7 +441,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         <button onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-4 w-4" />
         </button>
-        <button onClick={doRepost} disabled={reposting} className="flex items-center gap-1.5 transition hover:text-foreground disabled:opacity-50" aria-label="Repost to your page" title="Repost to your page">
+        <button onClick={doRepost} disabled={reposting} className={`flex items-center gap-1.5 transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"} aria-pressed={reposted}>
           <Repeat2 className="h-4 w-4" />
         </button>
         <button onClick={toggleSave} className={`ml-auto flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>

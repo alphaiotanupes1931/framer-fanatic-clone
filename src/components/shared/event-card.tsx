@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { externalShare } from "@/lib/share-preview";
-import { repostEvent } from "@/lib/repost";
+import { myRepostId, toggleRepostEvent } from "@/lib/repost";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img } from "@/components/shared/smart-img";
 import { stripHtml, stripUrls } from "@/lib/text-utils";
@@ -55,6 +55,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [reposting, setReposting] = useState(false);
+  const [reposted, setReposted] = useState(false);
   const eventUrl = siteUrl(`/events/${event.id}`);
   const previewText = stripUrls(stripHtml(event.description));
 
@@ -86,8 +87,9 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
     if (reposting) return;
     setReposting(true);
     try {
-      await repostEvent(event.id);
-      toast.success("Reposted to your page");
+      const now = await toggleRepostEvent(event.id);
+      setReposted(now);
+      toast.success(now ? "Reposted to your page" : "Repost removed");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not repost");
     } finally {
@@ -194,7 +196,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
         <button type="button" onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-4 w-4" />
         </button>
-        <button type="button" onClick={doRepost} disabled={reposting} className="flex items-center gap-1.5 transition hover:text-foreground disabled:opacity-50" aria-label="Repost to your page" title="Repost to your page">
+        <button type="button" onClick={doRepost} disabled={reposting} aria-pressed={reposted} className={`flex items-center gap-1.5 transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"}>
           <Repeat2 className="h-4 w-4" />
         </button>
         <ReportButton contentType="event" contentId={event.id} className="ml-auto" />
