@@ -301,7 +301,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
           )}
           <div className="px-4 pb-3 pt-4 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
 
-          <ul className="space-y-3 px-4 pb-4 pt-1">
+          <ul className="space-y-4 px-4 pb-4 pt-4">
             {comments.length === 0 && (
               <li className="flex flex-col items-center gap-1.5 py-6 text-center">
                 <MessageCircle className="h-6 w-6 text-muted-foreground/40" />
