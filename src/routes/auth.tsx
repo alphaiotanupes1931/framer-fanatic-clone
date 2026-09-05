@@ -64,7 +64,21 @@ function AuthPage() {
     } catch { /* ignore */ }
   }, []);
 
+  // An account that is signed in but never finished setup. We do NOT bounce it
+  // straight back into onboarding: someone who stepped out to sign in as
+  // somebody else would otherwise be trapped. They pick: continue or sign out.
+  const [unfinished, setUnfinished] = useState<string | null>(null);
+
   useEffect(() => {
+    // Only a confirmation link arrival (tokens in the URL, or a session minted
+    // in the last couple of minutes) should auto-continue into onboarding.
+    const arrivedFromConfirmLink = (() => {
+      try {
+        const qs = new URLSearchParams(window.location.search);
+        const hash = window.location.hash || "";
+        return qs.has("code") || qs.has("token_hash") || hash.includes("access_token") || hash.includes("type=signup");
+      } catch { return false; }
+    })();
     void (async () => {
       // Validate against the server: a deleted account leaves a stale token in
       // storage, and trusting it here caused an /auth <-> /dashboard loop.
@@ -74,10 +88,17 @@ function AuthPage() {
       // server-side flag rather than anything saved locally at signup.
       const { data: p } = await supabase.from("profiles").select(ONBOARDING_FIELDS).eq("id", uid).maybeSingle();
       if (profileNeedsOnboarding(p as any) && !getStaffMode()) {
-        // Keep the destination stored so onboarding can finish the trip.
-        const pending = popPostAuthRedirect(false);
-        if (pending) setPostAuthRedirect(pending);
-        navigate({ to: "/onboarding" });
+        const { data: s } = await supabase.auth.getSession();
+        const lastSignIn = s.session?.user.last_sign_in_at ? Date.parse(s.session.user.last_sign_in_at) : 0;
+        const justSignedIn = Date.now() - lastSignIn < 2 * 60 * 1000;
+        if (arrivedFromConfirmLink || justSignedIn) {
+          // Keep the destination stored so onboarding can finish the trip.
+          const pending = popPostAuthRedirect(false);
+          if (pending) setPostAuthRedirect(pending);
+          navigate({ to: "/onboarding" });
+        } else {
+          setUnfinished(s.session?.user.email ?? "your account");
+        }
         return;
       }
       const dest = redirect || popPostAuthRedirect();
@@ -85,6 +106,13 @@ function AuthPage() {
       navigate({ to: "/dashboard" });
     })();
   }, [navigate, redirect]);
+
+  const signOutUnfinished = async () => {
+    try { localStorage.removeItem("pb_pending_signup"); } catch { /* ignore */ }
+    await supabase.auth.signOut();
+    setUnfinished(null);
+    toast.success("Signed out. You can sign in with another account.");
+  };
 
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -224,6 +252,22 @@ function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {unfinished && !awaitingConfirm && (
+            <div className="mb-4 rounded-lg border border-orange-300 bg-orange-50 p-3 text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {unfinished} is still signed in and hasn't finished setup.
+              </p>
+              <div className="mt-2 flex justify-center gap-2">
+                <Button size="sm" className="bg-orange-600 text-white hover:bg-orange-700" onClick={() => navigate({ to: "/onboarding" })}>
+                  Continue setup
+                </Button>
+                <Button size="sm" variant="outline" onClick={signOutUnfinished}>
+                  Sign out
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">Or just sign in below with a different account.</p>
+            </div>
+          )}
           {(referrerName || invited) && !awaitingConfirm && (
             <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-center">
               <p className="text-sm font-semibold text-foreground">

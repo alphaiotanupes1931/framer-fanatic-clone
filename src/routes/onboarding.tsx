@@ -22,7 +22,7 @@ import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { popPostAuthRedirect } from "@/lib/pending-join";
-import { getStaffMode } from "@/lib/staff-mode";
+import { clearStaffMode, getStaffMode } from "@/lib/staff-mode";
 
 export const Route = createFileRoute("/onboarding")({
   validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
@@ -574,6 +574,23 @@ function Onboarding() {
                 </Button>
               </div>
             </>
+          )}
+          {!previewMode && (
+            <p className="pt-2 text-center text-xs text-neutral-500">
+              Not you, or want a different account?{" "}
+              <button
+                type="button"
+                className="font-semibold text-orange-600 underline"
+                onClick={async () => {
+                  try { localStorage.removeItem("pb_pending_signup"); } catch { /* ignore */ }
+                  clearStaffMode();
+                  await supabase.auth.signOut();
+                  navigate({ to: "/auth", replace: true });
+                }}
+              >
+                Sign out
+              </button>
+            </p>
           )}
         </CardContent>
       </Card>
