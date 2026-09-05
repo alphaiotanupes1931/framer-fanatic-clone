@@ -144,15 +144,19 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [likeRows, repostRows] = await Promise.all([
+      const [likeRows, repostRows, commentRows] = await Promise.all([
         supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", originalPostId).limit(3),
         supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", originalPostId).eq("is_deleted", false).limit(3),
+        post.repost_of_post_id
+          ? supabase.from("post_comments").select("id", { count: "exact", head: true }).eq("post_id", originalPostId)
+          : Promise.resolve({ count: null } as { count: number | null }),
       ]);
       if (cancelled) return;
       setLikerIds(((likeRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setReposterIds(((repostRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setRepostCount(repostRows.count ?? ((repostRows.data ?? []) as unknown[]).length);
       if (post.repost_of_post_id) setLikes(likeRows.count ?? ((likeRows.data ?? []) as unknown[]).length);
+      if (post.repost_of_post_id && typeof commentRows.count === "number") setCommentCount(commentRows.count);
     })();
     return () => { cancelled = true; };
   }, [originalPostId, post.repost_of_post_id, likes, reposted]);
@@ -184,6 +188,12 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     } finally {
       setReposting(false);
     }
+  };
+
+  // On a repost card, liking / reposting / commenting sends you to the original first.
+  const goOriginal = () => {
+    if (post.repost_of_post_id) navigate({ to: "/posts/$postId", params: { postId: post.repost_of_post_id } });
+    else if (post.repost_of_event_id) navigate({ to: "/events/$eventId", params: { eventId: post.repost_of_event_id } });
   };
 
   const share = () => setShareOpen(true);
@@ -444,8 +454,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       )}
       <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
         <div className="flex items-center gap-1.5">
-          <button onClick={toggleLike} className={`flex items-center transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={liked ? "Unlike" : "Like"}>
-            <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+          <button onClick={isRepost ? goOriginal : toggleLike} className={`flex items-center transition ${liked && !isRepost ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={isRepost ? "Open the original post to like it" : liked ? "Unlike" : "Like"} title={isRepost ? "Open the original to like" : undefined}>
+            <Heart className={`h-4 w-4 ${liked && !isRepost ? "fill-current" : ""}`} />
           </button>
           {likes > 0 ? (
             <Facepile userIds={likerIds} total={likes} onClick={() => setLikesOpen(true)} label="See who liked this" />
@@ -455,7 +465,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button onClick={doRepost} disabled={reposting} className={`flex items-center transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"} aria-pressed={reposted}>
+          <button onClick={isRepost ? goOriginal : doRepost} disabled={reposting} className={`flex items-center transition disabled:opacity-50 ${reposted && !isRepost ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={isRepost ? "Open the original post to repost it" : reposted ? "Remove repost" : "Repost to your page"} title={isRepost ? "Open the original to repost" : reposted ? "Remove repost" : "Repost to your page"} aria-pressed={isRepost ? undefined : reposted}>
             <Repeat2 className="h-4 w-4" />
           </button>
           {repostCount > 0 ? (
@@ -465,7 +475,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           )}
         </div>
 
-        <button onClick={openComments} className="flex items-center gap-1.5 transition hover:text-foreground">
+        <button onClick={isRepost ? goOriginal : openComments} className="flex items-center gap-1.5 transition hover:text-foreground" title={isRepost ? "Open the original to comment" : undefined}>
           <MessageCircle className="h-4 w-4" /> {commentCount}
         </button>
         <button onClick={share} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
