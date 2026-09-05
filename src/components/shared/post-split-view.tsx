@@ -224,7 +224,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
         </div>
       )}
       <div className="flex min-w-0 flex-col">
-        <header className="flex items-center gap-3 border-b border-border px-4 py-3">
+        <header className="flex items-center gap-3 border-b border-border px-4 py-4">
           {author && authorProfilePath ? (
             <Link {...authorProfilePath} className="flex min-w-0 items-center gap-2.5">
               <Avatar className="h-9 w-9 shrink-0">
@@ -293,15 +293,15 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
                 <div className="m-auto"><MentionText text={post.content} /></div>
               </div>
             ) : (
-              <div className="px-4 py-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
+              <div className="px-4 py-4 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
                 <span className="mr-2 font-semibold">{author?.display_name || author?.username || "Someone"}</span>
                 <MentionText text={post.content} />
               </div>
             )
           )}
-          <div className="px-4 pb-3 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
+          <div className="px-4 pb-3 pt-4 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
 
-          <ul className="space-y-3 px-4 pb-4 pt-1">
+          <ul className="space-y-4 px-4 pb-4 pt-4">
             {comments.length === 0 && (
               <li className="flex flex-col items-center gap-1.5 py-6 text-center">
                 <MessageCircle className="h-6 w-6 text-muted-foreground/40" />
