@@ -18,6 +18,7 @@ import { Img } from "@/components/shared/smart-img";
 import { useSmartImageUrl } from "@/components/smart-image";
 import { pageHead } from "@/lib/seo";
 import { popPostAuthRedirect } from "@/lib/pending-join";
+import { getStaffMode } from "@/lib/staff-mode";
 import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
 
 export const Route = createFileRoute("/")({
@@ -68,7 +69,7 @@ function Index() {
           .select(ONBOARDING_FIELDS)
           .eq("id", uid)
           .maybeSingle();
-        if (profileNeedsOnboarding(p as never)) {
+        if (profileNeedsOnboarding(p as never) && !getStaffMode()) {
           window.location.replace("/onboarding");
           return;
         }

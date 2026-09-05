@@ -22,6 +22,7 @@ import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { popPostAuthRedirect } from "@/lib/pending-join";
+import { getStaffMode } from "@/lib/staff-mode";
 
 export const Route = createFileRoute("/onboarding")({
   validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
@@ -97,6 +98,11 @@ function Onboarding() {
 
   const navigate = useNavigate();
   const { preview: previewMode } = Route.useSearch();
+  // A staff login manages one page and has no personal profile to set up.
+  const staffMode = getStaffMode();
+  useEffect(() => {
+    if (staffMode) navigate({ to: "/o/$slug", params: { slug: staffMode.slug }, replace: true });
+  }, [staffMode, navigate]);
   const draft = useRef<Partial<OnboardingDraft>>(loadDraft()).current;
   // 1 = how you want to join (Personal, Artist, Arts Org, Business or Visitor), 2 = photo + location, 3 = page setup
   // The photo cannot be restored, so never resume past the photo step.

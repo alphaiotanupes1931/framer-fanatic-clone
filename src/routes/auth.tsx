@@ -16,6 +16,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Img } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
 import { ONBOARDING_FIELDS, profileNeedsOnboarding } from "@/lib/onboarding";
+import { getStaffMode } from "@/lib/staff-mode";
 import { popPostAuthRedirect as popStoredRedirect, setPostAuthRedirect } from "@/lib/pending-join";
 
 function popPostAuthRedirect(consume = true): string | null {
@@ -72,7 +73,7 @@ function AuthPage() {
       // Confirmation links can land here on a different device, so trust the
       // server-side flag rather than anything saved locally at signup.
       const { data: p } = await supabase.from("profiles").select(ONBOARDING_FIELDS).eq("id", uid).maybeSingle();
-      if (profileNeedsOnboarding(p as any)) {
+      if (profileNeedsOnboarding(p as any) && !getStaffMode()) {
         // Keep the destination stored so onboarding can finish the trip.
         const pending = popPostAuthRedirect(false);
         if (pending) setPostAuthRedirect(pending);
@@ -118,7 +119,7 @@ function AuthPage() {
       if (p?.must_reset_password) {
         return navigate({ to: "/reset-password" });
       }
-      const needsOnboarding = profileNeedsOnboarding(p as any);
+      const needsOnboarding = profileNeedsOnboarding(p as any) && !getStaffMode();
       if (needsOnboarding) {
         const pending = redirect || popPostAuthRedirect(false);
         if (pending) setPostAuthRedirect(pending);

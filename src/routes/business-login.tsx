@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { staffLogin } from "@/lib/staff-login.functions";
-import { setStaffMode } from "@/lib/staff-mode";
+import { clearStaffMode, setStaffMode } from "@/lib/staff-mode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,9 +36,11 @@ function BusinessLoginPage() {
     setBusy(true);
     try {
       const res = await staffLogin({ data: { username: username.trim(), password } });
-      const { error } = await supabase.auth.signInWithPassword({ email: res.email, password });
-      if (error) throw error;
+      // Mark staff mode BEFORE the session appears: the auth state change kicks
+      // off the personal onboarding check, which must skip staff identities.
       setStaffMode({ slug: res.slug, name: res.name });
+      const { error } = await supabase.auth.signInWithPassword({ email: res.email, password });
+      if (error) { clearStaffMode(); throw error; }
       toast.success(`Signed in to ${res.name}`);
       navigate({ to: "/o/$slug", params: { slug: res.slug } });
     } catch (err) {
