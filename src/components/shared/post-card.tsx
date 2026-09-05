@@ -24,6 +24,7 @@ import { MentionText } from "@/components/shared/mention-text";
 import { MentionField } from "@/components/shared/mention-input";
 import { RepostEmbed } from "@/components/shared/repost-embed";
 import { myRepostId, toggleRepostPost } from "@/lib/repost";
+import { Facepile } from "@/components/shared/facepile";
 
 type Post = {
   id: string;
@@ -79,6 +80,9 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const isAdmin = useIsAdmin();
   const [reposting, setReposting] = useState(false);
   const [reposted, setReposted] = useState(false);
+  const [likerIds, setLikerIds] = useState<string[]>([]);
+  const [reposterIds, setReposterIds] = useState<string[]>([]);
+  const [repostsOpen, setRepostsOpen] = useState(false);
   const isRepost = !!(post.repost_of_post_id || post.repost_of_event_id);
   const [isFeatured, setIsFeatured] = useState(!!post.featured);
   const [featuring, setFeaturing] = useState(false);
@@ -132,6 +136,21 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       setLikes((n) => n + (wasLiked ? 1 : -1));
     }
   };
+
+  // Who liked and who reposted, for the little photo stacks under the post.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [likeRows, repostRows] = await Promise.all([
+        supabase.from("post_likes").select("user_id").eq("post_id", post.id).limit(3),
+        supabase.from("posts").select("user_id").eq("repost_of_post_id", post.id).eq("is_deleted", false).limit(3),
+      ]);
+      if (cancelled) return;
+      setLikerIds(((likeRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
+      setReposterIds(((repostRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
+    })();
+    return () => { cancelled = true; };
+  }, [post.id, likes, reposted]);
 
   // Instagram style toggle: highlighted while it is on your page, click to undo.
   useEffect(() => {
@@ -419,17 +438,26 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
       )}
       <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button onClick={toggleLike} className={`flex items-center transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={liked ? "Unlike" : "Like"}>
             <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
           </button>
-          <button
-            onClick={() => likes > 0 && setLikesOpen(true)}
-            className="transition hover:text-foreground hover:underline"
-            title="See who liked this"
-          >
-            {likes}
+          {likes > 0 ? (
+            <Facepile userIds={likerIds} total={likes} onClick={() => setLikesOpen(true)} label="See who liked this" />
+          ) : (
+            <span className="text-xs">0</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button onClick={doRepost} disabled={reposting} className={`flex items-center transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"} aria-pressed={reposted}>
+            <Repeat2 className="h-4 w-4" />
           </button>
+          {reposterIds.length > 0 ? (
+            <Facepile userIds={reposterIds} total={reposterIds.length} onClick={() => setRepostsOpen(true)} label="See who reposted this" />
+          ) : (
+            <span className="text-xs">0</span>
+          )}
         </div>
 
         <button onClick={openComments} className="flex items-center gap-1.5 transition hover:text-foreground">
@@ -440,9 +468,6 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </button>
         <button onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-4 w-4" />
-        </button>
-        <button onClick={doRepost} disabled={reposting} className={`flex items-center gap-1.5 transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"} aria-pressed={reposted}>
-          <Repeat2 className="h-4 w-4" />
         </button>
         <button onClick={toggleSave} className={`ml-auto flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
