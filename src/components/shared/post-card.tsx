@@ -186,6 +186,12 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     }
   };
 
+  // On a repost card, liking / reposting / commenting sends you to the original first.
+  const goOriginal = () => {
+    if (post.repost_of_post_id) navigate({ to: "/posts/$postId", params: { postId: post.repost_of_post_id } });
+    else if (post.repost_of_event_id) navigate({ to: "/events/$eventId", params: { eventId: post.repost_of_event_id } });
+  };
+
   const share = () => setShareOpen(true);
   const postUrl = siteUrl(`/posts/${post.id}`);
   const sendExternal = () => void externalShare(postUrl, post.content?.slice(0, 80) || "A post on Planet Baltimore");
