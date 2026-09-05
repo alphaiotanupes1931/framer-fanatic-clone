@@ -60,6 +60,13 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   const previewText = stripUrls(stripHtml(event.description));
 
   useEffect(() => {
+    if (!me?.id) { setReposted(false); return; }
+    let cancelled = false;
+    void myRepostId({ eventId: event.id }).then((id) => { if (!cancelled) setReposted(!!id); });
+    return () => { cancelled = true; };
+  }, [me?.id, event.id]);
+
+  useEffect(() => {
     if (compact || !me?.id) return;
     let cancelled = false;
     (async () => {
