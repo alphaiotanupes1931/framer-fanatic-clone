@@ -22,7 +22,7 @@ import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { popPostAuthRedirect } from "@/lib/pending-join";
-import { getStaffMode } from "@/lib/staff-mode";
+import { clearStaffMode, getStaffMode } from "@/lib/staff-mode";
 
 export const Route = createFileRoute("/onboarding")({
   validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
