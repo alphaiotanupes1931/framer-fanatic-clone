@@ -252,6 +252,22 @@ function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {unfinished && !awaitingConfirm && (
+            <div className="mb-4 rounded-lg border border-orange-300 bg-orange-50 p-3 text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {unfinished} is still signed in and hasn't finished setup.
+              </p>
+              <div className="mt-2 flex justify-center gap-2">
+                <Button size="sm" className="bg-orange-600 text-white hover:bg-orange-700" onClick={() => navigate({ to: "/onboarding" })}>
+                  Continue setup
+                </Button>
+                <Button size="sm" variant="outline" onClick={signOutUnfinished}>
+                  Sign out
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">Or just sign in below with a different account.</p>
+            </div>
+          )}
           {(referrerName || invited) && !awaitingConfirm && (
             <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-center">
               <p className="text-sm font-semibold text-foreground">
