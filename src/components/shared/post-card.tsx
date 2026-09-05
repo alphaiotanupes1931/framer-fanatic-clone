@@ -141,8 +141,6 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   };
 
   // Who liked and who reposted, for the little photo stacks under the post.
-  // On a repost card the numbers belong to the original post, not the wrapper.
-  const originalPostId = post.repost_of_post_id ?? post.id;
   useEffect(() => {
     let cancelled = false;
     (async () => {
