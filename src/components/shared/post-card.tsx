@@ -132,8 +132,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     setLiked(!wasLiked);
     setLikes((n) => n + (wasLiked ? -1 : 1));
     const res = wasLiked
-      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", currentUserId)
-      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: currentUserId });
+      ? await supabase.from("post_likes").delete().eq("post_id", originalPostId).eq("user_id", currentUserId)
+      : await supabase.from("post_likes").insert({ post_id: originalPostId, user_id: currentUserId });
     if (res.error) {
       setLiked(wasLiked);
       setLikes((n) => n + (wasLiked ? 1 : -1));
@@ -536,8 +536,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           </div>
         </div>
       )}
-      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={post.id} kind="post" />
-      <LikesListDialog open={repostsOpen} onOpenChange={setRepostsOpen} targetId={post.id} kind="repost-post" />
+      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={originalPostId} kind="post" />
+      <LikesListDialog open={repostsOpen} onOpenChange={setRepostsOpen} targetId={originalPostId} kind="repost-post" />
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
       <ShareToUsersDialog
         open={shareOpen}
