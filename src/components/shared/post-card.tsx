@@ -1,7 +1,7 @@
 import { siteUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Heart, MessageCircle, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, Share2, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Trash2, Bookmark, Star, TrendingUp, Send, Share2, ChevronLeft, ChevronRight, Pencil, Repeat2 } from "lucide-react";
 import { Flag, Link2 as LinkIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ import { useReaction } from "@/hooks/use-reaction";
 import { FollowButton } from "@/components/shared/follow-button";
 import { MentionText } from "@/components/shared/mention-text";
 import { MentionField } from "@/components/shared/mention-input";
+import { RepostEmbed } from "@/components/shared/repost-embed";
+import { repostPost } from "@/lib/repost";
 
 type Post = {
   id: string;
@@ -51,6 +53,8 @@ type Post = {
   category?: string | null;
   featured?: boolean | null;
   featured_at?: string | null;
+  repost_of_post_id?: string | null;
+  repost_of_event_id?: string | null;
 };
 
 export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason }: {
@@ -73,6 +77,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const [shareOpen, setShareOpen] = useState(false);
   const [mediaIdx, setMediaIdx] = useState(0);
   const isAdmin = useIsAdmin();
+  const [reposting, setReposting] = useState(false);
+  const isRepost = !!(post.repost_of_post_id || post.repost_of_event_id);
   const [isFeatured, setIsFeatured] = useState(!!post.featured);
   const [featuring, setFeaturing] = useState(false);
   const authorProfilePath = post.author_username ? { to: "/u/$username" as const, params: { username: post.author_username } } : null;
@@ -123,6 +129,20 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     if (res.error) {
       setLiked(wasLiked);
       setLikes((n) => n + (wasLiked ? 1 : -1));
+    }
+  };
+
+  const doRepost = async () => {
+    if (!currentUserId) { toast.error("Sign in to repost"); return; }
+    if (reposting) return;
+    setReposting(true);
+    try {
+      await repostPost(post.id);
+      toast.success("Reposted to your page");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not repost");
+    } finally {
+      setReposting(false);
     }
   };
 
@@ -185,6 +205,11 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
             <TrendingUp className="h-3 w-3" /> {reason}
           </span>
+        </div>
+      )}
+      {isRepost && (
+        <div className="order-0 flex items-center gap-1.5 px-5 pt-3 text-xs font-medium text-muted-foreground">
+          <Repeat2 className="h-3.5 w-3.5" /> {(post.author_name || "Someone")} reposted
         </div>
       )}
       <header className="order-4 mx-3 mb-1 mt-1 flex items-center gap-2.5 rounded-xl bg-muted/40 px-3 py-2 sm:mx-5">
@@ -309,6 +334,11 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           )}
         </div>
       )}
+      {isRepost && (
+        <div className="order-3">
+          <RepostEmbed postId={post.repost_of_post_id} eventId={post.repost_of_event_id} />
+        </div>
+      )}
       {post.link_url && (
         <a
           href={post.link_url}
@@ -394,6 +424,9 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </button>
         <button onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-4 w-4" />
+        </button>
+        <button onClick={doRepost} disabled={reposting} className="flex items-center gap-1.5 transition hover:text-foreground disabled:opacity-50" aria-label="Repost to your page" title="Repost to your page">
+          <Repeat2 className="h-4 w-4" />
         </button>
         <button onClick={toggleSave} className={`ml-auto flex items-center transition ${saved ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={saved ? "Unsave" : "Save"} title={saved ? "Unsave" : "Save"}>
           <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />

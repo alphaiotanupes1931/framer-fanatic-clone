@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/shared/follow-button";
 import { AppLayout } from "@/components/app-layout";
-import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark } from "lucide-react";
+import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, createEventDonationCheckout } from "@/lib/stripe.functions";
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ReportButton } from "@/components/shared/report-button";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { repostEvent } from "@/lib/repost";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { EventSocial } from "@/components/event-social";
 import { RichHtml } from "@/components/rich-html";
@@ -321,6 +322,16 @@ function EventDetail() {
     }
   };
 
+  const repostToFeed = async () => {
+    if (!evt) return;
+    try {
+      await repostEvent(evt.id);
+      toast.success("Reposted to your page");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not repost");
+    }
+  };
+
   const shareExternal = () => {
     void externalShare(window.location.href, evt?.title || "Event", evt?.description || undefined);
   };
@@ -598,6 +609,9 @@ function EventDetail() {
           <div className="flex items-center gap-2">
           <Button onClick={() => setShareOpen(true)} variant="outline" className="h-10 flex-1 rounded-full font-medium gap-2" aria-label="Share">
             <Send className="w-4 h-4 -rotate-45" />Share
+          </Button>
+          <Button onClick={() => void repostToFeed()} variant="outline" className="h-10 flex-1 rounded-full font-medium gap-2" aria-label="Repost to your page">
+            <Repeat2 className="w-4 h-4" />Repost
           </Button>
           <Button
             onClick={async () => {

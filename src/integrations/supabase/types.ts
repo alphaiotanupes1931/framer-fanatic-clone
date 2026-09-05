@@ -2345,6 +2345,8 @@ export type Database = {
           organization_id: string | null
           pin_order: number | null
           post_type: string
+          repost_of_event_id: string | null
+          repost_of_post_id: string | null
           tag: string | null
           text_color: string | null
           user_id: string
@@ -2376,6 +2378,8 @@ export type Database = {
           organization_id?: string | null
           pin_order?: number | null
           post_type?: string
+          repost_of_event_id?: string | null
+          repost_of_post_id?: string | null
           tag?: string | null
           text_color?: string | null
           user_id: string
@@ -2407,6 +2411,8 @@ export type Database = {
           organization_id?: string | null
           pin_order?: number | null
           post_type?: string
+          repost_of_event_id?: string | null
+          repost_of_post_id?: string | null
           tag?: string | null
           text_color?: string | null
           user_id?: string
@@ -2419,6 +2425,20 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_repost_of_event_id_fkey"
+            columns: ["repost_of_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_repost_of_post_id_fkey"
+            columns: ["repost_of_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
         ]

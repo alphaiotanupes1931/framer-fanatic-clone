@@ -1,6 +1,6 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2 } from "lucide-react";
 import { ReportButton } from "@/components/shared/report-button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
 import { externalShare } from "@/lib/share-preview";
+import { repostEvent } from "@/lib/repost";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img } from "@/components/shared/smart-img";
 import { stripHtml, stripUrls } from "@/lib/text-utils";
@@ -53,6 +54,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   const [deleting, setDeleting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [reposting, setReposting] = useState(false);
   const eventUrl = siteUrl(`/events/${event.id}`);
   const previewText = stripUrls(stripHtml(event.description));
 
@@ -79,6 +81,19 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   };
 
   const openShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setShareOpen(true); };
+  const doRepost = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (reposting) return;
+    setReposting(true);
+    try {
+      await repostEvent(event.id);
+      toast.success("Reposted to your page");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not repost");
+    } finally {
+      setReposting(false);
+    }
+  };
   const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(eventUrl, event.title, event.description || undefined); };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -178,6 +193,9 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
         </button>
         <button type="button" onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
           <Share2 className="h-4 w-4" />
+        </button>
+        <button type="button" onClick={doRepost} disabled={reposting} className="flex items-center gap-1.5 transition hover:text-foreground disabled:opacity-50" aria-label="Repost to your page" title="Repost to your page">
+          <Repeat2 className="h-4 w-4" />
         </button>
         <ReportButton contentType="event" contentId={event.id} className="ml-auto" />
         {canDelete && (
