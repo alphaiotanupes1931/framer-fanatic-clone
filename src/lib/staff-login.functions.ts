@@ -431,3 +431,28 @@ export const resendStaffVerification = createServerFn({ method: "POST" })
     await sendStaffCode(data.email, code, org.name ?? "your page");
     return { sent: true, alreadyVerified: false };
   });
+
+/**
+ * Public pre-signup check: returns a plain-language reason this email cannot
+ * be used for a new account (already a staff login or an existing account),
+ * or null when it is available. Never reveals which kind of account exists
+ * beyond "already in use".
+ */
+export const signupEmailProblem = createServerFn({ method: "GET" })
+  .inputValidator((data) => {
+    const email = String((data as { email?: string } | null)?.email ?? "").trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) throw new Error("Enter a valid email address");
+    return { email };
+  })
+  .handler(async ({ data }) => {
+    const found = await authUserByEmail(data.email);
+    if (found) return "That email is already in use. Try signing in instead.";
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: staff } = await supabaseAdmin
+      .from("organization_staff_logins")
+      .select("id")
+      .ilike("username", data.email)
+      .maybeSingle();
+    if (staff) return "That email is already in use as a staff login. Sign in on the staff login page.";
+    return null;
+  });
