@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ReportButton } from "@/components/shared/report-button";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
+import { repostEvent } from "@/lib/repost";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { EventSocial } from "@/components/event-social";
 import { RichHtml } from "@/components/rich-html";
@@ -318,6 +319,16 @@ function EventDetail() {
       toast.error(msg || "Planet Baltimore could not complete your RSVP. Please try again.");
     } finally {
       setRsvping(false);
+    }
+  };
+
+  const repostToFeed = async () => {
+    if (!evt) return;
+    try {
+      await repostEvent(evt.id);
+      toast.success("Reposted to your page");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not repost");
     }
   };
 
