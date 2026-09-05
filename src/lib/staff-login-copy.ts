@@ -1,3 +1,5 @@
+import { siteUrl } from "@/lib/utils";
+
 /**
  * Wording for the separate staff / board logins that page owners can hand out.
  *
@@ -67,8 +69,7 @@ export function staffLoginCopy(type: string): StaffLoginCopy {
 /** Path staff use to sign in to the one page they were given access to. */
 export const STAFF_LOGIN_PATH = "/business-login";
 
-/** Full, shareable sign-in link for staff. */
+/** Full, shareable sign-in link for staff. Always uses the Planet Baltimore domain. */
 export function staffLoginUrl(): string {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.planetbaltimore.com";
-  return `${origin}${STAFF_LOGIN_PATH}`;
+  return siteUrl(STAFF_LOGIN_PATH);
 }
