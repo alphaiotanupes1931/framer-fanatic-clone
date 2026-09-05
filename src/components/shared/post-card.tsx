@@ -144,15 +144,19 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [likeRows, repostRows] = await Promise.all([
+      const [likeRows, repostRows, commentRows] = await Promise.all([
         supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", originalPostId).limit(3),
         supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", originalPostId).eq("is_deleted", false).limit(3),
+        post.repost_of_post_id
+          ? supabase.from("post_comments").select("id", { count: "exact", head: true }).eq("post_id", originalPostId)
+          : Promise.resolve({ count: null } as { count: number | null }),
       ]);
       if (cancelled) return;
       setLikerIds(((likeRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setReposterIds(((repostRows.data ?? []) as { user_id: string }[]).map((r) => r.user_id));
       setRepostCount(repostRows.count ?? ((repostRows.data ?? []) as unknown[]).length);
       if (post.repost_of_post_id) setLikes(likeRows.count ?? ((likeRows.data ?? []) as unknown[]).length);
+      if (post.repost_of_post_id && typeof commentRows.count === "number") setCommentCount(commentRows.count);
     })();
     return () => { cancelled = true; };
   }, [originalPostId, post.repost_of_post_id, likes, reposted]);
