@@ -18,6 +18,7 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [codeFor, setCodeFor] = useState<string | null>(null);
+  const [replaceId, setReplaceId] = useState<string | null>(null);
   const [code, setCode] = useState("");
 
   const load = async () => {
@@ -30,10 +31,15 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
   const save = async () => {
     setBusy(true);
     try {
-      await setStaffLogin({ data: { organizationId: orgId, username: username.trim(), password } });
-      toast.success("Staff login saved. We sent a verification code to that email.");
-      setCodeFor(username.trim().toLowerCase());
-      setUsername(""); setPassword(""); setOpen(false);
+      const res = await setStaffLogin({ data: { organizationId: orgId, username: username.trim(), password, ...(replaceId ? { replaceId } : {}) } });
+      if (res?.needsVerification === false) {
+        toast.success("Staff login saved and verified.");
+        setCodeFor(null);
+      } else {
+        toast.success("Staff login saved. We sent a verification code to that email, and it has to be verified before it can be used.");
+        setCodeFor(username.trim().toLowerCase());
+      }
+      setUsername(""); setPassword(""); setOpen(false); setReplaceId(null);
       await load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
@@ -85,7 +91,23 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
             <p className="text-xs text-neutral-600">{copy.description}</p>
           </div>
         </div>
-        <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setOpen((o) => {
+              const next = !o;
+              if (next) {
+                const first = rows[0];
+                setReplaceId(first?.id ?? null);
+                setUsername(first?.username ?? "");
+              } else {
+                setReplaceId(null);
+              }
+              return next;
+            });
+          }}
+        >
           {rows.length ? "Change" : "Create"}
         </Button>
       </div>
@@ -133,7 +155,9 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
             <Input id="staff-p" type="password" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
           </div>
           <div className="sm:col-span-2 flex items-center justify-between">
-            <p className="text-xs text-neutral-500">Staff sign in at /business-login</p>
+            <p className="text-xs text-neutral-500">
+              {replaceId ? "Changing the email means the new address has to be verified before it can sign in." : "Staff sign in at /business-login"}
+            </p>
             <Button size="sm" onClick={save} disabled={busy || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username.trim()) || password.length < 8}>
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save
             </Button>
