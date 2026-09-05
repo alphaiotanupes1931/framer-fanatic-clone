@@ -190,11 +190,6 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     }
   };
 
-  // On a repost card, liking / reposting / commenting sends you to the original first.
-  const goOriginal = () => {
-    if (post.repost_of_post_id) navigate({ to: "/posts/$postId", params: { postId: post.repost_of_post_id } });
-    else if (post.repost_of_event_id) navigate({ to: "/events/$eventId", params: { eventId: post.repost_of_event_id } });
-  };
 
   const share = () => setShareOpen(true);
   const postUrl = siteUrl(`/posts/${post.id}`);
@@ -453,31 +448,35 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
       )}
       <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
-        <div className="flex items-center gap-1.5">
-          <button onClick={isRepost ? goOriginal : toggleLike} className={`flex items-center transition ${liked && !isRepost ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={isRepost ? "Open the original post to like it" : liked ? "Unlike" : "Like"} title={isRepost ? "Open the original to like" : undefined}>
-            <Heart className={`h-4 w-4 ${liked && !isRepost ? "fill-current" : ""}`} />
-          </button>
-          {likes > 0 ? (
-            <Facepile userIds={likerIds} total={likes} onClick={() => setLikesOpen(true)} label="See who liked this" />
-          ) : (
-            <span className="text-xs">0</span>
-          )}
-        </div>
+        {!isRepost && (
+          <>
+            <div className="flex items-center gap-1.5">
+              <button onClick={toggleLike} className={`flex items-center transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={liked ? "Unlike" : "Like"}>
+                <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+              </button>
+              {likes > 0 ? (
+                <Facepile userIds={likerIds} total={likes} onClick={() => setLikesOpen(true)} label="See who liked this" />
+              ) : (
+                <span className="text-xs">0</span>
+              )}
+            </div>
 
-        <div className="flex items-center gap-1.5">
-          <button onClick={isRepost ? goOriginal : doRepost} disabled={reposting} className={`flex items-center transition disabled:opacity-50 ${reposted && !isRepost ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={isRepost ? "Open the original post to repost it" : reposted ? "Remove repost" : "Repost to your page"} title={isRepost ? "Open the original to repost" : reposted ? "Remove repost" : "Repost to your page"} aria-pressed={isRepost ? undefined : reposted}>
-            <Repeat2 className="h-4 w-4" />
-          </button>
-          {repostCount > 0 ? (
-            <Facepile userIds={reposterIds} total={repostCount} onClick={() => setRepostsOpen(true)} label="See who reposted this" />
-          ) : (
-            <span className="text-xs">0</span>
-          )}
-        </div>
+            <div className="flex items-center gap-1.5">
+              <button onClick={doRepost} disabled={reposting} className={`flex items-center transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"} aria-pressed={reposted}>
+                <Repeat2 className="h-4 w-4" />
+              </button>
+              {repostCount > 0 ? (
+                <Facepile userIds={reposterIds} total={repostCount} onClick={() => setRepostsOpen(true)} label="See who reposted this" />
+              ) : (
+                <span className="text-xs">0</span>
+              )}
+            </div>
 
-        <button onClick={isRepost ? goOriginal : openComments} className="flex items-center gap-1.5 transition hover:text-foreground" title={isRepost ? "Open the original to comment" : undefined}>
-          <MessageCircle className="h-4 w-4" /> {commentCount}
-        </button>
+            <button onClick={openComments} className="flex items-center gap-1.5 transition hover:text-foreground">
+              <MessageCircle className="h-4 w-4" /> {commentCount}
+            </button>
+          </>
+        )}
         <button onClick={share} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
           <Send className="h-4 w-4 -rotate-45" />
         </button>
