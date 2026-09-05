@@ -31,9 +31,11 @@ export function Facepile({
 
   if (!total) return null;
 
+  // Instagram style: just the stack of faces, no number. The count only shows
+  // while the profile photos have not loaded yet so the row never looks empty.
   return (
-    <button type="button" onClick={onClick} className="flex items-center gap-1 transition hover:text-foreground" title={label} aria-label={label}>
-      {people.length > 0 && (
+    <button type="button" onClick={onClick} className="flex items-center gap-1 transition hover:text-foreground" title={`${label} (${total})`} aria-label={`${label} (${total})`}>
+      {people.length > 0 ? (
         <span className="flex -space-x-2">
           {people.map((p) => (
             <Avatar key={p.id} className="h-5 w-5 border border-background">
@@ -44,8 +46,9 @@ export function Facepile({
             </Avatar>
           ))}
         </span>
+      ) : (
+        <span className="text-xs">{total}</span>
       )}
-      <span className="text-xs">{total}</span>
     </button>
   );
 }
