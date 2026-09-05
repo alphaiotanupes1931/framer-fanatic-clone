@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { isValidLink, normalizeLink } from "@/components/shared/link-fields";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 
 export const Route = createFileRoute("/create-story")({
   component: CreateStoryPage,
