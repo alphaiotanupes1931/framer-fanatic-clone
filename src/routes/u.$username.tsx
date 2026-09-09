@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCategory } from "@/lib/format-category";
+import { titleCase } from "@/lib/utils";
 import { sortPosts } from "@/lib/sort-posts";
 import { PROFILE_TAGS } from "@/lib/categories";
 import { FollowListDialog } from "@/components/follow-list-dialog";
