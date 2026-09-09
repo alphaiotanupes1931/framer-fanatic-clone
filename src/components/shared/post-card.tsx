@@ -546,7 +546,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           </div>
         </div>
       )}
-      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={originalPostId} kind="post" />
+      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={post.id} kind="post" />
       <LikesListDialog open={repostsOpen} onOpenChange={setRepostsOpen} targetId={originalPostId} kind="repost-post" />
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
       <ShareToUsersDialog
