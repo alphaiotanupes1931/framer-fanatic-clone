@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Img } from "@/components/shared/smart-img";
 import { useEffect, useMemo, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
@@ -425,7 +426,7 @@ function FestivalDetailPage() {
         {/* Hero */}
         <section className="overflow-hidden rounded-2xl border border-border bg-card">
           {event.image_url && (
-            <img
+            <Img
               src={event.image_url}
               alt={event.title}
               className="max-h-[420px] w-full object-cover"
@@ -658,7 +659,7 @@ function FestivalDetailPage() {
                     />
                   )}
                   {gallery.map((u) => (
-                    <img
+                    <Img
                       key={u}
                       src={u}
                       alt={`${event.title} photo`}
@@ -772,7 +773,7 @@ function FestivalDetailPage() {
                 <h3 className="font-display text-base font-extrabold text-foreground">Organizer</h3>
                 <div className="mt-3 flex items-start gap-3">
                   {data!.organizer.avatar ? (
-                    <img
+                    <Img
                       src={data!.organizer.avatar}
                       alt={data!.organizer.name}
                       className="h-11 w-11 rounded-full object-cover"

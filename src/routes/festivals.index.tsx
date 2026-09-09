@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Img } from "@/components/shared/smart-img";
 import { useEffect, useMemo, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
@@ -169,7 +170,7 @@ function Thumb({ src, alt, className }: { src: string | null; alt: string; class
   if (!src) {
     return <div className={`bg-gradient-to-br from-[#d4580a] to-[#7a2f04] ${className ?? ""}`} />;
   }
-  return <img src={src} alt={alt} loading="lazy" className={`object-cover ${className ?? ""}`} />;
+  return <Img src={src} alt={alt} loading="lazy" className={`object-cover ${className ?? ""}`} />;
 }
 
 function OrgFollowButton({ orgId, meId }: { orgId: string; meId?: string | null }) {
@@ -761,7 +762,7 @@ function FestivalsPage() {
                   <div key={o.id} className="space-y-2 rounded-xl border border-border bg-card p-4">
                     <div className="flex items-center gap-3">
                       {o.avatar_url ? (
-                        <img
+                        <Img
                           src={o.avatar_url}
                           alt={o.name}
                           className="h-10 w-10 rounded-lg object-cover"
