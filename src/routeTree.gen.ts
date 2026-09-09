@@ -72,6 +72,7 @@ import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
+import { Route as FestivalsEventIdRouteImport } from './routes/festivals.$eventId'
 import { Route as EventsNewRouteImport } from './routes/events.new'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
@@ -410,6 +411,11 @@ const MarketplaceListingIdRoute = MarketplaceListingIdRouteImport.update({
   path: '/$listingId',
   getParentRoute: () => MarketplaceRoute,
 } as any)
+const FestivalsEventIdRoute = FestivalsEventIdRouteImport.update({
+  id: '/$eventId',
+  path: '/$eventId',
+  getParentRoute: () => FestivalsRoute,
+} as any)
 const EventsNewRoute = EventsNewRouteImport.update({
   id: '/events/new',
   path: '/events/new',
@@ -544,7 +550,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
-  '/festivals': typeof FestivalsRoute
+  '/festivals': typeof FestivalsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -584,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
+  '/festivals/$eventId': typeof FestivalsEventIdRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
@@ -630,7 +637,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
-  '/festivals': typeof FestivalsRoute
+  '/festivals': typeof FestivalsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -670,6 +677,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
+  '/festivals/$eventId': typeof FestivalsEventIdRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
@@ -717,7 +725,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
-  '/festivals': typeof FestivalsRoute
+  '/festivals': typeof FestivalsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -757,6 +765,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
+  '/festivals/$eventId': typeof FestivalsEventIdRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
@@ -845,6 +854,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/events/$eventId'
     | '/events/new'
+    | '/festivals/$eventId'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
@@ -931,6 +941,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/events/$eventId'
     | '/events/new'
+    | '/festivals/$eventId'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
@@ -1017,6 +1028,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/events/$eventId'
     | '/events/new'
+    | '/festivals/$eventId'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
@@ -1064,7 +1076,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
   EditProfileRoute: typeof EditProfileRoute
-  FestivalsRoute: typeof FestivalsRoute
+  FestivalsRoute: typeof FestivalsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -1570,6 +1582,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceListingIdRouteImport
       parentRoute: typeof MarketplaceRoute
     }
+    '/festivals/$eventId': {
+      id: '/festivals/$eventId'
+      path: '/$eventId'
+      fullPath: '/festivals/$eventId'
+      preLoaderRoute: typeof FestivalsEventIdRouteImport
+      parentRoute: typeof FestivalsRoute
+    }
     '/events/new': {
       id: '/events/new'
       path: '/events/new'
@@ -1720,6 +1739,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface FestivalsRouteChildren {
+  FestivalsEventIdRoute: typeof FestivalsEventIdRoute
+}
+
+const FestivalsRouteChildren: FestivalsRouteChildren = {
+  FestivalsEventIdRoute: FestivalsEventIdRoute,
+}
+
+const FestivalsRouteWithChildren = FestivalsRoute._addFileChildren(
+  FestivalsRouteChildren,
+)
+
 interface MarketplaceRouteChildren {
   MarketplaceListingIdRoute: typeof MarketplaceListingIdRoute
 }
@@ -1755,7 +1786,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
   EditProfileRoute: EditProfileRoute,
-  FestivalsRoute: FestivalsRoute,
+  FestivalsRoute: FestivalsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,

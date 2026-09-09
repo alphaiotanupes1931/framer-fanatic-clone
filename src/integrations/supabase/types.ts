@@ -592,6 +592,80 @@ export type Database = {
           },
         ]
       }
+      festival_details: {
+        Row: {
+          accessibility: string[]
+          age_range: string | null
+          event_id: string
+          expected_attendance: string | null
+          experiences: Json
+          faqs: Json
+          food: Json
+          footprint: string | null
+          format: string | null
+          hours: string | null
+          performers: Json
+          pet_policy: string | null
+          price_label: string | null
+          rain_or_shine: string | null
+          schedule: Json
+          tagline: string | null
+          updated_at: string
+          vendors: Json
+          website: string | null
+        }
+        Insert: {
+          accessibility?: string[]
+          age_range?: string | null
+          event_id: string
+          expected_attendance?: string | null
+          experiences?: Json
+          faqs?: Json
+          food?: Json
+          footprint?: string | null
+          format?: string | null
+          hours?: string | null
+          performers?: Json
+          pet_policy?: string | null
+          price_label?: string | null
+          rain_or_shine?: string | null
+          schedule?: Json
+          tagline?: string | null
+          updated_at?: string
+          vendors?: Json
+          website?: string | null
+        }
+        Update: {
+          accessibility?: string[]
+          age_range?: string | null
+          event_id?: string
+          expected_attendance?: string | null
+          experiences?: Json
+          faqs?: Json
+          food?: Json
+          footprint?: string | null
+          format?: string | null
+          hours?: string | null
+          performers?: Json
+          pet_policy?: string | null
+          price_label?: string | null
+          rain_or_shine?: string | null
+          schedule?: Json
+          tagline?: string | null
+          updated_at?: string
+          vendors?: Json
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "festival_details_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
