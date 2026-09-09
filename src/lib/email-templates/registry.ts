@@ -24,6 +24,7 @@ import { template as ticketConfirmationTemplate } from './ticket-confirmation'
 import { template as ticketCancelledTemplate } from './ticket-cancelled'
 import { template as eventInvitationTemplate } from './event-invitation'
 import { template as staffLoginVerifyTemplate } from './staff-login-verify'
+import { template as profileCompletionTemplate } from './profile-completion'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'referral-invite': referralInviteTemplate,
@@ -33,4 +34,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'ticket-cancelled': ticketCancelledTemplate,
   'event-invitation': eventInvitationTemplate,
   'staff-login-verify': staffLoginVerifyTemplate,
+  'profile-completion': profileCompletionTemplate,
 }
