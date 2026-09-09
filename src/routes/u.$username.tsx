@@ -85,14 +85,14 @@ function PublicProfilePage() {
   // Stored banner URLs are signed and expire; re-sign at render time.
   const bannerSrc = useSmartImageUrl(profile?.banner_url ?? null, "avatars");
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
+  const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0, referrals: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
   const [tab, setTab] = useState<PersonTabKey>("posts");
   const [posts, setPosts] = useState<any[]>([]);
   const [postViewerIdx, setPostViewerIdx] = useState<number | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
-  const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+  const [followList, setFollowList] = useState<"followers" | "following" | "referrals" | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isFounder, setIsFounder] = useState(false);
   const [founderSaving, setFounderSaving] = useState(false);
@@ -172,12 +172,13 @@ function PublicProfilePage() {
       setProfile(publicProfile || null);
       if (publicProfile) {
         setMuted(window.localStorage.getItem(`pb_mute_user_${publicProfile.id}`) === "1");
-        const [{ count: followers }, { count: following }, { count: posts }] = await Promise.all([
+        const [{ count: followers }, { count: following }, { count: posts }, { count: referrals }] = await Promise.all([
           supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
           supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
           supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id).eq("is_deleted", false).is("organization_id", null),
+          supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", publicProfile.id),
         ]);
-        setStats({ followers: followers || 0, following: following || 0, posts: posts || 0 });
+        setStats({ followers: followers || 0, following: following || 0, posts: posts || 0, referrals: referrals || 0 });
         if (me && me.id !== publicProfile.id) {
           const { data: f } = await supabase
             .from("follows")
@@ -477,7 +478,7 @@ function PublicProfilePage() {
         </div>
 
         {/* Stats */}
-        <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs sm:flex sm:gap-10 sm:text-left sm:text-sm">
+        <div className="mt-5 grid grid-cols-4 gap-2 text-center text-xs sm:flex sm:gap-10 sm:text-left sm:text-sm">
           <div>
             <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.posts}</div>
             <div className="text-neutral-500">Posts</div>
@@ -489,6 +490,10 @@ function PublicProfilePage() {
           <button type="button" onClick={() => setFollowList("following")} className="hover:text-[#d4580a]">
             <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.following}</div>
             <div className="text-neutral-500">Following</div>
+          </button>
+          <button type="button" onClick={() => setFollowList("referrals")} className="hover:text-[#d4580a]">
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{stats.referrals}</div>
+            <div className="text-neutral-500">Referrals</div>
           </button>
         </div>
 
