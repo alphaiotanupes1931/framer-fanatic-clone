@@ -454,8 +454,8 @@ function ProfilePage() {
           </div>
 
           <div className="mt-4">
-            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
-              {profile?.display_name || profile?.username}
+            <div className="flex flex-wrap items-center gap-2 text-xl font-bold text-foreground">
+              {titleCase(profile?.display_name) || profile?.username}
               {isAdmin && (
                 <span
                   className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
