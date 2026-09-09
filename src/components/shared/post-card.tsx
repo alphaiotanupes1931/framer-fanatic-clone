@@ -146,10 +146,10 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     let cancelled = false;
     (async () => {
       const [likeRows, repostRows, commentRows] = await Promise.all([
-        supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", originalPostId).limit(3),
+        supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", post.id).limit(3),
         supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", originalPostId).eq("is_deleted", false).limit(3),
         post.repost_of_post_id
-          ? supabase.from("post_comments").select("id", { count: "exact", head: true }).eq("post_id", originalPostId)
+          ? supabase.from("post_comments").select("id", { count: "exact", head: true }).eq("post_id", post.id)
           : Promise.resolve({ count: null } as { count: number | null }),
       ]);
       if (cancelled) return;
@@ -160,7 +160,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       if (post.repost_of_post_id && typeof commentRows.count === "number") setCommentCount(commentRows.count);
     })();
     return () => { cancelled = true; };
-  }, [originalPostId, post.repost_of_post_id, likes, reposted]);
+  }, [post.id, originalPostId, post.repost_of_post_id, likes, reposted]);
 
   // Instagram style toggle: highlighted while it is on your page, click to undo.
   useEffect(() => {
