@@ -129,7 +129,7 @@ function ProfilePage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [shareExternalOpen, setShareExternalOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
-  const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+  const [followList, setFollowList] = useState<"followers" | "following" | "referrals" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);

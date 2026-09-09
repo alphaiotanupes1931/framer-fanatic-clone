@@ -84,7 +84,7 @@ export function FollowListDialog({
             <p className="p-6 text-center text-sm text-muted-foreground">Loading people...</p>
           ) : people.length === 0 ? (
             <p className="p-6 text-center text-sm text-muted-foreground">
-              {mode === "followers" ? "No followers yet." : "Not following anyone yet."}
+              {mode === "followers" ? "No followers yet." : mode === "following" ? "Not following anyone yet." : "No successful referrals yet."}
             </p>
           ) : people.map((person) => {
             const name = formatName(person.display_name || person.username || "User");
