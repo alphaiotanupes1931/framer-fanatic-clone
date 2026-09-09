@@ -531,9 +531,17 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               {comments.length === 0 ? (
                 <p className="text-sm text-neutral-500">No comments yet. Be the first.</p>
               ) : comments.map((c) => (
-                <div key={c.id} className="text-sm">
-                  <span className="font-semibold">{c.author_name}</span>{" "}
-                  <MentionText text={c.body} className="text-neutral-700" />
+                <div key={c.id} className="flex items-start gap-2 text-sm">
+                  <Avatar className="h-7 w-7 shrink-0">
+                    {c.author_avatar && <SmartAvatarImage src={c.author_avatar} />}
+                    <AvatarFallback className="bg-neutral-200 text-[10px] font-semibold text-neutral-600">
+                      {(c.author_name || "S").slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <span className="font-semibold">{c.author_name}</span>{" "}
+                    <MentionText text={c.body} className="text-neutral-700" />
+                  </div>
                 </div>
               ))}
             </div>
