@@ -252,47 +252,73 @@ function FestivalsPage() {
                 <h2 className="font-display text-lg font-extrabold text-foreground sm:text-xl">
                   Featured Festival
                 </h2>
-                <Link
-                  to="/festivals/$eventId"
-                  params={{ eventId: featured.id }}
+                <div
                   className="block overflow-hidden rounded-2xl border-2 bg-card transition hover:shadow-md"
                   style={{ borderColor: "#d4580a" }}
                 >
                   <div className="grid gap-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-                    {featured.image_url ? (
-                      <img
-                        src={featured.image_url}
-                        alt={featured.title}
-                        loading="lazy"
-                        className="h-56 w-full object-cover md:h-full"
-                      />
-                    ) : (
-                      <div className="h-40 w-full bg-gradient-to-br from-[#d4580a] to-[#7a2f04] md:h-full" />
-                    )}
-                    <div className="space-y-2 p-5">
-                      <h3 className="font-display text-xl font-extrabold text-foreground sm:text-2xl">
-                        {featured.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                        <span>{dateRangeLabel(featured)}</span>
-                        {(featured.neighborhood || featured.venue_name) && (
-                          <span className="inline-flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5" />
-                            {featured.neighborhood || featured.venue_name}
-                          </span>
-                        )}
-                      </div>
-                      {featured.description && (
-                        <p className="line-clamp-4 text-sm text-muted-foreground">
-                          {featured.description.replace(/<[^>]+>/g, "")}
-                        </p>
+                    <Link
+                      to="/festivals/$eventId"
+                      params={{ eventId: featured.id }}
+                      className="block"
+                    >
+                      {featured.image_url ? (
+                        <img
+                          src={featured.image_url}
+                          alt={featured.title}
+                          loading="lazy"
+                          className="h-56 w-full object-cover md:h-full"
+                        />
+                      ) : (
+                        <div className="h-40 w-full bg-gradient-to-br from-[#d4580a] to-[#7a2f04] md:h-full" />
                       )}
-                      <span className="inline-block rounded-full bg-[#d4580a] px-4 py-2 text-xs font-semibold text-white">
-                        Explore Festival
-                      </span>
+                    </Link>
+                    <div className="space-y-2 p-5">
+                      <Link
+                        to="/festivals/$eventId"
+                        params={{ eventId: featured.id }}
+                        className="block space-y-2"
+                      >
+                        <h3 className="font-display text-xl font-extrabold text-foreground sm:text-2xl">
+                          {featured.title}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                          <span>{dateRangeLabel(featured)}</span>
+                          {(featured.neighborhood || featured.venue_name) && (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5" />
+                              {featured.neighborhood || featured.venue_name}
+                            </span>
+                          )}
+                        </div>
+                        {featured.description && (
+                          <p className="line-clamp-4 text-sm text-muted-foreground">
+                            {featured.description.replace(/<[^>]+>/g, "")}
+                          </p>
+                        )}
+                      </Link>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <Link
+                          to="/festivals/$eventId"
+                          params={{ eventId: featured.id }}
+                          className="inline-block rounded-full bg-[#d4580a] px-4 py-2 text-xs font-semibold text-white"
+                        >
+                          Explore Festival
+                        </Link>
+                        <Link
+                          to="/festivals/$eventId"
+                          params={{ eventId: featured.id }}
+                          hash="festival-schedule"
+                          className="inline-block rounded-full border-2 px-4 py-2 text-xs font-semibold text-foreground"
+                          style={{ borderColor: "#d4580a" }}
+                        >
+                          View Schedule
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </Link>
+                </div>
+
               </section>
             )}
 
