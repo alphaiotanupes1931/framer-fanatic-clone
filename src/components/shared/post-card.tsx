@@ -449,7 +449,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
       )}
       <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
-        {!isRepost && (
+        {(
           <>
             <div className="flex items-center gap-1.5">
               <button onClick={toggleLike} className={`flex items-center transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={liked ? "Unlike" : "Like"}>
