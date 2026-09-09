@@ -67,9 +67,10 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
 }) {
   const navigate = useNavigate();
   const [likes, setLikes] = useState(post.likes_count ?? 0);
-  // On a repost card the like/repost numbers belong to the original post, not the wrapper.
+  // Likes and comments belong to this card itself. A repost keeps its own
+  // conversation, separate from the original post it points at.
   const originalPostId = post.repost_of_post_id ?? post.id;
-  const { liked, saved, setLiked, setSaved } = useReaction(originalPostId, currentUserId);
+  const { liked, saved, setLiked, setSaved } = useReaction(post.id, currentUserId);
   const [lightbox, setLightbox] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string }[]>([]);
