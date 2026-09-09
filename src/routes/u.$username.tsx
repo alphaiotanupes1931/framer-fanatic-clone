@@ -373,8 +373,11 @@ function PublicProfilePage() {
       <div className="mt-3">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-[26px]">
-            {profile.display_name || profile.username}
+            {titleCase(profile.display_name) || profile.username}
           </h1>
+          {profile.username && (
+            <p className="w-full text-sm text-muted-foreground">@{profile.username}</p>
+          )}
           {isAdmin && isFounder && (
             <span title="Visible to admins only" className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
               <Star className="h-3 w-3" /> Founding Member
