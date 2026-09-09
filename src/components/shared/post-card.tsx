@@ -73,7 +73,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const { liked, saved, setLiked, setSaved } = useReaction(post.id, currentUserId);
   const [lightbox, setLightbox] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
-  const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string }[]>([]);
+  const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string; author_avatar?: string | null }[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
   const [reportOpen, setReportOpen] = useState(false);
@@ -216,12 +216,16 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       .limit(100);
     const rows = data ?? [];
     const ids = Array.from(new Set(rows.map((r) => r.user_id)));
-    let byId = new Map<string, { display_name: string | null; username: string | null }>();
+    let byId = new Map<string, { display_name: string | null; username: string | null; avatar_url: string | null }>();
     if (ids.length) {
       const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-      byId = new Map((profs ?? []).map((p: { id: string; display_name: string | null; username: string | null }) => [p.id, p]));
+      byId = new Map((profs ?? []).map((p: { id: string; display_name: string | null; username: string | null; avatar_url: string | null }) => [p.id, p]));
     }
-    setComments(rows.map((r) => ({ ...r, author_name: byId.get(r.user_id)?.display_name || byId.get(r.user_id)?.username || "Someone" })));
+    setComments(rows.map((r) => ({
+      ...r,
+      author_name: byId.get(r.user_id)?.display_name || byId.get(r.user_id)?.username || "Someone",
+      author_avatar: byId.get(r.user_id)?.avatar_url ?? null,
+    })));
   };
 
   const openComments = async () => {
@@ -527,9 +531,17 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               {comments.length === 0 ? (
                 <p className="text-sm text-neutral-500">No comments yet. Be the first.</p>
               ) : comments.map((c) => (
-                <div key={c.id} className="text-sm">
-                  <span className="font-semibold">{c.author_name}</span>{" "}
-                  <MentionText text={c.body} className="text-neutral-700" />
+                <div key={c.id} className="flex items-start gap-2 text-sm">
+                  <Avatar className="h-7 w-7 shrink-0">
+                    {c.author_avatar && <SmartAvatarImage src={c.author_avatar} />}
+                    <AvatarFallback className="bg-neutral-200 text-[10px] font-semibold text-neutral-600">
+                      {(c.author_name || "S").slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <span className="font-semibold">{c.author_name}</span>{" "}
+                    <MentionText text={c.body} className="text-neutral-700" />
+                  </div>
                 </div>
               ))}
             </div>
