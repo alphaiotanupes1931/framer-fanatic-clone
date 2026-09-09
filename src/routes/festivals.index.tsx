@@ -25,7 +25,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-export const Route = createFileRoute("/festivals")({
+export const Route = createFileRoute("/festivals/")({
   component: FestivalsPage,
   head: () =>
     pageHead({

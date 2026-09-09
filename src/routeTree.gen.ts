@@ -37,7 +37,6 @@ import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as GroupsRouteImport } from './routes/groups'
-import { Route as FestivalsRouteImport } from './routes/festivals'
 import { Route as EditProfileRouteImport } from './routes/edit-profile'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -62,6 +61,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VideosIndexRouteImport } from './routes/videos.index'
 import { Route as StoriesIndexRouteImport } from './routes/stories.index'
+import { Route as FestivalsIndexRouteImport } from './routes/festivals.index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VideosIdRouteImport } from './routes/videos.$id'
@@ -235,11 +235,6 @@ const GroupsRoute = GroupsRouteImport.update({
   path: '/groups',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FestivalsRoute = FestivalsRouteImport.update({
-  id: '/festivals',
-  path: '/festivals',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EditProfileRoute = EditProfileRouteImport.update({
   id: '/edit-profile',
   path: '/edit-profile',
@@ -361,6 +356,11 @@ const StoriesIndexRoute = StoriesIndexRouteImport.update({
   path: '/stories/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FestivalsIndexRoute = FestivalsIndexRouteImport.update({
+  id: '/festivals/',
+  path: '/festivals/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -412,9 +412,9 @@ const MarketplaceListingIdRoute = MarketplaceListingIdRouteImport.update({
   getParentRoute: () => MarketplaceRoute,
 } as any)
 const FestivalsEventIdRoute = FestivalsEventIdRouteImport.update({
-  id: '/$eventId',
-  path: '/$eventId',
-  getParentRoute: () => FestivalsRoute,
+  id: '/festivals/$eventId',
+  path: '/festivals/$eventId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EventsNewRoute = EventsNewRouteImport.update({
   id: '/events/new',
@@ -550,7 +550,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
-  '/festivals': typeof FestivalsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -601,6 +600,7 @@ export interface FileRoutesByFullPath {
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/festivals/': typeof FestivalsIndexRoute
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
@@ -637,7 +637,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
-  '/festivals': typeof FestivalsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -688,6 +687,7 @@ export interface FileRoutesByTo {
   '/videos/$id': typeof VideosIdRoute
   '/admin': typeof AdminIndexRoute
   '/events': typeof EventsIndexRoute
+  '/festivals': typeof FestivalsIndexRoute
   '/stories': typeof StoriesIndexRoute
   '/videos': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
@@ -725,7 +725,6 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
   '/edit-profile': typeof EditProfileRoute
-  '/festivals': typeof FestivalsRouteWithChildren
   '/groups': typeof GroupsRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -776,6 +775,7 @@ export interface FileRoutesById {
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/festivals/': typeof FestivalsIndexRoute
   '/stories/': typeof StoriesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
@@ -814,7 +814,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/discover'
     | '/edit-profile'
-    | '/festivals'
     | '/groups'
     | '/invite'
     | '/leaderboard'
@@ -865,6 +864,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin/'
     | '/events/'
+    | '/festivals/'
     | '/stories/'
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
@@ -901,7 +901,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/discover'
     | '/edit-profile'
-    | '/festivals'
     | '/groups'
     | '/invite'
     | '/leaderboard'
@@ -952,6 +951,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin'
     | '/events'
+    | '/festivals'
     | '/stories'
     | '/videos'
     | '/api/admin/check-stripe-webhooks'
@@ -988,7 +988,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/discover'
     | '/edit-profile'
-    | '/festivals'
     | '/groups'
     | '/invite'
     | '/leaderboard'
@@ -1039,6 +1038,7 @@ export interface FileRouteTypes {
     | '/videos/$id'
     | '/admin/'
     | '/events/'
+    | '/festivals/'
     | '/stories/'
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
@@ -1076,7 +1076,6 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
   EditProfileRoute: typeof EditProfileRoute
-  FestivalsRoute: typeof FestivalsRouteWithChildren
   GroupsRoute: typeof GroupsRoute
   InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -1116,6 +1115,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
+  FestivalsEventIdRoute: typeof FestivalsEventIdRoute
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
@@ -1125,6 +1125,7 @@ export interface RootRouteChildren {
   VideosIdRoute: typeof VideosIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
+  FestivalsIndexRoute: typeof FestivalsIndexRoute
   StoriesIndexRoute: typeof StoriesIndexRoute
   VideosIndexRoute: typeof VideosIndexRoute
   ApiAdminCheckStripeWebhooksRoute: typeof ApiAdminCheckStripeWebhooksRoute
@@ -1337,13 +1338,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/festivals': {
-      id: '/festivals'
-      path: '/festivals'
-      fullPath: '/festivals'
-      preLoaderRoute: typeof FestivalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/edit-profile': {
       id: '/edit-profile'
       path: '/edit-profile'
@@ -1512,6 +1506,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoriesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/festivals/': {
+      id: '/festivals/'
+      path: '/festivals'
+      fullPath: '/festivals/'
+      preLoaderRoute: typeof FestivalsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/': {
       id: '/events/'
       path: '/events'
@@ -1584,10 +1585,10 @@ declare module '@tanstack/react-router' {
     }
     '/festivals/$eventId': {
       id: '/festivals/$eventId'
-      path: '/$eventId'
+      path: '/festivals/$eventId'
       fullPath: '/festivals/$eventId'
       preLoaderRoute: typeof FestivalsEventIdRouteImport
-      parentRoute: typeof FestivalsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/events/new': {
       id: '/events/new'
@@ -1739,18 +1740,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface FestivalsRouteChildren {
-  FestivalsEventIdRoute: typeof FestivalsEventIdRoute
-}
-
-const FestivalsRouteChildren: FestivalsRouteChildren = {
-  FestivalsEventIdRoute: FestivalsEventIdRoute,
-}
-
-const FestivalsRouteWithChildren = FestivalsRoute._addFileChildren(
-  FestivalsRouteChildren,
-)
-
 interface MarketplaceRouteChildren {
   MarketplaceListingIdRoute: typeof MarketplaceListingIdRoute
 }
@@ -1786,7 +1775,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,
   EditProfileRoute: EditProfileRoute,
-  FestivalsRoute: FestivalsRouteWithChildren,
   GroupsRoute: GroupsRoute,
   InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,
@@ -1826,6 +1814,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
+  FestivalsEventIdRoute: FestivalsEventIdRoute,
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,
@@ -1835,6 +1824,7 @@ const rootRouteChildren: RootRouteChildren = {
   VideosIdRoute: VideosIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
+  FestivalsIndexRoute: FestivalsIndexRoute,
   StoriesIndexRoute: StoriesIndexRoute,
   VideosIndexRoute: VideosIndexRoute,
   ApiAdminCheckStripeWebhooksRoute: ApiAdminCheckStripeWebhooksRoute,
