@@ -24,7 +24,7 @@ export function FollowListDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profileId: string;
-  mode: "followers" | "following";
+  mode: "followers" | "following" | "referrals";
 }) {
   const [people, setPeople] = useState<FollowPerson[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,6 +34,18 @@ export function FollowListDialog({
     let cancelled = false;
     (async () => {
       setLoading(true);
+      if (mode === "referrals") {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, display_name, username, avatar_url, neighborhood")
+          .eq("referred_by", profileId)
+          .order("created_at", { ascending: false });
+        if (!cancelled) {
+          setPeople(error ? [] : ((data ?? []) as FollowPerson[]));
+          setLoading(false);
+        }
+        return;
+      }
       const result = mode === "followers"
         ? await supabase.from("follows").select("follower_id").eq("following_id", profileId)
         : await supabase.from("follows").select("following_id").eq("follower_id", profileId);
@@ -65,7 +77,7 @@ export function FollowListDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] w-[calc(100%_-_2rem)] max-w-md overflow-hidden rounded-xl p-0">
         <DialogHeader className="border-b border-border px-5 py-4 text-left">
-          <DialogTitle>{mode === "followers" ? "Followers" : "Following"}</DialogTitle>
+          <DialogTitle>{mode === "followers" ? "Followers" : mode === "following" ? "Following" : "Referrals"}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[65vh] overflow-y-auto p-2">
           {loading ? (
