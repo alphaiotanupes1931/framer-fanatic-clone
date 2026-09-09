@@ -412,9 +412,9 @@ const MarketplaceListingIdRoute = MarketplaceListingIdRouteImport.update({
   getParentRoute: () => MarketplaceRoute,
 } as any)
 const FestivalsEventIdRoute = FestivalsEventIdRouteImport.update({
-  id: '/festivals/$eventId',
-  path: '/festivals/$eventId',
-  getParentRoute: () => rootRouteImport,
+  id: '/$eventId',
+  path: '/$eventId',
+  getParentRoute: () => FestivalsRoute,
 } as any)
 const EventsNewRoute = EventsNewRouteImport.update({
   id: '/events/new',
@@ -1115,7 +1115,6 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
-  FestivalsEventIdRoute: typeof FestivalsEventIdRoute
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
@@ -1585,10 +1584,10 @@ declare module '@tanstack/react-router' {
     }
     '/festivals/$eventId': {
       id: '/festivals/$eventId'
-      path: '/festivals/$eventId'
+      path: '/$eventId'
       fullPath: '/festivals/$eventId'
       preLoaderRoute: typeof FestivalsEventIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof FestivalsRoute
     }
     '/events/new': {
       id: '/events/new'
@@ -1814,7 +1813,6 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
-  FestivalsEventIdRoute: FestivalsEventIdRoute,
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,
