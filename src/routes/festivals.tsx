@@ -253,7 +253,7 @@ function FestivalsPage() {
                   Featured Festival
                 </h2>
                 <Link
-                  to="/events/$eventId"
+                  to="/festivals/$eventId"
                   params={{ eventId: featured.id }}
                   className="block overflow-hidden rounded-2xl border-2 bg-card transition hover:shadow-md"
                   style={{ borderColor: "#d4580a" }}
