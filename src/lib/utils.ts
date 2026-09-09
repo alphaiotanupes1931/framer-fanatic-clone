@@ -52,3 +52,8 @@ export function sanitizeErrorMessage(input: unknown, fallback = "Something went 
     .replace(/\s{2,}/g, " ")
     .trim();
 }
+
+export function titleCase(input?: string | null): string {
+  if (!input) return "";
+  return input.replace(/\b\w/g, (c) => c.toUpperCase());
+}

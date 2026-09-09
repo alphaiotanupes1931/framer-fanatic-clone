@@ -28,7 +28,7 @@ import { FollowListDialog } from "@/components/follow-list-dialog";
 import { PostCard } from "@/components/shared/post-card";
 import { RepostTile } from "@/components/shared/repost-tile";
 import { PostSplitView } from "@/components/shared/post-split-view";
-import { sanitizeErrorMessage, siteUrl } from "@/lib/utils";
+import { sanitizeErrorMessage, siteUrl, titleCase } from "@/lib/utils";
 import { ArtistTalkTab } from "@/components/artist/artist-tab-sections";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
@@ -454,8 +454,8 @@ function ProfilePage() {
           </div>
 
           <div className="mt-4">
-            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
-              {profile?.display_name || profile?.username}
+            <div className="flex flex-wrap items-center gap-2 text-xl font-bold text-foreground">
+              {titleCase(profile?.display_name) || profile?.username}
               {isAdmin && (
                 <span
                   className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
@@ -466,6 +466,9 @@ function ProfilePage() {
                 </span>
               )}
             </div>
+            {profile?.username && (
+              <p className="text-sm text-muted-foreground">@{profile.username}</p>
+            )}
             {profile?.website && (
               <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer" className="mt-1 flex items-center gap-1 text-sm hover:underline" style={{ color: "#d4580a" }}>
                 <LinkIcon className="h-3.5 w-3.5" />{profile.website.replace(/https?:\/\//, "")}
