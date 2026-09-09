@@ -162,7 +162,7 @@ function ProfilePage() {
     if (!profile) return;
     (async () => {
       const [{ count: posts }, { count: followers }, { count: following }, { count: referrals }] = await Promise.all([
-        supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", profile.id).eq("is_deleted", false),
+        supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", profile.id).eq("is_deleted", false).is("organization_id", null),
         supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", profile.id),
         supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", profile.id),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", profile.id),
@@ -179,6 +179,7 @@ function ProfilePage() {
         .select("*")
         .eq("user_id", profile.id)
         .eq("is_deleted", false)
+        .is("organization_id", null)
         .order("created_at", { ascending: false })
         .limit(50);
       const author = {

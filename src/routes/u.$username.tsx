@@ -174,7 +174,7 @@ function PublicProfilePage() {
         const [{ count: followers }, { count: following }, { count: posts }] = await Promise.all([
           supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
           supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
-          supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id).eq("is_deleted", false),
+          supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id).eq("is_deleted", false).is("organization_id", null),
         ]);
         setStats({ followers: followers || 0, following: following || 0, posts: posts || 0 });
         if (me && me.id !== publicProfile.id) {
@@ -191,7 +191,7 @@ function PublicProfilePage() {
         // Load their content
         setContentLoading(true);
         const [postsRes, storiesRes, eventsRes] = await Promise.all([
-          supabase.from("posts").select("*").eq("user_id", publicProfile.id).eq("is_deleted", false).order("created_at", { ascending: false }).limit(50),
+          supabase.from("posts").select("*").eq("user_id", publicProfile.id).eq("is_deleted", false).is("organization_id", null).order("created_at", { ascending: false }).limit(50),
           supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("created_at", { ascending: false }).limit(30),
           supabase.from("events").select("*").eq("user_id", publicProfile.id).is("organization_id", null).order("starts_at", { ascending: false }).limit(30),
         ]);
