@@ -97,6 +97,16 @@ function Dashboard() {
     staleTime: 60_000,
   });
 
+  // Groups and community associations keep their posts on their own pages.
+  const { data: excludeOrgIds = new Set<string>() } = useQuery({
+    queryKey: ["home-exclude-org-ids"],
+    queryFn: async () => {
+      const { data } = await supabase.from("organizations").select("id").in("type", ["community_assoc", "group"]);
+      return new Set((data ?? []).map((o) => o.id));
+    },
+    staleTime: 300_000,
+  });
+
 
 
   const { data: stories = [], isLoading: loadingStories } = useQuery({
@@ -135,7 +145,9 @@ function Dashboard() {
 
   const feedItems = useMemo<FeedItem[]>(() => {
     const followedIds = new Set(follows.map((f: any) => f.target_id));
-    const filteredPosts = (posts as any[]).filter((p) => !p.is_deleted);
+    const filteredPosts = (posts as any[]).filter(
+      (p) => !p.is_deleted && !excludeOrgIds.has(p.organization_id),
+    );
 
     if (activeFilter === "On Planet") {
       // Reference site: stories lead the home feed, posts and events interleaved.
@@ -226,7 +238,7 @@ function Dashboard() {
     ];
     const dayOfYear = Math.floor(Date.now() / 86400000);
     return shuffleSeed(all, dayOfYear).slice(0, 40);
-  }, [activeFilter, posts, orgPosts, stories, events, follows, currentUser]);
+  }, [activeFilter, posts, orgPosts, stories, events, follows, currentUser, excludeOrgIds]);
 
 
   const orderedFeedItems = useMemo(
