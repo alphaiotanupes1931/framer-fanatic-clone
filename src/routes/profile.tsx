@@ -466,6 +466,9 @@ function ProfilePage() {
                 </span>
               )}
             </div>
+            {profile?.username && (
+              <p className="text-sm text-muted-foreground">@{profile.username}</p>
+            )}
             {profile?.website && (
               <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer" className="mt-1 flex items-center gap-1 text-sm hover:underline" style={{ color: "#d4580a" }}>
                 <LinkIcon className="h-3.5 w-3.5" />{profile.website.replace(/https?:\/\//, "")}
