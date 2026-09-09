@@ -1,7 +1,7 @@
 import {
   Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
   BookOpen, MessageCircle, Bell, User, Ticket, FileText, PenLine, Plane,
-  Settings, Video, Trophy, Search,
+  Settings, Video, Trophy, Search, PartyPopper,
 } from "lucide-react";
 
 export type NavItem = { icon: typeof Home; label: string; to: string };
@@ -15,6 +15,7 @@ export const navItems: NavItem[] = [
   { icon: Building2, label: "Businesses", to: "/businesses" },
   { icon: Shield, label: "Community Associations", to: "/community-associations" },
   { icon: Ticket, label: "Events", to: "/events" },
+  { icon: PartyPopper, label: "Festivals", to: "/festivals" },
   { icon: Users, label: "Groups", to: "/groups" },
   { icon: MapPin, label: "Neighborhoods", to: "/neighborhoods" },
   { icon: Search, label: "Search", to: "/search" },

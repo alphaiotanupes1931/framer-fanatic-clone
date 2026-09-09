@@ -83,7 +83,7 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
     setSaved(!was);
     const res = was
       ? await supabase.from("event_saves").delete().eq("event_id", event.id).eq("user_id", me.id)
-      : await supabase.from("event_saves").insert({ event_id: event.id, user_id: me.id });
+      : await supabase.from("event_saves").upsert({ event_id: event.id, user_id: me.id }, { onConflict: "event_id,user_id", ignoreDuplicates: true });
     if (res.error) { setSaved(was); toast.error(res.error.message); }
     else toast.success(was ? "Removed from saved" : "Saved");
   };
