@@ -340,6 +340,20 @@ function FestivalDetailPage() {
     document.getElementById(`festival-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = window.location.hash.replace(/^#/, "");
+    if (!raw) return;
+    const id = raw.replace(/^festival-/, "");
+    if (!tabs.some((t) => t.id === id)) return;
+    const timer = window.setTimeout(() => {
+      setActiveTab(id);
+      document.getElementById(`festival-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [tabs]);
+
+
   if (data === undefined) {
     return (
       <AppLayout>
