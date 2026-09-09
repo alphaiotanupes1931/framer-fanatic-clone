@@ -133,8 +133,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     setLiked(!wasLiked);
     setLikes((n) => n + (wasLiked ? -1 : 1));
     const res = wasLiked
-      ? await supabase.from("post_likes").delete().eq("post_id", originalPostId).eq("user_id", currentUserId)
-      : await supabase.from("post_likes").insert({ post_id: originalPostId, user_id: currentUserId });
+      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", currentUserId)
+      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: currentUserId });
     if (res.error) {
       setLiked(wasLiked);
       setLikes((n) => n + (wasLiked ? 1 : -1));
