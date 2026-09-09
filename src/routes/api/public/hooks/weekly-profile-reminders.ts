@@ -48,7 +48,24 @@ export const Route = createFileRoute("/api/public/hooks/weekly-profile-reminders
           return Response.json({ error: "query_failed" }, { status: 500 });
         }
 
-        const rows = profiles ?? [];
+        let rows = profiles ?? [];
+        if (rows.length === 0 && testEmail) {
+          // Test sends may target an address with no account yet; use sample data.
+          rows = [
+            {
+              id: "test",
+              email: testEmail,
+              display_name: "Friend",
+              username: null,
+              avatar_url: null,
+              banner_url: null,
+              bio: null,
+              neighborhood: null,
+              category: null,
+              website: null,
+            },
+          ];
+        }
         if (rows.length === 0) return Response.json({ scanned: 0, sent: 0 });
 
         // Who already has a post, so the "first post" step scores correctly.
