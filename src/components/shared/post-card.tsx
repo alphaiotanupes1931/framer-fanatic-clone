@@ -67,9 +67,10 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
 }) {
   const navigate = useNavigate();
   const [likes, setLikes] = useState(post.likes_count ?? 0);
-  // On a repost card the like/repost numbers belong to the original post, not the wrapper.
+  // Likes and comments belong to this card itself. A repost keeps its own
+  // conversation, separate from the original post it points at.
   const originalPostId = post.repost_of_post_id ?? post.id;
-  const { liked, saved, setLiked, setSaved } = useReaction(originalPostId, currentUserId);
+  const { liked, saved, setLiked, setSaved } = useReaction(post.id, currentUserId);
   const [lightbox, setLightbox] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState<{ id: string; body: string; user_id: string; created_at: string; author_name?: string }[]>([]);
@@ -132,8 +133,8 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     setLiked(!wasLiked);
     setLikes((n) => n + (wasLiked ? -1 : 1));
     const res = wasLiked
-      ? await supabase.from("post_likes").delete().eq("post_id", originalPostId).eq("user_id", currentUserId)
-      : await supabase.from("post_likes").insert({ post_id: originalPostId, user_id: currentUserId });
+      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", currentUserId)
+      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: currentUserId });
     if (res.error) {
       setLiked(wasLiked);
       setLikes((n) => n + (wasLiked ? 1 : -1));
@@ -145,10 +146,10 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
     let cancelled = false;
     (async () => {
       const [likeRows, repostRows, commentRows] = await Promise.all([
-        supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", originalPostId).limit(3),
+        supabase.from("post_likes").select("user_id", { count: "exact" }).eq("post_id", post.id).limit(3),
         supabase.from("posts").select("user_id", { count: "exact" }).eq("repost_of_post_id", originalPostId).eq("is_deleted", false).limit(3),
         post.repost_of_post_id
-          ? supabase.from("post_comments").select("id", { count: "exact", head: true }).eq("post_id", originalPostId)
+          ? supabase.from("post_comments").select("id", { count: "exact", head: true }).eq("post_id", post.id)
           : Promise.resolve({ count: null } as { count: number | null }),
       ]);
       if (cancelled) return;
@@ -159,7 +160,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       if (post.repost_of_post_id && typeof commentRows.count === "number") setCommentCount(commentRows.count);
     })();
     return () => { cancelled = true; };
-  }, [originalPostId, post.repost_of_post_id, likes, reposted]);
+  }, [post.id, originalPostId, post.repost_of_post_id, likes, reposted]);
 
   // Instagram style toggle: highlighted while it is on your page, click to undo.
   useEffect(() => {
@@ -448,7 +449,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
       )}
       <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
-        {!isRepost && (
+        {(
           <>
             <div className="flex items-center gap-1.5">
               <button onClick={toggleLike} className={`flex items-center transition ${liked ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={liked ? "Unlike" : "Like"}>
@@ -545,7 +546,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           </div>
         </div>
       )}
-      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={originalPostId} kind="post" />
+      <LikesListDialog open={likesOpen} onOpenChange={setLikesOpen} targetId={post.id} kind="post" />
       <LikesListDialog open={repostsOpen} onOpenChange={setRepostsOpen} targetId={originalPostId} kind="repost-post" />
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} contentType="post" contentId={post.id} />
       <ShareToUsersDialog
