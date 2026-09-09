@@ -92,6 +92,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicHooksWeeklyProfileRemindersRouteImport } from './routes/api/public/hooks/weekly-profile-reminders'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -513,6 +514,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksWeeklyProfileRemindersRoute =
+  ApiPublicHooksWeeklyProfileRemindersRouteImport.update({
+    id: '/api/public/hooks/weekly-profile-reminders',
+    path: '/api/public/hooks/weekly-profile-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -593,6 +600,7 @@ export interface FileRoutesByFullPath {
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
+  '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -678,6 +686,7 @@ export interface FileRoutesByTo {
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
+  '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -764,6 +773,7 @@ export interface FileRoutesById {
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug_/donate': typeof OSlugDonateRoute
+  '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -851,6 +861,7 @@ export interface FileRouteTypes {
     | '/api/public/stripe-webhook'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
+    | '/api/public/hooks/weekly-profile-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -936,6 +947,7 @@ export interface FileRouteTypes {
     | '/api/public/stripe-webhook'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
+    | '/api/public/hooks/weekly-profile-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1021,6 +1033,7 @@ export interface FileRouteTypes {
     | '/api/public/stripe-webhook'
     | '/lovable/email/suppression'
     | '/o/$slug_/donate'
+    | '/api/public/hooks/weekly-profile-reminders'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1106,6 +1119,7 @@ export interface RootRouteChildren {
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   OSlugDonateRoute: typeof OSlugDonateRoute
+  ApiPublicHooksWeeklyProfileRemindersRoute: typeof ApiPublicHooksWeeklyProfileRemindersRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1696,6 +1710,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/weekly-profile-reminders': {
+      id: '/api/public/hooks/weekly-profile-reminders'
+      path: '/api/public/hooks/weekly-profile-reminders'
+      fullPath: '/api/public/hooks/weekly-profile-reminders'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyProfileRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1789,6 +1810,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   OSlugDonateRoute: OSlugDonateRoute,
+  ApiPublicHooksWeeklyProfileRemindersRoute:
+    ApiPublicHooksWeeklyProfileRemindersRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
