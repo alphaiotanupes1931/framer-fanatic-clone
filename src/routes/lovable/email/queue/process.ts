@@ -5,11 +5,11 @@ import { createFileRoute } from '@tanstack/react-router'
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
 const DEFAULT_SEND_DELAY_MS = 200
-const DEFAULT_AUTH_TTL_MINUTES = 60
-const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 360
-// Never pause the worker longer than this, even if the provider asks for more.
-// A long cooldown would otherwise outlive message TTLs and silently drop mail.
-const MAX_COOLDOWN_SECONDS = 600
+const DEFAULT_AUTH_TTL_MINUTES = 240
+const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 1440
+// Honour the provider's Retry-After up to this cap. It must stay well below the
+// message TTLs so a single cooldown never outlives queued mail.
+const MAX_COOLDOWN_SECONDS = 3900
 
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
@@ -270,14 +270,9 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
               })
 
               if (isRateLimited(error)) {
-                await supabase.from('email_send_log').insert({
-                  message_id: payload.message_id,
-                  template_name: payload.label || queue,
-                  recipient_email: payload.to,
-                  status: 'failed',
-                  error_message: errorMsg.slice(0, 1000),
-                })
-
+                // Rate limits are not the message's fault: do NOT log a 'failed'
+                // attempt, or repeated cooldowns would burn the retry budget and
+                // dead-letter mail that was never actually rejected.
                 const retryAfterSecs = Math.min(getRetryAfterSeconds(error), MAX_COOLDOWN_SECONDS)
                 await supabase
                   .from('email_send_state')
