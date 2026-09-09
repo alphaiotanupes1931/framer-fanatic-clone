@@ -129,7 +129,7 @@ function ProfilePage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [shareExternalOpen, setShareExternalOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
-  const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+  const [followList, setFollowList] = useState<"followers" | "following" | "referrals" | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -510,11 +510,7 @@ function ProfilePage() {
             <div><div className="text-base font-bold sm:text-lg">{stats.posts}</div><div className="text-muted-foreground">Posts</div></div>
             <button type="button" onClick={() => setFollowList("followers")} className="hover:text-[#d4580a]"><div className="text-base font-bold sm:text-lg">{stats.followers}</div><div className="text-muted-foreground">Followers</div></button>
             <button type="button" onClick={() => setFollowList("following")} className="hover:text-[#d4580a]"><div className="text-base font-bold sm:text-lg">{stats.following}</div><div className="text-muted-foreground">Following</div></button>
-            <button type="button" onClick={() => setReferralOpen(true)} className="group relative rounded-lg px-2 py-1 transition hover:bg-[#d4580a]/10 hover:text-[#d4580a] sm:px-3">
-              <div className="text-base font-bold sm:text-lg">{stats.referrals ?? 0}</div>
-              <div className="text-muted-foreground group-hover:text-[#d4580a]">Referrals</div>
-              <span className="absolute -right-1 -top-1 hidden h-2 w-2 rounded-full bg-[#d4580a] sm:block" />
-            </button>
+            <button type="button" onClick={() => setFollowList("referrals")} className="hover:text-[#d4580a]"><div className="text-base font-bold sm:text-lg">{stats.referrals ?? 0}</div><div className="text-muted-foreground">Referrals</div></button>
           </div>
 
           {profile && followList && (
