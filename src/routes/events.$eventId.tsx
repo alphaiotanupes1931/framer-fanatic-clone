@@ -281,12 +281,16 @@ function EventDetail() {
     if (t.sale_ends_at && new Date(t.sale_ends_at).getTime() < now) return false;
     return true;
   };
-  // The organizer sets an order limit: the most tickets allowed in ONE order.
-  // Tickets this guest already holds are not counted against them.
+  // The organizer sets a per-person limit for THIS event. Tickets this guest
+  // already holds for this event count against it, so they can't refresh and buy more.
   const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
   const orderCap = selectedTier?.max_per_buyer ?? eventCap ?? null;
-  
-  const maxQty = Math.max(1, Math.min(orderCap ?? 20, remaining ?? 9999));
+  const ownedForLimit = selectedTier?.max_per_buyer ? (ownedByTier[selectedTier.id] ?? 0) : ownedForEvent;
+  const remainingAllowance = orderCap === null ? null : Math.max(0, orderCap - ownedForLimit);
+  const limitReached = remainingAllowance !== null && remainingAllowance <= 0;
+
+  const maxQty = Math.max(1, Math.min(remainingAllowance ?? 20, remaining ?? 9999));
+
 
   const rsvp = async () => {
     if (!evt) return;
