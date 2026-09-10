@@ -148,6 +148,13 @@
       "when": 1789053953866,
       "tag": "0020_grant_profiles_public_leaderboard_access",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789054065249,
+      "tag": "0021_grant_safe_profile_columns_for_public_view",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,2 @@
+GRANT SELECT (id, display_name, username, avatar_url, banner_url, bio, website, neighborhood, neighborhood_names, role, category, in_baltimore, is_baltimore_verified, is_founder, created_at, last_seen_at, banned, hidden_from_showcase) ON public.profiles TO authenticated;
+GRANT SELECT (id, display_name, username, avatar_url, banner_url, bio, website, neighborhood, neighborhood_names, role, category, in_baltimore, is_baltimore_verified, is_founder, created_at, last_seen_at, banned, hidden_from_showcase) ON public.profiles TO anon;
