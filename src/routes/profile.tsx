@@ -1518,9 +1518,15 @@ function MyTicketsTab() {
     );
   }
   const now = Date.now();
+  // An event that started a moment ago is still happening, so keep tickets in
+  // "Upcoming" for 12 hours past the start time. Tickets whose event details we
+  // can't read stay in Upcoming rather than disappearing into Past.
+  const GRACE_MS = 12 * 60 * 60 * 1000;
   const shown = tickets.filter((t) => {
-    const at = t.events ? new Date(t.events.starts_at).getTime() : 0;
-    return view === "upcoming" ? at >= now : at < now;
+    if (!t.events) return view === "upcoming";
+    const at = new Date(t.events.starts_at).getTime();
+    if (!Number.isFinite(at)) return view === "upcoming";
+    return view === "upcoming" ? at + GRACE_MS >= now : at + GRACE_MS < now;
   });
   // Several tickets for the same event are separate scannable passes.
   // Number them so a buyer can hand out "Ticket 2 of 3" without confusion.
