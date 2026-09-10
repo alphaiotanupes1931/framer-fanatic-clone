@@ -395,14 +395,20 @@ export function ShareToUsersDialog({
           // Direct threads are keyed by the sorted user pair; always look up and
           // insert with the normalized order so no duplicate thread can exist.
           const [a, b] = me.id < uid ? [me.id, uid] : [uid, me.id];
-          const { data: existing } = await supabase
-            .from("conversations")
-            .select("id")
-            .eq("user_a", a)
-            .eq("user_b", b)
-            .eq("is_group", false)
-            .maybeSingle();
-          let convId: string | null = (existing?.id as string | undefined) ?? null;
+          // Older threads were stored without a normalized pair order, so match
+          // either direction before creating a new one.
+          const findExisting = async () => {
+            const { data } = await supabase
+              .from("conversations")
+              .select("id")
+              .eq("is_group", false)
+              .or(
+                `and(user_a.eq.${a},user_b.eq.${b}),and(user_a.eq.${b},user_b.eq.${a})`,
+              )
+              .limit(1);
+            return (data?.[0]?.id as string | undefined) ?? null;
+          };
+          let convId: string | null = await findExisting();
           if (!convId) {
             const { data: conv, error } = await supabase
               .from("conversations")
@@ -415,12 +421,21 @@ export function ShareToUsersDialog({
               })
               .select("id")
               .single();
-            if (error || !conv) throw error || new Error("Could not create conversation");
-            convId = conv.id;
-            await supabase.from("conversation_members").insert([
-              { conversation_id: convId, user_id: a },
-              { conversation_id: convId, user_id: b },
-            ]);
+            if (error || !conv) {
+              // A duplicate thread already exists (created from the other side);
+              // reuse it instead of failing the whole send.
+              convId = await findExisting();
+              if (!convId) throw error || new Error("Could not create conversation");
+            } else {
+              convId = conv.id;
+            }
+            await supabase.from("conversation_members").upsert(
+              [
+                { conversation_id: convId, user_id: a },
+                { conversation_id: convId, user_id: b },
+              ],
+              { onConflict: "conversation_id,user_id", ignoreDuplicates: true },
+            );
           }
           const { error: msgErr } = await supabase
             .from("messages")

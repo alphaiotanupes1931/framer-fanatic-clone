@@ -221,6 +221,14 @@ export function OrgListPage({
             >
               All
             </button>
+            {type === "business" && (
+              <Link
+                to="/arts-orgs"
+                className="rounded-full border border-neutral-200 bg-white px-5 py-2 text-sm font-semibold text-neutral-600 transition hover:border-orange-300"
+              >
+                Arts Orgs
+              </Link>
+            )}
             {subs.map((s) => (
               <button
                 key={s}
