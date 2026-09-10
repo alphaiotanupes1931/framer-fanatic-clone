@@ -69,6 +69,7 @@ import { Img, SmartFileLink, SmartVideo, SmartAvatarImage } from "@/components/s
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { timeAgo } from "@/lib/text-utils";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { resolveMediaUrl } from "@/components/smart-image";
 import { notifyGroupJoinRequest } from "@/lib/group-requests.functions";
 import { getOrgSeo, unlockOrgWithCode, setOrgAccessCode, getPrivateOrgFallback } from "@/lib/org-access.functions";
 
@@ -1868,6 +1869,43 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
     load();
   };
 
+  const downloadPressImage = async (item: OrgPost) => {
+    if (!item.media_url) return;
+    try {
+      const resolvedUrl = await resolveMediaUrl(item.media_url, "post-media");
+      if (!resolvedUrl) throw new Error("Image unavailable");
+      const response = await fetch(resolvedUrl);
+      if (!response.ok) throw new Error("Image download failed");
+      const blob = await response.blob();
+      if (!blob.type.startsWith("image/")) throw new Error("Downloaded file is not an image");
+
+      const extensionByType: Record<string, string> = {
+        "image/avif": "avif",
+        "image/gif": "gif",
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/svg+xml": "svg",
+        "image/webp": "webp",
+      };
+      const extension = extensionByType[blob.type.toLowerCase()] ?? "jpg";
+      const baseName = (item.title || "press-image")
+        .normalize("NFKD")
+        .replace(/[^a-zA-Z0-9 _-]+/g, "")
+        .trim()
+        .replace(/\s+/g, "-") || "press-image";
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${baseName}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1_000);
+    } catch {
+      toast.error("This image could not be downloaded. Please try again.");
+    }
+  };
+
   const Section = ({ title, children, onAdd }: { title: string; children: React.ReactNode; onAdd?: () => void }) => (
     <div className="rounded-2xl border border-neutral-200 bg-white p-5">
       <div className="mb-3 flex items-center justify-between">
@@ -1886,14 +1924,14 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
     <div className="space-y-4">
       <Section title="Press Contact">
         {org.email || org.phone ? (
-          <div className="space-y-1.5 text-sm text-neutral-700">
+          <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5 text-sm text-neutral-700">
             {org.email && (
-              <a href={`mailto:${org.email}`} className="inline-flex items-center gap-2 hover:text-[#d4580a]">
+              <a href={`mailto:${org.email}`} className="inline-flex min-w-0 items-center gap-2.5 hover:text-[#d4580a]">
                 <Mail className="h-4 w-4" /> {org.email}
               </a>
             )}
             {org.phone && (
-              <div className="inline-flex items-center gap-2"><Phone className="h-4 w-4" /> {org.phone}</div>
+              <a href={`tel:${org.phone}`} className="inline-flex items-center gap-2.5 hover:text-[#d4580a]"><Phone className="h-4 w-4" /> {org.phone}</a>
             )}
           </div>
         ) : (
@@ -1926,22 +1964,7 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
                   <div className="min-w-0 truncate text-xs font-medium text-neutral-700">{it.title}</div>
                   <button
                     type="button"
-                    onClick={async () => {
-                      try {
-                        const res = await fetch(it.media_url!);
-                        const blob = await res.blob();
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = `${(it.title || "press-image").replace(/[^\w\- ]+/g, "").trim() || "press-image"}.jpg`;
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                        URL.revokeObjectURL(url);
-                      } catch {
-                        window.open(it.media_url!, "_blank");
-                      }
-                    }}
+                    onClick={() => void downloadPressImage(it)}
                     className="inline-flex shrink-0 items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
                     aria-label={`Download ${it.title}`}
                   >
