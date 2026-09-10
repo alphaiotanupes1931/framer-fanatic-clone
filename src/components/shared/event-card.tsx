@@ -1,6 +1,7 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, CalendarPlus } from "lucide-react";
+import { downloadIcs } from "@/lib/ics";
 import { ReportButton } from "@/components/shared/report-button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -22,12 +23,15 @@ type EventRow = {
   description?: string | null;
   image_url?: string | null;
   starts_at?: string | null;
+  ends_at?: string | null;
   date?: string | null;
   venue_name?: string | null;
+  address?: string | null;
   neighborhood?: string | null;
   neighborhood_name?: string | null;
   category?: string | null;
   is_free?: boolean;
+  price_cents?: number | null;
   user_id?: string | null;
 };
 
@@ -104,6 +108,30 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
     }
   };
   const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(eventUrl, event.title, event.description || undefined); };
+
+  const addToCalendar = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!eventDate) { toast.error("This event has no date yet"); return; }
+    downloadIcs(
+      {
+        uid: `event-${event.id}@planetbaltimore.com`,
+        title: event.title,
+        start: eventDate,
+        end: event.ends_at ? new Date(event.ends_at) : null,
+        location: event.address || event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore",
+        description: previewText || null,
+        url: eventUrl,
+      },
+      event.title.replace(/[^\w\s-]/g, "").trim() || "event",
+    );
+    toast.success("Added to your calendar");
+  };
+
+  const tags = [
+    event.is_free ? "Free" : event.price_cents ? `$${Math.round(event.price_cents / 100)}` : null,
+    event.category,
+    event.neighborhood_name || event.neighborhood,
+  ].filter(Boolean) as string[];
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -190,29 +218,46 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
           <MapPin className="h-3 w-3" />
           <span className="truncate">{event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore"}</span>
         </div>
+        {tags.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {tags.map((t) => (
+              <span key={t} className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
         </div>
       </Link>
-      <div className="flex items-center gap-4 border-t border-border/50 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-5">
-        <button type="button" onClick={toggleSave} className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
+      <div className="flex flex-wrap items-center gap-2 border-t border-border/50 px-3.5 py-2.5 sm:px-4">
+        <button type="button" onClick={toggleSave} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border text-muted-foreground hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
           <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
           {saved ? "Saved" : "Save"}
         </button>
-        <button type="button" onClick={openShare} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share in app" title="Share in app">
-          <Send className="h-4 w-4 -rotate-45" />
+        <button type="button" onClick={sendExternal} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Share outside the app">
+          <Share2 className="h-3.5 w-3.5" />
+          Share
         </button>
-        <button type="button" onClick={sendExternal} className="flex items-center gap-1.5 transition hover:text-foreground" aria-label="Share outside the app" title="Share outside the app">
-          <Share2 className="h-4 w-4" />
+        <button type="button" onClick={addToCalendar} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Add to calendar">
+          <CalendarPlus className="h-3.5 w-3.5" />
+          Calendar
         </button>
-        <button type="button" onClick={doRepost} disabled={reposting} aria-pressed={reposted} className={`flex items-center gap-1.5 transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-foreground"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"}>
-          <Repeat2 className="h-4 w-4" />
-        </button>
-        <ReportButton contentType="event" contentId={event.id} className="ml-auto" />
-        {canDelete && (
-          <button type="button" onClick={handleDelete} disabled={deleting} className="flex items-center text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
-            <Trash2 className="h-4 w-4" />
+        <div className="ml-auto flex items-center gap-2 text-muted-foreground">
+          <button type="button" onClick={openShare} className="rounded-full p-1.5 transition hover:text-[#d4580a]" aria-label="Send in app" title="Send in app">
+            <Send className="h-4 w-4 -rotate-45" />
           </button>
-        )}
+          <button type="button" onClick={doRepost} disabled={reposting} aria-pressed={reposted} className={`rounded-full p-1.5 transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-[#d4580a]"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"}>
+            <Repeat2 className="h-4 w-4" />
+          </button>
+          <ReportButton contentType="event" contentId={event.id} />
+          {canDelete && (
+            <button type="button" onClick={handleDelete} disabled={deleting} className="rounded-full p-1.5 text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
+
       <ShareToUsersDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
