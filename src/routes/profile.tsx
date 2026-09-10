@@ -1476,6 +1476,7 @@ function MyTicketsTab() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"upcoming" | "past">("upcoming");
+  const [refreshKey, setRefreshKey] = useState(0);
   const reconcile = useServerFn(reconcileMyTickets);
   useEffect(() => {
     (async () => {
