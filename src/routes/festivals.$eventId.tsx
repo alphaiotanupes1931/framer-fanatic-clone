@@ -980,36 +980,36 @@ function EditFestivalDetails({
             <span className="text-xs font-semibold text-muted-foreground">Tagline</span>
             <Textarea value={form.tagline} onChange={set("tagline")} rows={2} className="mt-1" />
           </label>
-          <Field label="Hours" k="hours" placeholder="Fri 11am–9pm · Sat 11am–9pm" />
-          <Field label="Price label" k="price_label" placeholder="Free or $55–$120" />
-          <Field label="Age" k="age_range" placeholder="All ages" />
-          <Field label="Format" k="format" placeholder="Street Festival" />
-          <Field label="Accessibility (comma separated)" k="accessibility" placeholder="wheelchair, asl, restrooms" />
-          <Field label="Rain or Shine" k="rain_or_shine" placeholder="Yes" />
-          <Field label="Pet Policy" k="pet_policy" />
-          <Field label="Expected Attendance" k="expected_attendance" placeholder="5,000+" />
-          <Field label="Website" k="website" placeholder="https://…" />
+          <Field label="Hours" value={form.hours} onChange={set("hours")} placeholder="Fri 11am–9pm · Sat 11am–9pm" />
+          <Field label="Price label" value={form.price_label} onChange={set("price_label")} placeholder="Free or $55–$120" />
+          <Field label="Age" value={form.age_range} onChange={set("age_range")} placeholder="All ages" />
+          <Field label="Format" value={form.format} onChange={set("format")} placeholder="Street Festival" />
+          <Field label="Accessibility (comma separated)" value={form.accessibility} onChange={set("accessibility")} placeholder="wheelchair, asl, restrooms" />
+          <Field label="Rain or Shine" value={form.rain_or_shine} onChange={set("rain_or_shine")} placeholder="Yes" />
+          <Field label="Pet Policy" value={form.pet_policy} onChange={set("pet_policy")} />
+          <Field label="Expected Attendance" value={form.expected_attendance} onChange={set("expected_attendance")} placeholder="5,000+" />
+          <Field label="Website" value={form.website} onChange={set("website")} placeholder="https://…" />
           <label className="block sm:col-span-2">
             <span className="text-xs font-semibold text-muted-foreground">Festival Footprint</span>
             <Textarea value={form.footprint} onChange={set("footprint")} rows={2} className="mt-1" />
           </label>
           <div className="sm:col-span-2">
-            <Area label="Schedule" k="schedule" hint="One per line: Day or time | Details" />
+            <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Day or time | Details" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Performers" k="performers" hint="One per line" />
+            <Area label="Performers" value={form.performers} onChange={set("performers")} hint="One per line" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Vendors" k="vendors" hint="One per line" />
+            <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Food + Drink" k="food" hint="One per line" />
+            <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Featured Experiences" k="experiences" hint="One per line: Name | Description" />
+            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Description" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="FAQs" k="faqs" hint="One per line: Question | Answer" />
+            <Area label="FAQs" value={form.faqs} onChange={set("faqs")} hint="One per line: Question | Answer" />
           </div>
         </div>
         <div className="mt-4 flex justify-end gap-2">
