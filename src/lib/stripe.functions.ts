@@ -807,7 +807,82 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
           } catch (err) {
             console.error("ticket confirmation email retry failed", err);
           }
+          return { confirmed: 0 };
         }
+
+        // No rows at all for a session the buyer just paid: the pre-created
+        // reservation never landed (or was wiped). Rebuild the tickets from the
+        // Stripe session so a paid order never goes missing from My Tickets.
+        let session: import("stripe").Stripe.Checkout.Session | null = null;
+        try {
+          session = await stripe.checkout.sessions.retrieve(data.sessionId);
+        } catch {
+          return { confirmed: 0 };
+        }
+        const meta = session.metadata ?? {};
+        if (
+          session.payment_status !== "paid" ||
+          meta['kind'] !== "ticket" ||
+          meta['buyer_id'] !== userId ||
+          !meta['event_id']
+        ) {
+          return { confirmed: 0 };
+        }
+        const qty = Math.max(1, Number(meta['quantity'] ?? 1) || 1);
+        const split = (total: number, i: number) =>
+          Math.floor(total / qty) + (i === 0 ? total % qty : 0);
+        const buyerTotal = Number(meta['buyer_total_cents'] ?? session.amount_total ?? 0) || 0;
+        const artistNet = Number(meta['artist_net_cents'] ?? 0) || 0;
+        const platformTax = Number(meta['platform_tax_cents'] ?? 0) || 0;
+        const stripeFee = Number(meta['stripe_fee_cents'] ?? 0) || 0;
+        const paymentIntentId = typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id ?? null;
+
+        const rebuilt = Array.from({ length: qty }, (_, i) => ({
+          event_id: meta['event_id']!,
+          buyer_id: userId,
+          artist_id: meta['artist_id'] || null,
+          stripe_checkout_session_id: data.sessionId!,
+          stripe_payment_intent_id: paymentIntentId,
+          buyer_total_cents: split(buyerTotal, i),
+          artist_net_cents: Math.floor(artistNet / qty),
+          platform_tax_cents: split(platformTax, i),
+          stripe_fee_cents: split(stripeFee, i),
+          ticket_type_id: meta['ticket_type_id'] || null,
+          status: "paid",
+        }));
+        const { data: inserted, error: insertErr } = await supabaseAdmin
+          .from("tickets")
+          .insert(rebuilt)
+          .select("id, event_id");
+        if (insertErr || !inserted?.length) {
+          console.error("ticket rebuild failed", insertErr);
+          return { confirmed: 0 };
+        }
+        await supabaseAdmin.from("notifications").insert({
+          user_id: userId,
+          actor_id: null,
+          type: "ticket_purchased",
+          target_type: "ticket",
+          target_id: inserted[0]!.id,
+          message: inserted.length > 1
+            ? `Your ${inserted.length} tickets are confirmed. Each has its own QR code.`
+            : "Your ticket is confirmed. Tap to view your digital ticket.",
+          metadata: { event_id: inserted[0]!.event_id, ticket_id: inserted[0]!.id, quantity: inserted.length },
+        });
+        try {
+          const { sendTicketConfirmation } = await import("./ticket-email.server");
+          await sendTicketConfirmation({
+            buyerId: userId,
+            eventId: inserted[0]!.event_id,
+            ticketIds: inserted.map((r) => r.id),
+            idempotencyKey: `ticket-confirm-${data.sessionId}`,
+          });
+        } catch (err) {
+          console.error("ticket confirmation email failed", err);
+        }
+        return { confirmed: inserted.length };
       }
       return { confirmed: 0 };
     }
