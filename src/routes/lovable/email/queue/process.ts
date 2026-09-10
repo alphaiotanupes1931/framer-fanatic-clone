@@ -5,11 +5,8 @@ import { createFileRoute } from '@tanstack/react-router'
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
 const DEFAULT_SEND_DELAY_MS = 200
-const DEFAULT_AUTH_TTL_MINUTES = 240
-const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 1440
-// Honour the provider's Retry-After up to this cap. It must stay well below the
-// message TTLs so a single cooldown never outlives queued mail.
-const MAX_COOLDOWN_SECONDS = 3900
+const DEFAULT_AUTH_TTL_MINUTES = 15
+const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
 
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
@@ -59,7 +56,7 @@ async function moveToDlq(
     payload,
   })
   if (error) {
-    console.error('Failed to move message to DLQ', { queue, msg_id: msg.msg_id, reason, error })
+    console.error('Failed to move message to DLQ', { queue, msg_id: msg.msg_id, reason, code: error.code, message: error.message })
   }
 }
 
@@ -121,7 +118,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
           })
 
           if (readError) {
-            console.error('Failed to read email batch', { queue, error: readError })
+            console.error('Failed to read email batch', { queue, code: readError.code, message: readError.message })
             continue
           }
 
@@ -150,7 +147,8 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
             if (failedRowsError) {
               console.error('Failed to load failed-attempt counters', {
                 queue,
-                error: failedRowsError,
+                code: failedRowsError.code,
+                message: failedRowsError.message,
               })
             } else {
               for (const row of failedRows ?? []) {
@@ -217,7 +215,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                   message_id: msg.msg_id,
                 })
                 if (dupDelError) {
-                  console.error('Failed to delete duplicate message from queue', { queue, msg_id: msg.msg_id, error: dupDelError })
+                  console.error('Failed to delete duplicate message from queue', { queue, msg_id: msg.msg_id, code: dupDelError.code, message: dupDelError.message })
                 }
                 continue
               }
@@ -256,7 +254,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                 message_id: msg.msg_id,
               })
               if (delError) {
-                console.error('Failed to delete sent message from queue', { queue, msg_id: msg.msg_id, error: delError })
+                console.error('Failed to delete sent message from queue', { queue, msg_id: msg.msg_id, code: delError.code, message: delError.message })
               }
               totalProcessed++
             } catch (error) {
@@ -270,10 +268,15 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
               })
 
               if (isRateLimited(error)) {
-                // Rate limits are not the message's fault: do NOT log a 'failed'
-                // attempt, or repeated cooldowns would burn the retry budget and
-                // dead-letter mail that was never actually rejected.
-                const retryAfterSecs = Math.min(getRetryAfterSeconds(error), MAX_COOLDOWN_SECONDS)
+                await supabase.from('email_send_log').insert({
+                  message_id: payload.message_id,
+                  template_name: payload.label || queue,
+                  recipient_email: payload.to,
+                  status: 'failed',
+                  error_message: errorMsg.slice(0, 1000),
+                })
+
+                const retryAfterSecs = getRetryAfterSeconds(error)
                 await supabase
                   .from('email_send_state')
                   .update({
