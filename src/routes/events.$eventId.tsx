@@ -174,6 +174,9 @@ function EventDetail() {
   const [donating, setDonating] = useState(false);
   const [donationsOn, setDonationsOn] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [ownedForEvent, setOwnedForEvent] = useState(0);
+  const [ownedByTier, setOwnedByTier] = useState<Record<string, number>>({});
+
   
 
   useEffect(() => {
