@@ -9,6 +9,7 @@ import { useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { useServerFn } from "@tanstack/react-start";
 import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
 import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
@@ -164,43 +165,53 @@ function NewEventPage() {
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
-  const onPickImage = async (file: File) => {
-    file = await compressImage(file);
-    if (!me) return;
-    setUploading(true);
-    try {
-      const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
-      if (error) throw error;
-      set("image_url", path);
-      toast.success("Image uploaded");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
+  // Photo cropping: every picked event photo goes through the crop dialog first.
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [cropTarget, setCropTarget] = useState<"flyer" | "gallery">("flyer");
+  const [cropAspect, setCropAspect] = useState(16 / 9);
+  const currentCrop = cropQueue[0] ?? null;
+
+  const uploadImageFile = async (raw: File) => {
+    const file = await compressImage(raw);
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${me!.id}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
+    if (error) throw error;
+    return path;
   };
 
-  const onPickGallery = async (files: File[]) => {
+  const onPickImage = (file: File) => {
+    if (!me) return;
+    setCropTarget("flyer");
+    setCropAspect(16 / 9);
+    setCropQueue([file]);
+  };
+
+  const onPickGallery = (files: File[]) => {
     if (!me || files.length === 0) return;
-    setUploadingGallery(true);
+    setCropTarget("gallery");
+    setCropAspect(1);
+    setCropQueue(files);
+  };
+
+  const onCropped = async (file: File) => {
+    const rest = cropQueue.slice(1);
+    setCropQueue(rest);
+    const isFlyer = cropTarget === "flyer";
+    if (isFlyer) setUploading(true); else setUploadingGallery(true);
     try {
-      const paths: string[] = [];
-      for (const raw of files) {
-        const file = await compressImage(raw);
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
-        const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
-        if (error) throw error;
-        paths.push(path);
+      const path = await uploadImageFile(file);
+      if (isFlyer) {
+        set("image_url", path);
+        toast.success("Image uploaded");
+      } else {
+        setForm((f) => ({ ...f, gallery_urls: [...f.gallery_urls, path] }));
+        toast.success("Photo added");
       }
-      setForm((f) => ({ ...f, gallery_urls: [...f.gallery_urls, ...paths] }));
-      toast.success(paths.length > 1 ? `${paths.length} photos added` : "Photo added");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
-      setUploadingGallery(false);
+      if (isFlyer) setUploading(false); else setUploadingGallery(false);
     }
   };
 
@@ -738,9 +749,37 @@ function NewEventPage() {
           </div>
         </div>
       )}
-
-
-
+      <ImageCropDialog
+        file={currentCrop}
+        aspect={cropAspect}
+        maxEdge={1600}
+        title={cropTarget === "flyer" ? "Crop your cover image" : "Crop your photo"}
+        open={!!currentCrop}
+        onOpenChange={(open) => { if (!open) setCropQueue([]); }}
+        onCropped={(f) => void onCropped(f)}
+        circleGuide={false}
+        extraControls={
+          <div className="flex w-full items-center justify-center gap-2">
+            <span className="text-xs text-muted-foreground">Shape</span>
+            {[
+              { label: "1:1", value: 1 },
+              { label: "4:5", value: 4 / 5 },
+              { label: "16:9", value: 16 / 9 },
+            ].map((opt) => (
+              <button
+                key={opt.label}
+                type="button"
+                onClick={() => setCropAspect(opt.value)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  Math.abs(cropAspect - opt.value) < 0.01 ? "bg-[#d4580a] text-white" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
     </AppLayout>
   );
 }
