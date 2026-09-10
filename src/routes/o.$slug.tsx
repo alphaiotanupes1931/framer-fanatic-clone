@@ -148,7 +148,7 @@ type OrgPost = {
 const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
   "Posts", "Mission", "Events", "Members", "Threads",
-  "Polls", "Jobs", "Leaderboard", "Rules", "Invite",
+  "Polls", "Jobs", "Rules", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
   "Posts", "Mission", "Events", "Members", "Threads",
