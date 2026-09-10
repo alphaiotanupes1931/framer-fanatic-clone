@@ -166,6 +166,95 @@ function Empty({ text }: { text: string }) {
   );
 }
 
+function tagsOf(r: Row) {
+  return [priceLabel(r), r.category, placeOf(r)].filter(Boolean) as string[];
+}
+
+/** Save / Share / Calendar actions used on the featured festival. */
+function FestivalActions({
+  row,
+  meId,
+  saved,
+  onSavedChange,
+}: {
+  row: Row;
+  meId?: string | null;
+  saved: boolean;
+  onSavedChange: (id: string, next: boolean) => void;
+}) {
+  const url = siteUrl(`/festivals/${row.id}`);
+
+  const toggleSave = async () => {
+    if (!meId) {
+      toast.error("Sign in to save");
+      return;
+    }
+    const next = !saved;
+    onSavedChange(row.id, next);
+    const res = next
+      ? await supabase
+          .from("event_saves")
+          .upsert({ event_id: row.id, user_id: meId }, { onConflict: "event_id,user_id", ignoreDuplicates: true })
+      : await supabase.from("event_saves").delete().eq("event_id", row.id).eq("user_id", meId);
+    if (res.error) {
+      onSavedChange(row.id, !next);
+      toast.error(res.error.message);
+    }
+  };
+
+  const addToCalendar = () => {
+    if (!row.starts_at) {
+      toast.error("This festival has no date yet");
+      return;
+    }
+    downloadIcs(
+      {
+        uid: `festival-${row.id}@planetbaltimore.com`,
+        title: row.title,
+        start: new Date(row.starts_at),
+        end: row.ends_at ? new Date(row.ends_at) : null,
+        location: row.address || row.venue_name || placeOf(row) || "Baltimore",
+        description: (row.description ?? "").replace(/<[^>]+>/g, "") || null,
+        url,
+      },
+      row.title.replace(/[^\w\s-]/g, "").trim() || "festival",
+    );
+    toast.success("Added to your calendar");
+  };
+
+  const btn =
+    "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]";
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={toggleSave}
+        className={
+          saved
+            ? "inline-flex items-center gap-1.5 rounded-full border border-[#d4580a] bg-[#d4580a]/10 px-3 py-1.5 text-xs font-medium text-[#d4580a]"
+            : btn
+        }
+      >
+        <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
+        {saved ? "Saved" : "Save"}
+      </button>
+      <button
+        type="button"
+        onClick={() => void externalShare(url, row.title, row.description || undefined)}
+        className={btn}
+      >
+        <Share2 className="h-3.5 w-3.5" />
+        Share
+      </button>
+      <button type="button" onClick={addToCalendar} className={btn}>
+        <CalendarPlus className="h-3.5 w-3.5" />
+        Calendar
+      </button>
+    </div>
+  );
+}
+
 function Thumb({ src, alt, className }: { src: string | null; alt: string; className?: string }) {
   if (!src) {
     return <div className={`bg-gradient-to-br from-[#d4580a] to-[#7a2f04] ${className ?? ""}`} />;
