@@ -22,12 +22,15 @@ type EventRow = {
   description?: string | null;
   image_url?: string | null;
   starts_at?: string | null;
+  ends_at?: string | null;
   date?: string | null;
   venue_name?: string | null;
+  address?: string | null;
   neighborhood?: string | null;
   neighborhood_name?: string | null;
   category?: string | null;
   is_free?: boolean;
+  price_cents?: number | null;
   user_id?: string | null;
 };
 
