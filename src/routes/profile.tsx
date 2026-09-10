@@ -1476,6 +1476,7 @@ function MyTicketsTab() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"upcoming" | "past">("upcoming");
+  const [refreshKey, setRefreshKey] = useState(0);
   const reconcile = useServerFn(reconcileMyTickets);
   useEffect(() => {
     (async () => {
@@ -1490,18 +1491,32 @@ function MyTicketsTab() {
         const res = await reconcile({ data: sessionId ? { sessionId } : {} });
         if (res?.confirmed) toast.success("Purchase confirmed. Your receipt is on the way by email.");
       } catch { /* reconciliation is best-effort */ }
+      // "pending" rows are orders Stripe has taken but not finished confirming.
+      // Showing them keeps a fresh purchase visible instead of appearing lost.
       const { data } = await supabase
         .from("tickets")
         .select("id, status, buyer_total_cents, event_id, events(title, starts_at, location, venue_name)")
         .eq("buyer_id", uid)
-        .eq("status", "paid")
+        .in("status", ["paid", "pending"])
         .order("created_at", { ascending: false });
       setTickets((data ?? []) as TicketRow[]);
       setLoading(false);
     })();
-  }, []);
+  }, [refreshKey]);
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading tickets…</div>;
-  if (tickets.length === 0) return <div className="py-12 text-center text-muted-foreground">You haven't bought any tickets yet.</div>;
+  if (tickets.length === 0) {
+    return (
+      <div className="py-12 text-center text-muted-foreground">
+        <p>You haven't bought any tickets yet.</p>
+        <button
+          onClick={() => { setLoading(true); setRefreshKey((k) => k + 1); }}
+          className="mt-3 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground"
+        >
+          Refresh
+        </button>
+      </div>
+    );
+  }
   const now = Date.now();
   const shown = tickets.filter((t) => {
     const at = t.events ? new Date(t.events.starts_at).getTime() : 0;
@@ -1533,6 +1548,7 @@ function MyTicketsTab() {
               key={t.id}
               t={t}
               seat={seat}
+              pending={t.status === "pending"}
               onCancelled={() => setTickets((prev) => prev.filter((x) => x.id !== t.id))}
             />
           ))}
@@ -1542,7 +1558,7 @@ function MyTicketsTab() {
   );
 }
 
-function TicketStub({ t, seat, onCancelled }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null }; seat?: string | null; onCancelled?: () => void }) {
+function TicketStub({ t, seat, pending, onCancelled }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null }; seat?: string | null; pending?: boolean; onCancelled?: () => void }) {
   const when = t.events ? new Date(t.events.starts_at) : null;
   const [cancelling, setCancelling] = useState(false);
   const isFreeRsvp = (t.buyer_total_cents ?? 0) === 0;
@@ -1570,9 +1586,11 @@ function TicketStub({ t, seat, onCancelled }: { t: { id: string; buyer_total_cen
         <div className="relative px-5 pb-4 pt-5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-white/45">Planet Baltimore</span>
-            {seat && (
+            {pending ? (
+              <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-amber-200 backdrop-blur">Processing</span>
+            ) : seat ? (
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/70 backdrop-blur">{seat}</span>
-            )}
+            ) : null}
           </div>
           <h3 className="mt-2.5 line-clamp-2 text-[19px] font-semibold leading-snug tracking-tight">
             {t.events?.title ?? "Event"}
