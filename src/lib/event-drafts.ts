@@ -23,6 +23,7 @@ export type EventDraft = {
     category: string;
     capacity: string;
     per_person: string;
+    show_tickets_remaining?: boolean;
     gallery_urls?: string[];
   };
 };

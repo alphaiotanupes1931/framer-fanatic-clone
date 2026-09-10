@@ -10,6 +10,7 @@ import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { Switch } from "@/components/ui/switch";
 import { hasCapacityErrors, parseLimit, validateCapacityFields, type CapacityErrors } from "@/lib/capacity-limits";
 
 type Neighborhood = { id: string; name: string };
@@ -55,6 +56,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
     price: "",
     capacity: "",
     per_person: "",
+    show_tickets_remaining: false,
   });
 
   useEffect(() => {
@@ -97,6 +99,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         price: priceCents > 0 ? (priceCents / 100).toFixed(2) : "",
         capacity: e.capacity != null ? String(e.capacity) : "",
         per_person: e.max_tickets_per_buyer != null ? String(e.max_tickets_per_buyer) : "",
+        show_tickets_remaining: e.show_tickets_remaining === true,
       });
       setLoading(false);
     })();
@@ -219,6 +222,7 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
         price_cents: priceCents,
         capacity,
         max_tickets_per_buyer: maxPerBuyer,
+        show_tickets_remaining: form.show_tickets_remaining,
       }).eq("id", eventId);
 
       if (error) {
@@ -372,6 +376,17 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
                 onChange={(e) => { set("per_person", e.target.value); setCapErrors(validateCapacityFields(form.capacity, e.target.value)); }}
               />
             </Field>
+          </div>
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 bg-white p-4">
+            <div>
+              <div className="text-sm font-semibold text-neutral-900">Show tickets remaining</div>
+              <p className="mt-1 text-xs text-neutral-500">Let guests see the exact number of tickets left for this event.</p>
+            </div>
+            <Switch
+              checked={form.show_tickets_remaining}
+              onCheckedChange={(checked) => set("show_tickets_remaining", checked)}
+              aria-label="Show tickets remaining"
+            />
           </div>
         </div>
 

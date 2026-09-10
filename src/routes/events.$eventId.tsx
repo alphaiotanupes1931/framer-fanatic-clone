@@ -33,6 +33,7 @@ type EventRow = {
   price_cents: number | null; status: string; is_published: boolean;
   neighborhood: string | null; video_url: string | null; gallery_urls: string[] | null;
   pricing_mode?: string | null; donations_enabled?: boolean | null;
+  show_tickets_remaining?: boolean;
 };
 
 type TicketTier = {
@@ -586,9 +587,9 @@ function EventDetail() {
               />
             </>
           )}
-          {!soldOut && (remaining !== null || orderCap !== null) && (
+          {!soldOut && ((evt.show_tickets_remaining && remaining !== null) || orderCap !== null) && (
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-[11px] text-muted-foreground">
-              {remaining !== null && (
+              {evt.show_tickets_remaining && remaining !== null && (
                 <span>{remaining} {remaining === 1 ? "ticket" : "tickets"} left for this event</span>
               )}
               {orderCap !== null && (
