@@ -429,10 +429,13 @@ export function ShareToUsersDialog({
             } else {
               convId = conv.id;
             }
-            await supabase.from("conversation_members").insert([
-              { conversation_id: convId, user_id: a },
-              { conversation_id: convId, user_id: b },
-            ]);
+            await supabase.from("conversation_members").upsert(
+              [
+                { conversation_id: convId, user_id: a },
+                { conversation_id: convId, user_id: b },
+              ],
+              { onConflict: "conversation_id,user_id", ignoreDuplicates: true },
+            );
           }
           const { error: msgErr } = await supabase
             .from("messages")
