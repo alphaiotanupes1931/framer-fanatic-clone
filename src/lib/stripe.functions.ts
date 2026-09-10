@@ -221,17 +221,10 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       tier = tt;
     }
 
-    // Event-level cap set by the organizer (used when the event has no tiers).
-    if (!tier && event.max_tickets_per_buyer) {
-      const { count: owned } = await supabase
-        .from("tickets")
-        .select("id", { count: "exact", head: true })
-        .eq("event_id", event.id)
-        .eq("buyer_id", userId)
-        .neq("status", "cancelled");
-      if ((owned ?? 0) + data.quantity > event.max_tickets_per_buyer) {
-        throw new Error(`The organizer limits this event to ${event.max_tickets_per_buyer} tickets per person.`);
-      }
+    // Event-level order limit (used when the event has no tiers). This caps a
+    // single order only; past orders for this or any other event do not count.
+    if (!tier && event.max_tickets_per_buyer && data.quantity > event.max_tickets_per_buyer) {
+      throw new Error(`The organizer limits this event to ${event.max_tickets_per_buyer} ticket(s) per order.`);
     }
 
     const unitPriceCents = tier ? tier.price_cents : (event.price_cents ?? 0);
