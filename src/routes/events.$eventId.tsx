@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/shared/follow-button";
 import { AppLayout } from "@/components/app-layout";
-import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2 } from "lucide-react";
+import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, createEventDonationCheckout } from "@/lib/stripe.functions";
@@ -162,6 +162,7 @@ function EventDetail() {
   const [isAdmin, setIsAdmin] = useState(false);
   const checkoutFn = useServerFn(createTicketCheckout);
   const [shareOpen, setShareOpen] = useState(false);
+  const [photoViewerIdx, setPhotoViewerIdx] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
   const [savingBk, setSavingBk] = useState(false);
   const [qty, setQty] = useState(1);
@@ -629,10 +630,16 @@ function EventDetail() {
           <div>
             <h2 className="font-semibold text-foreground mb-2">Photos</h2>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {evt.gallery_urls.map((p) => (
-                <div key={p} className="overflow-hidden rounded-2xl border border-border bg-card">
-                  <EventImage src={p} alt="Event photo" className="h-40 w-full object-cover" />
-                </div>
+              {evt.gallery_urls.map((p, i) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPhotoViewerIdx(i)}
+                  className="overflow-hidden rounded-2xl border border-border bg-card cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-[#d4580a]"
+                  aria-label={`Open photo ${i + 1} full screen`}
+                >
+                  <EventImage src={p} alt="Event photo" className="h-40 w-full object-cover transition-transform hover:scale-[1.03]" />
+                </button>
               ))}
             </div>
           </div>
@@ -653,6 +660,49 @@ function EventDetail() {
           </div>
         )}
       </div>
+      {photoViewerIdx !== null && evt.gallery_urls && evt.gallery_urls[photoViewerIdx] && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
+          onClick={() => setPhotoViewerIdx(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setPhotoViewerIdx(null)}
+            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          {evt.gallery_urls.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPhotoViewerIdx((photoViewerIdx - 1 + evt.gallery_urls!.length) % evt.gallery_urls!.length); }}
+                className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+                aria-label="Previous photo"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPhotoViewerIdx((photoViewerIdx + 1) % evt.gallery_urls!.length); }}
+                className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+                aria-label="Next photo"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+          <div className="max-h-[90vh] max-w-[92vw]" onClick={(e) => e.stopPropagation()}>
+            <EventImage src={evt.gallery_urls[photoViewerIdx]} alt="Event photo" className="max-h-[90vh] max-w-[92vw] rounded-lg object-contain" />
+          </div>
+          {evt.gallery_urls.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white">
+              {photoViewerIdx + 1} / {evt.gallery_urls.length}
+            </div>
+          )}
+        </div>
+      )}
       <ShareToUsersDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}

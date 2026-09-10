@@ -21,7 +21,7 @@ import {
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
   ChevronLeft, ChevronRight, ChevronDown, Heart, DollarSign,
   Loader2, ImagePlus, Video as VideoIcon, Type as TypeIcon, X,
-  Upload, Lock,
+  Upload, Lock, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -1922,7 +1922,32 @@ function PressTab({ org, canManage }: { org: Org; canManage: boolean }) {
             {items.map((it) => (
               <div key={it.id} className="group relative overflow-hidden rounded-xl border border-neutral-200">
                 <Img src={it.media_url!} alt={it.title} className="aspect-square w-full object-cover" loading="lazy" />
-                <div className="p-2 text-xs font-medium text-neutral-700">{it.title}</div>
+                <div className="flex items-center justify-between gap-2 p-2">
+                  <div className="min-w-0 truncate text-xs font-medium text-neutral-700">{it.title}</div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(it.media_url!);
+                        const blob = await res.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `${(it.title || "press-image").replace(/[^\w\- ]+/g, "").trim() || "press-image"}.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        URL.revokeObjectURL(url);
+                      } catch {
+                        window.open(it.media_url!, "_blank");
+                      }
+                    }}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
+                    aria-label={`Download ${it.title}`}
+                  >
+                    <Download className="h-3 w-3" /> Download
+                  </button>
+                </div>
                 {canManage && (
                   <button onClick={() => remove(it.id)} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-[#d4580a] shadow opacity-0 group-hover:opacity-100">
                     <Trash2 className="h-3.5 w-3.5" />
