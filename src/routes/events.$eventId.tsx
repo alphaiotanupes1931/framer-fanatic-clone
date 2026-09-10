@@ -312,6 +312,8 @@ function EventDetail() {
   const limitReached = remainingAllowance !== null && remainingAllowance <= 0;
 
   const maxQty = Math.max(1, Math.min(remainingAllowance ?? 20, remaining ?? 9999));
+  useEffect(() => { setQty((q) => Math.min(q, maxQty)); }, [maxQty]);
+
 
 
   const rsvp = async () => {
