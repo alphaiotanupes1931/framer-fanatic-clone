@@ -173,7 +173,7 @@ function EventDetail() {
   const [donating, setDonating] = useState(false);
   const [donationsOn, setDonationsOn] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
-  const [ownedCount, setOwnedCount] = useState(0);
+  
 
   useEffect(() => {
     (async () => {
@@ -195,13 +195,6 @@ function EventDetail() {
         if (uid) {
           const { data: sv } = await supabase.from("event_saves").select("event_id").eq("event_id", eventId).eq("user_id", uid).maybeSingle();
           setSaved(!!sv);
-          const { count: owned } = await supabase
-            .from("tickets")
-            .select("id", { count: "exact", head: true })
-            .eq("event_id", eventId)
-            .eq("buyer_id", uid)
-            .neq("status", "cancelled");
-          setOwnedCount(owned ?? 0);
         }
       }
       const { data: tt } = await supabase
@@ -287,13 +280,12 @@ function EventDetail() {
     if (t.sale_ends_at && new Date(t.sale_ends_at).getTime() < now) return false;
     return true;
   };
-  // The organizer decides the per-person limit. No cap set means a generous default.
+  // The organizer sets an order limit: the most tickets allowed in ONE order.
+  // Tickets this guest already holds are not counted against them.
   const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
-  const perPersonCap = selectedTier?.max_per_buyer ?? eventCap ?? null;
-  // How many more this guest may still claim, once their existing tickets are counted.
-  const perPersonLeft = perPersonCap !== null ? Math.max(0, perPersonCap - ownedCount) : null;
-  const limitReached = perPersonLeft !== null && perPersonLeft <= 0;
-  const maxQty = Math.max(1, Math.min(perPersonLeft ?? 20, remaining ?? 9999));
+  const orderCap = selectedTier?.max_per_buyer ?? eventCap ?? null;
+  
+  const maxQty = Math.max(1, Math.min(orderCap ?? 20, remaining ?? 9999));
 
   const rsvp = async () => {
     if (!evt) return;
@@ -477,13 +469,6 @@ function EventDetail() {
               <div className="text-base font-bold text-foreground">Sold out</div>
               <p className="mt-1 text-xs text-muted-foreground">Every ticket for this event has been claimed, so checkout is closed.</p>
             </div>
-          ) : limitReached ? (
-            <div className="rounded-2xl border border-border bg-muted/50 p-5 text-center">
-              <div className="text-base font-bold text-foreground">You have all your tickets</div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                The organizer limits this event to {perPersonCap} {perPersonCap === 1 ? "ticket" : "tickets"} per person, and you already have {ownedCount}. Checkout is closed for you.
-              </p>
-            </div>
           ) : tiers.length > 0 ? (
             <>
               <div className="space-y-2">
@@ -566,13 +551,13 @@ function EventDetail() {
               />
             </>
           )}
-          {!soldOut && !limitReached && (remaining !== null || perPersonLeft !== null) && (
+          {!soldOut && (remaining !== null || orderCap !== null) && (
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-[11px] text-muted-foreground">
               {remaining !== null && (
                 <span>{remaining} {remaining === 1 ? "ticket" : "tickets"} left for this event</span>
               )}
-              {perPersonLeft !== null && (
-                <span>You can still get {perPersonLeft} {perPersonLeft === 1 ? "ticket" : "tickets"} (limit {perPersonCap} per person)</span>
+              {orderCap !== null && (
+                <span>Up to {orderCap} {orderCap === 1 ? "ticket" : "tickets"} per order</span>
               )}
             </div>
           )}
