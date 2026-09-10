@@ -1,6 +1,7 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, CalendarPlus } from "lucide-react";
+import { downloadIcs } from "@/lib/ics";
 import { ReportButton } from "@/components/shared/report-button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
