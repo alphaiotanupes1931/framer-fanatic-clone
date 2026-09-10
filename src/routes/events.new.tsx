@@ -10,6 +10,7 @@ import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
+import { Switch } from "@/components/ui/switch";
 import { useServerFn } from "@tanstack/react-start";
 import { ensureConnectAccount, createConnectOnboardingLink, refreshConnectStatus } from "@/lib/stripe.functions";
 import { closeExternalWindow, navigateExternal, openExternalWindow } from "@/lib/external-nav";
@@ -87,6 +88,7 @@ function NewEventPage() {
     category: "community",
     capacity: "",
     per_person: "",
+    show_tickets_remaining: false,
     gallery_urls: [] as string[],
   });
 
@@ -96,7 +98,7 @@ function NewEventPage() {
     const d = getEventDraft(draftId);
     if (!d) return;
     // Older drafts may predate some fields, so keep safe defaults for them.
-    setForm({ ...d.form, gallery_urls: d.form.gallery_urls ?? [], capacity: d.form.capacity ?? "", per_person: d.form.per_person ?? "" });
+    setForm({ ...d.form, gallery_urls: d.form.gallery_urls ?? [], capacity: d.form.capacity ?? "", per_person: d.form.per_person ?? "", show_tickets_remaining: d.form.show_tickets_remaining ?? false });
     setStartMode(d.startMode);
     setIsOnline(d.isOnline);
     setPricing(d.pricing);
@@ -379,6 +381,7 @@ function NewEventPage() {
         donations_enabled: donation,
         capacity,
         max_tickets_per_buyer: maxPerBuyer,
+        show_tickets_remaining: form.show_tickets_remaining,
       }).select("id").single();
 
       if (error) {
@@ -692,6 +695,17 @@ function NewEventPage() {
                 onChange={(e) => { set("per_person", e.target.value); setCapErrors(validateCapacityFields(form.capacity, e.target.value)); }}
               />
             </Field>
+          </div>
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 bg-white p-4">
+            <div>
+              <div className="text-sm font-semibold text-neutral-900">Show tickets remaining</div>
+              <p className="mt-1 text-xs text-neutral-500">Let guests see the exact number of tickets left for this event.</p>
+            </div>
+            <Switch
+              checked={form.show_tickets_remaining}
+              onCheckedChange={(checked) => set("show_tickets_remaining", checked)}
+              aria-label="Show tickets remaining"
+            />
           </div>
         </div>
 
