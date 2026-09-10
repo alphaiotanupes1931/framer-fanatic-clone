@@ -1597,7 +1597,10 @@ function TicketStub({ t, seat, pending, onCancelled }: { t: { id: string; buyer_
           <div className="flex items-center justify-between gap-2">
             <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-white/45">Planet Baltimore</span>
             {pending ? (
-              <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-amber-200 backdrop-blur">Processing</span>
+              <span
+                title="Payment confirmation is still coming back from the card processor. This usually clears in a minute."
+                className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-amber-200 backdrop-blur"
+              >Confirming payment</span>
             ) : seat ? (
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/70 backdrop-blur">{seat}</span>
             ) : null}
