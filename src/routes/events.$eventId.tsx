@@ -630,10 +630,16 @@ function EventDetail() {
           <div>
             <h2 className="font-semibold text-foreground mb-2">Photos</h2>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {evt.gallery_urls.map((p) => (
-                <div key={p} className="overflow-hidden rounded-2xl border border-border bg-card">
-                  <EventImage src={p} alt="Event photo" className="h-40 w-full object-cover" />
-                </div>
+              {evt.gallery_urls.map((p, i) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPhotoViewerIdx(i)}
+                  className="overflow-hidden rounded-2xl border border-border bg-card cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-[#d4580a]"
+                  aria-label={`Open photo ${i + 1} full screen`}
+                >
+                  <EventImage src={p} alt="Event photo" className="h-40 w-full object-cover transition-transform hover:scale-[1.03]" />
+                </button>
               ))}
             </div>
           </div>
