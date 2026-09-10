@@ -1568,7 +1568,11 @@ function TicketStub({ t, seat, pending, onCancelled }: { t: { id: string; buyer_
   const when = t.events ? new Date(t.events.starts_at) : null;
   const [cancelling, setCancelling] = useState(false);
   const isFreeRsvp = (t.buyer_total_cents ?? 0) === 0;
-  const upcoming = when ? when.getTime() >= Date.now() : false;
+  // Match the 12-hour grace used by the Upcoming list so a just-started event
+  // still lets the guest release their spot.
+  const upcoming = when && Number.isFinite(when.getTime())
+    ? when.getTime() + 12 * 60 * 60 * 1000 >= Date.now()
+    : true;
 
   const cancelRsvp = async () => {
     if (!window.confirm("Cancel this RSVP? Your spot will be released.")) return;
