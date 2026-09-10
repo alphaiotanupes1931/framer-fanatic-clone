@@ -212,7 +212,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
           .select("id", { count: "exact", head: true })
           .eq("ticket_type_id", tt.id)
           .eq("buyer_id", userId)
-          .not("status", "in", "(cancelled,refunded)");
+          .not("status", "in", "(cancelled,refunded,failed)");
         const held = owned ?? 0;
         if (held >= tt.max_per_buyer) {
           throw new Error(`You already have the maximum of ${tt.max_per_buyer} ticket(s) for this event.`);
@@ -226,7 +226,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
           .from("tickets")
           .select("id", { count: "exact", head: true })
           .eq("ticket_type_id", tt.id)
-          .not("status", "in", "(cancelled,refunded)");
+          .not("status", "in", "(cancelled,refunded,failed)");
         if ((count ?? 0) + data.quantity > tt.quantity) throw new Error("Not enough tickets left in this tier.");
       }
       tier = tt;
@@ -240,7 +240,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
         .select("id", { count: "exact", head: true })
         .eq("event_id", event.id)
         .eq("buyer_id", userId)
-        .not("status", "in", "(cancelled,refunded)");
+        .not("status", "in", "(cancelled,refunded,failed)");
       const held = owned ?? 0;
       if (held >= event.max_tickets_per_buyer) {
         throw new Error(`You already have the maximum of ${event.max_tickets_per_buyer} ticket(s) for this event.`);

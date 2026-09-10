@@ -188,7 +188,7 @@ function EventDetail() {
       .select("id, ticket_type_id, status")
       .eq("event_id", eventId)
       .eq("buyer_id", uid);
-    const live = (mine ?? []).filter((t) => t.status !== "cancelled" && t.status !== "refunded");
+    const live = (mine ?? []).filter((t) => t.status !== "cancelled" && t.status !== "refunded" && t.status !== "failed");
     setOwnedForEvent(live.length);
     const byTier: Record<string, number> = {};
     for (const t of live) if (t.ticket_type_id) byTier[t.ticket_type_id] = (byTier[t.ticket_type_id] ?? 0) + 1;

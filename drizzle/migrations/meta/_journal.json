@@ -155,6 +155,13 @@
       "when": 1789054065249,
       "tag": "0021_grant_safe_profile_columns_for_public_view",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1789079716949,
+      "tag": "0022_rsvp_limit_exclude_failed",
+      "breakpoints": true
     }
   ]
 }
