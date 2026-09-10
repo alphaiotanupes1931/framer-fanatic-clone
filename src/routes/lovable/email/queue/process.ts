@@ -5,8 +5,8 @@ import { createFileRoute } from '@tanstack/react-router'
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
 const DEFAULT_SEND_DELAY_MS = 200
-const DEFAULT_AUTH_TTL_MINUTES = 15
-const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
+const DEFAULT_AUTH_TTL_MINUTES = 240
+const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 1440
 
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
@@ -272,7 +272,8 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                   message_id: payload.message_id,
                   template_name: payload.label || queue,
                   recipient_email: payload.to,
-                  status: 'failed',
+                  // A provider throttle is a delay, not a failed delivery attempt.
+                  status: 'pending',
                   error_message: errorMsg.slice(0, 1000),
                 })
 
