@@ -205,16 +205,10 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       const now = Date.now();
       if (tt.sale_starts_at && new Date(tt.sale_starts_at).getTime() > now) throw new Error("Sales for this ticket type haven't started yet.");
       if (tt.sale_ends_at && new Date(tt.sale_ends_at).getTime() < now) throw new Error("Sales for this ticket type have ended.");
-      if (tt.max_per_buyer) {
-        const { count: owned } = await supabase
-          .from("tickets")
-          .select("id", { count: "exact", head: true })
-          .eq("ticket_type_id", tt.id)
-          .eq("buyer_id", userId)
-          .neq("status", "cancelled");
-        if ((owned ?? 0) + data.quantity > tt.max_per_buyer) {
-          throw new Error(`The organizer limits this ticket to ${tt.max_per_buyer} per person.`);
-        }
+      // Order limit: most tickets allowed in one order. Tickets the guest already
+      // holds are not counted against them.
+      if (tt.max_per_buyer && data.quantity > tt.max_per_buyer) {
+        throw new Error(`The organizer limits this ticket to ${tt.max_per_buyer} per order.`);
       }
       if (tt.quantity !== null) {
         const { count } = await supabase
