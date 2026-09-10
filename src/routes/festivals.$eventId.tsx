@@ -213,6 +213,45 @@ function ListColumn({ title, items }: { title: string; items: string[] }) {
   );
 }
 
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold text-muted-foreground">{label}</span>
+      <Input value={value} onChange={onChange} placeholder={placeholder} className="mt-1" />
+    </label>
+  );
+}
+
+function Area({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  hint?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold text-muted-foreground">{label}</span>
+      <Textarea value={value} onChange={onChange} rows={4} className="mt-1" />
+      {hint && <span className="mt-0.5 block text-[11px] text-muted-foreground">{hint}</span>}
+    </label>
+  );
+}
+
 function FestivalDetailPage() {
   const { eventId } = Route.useParams();
   const [me, setMe] = useState<string | null>(null);
