@@ -109,6 +109,30 @@ export function EventCard({ event, compact = false, onDeleted }: { event: EventR
   };
   const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(eventUrl, event.title, event.description || undefined); };
 
+  const addToCalendar = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!eventDate) { toast.error("This event has no date yet"); return; }
+    downloadIcs(
+      {
+        uid: `event-${event.id}@planetbaltimore.com`,
+        title: event.title,
+        start: eventDate,
+        end: event.ends_at ? new Date(event.ends_at) : null,
+        location: event.address || event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore",
+        description: previewText || null,
+        url: eventUrl,
+      },
+      event.title.replace(/[^\w\s-]/g, "").trim() || "event",
+    );
+    toast.success("Added to your calendar");
+  };
+
+  const tags = [
+    event.is_free ? "Free" : event.price_cents ? `$${Math.round(event.price_cents / 100)}` : null,
+    event.category,
+    event.neighborhood_name || event.neighborhood,
+  ].filter(Boolean) as string[];
+
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
     if (!canDelete || deleting) return;
