@@ -174,9 +174,29 @@ function EventDetail() {
   const [donating, setDonating] = useState(false);
   const [donationsOn, setDonationsOn] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [ownedForEvent, setOwnedForEvent] = useState(0);
+  const [ownedByTier, setOwnedByTier] = useState<Record<string, number>>({});
+
   
 
+  // How many tickets this guest already holds for this event, so the per-person
+  // limit survives a page refresh instead of resetting each visit.
+  const loadOwned = async (uid: string) => {
+    const { data: mine } = await supabase
+      .from("tickets")
+      .select("id, ticket_type_id, status")
+      .eq("event_id", eventId)
+      .eq("buyer_id", uid);
+    const live = (mine ?? []).filter((t) => t.status !== "cancelled" && t.status !== "refunded");
+    setOwnedForEvent(live.length);
+    const byTier: Record<string, number> = {};
+    for (const t of live) if (t.ticket_type_id) byTier[t.ticket_type_id] = (byTier[t.ticket_type_id] ?? 0) + 1;
+    setOwnedByTier(byTier);
+    if (live.length > 0) setRsvped(true);
+  };
+
   useEffect(() => {
+
     (async () => {
       // A stale token left in storage still "looks" signed in, which is how
       // guests ended up calling ticket RPCs and seeing permission errors.
@@ -211,8 +231,10 @@ function EventDetail() {
       const { data: capRow } = await supabase.rpc("event_capacity_status", { _event_id: eventId });
       const cap = Array.isArray(capRow) ? capRow[0] : null;
       setRemaining(cap?.remaining ?? null);
+      if (uid) await loadOwned(uid);
       setLoading(false);
     })();
+
   }, [eventId]);
 
   // Guests who tap a ticket action get sent to sign up, then straight back here.
@@ -281,12 +303,18 @@ function EventDetail() {
     if (t.sale_ends_at && new Date(t.sale_ends_at).getTime() < now) return false;
     return true;
   };
-  // The organizer sets an order limit: the most tickets allowed in ONE order.
-  // Tickets this guest already holds are not counted against them.
+  // The organizer sets a per-person limit for THIS event. Tickets this guest
+  // already holds for this event count against it, so they can't refresh and buy more.
   const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
   const orderCap = selectedTier?.max_per_buyer ?? eventCap ?? null;
-  
-  const maxQty = Math.max(1, Math.min(orderCap ?? 20, remaining ?? 9999));
+  const ownedForLimit = selectedTier?.max_per_buyer ? (ownedByTier[selectedTier.id] ?? 0) : ownedForEvent;
+  const remainingAllowance = orderCap === null ? null : Math.max(0, orderCap - ownedForLimit);
+  const limitReached = remainingAllowance !== null && remainingAllowance <= 0;
+
+  const maxQty = Math.max(1, Math.min(remainingAllowance ?? 20, remaining ?? 9999));
+  useEffect(() => { setQty((q) => Math.min(q, maxQty)); }, [maxQty]);
+
+
 
   const rsvp = async () => {
     if (!evt) return;
@@ -302,6 +330,8 @@ function EventDetail() {
       const result = data as { quantity?: number } | null;
       const n = result?.quantity ?? qty;
       setRsvped(true);
+      if (me) await loadOwned(me);
+
       toast.success(n > 1 ? `${n} tickets reserved. Check your email for your tickets.` : "You're going! Check your email for your ticket.");
       void emailMyTickets({ data: { eventId: evt.id } }).catch((err) => {
         console.error("ticket email failed", err);
@@ -508,9 +538,10 @@ function EventDetail() {
                   <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
                   <BuyButton
                     onClick={buy}
-                    disabled={buying || !tierOnSale(selectedTier)}
+                    disabled={buying || limitReached || !tierOnSale(selectedTier)}
                     loading={buying}
-                    label={`Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+                    label={limitReached ? "Ticket limit reached" : `Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+
                     amount={`$${((selectedTier.price_cents * qty) / 100).toFixed(2)}`}
                   />
                 </>
@@ -519,9 +550,10 @@ function EventDetail() {
                   <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
                   <BuyButton
                     onClick={rsvp}
-                    disabled={rsvping || rsvped}
+                    disabled={rsvping || rsvped || limitReached}
                     loading={rsvping}
-                    label={rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} free tickets` : "Reserve free ticket"}
+                    label={limitReached ? "Ticket limit reached" : rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} free tickets` : "Reserve free ticket"}
+
                   />
                 </>
               )}
@@ -535,9 +567,10 @@ function EventDetail() {
               <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
               <BuyButton
                 onClick={buy}
-                disabled={buying}
+                disabled={buying || limitReached}
                 loading={buying}
-                label={`Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+                label={limitReached ? "Ticket limit reached" : `Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+
                 amount={`$${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
               />
             </>
@@ -546,9 +579,10 @@ function EventDetail() {
               <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
               <BuyButton
                 onClick={rsvp}
-                disabled={rsvping || rsvped}
+                disabled={rsvping || rsvped || limitReached}
                 loading={rsvping}
-                label={rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
+                label={limitReached ? "Ticket limit reached" : rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
+
               />
             </>
           )}
@@ -558,10 +592,15 @@ function EventDetail() {
                 <span>{remaining} {remaining === 1 ? "ticket" : "tickets"} left for this event</span>
               )}
               {orderCap !== null && (
-                <span>Up to {orderCap} {orderCap === 1 ? "ticket" : "tickets"} per order</span>
+                <span>
+                  {limitReached
+                    ? `You already have the maximum of ${orderCap} ${orderCap === 1 ? "ticket" : "tickets"} for this event`
+                    : `Limit ${orderCap} ${orderCap === 1 ? "ticket" : "tickets"} per person${ownedForLimit > 0 ? ` (you have ${ownedForLimit})` : ""}`}
+                </span>
               )}
             </div>
           )}
+
           {donationsOn && (
             <div className="rounded-2xl border border-[#d4580a]/30 bg-[#fff7f1] p-4">
               <div className="text-sm font-semibold text-foreground">Support this event</div>
