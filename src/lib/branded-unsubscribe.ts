@@ -35,36 +35,40 @@ function footerHtml(token: string): string {
 
 function providerFooterMinimizeStyle(): string {
   return `<style type="text/css">
-  /* Tone down the provider's default footer that appears below our branded footer.
-     It should blend into the white background so recipients use the Planet
-     Baltimore unsubscribe link above it. */
-  body > table.pb-branded-footer ~ table,
-  body > table.pb-branded-footer ~ div,
-  body > table:last-of-type:not(.pb-branded-footer),
-  body > div:last-of-type:not(.pb-branded-footer) {
-    font-size: 8px !important;
-    line-height: 10px !important;
+  /* Collapse the provider's default footer that is appended below our branded
+     footer, so the Planet Baltimore unsubscribe link is the only one shown.
+     Selectors avoid a "body >" prefix because clients such as Gmail rewrite
+     the body element into a div. */
+  .pb-branded-footer ~ table,
+  .pb-branded-footer ~ div,
+  .pb-branded-footer ~ p,
+  .pb-branded-footer ~ a,
+  .pb-branded-footer ~ center,
+  .pb-branded-footer ~ span {
+    display: none !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
     color: #ffffff !important;
     background-color: #ffffff !important;
+    mso-hide: all !important;
   }
-  body > table.pb-branded-footer ~ table a,
-  body > table.pb-branded-footer ~ div a,
-  body > table:last-of-type:not(.pb-branded-footer) a,
-  body > div:last-of-type:not(.pb-branded-footer) a {
+  .pb-branded-footer ~ table a,
+  .pb-branded-footer ~ div a,
+  .pb-branded-footer ~ table td,
+  .pb-branded-footer ~ div td {
+    display: none !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
     color: #ffffff !important;
     text-decoration: none !important;
-  }
-  body > table.pb-branded-footer ~ table td,
-  body > table.pb-branded-footer ~ div td,
-  body > table:last-of-type:not(.pb-branded-footer) td,
-  body > div:last-of-type:not(.pb-branded-footer) td {
-    color: #ffffff !important;
     background-color: #ffffff !important;
-    padding-top: 4px !important;
-    padding-bottom: 4px !important;
+    mso-hide: all !important;
   }
 </style>`
 }
+
 
 /** Append the branded footer to a rendered HTML email. */
 export function withBrandedUnsubscribeHtml(html: string, token: string): string {
