@@ -1490,18 +1490,32 @@ function MyTicketsTab() {
         const res = await reconcile({ data: sessionId ? { sessionId } : {} });
         if (res?.confirmed) toast.success("Purchase confirmed. Your receipt is on the way by email.");
       } catch { /* reconciliation is best-effort */ }
+      // "pending" rows are orders Stripe has taken but not finished confirming.
+      // Showing them keeps a fresh purchase visible instead of appearing lost.
       const { data } = await supabase
         .from("tickets")
         .select("id, status, buyer_total_cents, event_id, events(title, starts_at, location, venue_name)")
         .eq("buyer_id", uid)
-        .eq("status", "paid")
+        .in("status", ["paid", "pending"])
         .order("created_at", { ascending: false });
       setTickets((data ?? []) as TicketRow[]);
       setLoading(false);
     })();
-  }, []);
+  }, [refreshKey]);
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading tickets…</div>;
-  if (tickets.length === 0) return <div className="py-12 text-center text-muted-foreground">You haven't bought any tickets yet.</div>;
+  if (tickets.length === 0) {
+    return (
+      <div className="py-12 text-center text-muted-foreground">
+        <p>You haven't bought any tickets yet.</p>
+        <button
+          onClick={() => { setLoading(true); setRefreshKey((k) => k + 1); }}
+          className="mt-3 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground"
+        >
+          Refresh
+        </button>
+      </div>
+    );
+  }
   const now = Date.now();
   const shown = tickets.filter((t) => {
     const at = t.events ? new Date(t.events.starts_at).getTime() : 0;
