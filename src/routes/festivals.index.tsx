@@ -626,6 +626,18 @@ function FestivalsPage() {
                               </p>
                             )}
                           </Link>
+                          {tagsOf(featured).length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {tagsOf(featured).map((t) => (
+                                <span
+                                  key={t}
+                                  className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium capitalize text-muted-foreground"
+                                >
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           <div className="flex flex-wrap gap-2 pt-1">
                             <Link
                               to="/festivals/$eventId"
@@ -644,6 +656,19 @@ function FestivalsPage() {
                               View Schedule
                             </Link>
                           </div>
+                          <div className="pt-1">
+                            <FestivalActions
+                              row={featured}
+                              meId={me?.id}
+                              saved={savedIds.includes(featured.id)}
+                              onSavedChange={(id, next) =>
+                                setSavedIds((prev) =>
+                                  next ? [...new Set([...prev, id])] : prev.filter((x) => x !== id),
+                                )
+                              }
+                            />
+                          </div>
+
                         </div>
                       </div>
                     </div>
