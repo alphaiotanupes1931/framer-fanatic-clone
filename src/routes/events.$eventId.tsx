@@ -173,7 +173,7 @@ function EventDetail() {
   const [donating, setDonating] = useState(false);
   const [donationsOn, setDonationsOn] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
-  const [ownedCount, setOwnedCount] = useState(0);
+  
 
   useEffect(() => {
     (async () => {
@@ -291,7 +291,7 @@ function EventDetail() {
   // Tickets this guest already holds are not counted against them.
   const eventCap = (evt as (EventRow & { max_tickets_per_buyer?: number | null }) | null)?.max_tickets_per_buyer ?? null;
   const orderCap = selectedTier?.max_per_buyer ?? eventCap ?? null;
-  const limitReached = false;
+  
   const maxQty = Math.max(1, Math.min(orderCap ?? 20, remaining ?? 9999));
 
   const rsvp = async () => {
