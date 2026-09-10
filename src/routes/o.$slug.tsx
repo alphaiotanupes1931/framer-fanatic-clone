@@ -736,33 +736,6 @@ function OrgProfile() {
           )}
         </div>
 
-        {/* Secondary admin actions */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {canManage && !isStaffSession && (
-            <button
-              onClick={async () => {
-                if (!confirm("Delete this page?")) return;
-                const { error } = await supabase.from("organizations").delete().eq("id", org.id);
-                if (error) return toast.error(error.message);
-                toast.success("Deleted");
-                navigate({ to: "/dashboard" });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-            >
-              <Trash2 className="h-4 w-4" /> Delete Page {canManage && <span className="text-[10px] opacity-60">(Admin)</span>}
-            </button>
-          )}
-          {me && canManage && (
-            <button
-              onClick={toggleMute}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-            >
-              {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              {muted ? "Unmute Page" : "Mute Page"}
-            </button>
-          )}
-        </div>
-
         {/* Tabs */}
         {isOwner && supportsStaffLoginType(org.type) && <StaffLoginCard orgId={org.id} orgType={org.type} />}
 
