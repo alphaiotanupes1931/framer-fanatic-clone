@@ -214,8 +214,10 @@ function EventDetail() {
       const { data: capRow } = await supabase.rpc("event_capacity_status", { _event_id: eventId });
       const cap = Array.isArray(capRow) ? capRow[0] : null;
       setRemaining(cap?.remaining ?? null);
+      if (uid) await loadOwned(uid);
       setLoading(false);
     })();
+
   }, [eventId]);
 
   // Guests who tap a ticket action get sent to sign up, then straight back here.
