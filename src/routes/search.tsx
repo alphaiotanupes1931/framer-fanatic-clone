@@ -59,6 +59,7 @@ function SearchPage() {
       setLoading(true);
       const hasQ = debounced.length > 0;
       const like = `%${debounced}%`;
+      const eventCutoff = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
       const [pplRes, orgRes, evRes, bizRes, postRes, storyRes, hoodRes] = await Promise.all([
         hasQ
           ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
