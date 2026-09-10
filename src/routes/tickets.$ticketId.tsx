@@ -56,8 +56,21 @@ function TicketDetailPage() {
 
   useEffect(() => {
     if (!t?.buyer_id) return;
-    supabase.from("profiles").select("display_name,email").eq("id", t.buyer_id).maybeSingle()
-      .then(({ data }) => setHolder((data as { display_name: string | null; email: string | null } | null) ?? null));
+    let cancelled = false;
+    (async () => {
+      const [{ data: prof }, { data: sess }] = await Promise.all([
+        supabase.from("profiles").select("display_name").eq("id", t.buyer_id).maybeSingle(),
+        supabase.auth.getSession(),
+      ]);
+      if (cancelled) return;
+      // Emails are private: only surface the viewer's own address.
+      const isSelf = sess.session?.user.id === t.buyer_id;
+      setHolder({
+        display_name: (prof as { display_name: string | null } | null)?.display_name ?? null,
+        email: isSelf ? (sess.session?.user.email ?? null) : null,
+      });
+    })();
+    return () => { cancelled = true; };
   }, [t?.buyer_id]);
 
   useEffect(() => {
