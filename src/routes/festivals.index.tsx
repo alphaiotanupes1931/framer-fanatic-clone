@@ -12,6 +12,9 @@ import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { pageHead } from "@/lib/seo";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { siteUrl } from "@/lib/utils";
+import { downloadIcs } from "@/lib/ics";
+import { externalShare } from "@/lib/share-preview";
 import {
   Plus,
   MapPin,
@@ -24,6 +27,8 @@ import {
   Navigation,
   UserPlus,
   UserCheck,
+  Share2,
+  CalendarPlus,
 } from "lucide-react";
 
 export const Route = createFileRoute("/festivals/")({
