@@ -575,7 +575,7 @@ function OrgProfile() {
                   <Camera className="h-4 w-4" /> Edit banner
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => avatarInputRef.current?.click()} disabled={uploading === "avatar_url"}>
-                  <Camera className="h-4 w-4" /> Edit photo
+                  <Camera className="h-4 w-4" /> Edit avatar
                 </DropdownMenuItem>
                 {me && (
                   <DropdownMenuItem onClick={toggleMute}>
