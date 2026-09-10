@@ -930,21 +930,6 @@ function EditFestivalDetails({
     onSaved();
   };
 
-  const Field = ({ label, k, placeholder }: { label: string; k: keyof typeof form; placeholder?: string }) => (
-    <label className="block">
-      <span className="text-xs font-semibold text-muted-foreground">{label}</span>
-      <Input value={form[k]} onChange={set(k)} placeholder={placeholder} className="mt-1" />
-    </label>
-  );
-
-  const Area = ({ label, k, hint }: { label: string; k: keyof typeof form; hint?: string }) => (
-    <label className="block">
-      <span className="text-xs font-semibold text-muted-foreground">{label}</span>
-      <Textarea value={form[k]} onChange={set(k)} rows={4} className="mt-1" />
-      {hint && <span className="mt-0.5 block text-[11px] text-muted-foreground">{hint}</span>}
-    </label>
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
