@@ -577,9 +577,10 @@ function EventDetail() {
               <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
               <BuyButton
                 onClick={rsvp}
-                disabled={rsvping || rsvped}
+                disabled={rsvping || rsvped || limitReached}
                 loading={rsvping}
-                label={rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
+                label={limitReached ? "Ticket limit reached" : rsvped ? "You're going" : qty > 1 ? `Reserve ${qty} tickets` : "I'm going"}
+
               />
             </>
           )}
