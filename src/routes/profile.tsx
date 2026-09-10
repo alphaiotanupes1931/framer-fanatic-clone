@@ -1548,6 +1548,7 @@ function MyTicketsTab() {
               key={t.id}
               t={t}
               seat={seat}
+              pending={t.status === "pending"}
               onCancelled={() => setTickets((prev) => prev.filter((x) => x.id !== t.id))}
             />
           ))}
@@ -1557,7 +1558,7 @@ function MyTicketsTab() {
   );
 }
 
-function TicketStub({ t, seat, onCancelled }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null }; seat?: string | null; onCancelled?: () => void }) {
+function TicketStub({ t, seat, pending, onCancelled }: { t: { id: string; buyer_total_cents: number; events: { title: string; starts_at: string; location: string | null; venue_name: string | null } | null }; seat?: string | null; pending?: boolean; onCancelled?: () => void }) {
   const when = t.events ? new Date(t.events.starts_at) : null;
   const [cancelling, setCancelling] = useState(false);
   const isFreeRsvp = (t.buyer_total_cents ?? 0) === 0;
