@@ -328,6 +328,8 @@ function EventDetail() {
       const result = data as { quantity?: number } | null;
       const n = result?.quantity ?? qty;
       setRsvped(true);
+      if (me) await loadOwned(me);
+
       toast.success(n > 1 ? `${n} tickets reserved. Check your email for your tickets.` : "You're going! Check your email for your ticket.");
       void emailMyTickets({ data: { eventId: evt.id } }).catch((err) => {
         console.error("ticket email failed", err);
