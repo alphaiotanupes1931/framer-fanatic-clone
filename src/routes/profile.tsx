@@ -1495,11 +1495,19 @@ function MyTicketsTab() {
       // Showing them keeps a fresh purchase visible instead of appearing lost.
       const { data } = await supabase
         .from("tickets")
-        .select("id, status, buyer_total_cents, event_id, events(title, starts_at, location, venue_name)")
+        .select("id, status, buyer_total_cents, event_id, created_at, events(title, starts_at, location, venue_name)")
         .eq("buyer_id", uid)
         .in("status", ["paid", "pending"])
         .order("created_at", { ascending: false });
-      setTickets((data ?? []) as TicketRow[]);
+      // Keep an unconfirmed order visible only while it can still complete.
+      // Older ones are abandoned checkouts, not tickets.
+      const cutoff = Date.now() - 2 * 60 * 60 * 1000;
+      const rows = (data ?? []).filter((r) => {
+        if ((r as { status: string }).status !== "pending") return true;
+        const at = new Date((r as { created_at: string }).created_at).getTime();
+        return !Number.isFinite(at) || at >= cutoff;
+      });
+      setTickets(rows as TicketRow[]);
       setLoading(false);
     })();
   }, [refreshKey]);
