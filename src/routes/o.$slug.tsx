@@ -559,12 +559,49 @@ function OrgProfile() {
         </div>
         <div className="flex w-full flex-wrap items-center justify-start gap-2 pb-1 sm:w-auto sm:justify-end">
           {canManage && (
-            <button
-              onClick={() => { setTab("About"); setEditAbout(true); }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-            >
-              <Pencil className="h-4 w-4" /> Edit Profile
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+                >
+                  <Pencil className="h-4 w-4" /> Edit Profile <ChevronDown className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => { setTab("About"); setEditAbout(true); }}>
+                  <Pencil className="h-4 w-4" /> Edit profile details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => bannerInputRef.current?.click()} disabled={uploading === "banner_url"}>
+                  <Camera className="h-4 w-4" /> Edit banner
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => avatarInputRef.current?.click()} disabled={uploading === "avatar_url"}>
+                  <Camera className="h-4 w-4" /> Edit photo
+                </DropdownMenuItem>
+                {me && (
+                  <DropdownMenuItem onClick={toggleMute}>
+                    {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                    {muted ? "Unmute Page" : "Mute Page"}
+                  </DropdownMenuItem>
+                )}
+                {!isStaffSession && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-red-600 focus:text-red-600"
+                      onClick={async () => {
+                        if (!confirm("Delete this page?")) return;
+                        const { error } = await supabase.from("organizations").delete().eq("id", org.id);
+                        if (error) return toast.error(error.message);
+                        toast.success("Deleted");
+                        navigate({ to: "/dashboard" });
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete Page
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
           {canManage && (
           <MessageAllButton
