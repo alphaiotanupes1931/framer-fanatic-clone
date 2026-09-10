@@ -708,7 +708,7 @@ function OrgProfile() {
             <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700 whitespace-pre-wrap">{org.bio}</p>
           )
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
+        <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
           <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {memberCount} {memberCount === 1 ? "member" : "members"}</span>
           {org.website && (
             <>
