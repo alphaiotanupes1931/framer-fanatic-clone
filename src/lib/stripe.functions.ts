@@ -205,27 +205,51 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       const now = Date.now();
       if (tt.sale_starts_at && new Date(tt.sale_starts_at).getTime() > now) throw new Error("Sales for this ticket type haven't started yet.");
       if (tt.sale_ends_at && new Date(tt.sale_ends_at).getTime() < now) throw new Error("Sales for this ticket type have ended.");
-      // Order limit: most tickets allowed in one order. Tickets the guest already
-      // holds are not counted against them.
-      if (tt.max_per_buyer && data.quantity > tt.max_per_buyer) {
-        throw new Error(`The organizer limits this ticket to ${tt.max_per_buyer} per order.`);
+      // Per-person limit: everything this buyer already holds for THIS tier counts.
+      if (tt.max_per_buyer) {
+        const { count: owned } = await supabase
+          .from("tickets")
+          .select("id", { count: "exact", head: true })
+          .eq("ticket_type_id", tt.id)
+          .eq("buyer_id", userId)
+          .not("status", "in", "(cancelled,refunded)");
+        const held = owned ?? 0;
+        if (held >= tt.max_per_buyer) {
+          throw new Error(`You already have the maximum of ${tt.max_per_buyer} ticket(s) for this event.`);
+        }
+        if (held + data.quantity > tt.max_per_buyer) {
+          throw new Error(`You can only get ${tt.max_per_buyer - held} more ticket(s) for this event.`);
+        }
       }
       if (tt.quantity !== null) {
         const { count } = await supabase
           .from("tickets")
           .select("id", { count: "exact", head: true })
           .eq("ticket_type_id", tt.id)
-          .neq("status", "cancelled");
+          .not("status", "in", "(cancelled,refunded)");
         if ((count ?? 0) + data.quantity > tt.quantity) throw new Error("Not enough tickets left in this tier.");
       }
       tier = tt;
     }
 
-    // Event-level order limit (used when the event has no tiers). This caps a
-    // single order only; past orders for this or any other event do not count.
-    if (!tier && event.max_tickets_per_buyer && data.quantity > event.max_tickets_per_buyer) {
-      throw new Error(`The organizer limits this event to ${event.max_tickets_per_buyer} ticket(s) per order.`);
+    // Event-level per-person limit (used when the event has no tiers): counts
+    // every ticket this buyer already holds for this event.
+    if (!tier && event.max_tickets_per_buyer) {
+      const { count: owned } = await supabase
+        .from("tickets")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", event.id)
+        .eq("buyer_id", userId)
+        .not("status", "in", "(cancelled,refunded)");
+      const held = owned ?? 0;
+      if (held >= event.max_tickets_per_buyer) {
+        throw new Error(`You already have the maximum of ${event.max_tickets_per_buyer} ticket(s) for this event.`);
+      }
+      if (held + data.quantity > event.max_tickets_per_buyer) {
+        throw new Error(`You can only get ${event.max_tickets_per_buyer - held} more ticket(s) for this event.`);
+      }
     }
+
 
     const unitPriceCents = tier ? tier.price_cents : (event.price_cents ?? 0);
     if (!unitPriceCents || unitPriceCents <= 0) {
