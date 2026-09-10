@@ -774,8 +774,8 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const stripe = getStripe();
 
-    // Only look at this buyer's unconfirmed orders from the last 7 days.
-    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    // Look back far enough to clean up abandoned checkouts that were never paid.
+    const since = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
     let query = supabaseAdmin
       .from("tickets")
       .select("id, event_id, buyer_id, artist_id, stripe_checkout_session_id")
