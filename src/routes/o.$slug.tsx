@@ -19,11 +19,18 @@ import {
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
-  ChevronLeft, ChevronRight, Heart, DollarSign,
+  ChevronLeft, ChevronRight, ChevronDown, Heart, DollarSign,
   Loader2, ImagePlus, Video as VideoIcon, Type as TypeIcon, X,
   Upload, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { tabsForArtist, type ArtistTab } from "@/lib/artist-tabs";
 import { StoreTab } from "@/components/org/store-tab";
 import { OrgStoriesTab } from "@/components/org/org-stories-tab";
