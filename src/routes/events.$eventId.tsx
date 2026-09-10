@@ -565,13 +565,13 @@ function EventDetail() {
               />
             </>
           )}
-          {!soldOut && !limitReached && (remaining !== null || perPersonLeft !== null) && (
+          {!soldOut && (remaining !== null || orderCap !== null) && (
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-[11px] text-muted-foreground">
               {remaining !== null && (
                 <span>{remaining} {remaining === 1 ? "ticket" : "tickets"} left for this event</span>
               )}
-              {perPersonLeft !== null && (
-                <span>You can still get {perPersonLeft} {perPersonLeft === 1 ? "ticket" : "tickets"} (limit {perPersonCap} per person)</span>
+              {orderCap !== null && (
+                <span>Up to {orderCap} {orderCap === 1 ? "ticket" : "tickets"} per order</span>
               )}
             </div>
           )}
