@@ -127,6 +127,13 @@
       "when": 1789001229633,
       "tag": "0017_add_event_ticket_remaining_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789003700301,
+      "tag": "0018_security_hardening_profiles_follows_votes_functions",
+      "breakpoints": true
     }
   ]
 }
