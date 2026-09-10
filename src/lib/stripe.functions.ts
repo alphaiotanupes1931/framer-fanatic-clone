@@ -839,10 +839,22 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
           ? session.payment_intent
           : session.payment_intent?.id ?? null;
 
+        // The organizer is required on a ticket; fall back to the event owner.
+        let artistId = meta['artist_id'] || "";
+        if (!artistId) {
+          const { data: ev } = await supabaseAdmin
+            .from("events")
+            .select("user_id")
+            .eq("id", meta['event_id']!)
+            .maybeSingle();
+          artistId = ev?.user_id ?? "";
+        }
+        if (!artistId) return { confirmed: 0 };
+
         const rebuilt = Array.from({ length: qty }, (_, i) => ({
           event_id: meta['event_id']!,
           buyer_id: userId,
-          artist_id: meta['artist_id'] || null,
+          artist_id: artistId,
           stripe_checkout_session_id: data.sessionId!,
           stripe_payment_intent_id: paymentIntentId,
           buyer_total_cents: split(buyerTotal, i),
