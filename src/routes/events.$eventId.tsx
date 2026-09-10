@@ -586,10 +586,15 @@ function EventDetail() {
                 <span>{remaining} {remaining === 1 ? "ticket" : "tickets"} left for this event</span>
               )}
               {orderCap !== null && (
-                <span>Up to {orderCap} {orderCap === 1 ? "ticket" : "tickets"} per order</span>
+                <span>
+                  {limitReached
+                    ? `You already have the maximum of ${orderCap} ${orderCap === 1 ? "ticket" : "tickets"} for this event`
+                    : `Limit ${orderCap} ${orderCap === 1 ? "ticket" : "tickets"} per person${ownedForLimit > 0 ? ` (you have ${ownedForLimit})` : ""}`}
+                </span>
               )}
             </div>
           )}
+
           {donationsOn && (
             <div className="rounded-2xl border border-[#d4580a]/30 bg-[#fff7f1] p-4">
               <div className="text-sm font-semibold text-foreground">Support this event</div>
