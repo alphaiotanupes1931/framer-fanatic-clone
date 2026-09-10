@@ -918,8 +918,15 @@ export const reconcileMyTickets = createServerFn({ method: "POST" })
         continue;
       }
       if (session.payment_status !== "paid") {
-        if (session.status === "expired") {
-          await supabaseAdmin.from("tickets").update({ status: "failed" }).eq("stripe_checkout_session_id", sessionId);
+        // Abandoned checkout: the reservation was created when the buyer left
+        // for Stripe but no payment ever completed. Expire it so it stops
+        // showing as a ticket and its seats go back to inventory.
+        const stale = (session.created ?? 0) * 1000 < Date.now() - 2 * 60 * 60 * 1000;
+        if (session.status === "expired" || stale) {
+          if (session.status === "open") {
+            try { await stripe.checkout.sessions.expire(sessionId); } catch { /* already gone */ }
+          }
+          await supabaseAdmin.from("tickets").update({ status: "failed" }).eq("stripe_checkout_session_id", sessionId).eq("status", "pending");
         }
         continue;
       }
