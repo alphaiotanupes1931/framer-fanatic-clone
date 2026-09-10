@@ -19,11 +19,18 @@ import {
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
-  ChevronLeft, ChevronRight, Heart, DollarSign,
+  ChevronLeft, ChevronRight, ChevronDown, Heart, DollarSign,
   Loader2, ImagePlus, Video as VideoIcon, Type as TypeIcon, X,
   Upload, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { tabsForArtist, type ArtistTab } from "@/lib/artist-tabs";
 import { StoreTab } from "@/components/org/store-tab";
 import { OrgStoriesTab } from "@/components/org/org-stories-tab";
@@ -552,12 +559,49 @@ function OrgProfile() {
         </div>
         <div className="flex w-full flex-wrap items-center justify-start gap-2 pb-1 sm:w-auto sm:justify-end">
           {canManage && (
-            <button
-              onClick={() => { setTab("About"); setEditAbout(true); }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
-            >
-              <Pencil className="h-4 w-4" /> Edit Profile
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
+                >
+                  <Pencil className="h-4 w-4" /> Edit Profile <ChevronDown className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => { setTab("About"); setEditAbout(true); }}>
+                  <Pencil className="h-4 w-4" /> Edit profile details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => bannerInputRef.current?.click()} disabled={uploading === "banner_url"}>
+                  <Camera className="h-4 w-4" /> Edit banner
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => avatarInputRef.current?.click()} disabled={uploading === "avatar_url"}>
+                  <Camera className="h-4 w-4" /> Edit photo
+                </DropdownMenuItem>
+                {me && (
+                  <DropdownMenuItem onClick={toggleMute}>
+                    {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                    {muted ? "Unmute Page" : "Mute Page"}
+                  </DropdownMenuItem>
+                )}
+                {!isStaffSession && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-red-600 focus:text-red-600"
+                      onClick={async () => {
+                        if (!confirm("Delete this page?")) return;
+                        const { error } = await supabase.from("organizations").delete().eq("id", org.id);
+                        if (error) return toast.error(error.message);
+                        toast.success("Deleted");
+                        navigate({ to: "/dashboard" });
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete Page
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
           {canManage && (
           <MessageAllButton
@@ -689,33 +733,6 @@ function OrgProfile() {
               <span className="text-neutral-300">·</span>
               <a href={`tel:${org.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d4580a]"><Phone className="h-4 w-4" /> {org.phone}</a>
             </>
-          )}
-        </div>
-
-        {/* Secondary admin actions */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {canManage && !isStaffSession && (
-            <button
-              onClick={async () => {
-                if (!confirm("Delete this page?")) return;
-                const { error } = await supabase.from("organizations").delete().eq("id", org.id);
-                if (error) return toast.error(error.message);
-                toast.success("Deleted");
-                navigate({ to: "/dashboard" });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-            >
-              <Trash2 className="h-4 w-4" /> Delete Page {canManage && <span className="text-[10px] opacity-60">(Admin)</span>}
-            </button>
-          )}
-          {me && canManage && (
-            <button
-              onClick={toggleMute}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#d4580a]/40 bg-white px-4 py-1.5 text-sm font-semibold text-[#d4580a] hover:bg-[#d4580a]/[0.06]"
-            >
-              {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              {muted ? "Unmute Page" : "Mute Page"}
-            </button>
           )}
         </div>
 
