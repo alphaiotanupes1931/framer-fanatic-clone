@@ -565,9 +565,10 @@ function EventDetail() {
               <QtyStepper label="How many tickets?" qty={qty} max={maxQty} onChange={setQty} />
               <BuyButton
                 onClick={buy}
-                disabled={buying}
+                disabled={buying || limitReached}
                 loading={buying}
-                label={`Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+                label={limitReached ? "Ticket limit reached" : `Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
+
                 amount={`$${(((evt.price_cents ?? 0) * qty) / 100).toFixed(2)}`}
               />
             </>
