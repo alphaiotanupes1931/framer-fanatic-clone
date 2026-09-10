@@ -179,7 +179,24 @@ function EventDetail() {
 
   
 
+  // How many tickets this guest already holds for this event, so the per-person
+  // limit survives a page refresh instead of resetting each visit.
+  const loadOwned = async (uid: string) => {
+    const { data: mine } = await supabase
+      .from("tickets")
+      .select("id, ticket_type_id, status")
+      .eq("event_id", eventId)
+      .eq("buyer_id", uid);
+    const live = (mine ?? []).filter((t) => t.status !== "cancelled" && t.status !== "refunded");
+    setOwnedForEvent(live.length);
+    const byTier: Record<string, number> = {};
+    for (const t of live) if (t.ticket_type_id) byTier[t.ticket_type_id] = (byTier[t.ticket_type_id] ?? 0) + 1;
+    setOwnedByTier(byTier);
+    if (live.length > 0) setRsvped(true);
+  };
+
   useEffect(() => {
+
     (async () => {
       // A stale token left in storage still "looks" signed in, which is how
       // guests ended up calling ticket RPCs and seeing permission errors.
