@@ -134,6 +134,13 @@
       "when": 1789003700301,
       "tag": "0018_security_hardening_profiles_follows_votes_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789053684317,
+      "tag": "0019_grant_select_profiles_public",
+      "breakpoints": true
     }
   ]
 }
