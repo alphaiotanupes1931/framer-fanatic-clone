@@ -516,6 +516,7 @@ export type Database = {
           organization_id: string | null
           price_cents: number
           pricing_mode: string | null
+          show_tickets_remaining: boolean
           starts_at: string
           status: string
           title: string
@@ -545,6 +546,7 @@ export type Database = {
           organization_id?: string | null
           price_cents?: number
           pricing_mode?: string | null
+          show_tickets_remaining?: boolean
           starts_at: string
           status?: string
           title: string
@@ -574,6 +576,7 @@ export type Database = {
           organization_id?: string | null
           price_cents?: number
           pricing_mode?: string | null
+          show_tickets_remaining?: boolean
           starts_at?: string
           status?: string
           title?: string
