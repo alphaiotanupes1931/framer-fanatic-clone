@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type FestivalPin = {
   id: string;
@@ -38,43 +38,68 @@ export function FestivalMap({
     return <div className="h-[420px] w-full animate-pulse rounded-xl bg-muted" />;
   }
 
-  const { MapContainer, TileLayer, Marker, Popup, L } = Lib;
+  const { MapContainer, TileLayer, CircleMarker, Tooltip, Popup, useMap } = Lib;
+  const firstPin = pins[0];
+  const center: [number, number] = firstPin
+    ? [firstPin.latitude, firstPin.longitude]
+    : [39.299, -76.612];
 
-  const icon = (active: boolean) =>
-    L.divIcon({
-      className: "",
-      html: `<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${
-        active ? "#7a2f04" : "#d4580a"
-      };border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
-      iconSize: [22, 22],
-      iconAnchor: [11, 22],
-    });
-
-  const center = pins.length
-    ? ([pins[0]!.latitude, pins[0]!.longitude] as [number, number])
-    : ([39.2904, -76.6122] as [number, number]);
+  function KeepPinsInView() {
+    const map = useMap();
+    const signature = useMemo(
+      () => pins.map((pin) => `${pin.latitude},${pin.longitude}`).join("|"),
+      [],
+    );
+    useEffect(() => {
+      if (pins.length === 0) return;
+      if (pins.length === 1) {
+        const pin = pins[0];
+        if (pin) map.setView([pin.latitude, pin.longitude], 12);
+        return;
+      }
+      map.fitBounds(pins.map((pin) => [pin.latitude, pin.longitude]), { padding: [32, 32], maxZoom: 13 });
+    }, [map, signature]);
+    return null;
+  }
 
   return (
-    <MapContainer
-      center={center}
-      zoom={12}
-      scrollWheelZoom={false}
-      style={{ height: 420, width: "100%", borderRadius: 12 }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {pins.map((p) => (
-        <Marker
-          key={p.id}
-          position={[p.latitude, p.longitude]}
-          icon={icon(p.id === activeId)}
-          eventHandlers={{ click: () => onSelect?.(p.id) }}
-        >
-          <Popup>{p.title}</Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <div className="relative z-0 overflow-hidden rounded-2xl border border-border shadow-sm [isolation:isolate]">
+      <MapContainer
+        center={center}
+        zoom={12}
+        scrollWheelZoom={false}
+        style={{ height: "clamp(320px, 55vh, 560px)", width: "100%" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <KeepPinsInView />
+        {pins.map((pin) => {
+          const active = pin.id === activeId;
+          return (
+            <CircleMarker
+              key={pin.id}
+              center={[pin.latitude, pin.longitude]}
+              radius={active ? 16 : 13}
+              pathOptions={{
+                color: "var(--map-accent)",
+                fillColor: "var(--map-accent)",
+                fillOpacity: active ? 1 : 0.85,
+                weight: active ? 4 : 2,
+              }}
+              eventHandlers={{ click: () => onSelect?.(pin.id) }}
+            >
+              <Tooltip direction="top" offset={[0, -6]} opacity={1}>
+                <span className="text-xs font-semibold">{pin.title}</span>
+              </Tooltip>
+              <Popup>
+                <div className="min-w-[180px] font-semibold">{pin.title}</div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
+      </MapContainer>
+    </div>
   );
 }
