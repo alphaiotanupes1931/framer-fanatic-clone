@@ -37,6 +37,7 @@ export const createItems: NavItem[] = [
   { icon: Building2, label: "Business", to: "/create-business" },
   { icon: Shield, label: "Community Association", to: "/create-community-association" },
   { icon: Ticket, label: "Event", to: "/events/new" },
+  { icon: PartyPopper, label: "Festival", to: "/festivals/new" },
   { icon: Users, label: "Groups", to: "/create-community" },
   { icon: FileText, label: "New Post", to: "/create-post" },
   { icon: PenLine, label: "New Story", to: "/create-story" },

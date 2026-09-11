@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
@@ -30,6 +30,12 @@ const CATEGORIES = [
 ];
 
 const AUDIENCES = ["All Ages", "Family Friendly", "21+"];
+
+const SUGGESTED_TAGS = [
+  "Family Friendly", "Free", "Outdoor", "Indoor", "Live Music", "Local Vendors",
+  "Street Fair", "Block Party", "Food Trucks", "Kids Activities", "Dog Friendly",
+  "Craft Market", "Dance", "Parade", "Fireworks", "Wellness", "Pop-Up", "Nightlife",
+];
 
 type Neighborhood = { id: string; name: string };
 
@@ -110,6 +116,18 @@ function NewFestivalPage() {
       ...f,
       categories: f.categories.includes(c) ? f.categories.filter((x) => x !== c) : [...f.categories, c],
     }));
+
+  const [customTag, setCustomTag] = useState("");
+  const tagList: string[] = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+  const setTags = (list: string[]) => set("tags", list.join(", "));
+  const toggleTag = (t: string) =>
+    setTags(tagList.includes(t) ? tagList.filter((x) => x !== t) : [...tagList, t]);
+  const addCustomTag = () => {
+    const t = customTag.trim();
+    if (!t) return;
+    if (!tagList.some((x) => x.toLowerCase() === t.toLowerCase())) setTags([...tagList, t]);
+    setCustomTag("");
+  };
 
   const onPickImage = (file: File) => {
     if (!me) return;
@@ -225,6 +243,14 @@ function NewFestivalPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl px-4 py-6 space-y-6">
         <div>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/festivals" })}
+            className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-sm font-semibold text-neutral-600 transition hover:border-[#d4580a] hover:text-[#d4580a]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to festivals
+          </button>
           <h1 className="text-2xl font-bold text-neutral-900">Create a Festival</h1>
           <p className="mt-1 text-sm text-neutral-500">
             Set up your festival on Planet Baltimore. You can add the full schedule, artists, vendors, and more from the festival profile after publishing.
@@ -320,8 +346,55 @@ function NewFestivalPage() {
               })}
             </div>
           </Field>
-          <Field label="Tags (comma separated)">
-            <input className={inputCls} value={form.tags} onChange={(e) => set("tags", e.target.value)} placeholder="street fair, live music, local vendors" />
+          <Field label="Tags" hint="Pick the ones that fit. These help people find your festival in the filters.">
+            <div className="flex flex-wrap gap-2">
+              {SUGGESTED_TAGS.map((t) => {
+                const on = tagList.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleTag(t)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      on
+                        ? "border-[#d4580a] bg-[#d4580a] text-white"
+                        : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
+            {tagList.filter((t) => !SUGGESTED_TAGS.includes(t)).length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {tagList.filter((t) => !SUGGESTED_TAGS.includes(t)).map((t) => (
+                  <span key={t} className="inline-flex items-center gap-1 rounded-full border border-[#d4580a] bg-[#d4580a]/10 px-3 py-1.5 text-xs font-semibold text-[#d4580a]">
+                    {t}
+                    <button type="button" onClick={() => toggleTag(t)} aria-label={`Remove ${t}`}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="mt-2 flex gap-2">
+              <input
+                className={inputCls}
+                value={customTag}
+                onChange={(e) => setCustomTag(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomTag(); } }}
+                placeholder="Add your own tag"
+                maxLength={30}
+              />
+              <button
+                type="button"
+                onClick={addCustomTag}
+                className="shrink-0 rounded-lg border border-neutral-200 px-4 text-sm font-semibold text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
+              >
+                Add
+              </button>
+            </div>
           </Field>
           <Field label="Format" hint="For example: Outdoor street festival, Indoor market">
             <input className={inputCls} value={form.format} onChange={(e) => set("format", e.target.value)} />

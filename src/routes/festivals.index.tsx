@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { siteUrl } from "@/lib/utils";
 import { downloadIcs } from "@/lib/ics";
 import { externalShare } from "@/lib/share-preview";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import {
   Plus,
   MapPin,
@@ -28,6 +29,7 @@ import {
   UserPlus,
   UserCheck,
   Share2,
+  Send,
   CalendarPlus,
 } from "lucide-react";
 
@@ -101,8 +103,8 @@ const TABS = [
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
-function haystack(r: Row) {
-  return `${r.title ?? ""} ${r.description ?? ""} ${r.category ?? ""}`.toLowerCase();
+function haystack(r: Row, tags?: string[]) {
+  return `${r.title ?? ""} ${r.description ?? ""} ${r.category ?? ""} ${(tags ?? []).join(" ")}`.toLowerCase();
 }
 
 function isFree(r: Row) {
@@ -188,6 +190,7 @@ function FestivalActions({
   onSavedChange: (id: string, next: boolean) => void;
 }) {
   const url = siteUrl(`/festivals/${row.id}`);
+  const [shareInApp, setShareInApp] = useState(false);
 
   const toggleSave = async () => {
     if (!meId) {
@@ -244,6 +247,10 @@ function FestivalActions({
         <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
         {saved ? "Saved" : "Save"}
       </button>
+      <button type="button" onClick={() => setShareInApp(true)} className={btn}>
+        <Send className="h-3.5 w-3.5 -rotate-45" />
+        Send
+      </button>
       <button
         type="button"
         onClick={() => void externalShare(url, row.title, row.description || undefined)}
@@ -252,6 +259,20 @@ function FestivalActions({
         <Share2 className="h-3.5 w-3.5" />
         Share
       </button>
+      <ShareToUsersDialog
+        open={shareInApp}
+        onClose={() => setShareInApp(false)}
+        url={url}
+        title={row.title}
+        preview={{
+          type: "event",
+          id: row.id,
+          url,
+          title: row.title,
+          image: row.image_url,
+          excerpt: (row.description ?? "").replace(/<[^>]+>/g, "").slice(0, 160) || null,
+        }}
+      />
       <button type="button" onClick={addToCalendar} className={btn}>
         <CalendarPlus className="h-3.5 w-3.5" />
         Calendar
@@ -339,6 +360,7 @@ function FestivalsPage() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [hoods, setHoods] = useState<{ name: string; latitude: number; longitude: number }[]>([]);
+  const [tagMap, setTagMap] = useState<Record<string, string[]>>({});
 
   const { data } = useCachedFetch<Row[]>("pb:festivals:v3", async () => {
     const { data } = await supabase
@@ -372,6 +394,30 @@ function FestivalsPage() {
     })();
   }, []);
 
+  // Tags festival organizers picked, used for search and the quick filters.
+  useEffect(() => {
+    const ids = all.map((r) => r.id);
+    if (ids.length === 0) {
+      setTagMap({});
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("festival_details")
+        .select("event_id,tags,audience,format")
+        .in("event_id", ids);
+      const map: Record<string, string[]> = {};
+      for (const d of ((data as any[] | null) ?? [])) {
+        map[d.event_id as string] = [
+          ...(((d.tags as string[] | null) ?? [])),
+          d.audience as string | null,
+          d.format as string | null,
+        ].filter(Boolean) as string[];
+      }
+      setTagMap(map);
+    })();
+  }, [all]);
+
   // Organizers behind the festivals currently listed.
   useEffect(() => {
     const ids = [...new Set(all.map((r) => r.organization_id).filter(Boolean))] as string[];
@@ -403,22 +449,25 @@ function FestivalsPage() {
   const rows = useMemo(() => {
     const term = q.trim().toLowerCase();
     return all.filter((r) => {
+      const tags = tagMap[r.id] ?? [];
       if (
         term &&
-        !`${r.title ?? ""} ${r.neighborhood ?? ""} ${r.venue_name ?? ""}`.toLowerCase().includes(term)
+        !`${r.title ?? ""} ${r.neighborhood ?? ""} ${r.venue_name ?? ""} ${tags.join(" ")}`
+          .toLowerCase()
+          .includes(term)
       )
         return false;
       for (const f of active) {
-        if (f === "Free" && !isFree(r)) return false;
+        if (f === "Free" && !isFree(r) && !/\bfree\b/i.test(tags.join(" "))) return false;
         if (f === "This Weekend" && !isThisWeekend(r)) return false;
-        if (f === "Family Friendly" && !/family|kid|children|all ages/i.test(haystack(r)))
+        if (f === "Family Friendly" && !/family|kid|children|all ages/i.test(haystack(r, tags)))
           return false;
-        if (f === "Outdoor" && !/outdoor|park|street|plaza|waterfront|harbor/i.test(haystack(r)))
+        if (f === "Outdoor" && !/outdoor|park|street|plaza|waterfront|harbor/i.test(haystack(r, tags)))
           return false;
       }
       return true;
     });
-  }, [all, q, active]);
+  }, [all, q, active, tagMap]);
 
   const featured = rows[0] ?? null;
   const soon = rows.slice(0, 6);
