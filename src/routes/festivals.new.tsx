@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2, X } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
@@ -231,6 +231,14 @@ function NewFestivalPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl px-4 py-6 space-y-6">
         <div>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/festivals" })}
+            className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-sm font-semibold text-neutral-600 transition hover:border-[#d4580a] hover:text-[#d4580a]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to festivals
+          </button>
           <h1 className="text-2xl font-bold text-neutral-900">Create a Festival</h1>
           <p className="mt-1 text-sm text-neutral-500">
             Set up your festival on Planet Baltimore. You can add the full schedule, artists, vendors, and more from the festival profile after publishing.
