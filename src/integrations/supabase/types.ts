@@ -598,7 +598,10 @@ export type Database = {
       festival_details: {
         Row: {
           accessibility: string[]
+          admission_type: string | null
           age_range: string | null
+          audience: string | null
+          categories: string[]
           event_id: string
           expected_attendance: string | null
           experiences: Json
@@ -607,19 +610,27 @@ export type Database = {
           footprint: string | null
           format: string | null
           hours: string | null
+          organizer_description: string | null
+          organizer_name: string | null
+          organizer_website: string | null
           performers: Json
           pet_policy: string | null
           price_label: string | null
           rain_or_shine: string | null
           schedule: Json
           tagline: string | null
+          tags: string[]
+          ticket_url: string | null
           updated_at: string
           vendors: Json
           website: string | null
         }
         Insert: {
           accessibility?: string[]
+          admission_type?: string | null
           age_range?: string | null
+          audience?: string | null
+          categories?: string[]
           event_id: string
           expected_attendance?: string | null
           experiences?: Json
@@ -628,19 +639,27 @@ export type Database = {
           footprint?: string | null
           format?: string | null
           hours?: string | null
+          organizer_description?: string | null
+          organizer_name?: string | null
+          organizer_website?: string | null
           performers?: Json
           pet_policy?: string | null
           price_label?: string | null
           rain_or_shine?: string | null
           schedule?: Json
           tagline?: string | null
+          tags?: string[]
+          ticket_url?: string | null
           updated_at?: string
           vendors?: Json
           website?: string | null
         }
         Update: {
           accessibility?: string[]
+          admission_type?: string | null
           age_range?: string | null
+          audience?: string | null
+          categories?: string[]
           event_id?: string
           expected_attendance?: string | null
           experiences?: Json
@@ -649,12 +668,17 @@ export type Database = {
           footprint?: string | null
           format?: string | null
           hours?: string | null
+          organizer_description?: string | null
+          organizer_name?: string | null
+          organizer_website?: string | null
           performers?: Json
           pet_policy?: string | null
           price_label?: string | null
           rain_or_shine?: string | null
           schedule?: Json
           tagline?: string | null
+          tags?: string[]
+          ticket_url?: string | null
           updated_at?: string
           vendors?: Json
           website?: string | null

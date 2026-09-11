@@ -169,6 +169,13 @@
       "when": 1789079985936,
       "tag": "0023_sender_message_marks_read",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789169974929,
+      "tag": "0024_festival_details_extra_fields",
+      "breakpoints": true
     }
   ]
 }
