@@ -244,6 +244,10 @@ function FestivalActions({
         <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
         {saved ? "Saved" : "Save"}
       </button>
+      <button type="button" onClick={() => setShareInApp(true)} className={btn}>
+        <Send className="h-3.5 w-3.5 -rotate-45" />
+        Send
+      </button>
       <button
         type="button"
         onClick={() => void externalShare(url, row.title, row.description || undefined)}
@@ -252,6 +256,19 @@ function FestivalActions({
         <Share2 className="h-3.5 w-3.5" />
         Share
       </button>
+      <ShareToUsersDialog
+        open={shareInApp}
+        onClose={() => setShareInApp(false)}
+        url={url}
+        title={row.title}
+        preview={{
+          kind: "event",
+          id: row.id,
+          title: row.title,
+          image: row.image_url,
+          subtitle: placeOf(row) || undefined,
+        }}
+      />
       <button type="button" onClick={addToCalendar} className={btn}>
         <CalendarPlus className="h-3.5 w-3.5" />
         Calendar
