@@ -31,6 +31,12 @@ const CATEGORIES = [
 
 const AUDIENCES = ["All Ages", "Family Friendly", "21+"];
 
+const SUGGESTED_TAGS = [
+  "Family Friendly", "Free", "Outdoor", "Indoor", "Live Music", "Local Vendors",
+  "Street Fair", "Block Party", "Food Trucks", "Kids Activities", "Dog Friendly",
+  "Craft Market", "Dance", "Parade", "Fireworks", "Wellness", "Pop-Up", "Nightlife",
+];
+
 type Neighborhood = { id: string; name: string };
 
 const inputCls =
