@@ -117,6 +117,18 @@ function NewFestivalPage() {
       categories: f.categories.includes(c) ? f.categories.filter((x) => x !== c) : [...f.categories, c],
     }));
 
+  const [customTag, setCustomTag] = useState("");
+  const tagList: string[] = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+  const setTags = (list: string[]) => set("tags", list.join(", "));
+  const toggleTag = (t: string) =>
+    setTags(tagList.includes(t) ? tagList.filter((x) => x !== t) : [...tagList, t]);
+  const addCustomTag = () => {
+    const t = customTag.trim();
+    if (!t) return;
+    if (!tagList.some((x) => x.toLowerCase() === t.toLowerCase())) setTags([...tagList, t]);
+    setCustomTag("");
+  };
+
   const onPickImage = (file: File) => {
     if (!me) return;
     setCropFile(file);
