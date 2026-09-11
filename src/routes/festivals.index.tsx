@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { siteUrl } from "@/lib/utils";
 import { downloadIcs } from "@/lib/ics";
 import { externalShare } from "@/lib/share-preview";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import {
   Plus,
   MapPin,
@@ -28,6 +29,7 @@ import {
   UserPlus,
   UserCheck,
   Share2,
+  Send,
   CalendarPlus,
 } from "lucide-react";
 
@@ -188,6 +190,7 @@ function FestivalActions({
   onSavedChange: (id: string, next: boolean) => void;
 }) {
   const url = siteUrl(`/festivals/${row.id}`);
+  const [shareInApp, setShareInApp] = useState(false);
 
   const toggleSave = async () => {
     if (!meId) {
@@ -262,11 +265,12 @@ function FestivalActions({
         url={url}
         title={row.title}
         preview={{
-          kind: "event",
+          type: "event",
           id: row.id,
+          url,
           title: row.title,
           image: row.image_url,
-          subtitle: placeOf(row) || undefined,
+          excerpt: (row.description ?? "").replace(/<[^>]+>/g, "").slice(0, 160) || null,
         }}
       />
       <button type="button" onClick={addToCalendar} className={btn}>
