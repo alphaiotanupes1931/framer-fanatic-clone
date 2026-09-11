@@ -521,7 +521,7 @@ function FestivalsPage() {
           subtitle="Discover Baltimore's festivals, celebrations, performances, food, art and culture."
           cta={
             <Button asChild className="bg-[#d4580a] text-white hover:bg-[#b8490a]">
-              <Link to="/events/new">
+              <Link to="/festivals/new">
                 <Plus className="mr-1.5 h-4 w-4" />
                 Create a Festival
               </Link>
