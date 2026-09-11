@@ -3,10 +3,13 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 
 const MAX_RETRIES = 5
-const DEFAULT_BATCH_SIZE = 10
-const DEFAULT_SEND_DELAY_MS = 200
+const DEFAULT_BATCH_SIZE = 5
+const DEFAULT_SEND_DELAY_MS = 1000
 const DEFAULT_AUTH_TTL_MINUTES = 240
 const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 1440
+// Never pause the whole queue longer than this after a provider throttle,
+// otherwise a single bad Retry-After can outlive the message TTL.
+const MAX_COOLDOWN_SECONDS = 900
 
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
