@@ -334,8 +334,55 @@ function NewFestivalPage() {
               })}
             </div>
           </Field>
-          <Field label="Tags (comma separated)">
-            <input className={inputCls} value={form.tags} onChange={(e) => set("tags", e.target.value)} placeholder="street fair, live music, local vendors" />
+          <Field label="Tags" hint="Pick the ones that fit. These help people find your festival in the filters.">
+            <div className="flex flex-wrap gap-2">
+              {SUGGESTED_TAGS.map((t) => {
+                const on = tagList.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleTag(t)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      on
+                        ? "border-[#d4580a] bg-[#d4580a] text-white"
+                        : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
+            {tagList.filter((t) => !SUGGESTED_TAGS.includes(t)).length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {tagList.filter((t) => !SUGGESTED_TAGS.includes(t)).map((t) => (
+                  <span key={t} className="inline-flex items-center gap-1 rounded-full border border-[#d4580a] bg-[#d4580a]/10 px-3 py-1.5 text-xs font-semibold text-[#d4580a]">
+                    {t}
+                    <button type="button" onClick={() => toggleTag(t)} aria-label={`Remove ${t}`}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="mt-2 flex gap-2">
+              <input
+                className={inputCls}
+                value={customTag}
+                onChange={(e) => setCustomTag(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomTag(); } }}
+                placeholder="Add your own tag"
+                maxLength={30}
+              />
+              <button
+                type="button"
+                onClick={addCustomTag}
+                className="shrink-0 rounded-lg border border-neutral-200 px-4 text-sm font-semibold text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
+              >
+                Add
+              </button>
+            </div>
           </Field>
           <Field label="Format" hint="For example: Outdoor street festival, Indoor market">
             <input className={inputCls} value={form.format} onChange={(e) => set("format", e.target.value)} />
