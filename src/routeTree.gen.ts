@@ -72,6 +72,7 @@ import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
+import { Route as FestivalsNewRouteImport } from './routes/festivals.new'
 import { Route as FestivalsEventIdRouteImport } from './routes/festivals.$eventId'
 import { Route as EventsNewRouteImport } from './routes/events.new'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
@@ -411,6 +412,11 @@ const MarketplaceListingIdRoute = MarketplaceListingIdRouteImport.update({
   path: '/$listingId',
   getParentRoute: () => MarketplaceRoute,
 } as any)
+const FestivalsNewRoute = FestivalsNewRouteImport.update({
+  id: '/festivals/new',
+  path: '/festivals/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FestivalsEventIdRoute = FestivalsEventIdRouteImport.update({
   id: '/festivals/$eventId',
   path: '/festivals/$eventId',
@@ -590,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/festivals/$eventId': typeof FestivalsEventIdRoute
+  '/festivals/new': typeof FestivalsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
@@ -677,6 +684,7 @@ export interface FileRoutesByTo {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/festivals/$eventId': typeof FestivalsEventIdRoute
+  '/festivals/new': typeof FestivalsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
@@ -765,6 +773,7 @@ export interface FileRoutesById {
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
   '/festivals/$eventId': typeof FestivalsEventIdRoute
+  '/festivals/new': typeof FestivalsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
@@ -854,6 +863,7 @@ export interface FileRouteTypes {
     | '/events/$eventId'
     | '/events/new'
     | '/festivals/$eventId'
+    | '/festivals/new'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
@@ -941,6 +951,7 @@ export interface FileRouteTypes {
     | '/events/$eventId'
     | '/events/new'
     | '/festivals/$eventId'
+    | '/festivals/new'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
@@ -1028,6 +1039,7 @@ export interface FileRouteTypes {
     | '/events/$eventId'
     | '/events/new'
     | '/festivals/$eventId'
+    | '/festivals/new'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
@@ -1116,6 +1128,7 @@ export interface RootRouteChildren {
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
   FestivalsEventIdRoute: typeof FestivalsEventIdRoute
+  FestivalsNewRoute: typeof FestivalsNewRoute
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
@@ -1583,6 +1596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceListingIdRouteImport
       parentRoute: typeof MarketplaceRoute
     }
+    '/festivals/new': {
+      id: '/festivals/new'
+      path: '/festivals/new'
+      fullPath: '/festivals/new'
+      preLoaderRoute: typeof FestivalsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/festivals/$eventId': {
       id: '/festivals/$eventId'
       path: '/festivals/$eventId'
@@ -1815,6 +1835,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
   FestivalsEventIdRoute: FestivalsEventIdRoute,
+  FestivalsNewRoute: FestivalsNewRoute,
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,
