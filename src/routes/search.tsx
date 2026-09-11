@@ -67,11 +67,13 @@ function SearchPage() {
         hasQ
           ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group"]).ilike("name", like).limit(24)
           : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group"]).order("created_at", { ascending: false }).limit(24),
-        // Only events that have not already finished. Ongoing events stay
-        // visible for 12 hours after they start.
+        // Keyword searches return past events too (people look up events they
+        // attended). The default browse list only shows events that have not
+        // finished: multi-day events stay until ends_at, single ones for 12
+        // hours after they start.
         hasQ
-          ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").gte("starts_at", eventCutoff).ilike("title", like).order("starts_at", { ascending: true }).limit(24)
-          : supabase.from("events").select("id,title,starts_at,venue_name,image_url").gte("starts_at", eventCutoff).order("starts_at", { ascending: true }).limit(24),
+          ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").ilike("title", like).order("starts_at", { ascending: false }).limit(24)
+          : supabase.from("events").select("id,title,starts_at,venue_name,image_url").or(`ends_at.gte.${eventCutoff},and(ends_at.is.null,starts_at.gte.${eventCutoff})`).order("starts_at", { ascending: true }).limit(24),
         hasQ
           ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).ilike("name", like).limit(24)
           : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).order("created_at", { ascending: false }).limit(24),
