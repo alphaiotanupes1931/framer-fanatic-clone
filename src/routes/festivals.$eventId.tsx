@@ -1130,6 +1130,24 @@ function programItemsToLines(items: ProgramItem[]): string {
     .join("\n");
 }
 
+function scheduleLinesToObjects(text: string): ScheduleItem[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name = "", date = "", time = "", venue = "", type = "", price = "", description = ""] = line.split("|").map((part) => part.trim());
+      return { name, date, time, venue, type, price, description };
+    })
+    .filter((item) => item.name.length > 0);
+}
+
+function scheduleItemsToLines(items: ScheduleItem[]): string {
+  return items
+    .map((item) => [item.name, item.date, item.time, item.venue, item.type, item.price, item.description].join(" | "))
+    .join("\n");
+}
+
 function listToLines(list: string[]): string {
   return list.join("\n");
 }
@@ -1159,9 +1177,7 @@ function EditFestivalDetails({
     expected_attendance: details?.expected_attendance ?? "",
     footprint: details?.footprint ?? "",
     website: details?.website ?? "",
-    schedule: asSchedule(details?.schedule)
-      .map((s) => `${s.label} | ${s.detail}`)
-      .join("\n"),
+    schedule: scheduleItemsToLines(asSchedule(details?.schedule)),
     performers: programItemsToLines(asProgramItems(details?.performers)),
     vendors: listToLines(asStringList(details?.vendors)),
     food: listToLines(asStringList(details?.food)),
@@ -1190,7 +1206,7 @@ function EditFestivalDetails({
       expected_attendance: form.expected_attendance.trim() || null,
       footprint: form.footprint.trim() || null,
       website: form.website.trim() || null,
-      schedule: pairsToObjects(form.schedule, ["label", "detail"]),
+      schedule: scheduleLinesToObjects(form.schedule),
       performers: programLinesToObjects(form.performers),
       vendors: linesToList(form.vendors),
       food: linesToList(form.food),
@@ -1236,7 +1252,7 @@ function EditFestivalDetails({
             <Textarea value={form.footprint} onChange={set("footprint")} rows={2} className="mt-1" />
           </label>
           <div className="sm:col-span-2">
-            <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Day or time | Details" />
+            <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Name | Date | Time | Venue | Type | Free or price | Description" />
           </div>
           <div className="sm:col-span-2">
             <Area label="Festival Headliners" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price" />
