@@ -121,7 +121,23 @@ type NearbyOrg = {
   bio: string | null;
 };
 
-type Experience = { name: string; description: string };
+type NearbyArtist = {
+  id: string;
+  display_name: string | null;
+  username: string | null;
+  category: string | null;
+  bio: string | null;
+};
+
+type ProgramItem = {
+  name: string;
+  when: string;
+  venue: string;
+  description: string;
+  price: string;
+};
+
+type Experience = ProgramItem;
 type ScheduleItem = { label: string; detail: string };
 type Faq = { q: string; a: string };
 
@@ -136,9 +152,49 @@ function asStringList(v: unknown): string[] {
 function asExperiences(v: unknown): Experience[] {
   if (!Array.isArray(v)) return [];
   return v
-    .map((x) => x as Partial<Experience>)
+    .map((x) => typeof x === "string" ? { name: x } : x as Partial<Experience>)
     .filter((x) => x && typeof x.name === "string" && x.name.trim())
-    .map((x) => ({ name: x.name!.trim(), description: (x.description ?? "").trim() }));
+    .map((x) => ({
+      name: x.name!.trim(),
+      when: (x.when ?? "").trim(),
+      venue: (x.venue ?? "").trim(),
+      description: (x.description ?? "").trim(),
+      price: (x.price ?? "").trim(),
+    }));
+}
+
+function asProgramItems(v: unknown): ProgramItem[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x) => typeof x === "string" ? { name: x } : x as Partial<ProgramItem>)
+    .filter((x) => x && typeof x.name === "string" && x.name.trim())
+    .map((x) => ({
+      name: x.name!.trim(),
+      when: (x.when ?? "").trim(),
+      venue: (x.venue ?? "").trim(),
+      description: (x.description ?? "").trim(),
+      price: (x.price ?? "").trim(),
+    }));
+}
+
+function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fallbackAction: string; eventId: string }) {
+  const action = item.price || fallbackAction;
+  return (
+    <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+      <div className="min-w-0">
+        <h3 className="text-base font-bold text-foreground">{item.name}</h3>
+        {(item.when || item.venue) && (
+          <p className="mt-1 text-sm font-semibold text-muted-foreground">
+            {[item.when, item.venue].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+      </div>
+      <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="sm" className="w-fit">
+        <Link to="/events/$eventId" params={{ eventId }}>{action}</Link>
+      </Button>
+    </article>
+  );
 }
 
 function asSchedule(v: unknown): ScheduleItem[] {
@@ -327,14 +383,14 @@ function FestivalDetailPage() {
     }
 
     let nearby: NearbyOrg[] = [];
+    let nearbyArtists: NearbyArtist[] = [];
     if (event.neighborhood) {
-      const { data: orgs } = await supabase
-        .from("organizations")
-        .select("id,name,slug,type,subtype,tagline,bio")
-        .eq("is_public", true)
-        .ilike("neighborhood", event.neighborhood)
-        .limit(12);
-      nearby = (orgs as NearbyOrg[] | null) ?? [];
+      const [orgsRes, artistsRes] = await Promise.all([
+        supabase.from("organizations").select("id,name,slug,type,subtype,tagline,bio").eq("is_public", true).ilike("neighborhood", event.neighborhood).limit(12),
+        supabase.from("profiles_public").select("id,display_name,username,category,bio").ilike("neighborhood", event.neighborhood).not("username", "is", null).limit(8),
+      ]);
+      nearby = (orgsRes.data as NearbyOrg[] | null) ?? [];
+      nearbyArtists = ((artistsRes.data as NearbyArtist[] | null) ?? []).filter((artist) => artist.id !== event.user_id);
     }
 
     return {
@@ -343,6 +399,7 @@ function FestivalDetailPage() {
       tickets: (ticketsRes.data as TicketType[] | null) ?? [],
       organizer,
       nearby,
+      nearbyArtists,
     };
   });
 
@@ -362,7 +419,8 @@ function FestivalDetailPage() {
   const event = data?.event ?? null;
   const details = data?.details ?? null;
 
-  const performers = useMemo(() => asStringList(details?.performers), [details]);
+  const headliners = useMemo(() => asProgramItems(details?.performers), [details]);
+  const performers = useMemo(() => headliners.map((item) => item.name), [headliners]);
   const vendors = useMemo(() => asStringList(details?.vendors), [details]);
   const food = useMemo(() => asStringList(details?.food), [details]);
   const schedule = useMemo(() => asSchedule(details?.schedule), [details]);
