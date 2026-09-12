@@ -834,7 +834,7 @@ function FestivalDetailPage() {
 
               {(vendors.length > 0 || food.length > 0) && (
                 <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
-                  <ListColumn title="Vendors" items={vendors} />
+                  <ListColumn title="Vendors" items={vendors.map((v) => v.name)} />
                   <ListColumn title="Food + Drink" items={food} />
                 </div>
               )}
