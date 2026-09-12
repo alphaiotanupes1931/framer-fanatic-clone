@@ -1344,7 +1344,7 @@ function EditFestivalDetails({
             <Area label="Festival Headliners and Performers" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price | Type (dance, poetry, music)" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line" />
+            <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line: Category | Name | Booth | Description" />
           </div>
           <div className="sm:col-span-2">
             <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
