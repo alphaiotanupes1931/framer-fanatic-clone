@@ -434,7 +434,6 @@ function FestivalDetailPage() {
   const details = data?.details ?? null;
 
   const headliners = useMemo(() => asProgramItems(details?.performers), [details]);
-  const performers = useMemo(() => headliners.map((item) => item.name), [headliners]);
   const vendors = useMemo(() => asStringList(details?.vendors), [details]);
   const food = useMemo(() => asStringList(details?.food), [details]);
   const schedule = useMemo(() => asSchedule(details?.schedule), [details]);
