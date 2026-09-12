@@ -15,6 +15,7 @@ import { sortPosts } from "@/lib/sort-posts";
 import { PROFILE_TAGS } from "@/lib/categories";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { bannerLabelForArtist } from "@/lib/artist-tabs";
 import {
   PersonAboutTab,
@@ -100,6 +101,7 @@ function PublicProfilePage() {
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showHoodPicker, setShowHoodPicker] = useState(false);
   const [showTypePicker, setShowTypePicker] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   const isOwner = !!me && !!profile && me.id === profile.id;
 
@@ -362,11 +364,17 @@ function PublicProfilePage() {
       {/* Avatar uses the same placement as the account owner's profile. */}
       <div className="relative mt-4">
         <div className="relative inline-block">
-          <div className="h-20 w-20 overflow-hidden rounded-full bg-neutral-200 ring-4 ring-background sm:h-24 sm:w-24">
+          <button
+            type="button"
+            onClick={() => profile.avatar_url && setAvatarOpen(true)}
+            disabled={!profile.avatar_url}
+            aria-label={profile.avatar_url ? `View ${profile.display_name || profile.username} profile photo` : "No profile photo"}
+            className="relative h-20 w-20 overflow-hidden rounded-full bg-neutral-200 ring-4 ring-background disabled:cursor-default sm:h-24 sm:w-24"
+          >
             {profile.avatar_url && (
               <Img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
-          </div>
+          </button>
         </div>
       </div>
 
@@ -611,6 +619,19 @@ function PublicProfilePage() {
           mode={followList}
         />
       )}
+      <Dialog open={avatarOpen} onOpenChange={setAvatarOpen}>
+        <DialogContent className="w-auto max-w-[90vw] border-none bg-transparent p-0 shadow-none">
+          {profile.avatar_url && (
+            <Img
+              src={profile.avatar_url}
+              alt={profile.display_name || ""}
+              className="max-h-[85vh] max-w-full rounded-lg object-contain"
+              loading="eager"
+              decoding="async"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {postViewerIdx !== null && posts[postViewerIdx] && (
         <div

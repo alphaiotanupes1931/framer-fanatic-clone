@@ -37,6 +37,7 @@ import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -139,6 +140,7 @@ function ProfilePage() {
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
   const [postViewerIdx, setPostViewerIdx] = useState<number | null>(null);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   useEffect(() => {
     if (postViewerIdx === null) return;
@@ -395,10 +397,18 @@ function ProfilePage() {
         <div className="relative px-4 pb-6 sm:px-6">
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <div className="relative h-20 w-20 sm:h-24 sm:w-24">
-              <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
-                {profile?.avatar_url && <SmartAvatarImage src={profile.avatar_url} />}
-                <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
-              </Avatar>
+              <button
+                type="button"
+                onClick={() => profile?.avatar_url && setAvatarOpen(true)}
+                disabled={!profile?.avatar_url}
+                aria-label={profile?.avatar_url ? `View ${profile.display_name || "your"} profile photo` : "No profile photo"}
+                className="relative block h-20 w-20 rounded-full disabled:cursor-default sm:h-24 sm:w-24"
+              >
+                <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
+                  {profile?.avatar_url && <SmartAvatarImage src={profile.avatar_url} />}
+                  <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
+                </Avatar>
+              </button>
               {!publicPreview && (
               <>
               <button
@@ -721,6 +731,19 @@ function ProfilePage() {
         onClose={() => setReferralOpen(false)}
         profile={profile}
       />
+      <Dialog open={avatarOpen} onOpenChange={setAvatarOpen}>
+        <DialogContent className="w-auto max-w-[90vw] border-none bg-transparent p-0 shadow-none">
+          {profile?.avatar_url && (
+            <Img
+              src={profile.avatar_url}
+              alt={profile.display_name || ""}
+              className="max-h-[85vh] max-w-full rounded-lg object-contain"
+              loading="eager"
+              decoding="async"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
       {purchase === "success" && <PurchaseConfirmation sessionId={purchaseSessionId} />}
 
       {postViewerIdx !== null && myPosts[postViewerIdx] && (
