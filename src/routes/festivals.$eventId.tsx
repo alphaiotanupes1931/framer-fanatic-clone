@@ -211,7 +211,7 @@ function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fall
 function asSchedule(v: unknown): ScheduleItem[] {
   if (!Array.isArray(v)) return [];
   return v
-    .map((x) => x as Partial<ScheduleItem>)
+    .map((x) => x as Partial<ScheduleItem> & { label?: string; detail?: string })
     .filter((x) => x && (typeof x.name === "string" || typeof x.label === "string"))
     .map((x) => ({
       name: (x.name ?? x.detail ?? x.label ?? "").trim(),
@@ -504,6 +504,45 @@ function FestivalDetailPage() {
   }, []);
 
   const [activeTab, setActiveTab] = useState("overview");
+  const [scheduleRange, setScheduleRange] = useState("all");
+  const [scheduleDate, setScheduleDate] = useState("all");
+  const [mySchedule, setMySchedule] = useState<number[]>([]);
+  const scheduleDates = useMemo(
+    () => Array.from(new Set(schedule.map((item) => item.date).filter(Boolean))),
+    [schedule],
+  );
+  const visibleSchedule = useMemo(() => {
+    const now = new Date();
+    return schedule.filter((item) => {
+      if (scheduleDate !== "all" && item.date !== scheduleDate) return false;
+      if (scheduleRange === "all" || !item.date) return true;
+      const date = new Date(item.date);
+      if (Number.isNaN(date.getTime())) return true;
+      if (scheduleRange === "today") return date.toDateString() === now.toDateString();
+      const day = date.getDay();
+      return day === 0 || day === 6;
+    });
+  }, [schedule, scheduleDate, scheduleRange]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(`festival-schedule:${eventId}`);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as unknown;
+      if (Array.isArray(parsed)) setMySchedule(parsed.filter((value): value is number => typeof value === "number"));
+    } catch {
+      setMySchedule([]);
+    }
+  }, [eventId]);
+
+  const toggleMySchedule = (index: number) => {
+    setMySchedule((current) => {
+      const next = current.includes(index) ? current.filter((value) => value !== index) : [...current, index];
+      window.localStorage.setItem(`festival-schedule:${eventId}`, JSON.stringify(next));
+      return next;
+    });
+  };
   const scrollTo = (id: string) => {
     setActiveTab(id);
     document.getElementById(`festival-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -685,10 +724,10 @@ function FestivalDetailPage() {
           </div>
         </div>
 
-        <div className="grid gap-0 overflow-hidden rounded-2xl border border-border bg-card lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className={`grid gap-0 overflow-hidden rounded-2xl border border-border bg-card ${activeTab === "overview" ? "lg:grid-cols-[minmax(0,1fr)_340px]" : ""}`}>
           {/* Main column */}
           <div className="min-w-0 space-y-10 p-5 sm:p-8 lg:border-r lg:border-border">
-            <section id="festival-overview" className="scroll-mt-24 space-y-6">
+            <section id="festival-overview" className={`scroll-mt-24 space-y-6 ${activeTab !== "overview" ? "hidden" : ""}`}>
               {headliners.length > 0 && (
                 <div>
                   <h2 className="font-display text-2xl font-extrabold text-foreground">Festival Headliners</h2>
@@ -726,26 +765,51 @@ function FestivalDetailPage() {
               )}
             </section>
 
-            <section id="festival-schedule" className="scroll-mt-24">
-              <h2 className="font-display text-lg font-extrabold text-foreground">Schedule</h2>
+            <section id="festival-schedule" className={`scroll-mt-24 ${activeTab !== "schedule" ? "hidden" : ""}`}>
               {schedule.length > 0 ? (
-                <div className="mt-4 space-y-2">
-                  {schedule.map((s, i) => (
-                    <div
-                      key={`${s.label}-${i}`}
-                      className="flex items-baseline justify-between gap-4 rounded-xl border border-border bg-card px-4 py-3"
-                    >
-                      <span className="text-sm font-semibold text-foreground">{s.label}</span>
-                      {s.detail && (
-                        <span className="text-right text-sm text-muted-foreground">{s.detail}</span>
-                      )}
+                <div className="space-y-8">
+                  <div className="space-y-4 border-b border-border pb-6">
+                    <div className="flex flex-wrap gap-2">
+                      {[["all", "All Time"], ["today", "Today"], ["weekend", "This Weekend"]].map(([value, label]) => (
+                        <Button key={value} type="button" size="sm" variant={scheduleRange === value ? "default" : "outline"} onClick={() => setScheduleRange(value)}>{label}</Button>
+                      ))}
                     </div>
-                  ))}
+                    {scheduleDates.length > 0 && (
+                      <div className="flex gap-1 overflow-x-auto border-b border-border">
+                        <button type="button" onClick={() => setScheduleDate("all")} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold ${scheduleDate === "all" ? "border-orange text-orange" : "border-transparent text-muted-foreground"}`}>All dates</button>
+                        {scheduleDates.map((date) => (
+                          <button key={date} type="button" onClick={() => setScheduleDate(date)} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold ${scheduleDate === date ? "border-orange text-orange" : "border-transparent text-muted-foreground"}`}>{scheduleDateLabel(date)}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {headliners.length > 0 && (
+                    <div>
+                      <h2 className="font-display text-2xl font-extrabold text-foreground">Featured at the Festival</h2>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        {headliners.map((item, index) => (
+                          <article key={`${item.name}-${index}`} className="border-l-4 border-orange bg-muted/30 p-4">
+                            <span className="text-[11px] font-bold uppercase text-orange">Headliner</span>
+                            <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.name}</h3>
+                            {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    {visibleSchedule.length > 0 ? visibleSchedule.map((item) => {
+                      const index = schedule.indexOf(item);
+                      return <ScheduleRow key={`${item.name}-${index}`} item={item} scheduled={mySchedule.includes(index)} onToggle={() => toggleMySchedule(index)} />;
+                    }) : <TabEmpty message="No scheduled activities match these filters." />}
+                  </div>
                 </div>
               ) : <div className="mt-4"><TabEmpty message="The festival schedule has not been posted yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
             </section>
 
-            <section id="festival-performers" className="scroll-mt-24">
+            <section id="festival-performers" className={`scroll-mt-24 ${activeTab !== "performers" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Performers</h2>
               {headliners.length > 0 ? (
                 <div className="mt-2">
@@ -756,7 +820,7 @@ function FestivalDetailPage() {
               ) : <div className="mt-4"><TabEmpty message="Performers have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
             </section>
 
-            <section id="festival-vendors" className="scroll-mt-24">
+            <section id="festival-vendors" className={`scroll-mt-24 ${activeTab !== "vendors" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Vendors</h2>
               {vendors.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -772,7 +836,7 @@ function FestivalDetailPage() {
               ) : <div className="mt-4"><TabEmpty message="Vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
             </section>
 
-            <section id="festival-food" className="scroll-mt-24">
+            <section id="festival-food" className={`scroll-mt-24 ${activeTab !== "food" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Food + Drink</h2>
               {food.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -788,7 +852,7 @@ function FestivalDetailPage() {
               ) : <div className="mt-4"><TabEmpty message="Food and drink vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
             </section>
 
-            <section id="festival-tickets" className="scroll-mt-24">
+            <section id="festival-tickets" className={`scroll-mt-24 ${activeTab !== "tickets" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Tickets</h2>
               {tickets.length > 0 ? (
                 <div className="mt-4 space-y-3">
@@ -824,7 +888,7 @@ function FestivalDetailPage() {
               )}
             </section>
 
-            <section id="festival-gallery" className="scroll-mt-24">
+            <section id="festival-gallery" className={`scroll-mt-24 ${activeTab !== "gallery" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Gallery</h2>
               {(gallery.length > 0 || event.video_url) ? (
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -848,17 +912,17 @@ function FestivalDetailPage() {
               ) : <div className="mt-4"><TabEmpty message="Festival photos and videos have not been added yet." /></div>}
             </section>
 
-            <section id="festival-updates" className="scroll-mt-24">
+            <section id="festival-updates" className={`scroll-mt-24 ${activeTab !== "updates" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Updates</h2>
               <div className="mt-4"><TabEmpty message="There are no festival updates yet." /></div>
             </section>
 
-            <section id="festival-comments" className="scroll-mt-24">
+            <section id="festival-comments" className={`scroll-mt-24 ${activeTab !== "comments" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Comments</h2>
               <EventSocial eventId={event.id} hostId={event.user_id} />
             </section>
 
-            <section id="festival-faq" className="scroll-mt-24">
+            <section id="festival-faq" className={`scroll-mt-24 ${activeTab !== "faq" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">FAQ</h2>
               {faqs.length > 0 ? (
                 <div className="mt-4 space-y-3">
@@ -914,7 +978,7 @@ function FestivalDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <aside className="space-y-8 bg-muted/35 p-5 sm:p-8 lg:sticky lg:top-16 lg:self-start">
+          <aside className={`space-y-8 bg-muted/35 p-5 sm:p-8 lg:sticky lg:top-16 lg:self-start ${activeTab !== "overview" ? "hidden" : ""}`}>
             <div>
               <h2 className="font-display text-xl font-extrabold text-foreground">At a Glance</h2>
               <div className="mt-4 space-y-3">
