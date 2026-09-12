@@ -397,10 +397,18 @@ function ProfilePage() {
         <div className="relative px-4 pb-6 sm:px-6">
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <div className="relative h-20 w-20 sm:h-24 sm:w-24">
-              <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
-                {profile?.avatar_url && <SmartAvatarImage src={profile.avatar_url} />}
-                <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
-              </Avatar>
+              <button
+                type="button"
+                onClick={() => profile?.avatar_url && setAvatarOpen(true)}
+                disabled={!profile?.avatar_url}
+                aria-label={profile?.avatar_url ? `View ${profile.display_name || "your"} profile photo` : "No profile photo"}
+                className="relative block h-20 w-20 rounded-full disabled:cursor-default sm:h-24 sm:w-24"
+              >
+                <Avatar className="h-20 w-20 ring-4 ring-background sm:h-24 sm:w-24">
+                  {profile?.avatar_url && <SmartAvatarImage src={profile.avatar_url} />}
+                  <AvatarFallback className="bg-[#d4580a]/10 text-2xl text-[#d4580a]">{initials}</AvatarFallback>
+                </Avatar>
+              </button>
               {!publicPreview && (
               <>
               <button
