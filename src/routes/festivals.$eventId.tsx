@@ -16,16 +16,22 @@ import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { pageHead } from "@/lib/seo";
 import { externalShare } from "@/lib/share-preview";
 import { siteUrl, titleCase } from "@/lib/utils";
+import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
   Bookmark,
+  BarChart3,
   CalendarDays,
   Clock,
+  Eye,
+  EyeOff,
   ExternalLink,
   MapPin,
   Navigation,
   Pencil,
+  Send,
+  Settings,
   Share2,
   Ticket,
   Users,
@@ -257,6 +263,8 @@ function FestivalDetailPage() {
   const [me, setMe] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [previewAsVisitor, setPreviewAsVisitor] = useState(false);
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setMe(data.user?.id ?? null));
@@ -350,6 +358,7 @@ function FestivalDetailPage() {
   }, [me, eventId]);
 
   const isOwner = !!me && !!data && data.event.user_id === me;
+  const showCreatorTools = isOwner && !previewAsVisitor;
   const event = data?.event ?? null;
   const details = data?.details ?? null;
 
@@ -455,84 +464,95 @@ function FestivalDetailPage() {
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
         <PageBackButton destination="festivals" />
 
-        {/* Hero */}
-        <section className="overflow-hidden rounded-2xl border border-border bg-card">
-          {event.image_url && (
-            <Img
-              src={event.image_url}
-              alt={event.title}
-              className="max-h-[420px] w-full object-cover"
-            />
+        <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          {showCreatorTools && (
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-foreground px-4 py-3 text-background sm:px-6">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                <span className="text-xs font-bold uppercase">Creator tools</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" variant="secondary" onClick={() => setEditOpen(true)}>
+                  <Pencil /> Edit content
+                </Button>
+                <Button asChild size="sm" variant="secondary">
+                  <Link to="/organizer-studio" search={{ event: event.id }}>
+                    <Settings /> Event setup
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="secondary">
+                  <Link to="/ticket-sales-dashboard">
+                    <BarChart3 /> Ticket sales
+                  </Link>
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => setPreviewAsVisitor(true)}>
+                  <Eye /> Preview as visitor
+                </Button>
+              </div>
+            </div>
           )}
-          <div className="space-y-4 p-5 sm:p-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-bold text-white ${isFree ? "bg-emerald-600" : "bg-[#d4580a]"}`}
-              >
-                {isFree ? "Free" : "Ticketed"}
+
+          {isOwner && previewAsVisitor && (
+            <div className="flex items-center justify-between gap-3 border-b border-border bg-muted px-4 py-2.5 sm:px-6">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Eye className="h-4 w-4" /> You are previewing the visitor view
               </span>
-              {tagChips.map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground"
-                >
-                  {c}
-                </span>
-              ))}
+              <Button size="sm" variant="outline" onClick={() => setPreviewAsVisitor(false)}>
+                <EyeOff /> Exit preview
+              </Button>
             </div>
+          )}
 
-            <h1 className="font-display text-2xl font-extrabold text-foreground sm:text-4xl">
-              {event.title}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <CalendarDays className="h-4 w-4 text-[#d4580a]" />
-                {dateRange(event)}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-[#d4580a]" />
-                {details?.hours || defaultHours(event)}
-              </span>
-              {(event.neighborhood || event.venue_name) && (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4 text-[#d4580a]" />
-                  {event.neighborhood || event.venue_name}
-                </span>
-              )}
-            </div>
-
-            {details?.tagline && (
-              <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                {details.tagline}
-              </p>
+          <div className="relative min-h-[390px] bg-muted sm:min-h-[460px]">
+            {event.image_url ? (
+              <Img src={event.image_url} alt={event.title} className="absolute inset-0 h-full w-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 bg-primary/10" />
             )}
-
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button variant={saved ? "default" : "outline"} size="sm" onClick={() => void toggleSave()}>
-                <Bookmark className={`mr-1.5 h-4 w-4 ${saved ? "fill-current" : ""}`} />
-                {saved ? "Saved" : "Save"}
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => void share()}>
-                <Share2 className="mr-1.5 h-4 w-4" /> Share
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <a href={directionsUrl} target="_blank" rel="noopener noreferrer">
-                  <Navigation className="mr-1.5 h-4 w-4" /> Directions
-                </a>
-              </Button>
-              <Button asChild size="sm" className="bg-[#d4580a] text-white hover:bg-[#b8490a]">
+            <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/45 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-6 p-5 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl space-y-3 text-background">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded bg-primary px-2.5 py-1 text-xs font-bold text-primary-foreground">
+                    {isFree ? "Free" : "Ticketed"}
+                  </span>
+                  {tagChips.slice(0, 3).map((chip) => (
+                    <span key={chip} className="rounded border border-background/30 bg-foreground/35 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm">
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+                <h1 className="font-display text-3xl font-extrabold leading-tight sm:text-5xl">{event.title}</h1>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-background/85">
+                  <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />{dateRange(event)}</span>
+                  <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4" />{details?.hours || defaultHours(event)}</span>
+                  {(event.neighborhood || event.venue_name) && (
+                    <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{event.neighborhood || event.venue_name}</span>
+                  )}
+                </div>
+                {details?.tagline && <p className="max-w-2xl text-sm leading-relaxed text-background/80 sm:text-base">{details.tagline}</p>}
+              </div>
+              <Button asChild size="lg" className="w-full shrink-0 sm:w-auto">
                 <Link to="/events/$eventId" params={{ eventId: event.id }}>
-                  <Ticket className="mr-1.5 h-4 w-4" />
-                  {isFree ? "RSVP" : "Tickets"}
+                  <Ticket /> {isFree ? "RSVP" : "Buy tickets"}
                 </Link>
               </Button>
-              {isOwner && (
-                <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-                  <Pencil className="mr-1.5 h-4 w-4" /> Edit Festival Details
-                </Button>
-              )}
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 border-t border-border px-4 py-3 sm:px-6">
+            <Button variant={saved ? "default" : "outline"} size="sm" onClick={() => void toggleSave()}>
+              <Bookmark className={saved ? "fill-current" : ""} /> {saved ? "Saved" : "Save"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
+              <Send /> Send
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => void share()}>
+              <Share2 /> Share
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={directionsUrl} target="_blank" rel="noopener noreferrer"><Navigation /> Directions</a>
+            </Button>
           </div>
         </section>
 
@@ -545,12 +565,18 @@ function FestivalDetailPage() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-0 overflow-hidden rounded-2xl border border-border bg-card lg:grid-cols-[minmax(0,1fr)_340px]">
           {/* Main column */}
-          <div className="min-w-0 space-y-10">
+          <div className="min-w-0 space-y-10 p-5 sm:p-8 lg:border-r lg:border-border">
             <section id="festival-overview" className="scroll-mt-24 space-y-6">
+              {event.description && (
+                <div>
+                  <h2 className="font-display text-2xl font-extrabold text-foreground">About the festival</h2>
+                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
+                </div>
+              )}
               {(performers.length > 0 || vendors.length > 0 || food.length > 0) && (
-                <div className="rounded-2xl border border-border bg-card p-5">
+                <div className="border-t border-border pt-8">
                   <h2 className="font-display text-lg font-extrabold text-foreground">
                     Festival Headliners
                   </h2>
@@ -747,9 +773,9 @@ function FestivalDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <aside className="space-y-4 lg:sticky lg:top-16 lg:self-start">
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <h3 className="font-display text-base font-extrabold text-foreground">At a Glance</h3>
+          <aside className="space-y-8 bg-muted/35 p-5 sm:p-8 lg:sticky lg:top-16 lg:self-start">
+            <div>
+              <h3 className="text-xs font-extrabold uppercase text-muted-foreground">Festival snapshot</h3>
               <div className="mt-4 space-y-3">
                 <GlanceRow label="Dates" value={dateRange(event)} />
                 <GlanceRow label="Hours" value={details?.hours || defaultHours(event)} />
@@ -767,20 +793,8 @@ function FestivalDetailPage() {
               </div>
             </div>
 
-            {event.description && (
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <h3 className="font-display text-base font-extrabold text-foreground">
-                  About the Festival
-                </h3>
-                <div
-                  className="prose prose-sm mt-3 max-w-none text-muted-foreground"
-                  dangerouslySetInnerHTML={{ __html: event.description }}
-                />
-              </div>
-            )}
-
             {(details?.expected_attendance || details?.footprint) && (
-              <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="border-t border-border pt-6">
                 {details?.expected_attendance && (
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-[#d4580a]" />
@@ -801,7 +815,7 @@ function FestivalDetailPage() {
             )}
 
             {data!.organizer && (
-              <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="border-t border-border pt-6">
                 <h3 className="font-display text-base font-extrabold text-foreground">Organizer</h3>
                 <div className="mt-3 flex items-start gap-3">
                   {data!.organizer.avatar ? (
@@ -856,6 +870,20 @@ function FestivalDetailPage() {
           onSaved={() => void refetch()}
         />
       )}
+      <ShareToUsersDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        url={pageUrl}
+        title={event.title}
+        preview={{
+          type: "event",
+          id: event.id,
+          url: pageUrl,
+          title: event.title,
+          image: event.image_url,
+          excerpt: details?.tagline || event.description?.replace(/<[^>]+>/g, "").slice(0, 160) || null,
+        }}
+      />
     </AppLayout>
   );
 }
