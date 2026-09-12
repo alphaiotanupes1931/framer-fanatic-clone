@@ -182,7 +182,7 @@ function Tab({ id, label, active, onClick }: { id: string; label: string; active
       onClick={() => onClick(id)}
       className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition ${
         active
-          ? "border-[#d4580a] text-[#d4580a]"
+          ? "border-orange text-orange"
           : "border-transparent text-muted-foreground hover:text-foreground"
       }`}
     >
@@ -207,7 +207,7 @@ function ListColumn({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <h4 className="text-xs font-bold uppercase tracking-wide text-[#d4580a]">{title}</h4>
+      <h4 className="text-xs font-bold uppercase tracking-wide text-orange">{title}</h4>
       <ul className="mt-2 space-y-1.5">
         {items.map((it) => (
           <li key={it} className="text-sm text-foreground">
@@ -690,10 +690,10 @@ function FestivalDetailPage() {
                         )}
                       </div>
                       <div className="flex flex-shrink-0 items-center gap-3">
-                        <span className="text-sm font-bold text-[#d4580a]">
+                        <span className="text-sm font-bold text-orange">
                           {t.price_cents > 0 ? `$${(t.price_cents / 100).toFixed(2)}` : "Free"}
                         </span>
-                        <Button asChild size="sm" className="bg-[#d4580a] text-white hover:bg-[#b8490a]">
+                        <Button asChild variant="brand" size="sm">
                           <Link to="/events/$eventId" params={{ eventId: event.id }}>
                             Get
                           </Link>
@@ -754,9 +754,9 @@ function FestivalDetailPage() {
                       key={o.id}
                       to="/o/$slug"
                       params={{ slug: o.slug }}
-                      className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]"
+                      className="rounded-lg border border-border bg-card p-4 transition hover:border-orange"
                     >
-                      <div className="text-[11px] font-semibold uppercase tracking-wide text-[#d4580a]">
+                      <div className="text-[11px] font-semibold uppercase tracking-wide text-orange">
                         {o.subtype || o.type}
                       </div>
                       <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
@@ -797,7 +797,7 @@ function FestivalDetailPage() {
               <div className="border-t border-border pt-6">
                 {details?.expected_attendance && (
                   <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-[#d4580a]" />
+                    <Users className="h-4 w-4 text-orange" />
                     <div>
                       <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                         Expected Attendance
@@ -825,7 +825,7 @@ function FestivalDetailPage() {
                       className="h-11 w-11 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#d4580a]/10 text-sm font-bold text-[#d4580a]">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-orange/10 text-sm font-bold text-orange">
                       {data!.organizer.name.charAt(0)}
                     </div>
                   )}
@@ -838,7 +838,7 @@ function FestivalDetailPage() {
                     )}
                     <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold">
                       {data!.organizer.href !== "#" && (
-                        <Link to={data!.organizer.href} className="text-[#d4580a] hover:underline">
+                        <Link to={data!.organizer.href} className="text-orange hover:underline">
                           View {data!.organizer.kind === "org" ? "Organization" : "Profile"} →
                         </Link>
                       )}
@@ -847,7 +847,7 @@ function FestivalDetailPage() {
                           href={details?.website || data!.organizer.website!}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[#d4580a] hover:underline"
+                          className="inline-flex items-center gap-1 text-orange hover:underline"
                         >
                           Website <ExternalLink className="h-3 w-3" />
                         </a>
@@ -1040,7 +1040,7 @@ function EditFestivalDetails({
           <Button
             onClick={() => void save()}
             disabled={saving}
-            className="bg-[#d4580a] text-white hover:bg-[#b8490a]"
+            variant="brand"
           >
             {saving ? "Saving…" : "Save Details"}
           </Button>
