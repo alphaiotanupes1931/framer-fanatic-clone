@@ -153,12 +153,39 @@ type ScheduleItem = {
 };
 type Faq = { q: string; a: string };
 
+type VendorItem = {
+  category: string;
+  name: string;
+  booth: string;
+  description: string;
+};
+
 function asStringList(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
   return v
     .map((x) => (typeof x === "string" ? x : ((x as { name?: string })?.name ?? "")))
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+function asVendors(v: unknown): VendorItem[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x) => {
+      if (typeof x === "string") {
+        const [category = "", name = "", booth = "", description = ""] = x.split("|").map((s) => s.trim());
+        if (!name) return { category: "", name: category, booth: "", description: "" };
+        return { category, name, booth, description };
+      }
+      const item = x as Partial<VendorItem>;
+      return {
+        category: (item.category ?? "").trim(),
+        name: (item.name ?? "").trim(),
+        booth: (item.booth ?? "").trim(),
+        description: (item.description ?? "").trim(),
+      };
+    })
+    .filter((x) => x.name.length > 0);
 }
 
 function asExperiences(v: unknown): Experience[] {
