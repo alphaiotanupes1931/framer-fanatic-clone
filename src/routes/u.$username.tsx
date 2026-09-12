@@ -101,6 +101,7 @@ function PublicProfilePage() {
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   const [showHoodPicker, setShowHoodPicker] = useState(false);
   const [showTypePicker, setShowTypePicker] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   const isOwner = !!me && !!profile && me.id === profile.id;
 
