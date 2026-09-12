@@ -15,6 +15,7 @@ import { sortPosts } from "@/lib/sort-posts";
 import { PROFILE_TAGS } from "@/lib/categories";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { bannerLabelForArtist } from "@/lib/artist-tabs";
 import {
   PersonAboutTab,
