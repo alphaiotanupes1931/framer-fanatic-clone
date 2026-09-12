@@ -917,7 +917,7 @@ function FestivalsPage() {
                       <Link
                         to="/o/$slug"
                         params={{ slug: o.slug }}
-                        className="text-xs font-semibold text-[#d4580a]"
+                        className="text-xs font-semibold text-orange"
                       >
                         View Organization →
                       </Link>
