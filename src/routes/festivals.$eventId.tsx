@@ -627,40 +627,39 @@ function FestivalDetailPage() {
           {/* Main column */}
           <div className="min-w-0 space-y-10 p-5 sm:p-8 lg:border-r lg:border-border">
             <section id="festival-overview" className="scroll-mt-24 space-y-6">
-              {event.description && (
+              {headliners.length > 0 && (
                 <div>
-                  <h2 className="font-display text-2xl font-extrabold text-foreground">About the festival</h2>
-                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
-                </div>
-              )}
-              {(performers.length > 0 || vendors.length > 0 || food.length > 0) && (
-                <div className="border-t border-border pt-8">
-                  <h2 className="font-display text-lg font-extrabold text-foreground">
-                    Festival Headliners
-                  </h2>
-                  <div className="mt-4 grid gap-6 sm:grid-cols-2">
-                    <ListColumn title="Performances" items={performers} />
-                    <ListColumn title="Vendors" items={vendors} />
-                    <ListColumn title="Food + Drink" items={food} />
+                  <h2 className="font-display text-2xl font-extrabold text-foreground">Festival Headliners</h2>
+                  <div className="mt-2">
+                    {headliners.map((item, index) => (
+                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
+                    ))}
                   </div>
                 </div>
               )}
 
               {experiences.length > 0 && (
-                <div>
-                  <h2 className="font-display text-lg font-extrabold text-foreground">
-                    Featured Experiences
-                  </h2>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    {experiences.map((x) => (
-                      <div key={x.name} className="rounded-2xl border border-border bg-card p-4">
-                        <h3 className="text-sm font-bold text-foreground">{x.name}</h3>
-                        {x.description && (
-                          <p className="mt-1 text-sm text-muted-foreground">{x.description}</p>
-                        )}
-                      </div>
+                <div className="border-t border-border pt-8">
+                  <h2 className="font-display text-2xl font-extrabold text-foreground">Featured Experiences</h2>
+                  <div className="mt-2">
+                    {experiences.map((item, index) => (
+                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
                     ))}
                   </div>
+                </div>
+              )}
+
+              {event.description && (
+                <div className="border-t border-border pt-8">
+                  <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
+                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
+                </div>
+              )}
+
+              {(vendors.length > 0 || food.length > 0) && (
+                <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
+                  <ListColumn title="Vendors" items={vendors} />
+                  <ListColumn title="Food + Drink" items={food} />
                 </div>
               )}
             </section>
@@ -801,30 +800,42 @@ function FestivalDetailPage() {
               </section>
             )}
 
-            {data!.nearby.length > 0 && (
+            {(data!.nearby.length > 0 || data!.nearbyArtists.length > 0) && (
               <section className="scroll-mt-24">
                 <h2 className="font-display text-lg font-extrabold text-foreground">
                   Nearby on Planet Baltimore
                 </h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {data!.nearby.map((o) => (
-                    <Link
-                      key={o.id}
-                      to="/o/$slug"
-                      params={{ slug: o.slug }}
-                      className="rounded-lg border border-border bg-card p-4 transition hover:border-orange"
-                    >
-                      <div className="text-[11px] font-semibold uppercase tracking-wide text-orange">
-                        {o.subtype || o.type}
+                <div className="mt-4 space-y-6">
+                  {data!.nearby.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Nearby Arts Organizations ({data!.nearby.length})</h3>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {data!.nearby.map((o) => (
+                          <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="rounded-lg border border-border bg-card p-4 transition hover:border-orange">
+                            <div className="text-[11px] font-semibold uppercase text-orange">{(o.subtype || o.type).replaceAll("_", " ")}</div>
+                            <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
+                            {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{o.tagline || o.bio}</p>}
+                            <span className="mt-3 inline-block text-xs font-semibold text-orange">View</span>
+                          </Link>
+                        ))}
                       </div>
-                      <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
-                      {(o.tagline || o.bio) && (
-                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                          {o.tagline || o.bio}
-                        </p>
-                      )}
-                    </Link>
-                  ))}
+                    </div>
+                  )}
+                  {data!.nearbyArtists.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Nearby Artists ({data!.nearbyArtists.length})</h3>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {data!.nearbyArtists.map((artist) => (
+                          <Link key={artist.id} to="/u/$username" params={{ username: artist.username ?? "" }} className="rounded-lg border border-border bg-card p-4 transition hover:border-orange">
+                            {artist.category && <div className="text-[11px] font-semibold uppercase text-orange">{artist.category.replaceAll("_", " ")}</div>}
+                            <div className="mt-0.5 text-sm font-bold text-foreground">{titleCase(artist.display_name || artist.username || "Artist")}</div>
+                            {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{artist.bio}</p>}
+                            <span className="mt-3 inline-block text-xs font-semibold text-orange">View</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </section>
             )}
@@ -833,7 +844,7 @@ function FestivalDetailPage() {
           {/* Sidebar */}
           <aside className="space-y-8 bg-muted/35 p-5 sm:p-8 lg:sticky lg:top-16 lg:self-start">
             <div>
-              <h3 className="text-xs font-extrabold uppercase text-muted-foreground">Festival snapshot</h3>
+              <h2 className="font-display text-xl font-extrabold text-foreground">At a Glance</h2>
               <div className="mt-4 space-y-3">
                 <GlanceRow label="Dates" value={dateRange(event)} />
                 <GlanceRow label="Hours" value={details?.hours || defaultHours(event)} />
