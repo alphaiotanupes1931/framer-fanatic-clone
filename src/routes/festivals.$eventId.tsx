@@ -121,7 +121,23 @@ type NearbyOrg = {
   bio: string | null;
 };
 
-type Experience = { name: string; description: string };
+type NearbyArtist = {
+  id: string;
+  display_name: string | null;
+  username: string | null;
+  category: string | null;
+  bio: string | null;
+};
+
+type ProgramItem = {
+  name: string;
+  when: string;
+  venue: string;
+  description: string;
+  price: string;
+};
+
+type Experience = ProgramItem;
 type ScheduleItem = { label: string; detail: string };
 type Faq = { q: string; a: string };
 
@@ -136,9 +152,49 @@ function asStringList(v: unknown): string[] {
 function asExperiences(v: unknown): Experience[] {
   if (!Array.isArray(v)) return [];
   return v
-    .map((x) => x as Partial<Experience>)
+    .map((x) => typeof x === "string" ? { name: x } : x as Partial<Experience>)
     .filter((x) => x && typeof x.name === "string" && x.name.trim())
-    .map((x) => ({ name: x.name!.trim(), description: (x.description ?? "").trim() }));
+    .map((x) => ({
+      name: String(x.name).trim(),
+      when: (x.when ?? "").trim(),
+      venue: (x.venue ?? "").trim(),
+      description: (x.description ?? "").trim(),
+      price: (x.price ?? "").trim(),
+    }));
+}
+
+function asProgramItems(v: unknown): ProgramItem[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x) => typeof x === "string" ? { name: x } : x as Partial<ProgramItem>)
+    .filter((x) => x && typeof x.name === "string" && x.name.trim())
+    .map((x) => ({
+      name: String(x.name).trim(),
+      when: (x.when ?? "").trim(),
+      venue: (x.venue ?? "").trim(),
+      description: (x.description ?? "").trim(),
+      price: (x.price ?? "").trim(),
+    }));
+}
+
+function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fallbackAction: string; eventId: string }) {
+  const action = item.price || fallbackAction;
+  return (
+    <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+      <div className="min-w-0">
+        <h3 className="text-base font-bold text-foreground">{item.name}</h3>
+        {(item.when || item.venue) && (
+          <p className="mt-1 text-sm font-semibold text-muted-foreground">
+            {[item.when, item.venue].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+      </div>
+      <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="sm" className="w-fit">
+        <Link to="/events/$eventId" params={{ eventId }}>{action}</Link>
+      </Button>
+    </article>
+  );
 }
 
 function asSchedule(v: unknown): ScheduleItem[] {
@@ -327,14 +383,14 @@ function FestivalDetailPage() {
     }
 
     let nearby: NearbyOrg[] = [];
+    let nearbyArtists: NearbyArtist[] = [];
     if (event.neighborhood) {
-      const { data: orgs } = await supabase
-        .from("organizations")
-        .select("id,name,slug,type,subtype,tagline,bio")
-        .eq("is_public", true)
-        .ilike("neighborhood", event.neighborhood)
-        .limit(12);
-      nearby = (orgs as NearbyOrg[] | null) ?? [];
+      const [orgsRes, artistsRes] = await Promise.all([
+        supabase.from("organizations").select("id,name,slug,type,subtype,tagline,bio").eq("is_public", true).ilike("neighborhood", event.neighborhood).limit(12),
+        supabase.from("profiles_public").select("id,display_name,username,category,bio").ilike("neighborhood", event.neighborhood).not("username", "is", null).limit(8),
+      ]);
+      nearby = (orgsRes.data as NearbyOrg[] | null) ?? [];
+      nearbyArtists = ((artistsRes.data as NearbyArtist[] | null) ?? []).filter((artist) => artist.id !== event.user_id);
     }
 
     return {
@@ -343,6 +399,7 @@ function FestivalDetailPage() {
       tickets: (ticketsRes.data as TicketType[] | null) ?? [],
       organizer,
       nearby,
+      nearbyArtists,
     };
   });
 
@@ -362,7 +419,8 @@ function FestivalDetailPage() {
   const event = data?.event ?? null;
   const details = data?.details ?? null;
 
-  const performers = useMemo(() => asStringList(details?.performers), [details]);
+  const headliners = useMemo(() => asProgramItems(details?.performers), [details]);
+  const performers = useMemo(() => headliners.map((item) => item.name), [headliners]);
   const vendors = useMemo(() => asStringList(details?.vendors), [details]);
   const food = useMemo(() => asStringList(details?.food), [details]);
   const schedule = useMemo(() => asSchedule(details?.schedule), [details]);
@@ -569,40 +627,39 @@ function FestivalDetailPage() {
           {/* Main column */}
           <div className="min-w-0 space-y-10 p-5 sm:p-8 lg:border-r lg:border-border">
             <section id="festival-overview" className="scroll-mt-24 space-y-6">
-              {event.description && (
+              {headliners.length > 0 && (
                 <div>
-                  <h2 className="font-display text-2xl font-extrabold text-foreground">About the festival</h2>
-                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
-                </div>
-              )}
-              {(performers.length > 0 || vendors.length > 0 || food.length > 0) && (
-                <div className="border-t border-border pt-8">
-                  <h2 className="font-display text-lg font-extrabold text-foreground">
-                    Festival Headliners
-                  </h2>
-                  <div className="mt-4 grid gap-6 sm:grid-cols-2">
-                    <ListColumn title="Performances" items={performers} />
-                    <ListColumn title="Vendors" items={vendors} />
-                    <ListColumn title="Food + Drink" items={food} />
+                  <h2 className="font-display text-2xl font-extrabold text-foreground">Festival Headliners</h2>
+                  <div className="mt-2">
+                    {headliners.map((item, index) => (
+                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
+                    ))}
                   </div>
                 </div>
               )}
 
               {experiences.length > 0 && (
-                <div>
-                  <h2 className="font-display text-lg font-extrabold text-foreground">
-                    Featured Experiences
-                  </h2>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    {experiences.map((x) => (
-                      <div key={x.name} className="rounded-2xl border border-border bg-card p-4">
-                        <h3 className="text-sm font-bold text-foreground">{x.name}</h3>
-                        {x.description && (
-                          <p className="mt-1 text-sm text-muted-foreground">{x.description}</p>
-                        )}
-                      </div>
+                <div className="border-t border-border pt-8">
+                  <h2 className="font-display text-2xl font-extrabold text-foreground">Featured Experiences</h2>
+                  <div className="mt-2">
+                    {experiences.map((item, index) => (
+                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
                     ))}
                   </div>
+                </div>
+              )}
+
+              {event.description && (
+                <div className="border-t border-border pt-8">
+                  <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
+                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
+                </div>
+              )}
+
+              {(vendors.length > 0 || food.length > 0) && (
+                <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
+                  <ListColumn title="Vendors" items={vendors} />
+                  <ListColumn title="Food + Drink" items={food} />
                 </div>
               )}
             </section>
@@ -743,30 +800,42 @@ function FestivalDetailPage() {
               </section>
             )}
 
-            {data!.nearby.length > 0 && (
+            {(data!.nearby.length > 0 || data!.nearbyArtists.length > 0) && (
               <section className="scroll-mt-24">
                 <h2 className="font-display text-lg font-extrabold text-foreground">
                   Nearby on Planet Baltimore
                 </h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {data!.nearby.map((o) => (
-                    <Link
-                      key={o.id}
-                      to="/o/$slug"
-                      params={{ slug: o.slug }}
-                      className="rounded-lg border border-border bg-card p-4 transition hover:border-orange"
-                    >
-                      <div className="text-[11px] font-semibold uppercase tracking-wide text-orange">
-                        {o.subtype || o.type}
+                <div className="mt-4 space-y-6">
+                  {data!.nearby.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Nearby Arts Organizations ({data!.nearby.length})</h3>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {data!.nearby.map((o) => (
+                          <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="rounded-lg border border-border bg-card p-4 transition hover:border-orange">
+                            <div className="text-[11px] font-semibold uppercase text-orange">{(o.subtype || o.type).replaceAll("_", " ")}</div>
+                            <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
+                            {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{o.tagline || o.bio}</p>}
+                            <span className="mt-3 inline-block text-xs font-semibold text-orange">View</span>
+                          </Link>
+                        ))}
                       </div>
-                      <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
-                      {(o.tagline || o.bio) && (
-                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                          {o.tagline || o.bio}
-                        </p>
-                      )}
-                    </Link>
-                  ))}
+                    </div>
+                  )}
+                  {data!.nearbyArtists.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Nearby Artists ({data!.nearbyArtists.length})</h3>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {data!.nearbyArtists.map((artist) => (
+                          <Link key={artist.id} to="/u/$username" params={{ username: artist.username ?? "" }} className="rounded-lg border border-border bg-card p-4 transition hover:border-orange">
+                            {artist.category && <div className="text-[11px] font-semibold uppercase text-orange">{artist.category.replaceAll("_", " ")}</div>}
+                            <div className="mt-0.5 text-sm font-bold text-foreground">{titleCase(artist.display_name || artist.username || "Artist")}</div>
+                            {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{artist.bio}</p>}
+                            <span className="mt-3 inline-block text-xs font-semibold text-orange">View</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </section>
             )}
@@ -775,7 +844,7 @@ function FestivalDetailPage() {
           {/* Sidebar */}
           <aside className="space-y-8 bg-muted/35 p-5 sm:p-8 lg:sticky lg:top-16 lg:self-start">
             <div>
-              <h3 className="text-xs font-extrabold uppercase text-muted-foreground">Festival snapshot</h3>
+              <h2 className="font-display text-xl font-extrabold text-foreground">At a Glance</h2>
               <div className="mt-4 space-y-3">
                 <GlanceRow label="Dates" value={dateRange(event)} />
                 <GlanceRow label="Hours" value={details?.hours || defaultHours(event)} />
@@ -907,6 +976,24 @@ function pairsToObjects(text: string, keys: [string, string]) {
     .filter((o) => (o as Record<string, string>)[keys[0]]);
 }
 
+function programLinesToObjects(text: string): ProgramItem[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name = "", when = "", venue = "", description = "", price = ""] = line.split("|").map((part) => part.trim());
+      return { name, when, venue, description, price };
+    })
+    .filter((item) => item.name.length > 0);
+}
+
+function programItemsToLines(items: ProgramItem[]): string {
+  return items
+    .map((item) => [item.name, item.when, item.venue, item.description, item.price].join(" | "))
+    .join("\n");
+}
+
 function listToLines(list: string[]): string {
   return list.join("\n");
 }
@@ -939,12 +1026,10 @@ function EditFestivalDetails({
     schedule: asSchedule(details?.schedule)
       .map((s) => `${s.label} | ${s.detail}`)
       .join("\n"),
-    performers: listToLines(asStringList(details?.performers)),
+    performers: programItemsToLines(asProgramItems(details?.performers)),
     vendors: listToLines(asStringList(details?.vendors)),
     food: listToLines(asStringList(details?.food)),
-    experiences: asExperiences(details?.experiences)
-      .map((x) => `${x.name} | ${x.description}`)
-      .join("\n"),
+    experiences: programItemsToLines(asExperiences(details?.experiences)),
     faqs: asFaqs(details?.faqs)
       .map((f) => `${f.q} | ${f.a}`)
       .join("\n"),
@@ -970,10 +1055,10 @@ function EditFestivalDetails({
       footprint: form.footprint.trim() || null,
       website: form.website.trim() || null,
       schedule: pairsToObjects(form.schedule, ["label", "detail"]),
-      performers: linesToList(form.performers),
+      performers: programLinesToObjects(form.performers),
       vendors: linesToList(form.vendors),
       food: linesToList(form.food),
-      experiences: pairsToObjects(form.experiences, ["name", "description"]),
+      experiences: programLinesToObjects(form.experiences),
       faqs: pairsToObjects(form.faqs, ["q", "a"]),
       updated_at: new Date().toISOString(),
     };
@@ -1018,7 +1103,7 @@ function EditFestivalDetails({
             <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Day or time | Details" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Performers" value={form.performers} onChange={set("performers")} hint="One per line" />
+            <Area label="Festival Headliners" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price" />
           </div>
           <div className="sm:col-span-2">
             <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line" />
@@ -1027,7 +1112,7 @@ function EditFestivalDetails({
             <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Description" />
+            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Date and time | Venue | Description | Free or price" />
           </div>
           <div className="sm:col-span-2">
             <Area label="FAQs" value={form.faqs} onChange={set("faqs")} hint="One per line: Question | Answer" />
