@@ -17,17 +17,16 @@ export function EmptyState({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white/60 px-6 py-14 text-center ${className}`}
+      className={`flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/60 px-6 py-14 text-center ${className}`}
     >
       <div
-        className="mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-        style={{ backgroundColor: "rgba(212, 88, 10, 0.08)" }}
+        className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange/10"
       >
-        <Icon className="h-6 w-6" style={{ color: "#d4580a" }} />
+        <Icon className="h-6 w-6 text-orange" />
       </div>
-      <h3 className="text-base font-semibold text-neutral-900">{title}</h3>
+      <h3 className="text-base font-semibold text-foreground">{title}</h3>
       {description && (
-        <p className="mt-1 max-w-sm text-sm text-neutral-500">{description}</p>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
       )}
       {action && <div className="mt-4">{action}</div>}
     </div>
