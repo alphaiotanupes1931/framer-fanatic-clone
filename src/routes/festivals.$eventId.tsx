@@ -1294,7 +1294,7 @@ function EditFestivalDetails({
       website: form.website.trim() || null,
       schedule: scheduleLinesToObjects(form.schedule),
       performers: programLinesToObjects(form.performers),
-      vendors: linesToList(form.vendors),
+      vendors: vendorLinesToObjects(form.vendors),
       food: linesToList(form.food),
       experiences: programLinesToObjects(form.experiences),
       faqs: pairsToObjects(form.faqs, ["q", "a"]),
