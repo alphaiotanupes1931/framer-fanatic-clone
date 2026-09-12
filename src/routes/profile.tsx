@@ -37,6 +37,7 @@ import { ReferralNetworkDialog } from "@/components/referral-network-dialog";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
