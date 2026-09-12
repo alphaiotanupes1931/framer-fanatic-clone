@@ -83,6 +83,7 @@ import { Route as EditEventEventIdRouteImport } from './routes/edit-event.$event
 import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminDesignSystemRouteImport } from './routes/admin.design-system'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
@@ -467,6 +468,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDesignSystemRoute = AdminDesignSystemRouteImport.update({
+  id: '/admin/design-system',
+  path: '/admin/design-system',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/admin/content',
   path: '/admin/content',
@@ -586,6 +592,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/design-system': typeof AdminDesignSystemRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
@@ -674,6 +681,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/design-system': typeof AdminDesignSystemRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
@@ -763,6 +771,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/design-system': typeof AdminDesignSystemRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
@@ -853,6 +862,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/activity'
     | '/admin/content'
+    | '/admin/design-system'
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
@@ -941,6 +951,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/activity'
     | '/admin/content'
+    | '/admin/design-system'
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
@@ -1029,6 +1040,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/activity'
     | '/admin/content'
+    | '/admin/design-system'
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
@@ -1118,6 +1130,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   AdminActivityRoute: typeof AdminActivityRoute
   AdminContentRoute: typeof AdminContentRoute
+  AdminDesignSystemRoute: typeof AdminDesignSystemRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
   AdminTrashRoute: typeof AdminTrashRoute
@@ -1673,6 +1686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/design-system': {
+      id: '/admin/design-system'
+      path: '/admin/design-system'
+      fullPath: '/admin/design-system'
+      preLoaderRoute: typeof AdminDesignSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/admin/content'
@@ -1825,6 +1845,7 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   AdminActivityRoute: AdminActivityRoute,
   AdminContentRoute: AdminContentRoute,
+  AdminDesignSystemRoute: AdminDesignSystemRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
   AdminTrashRoute: AdminTrashRoute,

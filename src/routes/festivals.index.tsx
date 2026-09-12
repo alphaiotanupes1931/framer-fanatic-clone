@@ -16,6 +16,7 @@ import { siteUrl } from "@/lib/utils";
 import { downloadIcs } from "@/lib/ics";
 import { externalShare } from "@/lib/share-preview";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { Chip } from "@/components/shared/chip";
 import {
   Plus,
   MapPin,
@@ -230,35 +231,30 @@ function FestivalActions({
     toast.success("Added to your calendar");
   };
 
-  const btn =
-    "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]";
-
   return (
     <div className="flex flex-wrap gap-2">
-      <button
+      <Button
+        variant={saved ? "brand" : "outline"}
+        size="sm"
         type="button"
         onClick={toggleSave}
-        className={
-          saved
-            ? "inline-flex items-center gap-1.5 rounded-full border border-[#d4580a] bg-[#d4580a]/10 px-3 py-1.5 text-xs font-medium text-[#d4580a]"
-            : btn
-        }
       >
         <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
         {saved ? "Saved" : "Save"}
-      </button>
-      <button type="button" onClick={() => setShareInApp(true)} className={btn}>
+      </Button>
+      <Button variant="outline" size="sm" type="button" onClick={() => setShareInApp(true)}>
         <Send className="h-3.5 w-3.5 -rotate-45" />
         Send
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
         type="button"
         onClick={() => void externalShare(url, row.title, row.description || undefined)}
-        className={btn}
       >
         <Share2 className="h-3.5 w-3.5" />
         Share
-      </button>
+      </Button>
       <ShareToUsersDialog
         open={shareInApp}
         onClose={() => setShareInApp(false)}
@@ -273,10 +269,10 @@ function FestivalActions({
           excerpt: (row.description ?? "").replace(/<[^>]+>/g, "").slice(0, 160) || null,
         }}
       />
-      <button type="button" onClick={addToCalendar} className={btn}>
+      <Button variant="outline" size="sm" type="button" onClick={addToCalendar}>
         <CalendarPlus className="h-3.5 w-3.5" />
         Calendar
-      </button>
+      </Button>
     </div>
   );
 }
@@ -569,7 +565,7 @@ function FestivalsPage() {
           title="Festivals"
           subtitle="Discover Baltimore's festivals, celebrations, performances, food, art and culture."
           cta={
-            <Button asChild className="bg-[#d4580a] text-white hover:bg-[#b8490a]">
+            <Button asChild variant="brand">
               <Link to="/festivals/new">
                 <Plus className="mr-1.5 h-4 w-4" />
                 Create a Festival
@@ -583,18 +579,13 @@ function FestivalsPage() {
             {QUICK_FILTERS.map((f) => {
               const on = active.includes(f);
               return (
-                <button
+                <Chip
                   key={f}
-                  type="button"
+                  selected={on}
                   onClick={() => toggle(f)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                    on
-                      ? "border-[#d4580a] bg-[#d4580a] text-white"
-                      : "border-border bg-card text-muted-foreground hover:border-[#d4580a] hover:text-[#d4580a]"
-                  }`}
                 >
                   {f}
-                </button>
+                </Chip>
               );
             })}
           </div>
@@ -785,30 +776,20 @@ function FestivalsPage() {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
+                  <Chip
+                    selected={mapArea === "all"}
                     onClick={() => setMapArea("all")}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                      mapArea === "all"
-                        ? "border-[#d4580a] bg-[#d4580a] text-white"
-                        : "border-border bg-card text-muted-foreground"
-                    }`}
                   >
                     All ({located.length})
-                  </button>
+                  </Chip>
                   {mapAreas.map(([name, count]) => (
-                    <button
+                    <Chip
                       key={name}
-                      type="button"
+                      selected={mapArea === name}
                       onClick={() => setMapArea(name)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                        mapArea === name
-                          ? "border-[#d4580a] bg-[#d4580a] text-white"
-                          : "border-border bg-card text-muted-foreground"
-                      }`}
                     >
                       {name} ({count})
-                    </button>
+                    </Chip>
                   ))}
                 </div>
                 {located.length === 0 ? (

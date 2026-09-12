@@ -9,6 +9,10 @@ import { compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { PageBackButton } from "@/components/shared/page-back-button";
+import { Button } from "@/components/ui/button";
+import { Chip } from "@/components/shared/chip";
+import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const Route = createFileRoute("/festivals/new")({
   component: NewFestivalPage,
@@ -244,13 +248,11 @@ function NewFestivalPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl px-4 py-6 space-y-6">
         <div>
-          <div className="mb-4">
-            <PageBackButton destination="festivals" />
-          </div>
-          <h1 className="text-2xl font-bold text-neutral-900">Create a Festival</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Set up your festival on Planet Baltimore. You can add the full schedule, artists, vendors, and more from the festival profile after publishing.
-          </p>
+          <PageHeader
+            title="Create a Festival"
+            description="Set up your festival on Planet Baltimore. You can add the full schedule, artists, vendors, and more from the festival profile after publishing."
+            back={<PageBackButton destination="festivals" />}
+          />
         </div>
 
         <Section title="Festival Basics">
@@ -326,18 +328,13 @@ function NewFestivalPage() {
               {CATEGORIES.map((c) => {
                 const on = form.categories.includes(c);
                 return (
-                  <button
+                  <Chip
                     key={c}
-                    type="button"
+                    selected={on}
                     onClick={() => toggleCategory(c)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                      on
-                        ? "border-[#d4580a] bg-[#d4580a] text-white"
-                        : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-                    }`}
                   >
                     {c}
-                  </button>
+                  </Chip>
                 );
               })}
             </div>
@@ -347,18 +344,13 @@ function NewFestivalPage() {
               {SUGGESTED_TAGS.map((t) => {
                 const on = tagList.includes(t);
                 return (
-                  <button
+                  <Chip
                     key={t}
-                    type="button"
+                    selected={on}
                     onClick={() => toggleTag(t)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                      on
-                        ? "border-[#d4580a] bg-[#d4580a] text-white"
-                        : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-                    }`}
                   >
                     {t}
-                  </button>
+                  </Chip>
                 );
               })}
             </div>
@@ -375,21 +367,19 @@ function NewFestivalPage() {
               </div>
             )}
             <div className="mt-2 flex gap-2">
-              <input
-                className={inputCls}
+              <Input
                 value={customTag}
                 onChange={(e) => setCustomTag(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomTag(); } }}
                 placeholder="Add your own tag"
                 maxLength={30}
               />
-              <button
-                type="button"
+              <Button
+                variant="outline"
                 onClick={addCustomTag}
-                className="shrink-0 rounded-lg border border-neutral-200 px-4 text-sm font-semibold text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
               >
                 Add
-              </button>
+              </Button>
             </div>
           </Field>
           <Field label="Format" hint="For example: Outdoor street festival, Indoor market">
@@ -408,18 +398,13 @@ function NewFestivalPage() {
           <Field label="Admission type">
             <div className="flex flex-wrap gap-2">
               {([["free", "Free"], ["paid", "Paid / Ticketed"], ["donation", "Donation-based"]] as const).map(([v, label]) => (
-                <button
+                <Chip
                   key={v}
-                  type="button"
+                  selected={form.admission === v}
                   onClick={() => set("admission", v)}
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                    form.admission === v
-                      ? "border-[#d4580a] bg-[#d4580a] text-white"
-                      : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-                  }`}
                 >
                   {label}
-                </button>
+                </Chip>
               ))}
             </div>
           </Field>
@@ -466,48 +451,36 @@ function NewFestivalPage() {
 
         <Section title="Publish status">
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+            <Chip
+              selected={form.published}
               onClick={() => set("published", true)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                form.published
-                  ? "border-[#d4580a] bg-[#d4580a] text-white"
-                  : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-              }`}
             >
               Published (visible publicly)
-            </button>
-            <button
-              type="button"
+            </Chip>
+            <Chip
+              selected={!form.published}
               onClick={() => set("published", false)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                !form.published
-                  ? "border-[#d4580a] bg-[#d4580a] text-white"
-                  : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-              }`}
             >
               Draft (hidden from directory)
-            </button>
+            </Chip>
           </div>
         </Section>
 
         <div className="flex items-center justify-end gap-3 pb-10">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={() => navigate({ to: "/festivals" })}
-            className="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-600 hover:border-neutral-300"
           >
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="brand"
             onClick={submit}
             disabled={saving || uploading}
-            className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:bg-neutral-200 disabled:text-neutral-500 disabled:cursor-not-allowed"
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {form.published ? "Create & Publish Festival" : "Save Draft"}
-          </button>
+          </Button>
         </div>
       </div>
 
