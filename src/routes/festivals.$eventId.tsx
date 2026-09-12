@@ -681,9 +681,9 @@ function FestivalDetailPage() {
               )}
             </section>
 
-            {schedule.length > 0 && (
-              <section id="festival-schedule" className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">Schedule</h2>
+            <section id="festival-schedule" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Schedule</h2>
+              {schedule.length > 0 ? (
                 <div className="mt-4 space-y-2">
                   {schedule.map((s, i) => (
                     <div
@@ -697,60 +697,55 @@ function FestivalDetailPage() {
                     </div>
                   ))}
                 </div>
-              </section>
-            )}
+              ) : <div className="mt-4"><TabEmpty message="The festival schedule has not been posted yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+            </section>
 
-            {performers.length > 0 && (
-              <section id="festival-performers" className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">Performers</h2>
+            <section id="festival-performers" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Performers</h2>
+              {headliners.length > 0 ? (
+                <div className="mt-2">
+                  {headliners.map((item, index) => (
+                    <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
+                  ))}
+                </div>
+              ) : <div className="mt-4"><TabEmpty message="Performers have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+            </section>
+
+            <section id="festival-vendors" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Vendors</h2>
+              {vendors.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {performers.map((p) => (
+                  {vendors.map((vendor) => (
                     <span
-                      key={p}
+                      key={vendor}
                       className="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
                     >
-                      {p}
+                      {vendor}
                     </span>
                   ))}
                 </div>
-              </section>
-            )}
+              ) : <div className="mt-4"><TabEmpty message="Vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+            </section>
 
-            {vendors.length > 0 && (
-              <section id="festival-vendors" className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">Vendors</h2>
+            <section id="festival-food" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Food + Drink</h2>
+              {food.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {vendors.map((v) => (
+                  {food.map((item) => (
                     <span
-                      key={v}
+                      key={item}
                       className="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
                     >
-                      {v}
+                      {item}
                     </span>
                   ))}
                 </div>
-              </section>
-            )}
+              ) : <div className="mt-4"><TabEmpty message="Food and drink vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+            </section>
 
-            {food.length > 0 && (
-              <section id="festival-food" className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">Food + Drink</h2>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {food.map((f) => (
-                    <span
-                      key={f}
-                      className="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
-                    >
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {tickets.length > 0 && (
-              <section id="festival-tickets" className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">Tickets</h2>
+            <section id="festival-tickets" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Tickets</h2>
+              {tickets.length > 0 ? (
                 <div className="mt-4 space-y-3">
                   {tickets.map((t) => (
                     <div
@@ -776,12 +771,17 @@ function FestivalDetailPage() {
                     </div>
                   ))}
                 </div>
-              </section>
-            )}
+              ) : (
+                <div className="mt-4 rounded-lg border border-border bg-muted/25 p-5">
+                  <p className="text-sm text-muted-foreground">{isFree ? "This festival uses free RSVP admission." : "Ticket options have not been posted yet."}</p>
+                  <Button asChild variant="brand" size="sm" className="mt-4"><Link to="/events/$eventId" params={{ eventId: event.id }}>{isFree ? "RSVP" : "View admission"}</Link></Button>
+                </div>
+              )}
+            </section>
 
-            {(gallery.length > 0 || event.video_url) && (
-              <section id="festival-gallery" className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">Gallery</h2>
+            <section id="festival-gallery" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Gallery</h2>
+              {(gallery.length > 0 || event.video_url) ? (
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {event.video_url && (
                     <video
@@ -800,12 +800,22 @@ function FestivalDetailPage() {
                     />
                   ))}
                 </div>
-              </section>
-            )}
+              ) : <div className="mt-4"><TabEmpty message="Festival photos and videos have not been added yet." /></div>}
+            </section>
 
-            {faqs.length > 0 && (
-              <section id="festival-faq" className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">FAQ</h2>
+            <section id="festival-updates" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Updates</h2>
+              <div className="mt-4"><TabEmpty message="There are no festival updates yet." /></div>
+            </section>
+
+            <section id="festival-comments" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">Comments</h2>
+              <EventSocial eventId={event.id} hostId={event.user_id} />
+            </section>
+
+            <section id="festival-faq" className="scroll-mt-24">
+              <h2 className="font-display text-lg font-extrabold text-foreground">FAQ</h2>
+              {faqs.length > 0 ? (
                 <div className="mt-4 space-y-3">
                   {faqs.map((f) => (
                     <div key={f.q} className="rounded-xl border border-border bg-card p-4">
@@ -814,8 +824,8 @@ function FestivalDetailPage() {
                     </div>
                   ))}
                 </div>
-              </section>
-            )}
+              ) : <div className="mt-4"><TabEmpty message="Frequently asked questions have not been added yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+            </section>
 
             {(data!.nearby.length > 0 || data!.nearbyArtists.length > 0) && (
               <section className="scroll-mt-24">
