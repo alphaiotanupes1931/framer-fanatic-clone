@@ -619,6 +619,19 @@ function PublicProfilePage() {
           mode={followList}
         />
       )}
+      <Dialog open={avatarOpen} onOpenChange={setAvatarOpen}>
+        <DialogContent className="w-auto max-w-[90vw] border-none bg-transparent p-0 shadow-none">
+          {profile.avatar_url && (
+            <Img
+              src={profile.avatar_url}
+              alt={profile.display_name || ""}
+              className="max-h-[85vh] max-w-full rounded-lg object-contain"
+              loading="eager"
+              decoding="async"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {postViewerIdx !== null && posts[postViewerIdx] && (
         <div
