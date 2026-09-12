@@ -505,6 +505,19 @@ function OrgProfile() {
         title={cropField === "avatar_url" ? "Crop your page photo" : "Crop your banner"}
         onCropped={(f) => void handleFileUpload(cropField, f)}
       />
+      <Dialog open={avatarOpen} onOpenChange={setAvatarOpen}>
+        <DialogContent className="w-auto max-w-[90vw] border-none bg-transparent p-0 shadow-none">
+          {org.avatar_url && (
+            <Img
+              src={org.avatar_url}
+              alt={org.name}
+              className="max-h-[85vh] max-w-full rounded-lg object-contain"
+              loading="eager"
+              decoding="async"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Banner with floating actions */}
       <div className="relative h-44 overflow-hidden rounded-2xl bg-neutral-100 sm:h-60">
