@@ -17,6 +17,7 @@ import { pageHead } from "@/lib/seo";
 import { externalShare } from "@/lib/share-preview";
 import { siteUrl, titleCase } from "@/lib/utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { EventSocial } from "@/components/event-social";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -275,6 +276,19 @@ function ListColumn({ title, items }: { title: string; items: string[] }) {
   );
 }
 
+function TabEmpty({ message, canEdit, onEdit }: { message: string; canEdit?: boolean; onEdit?: () => void }) {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/25 px-5 py-10 text-center">
+      <p className="text-sm text-muted-foreground">{message}</p>
+      {canEdit && onEdit && (
+        <Button variant="outline" size="sm" className="mt-4" onClick={onEdit}>
+          <Pencil /> Add content
+        </Button>
+      )}
+    </div>
+  );
+}
+
 function Field({
   label,
   value,
@@ -430,16 +444,19 @@ function FestivalDetailPage() {
   const tickets = data?.tickets ?? [];
 
   const tabs = useMemo(() => {
-    const t: { id: string; label: string }[] = [{ id: "overview", label: "Overview" }];
-    if (schedule.length > 0) t.push({ id: "schedule", label: "Schedule" });
-    if (performers.length > 0) t.push({ id: "performers", label: "Performers" });
-    if (vendors.length > 0) t.push({ id: "vendors", label: "Vendors" });
-    if (food.length > 0) t.push({ id: "food", label: "Food + Drink" });
-    if (tickets.length > 0) t.push({ id: "tickets", label: "Tickets" });
-    if (gallery.length > 0 || event?.video_url) t.push({ id: "gallery", label: "Gallery" });
-    if (faqs.length > 0) t.push({ id: "faq", label: "FAQ" });
-    return t;
-  }, [schedule, performers, vendors, food, tickets, gallery, event, faqs]);
+    return [
+      { id: "overview", label: "Overview" },
+      { id: "schedule", label: "Schedule" },
+      { id: "performers", label: "Performers" },
+      { id: "vendors", label: "Vendors" },
+      { id: "food", label: "Food + Drink" },
+      { id: "tickets", label: "Tickets" },
+      { id: "gallery", label: "Gallery" },
+      { id: "updates", label: "Updates" },
+      { id: "comments", label: "Comments" },
+      { id: "faq", label: "FAQ" },
+    ];
+  }, []);
 
   const [activeTab, setActiveTab] = useState("overview");
   const scrollTo = (id: string) => {
