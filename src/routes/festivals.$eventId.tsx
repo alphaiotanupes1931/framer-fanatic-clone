@@ -1265,7 +1265,7 @@ function EditFestivalDetails({
     website: details?.website ?? "",
     schedule: scheduleItemsToLines(asSchedule(details?.schedule)),
     performers: programItemsToLines(asProgramItems(details?.performers)),
-    vendors: listToLines(asStringList(details?.vendors)),
+    vendors: vendorItemsToLines(asVendors(details?.vendors)),
     food: listToLines(asStringList(details?.food)),
     experiences: programItemsToLines(asExperiences(details?.experiences)),
     faqs: asFaqs(details?.faqs)
