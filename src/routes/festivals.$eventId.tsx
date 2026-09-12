@@ -19,7 +19,6 @@ import { siteUrl, titleCase } from "@/lib/utils";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
-  ArrowLeft,
   Bookmark,
   CalendarDays,
   Clock,
@@ -31,6 +30,7 @@ import {
   Ticket,
   Users,
 } from "lucide-react";
+import { PageBackButton } from "@/components/shared/page-back-button";
 
 export const Route = createFileRoute("/festivals/$eventId")({
   component: FestivalDetailPage,
@@ -409,9 +409,7 @@ function FestivalDetailPage() {
       <AppLayout>
         <div className="mx-auto max-w-5xl space-y-4 px-4 py-16 text-center">
           <p className="text-sm text-muted-foreground">This festival could not be found.</p>
-          <Button asChild variant="outline">
-            <Link to="/festivals">Back to all festivals</Link>
-          </Button>
+          <PageBackButton destination="festivals" />
         </div>
       </AppLayout>
     );
@@ -455,12 +453,7 @@ function FestivalDetailPage() {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
-        <Link
-          to="/festivals"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to all festivals
-        </Link>
+        <PageBackButton destination="festivals" />
 
         {/* Hero */}
         <section className="overflow-hidden rounded-2xl border border-border bg-card">

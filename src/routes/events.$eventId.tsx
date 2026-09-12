@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/shared/follow-button";
 import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { PageBackButton } from "@/components/shared/page-back-button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createTicketCheckout, createEventDonationCheckout } from "@/lib/stripe.functions";
@@ -392,7 +393,7 @@ function EventDetail() {
     <AppLayout>
       <div className="text-center py-16">
         <h3 className="font-semibold text-foreground mb-1">Event not found</h3>
-        <Button variant="ghost" onClick={() => navigate({ to: "/events" })} className="mt-4">Back to Events</Button>
+        <div className="mt-4 flex justify-center"><PageBackButton destination="events" /></div>
       </div>
     </AppLayout>
   );
@@ -414,9 +415,7 @@ function EventDetail() {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-[600px] space-y-6">
-        <button onClick={() => navigate({ to: "/events" })} aria-label="Go back" className="p-2 rounded-full hover:bg-secondary active:scale-90 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+        <PageBackButton destination="events" />
 
         {evt.image_url && (
           <div className="overflow-hidden rounded-2xl border border-border bg-muted">
