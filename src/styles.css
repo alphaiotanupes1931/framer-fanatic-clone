@@ -142,6 +142,7 @@
   --blue: oklch(0.434 0.120 249.33);
   --blue-deep: oklch(0.354 0.120 249.33);
   --orange: oklch(0.65 0.17 55);
+  --orange-foreground: oklch(0.99 0.002 90);
   --map-accent: oklch(0.53 0.15 150);
   --map-accent-foreground: oklch(0.98 0.01 150);
   --ink: oklch(0.12 0 0);
@@ -328,6 +329,7 @@
   --color-blue: var(--blue);
   --color-blue-deep: var(--blue-deep);
   --color-orange: var(--orange);
+  --color-orange-foreground: var(--orange-foreground);
   --color-ink: var(--ink);
   --color-paper: var(--paper);
   --color-chat-bg: var(--chat-bg);
@@ -390,6 +392,7 @@ html.theme-midnight {
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.6 0.15 290);
   --orange: oklch(0.72 0.18 320);
+  --orange-foreground: oklch(0.16 0.04 280);
 }
 
 /* Forest — deep evergreen with mossy gold accents */
@@ -412,6 +415,7 @@ html.theme-forest {
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.55 0.1 150);
   --orange: oklch(0.72 0.16 80);
+  --orange-foreground: oklch(0.16 0.03 155);
 }
 
 /* Rose — soft blush light theme, ruby accent */

@@ -63,7 +63,7 @@ export function FestivalMap({
   }
 
   return (
-    <div className="relative z-0 overflow-hidden rounded-2xl border border-border shadow-sm [isolation:isolate]">
+    <div className="relative z-0 overflow-hidden rounded-lg border border-border shadow-sm [isolation:isolate]">
       <MapContainer
         center={center}
         zoom={12}

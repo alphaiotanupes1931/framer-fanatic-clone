@@ -16,6 +16,7 @@ import { siteUrl } from "@/lib/utils";
 import { downloadIcs } from "@/lib/ics";
 import { externalShare } from "@/lib/share-preview";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { Chip } from "@/components/shared/chip";
 import {
   Plus,
   MapPin,
@@ -230,35 +231,30 @@ function FestivalActions({
     toast.success("Added to your calendar");
   };
 
-  const btn =
-    "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]";
-
   return (
     <div className="flex flex-wrap gap-2">
-      <button
+      <Button
+        variant={saved ? "brand" : "outline"}
+        size="sm"
         type="button"
         onClick={toggleSave}
-        className={
-          saved
-            ? "inline-flex items-center gap-1.5 rounded-full border border-[#d4580a] bg-[#d4580a]/10 px-3 py-1.5 text-xs font-medium text-[#d4580a]"
-            : btn
-        }
       >
         <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
         {saved ? "Saved" : "Save"}
-      </button>
-      <button type="button" onClick={() => setShareInApp(true)} className={btn}>
+      </Button>
+      <Button variant="outline" size="sm" type="button" onClick={() => setShareInApp(true)}>
         <Send className="h-3.5 w-3.5 -rotate-45" />
         Send
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
         type="button"
         onClick={() => void externalShare(url, row.title, row.description || undefined)}
-        className={btn}
       >
         <Share2 className="h-3.5 w-3.5" />
         Share
-      </button>
+      </Button>
       <ShareToUsersDialog
         open={shareInApp}
         onClose={() => setShareInApp(false)}
@@ -273,17 +269,17 @@ function FestivalActions({
           excerpt: (row.description ?? "").replace(/<[^>]+>/g, "").slice(0, 160) || null,
         }}
       />
-      <button type="button" onClick={addToCalendar} className={btn}>
+      <Button variant="outline" size="sm" type="button" onClick={addToCalendar}>
         <CalendarPlus className="h-3.5 w-3.5" />
         Calendar
-      </button>
+      </Button>
     </div>
   );
 }
 
 function Thumb({ src, alt, className }: { src: string | null; alt: string; className?: string }) {
   if (!src) {
-    return <div className={`bg-gradient-to-br from-[#d4580a] to-[#7a2f04] ${className ?? ""}`} />;
+    return <div className={`bg-orange ${className ?? ""}`} />;
   }
   return <Img src={src} alt={alt} loading="lazy" className={`object-cover ${className ?? ""}`} />;
 }
@@ -334,19 +330,16 @@ function OrgFollowButton({ orgId, meId }: { orgId: string; meId?: string | null 
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={toggle}
       disabled={busy}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-        following
-          ? "border-[#d4580a] bg-[#d4580a] text-white"
-          : "border-[#d4580a] bg-transparent text-[#d4580a] hover:bg-[#d4580a]/10"
-      }`}
+      variant={following ? "brand" : "outline"}
+      size="sm"
     >
       {following ? <UserCheck className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
       {following ? "Following" : "Follow"}
-    </button>
+    </Button>
   );
 }
 
@@ -569,7 +562,7 @@ function FestivalsPage() {
           title="Festivals"
           subtitle="Discover Baltimore's festivals, celebrations, performances, food, art and culture."
           cta={
-            <Button asChild className="bg-[#d4580a] text-white hover:bg-[#b8490a]">
+            <Button asChild variant="brand">
               <Link to="/festivals/new">
                 <Plus className="mr-1.5 h-4 w-4" />
                 Create a Festival
@@ -583,18 +576,13 @@ function FestivalsPage() {
             {QUICK_FILTERS.map((f) => {
               const on = active.includes(f);
               return (
-                <button
+                <Chip
                   key={f}
-                  type="button"
+                  selected={on}
                   onClick={() => toggle(f)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                    on
-                      ? "border-[#d4580a] bg-[#d4580a] text-white"
-                      : "border-border bg-card text-muted-foreground hover:border-[#d4580a] hover:text-[#d4580a]"
-                  }`}
                 >
                   {f}
-                </button>
+                </Chip>
               );
             })}
           </div>
@@ -611,17 +599,17 @@ function FestivalsPage() {
             const Icon = t.icon;
             const on = tab === t.key;
             return (
-              <button
+              <Button
                 key={t.key}
                 type="button"
                 onClick={() => setTab(t.key)}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-                  on ? "bg-[#d4580a] text-white" : "text-muted-foreground hover:text-foreground"
-                }`}
+                variant={on ? "brand" : "ghost"}
+                size="sm"
+                className="shrink-0"
               >
                 <Icon className="h-4 w-4" />
                 {t.label}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -640,8 +628,7 @@ function FestivalsPage() {
                       Featured Festival
                     </h2>
                     <div
-                      className="block overflow-hidden rounded-2xl border-2 bg-card transition hover:shadow-md"
-                      style={{ borderColor: "#d4580a" }}
+                      className="block overflow-hidden rounded-lg border-2 border-orange bg-card transition hover:shadow-md"
                     >
                       <div className="grid gap-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
                         <Link to="/festivals/$eventId" params={{ eventId: featured.id }} className="block">
@@ -688,22 +675,8 @@ function FestivalsPage() {
                             </div>
                           )}
                           <div className="flex flex-wrap gap-2 pt-1">
-                            <Link
-                              to="/festivals/$eventId"
-                              params={{ eventId: featured.id }}
-                              className="inline-block rounded-full bg-[#d4580a] px-4 py-2 text-xs font-semibold text-white"
-                            >
-                              Explore Festival
-                            </Link>
-                            <Link
-                              to="/festivals/$eventId"
-                              params={{ eventId: featured.id }}
-                              hash="festival-schedule"
-                              className="inline-block rounded-full border-2 px-4 py-2 text-xs font-semibold text-foreground"
-                              style={{ borderColor: "#d4580a" }}
-                            >
-                              View Schedule
-                            </Link>
+                            <Button asChild variant="brand" size="sm"><Link to="/festivals/$eventId" params={{ eventId: featured.id }}>Explore Festival</Link></Button>
+                            <Button asChild variant="outline" size="sm"><Link to="/festivals/$eventId" params={{ eventId: featured.id }} hash="festival-schedule">View Schedule</Link></Button>
                           </div>
                           <div className="pt-1">
                             <FestivalActions
@@ -732,7 +705,7 @@ function FestivalsPage() {
             )}
 
             {tab === "calendar" && (
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-lg border border-border bg-card p-5">
                 <h2 className="mb-3 font-display text-lg font-extrabold text-foreground">
                   Festival Calendar
                 </h2>
@@ -777,7 +750,7 @@ function FestivalsPage() {
               <section className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h2 className="inline-flex items-center gap-1.5 font-display text-lg font-extrabold text-foreground">
-                    <MapPin className="h-4 w-4 text-[#d4580a]" />
+                    <MapPin className="h-4 w-4 text-orange" />
                     Active Festivals Map
                   </h2>
                   <span className="text-xs text-muted-foreground">
@@ -785,30 +758,20 @@ function FestivalsPage() {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
+                  <Chip
+                    selected={mapArea === "all"}
                     onClick={() => setMapArea("all")}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                      mapArea === "all"
-                        ? "border-[#d4580a] bg-[#d4580a] text-white"
-                        : "border-border bg-card text-muted-foreground"
-                    }`}
                   >
                     All ({located.length})
-                  </button>
+                  </Chip>
                   {mapAreas.map(([name, count]) => (
-                    <button
+                    <Chip
                       key={name}
-                      type="button"
+                      selected={mapArea === name}
                       onClick={() => setMapArea(name)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                        mapArea === name
-                          ? "border-[#d4580a] bg-[#d4580a] text-white"
-                          : "border-border bg-card text-muted-foreground"
-                      }`}
                     >
                       {name} ({count})
-                    </button>
+                    </Chip>
                   ))}
                 </div>
                 {located.length === 0 ? (
@@ -821,7 +784,7 @@ function FestivalsPage() {
                         <div
                           key={l.row.id}
                           className={`flex items-center gap-3 rounded-xl border bg-card p-3 ${
-                            activePin === l.row.id ? "border-[#d4580a]" : "border-border"
+                            activePin === l.row.id ? "border-orange" : "border-border"
                           }`}
                         >
                           <Link to="/festivals/$eventId" params={{ eventId: l.row.id }}>
@@ -845,14 +808,15 @@ function FestivalsPage() {
                             </div>
                             <div className="text-xs text-muted-foreground">{priceLabel(l.row)}</div>
                           </div>
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             type="button"
                             aria-label={`Directions to ${l.row.title}`}
                             onClick={() => directions(l.row)}
-                            className="rounded-full p-2 text-muted-foreground hover:text-[#d4580a]"
                           >
                             <Navigation className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -871,7 +835,7 @@ function FestivalsPage() {
                       setQ(c.label);
                       setTab("discover");
                     }}
-                    className="overflow-hidden rounded-xl border border-border bg-card text-left transition hover:border-[#d4580a]"
+                    className="overflow-hidden rounded-lg border border-border bg-card text-left transition hover:border-orange"
                   >
                     <Thumb src={c.image} alt={c.label} className="h-32 w-full" />
                     <div className="p-3">
@@ -896,7 +860,7 @@ function FestivalsPage() {
                     />
                     <div className="space-y-1 p-3">
                       <div className="inline-flex items-center gap-1 font-semibold text-foreground">
-                        <MapPin className="h-4 w-4 text-[#d4580a]" />
+                        <MapPin className="h-4 w-4 text-orange" />
                         {name}
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -911,7 +875,7 @@ function FestivalsPage() {
                           setQ(name);
                           setTab("discover");
                         }}
-                        className="pt-1 text-xs font-semibold text-[#d4580a]"
+                        className="pt-1 text-xs font-semibold text-orange"
                       >
                         View Festivals →
                       </button>
@@ -953,7 +917,7 @@ function FestivalsPage() {
                       <Link
                         to="/o/$slug"
                         params={{ slug: o.slug }}
-                        className="text-xs font-semibold text-[#d4580a]"
+                        className="text-xs font-semibold text-orange"
                       >
                         View Organization →
                       </Link>

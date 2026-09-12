@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { Activity, LayoutTemplate, LogOut } from "lucide-react";
 import { isAdminUnlocked, lockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
 import pbLogo from "@/assets/pb-logo-dark.png";
 import { Toaster } from "@/components/ui/sonner";
 import { Img } from "@/components/shared/smart-img";
+import { Button } from "@/components/ui/button";
 
 export function AdminShell({
   title,
@@ -30,21 +31,22 @@ export function AdminShell({
           </Link>
           {unlocked && (
             <div className="flex items-center gap-2">
-              <Link
-                to="/admin/activity"
-                className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-              >
-                Activity
-              </Link>
-              <button
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/activity"><Activity /> Activity</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/design-system"><LayoutTemplate /> Design system</Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={async () => {
                   await lockAdmin();
                   window.location.href = "/admin/login";
                 }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
               >
-                <LogOut className="h-3.5 w-3.5" /> Sign out
-              </button>
+                <LogOut /> Sign out
+              </Button>
             </div>
           )}
         </div>

@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { isAdminUnlocked, getAdminToken } from "@/lib/admin-gate";
 import { adminRpc } from "@/lib/admin-site.functions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText, Star, MapPin } from "lucide-react";
+import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText, Star, MapPin, LayoutTemplate } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -186,6 +186,22 @@ function AdminPage() {
           >
             <Trash2 className="h-3.5 w-3.5" /> Open Trash
           </Link>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <LayoutTemplate className="h-4 w-4 text-orange" /> Design system
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Review the approved buttons, colors, headings, forms, cards, tabs, and spacing used across the platform.
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/design-system">Open reference</Link>
+          </Button>
         </div>
       </div>
 

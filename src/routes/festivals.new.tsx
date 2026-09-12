@@ -3,12 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, Loader2 } from "lucide-react";
 import { EventImage } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { PageBackButton } from "@/components/shared/page-back-button";
+import { Button } from "@/components/ui/button";
+import { Chip } from "@/components/shared/chip";
+import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const Route = createFileRoute("/festivals/new")({
   component: NewFestivalPage,
@@ -41,12 +45,12 @@ const SUGGESTED_TAGS = [
 type Neighborhood = { id: string; name: string };
 
 const inputCls =
-  "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30";
+  "w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm text-foreground focus:border-orange focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6">
-      <h2 className="text-base font-bold text-neutral-900 mb-4">{title}</h2>
+    <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
+      <h2 className="mb-4 text-base font-bold text-foreground">{title}</h2>
       <div className="space-y-4">{children}</div>
     </section>
   );
@@ -55,11 +59,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, required, children, hint }: { label: string; required?: boolean; children: React.ReactNode; hint?: string }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-neutral-700">
-        {label} {required && <span className="text-[#d4580a]">*</span>}
+      <span className="mb-1.5 block text-sm font-semibold text-foreground">
+        {label} {required && <span className="text-orange">*</span>}
       </span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-neutral-400">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-muted-foreground">{hint}</span>}
     </label>
   );
 }
@@ -244,13 +248,11 @@ function NewFestivalPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl px-4 py-6 space-y-6">
         <div>
-          <div className="mb-4">
-            <PageBackButton destination="festivals" />
-          </div>
-          <h1 className="text-2xl font-bold text-neutral-900">Create a Festival</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Set up your festival on Planet Baltimore. You can add the full schedule, artists, vendors, and more from the festival profile after publishing.
-          </p>
+          <PageHeader
+            title="Create a Festival"
+            description="Set up your festival on Planet Baltimore. You can add the full schedule, artists, vendors, and more from the festival profile after publishing."
+            back={<PageBackButton destination="festivals" />}
+          />
         </div>
 
         <Section title="Festival Basics">
@@ -264,10 +266,11 @@ function NewFestivalPage() {
             <RichTextEditor value={form.description} onChange={(v) => set("description", v)} placeholder="Tell people about your festival..." minHeight={140} />
           </Field>
           <Field label="Festival image">
-            <button
+            <Button
+              variant="outline"
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="w-full aspect-[16/9] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50 hover:border-[#d4580a]/40 hover:bg-[#d4580a]/[0.03] flex flex-col items-center justify-center text-neutral-500 overflow-hidden"
+              className="h-auto w-full aspect-[16/9] overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground hover:border-orange hover:bg-orange/5 hover:text-orange"
             >
               {form.image_url ? (
                 <EventImage src={form.image_url} alt="Festival image" className="w-full h-full object-cover" />
@@ -283,7 +286,7 @@ function NewFestivalPage() {
                 hidden
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) onPickImage(f); e.target.value = ""; }}
               />
-            </button>
+            </Button>
           </Field>
         </Section>
 
@@ -326,18 +329,13 @@ function NewFestivalPage() {
               {CATEGORIES.map((c) => {
                 const on = form.categories.includes(c);
                 return (
-                  <button
+                  <Chip
                     key={c}
-                    type="button"
+                    selected={on}
                     onClick={() => toggleCategory(c)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                      on
-                        ? "border-[#d4580a] bg-[#d4580a] text-white"
-                        : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-                    }`}
                   >
                     {c}
-                  </button>
+                  </Chip>
                 );
               })}
             </div>
@@ -347,49 +345,37 @@ function NewFestivalPage() {
               {SUGGESTED_TAGS.map((t) => {
                 const on = tagList.includes(t);
                 return (
-                  <button
+                  <Chip
                     key={t}
-                    type="button"
+                    selected={on}
                     onClick={() => toggleTag(t)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                      on
-                        ? "border-[#d4580a] bg-[#d4580a] text-white"
-                        : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-                    }`}
                   >
                     {t}
-                  </button>
+                  </Chip>
                 );
               })}
             </div>
             {tagList.filter((t) => !SUGGESTED_TAGS.includes(t)).length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {tagList.filter((t) => !SUGGESTED_TAGS.includes(t)).map((t) => (
-                  <span key={t} className="inline-flex items-center gap-1 rounded-full border border-[#d4580a] bg-[#d4580a]/10 px-3 py-1.5 text-xs font-semibold text-[#d4580a]">
-                    {t}
-                    <button type="button" onClick={() => toggleTag(t)} aria-label={`Remove ${t}`}>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
+                  <Chip key={t} removable selected onClick={() => toggleTag(t)} aria-label={`Remove ${t}`}>{t}</Chip>
                 ))}
               </div>
             )}
             <div className="mt-2 flex gap-2">
-              <input
-                className={inputCls}
+              <Input
                 value={customTag}
                 onChange={(e) => setCustomTag(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomTag(); } }}
                 placeholder="Add your own tag"
                 maxLength={30}
               />
-              <button
-                type="button"
+              <Button
+                variant="outline"
                 onClick={addCustomTag}
-                className="shrink-0 rounded-lg border border-neutral-200 px-4 text-sm font-semibold text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
               >
                 Add
-              </button>
+              </Button>
             </div>
           </Field>
           <Field label="Format" hint="For example: Outdoor street festival, Indoor market">
@@ -408,18 +394,13 @@ function NewFestivalPage() {
           <Field label="Admission type">
             <div className="flex flex-wrap gap-2">
               {([["free", "Free"], ["paid", "Paid / Ticketed"], ["donation", "Donation-based"]] as const).map(([v, label]) => (
-                <button
+                <Chip
                   key={v}
-                  type="button"
+                  selected={form.admission === v}
                   onClick={() => set("admission", v)}
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                    form.admission === v
-                      ? "border-[#d4580a] bg-[#d4580a] text-white"
-                      : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-                  }`}
                 >
                   {label}
-                </button>
+                </Chip>
               ))}
             </div>
           </Field>
@@ -466,48 +447,36 @@ function NewFestivalPage() {
 
         <Section title="Publish status">
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+            <Chip
+              selected={form.published}
               onClick={() => set("published", true)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                form.published
-                  ? "border-[#d4580a] bg-[#d4580a] text-white"
-                  : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-              }`}
             >
               Published (visible publicly)
-            </button>
-            <button
-              type="button"
+            </Chip>
+            <Chip
+              selected={!form.published}
               onClick={() => set("published", false)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                !form.published
-                  ? "border-[#d4580a] bg-[#d4580a] text-white"
-                  : "border-neutral-200 bg-white text-neutral-600 hover:border-[#d4580a] hover:text-[#d4580a]"
-              }`}
             >
               Draft (hidden from directory)
-            </button>
+            </Chip>
           </div>
         </Section>
 
         <div className="flex items-center justify-end gap-3 pb-10">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={() => navigate({ to: "/festivals" })}
-            className="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-600 hover:border-neutral-300"
           >
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="brand"
             onClick={submit}
             disabled={saving || uploading}
-            className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:bg-neutral-200 disabled:text-neutral-500 disabled:cursor-not-allowed"
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {form.published ? "Create & Publish Festival" : "Save Draft"}
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -7,3 +7,6 @@
 - [x] Restrict staff logins to email credentials and business-page-only access; test end to end
 - [x] Keep only Groups and Community Associations under profile Memberships; remove Artists and Businesses (defensive client-side filter added)
 - [ ] Add staff-login creation step to the in-app business-page creation flow so it matches the home-screen flow
+- [x] Establish shared interface foundations and private admin design-system reference
+- [x] Apply shared controls, semantic colors, headers, cards, and spacing to Festivals
+- [ ] Migrate remaining high-traffic product areas to the shared interface system
