@@ -155,7 +155,7 @@ function asExperiences(v: unknown): Experience[] {
     .map((x) => typeof x === "string" ? { name: x } : x as Partial<Experience>)
     .filter((x) => x && typeof x.name === "string" && x.name.trim())
     .map((x) => ({
-      name: x.name!.trim(),
+      name: String(x.name).trim(),
       when: (x.when ?? "").trim(),
       venue: (x.venue ?? "").trim(),
       description: (x.description ?? "").trim(),
@@ -169,7 +169,7 @@ function asProgramItems(v: unknown): ProgramItem[] {
     .map((x) => typeof x === "string" ? { name: x } : x as Partial<ProgramItem>)
     .filter((x) => x && typeof x.name === "string" && x.name.trim())
     .map((x) => ({
-      name: x.name!.trim(),
+      name: String(x.name).trim(),
       when: (x.when ?? "").trim(),
       venue: (x.venue ?? "").trim(),
       description: (x.description ?? "").trim(),
@@ -976,6 +976,24 @@ function pairsToObjects(text: string, keys: [string, string]) {
     .filter((o) => (o as Record<string, string>)[keys[0]]);
 }
 
+function programLinesToObjects(text: string): ProgramItem[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name = "", when = "", venue = "", description = "", price = ""] = line.split("|").map((part) => part.trim());
+      return { name, when, venue, description, price };
+    })
+    .filter((item) => item.name.length > 0);
+}
+
+function programItemsToLines(items: ProgramItem[]): string {
+  return items
+    .map((item) => [item.name, item.when, item.venue, item.description, item.price].join(" | "))
+    .join("\n");
+}
+
 function listToLines(list: string[]): string {
   return list.join("\n");
 }
@@ -1008,12 +1026,10 @@ function EditFestivalDetails({
     schedule: asSchedule(details?.schedule)
       .map((s) => `${s.label} | ${s.detail}`)
       .join("\n"),
-    performers: listToLines(asStringList(details?.performers)),
+    performers: programItemsToLines(asProgramItems(details?.performers)),
     vendors: listToLines(asStringList(details?.vendors)),
     food: listToLines(asStringList(details?.food)),
-    experiences: asExperiences(details?.experiences)
-      .map((x) => `${x.name} | ${x.description}`)
-      .join("\n"),
+    experiences: programItemsToLines(asExperiences(details?.experiences)),
     faqs: asFaqs(details?.faqs)
       .map((f) => `${f.q} | ${f.a}`)
       .join("\n"),
@@ -1039,10 +1055,10 @@ function EditFestivalDetails({
       footprint: form.footprint.trim() || null,
       website: form.website.trim() || null,
       schedule: pairsToObjects(form.schedule, ["label", "detail"]),
-      performers: linesToList(form.performers),
+      performers: programLinesToObjects(form.performers),
       vendors: linesToList(form.vendors),
       food: linesToList(form.food),
-      experiences: pairsToObjects(form.experiences, ["name", "description"]),
+      experiences: programLinesToObjects(form.experiences),
       faqs: pairsToObjects(form.faqs, ["q", "a"]),
       updated_at: new Date().toISOString(),
     };
@@ -1087,7 +1103,7 @@ function EditFestivalDetails({
             <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Day or time | Details" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Performers" value={form.performers} onChange={set("performers")} hint="One per line" />
+            <Area label="Festival Headliners" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price" />
           </div>
           <div className="sm:col-span-2">
             <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line" />
@@ -1096,7 +1112,7 @@ function EditFestivalDetails({
             <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Description" />
+            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Date and time | Venue | Description | Free or price" />
           </div>
           <div className="sm:col-span-2">
             <Area label="FAQs" value={form.faqs} onChange={set("faqs")} hint="One per line: Question | Answer" />
