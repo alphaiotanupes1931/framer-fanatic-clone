@@ -138,6 +138,7 @@ type ProgramItem = {
   venue: string;
   description: string;
   price: string;
+  type: string;
 };
 
 type Experience = ProgramItem;
@@ -171,6 +172,7 @@ function asExperiences(v: unknown): Experience[] {
       venue: (x.venue ?? "").trim(),
       description: (x.description ?? "").trim(),
       price: (x.price ?? "").trim(),
+      type: (x.type ?? "").trim(),
     }));
 }
 
@@ -185,6 +187,7 @@ function asProgramItems(v: unknown): ProgramItem[] {
       venue: (x.venue ?? "").trim(),
       description: (x.description ?? "").trim(),
       price: (x.price ?? "").trim(),
+      type: (x.type ?? "").trim(),
     }));
 }
 
@@ -204,6 +207,36 @@ function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fall
       <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="sm" className="w-fit">
         <Link to="/events/$eventId" params={{ eventId }}>{action}</Link>
       </Button>
+    </article>
+  );
+}
+
+function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: EventRow; isFree: boolean }) {
+  const performerUrl = `${siteUrl()}/festivals/${event.id}#festival-performers`;
+  const sharePerformer = async () => {
+    await externalShare(performerUrl, `${item.name} at ${event.title}`, item.description || undefined);
+  };
+
+  return (
+    <article className="border-b border-border py-6 first:pt-2 last:border-0">
+      <div className="text-[11px] font-bold uppercase text-orange">{item.type || event.category || "Performer"}</div>
+      <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
+      {(item.when || item.venue) && (
+        <p className="mt-2 text-sm font-semibold text-muted-foreground">
+          {[item.when, item.venue].filter(Boolean).join(" · ")}
+        </p>
+      )}
+      {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={() => void sharePerformer()}>
+          <Share2 /> Share
+        </Button>
+        <Button asChild variant="brand" size="sm">
+          <Link to="/events/$eventId" params={{ eventId: event.id }}>
+            <Ticket /> {isFree ? "RSVP" : "Tickets"}
+          </Link>
+        </Button>
+      </div>
     </article>
   );
 }
@@ -810,11 +843,10 @@ function FestivalDetailPage() {
             </section>
 
             <section id="festival-performers" className={`scroll-mt-24 ${activeTab !== "performers" ? "hidden" : ""}`}>
-              <h2 className="font-display text-lg font-extrabold text-foreground">Performers</h2>
               {headliners.length > 0 ? (
-                <div className="mt-2">
+                <div>
                   {headliners.map((item, index) => (
-                    <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
+                    <PerformerCard key={`${item.name}-${index}`} item={item} event={event} isFree={isFree} />
                   ))}
                 </div>
               ) : <div className="mt-4"><TabEmpty message="Performers have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
@@ -1118,15 +1150,15 @@ function programLinesToObjects(text: string): ProgramItem[] {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [name = "", when = "", venue = "", description = "", price = ""] = line.split("|").map((part) => part.trim());
-      return { name, when, venue, description, price };
+      const [name = "", when = "", venue = "", description = "", price = "", type = ""] = line.split("|").map((part) => part.trim());
+      return { name, when, venue, description, price, type };
     })
     .filter((item) => item.name.length > 0);
 }
 
 function programItemsToLines(items: ProgramItem[]): string {
   return items
-    .map((item) => [item.name, item.when, item.venue, item.description, item.price].join(" | "))
+    .map((item) => [item.name, item.when, item.venue, item.description, item.price, item.type].join(" | "))
     .join("\n");
 }
 
@@ -1255,7 +1287,7 @@ function EditFestivalDetails({
             <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Name | Date | Time | Venue | Type | Free or price | Description" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Festival Headliners" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price" />
+            <Area label="Festival Headliners and Performers" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price | Type (dance, poetry, music)" />
           </div>
           <div className="sm:col-span-2">
             <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line" />
@@ -1264,7 +1296,7 @@ function EditFestivalDetails({
             <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Date and time | Venue | Description | Free or price" />
+            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Date and time | Venue | Description | Free or price | Type" />
           </div>
           <div className="sm:col-span-2">
             <Area label="FAQs" value={form.faqs} onChange={set("faqs")} hint="One per line: Question | Answer" />
