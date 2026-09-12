@@ -895,16 +895,10 @@ function FestivalDetailPage() {
             </section>
 
             <section id="festival-vendors" className={`scroll-mt-24 ${activeTab !== "vendors" ? "hidden" : ""}`}>
-              <h2 className="font-display text-lg font-extrabold text-foreground">Vendors</h2>
               {vendors.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {vendors.map((vendor) => (
-                    <span
-                      key={vendor}
-                      className="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
-                    >
-                      {vendor}
-                    </span>
+                <div>
+                  {vendors.map((item, index) => (
+                    <VendorCard key={`${item.name}-${index}`} item={item} />
                   ))}
                 </div>
               ) : <div className="mt-4"><TabEmpty message="Vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
