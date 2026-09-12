@@ -153,12 +153,39 @@ type ScheduleItem = {
 };
 type Faq = { q: string; a: string };
 
+type VendorItem = {
+  category: string;
+  name: string;
+  booth: string;
+  description: string;
+};
+
 function asStringList(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
   return v
     .map((x) => (typeof x === "string" ? x : ((x as { name?: string })?.name ?? "")))
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+function asVendors(v: unknown): VendorItem[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x) => {
+      if (typeof x === "string") {
+        const [category = "", name = "", booth = "", description = ""] = x.split("|").map((s) => s.trim());
+        if (!name) return { category: "", name: category, booth: "", description: "" };
+        return { category, name, booth, description };
+      }
+      const item = x as Partial<VendorItem>;
+      return {
+        category: (item.category ?? "").trim(),
+        name: (item.name ?? "").trim(),
+        booth: (item.booth ?? "").trim(),
+        description: (item.description ?? "").trim(),
+      };
+    })
+    .filter((x) => x.name.length > 0);
 }
 
 function asExperiences(v: unknown): Experience[] {
@@ -237,6 +264,21 @@ function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: Even
           </Link>
         </Button>
       </div>
+    </article>
+  );
+}
+
+function VendorCard({ item }: { item: VendorItem }) {
+  return (
+    <article className="border-b border-border py-6 first:pt-2 last:border-0">
+      {item.category && <div className="text-[11px] font-bold uppercase text-orange">{item.category}</div>}
+      <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
+      {(item.category || item.booth) && (
+        <p className="mt-2 text-sm font-semibold text-muted-foreground">
+          {[item.category, item.booth].filter(Boolean).join(" · ")}
+        </p>
+      )}
+      {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
     </article>
   );
 }
@@ -513,7 +555,7 @@ function FestivalDetailPage() {
   const details = data?.details ?? null;
 
   const headliners = useMemo(() => asProgramItems(details?.performers), [details]);
-  const vendors = useMemo(() => asStringList(details?.vendors), [details]);
+  const vendors = useMemo(() => asVendors(details?.vendors), [details]);
   const food = useMemo(() => asStringList(details?.food), [details]);
   const schedule = useMemo(() => asSchedule(details?.schedule), [details]);
   const experiences = useMemo(() => asExperiences(details?.experiences), [details]);
@@ -792,7 +834,7 @@ function FestivalDetailPage() {
 
               {(vendors.length > 0 || food.length > 0) && (
                 <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
-                  <ListColumn title="Vendors" items={vendors} />
+                  <ListColumn title="Vendors" items={vendors.map((v) => v.name)} />
                   <ListColumn title="Food + Drink" items={food} />
                 </div>
               )}
@@ -853,16 +895,10 @@ function FestivalDetailPage() {
             </section>
 
             <section id="festival-vendors" className={`scroll-mt-24 ${activeTab !== "vendors" ? "hidden" : ""}`}>
-              <h2 className="font-display text-lg font-extrabold text-foreground">Vendors</h2>
               {vendors.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {vendors.map((vendor) => (
-                    <span
-                      key={vendor}
-                      className="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
-                    >
-                      {vendor}
-                    </span>
+                <div>
+                  {vendors.map((item, index) => (
+                    <VendorCard key={`${item.name}-${index}`} item={item} />
                   ))}
                 </div>
               ) : <div className="mt-4"><TabEmpty message="Vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
@@ -1184,6 +1220,24 @@ function listToLines(list: string[]): string {
   return list.join("\n");
 }
 
+function vendorLinesToObjects(text: string): VendorItem[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [category = "", name = "", booth = "", description = ""] = line.split("|").map((part) => part.trim());
+      return { category, name, booth, description };
+    })
+    .filter((item) => item.name.length > 0);
+}
+
+function vendorItemsToLines(items: VendorItem[]): string {
+  return items
+    .map((item) => [item.category, item.name, item.booth, item.description].join(" | "))
+    .join("\n");
+}
+
 function EditFestivalDetails({
   open,
   onOpenChange,
@@ -1211,7 +1265,7 @@ function EditFestivalDetails({
     website: details?.website ?? "",
     schedule: scheduleItemsToLines(asSchedule(details?.schedule)),
     performers: programItemsToLines(asProgramItems(details?.performers)),
-    vendors: listToLines(asStringList(details?.vendors)),
+    vendors: vendorItemsToLines(asVendors(details?.vendors)),
     food: listToLines(asStringList(details?.food)),
     experiences: programItemsToLines(asExperiences(details?.experiences)),
     faqs: asFaqs(details?.faqs)
@@ -1240,7 +1294,7 @@ function EditFestivalDetails({
       website: form.website.trim() || null,
       schedule: scheduleLinesToObjects(form.schedule),
       performers: programLinesToObjects(form.performers),
-      vendors: linesToList(form.vendors),
+      vendors: vendorLinesToObjects(form.vendors),
       food: linesToList(form.food),
       experiences: programLinesToObjects(form.experiences),
       faqs: pairsToObjects(form.faqs, ["q", "a"]),
@@ -1290,7 +1344,7 @@ function EditFestivalDetails({
             <Area label="Festival Headliners and Performers" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price | Type (dance, poetry, music)" />
           </div>
           <div className="sm:col-span-2">
-            <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line" />
+            <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line: Category | Name | Booth | Description" />
           </div>
           <div className="sm:col-span-2">
             <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
