@@ -543,14 +543,20 @@ function OrgProfile() {
       {/* Avatar overlapping banner + inline action buttons */}
       <div className="relative flex flex-col items-start gap-3 px-1 sm:flex-row sm:items-end sm:justify-between sm:px-2">
         <div className="relative -mt-8 inline-block shrink-0">
-          <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm">
+          <button
+            type="button"
+            onClick={() => org.avatar_url && setAvatarOpen(true)}
+            disabled={!org.avatar_url}
+            aria-label={org.avatar_url ? `View ${org.name} profile photo` : "No profile photo"}
+            className="relative h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-neutral-200 shadow-sm disabled:cursor-default"
+          >
             {org.avatar_url && (
               <Img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
-          </div>
+          </button>
           {canManage && (
             <button
-              onClick={() => avatarInputRef.current?.click()}
+              onClick={(e) => { e.stopPropagation(); avatarInputRef.current?.click(); }}
               disabled={uploading === "avatar_url"}
               aria-label="Edit avatar"
               className="absolute bottom-1 right-1 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-white hover:bg-black/85"
