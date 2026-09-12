@@ -1220,6 +1220,24 @@ function listToLines(list: string[]): string {
   return list.join("\n");
 }
 
+function vendorLinesToObjects(text: string): VendorItem[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [category = "", name = "", booth = "", description = ""] = line.split("|").map((part) => part.trim());
+      return { category, name, booth, description };
+    })
+    .filter((item) => item.name.length > 0);
+}
+
+function vendorItemsToLines(items: VendorItem[]): string {
+  return items
+    .map((item) => [item.category, item.name, item.booth, item.description].join(" | "))
+    .join("\n");
+}
+
 function EditFestivalDetails({
   open,
   onOpenChange,
