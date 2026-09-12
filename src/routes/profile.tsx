@@ -140,6 +140,7 @@ function ProfilePage() {
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [followerPreview, setFollowerPreview] = useState<Array<{ id: string; display_name: string | null; username: string | null }>>([]);
   const [postViewerIdx, setPostViewerIdx] = useState<number | null>(null);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   useEffect(() => {
     if (postViewerIdx === null) return;
