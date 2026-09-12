@@ -24,6 +24,7 @@ import {
   Bookmark,
   BarChart3,
   CalendarDays,
+  Check,
   Clock,
   Eye,
   EyeOff,
@@ -31,6 +32,7 @@ import {
   MapPin,
   Navigation,
   Pencil,
+  Plus,
   Send,
   Settings,
   Share2,
@@ -139,7 +141,15 @@ type ProgramItem = {
 };
 
 type Experience = ProgramItem;
-type ScheduleItem = { label: string; detail: string };
+type ScheduleItem = {
+  name: string;
+  date: string;
+  time: string;
+  venue: string;
+  type: string;
+  price: string;
+  description: string;
+};
 type Faq = { q: string; a: string };
 
 function asStringList(v: unknown): string[] {
@@ -202,8 +212,44 @@ function asSchedule(v: unknown): ScheduleItem[] {
   if (!Array.isArray(v)) return [];
   return v
     .map((x) => x as Partial<ScheduleItem>)
-    .filter((x) => x && typeof x.label === "string" && x.label.trim())
-    .map((x) => ({ label: x.label!.trim(), detail: (x.detail ?? "").trim() }));
+    .filter((x) => x && (typeof x.name === "string" || typeof x.label === "string"))
+    .map((x) => ({
+      name: (x.name ?? x.detail ?? x.label ?? "").trim(),
+      date: (x.date ?? "").trim(),
+      time: (x.time ?? x.label ?? "").trim(),
+      venue: (x.venue ?? "").trim(),
+      type: (x.type ?? "").trim(),
+      price: (x.price ?? "").trim(),
+      description: (x.description ?? "").trim(),
+    }))
+    .filter((x) => x.name.length > 0);
+}
+
+function scheduleDateLabel(value: string) {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : format(parsed, "EEE, MMM d");
+}
+
+function ScheduleRow({ item, scheduled, onToggle }: { item: ScheduleItem; scheduled: boolean; onToggle: () => void }) {
+  return (
+    <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[70px_minmax(0,1fr)_auto] sm:items-start">
+      <div className="text-lg font-extrabold text-foreground">{item.time}</div>
+      <div className="min-w-0">
+        <h3 className="text-base font-bold text-foreground">{item.name}</h3>
+        {(item.venue || item.type || item.price) && (
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold">
+            {item.venue && <span className="text-muted-foreground">{item.venue}</span>}
+            {item.type && <span className="rounded bg-muted px-2 py-1 text-foreground">{item.type}</span>}
+            {item.price && <span className="rounded bg-primary/10 px-2 py-1 text-orange">{item.price}</span>}
+          </div>
+        )}
+        {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+      </div>
+      <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
+        {scheduled ? <Check /> : <Plus />} {scheduled ? "In My Schedule" : "My Schedule"}
+      </Button>
+    </article>
+  );
 }
 
 function asFaqs(v: unknown): Faq[] {
