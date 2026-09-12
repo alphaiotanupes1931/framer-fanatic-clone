@@ -364,11 +364,17 @@ function PublicProfilePage() {
       {/* Avatar uses the same placement as the account owner's profile. */}
       <div className="relative mt-4">
         <div className="relative inline-block">
-          <div className="h-20 w-20 overflow-hidden rounded-full bg-neutral-200 ring-4 ring-background sm:h-24 sm:w-24">
+          <button
+            type="button"
+            onClick={() => profile.avatar_url && setAvatarOpen(true)}
+            disabled={!profile.avatar_url}
+            aria-label={profile.avatar_url ? `View ${profile.display_name || profile.username} profile photo` : "No profile photo"}
+            className="relative h-20 w-20 overflow-hidden rounded-full bg-neutral-200 ring-4 ring-background disabled:cursor-default sm:h-24 sm:w-24"
+          >
             {profile.avatar_url && (
               <Img src={profile.avatar_url} alt={profile.display_name || ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             )}
-          </div>
+          </button>
         </div>
       </div>
 
