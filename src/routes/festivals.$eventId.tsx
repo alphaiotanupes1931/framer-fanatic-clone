@@ -268,6 +268,21 @@ function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: Even
   );
 }
 
+function VendorCard({ item }: { item: VendorItem }) {
+  return (
+    <article className="border-b border-border py-6 first:pt-2 last:border-0">
+      {item.category && <div className="text-[11px] font-bold uppercase text-orange">{item.category}</div>}
+      <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
+      {(item.category || item.booth) && (
+        <p className="mt-2 text-sm font-semibold text-muted-foreground">
+          {[item.category, item.booth].filter(Boolean).join(" · ")}
+        </p>
+      )}
+      {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+    </article>
+  );
+}
+
 function asSchedule(v: unknown): ScheduleItem[] {
   if (!Array.isArray(v)) return [];
   return v
