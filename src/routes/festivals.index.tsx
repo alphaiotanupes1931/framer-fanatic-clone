@@ -250,14 +250,14 @@ function placeOf(r: Row) {
   return (r.neighborhood || r.venue_name || "").trim();
 }
 
-function Section({ title, rows, id, draft = false }: { title: string; rows: Row[]; id?: string; draft?: boolean }) {
+function Section({ title, rows, id, draft = false, onRemove }: { title: string; rows: Row[]; id?: string; draft?: boolean; onRemove?: (id: string) => void }) {
   if (rows.length === 0) return null;
   return (
     <section id={id} className="space-y-3">
       <h2 className="font-display text-lg font-extrabold text-foreground sm:text-xl">{title}</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((e) => (
-          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} showCalendar={false} draft={draft} />
+          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} showCalendar={false} draft={draft} onDeleted={onRemove} />
         ))}
       </div>
     </section>
@@ -758,7 +758,12 @@ function FestivalsPage() {
           ) : drafts.length === 0 ? (
             <Empty text="You have no festival drafts. Anything you save as a draft appears here." />
           ) : (
-            <Section title="Your Drafts" rows={drafts} draft />
+            <Section
+              title="Your Drafts"
+              rows={drafts}
+              draft
+              onRemove={(id) => setDrafts((prev) => prev.filter((d) => d.id !== id))}
+            />
           )
         ) : all.length === 0 ? (
           <Empty text="No festivals listed yet. Create one and it will show up here." />
