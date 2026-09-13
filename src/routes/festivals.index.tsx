@@ -136,7 +136,9 @@ function isFree(r: Row) {
 
 function priceLabel(r: Row) {
   if (isFree(r)) return "Free";
-  return `$${Math.round((r.price_cents ?? 0) / 100)}`;
+  const cents = r.price_cents ?? 0;
+  if (cents <= 0) return "Ticketed";
+  return `$${(cents / 100).toFixed(2).replace(/\.00$/, "")}`;
 }
 
 function weekendRange() {
