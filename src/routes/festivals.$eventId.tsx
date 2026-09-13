@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Img } from "@/components/shared/smart-img";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { PageBackButton } from "@/components/shared/page-back-button";
+import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
 import { EditableList, ImagePickerField, type FieldSpec } from "@/components/festival/festival-editing";
 
 export const Route = createFileRoute("/festivals/$eventId")({
