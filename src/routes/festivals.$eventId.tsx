@@ -448,6 +448,35 @@ function GlanceRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** Lets the festival creator add a photo to the gallery. */
+function GalleryUploadButton({ onAdd }: { onAdd: (path: string) => void | Promise<void> }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <>
+      <Button type="button" variant="brand" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+        <Plus /> {busy ? "Uploading…" : "Add photo"}
+      </Button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (!f) return;
+          setBusy(true);
+          void uploadFestivalImage(f)
+            .then((p) => onAdd(p))
+            .catch((err) => toast.error(err instanceof Error ? err.message : "Upload failed"))
+            .finally(() => setBusy(false));
+        }}
+      />
+    </>
+  );
+}
+
 function ListColumn({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
