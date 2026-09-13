@@ -210,9 +210,9 @@ function matchesOption(option: string, r: Row, tags: string[]) {
     case "This Month":
       return isThisMonth(r);
     case "Free":
-      return !r.donations_enabled && (isFree(r) || /\bfree\b/i.test(tags.join(" ")));
+      return !isDonation(r) && (isFree(r) || /\bfree\b/i.test(tags.join(" ")));
     case "Paid":
-      return !isFree(r);
+      return !isFree(r) && !isDonation(r);
     case "Donation-Based":
       return (
         r.donations_enabled === true ||
