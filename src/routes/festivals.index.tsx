@@ -244,7 +244,7 @@ function Section({ title, rows, id }: { title: string; rows: Row[]; id?: string 
       <h2 className="font-display text-lg font-extrabold text-foreground sm:text-xl">{title}</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((e) => (
-          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} />
+          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} showCalendar={false} />
         ))}
       </div>
     </section>
