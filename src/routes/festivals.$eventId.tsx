@@ -623,12 +623,37 @@ function FestivalDetailPage() {
 
   const headliners = useMemo(() => asProgramItems(details?.performers), [details]);
   const vendors = useMemo(() => asVendors(details?.vendors), [details]);
-  const food = useMemo(() => asStringList(details?.food), [details]);
+  const food = useMemo(() => asVendors(details?.food), [details]);
   const schedule = useMemo(() => asSchedule(details?.schedule), [details]);
   const experiences = useMemo(() => asExperiences(details?.experiences), [details]);
   const faqs = useMemo(() => asFaqs(details?.faqs), [details]);
+  const updates = useMemo(() => asUpdates((details as { updates?: unknown } | null)?.updates), [details]);
   const gallery = event?.gallery_urls ?? [];
   const tickets = data?.tickets ?? [];
+
+  /** Saves one part of the festival content and refreshes the page. */
+  const saveDetails = async (patch: Record<string, unknown>) => {
+    const res = await supabase
+      .from("festival_details")
+      .upsert({ event_id: eventId, ...patch, updated_at: new Date().toISOString() } as never, {
+        onConflict: "event_id",
+      });
+    if (res.error) {
+      toast.error(res.error.message);
+      return;
+    }
+    toast.success("Saved");
+    await refetch();
+  };
+
+  const saveGallery = async (next: string[]) => {
+    const res = await supabase.from("events").update({ gallery_urls: next }).eq("id", eventId);
+    if (res.error) {
+      toast.error(res.error.message);
+      return;
+    }
+    await refetch();
+  };
 
   const tabs = useMemo(() => {
     return [
