@@ -591,7 +591,15 @@ function FestivalsPage() {
           })}
         </div>
 
-        {all.length === 0 ? (
+        {tab === "drafts" ? (
+          !me?.id ? (
+            <Empty text="Sign in to see your festival drafts." />
+          ) : drafts.length === 0 ? (
+            <Empty text="You have no festival drafts. Anything you save as a draft appears here." />
+          ) : (
+            <Section title="Your Drafts" rows={drafts} />
+          )
+        ) : all.length === 0 ? (
           <Empty text="No festivals listed yet. Create one and it will show up here." />
         ) : rows.length === 0 ? (
           <Empty text="No festivals match those filters." />
