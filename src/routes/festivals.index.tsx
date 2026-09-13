@@ -31,7 +31,8 @@ import {
   UserCheck,
   Share2,
   Send,
-  CalendarPlus,
+  SlidersHorizontal,
+  FileText,
 } from "lucide-react";
 
 export const Route = createFileRoute("/festivals/")({
@@ -156,6 +157,70 @@ function isThisWeekend(r: Row) {
   const s = new Date(r.starts_at);
   const e = r.ends_at ? new Date(r.ends_at) : s;
   return e >= start && s <= end;
+}
+
+function isToday(r: Row) {
+  if (!r.starts_at) return false;
+  const now = new Date();
+  const s = new Date(r.starts_at);
+  const e = r.ends_at ? new Date(r.ends_at) : s;
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayStart.getDate() + 1);
+  return e >= dayStart && s < dayEnd;
+}
+
+function isThisMonth(r: Row) {
+  if (!r.starts_at) return false;
+  const now = new Date();
+  const s = new Date(r.starts_at);
+  return s.getFullYear() === now.getFullYear() && s.getMonth() === now.getMonth();
+}
+
+const CATEGORY_MATCH: Record<string, RegExp> = {
+  Arts: /art|craft|gallery|mural|design/i,
+  Music: /music|concert|jazz|band|dj|hip hop|sound/i,
+  Food: /food|taste|eat|culinary|restaurant|brew|wine|beer/i,
+  Film: /film|cinema|movie|screening/i,
+  Literature: /book|poetry|literar|author|writing/i,
+  Pride: /pride|lgbt|queer/i,
+  Caribbean: /caribbean|soca|reggae|carnival/i,
+  Family: /family|kid|children|all ages/i,
+  Neighborhood: /neighborhood|block party|street fair|community/i,
+};
+
+/** True when a festival matches one selected filter option. */
+function matchesOption(option: string, r: Row, tags: string[]) {
+  const hay = haystack(r, tags);
+  switch (option) {
+    case "Today":
+      return isToday(r);
+    case "This Weekend":
+      return isThisWeekend(r);
+    case "This Month":
+      return isThisMonth(r);
+    case "Free":
+      return isFree(r) || /\bfree\b/i.test(tags.join(" "));
+    case "Paid":
+      return !isFree(r);
+    case "Donation-Based":
+      return r.pricing_mode === "donation" || /donation|pay what you can|suggested/i.test(hay);
+    case "All Ages":
+      return /all ages/i.test(hay);
+    case "21+":
+      return /21\+|21 and over|21 &|adults only/i.test(hay);
+    case "Family Friendly":
+      return /family|kid|children|all ages/i.test(hay);
+    case "Outdoor":
+      return /outdoor|park|street|plaza|waterfront|harbor|open air/i.test(hay);
+    case "Indoor":
+      return /indoor|hall|theater|theatre|museum|venue|center|centre/i.test(hay);
+    case "Street Festival":
+      return /street festival|street fair|block party|parade/i.test(hay);
+    default:
+      return CATEGORY_MATCH[option]?.test(hay) ?? false;
+  }
 }
 
 function dateRangeLabel(r: Row) {
