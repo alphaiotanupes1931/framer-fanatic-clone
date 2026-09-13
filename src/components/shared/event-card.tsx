@@ -1,6 +1,6 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, CalendarPlus } from "lucide-react";
+import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, CalendarPlus, Upload } from "lucide-react";
 import { downloadIcs } from "@/lib/ics";
 import { ReportButton } from "@/components/shared/report-button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +56,25 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
   const isOwner = !!me?.id && !!event.user_id && me.id === event.user_id;
   const canDelete = isOwner || isAdmin;
   const [deleting, setDeleting] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+
+  // Draft cards let the owner publish in place, so a saved draft is easy to make live.
+  const handlePublish = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPublishing(true);
+    const { error } = await supabase
+      .from("events")
+      .update({ is_published: true })
+      .eq("id", event.id);
+    setPublishing(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Published. It is now visible to everyone.");
+    onDeleted?.(event.id);
+  };
   const [saved, setSaved] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [reposting, setReposting] = useState(false);
@@ -249,9 +268,22 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
           </>
         )}
         {draft && (
-          <span className="inline-flex items-center rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
-            Draft, only you can see this
-          </span>
+          <>
+            <span className="inline-flex items-center rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
+              Draft, only you can see this
+            </span>
+            {isOwner && (
+              <button
+                type="button"
+                onClick={handlePublish}
+                disabled={publishing}
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                {publishing ? "Publishing..." : "Publish"}
+              </button>
+            )}
+          </>
         )}
         <div className="ml-auto flex items-center gap-2 text-muted-foreground">
           {!draft && (

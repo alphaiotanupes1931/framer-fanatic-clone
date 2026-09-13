@@ -73,6 +73,8 @@ type EventRow = {
   organization_id: string | null;
   latitude: number | null;
   longitude: number | null;
+  donations_enabled: boolean | null;
+  is_published: boolean | null;
 };
 
 type DetailsRow = {
@@ -456,6 +458,7 @@ function FestivalDetailPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [previewAsVisitor, setPreviewAsVisitor] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setMe(data.user?.id ?? null));
@@ -465,7 +468,7 @@ function FestivalDetailPage() {
     const { data: ev } = await supabase
       .from("events")
       .select(
-        "id,title,description,image_url,video_url,gallery_urls,starts_at,ends_at,venue_name,address,location,neighborhood,category,price_cents,pricing_mode,capacity,user_id,organization_id,latitude,longitude",
+        "id,title,description,image_url,video_url,gallery_urls,starts_at,ends_at,venue_name,address,location,neighborhood,category,price_cents,pricing_mode,donations_enabled,is_published,capacity,user_id,organization_id,latitude,longitude",
       )
       .eq("id", eventId)
       .maybeSingle();
@@ -722,6 +725,29 @@ function FestivalDetailPage() {
                 <Button size="sm" variant="secondary" onClick={() => setPreviewAsVisitor(true)}>
                   <Eye /> Preview as visitor
                 </Button>
+                {event.is_published === false && (
+                  <Button
+                    size="sm"
+                    variant="brand"
+                    disabled={publishing}
+                    onClick={async () => {
+                      setPublishing(true);
+                      const { error } = await supabase
+                        .from("events")
+                        .update({ is_published: true })
+                        .eq("id", event.id);
+                      setPublishing(false);
+                      if (error) {
+                        toast.error(error.message);
+                        return;
+                      }
+                      toast.success("Festival published.");
+                      void refetch();
+                    }}
+                  >
+                    {publishing ? "Publishing..." : "Publish festival"}
+                  </Button>
+                )}
               </div>
             </div>
           )}
