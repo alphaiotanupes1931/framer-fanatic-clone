@@ -59,6 +59,7 @@ type Row = {
   category: string | null;
   price_cents: number | null;
   pricing_mode: string | null;
+  donations_enabled: boolean | null;
   latitude: number | null;
   longitude: number | null;
   organization_id: string | null;
@@ -207,7 +208,11 @@ function matchesOption(option: string, r: Row, tags: string[]) {
     case "Paid":
       return !isFree(r);
     case "Donation-Based":
-      return r.pricing_mode === "donation" || /donation|pay what you can|suggested/i.test(hay);
+      return (
+        r.donations_enabled === true ||
+        r.pricing_mode === "donation" ||
+        /donation|pay what you can|suggested/i.test(hay)
+      );
     case "All Ages":
       return /all ages/i.test(hay);
     case "21+":
