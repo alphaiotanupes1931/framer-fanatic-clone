@@ -13,7 +13,7 @@ import { pageHead } from "@/lib/seo";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { siteUrl } from "@/lib/utils";
-import { downloadIcs } from "@/lib/ics";
+
 import { externalShare } from "@/lib/share-preview";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { Chip } from "@/components/shared/chip";
@@ -31,7 +31,8 @@ import {
   UserCheck,
   Share2,
   Send,
-  CalendarPlus,
+  SlidersHorizontal,
+  FileText,
 } from "lucide-react";
 
 export const Route = createFileRoute("/festivals/")({
@@ -90,8 +91,27 @@ const CATEGORY_GROUPS: { label: string; match: RegExp }[] = [
   { label: "Markets", match: /market|vendor|flea|bazaar/i },
 ];
 
-const QUICK_FILTERS = ["This Weekend", "Free", "Family Friendly", "Outdoor"] as const;
-type QuickFilter = (typeof QUICK_FILTERS)[number];
+const FILTER_GROUPS: { key: string; label: string; options: string[] }[] = [
+  { key: "date", label: "Date", options: ["Today", "This Weekend", "This Month"] },
+  { key: "price", label: "Price", options: ["Free", "Paid", "Donation-Based"] },
+  {
+    key: "category",
+    label: "Category",
+    options: [
+      "Arts",
+      "Music",
+      "Food",
+      "Film",
+      "Literature",
+      "Pride",
+      "Caribbean",
+      "Family",
+      "Neighborhood",
+    ],
+  },
+  { key: "audience", label: "Audience", options: ["All Ages", "Family Friendly", "21+"] },
+  { key: "format", label: "Format", options: ["Outdoor", "Indoor", "Street Festival"] },
+];
 
 const TABS = [
   { key: "discover", label: "Discover", icon: Compass },
@@ -101,6 +121,7 @@ const TABS = [
   { key: "neighborhoods", label: "Neighborhoods", icon: Landmark },
   { key: "organizers", label: "Organizers", icon: Users },
   { key: "saved", label: "Saved", icon: Bookmark },
+  { key: "drafts", label: "Drafts", icon: FileText },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
@@ -138,6 +159,70 @@ function isThisWeekend(r: Row) {
   return e >= start && s <= end;
 }
 
+function isToday(r: Row) {
+  if (!r.starts_at) return false;
+  const now = new Date();
+  const s = new Date(r.starts_at);
+  const e = r.ends_at ? new Date(r.ends_at) : s;
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayStart.getDate() + 1);
+  return e >= dayStart && s < dayEnd;
+}
+
+function isThisMonth(r: Row) {
+  if (!r.starts_at) return false;
+  const now = new Date();
+  const s = new Date(r.starts_at);
+  return s.getFullYear() === now.getFullYear() && s.getMonth() === now.getMonth();
+}
+
+const CATEGORY_MATCH: Record<string, RegExp> = {
+  Arts: /art|craft|gallery|mural|design/i,
+  Music: /music|concert|jazz|band|dj|hip hop|sound/i,
+  Food: /food|taste|eat|culinary|restaurant|brew|wine|beer/i,
+  Film: /film|cinema|movie|screening/i,
+  Literature: /book|poetry|literar|author|writing/i,
+  Pride: /pride|lgbt|queer/i,
+  Caribbean: /caribbean|soca|reggae|carnival/i,
+  Family: /family|kid|children|all ages/i,
+  Neighborhood: /neighborhood|block party|street fair|community/i,
+};
+
+/** True when a festival matches one selected filter option. */
+function matchesOption(option: string, r: Row, tags: string[]) {
+  const hay = haystack(r, tags);
+  switch (option) {
+    case "Today":
+      return isToday(r);
+    case "This Weekend":
+      return isThisWeekend(r);
+    case "This Month":
+      return isThisMonth(r);
+    case "Free":
+      return isFree(r) || /\bfree\b/i.test(tags.join(" "));
+    case "Paid":
+      return !isFree(r);
+    case "Donation-Based":
+      return r.pricing_mode === "donation" || /donation|pay what you can|suggested/i.test(hay);
+    case "All Ages":
+      return /all ages/i.test(hay);
+    case "21+":
+      return /21\+|21 and over|21 &|adults only/i.test(hay);
+    case "Family Friendly":
+      return /family|kid|children|all ages/i.test(hay);
+    case "Outdoor":
+      return /outdoor|park|street|plaza|waterfront|harbor|open air/i.test(hay);
+    case "Indoor":
+      return /indoor|hall|theater|theatre|museum|venue|center|centre/i.test(hay);
+    case "Street Festival":
+      return /street festival|street fair|block party|parade/i.test(hay);
+    default:
+      return CATEGORY_MATCH[option]?.test(hay) ?? false;
+  }
+}
+
 function dateRangeLabel(r: Row) {
   if (!r.starts_at) return "Date TBD";
   const s = new Date(r.starts_at);
@@ -159,7 +244,7 @@ function Section({ title, rows, id }: { title: string; rows: Row[]; id?: string 
       <h2 className="font-display text-lg font-extrabold text-foreground sm:text-xl">{title}</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((e) => (
-          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} />
+          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} showCalendar={false} />
         ))}
       </div>
     </section>
@@ -211,25 +296,6 @@ function FestivalActions({
     }
   };
 
-  const addToCalendar = () => {
-    if (!row.starts_at) {
-      toast.error("This festival has no date yet");
-      return;
-    }
-    downloadIcs(
-      {
-        uid: `festival-${row.id}@planetbaltimore.com`,
-        title: row.title,
-        start: new Date(row.starts_at),
-        end: row.ends_at ? new Date(row.ends_at) : null,
-        location: row.address || row.venue_name || placeOf(row) || "Baltimore",
-        description: (row.description ?? "").replace(/<[^>]+>/g, "") || null,
-        url,
-      },
-      row.title.replace(/[^\w\s-]/g, "").trim() || "festival",
-    );
-    toast.success("Added to your calendar");
-  };
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -269,10 +335,6 @@ function FestivalActions({
           excerpt: (row.description ?? "").replace(/<[^>]+>/g, "").slice(0, 160) || null,
         }}
       />
-      <Button variant="outline" size="sm" type="button" onClick={addToCalendar}>
-        <CalendarPlus className="h-3.5 w-3.5" />
-        Calendar
-      </Button>
     </div>
   );
 }
@@ -346,7 +408,9 @@ function OrgFollowButton({ orgId, meId }: { orgId: string; meId?: string | null 
 function FestivalsPage() {
   const me = useCurrentProfile();
   const [q, setQ] = useState("");
-  const [active, setActive] = useState<QuickFilter[]>([]);
+  const [active, setActive] = useState<Record<string, string[]>>({});
+  const [showFilters, setShowFilters] = useState(false);
+  const [drafts, setDrafts] = useState<Row[]>([]);
   const [tab, setTab] = useState<TabKey>("discover");
   const [mapArea, setMapArea] = useState<string>("all");
   const [activePin, setActivePin] = useState<string | null>(null);
@@ -439,6 +503,31 @@ function FestivalsPage() {
     })();
   }, [me?.id, tab]);
 
+  // Unpublished festivals this person started, so drafts are easy to find again.
+  useEffect(() => {
+    if (!me?.id) {
+      setDrafts([]);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("events")
+        .select(
+          "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,latitude,longitude,organization_id,user_id",
+        )
+        .eq("user_id", me.id)
+        .eq("is_published", false)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      const rows = ((data as Row[] | null) ?? []).filter(
+        (r) =>
+          /festival/i.test(r.category ?? "") ||
+          /festival|fest\b|block party|street fair|celebration/i.test(r.title ?? ""),
+      );
+      setDrafts(rows);
+    })();
+  }, [me?.id, tab]);
+
   const rows = useMemo(() => {
     const term = q.trim().toLowerCase();
     return all.filter((r) => {
@@ -450,13 +539,11 @@ function FestivalsPage() {
           .includes(term)
       )
         return false;
-      for (const f of active) {
-        if (f === "Free" && !isFree(r) && !/\bfree\b/i.test(tags.join(" "))) return false;
-        if (f === "This Weekend" && !isThisWeekend(r)) return false;
-        if (f === "Family Friendly" && !/family|kid|children|all ages/i.test(haystack(r, tags)))
-          return false;
-        if (f === "Outdoor" && !/outdoor|park|street|plaza|waterfront|harbor/i.test(haystack(r, tags)))
-          return false;
+      // Options inside a group are "any of"; groups combine as "all of".
+      for (const g of FILTER_GROUPS) {
+        const picked = active[g.key] ?? [];
+        if (picked.length === 0) continue;
+        if (!picked.some((o) => matchesOption(o, r, tags))) return false;
       }
       return true;
     });
@@ -547,8 +634,14 @@ function FestivalsPage() {
 
   const saved = rows.filter((r) => savedIds.includes(r.id));
 
-  const toggle = (f: QuickFilter) =>
-    setActive((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
+  const toggle = (group: string, option: string) =>
+    setActive((prev) => {
+      const cur = prev[group] ?? [];
+      const next = cur.includes(option) ? cur.filter((x) => x !== option) : [...cur, option];
+      return { ...prev, [group]: next };
+    });
+
+  const activeCount = Object.values(active).reduce((n, list) => n + list.length, 0);
 
   const directions = (r: Row) => {
     const dest = encodeURIComponent(r.address || r.venue_name || placeOf(r) || r.title);
@@ -571,27 +664,59 @@ function FestivalsPage() {
           }
         />
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {QUICK_FILTERS.map((f) => {
-              const on = active.includes(f);
-              return (
-                <Chip
-                  key={f}
-                  selected={on}
-                  onClick={() => toggle(f)}
-                >
-                  {f}
-                </Chip>
-              );
-            })}
+        <div className="space-y-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant={showFilters ? "brand" : "outline"}
+                size="sm"
+                onClick={() => setShowFilters((v) => !v)}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filters
+                {activeCount > 0 && (
+                  <span className="ml-1 rounded-full bg-background/30 px-1.5 text-[11px] font-bold">
+                    {activeCount}
+                  </span>
+                )}
+              </Button>
+              {activeCount > 0 && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setActive({})}>
+                  Clear all
+                </Button>
+              )}
+            </div>
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search festivals by name, neighborhood or venue"
+              className="sm:max-w-xs"
+            />
           </div>
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search festivals by name, neighborhood or venue"
-            className="sm:max-w-xs"
-          />
+
+          {showFilters && (
+            <div className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3">
+              {FILTER_GROUPS.map((g) => (
+                <div key={g.key} className="space-y-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                    {g.label}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {g.options.map((o) => (
+                      <Chip
+                        key={o}
+                        selected={(active[g.key] ?? []).includes(o)}
+                        onClick={() => toggle(g.key, o)}
+                      >
+                        {o}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-1 overflow-x-auto rounded-xl bg-muted p-1">
@@ -614,7 +739,15 @@ function FestivalsPage() {
           })}
         </div>
 
-        {all.length === 0 ? (
+        {tab === "drafts" ? (
+          !me?.id ? (
+            <Empty text="Sign in to see your festival drafts." />
+          ) : drafts.length === 0 ? (
+            <Empty text="You have no festival drafts. Anything you save as a draft appears here." />
+          ) : (
+            <Section title="Your Drafts" rows={drafts} />
+          )
+        ) : all.length === 0 ? (
           <Empty text="No festivals listed yet. Create one and it will show up here." />
         ) : rows.length === 0 ? (
           <Empty text="No festivals match those filters." />
