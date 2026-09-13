@@ -458,6 +458,7 @@ function FestivalDetailPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [previewAsVisitor, setPreviewAsVisitor] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setMe(data.user?.id ?? null));
@@ -724,6 +725,29 @@ function FestivalDetailPage() {
                 <Button size="sm" variant="secondary" onClick={() => setPreviewAsVisitor(true)}>
                   <Eye /> Preview as visitor
                 </Button>
+                {event.is_published === false && (
+                  <Button
+                    size="sm"
+                    variant="brand"
+                    disabled={publishing}
+                    onClick={async () => {
+                      setPublishing(true);
+                      const { error } = await supabase
+                        .from("events")
+                        .update({ is_published: true })
+                        .eq("id", event.id);
+                      setPublishing(false);
+                      if (error) {
+                        toast.error(error.message);
+                        return;
+                      }
+                      toast.success("Festival published.");
+                      void refetch();
+                    }}
+                  >
+                    {publishing ? "Publishing..." : "Publish festival"}
+                  </Button>
+                )}
               </div>
             </div>
           )}
