@@ -204,7 +204,7 @@ function matchesOption(option: string, r: Row, tags: string[]) {
     case "This Month":
       return isThisMonth(r);
     case "Free":
-      return isFree(r) || /\bfree\b/i.test(tags.join(" "));
+      return !r.donations_enabled && (isFree(r) || /\bfree\b/i.test(tags.join(" ")));
     case "Paid":
       return !isFree(r);
     case "Donation-Based":
@@ -430,7 +430,7 @@ function FestivalsPage() {
     const { data } = await supabase
       .from("events")
       .select(
-        "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,latitude,longitude,organization_id,user_id",
+        "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,donations_enabled,latitude,longitude,organization_id,user_id",
       )
       .eq("is_published", true)
       .gte("starts_at", new Date(Date.now() - 12 * 3600 * 1000).toISOString())
