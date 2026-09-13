@@ -520,7 +520,7 @@ function FestivalsPage() {
       const { data } = await supabase
         .from("events")
         .select(
-          "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,latitude,longitude,organization_id,user_id",
+          "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,donations_enabled,latitude,longitude,organization_id,user_id",
         )
         .eq("user_id", me.id)
         .eq("is_published", false)
