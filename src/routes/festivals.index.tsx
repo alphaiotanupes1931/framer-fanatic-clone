@@ -427,13 +427,11 @@ function FestivalsPage() {
           .includes(term)
       )
         return false;
-      for (const f of active) {
-        if (f === "Free" && !isFree(r) && !/\bfree\b/i.test(tags.join(" "))) return false;
-        if (f === "This Weekend" && !isThisWeekend(r)) return false;
-        if (f === "Family Friendly" && !/family|kid|children|all ages/i.test(haystack(r, tags)))
-          return false;
-        if (f === "Outdoor" && !/outdoor|park|street|plaza|waterfront|harbor/i.test(haystack(r, tags)))
-          return false;
+      // Options inside a group are "any of"; groups combine as "all of".
+      for (const g of FILTER_GROUPS) {
+        const picked = active[g.key] ?? [];
+        if (picked.length === 0) continue;
+        if (!picked.some((o) => matchesOption(o, r, tags))) return false;
       }
       return true;
     });
@@ -524,8 +522,14 @@ function FestivalsPage() {
 
   const saved = rows.filter((r) => savedIds.includes(r.id));
 
-  const toggle = (f: QuickFilter) =>
-    setActive((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
+  const toggle = (group: string, option: string) =>
+    setActive((prev) => {
+      const cur = prev[group] ?? [];
+      const next = cur.includes(option) ? cur.filter((x) => x !== option) : [...cur, option];
+      return { ...prev, [group]: next };
+    });
+
+  const activeCount = Object.values(active).reduce((n, list) => n + list.length, 0);
 
   const directions = (r: Row) => {
     const dest = encodeURIComponent(r.address || r.venue_name || placeOf(r) || r.title);
@@ -548,27 +552,59 @@ function FestivalsPage() {
           }
         />
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {QUICK_FILTERS.map((f) => {
-              const on = active.includes(f);
-              return (
-                <Chip
-                  key={f}
-                  selected={on}
-                  onClick={() => toggle(f)}
-                >
-                  {f}
-                </Chip>
-              );
-            })}
+        <div className="space-y-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant={showFilters ? "brand" : "outline"}
+                size="sm"
+                onClick={() => setShowFilters((v) => !v)}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filters
+                {activeCount > 0 && (
+                  <span className="ml-1 rounded-full bg-background/30 px-1.5 text-[11px] font-bold">
+                    {activeCount}
+                  </span>
+                )}
+              </Button>
+              {activeCount > 0 && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setActive({})}>
+                  Clear all
+                </Button>
+              )}
+            </div>
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search festivals by name, neighborhood or venue"
+              className="sm:max-w-xs"
+            />
           </div>
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search festivals by name, neighborhood or venue"
-            className="sm:max-w-xs"
-          />
+
+          {showFilters && (
+            <div className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3">
+              {FILTER_GROUPS.map((g) => (
+                <div key={g.key} className="space-y-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                    {g.label}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {g.options.map((o) => (
+                      <Chip
+                        key={o}
+                        selected={(active[g.key] ?? []).includes(o)}
+                        onClick={() => toggle(g.key, o)}
+                      >
+                        {o}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-1 overflow-x-auto rounded-xl bg-muted p-1">
