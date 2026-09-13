@@ -745,7 +745,7 @@ function FestivalsPage() {
           ) : drafts.length === 0 ? (
             <Empty text="You have no festival drafts. Anything you save as a draft appears here." />
           ) : (
-            <Section title="Your Drafts" rows={drafts} />
+            <Section title="Your Drafts" rows={drafts} draft />
           )
         ) : all.length === 0 ? (
           <Empty text="No festivals listed yet. Create one and it will show up here." />
