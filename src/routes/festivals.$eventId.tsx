@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Img } from "@/components/shared/smart-img";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,9 +37,11 @@ import {
   Settings,
   Share2,
   Ticket,
+  Trash2,
   Users,
 } from "lucide-react";
 import { PageBackButton } from "@/components/shared/page-back-button";
+import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
 
 export const Route = createFileRoute("/festivals/$eventId")({
   component: FestivalDetailPage,
@@ -141,6 +143,7 @@ type ProgramItem = {
   description: string;
   price: string;
   type: string;
+  image: string;
 };
 
 type Experience = ProgramItem;
@@ -152,15 +155,80 @@ type ScheduleItem = {
   type: string;
   price: string;
   description: string;
+  image: string;
 };
 type Faq = { q: string; a: string };
+type UpdateItem = { title: string; date: string; body: string; image: string };
 
 type VendorItem = {
   category: string;
   name: string;
   booth: string;
   description: string;
+  image: string;
 };
+
+const PROGRAM_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "name", label: "Name", placeholder: "Right Now Rouge" },
+  { key: "type", label: "Type", placeholder: "Music, dance, poetry" },
+  { key: "when", label: "Date and time", placeholder: "Sat, Jun 14 · 7:00 pm" },
+  { key: "venue", label: "Venue or stage", placeholder: "Main Stage" },
+  { key: "description", label: "Description", type: "textarea" },
+  { key: "price", label: "Admission label", placeholder: "Free, RSVP or $25" },
+];
+
+const SCHEDULE_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "name", label: "What is happening", placeholder: "Opening parade" },
+  { key: "date", label: "Date", placeholder: "2026-06-14" },
+  { key: "time", label: "Time", placeholder: "1:00 pm" },
+  { key: "venue", label: "Venue or stage", placeholder: "Patriot Plaza" },
+  { key: "type", label: "Type", placeholder: "Performance, workshop, parade" },
+  { key: "price", label: "Admission label", placeholder: "Free or $10" },
+  { key: "description", label: "Description", type: "textarea" },
+];
+
+const VENDOR_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "category", label: "Category", placeholder: "Jewelry, apparel, art" },
+  { key: "name", label: "Name", placeholder: "Charm City Ceramics" },
+  { key: "booth", label: "Booth", placeholder: "Booth 14" },
+  { key: "description", label: "Description", type: "textarea" },
+];
+
+const FOOD_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "category", label: "Category", placeholder: "Food truck, dessert, drinks" },
+  { key: "name", label: "Name", placeholder: "Sweet Pea BBQ" },
+  { key: "booth", label: "Booth", placeholder: "Food row 3" },
+  { key: "description", label: "Description", type: "textarea" },
+];
+
+const FAQ_FIELDS: FieldSpec[] = [
+  { key: "q", label: "Question" },
+  { key: "a", label: "Answer", type: "textarea" },
+];
+
+const UPDATE_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "title", label: "Headline", placeholder: "Rain plan in effect" },
+  { key: "date", label: "Date", placeholder: "June 14" },
+  { key: "body", label: "Update", type: "textarea" },
+];
+
+function asUpdates(v: unknown): UpdateItem[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x) => x as Partial<UpdateItem>)
+    .filter((x) => x && typeof x.title === "string" && x.title.trim())
+    .map((x) => ({
+      title: x.title!.trim(),
+      date: (x.date ?? "").trim(),
+      body: (x.body ?? "").trim(),
+      image: (x.image ?? "").trim(),
+    }));
+}
 
 function asStringList(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
@@ -176,8 +244,8 @@ function asVendors(v: unknown): VendorItem[] {
     .map((x) => {
       if (typeof x === "string") {
         const [category = "", name = "", booth = "", description = ""] = x.split("|").map((s) => s.trim());
-        if (!name) return { category: "", name: category, booth: "", description: "" };
-        return { category, name, booth, description };
+        if (!name) return { category: "", name: category, booth: "", description: "", image: "" };
+        return { category, name, booth, description, image: "" };
       }
       const item = x as Partial<VendorItem>;
       return {
@@ -185,24 +253,14 @@ function asVendors(v: unknown): VendorItem[] {
         name: (item.name ?? "").trim(),
         booth: (item.booth ?? "").trim(),
         description: (item.description ?? "").trim(),
+        image: (item.image ?? "").trim(),
       };
     })
     .filter((x) => x.name.length > 0);
 }
 
 function asExperiences(v: unknown): Experience[] {
-  if (!Array.isArray(v)) return [];
-  return v
-    .map((x) => typeof x === "string" ? { name: x } : x as Partial<Experience>)
-    .filter((x) => x && typeof x.name === "string" && x.name.trim())
-    .map((x) => ({
-      name: String(x.name).trim(),
-      when: (x.when ?? "").trim(),
-      venue: (x.venue ?? "").trim(),
-      description: (x.description ?? "").trim(),
-      price: (x.price ?? "").trim(),
-      type: (x.type ?? "").trim(),
-    }));
+  return asProgramItems(v);
 }
 
 function asProgramItems(v: unknown): ProgramItem[] {
@@ -217,6 +275,7 @@ function asProgramItems(v: unknown): ProgramItem[] {
       description: (x.description ?? "").trim(),
       price: (x.price ?? "").trim(),
       type: (x.type ?? "").trim(),
+      image: (x.image ?? "").trim(),
     }));
 }
 
@@ -272,15 +331,20 @@ function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: Even
 
 function VendorCard({ item }: { item: VendorItem }) {
   return (
-    <article className="border-b border-border py-6 first:pt-2 last:border-0">
-      {item.category && <div className="text-[11px] font-bold uppercase text-orange">{item.category}</div>}
-      <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
-      {(item.category || item.booth) && (
-        <p className="mt-2 text-sm font-semibold text-muted-foreground">
-          {[item.category, item.booth].filter(Boolean).join(" · ")}
-        </p>
+    <article className="flex gap-4 border-b border-border py-6 first:pt-2 last:border-0">
+      {item.image && (
+        <Img src={item.image} alt={item.name} className="h-24 w-24 shrink-0 rounded-xl object-cover" />
       )}
-      {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+      <div className="min-w-0">
+        {item.category && <div className="text-[11px] font-bold uppercase text-orange">{item.category}</div>}
+        <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
+        {(item.category || item.booth) && (
+          <p className="mt-2 text-sm font-semibold text-muted-foreground">
+            {[item.category, item.booth].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+      </div>
     </article>
   );
 }
@@ -298,6 +362,7 @@ function asSchedule(v: unknown): ScheduleItem[] {
       type: (x.type ?? "").trim(),
       price: (x.price ?? "").trim(),
       description: (x.description ?? "").trim(),
+      image: (x.image ?? "").trim(),
     }))
     .filter((x) => x.name.length > 0);
 }
@@ -380,6 +445,35 @@ function GlanceRow({ label, value }: { label: string; value: string }) {
       </div>
       <div className="mt-0.5 text-sm font-medium text-foreground">{value}</div>
     </div>
+  );
+}
+
+/** Lets the festival creator add a photo to the gallery. */
+function GalleryUploadButton({ onAdd }: { onAdd: (path: string) => void | Promise<void> }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <>
+      <Button type="button" variant="brand" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+        <Plus /> {busy ? "Uploading…" : "Add photo"}
+      </Button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (!f) return;
+          setBusy(true);
+          void uploadFestivalImage(f)
+            .then((p) => onAdd(p))
+            .catch((err) => toast.error(err instanceof Error ? err.message : "Upload failed"))
+            .finally(() => setBusy(false));
+        }}
+      />
+    </>
   );
 }
 
@@ -559,12 +653,37 @@ function FestivalDetailPage() {
 
   const headliners = useMemo(() => asProgramItems(details?.performers), [details]);
   const vendors = useMemo(() => asVendors(details?.vendors), [details]);
-  const food = useMemo(() => asStringList(details?.food), [details]);
+  const food = useMemo(() => asVendors(details?.food), [details]);
   const schedule = useMemo(() => asSchedule(details?.schedule), [details]);
   const experiences = useMemo(() => asExperiences(details?.experiences), [details]);
   const faqs = useMemo(() => asFaqs(details?.faqs), [details]);
+  const updates = useMemo(() => asUpdates((details as { updates?: unknown } | null)?.updates), [details]);
   const gallery = event?.gallery_urls ?? [];
   const tickets = data?.tickets ?? [];
+
+  /** Saves one part of the festival content and refreshes the page. */
+  const saveDetails = async (patch: Record<string, unknown>) => {
+    const res = await supabase
+      .from("festival_details")
+      .upsert({ event_id: eventId, ...patch, updated_at: new Date().toISOString() } as never, {
+        onConflict: "event_id",
+      });
+    if (res.error) {
+      toast.error(res.error.message);
+      return;
+    }
+    toast.success("Saved");
+    await refetch();
+  };
+
+  const saveGallery = async (next: string[]) => {
+    const res = await supabase.from("events").update({ gallery_urls: next }).eq("id", eventId);
+    if (res.error) {
+      toast.error(res.error.message);
+      return;
+    }
+    await refetch();
+  };
 
   const tabs = useMemo(() => {
     return [
@@ -829,46 +948,75 @@ function FestivalDetailPage() {
           {/* Main column */}
           <div className="min-w-0 space-y-10 p-5 sm:p-8 lg:border-r lg:border-border">
             <section id="festival-overview" className={`scroll-mt-24 space-y-6 ${activeTab !== "overview" ? "hidden" : ""}`}>
-              {headliners.length > 0 && (
+              {(headliners.length > 0 || showCreatorTools) && (
                 <div>
                   <h2 className="font-display text-2xl font-extrabold text-foreground">Festival Headliners</h2>
                   <div className="mt-2">
-                    {headliners.map((item, index) => (
-                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
-                    ))}
+                    <EditableList
+                      items={headliners}
+                      canEdit={showCreatorTools}
+                      addLabel="Add headliner"
+                      dialogTitle="Headliner"
+                      fields={PROGRAM_FIELDS}
+                      onChange={(next) => saveDetails({ performers: next })}
+                      emptyState={<TabEmpty message="No headliners added yet." />}
+                      renderItem={(item) => (
+                        <ProgramRow item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
+                      )}
+                    />
                   </div>
                 </div>
               )}
 
-              {experiences.length > 0 && (
+              {(experiences.length > 0 || showCreatorTools) && (
                 <div className="border-t border-border pt-8">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">Featured Experiences</h2>
                   <div className="mt-2">
-                    {experiences.map((item, index) => (
-                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
-                    ))}
+                    <EditableList
+                      items={experiences}
+                      canEdit={showCreatorTools}
+                      addLabel="Add experience"
+                      dialogTitle="Featured experience"
+                      fields={PROGRAM_FIELDS}
+                      onChange={(next) => saveDetails({ experiences: next })}
+                      emptyState={<TabEmpty message="No featured experiences added yet." />}
+                      renderItem={(item) => (
+                        <ProgramRow item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
+                      )}
+                    />
                   </div>
                 </div>
               )}
 
-              {event.description && (
-                <div className="border-t border-border pt-8">
+              <div className="border-t border-border pt-8">
+                <div className="flex items-center justify-between gap-3">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
-                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
+                  {showCreatorTools && (
+                    <Button type="button" variant="outline" size="xs" onClick={() => setEditOpen(true)}>
+                      <Pencil /> Edit
+                    </Button>
+                  )}
                 </div>
-              )}
+                {event.description ? (
+                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
+                ) : (
+                  <div className="mt-4">
+                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} />
+                  </div>
+                )}
+              </div>
 
               {(vendors.length > 0 || food.length > 0) && (
                 <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
                   <ListColumn title="Vendors" items={vendors.map((v) => v.name)} />
-                  <ListColumn title="Food + Drink" items={food} />
+                  <ListColumn title="Food + Drink" items={food.map((v) => v.name)} />
                 </div>
               )}
             </section>
 
             <section id="festival-schedule" className={`scroll-mt-24 ${activeTab !== "schedule" ? "hidden" : ""}`}>
-              {schedule.length > 0 ? (
-                <div className="space-y-8">
+              <div className="space-y-8">
+                {schedule.length > 0 && (
                   <div className="space-y-4 border-b border-border pb-6">
                     <div className="flex flex-wrap gap-2">
                       {[["all", "All Time"], ["today", "Today"], ["weekend", "This Weekend"]].map(([value, label]) => (
@@ -884,66 +1032,85 @@ function FestivalDetailPage() {
                       </div>
                     )}
                   </div>
+                )}
 
-                  {headliners.length > 0 && (
-                    <div>
-                      <h2 className="font-display text-2xl font-extrabold text-foreground">Featured at the Festival</h2>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        {headliners.map((item, index) => (
-                          <article key={`${item.name}-${index}`} className="border-l-4 border-orange bg-muted/30 p-4">
-                            <span className="text-[11px] font-bold uppercase text-orange">Headliner</span>
-                            <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.name}</h3>
-                            {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
+                {headliners.length > 0 && (
                   <div>
-                    {visibleSchedule.length > 0 ? visibleSchedule.map((item) => {
-                      const index = schedule.indexOf(item);
-                      return <ScheduleRow key={`${item.name}-${index}`} item={item} scheduled={mySchedule.includes(index)} onToggle={() => toggleMySchedule(index)} />;
-                    }) : <TabEmpty message="No scheduled activities match these filters." />}
+                    <h2 className="font-display text-2xl font-extrabold text-foreground">Featured at the Festival</h2>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {headliners.map((item, index) => (
+                        <article key={`${item.name}-${index}`} className="border-l-4 border-orange bg-muted/30 p-4">
+                          <span className="text-[11px] font-bold uppercase text-orange">Headliner</span>
+                          <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.name}</h3>
+                          {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+                        </article>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="The festival schedule has not been posted yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+                )}
+
+                <EditableList
+                  items={schedule}
+                  canEdit={showCreatorTools}
+                  addLabel="Add happening"
+                  dialogTitle="Event or happening"
+                  fields={SCHEDULE_FIELDS}
+                  onChange={(next) => saveDetails({ schedule: next })}
+                  emptyState={<TabEmpty message="The festival schedule has not been posted yet." />}
+                  renderItem={(item, index) => {
+                    if (!visibleSchedule.includes(item)) return null;
+                    return (
+                      <ScheduleRow
+                        item={item}
+                        scheduled={mySchedule.includes(index)}
+                        onToggle={() => toggleMySchedule(index)}
+                      />
+                    );
+                  }}
+                />
+              </div>
             </section>
 
             <section id="festival-performers" className={`scroll-mt-24 ${activeTab !== "performers" ? "hidden" : ""}`}>
-              {headliners.length > 0 ? (
-                <div>
-                  {headliners.map((item, index) => (
-                    <PerformerCard key={`${item.name}-${index}`} item={item} event={event} isFree={isFree} />
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Performers have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+              <EditableList
+                items={headliners}
+                canEdit={showCreatorTools}
+                addLabel="Add performer"
+                dialogTitle="Performer"
+                fields={PROGRAM_FIELDS}
+                onChange={(next) => saveDetails({ performers: next })}
+                emptyState={<div className="mt-4"><TabEmpty message="Performers have not been announced yet." /></div>}
+                renderItem={(item) => <PerformerCard item={item} event={event} isFree={isFree} />}
+              />
             </section>
 
             <section id="festival-vendors" className={`scroll-mt-24 ${activeTab !== "vendors" ? "hidden" : ""}`}>
-              {vendors.length > 0 ? (
-                <div>
-                  {vendors.map((item, index) => (
-                    <VendorCard key={`${item.name}-${index}`} item={item} />
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+              <EditableList
+                items={vendors}
+                canEdit={showCreatorTools}
+                addLabel="Add vendor"
+                dialogTitle="Vendor"
+                fields={VENDOR_FIELDS}
+                onChange={(next) => saveDetails({ vendors: next })}
+                emptyState={<div className="mt-4"><TabEmpty message="Vendors have not been announced yet." /></div>}
+                renderItem={(item) => <VendorCard item={item} />}
+              />
             </section>
 
             <section id="festival-food" className={`scroll-mt-24 ${activeTab !== "food" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Food + Drink</h2>
-              {food.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {food.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Food and drink vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+              <div className="mt-4">
+                <EditableList
+                  items={food}
+                  canEdit={showCreatorTools}
+                  addLabel="Add food or drink"
+                  dialogTitle="Food and drink vendor"
+                  fields={FOOD_FIELDS}
+                  onChange={(next) => saveDetails({ food: next })}
+                  emptyState={<TabEmpty message="Food and drink vendors have not been announced yet." />}
+                  renderItem={(item) => <VendorCard item={item} />}
+                />
+              </div>
             </section>
 
             <section id="festival-tickets" className={`scroll-mt-24 ${activeTab !== "tickets" ? "hidden" : ""}`}>
@@ -983,7 +1150,12 @@ function FestivalDetailPage() {
             </section>
 
             <section id="festival-gallery" className={`scroll-mt-24 ${activeTab !== "gallery" ? "hidden" : ""}`}>
-              <h2 className="font-display text-lg font-extrabold text-foreground">Gallery</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-lg font-extrabold text-foreground">Gallery</h2>
+                {showCreatorTools && (
+                  <GalleryUploadButton onAdd={(path) => saveGallery([...gallery, path])} />
+                )}
+              </div>
               {(gallery.length > 0 || event.video_url) ? (
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {event.video_url && (
@@ -994,13 +1166,24 @@ function FestivalDetailPage() {
                     />
                   )}
                   {gallery.map((u) => (
-                    <Img
-                      key={u}
-                      src={u}
-                      alt={`${event.title} photo`}
-                      loading="lazy"
-                      className="aspect-square w-full rounded-xl object-cover"
-                    />
+                    <div key={u} className="relative">
+                      <Img
+                        src={u}
+                        alt={`${event.title} photo`}
+                        loading="lazy"
+                        className="aspect-square w-full rounded-xl object-cover"
+                      />
+                      {showCreatorTools && (
+                        <button
+                          type="button"
+                          aria-label="Remove photo"
+                          onClick={() => void saveGallery(gallery.filter((g) => g !== u))}
+                          className="absolute right-2 top-2 rounded-full bg-foreground/70 p-1.5 text-background"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               ) : <div className="mt-4"><TabEmpty message="Festival photos and videos have not been added yet." /></div>}
@@ -1008,7 +1191,27 @@ function FestivalDetailPage() {
 
             <section id="festival-updates" className={`scroll-mt-24 ${activeTab !== "updates" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Updates</h2>
-              <div className="mt-4"><TabEmpty message="There are no festival updates yet." /></div>
+              <div className="mt-4">
+                <EditableList
+                  items={updates}
+                  canEdit={showCreatorTools}
+                  addLabel="Post update"
+                  dialogTitle="Festival update"
+                  fields={UPDATE_FIELDS}
+                  onChange={(next) => saveDetails({ updates: next })}
+                  emptyState={<TabEmpty message="There are no festival updates yet." />}
+                  renderItem={(item) => (
+                    <article className="mb-4 rounded-xl border border-border bg-card p-4">
+                      {item.date && <div className="text-xs font-semibold text-orange">{item.date}</div>}
+                      <h3 className="mt-1 text-base font-extrabold text-foreground">{item.title}</h3>
+                      {item.body && <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>}
+                      {item.image && (
+                        <Img src={item.image} alt="" className="mt-3 w-full rounded-lg object-cover" />
+                      )}
+                    </article>
+                  )}
+                />
+              </div>
             </section>
 
             <section id="festival-comments" className={`scroll-mt-24 ${activeTab !== "comments" ? "hidden" : ""}`}>
@@ -1018,16 +1221,23 @@ function FestivalDetailPage() {
 
             <section id="festival-faq" className={`scroll-mt-24 ${activeTab !== "faq" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">FAQ</h2>
-              {faqs.length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  {faqs.map((f) => (
-                    <div key={f.q} className="rounded-xl border border-border bg-card p-4">
+              <div className="mt-4">
+                <EditableList
+                  items={faqs}
+                  canEdit={showCreatorTools}
+                  addLabel="Add question"
+                  dialogTitle="Frequently asked question"
+                  fields={FAQ_FIELDS}
+                  onChange={(next) => saveDetails({ faqs: next })}
+                  emptyState={<TabEmpty message="Frequently asked questions have not been added yet." />}
+                  renderItem={(f) => (
+                    <div className="mb-3 rounded-xl border border-border bg-card p-4">
                       <div className="text-sm font-bold text-foreground">{f.q}</div>
                       {f.a && <p className="mt-1 text-sm text-muted-foreground">{f.a}</p>}
                     </div>
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Frequently asked questions have not been added yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+                  )}
+                />
+              </div>
             </section>
 
             {(data!.nearby.length > 0 || data!.nearbyArtists.length > 0) && (
@@ -1203,83 +1413,6 @@ function FestivalDetailPage() {
   );
 }
 
-function linesToList(text: string): string[] {
-  return text
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-function pairsToObjects(text: string, keys: [string, string]) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => {
-      const [a, b] = l.split("|").map((s) => s.trim());
-      return { [keys[0]]: a ?? "", [keys[1]]: b ?? "" };
-    })
-    .filter((o) => (o as Record<string, string>)[keys[0]]);
-}
-
-function programLinesToObjects(text: string): ProgramItem[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [name = "", when = "", venue = "", description = "", price = "", type = ""] = line.split("|").map((part) => part.trim());
-      return { name, when, venue, description, price, type };
-    })
-    .filter((item) => item.name.length > 0);
-}
-
-function programItemsToLines(items: ProgramItem[]): string {
-  return items
-    .map((item) => [item.name, item.when, item.venue, item.description, item.price, item.type].join(" | "))
-    .join("\n");
-}
-
-function scheduleLinesToObjects(text: string): ScheduleItem[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [name = "", date = "", time = "", venue = "", type = "", price = "", description = ""] = line.split("|").map((part) => part.trim());
-      return { name, date, time, venue, type, price, description };
-    })
-    .filter((item) => item.name.length > 0);
-}
-
-function scheduleItemsToLines(items: ScheduleItem[]): string {
-  return items
-    .map((item) => [item.name, item.date, item.time, item.venue, item.type, item.price, item.description].join(" | "))
-    .join("\n");
-}
-
-function listToLines(list: string[]): string {
-  return list.join("\n");
-}
-
-function vendorLinesToObjects(text: string): VendorItem[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [category = "", name = "", booth = "", description = ""] = line.split("|").map((part) => part.trim());
-      return { category, name, booth, description };
-    })
-    .filter((item) => item.name.length > 0);
-}
-
-function vendorItemsToLines(items: VendorItem[]): string {
-  return items
-    .map((item) => [item.category, item.name, item.booth, item.description].join(" | "))
-    .join("\n");
-}
-
 function EditFestivalDetails({
   open,
   onOpenChange,
@@ -1305,14 +1438,6 @@ function EditFestivalDetails({
     expected_attendance: details?.expected_attendance ?? "",
     footprint: details?.footprint ?? "",
     website: details?.website ?? "",
-    schedule: scheduleItemsToLines(asSchedule(details?.schedule)),
-    performers: programItemsToLines(asProgramItems(details?.performers)),
-    vendors: vendorItemsToLines(asVendors(details?.vendors)),
-    food: listToLines(asStringList(details?.food)),
-    experiences: programItemsToLines(asExperiences(details?.experiences)),
-    faqs: asFaqs(details?.faqs)
-      .map((f) => `${f.q} | ${f.a}`)
-      .join("\n"),
   }));
   const [saving, setSaving] = useState(false);
 
@@ -1334,12 +1459,6 @@ function EditFestivalDetails({
       expected_attendance: form.expected_attendance.trim() || null,
       footprint: form.footprint.trim() || null,
       website: form.website.trim() || null,
-      schedule: scheduleLinesToObjects(form.schedule),
-      performers: programLinesToObjects(form.performers),
-      vendors: vendorLinesToObjects(form.vendors),
-      food: linesToList(form.food),
-      experiences: programLinesToObjects(form.experiences),
-      faqs: pairsToObjects(form.faqs, ["q", "a"]),
       updated_at: new Date().toISOString(),
     };
     const res = await supabase
@@ -1359,55 +1478,165 @@ function EditFestivalDetails({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Festival Details</DialogTitle>
+          <DialogTitle>At a Glance</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block sm:col-span-2">
             <span className="text-xs font-semibold text-muted-foreground">Tagline</span>
             <Textarea value={form.tagline} onChange={set("tagline")} rows={2} className="mt-1" />
           </label>
-          <Field label="Hours" value={form.hours} onChange={set("hours")} placeholder="Fri 11am–9pm · Sat 11am–9pm" />
-          <Field label="Price label" value={form.price_label} onChange={set("price_label")} placeholder="Free or $55–$120" />
+          <Field label="Hours" value={form.hours} onChange={set("hours")} placeholder="Fri 11am-9pm, Sat 11am-9pm" />
+          <Field label="Price label" value={form.price_label} onChange={set("price_label")} placeholder="Free or $55 to $120" />
           <Field label="Age" value={form.age_range} onChange={set("age_range")} placeholder="All ages" />
           <Field label="Format" value={form.format} onChange={set("format")} placeholder="Street Festival" />
           <Field label="Accessibility (comma separated)" value={form.accessibility} onChange={set("accessibility")} placeholder="wheelchair, asl, restrooms" />
           <Field label="Rain or Shine" value={form.rain_or_shine} onChange={set("rain_or_shine")} placeholder="Yes" />
           <Field label="Pet Policy" value={form.pet_policy} onChange={set("pet_policy")} />
           <Field label="Expected Attendance" value={form.expected_attendance} onChange={set("expected_attendance")} placeholder="5,000+" />
-          <Field label="Website" value={form.website} onChange={set("website")} placeholder="https://…" />
+          <Field label="Website" value={form.website} onChange={set("website")} placeholder="https://" />
           <label className="block sm:col-span-2">
             <span className="text-xs font-semibold text-muted-foreground">Festival Footprint</span>
             <Textarea value={form.footprint} onChange={set("footprint")} rows={2} className="mt-1" />
           </label>
-          <div className="sm:col-span-2">
-            <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Name | Date | Time | Venue | Type | Free or price | Description" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Festival Headliners and Performers" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price | Type (dance, poetry, music)" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line: Category | Name | Booth | Description" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Date and time | Venue | Description | Free or price | Type" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="FAQs" value={form.faqs} onChange={set("faqs")} hint="One per line: Question | Answer" />
-          </div>
         </div>
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={() => void save()}
-            disabled={saving}
-            variant="brand"
-          >
-            {saving ? "Saving…" : "Save Details"}
+          <Button onClick={() => void save()} disabled={saving} variant="brand">
+            {saving ? "Saving..." : "Save Details"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function toLocalInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Lets the page creator change the headline parts of the festival itself. */
+function EditFestivalBasics({
+  open,
+  onOpenChange,
+  event,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  event: EventRow;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState({
+    title: event.title,
+    description: event.description ?? "",
+    image_url: event.image_url ?? "",
+    starts_at: toLocalInput(event.starts_at),
+    ends_at: toLocalInput(event.ends_at),
+    venue_name: event.venue_name ?? "",
+    address: event.address ?? "",
+    neighborhood: event.neighborhood ?? "",
+    category: event.category ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setForm({
+      title: event.title,
+      description: event.description ?? "",
+      image_url: event.image_url ?? "",
+      starts_at: toLocalInput(event.starts_at),
+      ends_at: toLocalInput(event.ends_at),
+      venue_name: event.venue_name ?? "",
+      address: event.address ?? "",
+      neighborhood: event.neighborhood ?? "",
+      category: event.category ?? "",
+    });
+  }, [open, event]);
+
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const save = async () => {
+    if (!form.title.trim()) {
+      toast.error("Give your festival a title");
+      return;
+    }
+    if (!form.starts_at) {
+      toast.error("Pick a start date and time");
+      return;
+    }
+    setSaving(true);
+    const res = await supabase
+      .from("events")
+      .update({
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        image_url: form.image_url || null,
+        starts_at: new Date(form.starts_at).toISOString(),
+        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+        venue_name: form.venue_name.trim() || null,
+        address: form.address.trim() || null,
+        location: form.venue_name.trim() || form.address.trim() || null,
+        neighborhood: form.neighborhood.trim() || null,
+        category: form.category.trim() || null,
+      })
+      .eq("id", event.id);
+    setSaving(false);
+    if (res.error) {
+      toast.error(res.error.message);
+      return;
+    }
+    toast.success("Festival page updated");
+    onOpenChange(false);
+    onSaved();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Festival page</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <ImagePickerField
+              label="Cover photo"
+              value={form.image_url}
+              onChange={(v) => setForm((f) => ({ ...f, image_url: v }))}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Field label="Title" value={form.title} onChange={set("title")} />
+          </div>
+          <label className="block sm:col-span-2">
+            <span className="text-xs font-semibold text-muted-foreground">About the festival</span>
+            <Textarea value={form.description} onChange={set("description")} rows={6} className="mt-1" />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold text-muted-foreground">Starts</span>
+            <Input type="datetime-local" className="mt-1" value={form.starts_at} onChange={set("starts_at")} />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold text-muted-foreground">Ends</span>
+            <Input type="datetime-local" className="mt-1" value={form.ends_at} onChange={set("ends_at")} />
+          </label>
+          <Field label="Venue" value={form.venue_name} onChange={set("venue_name")} />
+          <Field label="Address" value={form.address} onChange={set("address")} />
+          <Field label="Neighborhood" value={form.neighborhood} onChange={set("neighborhood")} />
+          <Field label="Category" value={form.category} onChange={set("category")} />
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={() => void save()} disabled={saving} variant="brand">
+            {saving ? "Saving..." : "Save page"}
           </Button>
         </div>
       </DialogContent>

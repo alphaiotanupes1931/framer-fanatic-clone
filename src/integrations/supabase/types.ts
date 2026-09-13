@@ -622,6 +622,7 @@ export type Database = {
           tags: string[]
           ticket_url: string | null
           updated_at: string
+          updates: Json
           vendors: Json
           website: string | null
         }
@@ -651,6 +652,7 @@ export type Database = {
           tags?: string[]
           ticket_url?: string | null
           updated_at?: string
+          updates?: Json
           vendors?: Json
           website?: string | null
         }
@@ -680,6 +682,7 @@ export type Database = {
           tags?: string[]
           ticket_url?: string | null
           updated_at?: string
+          updates?: Json
           vendors?: Json
           website?: string | null
         }

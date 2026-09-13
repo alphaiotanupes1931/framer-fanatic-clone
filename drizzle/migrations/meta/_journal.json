@@ -176,6 +176,13 @@
       "when": 1789169974929,
       "tag": "0024_festival_details_extra_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789326673528,
+      "tag": "0025_add_festival_updates",
+      "breakpoints": true
     }
   ]
 }

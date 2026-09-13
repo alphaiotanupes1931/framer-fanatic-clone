@@ -1,0 +1,1 @@
+ALTER TABLE public.festival_details ADD COLUMN IF NOT EXISTS updates jsonb NOT NULL DEFAULT '[]'::jsonb;
