@@ -985,8 +985,8 @@ function FestivalDetailPage() {
             </section>
 
             <section id="festival-schedule" className={`scroll-mt-24 ${activeTab !== "schedule" ? "hidden" : ""}`}>
-              {schedule.length > 0 ? (
-                <div className="space-y-8">
+              <div className="space-y-8">
+                {schedule.length > 0 && (
                   <div className="space-y-4 border-b border-border pb-6">
                     <div className="flex flex-wrap gap-2">
                       {[["all", "All Time"], ["today", "Today"], ["weekend", "This Weekend"]].map(([value, label]) => (
@@ -1002,66 +1002,85 @@ function FestivalDetailPage() {
                       </div>
                     )}
                   </div>
+                )}
 
-                  {headliners.length > 0 && (
-                    <div>
-                      <h2 className="font-display text-2xl font-extrabold text-foreground">Featured at the Festival</h2>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        {headliners.map((item, index) => (
-                          <article key={`${item.name}-${index}`} className="border-l-4 border-orange bg-muted/30 p-4">
-                            <span className="text-[11px] font-bold uppercase text-orange">Headliner</span>
-                            <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.name}</h3>
-                            {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
+                {headliners.length > 0 && (
                   <div>
-                    {visibleSchedule.length > 0 ? visibleSchedule.map((item) => {
-                      const index = schedule.indexOf(item);
-                      return <ScheduleRow key={`${item.name}-${index}`} item={item} scheduled={mySchedule.includes(index)} onToggle={() => toggleMySchedule(index)} />;
-                    }) : <TabEmpty message="No scheduled activities match these filters." />}
+                    <h2 className="font-display text-2xl font-extrabold text-foreground">Featured at the Festival</h2>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {headliners.map((item, index) => (
+                        <article key={`${item.name}-${index}`} className="border-l-4 border-orange bg-muted/30 p-4">
+                          <span className="text-[11px] font-bold uppercase text-orange">Headliner</span>
+                          <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.name}</h3>
+                          {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+                        </article>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="The festival schedule has not been posted yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+                )}
+
+                <EditableList
+                  items={schedule}
+                  canEdit={showCreatorTools}
+                  addLabel="Add happening"
+                  dialogTitle="Event or happening"
+                  fields={SCHEDULE_FIELDS}
+                  onChange={(next) => saveDetails({ schedule: next })}
+                  emptyState={<TabEmpty message="The festival schedule has not been posted yet." />}
+                  renderItem={(item, index) => {
+                    if (!visibleSchedule.includes(item)) return null;
+                    return (
+                      <ScheduleRow
+                        item={item}
+                        scheduled={mySchedule.includes(index)}
+                        onToggle={() => toggleMySchedule(index)}
+                      />
+                    );
+                  }}
+                />
+              </div>
             </section>
 
             <section id="festival-performers" className={`scroll-mt-24 ${activeTab !== "performers" ? "hidden" : ""}`}>
-              {headliners.length > 0 ? (
-                <div>
-                  {headliners.map((item, index) => (
-                    <PerformerCard key={`${item.name}-${index}`} item={item} event={event} isFree={isFree} />
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Performers have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+              <EditableList
+                items={headliners}
+                canEdit={showCreatorTools}
+                addLabel="Add performer"
+                dialogTitle="Performer"
+                fields={PROGRAM_FIELDS}
+                onChange={(next) => saveDetails({ performers: next })}
+                emptyState={<div className="mt-4"><TabEmpty message="Performers have not been announced yet." /></div>}
+                renderItem={(item) => <PerformerCard item={item} event={event} isFree={isFree} />}
+              />
             </section>
 
             <section id="festival-vendors" className={`scroll-mt-24 ${activeTab !== "vendors" ? "hidden" : ""}`}>
-              {vendors.length > 0 ? (
-                <div>
-                  {vendors.map((item, index) => (
-                    <VendorCard key={`${item.name}-${index}`} item={item} />
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+              <EditableList
+                items={vendors}
+                canEdit={showCreatorTools}
+                addLabel="Add vendor"
+                dialogTitle="Vendor"
+                fields={VENDOR_FIELDS}
+                onChange={(next) => saveDetails({ vendors: next })}
+                emptyState={<div className="mt-4"><TabEmpty message="Vendors have not been announced yet." /></div>}
+                renderItem={(item) => <VendorCard item={item} />}
+              />
             </section>
 
             <section id="festival-food" className={`scroll-mt-24 ${activeTab !== "food" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Food + Drink</h2>
-              {food.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {food.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Food and drink vendors have not been announced yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+              <div className="mt-4">
+                <EditableList
+                  items={food}
+                  canEdit={showCreatorTools}
+                  addLabel="Add food or drink"
+                  dialogTitle="Food and drink vendor"
+                  fields={FOOD_FIELDS}
+                  onChange={(next) => saveDetails({ food: next })}
+                  emptyState={<TabEmpty message="Food and drink vendors have not been announced yet." />}
+                  renderItem={(item) => <VendorCard item={item} />}
+                />
+              </div>
             </section>
 
             <section id="festival-tickets" className={`scroll-mt-24 ${activeTab !== "tickets" ? "hidden" : ""}`}>
