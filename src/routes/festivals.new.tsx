@@ -94,6 +94,7 @@ function NewFestivalPage() {
     format: "",
     audience: "All Ages",
     admission: "free" as "free" | "paid" | "donation",
+    price: "",
     ticket_url: "",
     organizer_name: "",
     organizer_description: "",
