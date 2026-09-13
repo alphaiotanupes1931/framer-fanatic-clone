@@ -400,6 +400,7 @@ function ScheduleRow({ item, scheduled, onToggle }: { item: ScheduleItem; schedu
           </div>
         )}
         {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+        </div>
       </div>
       <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
         {scheduled ? <Check /> : <Plus />} {scheduled ? "In My Schedule" : "My Schedule"}
