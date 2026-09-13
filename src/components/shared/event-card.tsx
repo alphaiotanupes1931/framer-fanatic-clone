@@ -35,7 +35,7 @@ type EventRow = {
   user_id?: string | null;
 };
 
-export function EventCard({ event, compact = false, onDeleted, showCalendar = true }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean }) {
+export function EventCard({ event, compact = false, onDeleted, showCalendar = true, draft = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean; draft?: boolean }) {
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
   const resolvedImage = useEventImageUrl(event.image_url);
@@ -230,28 +230,41 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
         </div>
       </Link>
       <div className="flex flex-wrap items-center gap-2 border-t border-border/50 px-3.5 py-2.5 sm:px-4">
-        <button type="button" onClick={toggleSave} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border text-muted-foreground hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
-          <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
-          {saved ? "Saved" : "Save"}
-        </button>
-        <button type="button" onClick={sendExternal} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Share outside the app">
-          <Share2 className="h-3.5 w-3.5" />
-          Share
-        </button>
-        {showCalendar && (
-          <button type="button" onClick={addToCalendar} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Add to calendar">
-            <CalendarPlus className="h-3.5 w-3.5" />
-            Calendar
-          </button>
+        {!draft && (
+          <>
+            <button type="button" onClick={toggleSave} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${saved ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border text-muted-foreground hover:border-[#d4580a] hover:text-[#d4580a]"}`} aria-label="Save">
+              <Bookmark className={`h-3.5 w-3.5 ${saved ? "fill-current" : ""}`} />
+              {saved ? "Saved" : "Save"}
+            </button>
+            <button type="button" onClick={sendExternal} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Share outside the app">
+              <Share2 className="h-3.5 w-3.5" />
+              Share
+            </button>
+            {showCalendar && (
+              <button type="button" onClick={addToCalendar} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Add to calendar">
+                <CalendarPlus className="h-3.5 w-3.5" />
+                Calendar
+              </button>
+            )}
+          </>
+        )}
+        {draft && (
+          <span className="inline-flex items-center rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
+            Draft, only you can see this
+          </span>
         )}
         <div className="ml-auto flex items-center gap-2 text-muted-foreground">
-          <button type="button" onClick={openShare} className="rounded-full p-1.5 transition hover:text-[#d4580a]" aria-label="Send in app" title="Send in app">
-            <Send className="h-4 w-4 -rotate-45" />
-          </button>
-          <button type="button" onClick={doRepost} disabled={reposting} aria-pressed={reposted} className={`rounded-full p-1.5 transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-[#d4580a]"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"}>
-            <Repeat2 className="h-4 w-4" />
-          </button>
-          <ReportButton contentType="event" contentId={event.id} />
+          {!draft && (
+            <>
+              <button type="button" onClick={openShare} className="rounded-full p-1.5 transition hover:text-[#d4580a]" aria-label="Send in app" title="Send in app">
+                <Send className="h-4 w-4 -rotate-45" />
+              </button>
+              <button type="button" onClick={doRepost} disabled={reposting} aria-pressed={reposted} className={`rounded-full p-1.5 transition disabled:opacity-50 ${reposted ? "text-[#d4580a]" : "hover:text-[#d4580a]"}`} aria-label={reposted ? "Remove repost" : "Repost to your page"} title={reposted ? "Remove repost" : "Repost to your page"}>
+                <Repeat2 className="h-4 w-4" />
+              </button>
+              <ReportButton contentType="event" contentId={event.id} />
+            </>
+          )}
           {canDelete && (
             <button type="button" onClick={handleDelete} disabled={deleting} className="rounded-full p-1.5 text-red-600 transition hover:text-red-700 disabled:opacity-50" aria-label={isOwner ? "Delete" : "Admin delete"} title={isOwner ? "Delete" : "Admin delete"}>
               <Trash2 className="h-4 w-4" />
