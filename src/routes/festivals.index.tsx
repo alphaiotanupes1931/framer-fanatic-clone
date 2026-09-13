@@ -130,12 +130,18 @@ function haystack(r: Row, tags?: string[]) {
   return `${r.title ?? ""} ${r.description ?? ""} ${r.category ?? ""} ${(tags ?? []).join(" ")}`.toLowerCase();
 }
 
+function isDonation(r: Row) {
+  return r.donations_enabled === true || r.pricing_mode === "donation";
+}
+
 function isFree(r: Row) {
+  if (isDonation(r)) return false;
   if (r.pricing_mode === "paid") return false;
   return !r.price_cents || r.price_cents <= 0;
 }
 
 function priceLabel(r: Row) {
+  if (isDonation(r)) return "Donation-based";
   if (isFree(r)) return "Free";
   const cents = r.price_cents ?? 0;
   if (cents <= 0) return "Ticketed";

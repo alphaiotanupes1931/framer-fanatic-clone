@@ -73,6 +73,8 @@ type EventRow = {
   organization_id: string | null;
   latitude: number | null;
   longitude: number | null;
+  donations_enabled: boolean | null;
+  is_published: boolean | null;
 };
 
 type DetailsRow = {
@@ -465,7 +467,7 @@ function FestivalDetailPage() {
     const { data: ev } = await supabase
       .from("events")
       .select(
-        "id,title,description,image_url,video_url,gallery_urls,starts_at,ends_at,venue_name,address,location,neighborhood,category,price_cents,pricing_mode,capacity,user_id,organization_id,latitude,longitude",
+        "id,title,description,image_url,video_url,gallery_urls,starts_at,ends_at,venue_name,address,location,neighborhood,category,price_cents,pricing_mode,donations_enabled,is_published,capacity,user_id,organization_id,latitude,longitude",
       )
       .eq("id", eventId)
       .maybeSingle();
