@@ -1063,6 +1063,22 @@ function FestivalDetailPage() {
                 <GlanceRow label="Rain or Shine" value={details?.rain_or_shine || ""} />
                 <GlanceRow label="Pet Policy" value={details?.pet_policy || ""} />
                 <GlanceRow label="Capacity" value={event.capacity ? `${event.capacity}` : ""} />
+                {details?.website && (
+                  <div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      Website
+                    </div>
+                    <a
+                      href={details.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-0.5 inline-flex items-center gap-1 break-all text-sm font-medium text-orange underline underline-offset-2"
+                    >
+                      {details.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
 

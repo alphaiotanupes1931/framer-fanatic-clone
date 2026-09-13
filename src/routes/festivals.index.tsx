@@ -13,7 +13,7 @@ import { pageHead } from "@/lib/seo";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { siteUrl } from "@/lib/utils";
-import { downloadIcs } from "@/lib/ics";
+
 import { externalShare } from "@/lib/share-preview";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { Chip } from "@/components/shared/chip";
@@ -211,25 +211,6 @@ function FestivalActions({
     }
   };
 
-  const addToCalendar = () => {
-    if (!row.starts_at) {
-      toast.error("This festival has no date yet");
-      return;
-    }
-    downloadIcs(
-      {
-        uid: `festival-${row.id}@planetbaltimore.com`,
-        title: row.title,
-        start: new Date(row.starts_at),
-        end: row.ends_at ? new Date(row.ends_at) : null,
-        location: row.address || row.venue_name || placeOf(row) || "Baltimore",
-        description: (row.description ?? "").replace(/<[^>]+>/g, "") || null,
-        url,
-      },
-      row.title.replace(/[^\w\s-]/g, "").trim() || "festival",
-    );
-    toast.success("Added to your calendar");
-  };
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -269,10 +250,6 @@ function FestivalActions({
           excerpt: (row.description ?? "").replace(/<[^>]+>/g, "").slice(0, 160) || null,
         }}
       />
-      <Button variant="outline" size="sm" type="button" onClick={addToCalendar}>
-        <CalendarPlus className="h-3.5 w-3.5" />
-        Calendar
-      </Button>
     </div>
   );
 }
