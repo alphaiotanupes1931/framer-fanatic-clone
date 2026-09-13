@@ -9,7 +9,9 @@ const DEFAULT_AUTH_TTL_MINUTES = 240
 const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 1440
 // Never pause the whole queue longer than this after a provider throttle,
 // otherwise a single bad Retry-After can outlive the message TTL.
-const MAX_COOLDOWN_SECONDS = 900
+// Provider rate-limit windows can run close to an hour; cap high enough that we
+// honour the provider's Retry-After instead of waking early and hitting 429 again.
+const MAX_COOLDOWN_SECONDS = 3600
 
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
