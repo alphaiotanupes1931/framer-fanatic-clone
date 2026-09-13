@@ -59,6 +59,7 @@ type Row = {
   category: string | null;
   price_cents: number | null;
   pricing_mode: string | null;
+  donations_enabled: boolean | null;
   latitude: number | null;
   longitude: number | null;
   organization_id: string | null;
@@ -203,11 +204,15 @@ function matchesOption(option: string, r: Row, tags: string[]) {
     case "This Month":
       return isThisMonth(r);
     case "Free":
-      return isFree(r) || /\bfree\b/i.test(tags.join(" "));
+      return !r.donations_enabled && (isFree(r) || /\bfree\b/i.test(tags.join(" ")));
     case "Paid":
       return !isFree(r);
     case "Donation-Based":
-      return r.pricing_mode === "donation" || /donation|pay what you can|suggested/i.test(hay);
+      return (
+        r.donations_enabled === true ||
+        r.pricing_mode === "donation" ||
+        /donation|pay what you can|suggested/i.test(hay)
+      );
     case "All Ages":
       return /all ages/i.test(hay);
     case "21+":
@@ -425,7 +430,7 @@ function FestivalsPage() {
     const { data } = await supabase
       .from("events")
       .select(
-        "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,latitude,longitude,organization_id,user_id",
+        "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,donations_enabled,latitude,longitude,organization_id,user_id",
       )
       .eq("is_published", true)
       .gte("starts_at", new Date(Date.now() - 12 * 3600 * 1000).toISOString())
@@ -515,7 +520,7 @@ function FestivalsPage() {
       const { data } = await supabase
         .from("events")
         .select(
-          "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,latitude,longitude,organization_id,user_id",
+          "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,donations_enabled,latitude,longitude,organization_id,user_id",
         )
         .eq("user_id", me.id)
         .eq("is_published", false)
