@@ -1221,16 +1221,23 @@ function FestivalDetailPage() {
 
             <section id="festival-faq" className={`scroll-mt-24 ${activeTab !== "faq" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">FAQ</h2>
-              {faqs.length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  {faqs.map((f) => (
-                    <div key={f.q} className="rounded-xl border border-border bg-card p-4">
+              <div className="mt-4">
+                <EditableList
+                  items={faqs}
+                  canEdit={showCreatorTools}
+                  addLabel="Add question"
+                  dialogTitle="Frequently asked question"
+                  fields={FAQ_FIELDS}
+                  onChange={(next) => saveDetails({ faqs: next })}
+                  emptyState={<TabEmpty message="Frequently asked questions have not been added yet." />}
+                  renderItem={(f) => (
+                    <div className="mb-3 rounded-xl border border-border bg-card p-4">
                       <div className="text-sm font-bold text-foreground">{f.q}</div>
                       {f.a && <p className="mt-1 text-sm text-muted-foreground">{f.a}</p>}
                     </div>
-                  ))}
-                </div>
-              ) : <div className="mt-4"><TabEmpty message="Frequently asked questions have not been added yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} /></div>}
+                  )}
+                />
+              </div>
             </section>
 
             {(data!.nearby.length > 0 || data!.nearbyArtists.length > 0) && (
