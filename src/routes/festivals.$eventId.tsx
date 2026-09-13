@@ -1120,7 +1120,12 @@ function FestivalDetailPage() {
             </section>
 
             <section id="festival-gallery" className={`scroll-mt-24 ${activeTab !== "gallery" ? "hidden" : ""}`}>
-              <h2 className="font-display text-lg font-extrabold text-foreground">Gallery</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-lg font-extrabold text-foreground">Gallery</h2>
+                {showCreatorTools && (
+                  <GalleryUploadButton onAdd={(path) => saveGallery([...gallery, path])} />
+                )}
+              </div>
               {(gallery.length > 0 || event.video_url) ? (
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {event.video_url && (
@@ -1131,13 +1136,24 @@ function FestivalDetailPage() {
                     />
                   )}
                   {gallery.map((u) => (
-                    <Img
-                      key={u}
-                      src={u}
-                      alt={`${event.title} photo`}
-                      loading="lazy"
-                      className="aspect-square w-full rounded-xl object-cover"
-                    />
+                    <div key={u} className="relative">
+                      <Img
+                        src={u}
+                        alt={`${event.title} photo`}
+                        loading="lazy"
+                        className="aspect-square w-full rounded-xl object-cover"
+                      />
+                      {showCreatorTools && (
+                        <button
+                          type="button"
+                          aria-label="Remove photo"
+                          onClick={() => void saveGallery(gallery.filter((g) => g !== u))}
+                          className="absolute right-2 top-2 rounded-full bg-foreground/70 p-1.5 text-background"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               ) : <div className="mt-4"><TabEmpty message="Festival photos and videos have not been added yet." /></div>}
@@ -1145,7 +1161,27 @@ function FestivalDetailPage() {
 
             <section id="festival-updates" className={`scroll-mt-24 ${activeTab !== "updates" ? "hidden" : ""}`}>
               <h2 className="font-display text-lg font-extrabold text-foreground">Updates</h2>
-              <div className="mt-4"><TabEmpty message="There are no festival updates yet." /></div>
+              <div className="mt-4">
+                <EditableList
+                  items={updates}
+                  canEdit={showCreatorTools}
+                  addLabel="Post update"
+                  dialogTitle="Festival update"
+                  fields={UPDATE_FIELDS}
+                  onChange={(next) => saveDetails({ updates: next })}
+                  emptyState={<TabEmpty message="There are no festival updates yet." />}
+                  renderItem={(item) => (
+                    <article className="mb-4 rounded-xl border border-border bg-card p-4">
+                      {item.date && <div className="text-xs font-semibold text-orange">{item.date}</div>}
+                      <h3 className="mt-1 text-base font-extrabold text-foreground">{item.title}</h3>
+                      {item.body && <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>}
+                      {item.image && (
+                        <Img src={item.image} alt="" className="mt-3 w-full rounded-lg object-cover" />
+                      )}
+                    </article>
+                  )}
+                />
+              </div>
             </section>
 
             <section id="festival-comments" className={`scroll-mt-24 ${activeTab !== "comments" ? "hidden" : ""}`}>
