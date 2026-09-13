@@ -44,23 +44,6 @@ export function FestivalMap({
     ? [firstPin.latitude, firstPin.longitude]
     : [39.299, -76.612];
 
-  function KeepPinsInView() {
-    const map = useMap();
-    const signature = useMemo(
-      () => pins.map((pin) => `${pin.latitude},${pin.longitude}`).join("|"),
-      [],
-    );
-    useEffect(() => {
-      if (pins.length === 0) return;
-      if (pins.length === 1) {
-        const pin = pins[0];
-        if (pin) map.setView([pin.latitude, pin.longitude], 12);
-        return;
-      }
-      map.fitBounds(pins.map((pin) => [pin.latitude, pin.longitude]), { padding: [32, 32], maxZoom: 13 });
-    }, [map, signature]);
-    return null;
-  }
 
   return (
     <div className="relative z-0 overflow-hidden rounded-lg border border-border shadow-sm [isolation:isolate]">
