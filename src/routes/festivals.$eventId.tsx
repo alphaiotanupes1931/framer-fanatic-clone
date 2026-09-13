@@ -37,6 +37,7 @@ import {
   Settings,
   Share2,
   Ticket,
+  Trash2,
   Users,
 } from "lucide-react";
 import { PageBackButton } from "@/components/shared/page-back-button";
