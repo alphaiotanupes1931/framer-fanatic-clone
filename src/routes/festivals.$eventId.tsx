@@ -283,7 +283,11 @@ function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fall
   const action = item.price || fallbackAction;
   return (
     <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-      <div className="min-w-0">
+      <div className="flex min-w-0 gap-4">
+        {item.image && (
+          <Img src={item.image} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+        )}
+        <div className="min-w-0">
         <h3 className="text-base font-bold text-foreground">{item.name}</h3>
         {(item.when || item.venue) && (
           <p className="mt-1 text-sm font-semibold text-muted-foreground">
@@ -291,6 +295,7 @@ function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fall
           </p>
         )}
         {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+        </div>
       </div>
       <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="sm" className="w-fit">
         <Link to="/events/$eventId" params={{ eventId }}>{action}</Link>
@@ -306,24 +311,29 @@ function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: Even
   };
 
   return (
-    <article className="border-b border-border py-6 first:pt-2 last:border-0">
-      <div className="text-[11px] font-bold uppercase text-orange">{item.type || event.category || "Performer"}</div>
-      <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
-      {(item.when || item.venue) && (
-        <p className="mt-2 text-sm font-semibold text-muted-foreground">
-          {[item.when, item.venue].filter(Boolean).join(" · ")}
-        </p>
+    <article className="flex gap-4 border-b border-border py-6 first:pt-2 last:border-0">
+      {item.image && (
+        <Img src={item.image} alt={item.name} className="h-24 w-24 shrink-0 rounded-xl object-cover" />
       )}
-      {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => void sharePerformer()}>
-          <Share2 /> Share
-        </Button>
-        <Button asChild variant="brand" size="sm">
-          <Link to="/events/$eventId" params={{ eventId: event.id }}>
-            <Ticket /> {isFree ? "RSVP" : "Tickets"}
-          </Link>
-        </Button>
+      <div className="min-w-0 flex-1">
+        <div className="text-[11px] font-bold uppercase text-orange">{item.type || event.category || "Performer"}</div>
+        <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
+        {(item.when || item.venue) && (
+          <p className="mt-2 text-sm font-semibold text-muted-foreground">
+            {[item.when, item.venue].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => void sharePerformer()}>
+            <Share2 /> Share
+          </Button>
+          <Button asChild variant="brand" size="sm">
+            <Link to="/events/$eventId" params={{ eventId: event.id }}>
+              <Ticket /> {isFree ? "RSVP" : "Tickets"}
+            </Link>
+          </Button>
+        </div>
       </div>
     </article>
   );
@@ -376,7 +386,11 @@ function ScheduleRow({ item, scheduled, onToggle }: { item: ScheduleItem; schedu
   return (
     <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[70px_minmax(0,1fr)_auto] sm:items-start">
       <div className="text-lg font-extrabold text-foreground">{item.time}</div>
-      <div className="min-w-0">
+      <div className="flex min-w-0 gap-4">
+        {item.image && (
+          <Img src={item.image} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+        )}
+        <div className="min-w-0">
         <h3 className="text-base font-bold text-foreground">{item.name}</h3>
         {(item.venue || item.type || item.price) && (
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold">
@@ -386,6 +400,7 @@ function ScheduleRow({ item, scheduled, onToggle }: { item: ScheduleItem; schedu
           </div>
         )}
         {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+        </div>
       </div>
       <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
         {scheduled ? <Check /> : <Plus />} {scheduled ? "In My Schedule" : "My Schedule"}
