@@ -141,6 +141,7 @@ type ProgramItem = {
   description: string;
   price: string;
   type: string;
+  image: string;
 };
 
 type Experience = ProgramItem;
@@ -152,15 +153,80 @@ type ScheduleItem = {
   type: string;
   price: string;
   description: string;
+  image: string;
 };
 type Faq = { q: string; a: string };
+type UpdateItem = { title: string; date: string; body: string; image: string };
 
 type VendorItem = {
   category: string;
   name: string;
   booth: string;
   description: string;
+  image: string;
 };
+
+const PROGRAM_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "name", label: "Name", placeholder: "Right Now Rouge" },
+  { key: "type", label: "Type", placeholder: "Music, dance, poetry" },
+  { key: "when", label: "Date and time", placeholder: "Sat, Jun 14 · 7:00 pm" },
+  { key: "venue", label: "Venue or stage", placeholder: "Main Stage" },
+  { key: "description", label: "Description", type: "textarea" },
+  { key: "price", label: "Admission label", placeholder: "Free, RSVP or $25" },
+];
+
+const SCHEDULE_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "name", label: "What is happening", placeholder: "Opening parade" },
+  { key: "date", label: "Date", placeholder: "2026-06-14" },
+  { key: "time", label: "Time", placeholder: "1:00 pm" },
+  { key: "venue", label: "Venue or stage", placeholder: "Patriot Plaza" },
+  { key: "type", label: "Type", placeholder: "Performance, workshop, parade" },
+  { key: "price", label: "Admission label", placeholder: "Free or $10" },
+  { key: "description", label: "Description", type: "textarea" },
+];
+
+const VENDOR_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "category", label: "Category", placeholder: "Jewelry, apparel, art" },
+  { key: "name", label: "Name", placeholder: "Charm City Ceramics" },
+  { key: "booth", label: "Booth", placeholder: "Booth 14" },
+  { key: "description", label: "Description", type: "textarea" },
+];
+
+const FOOD_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "category", label: "Category", placeholder: "Food truck, dessert, drinks" },
+  { key: "name", label: "Name", placeholder: "Sweet Pea BBQ" },
+  { key: "booth", label: "Booth", placeholder: "Food row 3" },
+  { key: "description", label: "Description", type: "textarea" },
+];
+
+const FAQ_FIELDS: FieldSpec[] = [
+  { key: "q", label: "Question" },
+  { key: "a", label: "Answer", type: "textarea" },
+];
+
+const UPDATE_FIELDS: FieldSpec[] = [
+  { key: "image", label: "Photo", type: "image" },
+  { key: "title", label: "Headline", placeholder: "Rain plan in effect" },
+  { key: "date", label: "Date", placeholder: "June 14" },
+  { key: "body", label: "Update", type: "textarea" },
+];
+
+function asUpdates(v: unknown): UpdateItem[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x) => x as Partial<UpdateItem>)
+    .filter((x) => x && typeof x.title === "string" && x.title.trim())
+    .map((x) => ({
+      title: x.title!.trim(),
+      date: (x.date ?? "").trim(),
+      body: (x.body ?? "").trim(),
+      image: (x.image ?? "").trim(),
+    }));
+}
 
 function asStringList(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
