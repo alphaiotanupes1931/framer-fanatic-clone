@@ -408,6 +408,19 @@ function NewFestivalPage() {
               ))}
             </div>
           </Field>
+          {form.admission === "paid" && (
+            <Field label="Ticket price (USD)">
+              <input
+                className={inputCls}
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.price}
+                onChange={(e) => set("price", e.target.value)}
+                placeholder="25"
+              />
+            </Field>
+          )}
           {form.admission !== "free" && (
             <Field label="Ticket / registration link">
               <input className={inputCls} type="url" value={form.ticket_url} onChange={(e) => set("ticket_url", e.target.value)} placeholder="https://" />
