@@ -503,6 +503,31 @@ function FestivalsPage() {
     })();
   }, [me?.id, tab]);
 
+  // Unpublished festivals this person started, so drafts are easy to find again.
+  useEffect(() => {
+    if (!me?.id) {
+      setDrafts([]);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("events")
+        .select(
+          "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,latitude,longitude,organization_id,user_id",
+        )
+        .eq("user_id", me.id)
+        .eq("is_published", false)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      const rows = ((data as Row[] | null) ?? []).filter(
+        (r) =>
+          /festival/i.test(r.category ?? "") ||
+          /festival|fest\b|block party|street fair|celebration/i.test(r.title ?? ""),
+      );
+      setDrafts(rows);
+    })();
+  }, [me?.id, tab]);
+
   const rows = useMemo(() => {
     const term = q.trim().toLowerCase();
     return all.filter((r) => {
