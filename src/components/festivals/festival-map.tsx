@@ -87,7 +87,7 @@ export function FestivalMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <KeepPinsInView />
+        <KeepPinsInView pins={pins} useMap={useMap} />
         {pins.map((pin) => {
           const active = pin.id === activeId;
           return (
