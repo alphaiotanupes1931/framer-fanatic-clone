@@ -386,7 +386,11 @@ function ScheduleRow({ item, scheduled, onToggle }: { item: ScheduleItem; schedu
   return (
     <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[70px_minmax(0,1fr)_auto] sm:items-start">
       <div className="text-lg font-extrabold text-foreground">{item.time}</div>
-      <div className="min-w-0">
+      <div className="flex min-w-0 gap-4">
+        {item.image && (
+          <Img src={item.image} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+        )}
+        <div className="min-w-0">
         <h3 className="text-base font-bold text-foreground">{item.name}</h3>
         {(item.venue || item.type || item.price) && (
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold">
