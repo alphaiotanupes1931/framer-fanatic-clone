@@ -242,8 +242,8 @@ function asVendors(v: unknown): VendorItem[] {
     .map((x) => {
       if (typeof x === "string") {
         const [category = "", name = "", booth = "", description = ""] = x.split("|").map((s) => s.trim());
-        if (!name) return { category: "", name: category, booth: "", description: "" };
-        return { category, name, booth, description };
+        if (!name) return { category: "", name: category, booth: "", description: "", image: "" };
+        return { category, name, booth, description, image: "" };
       }
       const item = x as Partial<VendorItem>;
       return {
@@ -251,24 +251,14 @@ function asVendors(v: unknown): VendorItem[] {
         name: (item.name ?? "").trim(),
         booth: (item.booth ?? "").trim(),
         description: (item.description ?? "").trim(),
+        image: (item.image ?? "").trim(),
       };
     })
     .filter((x) => x.name.length > 0);
 }
 
 function asExperiences(v: unknown): Experience[] {
-  if (!Array.isArray(v)) return [];
-  return v
-    .map((x) => typeof x === "string" ? { name: x } : x as Partial<Experience>)
-    .filter((x) => x && typeof x.name === "string" && x.name.trim())
-    .map((x) => ({
-      name: String(x.name).trim(),
-      when: (x.when ?? "").trim(),
-      venue: (x.venue ?? "").trim(),
-      description: (x.description ?? "").trim(),
-      price: (x.price ?? "").trim(),
-      type: (x.type ?? "").trim(),
-    }));
+  return asProgramItems(v);
 }
 
 function asProgramItems(v: unknown): ProgramItem[] {
@@ -283,6 +273,7 @@ function asProgramItems(v: unknown): ProgramItem[] {
       description: (x.description ?? "").trim(),
       price: (x.price ?? "").trim(),
       type: (x.type ?? "").trim(),
+      image: (x.image ?? "").trim(),
     }));
 }
 
