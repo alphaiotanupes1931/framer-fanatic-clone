@@ -918,39 +918,68 @@ function FestivalDetailPage() {
           {/* Main column */}
           <div className="min-w-0 space-y-10 p-5 sm:p-8 lg:border-r lg:border-border">
             <section id="festival-overview" className={`scroll-mt-24 space-y-6 ${activeTab !== "overview" ? "hidden" : ""}`}>
-              {headliners.length > 0 && (
+              {(headliners.length > 0 || showCreatorTools) && (
                 <div>
                   <h2 className="font-display text-2xl font-extrabold text-foreground">Festival Headliners</h2>
                   <div className="mt-2">
-                    {headliners.map((item, index) => (
-                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
-                    ))}
+                    <EditableList
+                      items={headliners}
+                      canEdit={showCreatorTools}
+                      addLabel="Add headliner"
+                      dialogTitle="Headliner"
+                      fields={PROGRAM_FIELDS}
+                      onChange={(next) => saveDetails({ performers: next })}
+                      emptyState={<TabEmpty message="No headliners added yet." />}
+                      renderItem={(item) => (
+                        <ProgramRow item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
+                      )}
+                    />
                   </div>
                 </div>
               )}
 
-              {experiences.length > 0 && (
+              {(experiences.length > 0 || showCreatorTools) && (
                 <div className="border-t border-border pt-8">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">Featured Experiences</h2>
                   <div className="mt-2">
-                    {experiences.map((item, index) => (
-                      <ProgramRow key={`${item.name}-${index}`} item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
-                    ))}
+                    <EditableList
+                      items={experiences}
+                      canEdit={showCreatorTools}
+                      addLabel="Add experience"
+                      dialogTitle="Featured experience"
+                      fields={PROGRAM_FIELDS}
+                      onChange={(next) => saveDetails({ experiences: next })}
+                      emptyState={<TabEmpty message="No featured experiences added yet." />}
+                      renderItem={(item) => (
+                        <ProgramRow item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
+                      )}
+                    />
                   </div>
                 </div>
               )}
 
-              {event.description && (
-                <div className="border-t border-border pt-8">
+              <div className="border-t border-border pt-8">
+                <div className="flex items-center justify-between gap-3">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
-                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
+                  {showCreatorTools && (
+                    <Button type="button" variant="outline" size="xs" onClick={() => setBasicsOpen(true)}>
+                      <Pencil /> Edit
+                    </Button>
+                  )}
                 </div>
-              )}
+                {event.description ? (
+                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
+                ) : (
+                  <div className="mt-4">
+                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setBasicsOpen(true)} />
+                  </div>
+                )}
+              </div>
 
               {(vendors.length > 0 || food.length > 0) && (
                 <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
                   <ListColumn title="Vendors" items={vendors.map((v) => v.name)} />
-                  <ListColumn title="Food + Drink" items={food} />
+                  <ListColumn title="Food + Drink" items={food.map((v) => v.name)} />
                 </div>
               )}
             </section>
