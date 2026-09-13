@@ -1267,83 +1267,6 @@ function FestivalDetailPage() {
   );
 }
 
-function linesToList(text: string): string[] {
-  return text
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-function pairsToObjects(text: string, keys: [string, string]) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => {
-      const [a, b] = l.split("|").map((s) => s.trim());
-      return { [keys[0]]: a ?? "", [keys[1]]: b ?? "" };
-    })
-    .filter((o) => (o as Record<string, string>)[keys[0]]);
-}
-
-function programLinesToObjects(text: string): ProgramItem[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [name = "", when = "", venue = "", description = "", price = "", type = ""] = line.split("|").map((part) => part.trim());
-      return { name, when, venue, description, price, type };
-    })
-    .filter((item) => item.name.length > 0);
-}
-
-function programItemsToLines(items: ProgramItem[]): string {
-  return items
-    .map((item) => [item.name, item.when, item.venue, item.description, item.price, item.type].join(" | "))
-    .join("\n");
-}
-
-function scheduleLinesToObjects(text: string): ScheduleItem[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [name = "", date = "", time = "", venue = "", type = "", price = "", description = ""] = line.split("|").map((part) => part.trim());
-      return { name, date, time, venue, type, price, description };
-    })
-    .filter((item) => item.name.length > 0);
-}
-
-function scheduleItemsToLines(items: ScheduleItem[]): string {
-  return items
-    .map((item) => [item.name, item.date, item.time, item.venue, item.type, item.price, item.description].join(" | "))
-    .join("\n");
-}
-
-function listToLines(list: string[]): string {
-  return list.join("\n");
-}
-
-function vendorLinesToObjects(text: string): VendorItem[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [category = "", name = "", booth = "", description = ""] = line.split("|").map((part) => part.trim());
-      return { category, name, booth, description };
-    })
-    .filter((item) => item.name.length > 0);
-}
-
-function vendorItemsToLines(items: VendorItem[]): string {
-  return items
-    .map((item) => [item.category, item.name, item.booth, item.description].join(" | "))
-    .join("\n");
-}
-
 function EditFestivalDetails({
   open,
   onOpenChange,
@@ -1369,14 +1292,6 @@ function EditFestivalDetails({
     expected_attendance: details?.expected_attendance ?? "",
     footprint: details?.footprint ?? "",
     website: details?.website ?? "",
-    schedule: scheduleItemsToLines(asSchedule(details?.schedule)),
-    performers: programItemsToLines(asProgramItems(details?.performers)),
-    vendors: vendorItemsToLines(asVendors(details?.vendors)),
-    food: listToLines(asStringList(details?.food)),
-    experiences: programItemsToLines(asExperiences(details?.experiences)),
-    faqs: asFaqs(details?.faqs)
-      .map((f) => `${f.q} | ${f.a}`)
-      .join("\n"),
   }));
   const [saving, setSaving] = useState(false);
 
@@ -1398,12 +1313,6 @@ function EditFestivalDetails({
       expected_attendance: form.expected_attendance.trim() || null,
       footprint: form.footprint.trim() || null,
       website: form.website.trim() || null,
-      schedule: scheduleLinesToObjects(form.schedule),
-      performers: programLinesToObjects(form.performers),
-      vendors: vendorLinesToObjects(form.vendors),
-      food: linesToList(form.food),
-      experiences: programLinesToObjects(form.experiences),
-      faqs: pairsToObjects(form.faqs, ["q", "a"]),
       updated_at: new Date().toISOString(),
     };
     const res = await supabase
@@ -1423,55 +1332,165 @@ function EditFestivalDetails({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Festival Details</DialogTitle>
+          <DialogTitle>At a Glance</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block sm:col-span-2">
             <span className="text-xs font-semibold text-muted-foreground">Tagline</span>
             <Textarea value={form.tagline} onChange={set("tagline")} rows={2} className="mt-1" />
           </label>
-          <Field label="Hours" value={form.hours} onChange={set("hours")} placeholder="Fri 11am–9pm · Sat 11am–9pm" />
-          <Field label="Price label" value={form.price_label} onChange={set("price_label")} placeholder="Free or $55–$120" />
+          <Field label="Hours" value={form.hours} onChange={set("hours")} placeholder="Fri 11am-9pm, Sat 11am-9pm" />
+          <Field label="Price label" value={form.price_label} onChange={set("price_label")} placeholder="Free or $55 to $120" />
           <Field label="Age" value={form.age_range} onChange={set("age_range")} placeholder="All ages" />
           <Field label="Format" value={form.format} onChange={set("format")} placeholder="Street Festival" />
           <Field label="Accessibility (comma separated)" value={form.accessibility} onChange={set("accessibility")} placeholder="wheelchair, asl, restrooms" />
           <Field label="Rain or Shine" value={form.rain_or_shine} onChange={set("rain_or_shine")} placeholder="Yes" />
           <Field label="Pet Policy" value={form.pet_policy} onChange={set("pet_policy")} />
           <Field label="Expected Attendance" value={form.expected_attendance} onChange={set("expected_attendance")} placeholder="5,000+" />
-          <Field label="Website" value={form.website} onChange={set("website")} placeholder="https://…" />
+          <Field label="Website" value={form.website} onChange={set("website")} placeholder="https://" />
           <label className="block sm:col-span-2">
             <span className="text-xs font-semibold text-muted-foreground">Festival Footprint</span>
             <Textarea value={form.footprint} onChange={set("footprint")} rows={2} className="mt-1" />
           </label>
-          <div className="sm:col-span-2">
-            <Area label="Schedule" value={form.schedule} onChange={set("schedule")} hint="One per line: Name | Date | Time | Venue | Type | Free or price | Description" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Festival Headliners and Performers" value={form.performers} onChange={set("performers")} hint="One per line: Name | Date and time | Venue | Description | RSVP, Free, or price | Type (dance, poetry, music)" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Vendors" value={form.vendors} onChange={set("vendors")} hint="One per line: Category | Name | Booth | Description" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Food + Drink" value={form.food} onChange={set("food")} hint="One per line" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="Featured Experiences" value={form.experiences} onChange={set("experiences")} hint="One per line: Name | Date and time | Venue | Description | Free or price | Type" />
-          </div>
-          <div className="sm:col-span-2">
-            <Area label="FAQs" value={form.faqs} onChange={set("faqs")} hint="One per line: Question | Answer" />
-          </div>
         </div>
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={() => void save()}
-            disabled={saving}
-            variant="brand"
-          >
-            {saving ? "Saving…" : "Save Details"}
+          <Button onClick={() => void save()} disabled={saving} variant="brand">
+            {saving ? "Saving..." : "Save Details"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function toLocalInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Lets the page creator change the headline parts of the festival itself. */
+function EditFestivalBasics({
+  open,
+  onOpenChange,
+  event,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  event: EventRow;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState({
+    title: event.title,
+    description: event.description ?? "",
+    image_url: event.image_url ?? "",
+    starts_at: toLocalInput(event.starts_at),
+    ends_at: toLocalInput(event.ends_at),
+    venue_name: event.venue_name ?? "",
+    address: event.address ?? "",
+    neighborhood: event.neighborhood ?? "",
+    category: event.category ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setForm({
+      title: event.title,
+      description: event.description ?? "",
+      image_url: event.image_url ?? "",
+      starts_at: toLocalInput(event.starts_at),
+      ends_at: toLocalInput(event.ends_at),
+      venue_name: event.venue_name ?? "",
+      address: event.address ?? "",
+      neighborhood: event.neighborhood ?? "",
+      category: event.category ?? "",
+    });
+  }, [open, event]);
+
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const save = async () => {
+    if (!form.title.trim()) {
+      toast.error("Give your festival a title");
+      return;
+    }
+    if (!form.starts_at) {
+      toast.error("Pick a start date and time");
+      return;
+    }
+    setSaving(true);
+    const res = await supabase
+      .from("events")
+      .update({
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        image_url: form.image_url || null,
+        starts_at: new Date(form.starts_at).toISOString(),
+        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+        venue_name: form.venue_name.trim() || null,
+        address: form.address.trim() || null,
+        location: form.venue_name.trim() || form.address.trim() || null,
+        neighborhood: form.neighborhood.trim() || null,
+        category: form.category.trim() || null,
+      })
+      .eq("id", event.id);
+    setSaving(false);
+    if (res.error) {
+      toast.error(res.error.message);
+      return;
+    }
+    toast.success("Festival page updated");
+    onOpenChange(false);
+    onSaved();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Festival page</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <ImagePickerField
+              label="Cover photo"
+              value={form.image_url}
+              onChange={(v) => setForm((f) => ({ ...f, image_url: v }))}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Field label="Title" value={form.title} onChange={set("title")} />
+          </div>
+          <label className="block sm:col-span-2">
+            <span className="text-xs font-semibold text-muted-foreground">About the festival</span>
+            <Textarea value={form.description} onChange={set("description")} rows={6} className="mt-1" />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold text-muted-foreground">Starts</span>
+            <Input type="datetime-local" className="mt-1" value={form.starts_at} onChange={set("starts_at")} />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold text-muted-foreground">Ends</span>
+            <Input type="datetime-local" className="mt-1" value={form.ends_at} onChange={set("ends_at")} />
+          </label>
+          <Field label="Venue" value={form.venue_name} onChange={set("venue_name")} />
+          <Field label="Address" value={form.address} onChange={set("address")} />
+          <Field label="Neighborhood" value={form.neighborhood} onChange={set("neighborhood")} />
+          <Field label="Category" value={form.category} onChange={set("category")} />
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={() => void save()} disabled={saving} variant="brand">
+            {saving ? "Saving..." : "Save page"}
           </Button>
         </div>
       </DialogContent>
