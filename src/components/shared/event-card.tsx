@@ -35,7 +35,7 @@ type EventRow = {
   user_id?: string | null;
 };
 
-export function EventCard({ event, compact = false, onDeleted, showCalendar = true }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean }) {
+export function EventCard({ event, compact = false, onDeleted, showCalendar = true, draft = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean; draft?: boolean }) {
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
   const resolvedImage = useEventImageUrl(event.image_url);
