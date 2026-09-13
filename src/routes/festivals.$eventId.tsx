@@ -40,8 +40,8 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
+import { PageBackButton } from "@/components/shared/page-back-button";
 import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
-import { EditableList, ImagePickerField, type FieldSpec } from "@/components/festival/festival-editing";
 
 export const Route = createFileRoute("/festivals/$eventId")({
   component: FestivalDetailPage,
