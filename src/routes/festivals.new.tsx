@@ -198,7 +198,10 @@ function NewFestivalPage() {
           latitude: lat,
           longitude: lng,
           category: "festival",
-          price_cents: 0,
+          price_cents:
+            form.admission === "paid"
+              ? Math.max(0, Math.round(Number(form.price || 0) * 100))
+              : 0,
           pricing_mode: pricingMode,
           donations_enabled: form.admission === "donation",
           is_published: form.published,
