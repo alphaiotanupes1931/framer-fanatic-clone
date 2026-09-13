@@ -238,10 +238,12 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
           <Share2 className="h-3.5 w-3.5" />
           Share
         </button>
-        <button type="button" onClick={addToCalendar} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Add to calendar">
-          <CalendarPlus className="h-3.5 w-3.5" />
-          Calendar
-        </button>
+        {showCalendar && (
+          <button type="button" onClick={addToCalendar} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Add to calendar">
+            <CalendarPlus className="h-3.5 w-3.5" />
+            Calendar
+          </button>
+        )}
         <div className="ml-auto flex items-center gap-2 text-muted-foreground">
           <button type="button" onClick={openShare} className="rounded-full p-1.5 transition hover:text-[#d4580a]" aria-label="Send in app" title="Send in app">
             <Send className="h-4 w-4 -rotate-45" />
