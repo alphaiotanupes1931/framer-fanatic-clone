@@ -283,7 +283,11 @@ function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fall
   const action = item.price || fallbackAction;
   return (
     <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-      <div className="min-w-0">
+      <div className="flex min-w-0 gap-4">
+        {item.image && (
+          <Img src={item.image} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+        )}
+        <div className="min-w-0">
         <h3 className="text-base font-bold text-foreground">{item.name}</h3>
         {(item.when || item.venue) && (
           <p className="mt-1 text-sm font-semibold text-muted-foreground">
