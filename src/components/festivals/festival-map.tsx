@@ -1,5 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
 
+/**
+ * Fits the map to the current pins. Declared at module scope so its identity is
+ * stable across renders, otherwise React remounts it and resets the user's
+ * zoom/pan on every parent render.
+ */
+function KeepPinsInView({
+  pins,
+  useMap,
+}: {
+  pins: FestivalPin[];
+  useMap: () => any;
+}) {
+  const map = useMap();
+  const signature = useMemo(
+    () => pins.map((pin) => `${pin.latitude},${pin.longitude}`).join("|"),
+    [pins],
+  );
+  useEffect(() => {
+    if (pins.length === 0) return;
+    if (pins.length === 1) {
+      const pin = pins[0];
+      if (pin) map.setView([pin.latitude, pin.longitude], 12);
+      return;
+    }
+    map.fitBounds(pins.map((pin) => [pin.latitude, pin.longitude]), { padding: [32, 32], maxZoom: 13 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, signature]);
+  return null;
+}
+
 export type FestivalPin = {
   id: string;
   title: string;
