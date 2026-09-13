@@ -295,6 +295,7 @@ function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fall
           </p>
         )}
         {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+        </div>
       </div>
       <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="sm" className="w-fit">
         <Link to="/events/$eventId" params={{ eventId }}>{action}</Link>
