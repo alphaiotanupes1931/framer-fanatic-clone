@@ -306,24 +306,29 @@ function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: Even
   };
 
   return (
-    <article className="border-b border-border py-6 first:pt-2 last:border-0">
-      <div className="text-[11px] font-bold uppercase text-orange">{item.type || event.category || "Performer"}</div>
-      <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
-      {(item.when || item.venue) && (
-        <p className="mt-2 text-sm font-semibold text-muted-foreground">
-          {[item.when, item.venue].filter(Boolean).join(" · ")}
-        </p>
+    <article className="flex gap-4 border-b border-border py-6 first:pt-2 last:border-0">
+      {item.image && (
+        <Img src={item.image} alt={item.name} className="h-24 w-24 shrink-0 rounded-xl object-cover" />
       )}
-      {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => void sharePerformer()}>
-          <Share2 /> Share
-        </Button>
-        <Button asChild variant="brand" size="sm">
-          <Link to="/events/$eventId" params={{ eventId: event.id }}>
-            <Ticket /> {isFree ? "RSVP" : "Tickets"}
-          </Link>
-        </Button>
+      <div className="min-w-0 flex-1">
+        <div className="text-[11px] font-bold uppercase text-orange">{item.type || event.category || "Performer"}</div>
+        <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
+        {(item.when || item.venue) && (
+          <p className="mt-2 text-sm font-semibold text-muted-foreground">
+            {[item.when, item.venue].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => void sharePerformer()}>
+            <Share2 /> Share
+          </Button>
+          <Button asChild variant="brand" size="sm">
+            <Link to="/events/$eventId" params={{ eventId: event.id }}>
+              <Ticket /> {isFree ? "RSVP" : "Tickets"}
+            </Link>
+          </Button>
+        </div>
       </div>
     </article>
   );
