@@ -90,8 +90,27 @@ const CATEGORY_GROUPS: { label: string; match: RegExp }[] = [
   { label: "Markets", match: /market|vendor|flea|bazaar/i },
 ];
 
-const QUICK_FILTERS = ["This Weekend", "Free", "Family Friendly", "Outdoor"] as const;
-type QuickFilter = (typeof QUICK_FILTERS)[number];
+const FILTER_GROUPS: { key: string; label: string; options: string[] }[] = [
+  { key: "date", label: "Date", options: ["Today", "This Weekend", "This Month"] },
+  { key: "price", label: "Price", options: ["Free", "Paid", "Donation-Based"] },
+  {
+    key: "category",
+    label: "Category",
+    options: [
+      "Arts",
+      "Music",
+      "Food",
+      "Film",
+      "Literature",
+      "Pride",
+      "Caribbean",
+      "Family",
+      "Neighborhood",
+    ],
+  },
+  { key: "audience", label: "Audience", options: ["All Ages", "Family Friendly", "21+"] },
+  { key: "format", label: "Format", options: ["Outdoor", "Indoor", "Street Festival"] },
+];
 
 const TABS = [
   { key: "discover", label: "Discover", icon: Compass },
@@ -101,6 +120,7 @@ const TABS = [
   { key: "neighborhoods", label: "Neighborhoods", icon: Landmark },
   { key: "organizers", label: "Organizers", icon: Users },
   { key: "saved", label: "Saved", icon: Bookmark },
+  { key: "drafts", label: "Drafts", icon: FileText },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
@@ -323,7 +343,9 @@ function OrgFollowButton({ orgId, meId }: { orgId: string; meId?: string | null 
 function FestivalsPage() {
   const me = useCurrentProfile();
   const [q, setQ] = useState("");
-  const [active, setActive] = useState<QuickFilter[]>([]);
+  const [active, setActive] = useState<Record<string, string[]>>({});
+  const [showFilters, setShowFilters] = useState(false);
+  const [drafts, setDrafts] = useState<Row[]>([]);
   const [tab, setTab] = useState<TabKey>("discover");
   const [mapArea, setMapArea] = useState<string>("all");
   const [activePin, setActivePin] = useState<string | null>(null);
