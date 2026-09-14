@@ -238,9 +238,12 @@ export function EditableList<T extends ItemRecord>({
 
       {items.length > 0 ? (
         <div>
-          {items.map((item, index) => (
+          {items.map((item, index) => {
+            const rendered = renderItem(item, index);
+            if (rendered === null || rendered === undefined || rendered === false) return null;
+            return (
             <div key={`${item.name ?? item.q ?? item.title ?? index}-${index}`} className="relative">
-              {renderItem(item, index)}
+              {rendered}
               {canEdit && (
                 <div className="mb-4 flex gap-2">
                   <Button
