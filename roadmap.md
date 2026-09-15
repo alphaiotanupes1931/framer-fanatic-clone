@@ -12,3 +12,4 @@
 - [ ] Migrate remaining high-traffic product areas to the shared interface system
 - [x] Match festival overview sections to supplied reference and verify owner/visitor layouts
 - [x] Keep festival cards on the Explore page and show inline editing controls to authorized users
+- [x] Limit event and festival creation and editing to one category
