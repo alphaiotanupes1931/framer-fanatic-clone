@@ -119,6 +119,8 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
 
         // 2. Process auth_emails first (priority), then transactional_emails
         for (const queue of ['auth_emails', 'transactional_emails']) {
+          if (coolingDown && queue !== 'auth_emails') continue
+
           const { data: messages, error: readError } = await supabase.rpc('read_email_batch', {
             queue_name: queue,
             batch_size: batchSize,
