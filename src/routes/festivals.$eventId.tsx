@@ -50,7 +50,7 @@ import { PageBackButton } from "@/components/shared/page-back-button";
 import { useUserRole } from "@/hooks/use-user-role";
 import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
 import { EditFestivalDialog } from "@/components/festival/edit-festival-dialog";
-import { downloadIcs } from "@/lib/ics";
+
 
 export const Route = createFileRoute("/festivals/$eventId")({
   component: FestivalDetailPage,
@@ -782,7 +782,6 @@ function FestivalDetailPage() {
   const [scheduleRange, setScheduleRange] = useState("all");
   const [scheduleDate, setScheduleDate] = useState("all");
   const [scheduleQuery, setScheduleQuery] = useState("");
-  const [mySchedule, setMySchedule] = useState<number[]>([]);
   const scheduleDates = useMemo(
     () => Array.from(new Set(schedule.map((item) => item.date).filter(Boolean))),
     [schedule],
@@ -804,41 +803,6 @@ function FestivalDetailPage() {
     });
   }, [schedule, scheduleDate, scheduleRange, scheduleQuery]);
 
-  const addScheduleToCalendar = (item: ScheduleItem) => {
-    const base = item.date ? new Date(`${item.date} ${item.time || "12:00"}`) : new Date(`${item.time || ""}`);
-    const start = Number.isNaN(base.getTime()) ? new Date(event?.starts_at ?? Date.now()) : base;
-    downloadIcs(
-      {
-        uid: `festival-${eventId}-${item.name}`,
-        title: item.name,
-        start,
-        location: item.venue || event?.venue_name || null,
-        description: item.description || null,
-        url: typeof window !== "undefined" ? window.location.href : null,
-      },
-      item.name,
-    );
-  };
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(`festival-schedule:${eventId}`);
-    if (!stored) return;
-    try {
-      const parsed = JSON.parse(stored) as unknown;
-      if (Array.isArray(parsed)) setMySchedule(parsed.filter((value): value is number => typeof value === "number"));
-    } catch {
-      setMySchedule([]);
-    }
-  }, [eventId]);
-
-  const toggleMySchedule = (index: number) => {
-    setMySchedule((current) => {
-      const next = current.includes(index) ? current.filter((value) => value !== index) : [...current, index];
-      window.localStorage.setItem(`festival-schedule:${eventId}`, JSON.stringify(next));
-      return next;
-    });
-  };
   const scrollTo = (id: string) => {
     setActiveTab(id);
     document.getElementById(`festival-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
