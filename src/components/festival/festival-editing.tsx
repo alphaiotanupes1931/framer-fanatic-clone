@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Img } from "@/components/shared/smart-img";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, GripVertical, ImagePlus, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, GripVertical, ImagePlus, Loader2, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
 
 /** Rejects when a promise takes longer than `ms`, so uploads never hang forever. */
 function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> {
@@ -299,47 +300,20 @@ export function EditableList<T extends ItemRecord>({
               }
             >
               {rendered}
-              {canDrag && (
-                <span
-                  aria-hidden
-                  className="absolute right-3 top-3 cursor-grab rounded-full bg-foreground/70 p-1.5 text-background active:cursor-grabbing"
-                >
-                  <GripVertical className="h-3.5 w-3.5" />
-                </span>
-              )}
               {canEdit && (
-                <div className="mb-4 flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="xs"
-                    onClick={() => {
-                      setEditIndex(index);
-                      setOpen(true);
-                    }}
-                  >
-                    <Pencil /> Edit
-                  </Button>
-                  <Button type="button" variant="outline" size="xs" onClick={() => void remove(index)}>
-                    <Trash2 /> Remove
-                  </Button>
-                  {canDrag && items.length > 1 && (
-                    <>
-                      <Button type="button" variant="outline" size="xs" disabled={index === 0} onClick={() => void move(index, index - 1)}>
-                        <ArrowUp /> Up
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="xs"
-                        disabled={index === items.length - 1}
-                        onClick={() => void move(index, index + 1)}
-                      >
-                        <ArrowDown /> Down
-                      </Button>
-                    </>
-                  )}
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="secondary" size="icon-sm" className="absolute right-2 top-2 rounded-full bg-foreground/70 text-background hover:bg-foreground" aria-label={`Manage ${item.name ?? item.title ?? "item"}`}>
+                      <MoreVertical />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => { setEditIndex(index); setOpen(true); }}><Pencil /> Edit</DropdownMenuItem>
+                    {canDrag && items.length > 1 && <DropdownMenuItem disabled={index === 0} onSelect={() => void move(index, index - 1)}><ArrowUp /> Move up</DropdownMenuItem>}
+                    {canDrag && items.length > 1 && <DropdownMenuItem disabled={index === items.length - 1} onSelect={() => void move(index, index + 1)}><ArrowDown /> Move down</DropdownMenuItem>}
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => void remove(index)}><Trash2 /> Remove</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
             );
