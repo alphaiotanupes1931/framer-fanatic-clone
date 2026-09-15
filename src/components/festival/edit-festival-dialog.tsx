@@ -709,6 +709,18 @@ export function EditFestivalDialog({
             </div>
           </div>
         )}
+    </>
+  );
+
+  if (asPage) return <div className="space-y-2">{body}</div>;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Festival</DialogTitle>
+        </DialogHeader>
+        {body}
       </DialogContent>
     </Dialog>
   );
