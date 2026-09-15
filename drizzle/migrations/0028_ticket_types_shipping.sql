@@ -1,0 +1,1 @@
+ALTER TABLE public.ticket_types ADD COLUMN IF NOT EXISTS shipping_cents integer NOT NULL DEFAULT 0 CHECK (shipping_cents >= 0);
