@@ -59,12 +59,14 @@ export function ImagePickerField({
   onChange,
   label = "Image",
   aspect = 1,
+  trigger,
 }: {
   value: string;
   onChange: (v: string) => void;
   label?: string;
   /** Starting crop shape; the person can still pick another one. */
   aspect?: number;
+  trigger?: React.ReactNode;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
