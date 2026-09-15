@@ -45,17 +45,29 @@ export async function uploadFestivalImage(file: File): Promise<string> {
   return path;
 }
 
+const CROP_SHAPES = [
+  { label: "1:1", value: 1 },
+  { label: "4:5", value: 4 / 5 },
+  { label: "4:3", value: 4 / 3 },
+  { label: "16:9", value: 16 / 9 },
+];
+
 export function ImagePickerField({
   value,
   onChange,
   label = "Image",
+  aspect = 1,
 }: {
   value: string;
   onChange: (v: string) => void;
   label?: string;
+  /** Starting crop shape; the person can still pick another one. */
+  aspect?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropAspect, setCropAspect] = useState(aspect);
 
   const pick = async (file: File) => {
     setBusy(true);
