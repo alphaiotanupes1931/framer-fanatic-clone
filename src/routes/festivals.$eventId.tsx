@@ -1480,14 +1480,11 @@ function FestivalDetailPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                const next = [...updates];
-                                next[idx] = { ...item };
-                                // Handled by EditableList-style dialog? For now inline edit is complex; use prompt
-                                const newBody = window.prompt("Edit update", item.body);
-                                if (newBody !== null) {
-                                  next[idx] = { ...item, body: newBody };
-                                  void saveDetails({ updates: next });
-                                }
+                                setEditingUpdateIdx(idx);
+                                setUpdateType(item.type || "Announcement");
+                                setUpdateBody(item.body || "");
+                                setUpdateImage(item.image || null);
+                                document.getElementById("festival-updates")?.scrollIntoView({ behavior: "smooth", block: "start" });
                               }}
                             >
                               Edit
