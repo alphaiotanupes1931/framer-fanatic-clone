@@ -224,6 +224,18 @@ function EventDetail() {
           const { data: sv } = await supabase.from("event_saves").select("event_id").eq("event_id", eventId).eq("user_id", uid).maybeSingle();
           setSaved(!!sv);
         }
+        const neighborhood = (data as EventRow).neighborhood;
+        if (neighborhood) {
+          const [orgsRes, artistsRes] = await Promise.all([
+            supabase.from("organizations").select("id,name,slug,type,subtype,tagline,bio").eq("is_public", true).ilike("neighborhood", neighborhood).limit(12),
+            supabase.from("profiles_public").select("id,display_name,username,category,bio").ilike("neighborhood", neighborhood).not("username", "is", null).limit(8),
+          ]);
+          setNearbyOrgs((orgsRes.data as NearbyOrg[] | null) ?? []);
+          setNearbyArtists(((artistsRes.data as NearbyArtist[] | null) ?? []).filter((artist) => artist.id !== (data as EventRow).user_id));
+        } else {
+          setNearbyOrgs([]);
+          setNearbyArtists([]);
+        }
       }
       const { data: tt } = await supabase
         .from("ticket_types")
