@@ -1,7 +1,6 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, CalendarPlus, Upload } from "lucide-react";
-import { downloadIcs } from "@/lib/ics";
+import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, Upload } from "lucide-react";
 import { ReportButton } from "@/components/shared/report-button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -35,7 +34,7 @@ type EventRow = {
   user_id?: string | null;
 };
 
-export function EventCard({ event, compact = false, onDeleted, showCalendar = true, draft = false, festival = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean; draft?: boolean; festival?: boolean }) {
+export function EventCard({ event, compact = false, onDeleted, draft = false, festival = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; draft?: boolean; festival?: boolean }) {
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
   const resolvedImage = useEventImageUrl(event.image_url);

@@ -257,7 +257,7 @@ function Section({ title, rows, id, draft = false, onRemove }: { title: string; 
       <h2 className="font-display text-lg font-extrabold text-foreground sm:text-xl">{title}</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((e) => (
-          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} showCalendar={false} draft={draft} festival onDeleted={onRemove} />
+          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} draft={draft} festival onDeleted={onRemove} />
         ))}
       </div>
     </section>
