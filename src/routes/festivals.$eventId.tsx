@@ -291,6 +291,7 @@ function asProgramItems(v: unknown): ProgramItem[] {
 
 function ProgramCard({ item, fallbackAction, eventId }: { item: ProgramItem; fallbackAction: string; eventId: string }) {
   const action = item.price || fallbackAction;
+  const isFreeAction = action.toLowerCase() === "free";
   return (
     <article className="group relative aspect-[1.05/1] min-h-64 overflow-hidden rounded-lg border border-border bg-foreground">
       {item.image ? (
@@ -303,7 +304,12 @@ function ProgramCard({ item, fallbackAction, eventId }: { item: ProgramItem; fal
         <h3 className="font-display text-xl font-extrabold leading-tight sm:text-2xl">{item.name}</h3>
         {(item.when || item.venue) && <p className="mt-1 text-xs font-semibold">{[item.when, item.venue].filter(Boolean).join(" · ")}</p>}
         {item.description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-background/85">{item.description}</p>}
-        <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="xs" className="mt-2 w-fit border-orange text-orange hover:bg-orange hover:text-orange-foreground">
+        <Button
+          asChild
+          variant={isFreeAction ? "outline" : "brand"}
+          size="xs"
+          className={isFreeAction ? "mt-2 w-fit border-orange text-orange hover:bg-orange hover:text-orange-foreground" : "mt-2 w-fit"}
+        >
           <Link to="/events/$eventId" params={{ eventId }}><Ticket /> {action}</Link>
         </Button>
       </div>
