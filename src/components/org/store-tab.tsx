@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Trash2, Pencil, ShoppingBag, X } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, ShoppingBag, X, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { ImageUpload } from "@/components/shared/image-upload";
@@ -17,7 +17,29 @@ type Product = {
   inventory: number | null;
   is_active: boolean;
   sort_order: number;
+  requires_shipping: boolean | null;
 };
+
+type Order = {
+  id: string;
+  created_at: string;
+  quantity: number;
+  status: string;
+  buyer_total_cents: number;
+  ship_name: string | null;
+  ship_email: string | null;
+  ship_phone: string | null;
+  ship_address: Record<string, string | null> | null;
+  buyer_note: string | null;
+  product_id: string;
+};
+
+function formatAddress(a: Record<string, string | null> | null) {
+  if (!a) return null;
+  return [a.line1, a.line2, [a.city, a.state].filter(Boolean).join(", "), a.postal_code, a.country]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 const money = (c: number) => `$${(c / 100).toFixed(2).replace(/\.00$/, "")}`;
 
@@ -35,6 +57,18 @@ export function StoreTab({
   const [editing, setEditing] = useState<Product | "new" | null>(null);
   const [payoutsReady, setPayoutsReady] = useState<boolean | null>(null);
   const [buying, setBuying] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [showOrders, setShowOrders] = useState(false);
+
+  const loadOrders = async () => {
+    const { data } = await supabase
+      .from("product_orders")
+      .select("id, created_at, quantity, status, buyer_total_cents, ship_name, ship_email, ship_phone, ship_address, buyer_note, product_id")
+      .eq("org_id", orgId)
+      .eq("status", "paid")
+      .order("created_at", { ascending: false });
+    setOrders((data ?? []) as unknown as Order[]);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -50,6 +84,7 @@ export function StoreTab({
 
   useEffect(() => {
     void load();
+    if (canManage) void loadOrders();
     getOrgPaymentStatus({ data: { orgId } })
       .then((r) => setPayoutsReady(!!r.ready))
       .catch(() => setPayoutsReady(false));
@@ -89,14 +124,54 @@ export function StoreTab({
           <ShoppingBag className="h-5 w-5 text-primary" /> {title}
         </h3>
         {canManage && (
-          <button
-            onClick={() => setEditing("new")}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add product
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setShowOrders((v) => !v); void loadOrders(); }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-accent"
+            >
+              <Package className="h-3.5 w-3.5" /> Orders{orders.length ? ` (${orders.length})` : ""}
+            </button>
+            <button
+              onClick={() => setEditing("new")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add product
+            </button>
+          </div>
         )}
       </div>
+
+      {canManage && showOrders && (
+        <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
+          <div className="text-sm font-bold text-foreground">Orders to ship</div>
+          {orders.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No paid orders yet.</p>
+          ) : (
+            orders.map((o) => {
+              const p = items.find((i) => i.id === o.product_id);
+              const addr = formatAddress(o.ship_address);
+              return (
+                <div key={o.id} className="rounded-xl border border-border p-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-foreground">
+                      {p?.name ?? "Product"} × {o.quantity}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(o.created_at).toLocaleDateString()} · {money(o.buyer_total_cents)}
+                    </span>
+                  </div>
+                  <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                    <div>{o.ship_name ?? "Buyer"}{o.ship_email ? ` · ${o.ship_email}` : ""}{o.ship_phone ? ` · ${o.ship_phone}` : ""}</div>
+                    {addr ? <div>{addr}</div> : <div>No shipping address on file (digital item).</div>}
+                    {o.buyer_note && <div className="italic">Note: {o.buyer_note}</div>}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
 
       {canManage && payoutsReady === false && (
         <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
@@ -194,6 +269,7 @@ function ProductForm({
   const [inventory, setInventory] = useState(initial?.inventory != null ? String(initial.inventory) : "");
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
   const [active, setActive] = useState(initial?.is_active ?? true);
+  const [needsShipping, setNeedsShipping] = useState(initial?.requires_shipping ?? true);
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -209,6 +285,7 @@ function ProductForm({
       image_url: imageUrl || null,
       inventory: inventory.trim() === "" ? null : Math.max(0, parseInt(inventory, 10) || 0),
       is_active: active,
+      requires_shipping: needsShipping,
     };
     const { error } = initial
       ? await supabase.from("organization_products").update(payload).eq("id", initial.id)
@@ -237,6 +314,9 @@ function ProductForm({
       <ImageUpload value={imageUrl} onChange={setImageUrl} label="Upload product photo" />
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
         <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Listed for sale
+      </label>
+      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <input type="checkbox" checked={needsShipping} onChange={(e) => setNeedsShipping(e.target.checked)} /> Physical item (ask the buyer for a shipping address)
       </label>
       <p className="text-[11px] text-muted-foreground">
         Buyers pay the platform fee and card processing on top, so you receive the price you set.

@@ -569,7 +569,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
 
     const { data: product } = await supabaseAdmin
       .from("organization_products")
-      .select("id, org_id, name, description, price_cents, image_url, inventory, is_active")
+      .select("id, org_id, name, description, price_cents, image_url, inventory, is_active, requires_shipping")
       .eq("id", data.productId)
       .maybeSingle();
     if (!product || !product.is_active) throw new Error("This product is no longer available.");
@@ -601,7 +601,20 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       cancel_url: `${data.returnOrigin}/o/${org.slug}?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
-      shipping_address_collection: { allowed_countries: ["US"] },
+      ...(product.requires_shipping === false
+        ? {}
+        : {
+            shipping_address_collection: { allowed_countries: ["US"] as const },
+            phone_number_collection: { enabled: true },
+            custom_fields: [
+              {
+                key: "delivery_notes",
+                label: { type: "custom" as const, custom: "Delivery notes (optional)" },
+                type: "text" as const,
+                optional: true,
+              },
+            ],
+          }),
       line_items: checkoutLineItems(breakdown, {
         name: data.quantity > 1 ? `${product.name} x${data.quantity}` : product.name,
         description: product.description ?? undefined,

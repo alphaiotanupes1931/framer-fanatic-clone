@@ -1824,6 +1824,7 @@ export type Database = {
           name: string
           org_id: string
           price_cents: number
+          requires_shipping: boolean
           sort_order: number
           updated_at: string
         }
@@ -1837,6 +1838,7 @@ export type Database = {
           name: string
           org_id: string
           price_cents?: number
+          requires_shipping?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -1850,6 +1852,7 @@ export type Database = {
           name?: string
           org_id?: string
           price_cents?: number
+          requires_shipping?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -2586,6 +2589,7 @@ export type Database = {
       product_orders: {
         Row: {
           buyer_id: string | null
+          buyer_note: string | null
           buyer_total_cents: number
           created_at: string
           id: string
@@ -2595,6 +2599,10 @@ export type Database = {
           quantity: number
           seller_id: string
           seller_net_cents: number
+          ship_address: Json | null
+          ship_email: string | null
+          ship_name: string | null
+          ship_phone: string | null
           status: string
           stripe_checkout_session_id: string | null
           stripe_fee_cents: number
@@ -2603,6 +2611,7 @@ export type Database = {
         }
         Insert: {
           buyer_id?: string | null
+          buyer_note?: string | null
           buyer_total_cents?: number
           created_at?: string
           id?: string
@@ -2612,6 +2621,10 @@ export type Database = {
           quantity?: number
           seller_id: string
           seller_net_cents?: number
+          ship_address?: Json | null
+          ship_email?: string | null
+          ship_name?: string | null
+          ship_phone?: string | null
           status?: string
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number
@@ -2620,6 +2633,7 @@ export type Database = {
         }
         Update: {
           buyer_id?: string | null
+          buyer_note?: string | null
           buyer_total_cents?: number
           created_at?: string
           id?: string
@@ -2629,6 +2643,10 @@ export type Database = {
           quantity?: number
           seller_id?: string
           seller_net_cents?: number
+          ship_address?: Json | null
+          ship_email?: string | null
+          ship_name?: string | null
+          ship_phone?: string | null
           status?: string
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number
