@@ -846,11 +846,8 @@ function FestivalDetailPage() {
                 <span className="text-xs font-bold uppercase">Creator tools</span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="secondary" onClick={() => setBasicsOpen(true)}>
-                  <Pencil /> Edit festival
-                </Button>
-                <Button size="sm" variant="secondary" onClick={() => setEditOpen(true)}>
-                  <Pencil /> Edit details
+                <Button size="sm" variant="secondary" onClick={() => setFullEditOpen(true)}>
+                  <Pencil /> Edit Festival
                 </Button>
                 <Button asChild size="sm" variant="secondary">
                   <Link to="/organizer-studio" search={{ event: event.id }}>
