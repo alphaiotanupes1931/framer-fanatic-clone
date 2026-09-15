@@ -1011,7 +1011,7 @@ function FestivalDetailPage() {
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
                   {showCreatorTools && (
-                    <Button type="button" variant="outline" size="xs" onClick={() => setEditOpen(true)}>
+                    <Button type="button" variant="outline" size="xs" onClick={() => setBasicsOpen(true)}>
                       <Pencil /> Edit
                     </Button>
                   )}
@@ -1020,7 +1020,7 @@ function FestivalDetailPage() {
                   <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
                 ) : (
                   <div className="mt-4">
-                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setEditOpen(true)} />
+                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setBasicsOpen(true)} />
                   </div>
                 )}
               </div>
