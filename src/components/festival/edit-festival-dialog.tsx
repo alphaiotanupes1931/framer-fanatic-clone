@@ -197,12 +197,13 @@ export function EditFestivalDialog({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  eventId: string;
+  eventId: string | null;
   onSaved: () => void;
   /** Render inline as a full page instead of inside a modal. */
   asPage?: boolean;
 }) {
   const navigate = useNavigate();
+  const isCreate = !eventId;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [ev, setEv] = useState<Record<string, string>>({});
@@ -229,6 +230,10 @@ export function EditFestivalDialog({
 
   useEffect(() => {
     if (!open) return;
+    if (!eventId) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     void (async () => {
@@ -314,6 +319,23 @@ export function EditFestivalDialog({
       toast.error("Ticket types need a name and a price");
       return;
     }
+    if (isCreate) {
+      setTickets((t) => [
+        ...t,
+        {
+          id: `new-${crypto.randomUUID()}`,
+          name: ticketForm.name.trim(),
+          description: ticketForm.description.trim() || null,
+          price_cents: Math.max(0, Math.round(Number(ticketForm.price) * 100)),
+          shipping_cents: Math.max(0, Math.round(Number(ticketForm.shipping || 0) * 100)),
+          quantity: ticketForm.quantity ? Number(ticketForm.quantity) : null,
+          max_per_buyer: ticketForm.max ? Number(ticketForm.max) : null,
+        },
+      ]);
+      setTicketForm({ name: "", description: "", price: "", shipping: "", quantity: "", max: "" });
+      toast.success("Ticket type added");
+      return;
+    }
     const res = await supabase
       .from("ticket_types")
       .insert({
@@ -338,6 +360,10 @@ export function EditFestivalDialog({
   };
 
   const removeTicketType = async (id: string) => {
+    if (id.startsWith("new-")) {
+      setTickets((t) => t.filter((x) => x.id !== id));
+      return;
+    }
     const res = await supabase.from("ticket_types").delete().eq("id", id);
     if (res.error) {
       toast.error(res.error.message);
@@ -357,36 +383,60 @@ export function EditFestivalDialog({
     }
     setSaving(true);
     const priceCents = ev.admission === "paid" ? Math.max(0, Math.round(Number(ev.price || 0) * 100)) : 0;
-    const evRes = await supabase
-      .from("events")
-      .update({
-        title: ev.title.trim(),
-        description: ev.description?.trim() || null,
-        image_url: ev.image_url || null,
-        starts_at: new Date(ev.starts_at).toISOString(),
-        ends_at: ev.ends_at ? new Date(ev.ends_at).toISOString() : null,
-        venue_name: ev.venue_name?.trim() || null,
-        address: ev.address?.trim() || null,
-        location: ev.venue_name?.trim() || ev.address?.trim() || null,
-        neighborhood: ev.neighborhood?.trim() || null,
-        category: ev.category?.trim() || categories[0] || null,
-        latitude: ev.latitude ? Number(ev.latitude) : null,
-        longitude: ev.longitude ? Number(ev.longitude) : null,
-        pricing_mode: ev.admission === "paid" ? "paid" : "free",
-        donations_enabled: ev.admission === "donation",
-        price_cents: priceCents,
-        gallery_urls: galleryFinal,
-        is_published: published,
-      } as never)
-      .eq("id", eventId);
-    if (evRes.error) {
-      setSaving(false);
-      toast.error(evRes.error.message);
-      return;
+    const eventFields = {
+      title: ev.title.trim(),
+      description: ev.description?.trim() || null,
+      image_url: ev.image_url || null,
+      starts_at: new Date(ev.starts_at).toISOString(),
+      ends_at: ev.ends_at ? new Date(ev.ends_at).toISOString() : null,
+      venue_name: ev.venue_name?.trim() || null,
+      address: ev.address?.trim() || null,
+      location: ev.venue_name?.trim() || ev.address?.trim() || null,
+      neighborhood: ev.neighborhood?.trim() || null,
+      category: ev.category?.trim() || categories[0] || (isCreate ? "festival" : null),
+      latitude: ev.latitude ? Number(ev.latitude) : null,
+      longitude: ev.longitude ? Number(ev.longitude) : null,
+      pricing_mode: ev.admission === "paid" ? "paid" : "free",
+      donations_enabled: ev.admission === "donation",
+      price_cents: priceCents,
+      gallery_urls: galleryFinal,
+      is_published: published,
+    };
+    let targetId = eventId ?? "";
+    if (isCreate) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData.session?.user?.id;
+      if (!uid) {
+        setSaving(false);
+        toast.error("Sign in to create a festival");
+        return;
+      }
+      const ins = await supabase
+        .from("events")
+        .insert({ ...eventFields, user_id: uid } as never)
+        .select("id")
+        .single();
+      if (ins.error) {
+        setSaving(false);
+        toast.error(
+          ins.error.message.includes("row-level security")
+            ? "Only Artists can post festivals. Upgrade in your profile."
+            : ins.error.message,
+        );
+        return;
+      }
+      targetId = (ins.data as { id: string }).id;
+    } else {
+      const upd = await supabase.from("events").update(eventFields as never).eq("id", eventId);
+      if (upd.error) {
+        setSaving(false);
+        toast.error(upd.error.message);
+        return;
+      }
     }
     const detRes = await supabase.from("festival_details").upsert(
       {
-        event_id: eventId,
+        event_id: targetId,
         tagline: det.tagline?.trim() || null,
         hours: det.hours?.trim() || null,
         price_label: det.price_label?.trim() || null,
@@ -430,12 +480,28 @@ export function EditFestivalDialog({
       toast.error(detRes.error.message);
       return;
     }
-    toast.success("Festival updated");
+    if (isCreate && tickets.length > 0) {
+      await supabase.from("ticket_types").insert(
+        tickets.map((t, i) => ({
+          event_id: targetId,
+          name: t.name,
+          description: t.description,
+          price_cents: t.price_cents,
+          shipping_cents: t.shipping_cents ?? 0,
+          quantity: t.quantity,
+          max_per_buyer: t.max_per_buyer,
+          sort_order: i,
+        })) as never,
+      );
+    }
+    toast.success(isCreate ? (published ? "Festival published" : "Festival saved as draft") : "Festival updated");
     onOpenChange(false);
     onSaved();
+    if (isCreate && targetId) void navigate({ to: "/festivals/$eventId", params: { eventId: targetId } });
   };
 
   const remove = async () => {
+    if (!eventId) return;
     if (!window.confirm("Delete this festival? This cannot be undone.")) return;
     const res = await supabase.from("events").delete().eq("id", eventId);
     if (res.error) {
@@ -455,7 +521,11 @@ export function EditFestivalDialog({
 
   const body = (
     <>
-        <p className="text-sm text-muted-foreground">Update every part of your festival page. Changes go live immediately.</p>
+        <p className="text-sm text-muted-foreground">
+          {isCreate
+            ? "Fill in every part of your festival page. You can publish now or save it as a draft."
+            : "Update every part of your festival page. Changes go live immediately."}
+        </p>
 
 
 
@@ -700,14 +770,16 @@ export function EditFestivalDialog({
             </Section>
 
             <div className="sticky bottom-0 -mx-6 flex flex-wrap items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
-              <Button type="button" variant="outline" onClick={() => void remove()}>
-                <Trash2 /> Delete Festival
-              </Button>
+              {!isCreate && (
+                <Button type="button" variant="outline" onClick={() => void remove()}>
+                  <Trash2 /> Delete Festival
+                </Button>
+              )}
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="button" variant="brand" disabled={saving} onClick={() => void save()}>
-                {saving ? "Saving…" : "Save Changes"}
+                {saving ? "Saving…" : isCreate ? "Create Festival" : "Save Changes"}
               </Button>
             </div>
           </div>
@@ -721,7 +793,7 @@ export function EditFestivalDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Festival</DialogTitle>
+          <DialogTitle>{isCreate ? "Create Festival" : "Edit Festival"}</DialogTitle>
         </DialogHeader>
         {body}
       </DialogContent>
