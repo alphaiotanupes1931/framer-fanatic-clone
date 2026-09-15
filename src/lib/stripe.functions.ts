@@ -194,11 +194,11 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     }
 
     // Events can sell several tiers. When a tier is chosen it defines price and limits.
-    let tier: { id: string; name: string; price_cents: number; quantity: number | null; max_per_buyer: number | null; sale_starts_at: string | null; sale_ends_at: string | null } | null = null;
+    let tier: { id: string; name: string; price_cents: number; shipping_cents: number | null; quantity: number | null; max_per_buyer: number | null; sale_starts_at: string | null; sale_ends_at: string | null } | null = null;
     if (data.ticketTypeId) {
       const { data: tt } = await supabase
         .from("ticket_types")
-        .select("id, name, price_cents, quantity, max_per_buyer, sale_starts_at, sale_ends_at, event_id")
+        .select("id, name, price_cents, shipping_cents, quantity, max_per_buyer, sale_starts_at, sale_ends_at, event_id")
         .eq("id", data.ticketTypeId)
         .maybeSingle();
       if (!tt || tt.event_id !== event.id) throw new Error("Ticket type not found for this event.");
