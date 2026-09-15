@@ -8,7 +8,7 @@ import { Img } from "@/components/shared/smart-img";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, GripVertical, ImagePlus, Loader2, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
+import { GripVertical, ImagePlus, Loader2, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
 
 /** Rejects when a promise takes longer than `ms`, so uploads never hang forever. */
 function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> {
@@ -259,7 +259,7 @@ export function EditableList<T extends ItemRecord>({
         <div className="mb-4 flex items-center justify-end gap-3">
           {canDrag && items.length > 1 && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <GripVertical className="h-3.5 w-3.5" /> drag to reorder
+              <GripVertical className="h-3.5 w-3.5" /> Drag cards to reorder
             </span>
           )}
           <Button
@@ -284,9 +284,12 @@ export function EditableList<T extends ItemRecord>({
             return (
             <div
               key={`${item.name ?? item.q ?? item.title ?? index}-${index}`}
-              className={`relative ${dragIndex === index ? "opacity-50" : ""}`}
+              className={`relative ${canDrag ? "cursor-grab select-none active:cursor-grabbing" : ""} ${dragIndex === index ? "opacity-50" : ""}`}
               draggable={canDrag}
-              onDragStart={canDrag ? () => setDragIndex(index) : undefined}
+              onDragStart={canDrag ? (e) => {
+                e.dataTransfer.effectAllowed = "move";
+                setDragIndex(index);
+              } : undefined}
               onDragEnd={canDrag ? () => setDragIndex(null) : undefined}
               onDragOver={canDrag ? (e) => e.preventDefault() : undefined}
               onDrop={
@@ -309,8 +312,6 @@ export function EditableList<T extends ItemRecord>({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onSelect={() => { setEditIndex(index); setOpen(true); }}><Pencil /> Edit</DropdownMenuItem>
-                    {canDrag && items.length > 1 && <DropdownMenuItem disabled={index === 0} onSelect={() => void move(index, index - 1)}><ArrowUp /> Move up</DropdownMenuItem>}
-                    {canDrag && items.length > 1 && <DropdownMenuItem disabled={index === items.length - 1} onSelect={() => void move(index, index + 1)}><ArrowDown /> Move down</DropdownMenuItem>}
                     <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => void remove(index)}><Trash2 /> Remove</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
