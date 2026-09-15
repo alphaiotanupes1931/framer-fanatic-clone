@@ -57,6 +57,18 @@ export function StoreTab({
   const [editing, setEditing] = useState<Product | "new" | null>(null);
   const [payoutsReady, setPayoutsReady] = useState<boolean | null>(null);
   const [buying, setBuying] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [showOrders, setShowOrders] = useState(false);
+
+  const loadOrders = async () => {
+    const { data } = await supabase
+      .from("product_orders")
+      .select("id, created_at, quantity, status, buyer_total_cents, ship_name, ship_email, ship_phone, ship_address, buyer_note, product_id")
+      .eq("org_id", orgId)
+      .eq("status", "paid")
+      .order("created_at", { ascending: false });
+    setOrders((data ?? []) as unknown as Order[]);
+  };
 
   const load = async () => {
     setLoading(true);
