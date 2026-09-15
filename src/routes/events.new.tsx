@@ -170,7 +170,6 @@ function NewEventPage() {
   // Photo cropping: every picked event photo goes through the crop dialog first.
   const [cropQueue, setCropQueue] = useState<File[]>([]);
   const [cropTarget, setCropTarget] = useState<"flyer" | "gallery">("flyer");
-  const [cropAspect, setCropAspect] = useState(16 / 9);
   const currentCrop = cropQueue[0] ?? null;
 
   const uploadImageFile = async (raw: File) => {
@@ -185,14 +184,12 @@ function NewEventPage() {
   const onPickImage = (file: File) => {
     if (!me) return;
     setCropTarget("flyer");
-    setCropAspect(16 / 9);
     setCropQueue([file]);
   };
 
   const onPickGallery = (files: File[]) => {
     if (!me || files.length === 0) return;
     setCropTarget("gallery");
-    setCropAspect(1);
     setCropQueue(files);
   };
 
@@ -765,34 +762,13 @@ function NewEventPage() {
       )}
       <ImageCropDialog
         file={currentCrop}
-        aspect={cropAspect}
+        aspect={cropTarget === "flyer" ? 16 / 9 : 1}
         maxEdge={1600}
         title={cropTarget === "flyer" ? "Crop your cover image" : "Crop your photo"}
         open={!!currentCrop}
         onOpenChange={(open) => { if (!open) setCropQueue([]); }}
         onCropped={(f) => void onCropped(f)}
         circleGuide={false}
-        extraControls={
-          <div className="flex w-full items-center justify-center gap-2">
-            <span className="text-xs text-muted-foreground">Shape</span>
-            {[
-              { label: "1:1", value: 1 },
-              { label: "4:5", value: 4 / 5 },
-              { label: "16:9", value: 16 / 9 },
-            ].map((opt) => (
-              <button
-                key={opt.label}
-                type="button"
-                onClick={() => setCropAspect(opt.value)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  Math.abs(cropAspect - opt.value) < 0.01 ? "bg-[#d4580a] text-white" : "bg-secondary text-muted-foreground"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        }
       />
     </AppLayout>
   );

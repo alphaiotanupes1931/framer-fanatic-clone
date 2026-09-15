@@ -175,7 +175,7 @@ function CreateArtistPage() {
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Banner image</Label>
-            <ImageUpload value={form.banner_url} onChange={(v) => setForm((f) => ({ ...f, banner_url: v }))} label="Upload banner image" bucket="avatars" />
+            <ImageUpload value={form.banner_url} onChange={(v) => setForm((f) => ({ ...f, banner_url: v }))} label="Upload banner image" bucket="avatars" aspect={3} />
           </div>
           <div className="flex justify-end">
             <Button onClick={submit} disabled={!canSubmit || saving || checkingExisting}>

@@ -130,11 +130,11 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Avatar image</Label>
-          <ImageUpload value={form.avatar_url} onChange={(v) => set("avatar_url", v)} label="Upload avatar image" bucket="avatars" />
+          <ImageUpload value={form.avatar_url} onChange={(v) => set("avatar_url", v)} label="Upload avatar image" bucket="avatars" aspect={1} circleGuide />
         </div>
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Banner image</Label>
-          <ImageUpload value={form.banner_url} onChange={(v) => set("banner_url", v)} label="Upload banner image" bucket="avatars" hint={BANNER_SPEC} />
+          <ImageUpload value={form.banner_url} onChange={(v) => set("banner_url", v)} label="Upload banner image" bucket="avatars" hint={BANNER_SPEC} aspect={3} />
         </div>
       </div>
       <div className="flex justify-end">
