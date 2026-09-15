@@ -70,6 +70,24 @@ export function ImagePickerField({
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropAspect, setCropAspect] = useState(aspect);
 
+  /** Re-opens the crop tool with the photo that is already saved. */
+  const adjustExisting = async () => {
+    if (!value) return;
+    setBusy(true);
+    try {
+      const url = (await resolveMediaUrl(value)) ?? value;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Could not load that photo");
+      const blob = await res.blob();
+      setCropAspect(aspect);
+      setCropFile(new File([blob], "photo.jpg", { type: blob.type || "image/jpeg" }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not load that photo");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const pick = async (file: File) => {
     setBusy(true);
     try {
