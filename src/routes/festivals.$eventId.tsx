@@ -24,6 +24,9 @@ import {
   Bookmark,
   BarChart3,
   CalendarDays,
+  CalendarPlus,
+  Music,
+  Search,
   Check,
   Clock,
   Compass,
@@ -47,6 +50,7 @@ import { PageBackButton } from "@/components/shared/page-back-button";
 import { useUserRole } from "@/hooks/use-user-role";
 import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
 import { EditFestivalDialog } from "@/components/festival/edit-festival-dialog";
+import { downloadIcs } from "@/lib/ics";
 
 export const Route = createFileRoute("/festivals/$eventId")({
   component: FestivalDetailPage,
@@ -411,29 +415,48 @@ function scheduleDateLabel(value: string) {
   return Number.isNaN(parsed.getTime()) ? value : format(parsed, "EEE, MMM d");
 }
 
-function ScheduleRow({ item, scheduled, onToggle }: { item: ScheduleItem; scheduled: boolean; onToggle: () => void }) {
+function ScheduleRow({
+  item,
+  scheduled,
+  onToggle,
+  onAddCalendar,
+}: {
+  item: ScheduleItem;
+  scheduled: boolean;
+  onToggle: () => void;
+  onAddCalendar: () => void;
+}) {
   return (
-    <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[70px_minmax(0,1fr)_auto] sm:items-start">
-      <div className="text-lg font-extrabold text-foreground">{item.time}</div>
-      <div className="flex min-w-0 gap-4">
+    <article className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-[58px_minmax(0,1fr)_auto] sm:items-start">
+      <div className="text-sm font-extrabold text-orange">{item.time}</div>
+      <div className="flex min-w-0 gap-3">
         {item.image && (
-          <Img src={item.image} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+          <Img src={item.image} alt={item.name} className="h-14 w-14 shrink-0 rounded-lg object-cover" />
         )}
         <div className="min-w-0">
-        <h3 className="text-base font-bold text-foreground">{item.name}</h3>
-        {(item.venue || item.type || item.price) && (
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold">
-            {item.venue && <span className="text-muted-foreground">{item.venue}</span>}
-            {item.type && <span className="rounded bg-muted px-2 py-1 text-foreground">{item.type}</span>}
-            {item.price && <span className="rounded bg-primary/10 px-2 py-1 text-orange">{item.price}</span>}
-          </div>
-        )}
-        {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+          <h3 className="text-base font-bold text-foreground">{item.name}</h3>
+          {(item.venue || item.type || item.price) && (
+            <div className="mt-1 flex flex-wrap items-center gap-3 text-xs font-semibold text-muted-foreground">
+              {item.venue && (
+                <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {item.venue}</span>
+              )}
+              {item.type && (
+                <span className="inline-flex items-center gap-1"><Music className="h-3.5 w-3.5" /> {item.type}</span>
+              )}
+              {item.price && <span className="text-orange">{item.price}</span>}
+            </div>
+          )}
+          {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
         </div>
       </div>
-      <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
-        {scheduled ? <Check /> : <Plus />} {scheduled ? "In My Schedule" : "My Schedule"}
-      </Button>
+      <div className="flex flex-col gap-2 sm:w-40">
+        <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
+          {scheduled ? <Check /> : <Bookmark />} {scheduled ? "In My Schedule" : "My Schedule"}
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={onAddCalendar} aria-label="Add to calendar">
+          <CalendarPlus />
+        </Button>
+      </div>
     </article>
   );
 }
@@ -750,6 +773,7 @@ function FestivalDetailPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [scheduleRange, setScheduleRange] = useState("all");
   const [scheduleDate, setScheduleDate] = useState("all");
+  const [scheduleQuery, setScheduleQuery] = useState("");
   const [mySchedule, setMySchedule] = useState<number[]>([]);
   const scheduleDates = useMemo(
     () => Array.from(new Set(schedule.map((item) => item.date).filter(Boolean))),
@@ -757,7 +781,11 @@ function FestivalDetailPage() {
   );
   const visibleSchedule = useMemo(() => {
     const now = new Date();
+    const q = scheduleQuery.trim().toLowerCase();
     return schedule.filter((item) => {
+      if (q && ![item.name, item.venue, item.type, item.description].some((v) => (v ?? "").toLowerCase().includes(q))) {
+        return false;
+      }
       if (scheduleDate !== "all" && item.date !== scheduleDate) return false;
       if (scheduleRange === "all" || !item.date) return true;
       const date = new Date(item.date);
@@ -766,7 +794,23 @@ function FestivalDetailPage() {
       const day = date.getDay();
       return day === 0 || day === 6;
     });
-  }, [schedule, scheduleDate, scheduleRange]);
+  }, [schedule, scheduleDate, scheduleRange, scheduleQuery]);
+
+  const addScheduleToCalendar = (item: ScheduleItem) => {
+    const base = item.date ? new Date(`${item.date} ${item.time || "12:00"}`) : new Date(`${item.time || ""}`);
+    const start = Number.isNaN(base.getTime()) ? new Date(event?.starts_at ?? Date.now()) : base;
+    downloadIcs(
+      {
+        uid: `festival-${eventId}-${item.name}`,
+        title: item.name,
+        start,
+        location: item.venue || event?.venue_name || null,
+        description: item.description || null,
+        url: typeof window !== "undefined" ? window.location.href : null,
+      },
+      item.name,
+    );
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1058,32 +1102,65 @@ function FestivalDetailPage() {
             <section id="festival-schedule" className={`scroll-mt-24 ${activeTab !== "schedule" ? "hidden" : ""}`}>
               <div className="space-y-8">
                 {schedule.length > 0 && (
-                  <div className="space-y-4 border-b border-border pb-6">
+                  <div className="space-y-3">
                     <div className="flex flex-wrap gap-2">
                       {[["all", "All Time"], ["today", "Today"], ["weekend", "This Weekend"]].map(([value, label]) => (
-                        <Button key={value} type="button" size="sm" variant={scheduleRange === value ? "default" : "outline"} onClick={() => setScheduleRange(value)}>{label}</Button>
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setScheduleRange(value)}
+                          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${scheduleRange === value ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+                        >
+                          {label}
+                        </button>
                       ))}
                     </div>
                     {scheduleDates.length > 0 && (
-                      <div className="flex gap-1 overflow-x-auto border-b border-border">
-                        <button type="button" onClick={() => setScheduleDate("all")} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold ${scheduleDate === "all" ? "border-orange text-orange" : "border-transparent text-muted-foreground"}`}>All dates</button>
+                      <div className="flex flex-wrap gap-2">
                         {scheduleDates.map((date) => (
-                          <button key={date} type="button" onClick={() => setScheduleDate(date)} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold ${scheduleDate === date ? "border-orange text-orange" : "border-transparent text-muted-foreground"}`}>{scheduleDateLabel(date)}</button>
+                          <button
+                            key={date}
+                            type="button"
+                            onClick={() => setScheduleDate(scheduleDate === date ? "all" : date)}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${scheduleDate === date ? "bg-orange text-white" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+                          >
+                            {scheduleDateLabel(date)}
+                          </button>
                         ))}
                       </div>
                     )}
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        value={scheduleQuery}
+                        onChange={(e) => setScheduleQuery(e.target.value)}
+                        placeholder="Search schedule..."
+                        className="rounded-xl bg-muted/50 pl-9"
+                      />
+                    </div>
                   </div>
                 )}
 
                 {headliners.length > 0 && (
                   <div>
-                    <h2 className="font-display text-2xl font-extrabold text-foreground">Featured at the Festival</h2>
+                    <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <Star className="h-4 w-4" /> Featured at the festival
+                    </h2>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       {headliners.map((item, index) => (
-                        <article key={`${item.name}-${index}`} className="border-l-4 border-orange bg-muted/30 p-4">
-                          <span className="text-[11px] font-bold uppercase text-orange">Headliner</span>
-                          <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.name}</h3>
-                          {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+                        <article key={`${item.name}-${index}`} className="overflow-hidden rounded-xl border border-orange/40 bg-card">
+                          <div className="relative">
+                            {item.image ? (
+                              <Img src={item.image} alt={item.name} className="h-40 w-full object-cover" />
+                            ) : (
+                              <div className="h-40 w-full bg-muted" />
+                            )}
+                            <span className="absolute left-3 top-3 rounded-md bg-orange px-2 py-1 text-[11px] font-bold text-white">Headliner</span>
+                          </div>
+                          <div className="p-4">
+                            <h3 className="text-base font-extrabold text-foreground">{item.name}</h3>
+                            {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+                          </div>
                         </article>
                       ))}
                     </div>
@@ -1097,6 +1174,7 @@ function FestivalDetailPage() {
                   dialogTitle="Event or happening"
                   fields={SCHEDULE_FIELDS}
                   onChange={(next) => saveDetails({ schedule: next })}
+                  listClassName="space-y-3"
                   emptyState={<TabEmpty message="The festival schedule has not been posted yet." />}
                   renderItem={(item, index) => {
                     if (!visibleSchedule.includes(item)) return null;
@@ -1105,6 +1183,7 @@ function FestivalDetailPage() {
                         item={item}
                         scheduled={mySchedule.includes(index)}
                         onToggle={() => toggleMySchedule(index)}
+                        onAddCalendar={() => addScheduleToCalendar(item)}
                       />
                     );
                   }}
