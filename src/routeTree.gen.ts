@@ -89,6 +89,7 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as FestivalsEventIdEditRouteImport } from './routes/festivals.$eventId_.edit'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiAdminCheckStripeWebhooksRouteImport } from './routes/api/admin/check-stripe-webhooks'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -499,6 +500,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FestivalsEventIdEditRoute = FestivalsEventIdEditRouteImport.update({
+  id: '/festivals/$eventId_/edit',
+  path: '/festivals/$eventId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -626,6 +632,7 @@ export interface FileRoutesByFullPath {
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/festivals/$eventId/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
   '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
@@ -716,6 +723,7 @@ export interface FileRoutesByTo {
   '/videos': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/festivals/$eventId/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
   '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
@@ -807,6 +815,7 @@ export interface FileRoutesById {
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/festivals/$eventId_/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug_/donate': typeof OSlugDonateRoute
   '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
@@ -899,6 +908,7 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
+    | '/festivals/$eventId/edit'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
     | '/api/public/hooks/weekly-profile-reminders'
@@ -989,6 +999,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
+    | '/festivals/$eventId/edit'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
     | '/api/public/hooks/weekly-profile-reminders'
@@ -1079,6 +1090,7 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
+    | '/festivals/$eventId_/edit'
     | '/lovable/email/suppression'
     | '/o/$slug_/donate'
     | '/api/public/hooks/weekly-profile-reminders'
@@ -1169,6 +1181,7 @@ export interface RootRouteChildren {
   VideosIndexRoute: typeof VideosIndexRoute
   ApiAdminCheckStripeWebhooksRoute: typeof ApiAdminCheckStripeWebhooksRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
+  FestivalsEventIdEditRoute: typeof FestivalsEventIdEditRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   OSlugDonateRoute: typeof OSlugDonateRoute
   ApiPublicHooksWeeklyProfileRemindersRoute: typeof ApiPublicHooksWeeklyProfileRemindersRoute
@@ -1741,6 +1754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/festivals/$eventId_/edit': {
+      id: '/festivals/$eventId_/edit'
+      path: '/festivals/$eventId/edit'
+      fullPath: '/festivals/$eventId/edit'
+      preLoaderRoute: typeof FestivalsEventIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -1892,6 +1912,7 @@ const rootRouteChildren: RootRouteChildren = {
   VideosIndexRoute: VideosIndexRoute,
   ApiAdminCheckStripeWebhooksRoute: ApiAdminCheckStripeWebhooksRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
+  FestivalsEventIdEditRoute: FestivalsEventIdEditRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   OSlugDonateRoute: OSlugDonateRoute,
   ApiPublicHooksWeeklyProfileRemindersRoute:

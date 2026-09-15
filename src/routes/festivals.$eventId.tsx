@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Img } from "@/components/shared/smart-img";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
@@ -565,12 +565,14 @@ function Area({
 
 function FestivalDetailPage() {
   const { eventId } = Route.useParams();
+  const navigate = useNavigate();
   const [me, setMe] = useState<string | null>(null);
   const { isAdmin } = useUserRole();
   const [saved, setSaved] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [basicsOpen, setBasicsOpen] = useState(false);
   const [fullEditOpen, setFullEditOpen] = useState(false);
+  const openFullEdit = () => void navigate({ to: "/festivals/$eventId/edit", params: { eventId } });
   const [shareOpen, setShareOpen] = useState(false);
   const [previewAsVisitor, setPreviewAsVisitor] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -849,7 +851,7 @@ function FestivalDetailPage() {
                 <span className="text-xs font-bold uppercase">Creator tools</span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="secondary" onClick={() => setFullEditOpen(true)}>
+                <Button size="sm" variant="secondary" onClick={() => openFullEdit()}>
                   <Pencil /> Edit Festival
                 </Button>
                 <Button asChild size="sm" variant="secondary">
@@ -940,7 +942,7 @@ function FestivalDetailPage() {
                   <CalendarDays /> View Schedule
                 </Button>
                 {showCreatorTools && (
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={() => setFullEditOpen(true)}>
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={() => openFullEdit()}>
                     <Pencil /> Edit
                   </Button>
                 )}
@@ -1023,7 +1025,7 @@ function FestivalDetailPage() {
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
                   {showCreatorTools && (
-                    <Button type="button" variant="outline" size="xs" onClick={() => setFullEditOpen(true)}>
+                    <Button type="button" variant="outline" size="xs" onClick={() => openFullEdit()}>
                       <Pencil /> Edit
                     </Button>
                   )}
@@ -1032,7 +1034,7 @@ function FestivalDetailPage() {
                   <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
                 ) : (
                   <div className="mt-4">
-                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setFullEditOpen(true)} />
+                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => openFullEdit()} />
                   </div>
                 )}
               </div>

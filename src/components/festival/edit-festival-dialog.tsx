@@ -192,11 +192,14 @@ export function EditFestivalDialog({
   onOpenChange,
   eventId,
   onSaved,
+  asPage = false,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   eventId: string;
   onSaved: () => void;
+  /** Render inline as a full page instead of inside a modal. */
+  asPage?: boolean;
 }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -448,13 +451,11 @@ export function EditFestivalDialog({
     emptyState: emptyRows,
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Festival</DialogTitle>
-        </DialogHeader>
+  const body = (
+    <>
         <p className="text-sm text-muted-foreground">Update every part of your festival page. Changes go live immediately.</p>
+
+
 
         {loading ? (
           <div className="flex items-center gap-2 py-10 text-muted-foreground">
@@ -708,6 +709,18 @@ export function EditFestivalDialog({
             </div>
           </div>
         )}
+    </>
+  );
+
+  if (asPage) return <div className="space-y-2">{body}</div>;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Festival</DialogTitle>
+        </DialogHeader>
+        {body}
       </DialogContent>
     </Dialog>
   );
