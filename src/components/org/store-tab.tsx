@@ -285,6 +285,7 @@ function ProductForm({
       image_url: imageUrl || null,
       inventory: inventory.trim() === "" ? null : Math.max(0, parseInt(inventory, 10) || 0),
       is_active: active,
+      requires_shipping: needsShipping,
     };
     const { error } = initial
       ? await supabase.from("organization_products").update(payload).eq("id", initial.id)
