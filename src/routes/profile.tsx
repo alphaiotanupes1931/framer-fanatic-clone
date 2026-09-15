@@ -335,7 +335,7 @@ function ProfilePage() {
       )}
       <div className="rounded-2xl border border-border bg-card overflow-hidden sm:rounded-3xl">
         <div
-          className="relative h-36 bg-gradient-to-br from-neutral-200 to-neutral-300 sm:h-56"
+          className="relative aspect-[3/1] bg-gradient-to-br from-neutral-200 to-neutral-300"
           style={bannerSrc ? { backgroundImage: `url(${bannerSrc})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         >
           <div className="absolute left-3 top-3 z-10 flex items-center gap-2 sm:left-4 sm:top-4">
