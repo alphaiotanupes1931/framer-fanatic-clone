@@ -124,14 +124,54 @@ export function StoreTab({
           <ShoppingBag className="h-5 w-5 text-primary" /> {title}
         </h3>
         {canManage && (
-          <button
-            onClick={() => setEditing("new")}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add product
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setShowOrders((v) => !v); void loadOrders(); }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-accent"
+            >
+              <Package className="h-3.5 w-3.5" /> Orders{orders.length ? ` (${orders.length})` : ""}
+            </button>
+            <button
+              onClick={() => setEditing("new")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add product
+            </button>
+          </div>
         )}
       </div>
+
+      {canManage && showOrders && (
+        <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
+          <div className="text-sm font-bold text-foreground">Orders to ship</div>
+          {orders.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No paid orders yet.</p>
+          ) : (
+            orders.map((o) => {
+              const p = items.find((i) => i.id === o.product_id);
+              const addr = formatAddress(o.ship_address);
+              return (
+                <div key={o.id} className="rounded-xl border border-border p-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-foreground">
+                      {p?.name ?? "Product"} × {o.quantity}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(o.created_at).toLocaleDateString()} · {money(o.buyer_total_cents)}
+                    </span>
+                  </div>
+                  <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                    <div>{o.ship_name ?? "Buyer"}{o.ship_email ? ` · ${o.ship_email}` : ""}{o.ship_phone ? ` · ${o.ship_phone}` : ""}</div>
+                    {addr ? <div>{addr}</div> : <div>No shipping address on file (digital item).</div>}
+                    {o.buyer_note && <div className="italic">Note: {o.buyer_note}</div>}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
 
       {canManage && payoutsReady === false && (
         <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
