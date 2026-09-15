@@ -184,7 +184,7 @@ type VendorItem = {
 };
 
 const PROGRAM_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "name", label: "Name", placeholder: "Right Now Rouge" },
   { key: "type", label: "Type", placeholder: "Music, dance, poetry" },
   { key: "when", label: "Date and time", placeholder: "Sat, Jun 14 · 7:00 pm" },
@@ -194,7 +194,7 @@ const PROGRAM_FIELDS: FieldSpec[] = [
 ];
 
 const SCHEDULE_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "name", label: "What is happening", placeholder: "Opening parade" },
   { key: "date", label: "Date", placeholder: "2026-06-14" },
   { key: "time", label: "Time", placeholder: "1:00 pm" },
@@ -205,7 +205,7 @@ const SCHEDULE_FIELDS: FieldSpec[] = [
 ];
 
 const VENDOR_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "category", label: "Category", placeholder: "Jewelry, apparel, art" },
   { key: "name", label: "Name", placeholder: "Charm City Ceramics" },
   { key: "booth", label: "Booth", placeholder: "Booth 14" },
@@ -213,7 +213,7 @@ const VENDOR_FIELDS: FieldSpec[] = [
 ];
 
 const FOOD_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "category", label: "Category", placeholder: "Food truck, dessert, drinks" },
   { key: "name", label: "Name", placeholder: "Sweet Pea BBQ" },
   { key: "booth", label: "Booth", placeholder: "Food row 3" },
@@ -229,7 +229,7 @@ const UPDATE_TYPES = ["Announcement", "Schedule Change", "Weather Alert", "Emerg
 
 const UPDATE_FIELDS: FieldSpec[] = [
   { key: "type", label: "Type", type: "select", options: UPDATE_TYPES },
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 16 / 9 },
   { key: "title", label: "Headline", placeholder: "Rain plan in effect" },
   { key: "date", label: "Date", placeholder: "June 14" },
   { key: "body", label: "Update", type: "textarea" },
@@ -1885,6 +1885,7 @@ function EditFestivalBasics({
               label="Cover photo"
               value={form.image_url}
               onChange={(v) => setForm((f) => ({ ...f, image_url: v }))}
+              aspect={16 / 9}
             />
           </div>
           <div className="sm:col-span-2">

@@ -168,7 +168,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         </div>
         <Link to="/stories/$storyId" params={{ storyId: story.id }} className="block">
         {story.cover_url && (
-          <div className="relative mt-3 aspect-[16/7] overflow-hidden bg-muted">
+          <div className="relative mt-3 aspect-video overflow-hidden bg-muted">
             <Img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
             {isAdmin && (
               <button onClick={toggleFeatured} disabled={featuring} className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${isFeatured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}>
@@ -221,7 +221,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
         <Link
           to="/stories/$storyId"
           params={{ storyId: story.id }}
-          className="mt-2 block aspect-[16/7] w-full overflow-hidden bg-muted"
+          className="mt-2 block aspect-video w-full overflow-hidden bg-muted"
         >
           <Img
             src={story.cover_url}
