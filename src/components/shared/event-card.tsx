@@ -35,7 +35,7 @@ type EventRow = {
   user_id?: string | null;
 };
 
-export function EventCard({ event, compact = false, onDeleted, showCalendar = true, draft = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean; draft?: boolean }) {
+export function EventCard({ event, compact = false, onDeleted, showCalendar = true, draft = false, festival = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean; draft?: boolean; festival?: boolean }) {
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
   const resolvedImage = useEventImageUrl(event.image_url);
@@ -79,7 +79,7 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
   const [shareOpen, setShareOpen] = useState(false);
   const [reposting, setReposting] = useState(false);
   const [reposted, setReposted] = useState(false);
-  const eventUrl = siteUrl(`/events/${event.id}`);
+  const eventUrl = siteUrl(festival ? `/festivals/${event.id}` : `/events/${event.id}`);
   const previewText = stripUrls(stripHtml(event.description));
 
   useEffect(() => {
@@ -168,8 +168,8 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
   };
 
   if (compact) {
-    return (
-      <Link to="/events/$eventId" params={{ eventId: event.id }} className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0 sm:p-3.5">
+    const compactContent = (
+      <>
         <div className="flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center overflow-hidden rounded-lg bg-[#d4580a]/10 sm:h-16 sm:w-16">
           {eventDate ? (
             <>
@@ -188,66 +188,89 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
             <span className="truncate">{event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore"}</span>
           </div>
         </div>
-      </Link>
+      </>
+    );
+    return (
+      festival ? (
+        <Link to={canDelete ? "/festivals/$eventId/edit" : "/festivals/$eventId"} params={{ eventId: event.id }} className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0 sm:p-3.5">
+          {compactContent}
+        </Link>
+      ) : (
+        <Link to="/events/$eventId" params={{ eventId: event.id }} className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0 sm:p-3.5">
+          {compactContent}
+        </Link>
+      )
     );
   }
 
-  return (
-    <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
-      <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
-        {showImage ? (
-        <div className="relative aspect-[16/7] overflow-hidden bg-muted">
-          <Img
-            src={resolvedImage}
-            alt={event.title}
-            loading="lazy"
-            decoding="async"
-            onError={() => setImgOk(false)}
-            className="h-full w-full object-cover"
-          />
+  const cardContent = (
+    <>
+      {showImage ? (
+      <div className="relative aspect-[16/7] overflow-hidden bg-muted">
+        <Img
+          src={resolvedImage}
+          alt={event.title}
+          loading="lazy"
+          decoding="async"
+          onError={() => setImgOk(false)}
+          className="h-full w-full object-cover"
+        />
+        {event.is_free && (
+          <Badge className="absolute left-3 top-3 border-0 bg-green-500/90 text-xs text-white">Free</Badge>
+        )}
+        {event.category && (
+          <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">{event.category}</Badge>
+        )}
+      </div>
+      ) : (
+        <div className="relative flex aspect-[16/6] flex-col justify-end overflow-hidden bg-gradient-to-br from-[#d4580a] to-[#7a2f04] p-4 sm:p-5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
+            {eventDate ? format(eventDate, "EEE, MMM d") : "Date TBD"}
+          </span>
+          <span className="line-clamp-2 text-base font-extrabold leading-tight text-white sm:text-lg">{event.title}</span>
           {event.is_free && (
             <Badge className="absolute left-3 top-3 border-0 bg-green-500/90 text-xs text-white">Free</Badge>
           )}
           {event.category && (
-            <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/50 text-xs capitalize text-white backdrop-blur-sm">{event.category}</Badge>
+            <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/30 text-xs capitalize text-white">{event.category}</Badge>
           )}
         </div>
-        ) : (
-          <div className="relative flex aspect-[16/6] flex-col justify-end overflow-hidden bg-gradient-to-br from-[#d4580a] to-[#7a2f04] p-4 sm:p-5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
-              {eventDate ? format(eventDate, "EEE, MMM d") : "Date TBD"}
+      )}
+      <div className="p-3.5 sm:p-4">
+      <div className="mb-1.5 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
+        <Clock className="h-3.5 w-3.5" />
+        <span className="truncate">{eventDate ? format(eventDate, "EEE, MMM d · h:mm a") : "Date TBD"}</span>
+      </div>
+      <h3 className="line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{event.title}</h3>
+      {previewText && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">{previewText}</p>}
+      <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground sm:text-xs">
+        <MapPin className="h-3 w-3" />
+        <span className="truncate">{event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore"}</span>
+      </div>
+      {tags.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {tags.map((t) => (
+            <span key={t} className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
+              {t}
             </span>
-            <span className="line-clamp-2 text-base font-extrabold leading-tight text-white sm:text-lg">{event.title}</span>
-            {event.is_free && (
-              <Badge className="absolute left-3 top-3 border-0 bg-green-500/90 text-xs text-white">Free</Badge>
-            )}
-            {event.category && (
-              <Badge variant="secondary" className="absolute right-3 top-3 border-0 bg-black/30 text-xs capitalize text-white">{event.category}</Badge>
-            )}
-          </div>
-        )}
-        <div className="p-3.5 sm:p-4">
-        <div className="mb-1.5 flex items-center gap-2 text-[11px] font-semibold sm:text-xs" style={{ color: "#d4580a" }}>
-          <Clock className="h-3.5 w-3.5" />
-          <span className="truncate">{eventDate ? format(eventDate, "EEE, MMM d · h:mm a") : "Date TBD"}</span>
+          ))}
         </div>
-        <h3 className="line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-[#d4580a]">{event.title}</h3>
-        {previewText && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">{previewText}</p>}
-        <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground sm:text-xs">
-          <MapPin className="h-3 w-3" />
-          <span className="truncate">{event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore"}</span>
-        </div>
-        {tags.length > 0 && (
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
-            {tags.map((t) => (
-              <span key={t} className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
-                {t}
-              </span>
-            ))}
-          </div>
-        )}
-        </div>
-      </Link>
+      )}
+      </div>
+    </>
+  );
+
+  return (
+    <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
+      {festival ? (
+        <Link to={canDelete ? "/festivals/$eventId/edit" : "/festivals/$eventId"} params={{ eventId: event.id }} className="block">
+          {cardContent}
+        </Link>
+      ) : (
+        <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
+          {cardContent}
+        </Link>
+      )}
       <div className="flex flex-wrap items-center gap-2 border-t border-border/50 px-3.5 py-2.5 sm:px-4">
         {!draft && (
           <>
