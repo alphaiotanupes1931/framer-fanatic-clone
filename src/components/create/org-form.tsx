@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, ImagePlus, Loader2, X } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
+import { ImageUpload } from "@/components/shared/image-upload";
 import {
   confirmStaffEmailVerification,
   setStaffLogin,
@@ -28,10 +28,6 @@ export type OrgType = "arts_org" | "business" | "community_assoc" | "group";
 export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const bannerRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [saving, setSaving] = useState(false);
   const [neighborhoods, setNeighborhoods] = useState<Array<{ id: string; name: string }>>([]);
   // Arts organizations are public-facing listings, so they need enough detail
@@ -106,29 +102,6 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       setNeighborhoods((data ?? []) as Array<{ id: string; name: string }>);
     })();
   }, []);
-
-  const uploadImage = async (field: "avatar_url" | "banner_url", file: File) => {
-    file = await compressImage(file);
-    if (!me) return;
-    const maxMb = 25;
-    if (file.size > maxMb * 1024 * 1024) { toast.error(`Image must be under ${maxMb}MB`); return; }
-    const setBusy = field === "banner_url" ? setUploadingBanner : setUploading;
-    setBusy(true);
-    try {
-      const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${me.id}/org-${field}-${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type });
-      if (error) throw error;
-      const { data: signed, error: signErr } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
-      if (signErr || !signed?.signedUrl) throw signErr || new Error("Could not sign URL");
-      set(field, signed.signedUrl);
-      toast.success(field === "banner_url" ? "Background uploaded" : "Logo uploaded");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const canSubmit = strict
     ? form.name.trim().length > 1 &&
@@ -268,32 +241,10 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           <Input value={form.address} onChange={(e) => set("address", e.target.value)} maxLength={200} />
         </Field>
         <Field label="Logo / avatar">
-          <input ref={fileRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("avatar_url", f); }} />
-          {form.avatar_url ? (
-            <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-              <span className="truncate">Logo attached</span>
-              <button type="button" onClick={() => set("avatar_url", "")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
-            </div>
-          ) : (
-            <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full">
-              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
-              Upload logo
-            </Button>
-          )}
+          <ImageUpload value={form.avatar_url} onChange={(v) => set("avatar_url", v)} label="Upload logo" bucket="avatars" aspect={1} />
         </Field>
         <Field label="Banner image">
-          <input ref={bannerRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("banner_url", f); }} />
-          {form.banner_url ? (
-            <div className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-              <span className="truncate">Background attached</span>
-              <button type="button" onClick={() => set("banner_url", "")} className="text-neutral-500 hover:text-neutral-900"><X className="h-4 w-4" /></button>
-            </div>
-          ) : (
-            <Button type="button" variant="outline" onClick={() => bannerRef.current?.click()} disabled={uploadingBanner} className="w-full">
-              {uploadingBanner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
-              Upload background
-            </Button>
-          )}
+          <ImageUpload value={form.banner_url} onChange={(v) => set("banner_url", v)} label="Upload background" bucket="avatars" aspect={3} hint={BANNER_SPEC} />
           {!form.banner_url && (
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{BANNER_SPEC}</p>
           )}

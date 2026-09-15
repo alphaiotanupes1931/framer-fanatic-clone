@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile, AppLayout } from "@/components/app-layout";
 import { toast } from "sonner";
-import { ArrowLeft, Upload } from "lucide-react";
-import { Img } from "@/components/shared/smart-img";
-import { compressImage } from "@/lib/image-compress";
+import { ArrowLeft } from "lucide-react";
+import { ImageUpload } from "@/components/shared/image-upload";
+import { BANNER_SPEC } from "@/lib/media-guidelines";
 import { RichTextEditor } from "@/components/rich-text-editor";
 
 export const Route = createFileRoute("/edit-profile")({
@@ -28,7 +28,6 @@ function EditProfilePage() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState<"avatar" | "banner" | null>(null);
 
   useEffect(() => {
     if (!me?.id) return;
@@ -53,26 +52,6 @@ function EditProfilePage() {
       setLoading(false);
     })();
   }, [me?.id]);
-
-  const uploadImage = async (file: File, kind: "avatar" | "banner") => {
-    file = await compressImage(file);
-    if (!me?.id) return;
-    if (file.size > 25 * 1024 * 1024) { toast.error("Max 25MB"); return; }
-    setUploading(kind);
-    try {
-      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `${me.id}/${kind}-${Date.now()}-${safe}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: false });
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      setForm((f) => ({ ...f, [kind === "avatar" ? "avatar_url" : "banner_url"]: data.publicUrl }));
-      toast.success(`${kind === "avatar" ? "Photo" : "Banner"} uploaded`);
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploading(null);
-    }
-  };
 
   const save = async () => {
     if (!me?.id) return;
@@ -110,24 +89,14 @@ function EditProfilePage() {
         <h1 className="text-2xl font-bold">Edit Profile</h1>
       </div>
 
-      <div className="mb-6 overflow-hidden rounded-xl border border-border">
-        <div className="relative h-40 w-full bg-secondary">
-          {form.banner_url && <Img src={form.banner_url} alt="" className="h-full w-full object-cover" />}
-          <label className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-2 rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black">
-            <Upload className="h-3.5 w-3.5" />
-            {uploading === "banner" ? "Uploading..." : "Change banner"}
-            <input type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadImage(f, "banner"); e.target.value = ""; }} />
-          </label>
+      <div className="mb-6 space-y-5 rounded-xl border border-border p-4">
+        <div>
+          <div className="mb-2 text-sm font-semibold">Banner</div>
+          <ImageUpload value={form.banner_url} onChange={(banner_url) => setForm((f) => ({ ...f, banner_url }))} label="Upload banner" bucket="avatars" aspect={3} hint={BANNER_SPEC} />
         </div>
-        <div className="flex items-center gap-4 p-4">
-          <div className="h-20 w-20 overflow-hidden rounded-full bg-secondary ring-2 ring-background">
-            {form.avatar_url && <Img src={form.avatar_url} alt="" className="h-full w-full object-cover" />}
-          </div>
-          <label className="flex cursor-pointer items-center gap-2 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#b8480a]">
-            <Upload className="h-4 w-4" />
-            {uploading === "avatar" ? "Uploading..." : "Change photo"}
-            <input type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadImage(f, "avatar"); e.target.value = ""; }} />
-          </label>
+        <div className="max-w-xs">
+          <div className="mb-2 text-sm font-semibold">Profile photo</div>
+          <ImageUpload value={form.avatar_url} onChange={(avatar_url) => setForm((f) => ({ ...f, avatar_url }))} label="Upload profile photo" bucket="avatars" aspect={1} circleGuide />
         </div>
       </div>
 

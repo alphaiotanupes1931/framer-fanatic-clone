@@ -10,6 +10,7 @@ import { EventImage, useEventImageUrl } from "@/components/event-image";
 import { compressImage } from "@/lib/image-compress";
 import { SmartVideo } from "@/components/shared/smart-img";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { ImagePickerField } from "@/components/festival/festival-editing";
 import { Switch } from "@/components/ui/switch";
 import { hasCapacityErrors, parseLimit, validateCapacityFields, type CapacityErrors } from "@/lib/capacity-limits";
 
@@ -28,7 +29,6 @@ function toLocalInput(iso: string | null): string {
 export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string; onSaved?: () => void; onCancel?: () => void }) {
   const me = useCurrentProfile();
   const navigate = useNavigate({ from: "/organizer-studio" });
-  const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -106,24 +106,6 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
   }, [me, eventId, navigate]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
-
-  const onPickImage = async (file: File) => {
-    file = await compressImage(file);
-    if (!me) return;
-    setUploading(true);
-    try {
-      const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("event-images").upload(path, file, { upsert: false, contentType: file.type });
-      if (error) throw error;
-      set("image_url", path);
-      toast.success("Image uploaded");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const onPickVideo = async (file: File) => {
     file = await compressImage(file);
@@ -266,26 +248,9 @@ export function EventEditForm({ eventId, onSaved, onCancel }: { eventId: string;
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="w-full aspect-[16/9] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50 hover:border-[#d4580a]/40 hover:bg-[#d4580a]/[0.03] flex flex-col items-center justify-center text-neutral-500 mb-8 overflow-hidden"
-        >
-          {form.image_url ? (
-            <EventImage src={form.image_url} alt="Exhibition flyer" className="w-full h-full object-cover" />
-          ) : uploading ? (
-            <><Loader2 className="w-6 h-6 animate-spin mb-2" /><span className="text-sm">Uploading…</span></>
-          ) : (
-            <><ImagePlus className="w-8 h-8 mb-2" /><span className="text-sm font-medium">Change Exhibition flyer</span></>
-          )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickImage(f); e.target.value = ""; }}
-          />
-        </button>
+        <div className="mb-8">
+          <ImagePickerField label="Event photo or flyer" value={form.image_url} onChange={(v) => set("image_url", v)} aspect={16 / 9} />
+        </div>
 
         <div className="mb-8">
           <label className="block text-sm font-semibold mb-2">Exhibition Video <span className="ml-2 text-xs font-normal text-neutral-400">(optional)</span></label>
