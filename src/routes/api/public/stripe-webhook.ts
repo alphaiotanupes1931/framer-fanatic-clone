@@ -94,9 +94,23 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               const orgId = session.metadata?.org_id ?? null;
               const quantity = Number(session.metadata?.quantity ?? "1") || 1;
               const amountCents = Number(session.metadata?.amount_cents ?? "0") || 0;
+              const details = session.customer_details ?? null;
+              const shipping =
+                (session as unknown as { shipping_details?: { name?: string | null; address?: unknown } | null })
+                  .shipping_details ?? null;
+              const note =
+                (session.custom_fields ?? []).find((f) => f.key === "delivery_notes")?.text?.value ?? null;
               await supabaseAdmin
                 .from("product_orders")
-                .update({ status: "paid", stripe_payment_intent_id: paymentIntentId })
+                .update({
+                  status: "paid",
+                  stripe_payment_intent_id: paymentIntentId,
+                  ship_name: shipping?.name ?? details?.name ?? null,
+                  ship_email: details?.email ?? null,
+                  ship_phone: details?.phone ?? null,
+                  ship_address: (shipping?.address ?? details?.address ?? null) as never,
+                  buyer_note: note,
+                })
                 .eq("stripe_checkout_session_id", session.id);
               if (productId) {
                 const { data: prod } = await supabaseAdmin
