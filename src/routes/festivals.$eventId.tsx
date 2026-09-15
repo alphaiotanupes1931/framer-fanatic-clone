@@ -224,7 +224,10 @@ const FAQ_FIELDS: FieldSpec[] = [
   { key: "a", label: "Answer", type: "textarea" },
 ];
 
+const UPDATE_TYPES = ["Announcement", "Schedule Change", "Weather Alert", "Emergency"];
+
 const UPDATE_FIELDS: FieldSpec[] = [
+  { key: "type", label: "Type", type: "select", options: UPDATE_TYPES },
   { key: "image", label: "Photo", type: "image" },
   { key: "title", label: "Headline", placeholder: "Rain plan in effect" },
   { key: "date", label: "Date", placeholder: "June 14" },
@@ -237,10 +240,12 @@ function asUpdates(v: unknown): UpdateItem[] {
     .map((x) => x as Partial<UpdateItem>)
     .filter((x) => x && typeof x.title === "string" && x.title.trim())
     .map((x) => ({
+      type: (x.type ?? "Announcement").trim(),
       title: x.title!.trim(),
       date: (x.date ?? "").trim(),
       body: (x.body ?? "").trim(),
       image: (x.image ?? "").trim(),
+      created_at: (x.created_at ?? "").trim(),
     }));
 }
 
