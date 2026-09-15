@@ -10,3 +10,4 @@
 - [x] Establish shared interface foundations and private admin design-system reference
 - [x] Apply shared controls, semantic colors, headers, cards, and spacing to Festivals
 - [ ] Migrate remaining high-traffic product areas to the shared interface system
+- [x] Match festival overview sections to supplied reference and verify owner/visitor layouts
