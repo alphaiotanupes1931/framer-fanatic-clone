@@ -577,7 +577,7 @@ export function EditFestivalDialog({
                       <div className="min-w-0">
                         <div className="text-sm font-bold text-foreground">{t.name}</div>
                         <div className="text-xs text-muted-foreground">
-                          {[`$${(t.price_cents / 100).toFixed(2).replace(/\.00$/, "")}`, t.quantity != null ? `${t.quantity} available` : null, t.max_per_buyer ? `max ${t.max_per_buyer}/buyer` : null]
+                          {[`$${(t.price_cents / 100).toFixed(2).replace(/\.00$/, "")}`, t.shipping_cents ? `+ $${(t.shipping_cents / 100).toFixed(2)} shipping` : null, t.quantity != null ? `${t.quantity} available` : null, t.max_per_buyer ? `max ${t.max_per_buyer}/buyer` : null]
                             .filter(Boolean)
                             .join(" · ")}
                         </div>
