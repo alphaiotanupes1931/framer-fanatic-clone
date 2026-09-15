@@ -772,6 +772,7 @@ function FestivalDetailPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [scheduleRange, setScheduleRange] = useState("all");
   const [scheduleDate, setScheduleDate] = useState("all");
+  const [scheduleQuery, setScheduleQuery] = useState("");
   const [mySchedule, setMySchedule] = useState<number[]>([]);
   const scheduleDates = useMemo(
     () => Array.from(new Set(schedule.map((item) => item.date).filter(Boolean))),
@@ -779,7 +780,11 @@ function FestivalDetailPage() {
   );
   const visibleSchedule = useMemo(() => {
     const now = new Date();
+    const q = scheduleQuery.trim().toLowerCase();
     return schedule.filter((item) => {
+      if (q && ![item.name, item.venue, item.type, item.description].some((v) => (v ?? "").toLowerCase().includes(q))) {
+        return false;
+      }
       if (scheduleDate !== "all" && item.date !== scheduleDate) return false;
       if (scheduleRange === "all" || !item.date) return true;
       const date = new Date(item.date);
@@ -788,7 +793,23 @@ function FestivalDetailPage() {
       const day = date.getDay();
       return day === 0 || day === 6;
     });
-  }, [schedule, scheduleDate, scheduleRange]);
+  }, [schedule, scheduleDate, scheduleRange, scheduleQuery]);
+
+  const addScheduleToCalendar = (item: ScheduleItem) => {
+    const base = item.date ? new Date(`${item.date} ${item.time || "12:00"}`) : new Date(`${item.time || ""}`);
+    const start = Number.isNaN(base.getTime()) ? new Date(event?.starts_at ?? Date.now()) : base;
+    downloadIcs(
+      {
+        uid: `festival-${eventId}-${item.name}`,
+        title: item.name,
+        start,
+        location: item.venue || event?.venue_name || null,
+        description: item.description || null,
+        url: typeof window !== "undefined" ? window.location.href : null,
+      },
+      item.name,
+    );
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
