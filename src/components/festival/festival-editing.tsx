@@ -358,9 +358,9 @@ export function EditableList<T extends ItemRecord>({
                 <span
                   aria-label="Drag to reorder"
                   title="Drag to reorder"
-                  className="pointer-events-none absolute left-2 top-1/2 z-10 inline-flex -translate-y-1/2 items-center gap-1 rounded-full bg-foreground/70 px-2 py-1 text-[11px] font-semibold text-background shadow"
+                  className="pointer-events-none absolute -left-3 top-1/2 z-10 inline-flex -translate-y-1/2 items-center rounded-r-md bg-foreground/60 px-1 py-2 text-background shadow backdrop-blur-sm"
                 >
-                  <GripVertical className="h-3.5 w-3.5" /> Drag
+                  <GripVertical className="h-4 w-4" />
                 </span>
               )}
               {canEdit && (
