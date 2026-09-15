@@ -571,6 +571,7 @@ function FestivalDetailPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [basicsOpen, setBasicsOpen] = useState(false);
   const [fullEditOpen, setFullEditOpen] = useState(false);
+  const openFullEdit = () => void navigate({ to: "/festivals/$eventId/edit", params: { eventId } });
   const [shareOpen, setShareOpen] = useState(false);
   const [previewAsVisitor, setPreviewAsVisitor] = useState(false);
   const [publishing, setPublishing] = useState(false);
