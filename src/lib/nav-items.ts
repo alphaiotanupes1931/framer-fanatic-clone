@@ -12,7 +12,7 @@ export const navItems: NavItem[] = [
   { icon: Palette, label: "Artists", to: "/artists" },
   { icon: Trophy, label: "Baltimore 100", to: "/leaderboard" },
   { icon: Building2, label: "Businesses", to: "/businesses" },
-  { icon: Shield, label: "Community Associations", to: "/community-associations" },
+  { icon: Shield, label: "Communities", to: "/communities" },
   { icon: Ticket, label: "Events", to: "/events" },
   { icon: PartyPopper, label: "Festivals", to: "/festivals" },
   { icon: Users, label: "Groups", to: "/groups" },
