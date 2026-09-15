@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Img } from "@/components/shared/smart-img";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
