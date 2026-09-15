@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { pageHead } from "@/lib/seo";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -257,7 +258,7 @@ function Section({ title, rows, id, draft = false, onRemove }: { title: string; 
       <h2 className="font-display text-lg font-extrabold text-foreground sm:text-xl">{title}</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((e) => (
-          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} showCalendar={false} draft={draft} onDeleted={onRemove} />
+          <EventCard key={e.id} event={{ ...e, is_free: isFree(e) }} showCalendar={false} draft={draft} festival onDeleted={onRemove} />
         ))}
       </div>
     </section>
@@ -420,6 +421,7 @@ function OrgFollowButton({ orgId, meId }: { orgId: string; meId?: string | null 
 
 function FestivalsPage() {
   const me = useCurrentProfile();
+  const isAdmin = useIsAdmin();
   const [q, setQ] = useState("");
   const [active, setActive] = useState<Record<string, string[]>>({});
   const [showFilters, setShowFilters] = useState(false);
@@ -655,6 +657,7 @@ function FestivalsPage() {
     });
 
   const activeCount = Object.values(active).reduce((n, list) => n + list.length, 0);
+  const festivalTarget = (row: Row) => (me?.id === row.user_id || isAdmin ? "/festivals/$eventId_/edit" : "/festivals/$eventId");
 
   const directions = (r: Row) => {
     const dest = encodeURIComponent(r.address || r.venue_name || placeOf(r) || r.title);
@@ -782,7 +785,7 @@ function FestivalsPage() {
                       className="block overflow-hidden rounded-lg border-2 border-orange bg-card transition hover:shadow-md"
                     >
                       <div className="grid gap-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-                        <Link to="/festivals/$eventId" params={{ eventId: featured.id }} className="block">
+                        <Link to={festivalTarget(featured)} params={{ eventId: featured.id }} className="block">
                           <Thumb
                             src={featured.image_url}
                             alt={featured.title}
@@ -791,7 +794,7 @@ function FestivalsPage() {
                         </Link>
                         <div className="space-y-2 p-5">
                           <Link
-                            to="/festivals/$eventId"
+                            to={festivalTarget(featured)}
                             params={{ eventId: featured.id }}
                             className="block space-y-2"
                           >
@@ -826,7 +829,7 @@ function FestivalsPage() {
                             </div>
                           )}
                           <div className="flex flex-wrap gap-2 pt-1">
-                            <Button asChild variant="brand" size="sm"><Link to="/festivals/$eventId" params={{ eventId: featured.id }}>Explore Festival</Link></Button>
+                            <Button asChild variant="brand" size="sm"><Link to={festivalTarget(featured)} params={{ eventId: featured.id }}>{me?.id === featured.user_id || isAdmin ? "Edit Festival" : "Explore Festival"}</Link></Button>
                             <Button asChild variant="outline" size="sm"><Link to="/festivals/$eventId" params={{ eventId: featured.id }} hash="festival-schedule">View Schedule</Link></Button>
                           </div>
                           <div className="pt-1">
@@ -866,7 +869,7 @@ function FestivalsPage() {
                     return (
                       <Link
                         key={r.id}
-                        to="/festivals/$eventId"
+                        to={festivalTarget(r)}
                         params={{ eventId: r.id }}
                         className="flex items-center gap-4 py-3 transition hover:bg-muted/50"
                       >
@@ -938,7 +941,7 @@ function FestivalsPage() {
                             activePin === l.row.id ? "border-orange" : "border-border"
                           }`}
                         >
-                          <Link to="/festivals/$eventId" params={{ eventId: l.row.id }}>
+                          <Link to={festivalTarget(l.row)} params={{ eventId: l.row.id }}>
                             <Thumb
                               src={l.row.image_url}
                               alt={l.row.title}
@@ -947,7 +950,7 @@ function FestivalsPage() {
                           </Link>
                           <div className="min-w-0 flex-1">
                             <Link
-                              to="/festivals/$eventId"
+                              to={festivalTarget(l.row)}
                               params={{ eventId: l.row.id }}
                               className="block truncate font-semibold text-foreground"
                             >
