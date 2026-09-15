@@ -32,6 +32,21 @@ function prettyLabel(v: string) {
     .join(" ");
 }
 
+// Filter chips read better in the plural ("Restaurants" not "Restaurant").
+// Mass nouns and already-plural words stay as they are.
+const NO_PLURAL = new Set([
+  "Retail", "Entertainment", "Health", "Cultural", "Community", "DIY / Alt",
+  "Education", "Other", "Mutual Aid", "Advocacy", "Civic", "Nonprofit Support",
+]);
+
+function pluralLabel(v: string) {
+  const label = prettyLabel(v);
+  if (NO_PLURAL.has(label) || label.endsWith("s")) return label;
+  if (/[^aeiou]y$/i.test(label)) return `${label.slice(0, -1)}ies`;
+  if (/(ch|sh|x|z)$/i.test(label)) return `${label}es`;
+  return `${label}s`;
+}
+
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
   type: string; subtype: string | null; neighborhood: string | null;
