@@ -321,6 +321,7 @@ export function EditFestivalDialog({
         name: ticketForm.name.trim(),
         description: ticketForm.description.trim() || null,
         price_cents: Math.max(0, Math.round(Number(ticketForm.price) * 100)),
+        shipping_cents: Math.max(0, Math.round(Number(ticketForm.shipping || 0) * 100)),
         quantity: ticketForm.quantity ? Number(ticketForm.quantity) : null,
         max_per_buyer: ticketForm.max ? Number(ticketForm.max) : null,
         sort_order: tickets.length,
@@ -332,7 +333,7 @@ export function EditFestivalDialog({
       return;
     }
     setTickets((t) => [...t, res.data as TicketTypeRow]);
-    setTicketForm({ name: "", description: "", price: "", quantity: "", max: "" });
+    setTicketForm({ name: "", description: "", price: "", shipping: "", quantity: "", max: "" });
     toast.success("Ticket type added");
   };
 
@@ -559,6 +560,7 @@ export function EditFestivalDialog({
                   <LabeledInput label="Name *" value={ticketForm.name} onChange={(v) => setTicketForm((f) => ({ ...f, name: v }))} />
                   <LabeledInput label="Description" value={ticketForm.description} onChange={(v) => setTicketForm((f) => ({ ...f, description: v }))} />
                   <LabeledInput label="Price ($) *" value={ticketForm.price} onChange={(v) => setTicketForm((f) => ({ ...f, price: v }))} />
+                  <LabeledInput label="Shipping ($)" placeholder="0.00" value={ticketForm.shipping} onChange={(v) => setTicketForm((f) => ({ ...f, shipping: v }))} />
                   <LabeledInput label="Quantity" value={ticketForm.quantity} onChange={(v) => setTicketForm((f) => ({ ...f, quantity: v }))} />
                   <LabeledInput label="Max / buyer" value={ticketForm.max} onChange={(v) => setTicketForm((f) => ({ ...f, max: v }))} />
                 </div>
