@@ -1,5 +1,5 @@
 import {
-  Home, Compass, Calendar, MapPin, Shield, Palette, Landmark, Building2,
+  Home, Compass, Calendar, MapPin, Users, Shield, Palette, Landmark, Building2,
   BookOpen, MessageCircle, Bell, User, Ticket, FileText, PenLine, Plane,
   Settings, Video, Trophy, Search, PartyPopper,
 } from "lucide-react";
