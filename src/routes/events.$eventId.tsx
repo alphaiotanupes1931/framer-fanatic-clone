@@ -701,6 +701,44 @@ function EventDetail() {
           </div>
         )}
 
+        {(nearbyOrgs.length > 0 || nearbyArtists.length > 0) && (
+          <div>
+            <h2 className="font-semibold text-foreground mb-3">Nearby on Planet Baltimore</h2>
+            <div className="space-y-6">
+              {nearbyOrgs.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-foreground mb-3">Nearby Arts Organizations ({nearbyOrgs.length})</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {nearbyOrgs.map((o) => (
+                      <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
+                        <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{(o.subtype || o.type).replaceAll("_", " ")}</div>
+                        <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
+                        {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{o.tagline || o.bio}</p>}
+                        <span className="mt-3 inline-block text-xs font-semibold" style={{ color: "#d4580a" }}>View</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {nearbyArtists.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-foreground mb-3">Nearby Artists ({nearbyArtists.length})</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {nearbyArtists.map((artist) => (
+                      <Link key={artist.id} to="/u/$username" params={{ username: artist.username ?? "" }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
+                        {artist.category && <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{artist.category.replaceAll("_", " ")}</div>}
+                        <div className="mt-0.5 text-sm font-bold text-foreground">{titleCase(artist.display_name || artist.username || "Artist")}</div>
+                        {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{artist.bio}</p>}
+                        <span className="mt-3 inline-block text-xs font-semibold" style={{ color: "#d4580a" }}>View</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <EventSocial eventId={evt.id} hostId={evt.user_id} />
 
         {canDelete && (
