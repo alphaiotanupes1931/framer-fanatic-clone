@@ -26,6 +26,7 @@ import {
   CalendarDays,
   Check,
   Clock,
+  Compass,
   Eye,
   EyeOff,
   ExternalLink,
