@@ -235,7 +235,7 @@ export function EditFestivalDialog({
       const [e, d, t] = await Promise.all([
         supabase.from("events").select("*").eq("id", eventId).maybeSingle(),
         supabase.from("festival_details").select("*").eq("event_id", eventId).maybeSingle(),
-        supabase.from("ticket_types").select("id,name,description,price_cents,quantity,max_per_buyer").eq("event_id", eventId).order("sort_order"),
+        supabase.from("ticket_types").select("id,name,description,price_cents,shipping_cents,quantity,max_per_buyer").eq("event_id", eventId).order("sort_order"),
       ]);
       if (cancelled) return;
       const row = (e.data ?? {}) as Record<string, unknown>;
@@ -326,7 +326,7 @@ export function EditFestivalDialog({
         max_per_buyer: ticketForm.max ? Number(ticketForm.max) : null,
         sort_order: tickets.length,
       } as never)
-      .select("id,name,description,price_cents,quantity,max_per_buyer")
+      .select("id,name,description,price_cents,shipping_cents,quantity,max_per_buyer")
       .single();
     if (res.error) {
       toast.error(res.error.message);
