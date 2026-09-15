@@ -801,6 +801,7 @@ function FestivalDetailPage() {
   const [updateBody, setUpdateBody] = useState("");
   const [updateImage, setUpdateImage] = useState<string | null>(null);
   const [updatePosting, setUpdatePosting] = useState(false);
+  const [editingUpdateIdx, setEditingUpdateIdx] = useState<number | null>(null);
   const scheduleDates = useMemo(
     () => Array.from(new Set(schedule.map((item) => item.date).filter(Boolean))),
     [schedule],
@@ -1315,7 +1316,7 @@ function FestivalDetailPage() {
                   <div className="rounded-xl border border-border bg-card p-4">
                     <div className="flex items-center gap-2 text-foreground">
                       <Megaphone className="h-4 w-4 text-orange" />
-                      <h3 className="font-display text-base font-extrabold">Post an Update</h3>
+                      <h3 className="font-display text-base font-extrabold">{editingUpdateIdx !== null ? "Edit Update" : "Post an Update"}</h3>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Followers of this festival receive a notification when you post.
@@ -1365,35 +1366,62 @@ function FestivalDetailPage() {
                           </Button>
                         }
                       />
-                      <Button
-                        type="button"
-                        variant="brand"
-                        size="sm"
-                        disabled={updatePosting || !updateBody.trim()}
-                        onClick={() => {
-                          setUpdatePosting(true);
-                          const next: UpdateItem[] = [
-                            {
-                              type: updateType,
-                              title: updateType,
-                              body: updateBody.trim(),
-                              date: "",
-                              image: updateImage ?? "",
-                              created_at: new Date().toISOString(),
-                            },
-                            ...updates,
-                          ];
-                          void saveDetails({ updates: next }).then(() => {
-                            setUpdateBody("");
-                            setUpdateImage(null);
-                            setUpdateType("Announcement");
-                            setUpdatePosting(false);
-                          });
-                        }}
-                      >
-                        <Megaphone className="mr-1.5 h-4 w-4" />
-                        {updatePosting ? "Posting…" : "Post & Notify"}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {editingUpdateIdx !== null && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingUpdateIdx(null);
+                              setUpdateBody("");
+                              setUpdateImage(null);
+                              setUpdateType("Announcement");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="brand"
+                          size="sm"
+                          disabled={updatePosting || !updateBody.trim()}
+                          onClick={() => {
+                            setUpdatePosting(true);
+                            let next: UpdateItem[];
+                            if (editingUpdateIdx !== null) {
+                              next = updates.map((u, i) =>
+                                i === editingUpdateIdx
+                                  ? { ...u, type: updateType, title: updateType, body: updateBody.trim(), image: updateImage ?? "" }
+                                  : u,
+                              );
+                            } else {
+                              next = [
+                                {
+                                  type: updateType,
+                                  title: updateType,
+                                  body: updateBody.trim(),
+                                  date: "",
+                                  image: updateImage ?? "",
+                                  created_at: new Date().toISOString(),
+                                },
+                                ...updates,
+                              ];
+                            }
+                            void saveDetails({ updates: next }).then(() => {
+                              setUpdateBody("");
+                              setUpdateImage(null);
+                              setUpdateType("Announcement");
+                              setEditingUpdateIdx(null);
+                              setUpdatePosting(false);
+                            });
+                          }}
+                        >
+                          <Megaphone className="mr-1.5 h-4 w-4" />
+                          {updatePosting ? "Saving…" : editingUpdateIdx !== null ? "Save Changes" : "Post & Notify"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1452,14 +1480,11 @@ function FestivalDetailPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                const next = [...updates];
-                                next[idx] = { ...item };
-                                // Handled by EditableList-style dialog? For now inline edit is complex; use prompt
-                                const newBody = window.prompt("Edit update", item.body);
-                                if (newBody !== null) {
-                                  next[idx] = { ...item, body: newBody };
-                                  void saveDetails({ updates: next });
-                                }
+                                setEditingUpdateIdx(idx);
+                                setUpdateType(item.type || "Announcement");
+                                setUpdateBody(item.body || "");
+                                setUpdateImage(item.image || null);
+                                document.getElementById("festival-updates")?.scrollIntoView({ behavior: "smooth", block: "start" });
                               }}
                             >
                               Edit
