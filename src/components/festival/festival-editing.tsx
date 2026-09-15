@@ -9,17 +9,37 @@ import { compressImage } from "@/lib/image-compress";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, GripVertical, ImagePlus, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 
+/** Rejects when a promise takes longer than `ms`, so uploads never hang forever. */
+function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e as Error);
+      },
+    );
+  });
+}
+
 /** Uploads an image to the shared event image bucket and returns its stored path. */
 export async function uploadFestivalImage(file: File): Promise<string> {
-  const compressed = await compressImage(file);
-  const { data: userData } = await supabase.auth.getUser();
-  const uid = userData.user?.id;
+  const compressed = await withTimeout(compressImage(file), 30_000, "That image took too long to process. Try a smaller photo.");
+  // getSession reads the local session; it cannot stall on the network.
+  const { data: sessionData } = await supabase.auth.getSession();
+  const uid = sessionData.session?.user?.id;
   if (!uid) throw new Error("Please sign in again to upload images.");
   const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
   const path = `${uid}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from("event-images")
-    .upload(path, compressed, { upsert: false, contentType: compressed.type });
+  const { error } = await withTimeout(
+    supabase.storage.from("event-images").upload(path, compressed, { upsert: false, contentType: compressed.type }),
+    60_000,
+    "The upload timed out. Check your connection and try again.",
+  );
   if (error) throw error;
   return path;
 }
