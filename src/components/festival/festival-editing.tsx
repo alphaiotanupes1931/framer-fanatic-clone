@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Img } from "@/components/shared/smart-img";
+import { resolveMediaUrl } from "@/components/smart-image";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
@@ -70,6 +71,24 @@ export function ImagePickerField({
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropAspect, setCropAspect] = useState(aspect);
 
+  /** Re-opens the crop tool with the photo that is already saved. */
+  const adjustExisting = async () => {
+    if (!value) return;
+    setBusy(true);
+    try {
+      const url = (await resolveMediaUrl(value)) ?? value;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Could not load that photo");
+      const blob = await res.blob();
+      setCropAspect(aspect);
+      setCropFile(new File([blob], "photo.jpg", { type: blob.type || "image/jpeg" }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not load that photo");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const pick = async (file: File) => {
     setBusy(true);
     try {
@@ -104,9 +123,16 @@ export function ImagePickerField({
             </div>
           )}
         </div>
-        <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-          {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {value ? (
+            <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => void adjustExisting()}>
+              {busy ? "Working…" : "Adjust image"}
+            </Button>
+          ) : null}
+          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+            {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
+          </Button>
+        </div>
         <input
           ref={inputRef}
           type="file"
