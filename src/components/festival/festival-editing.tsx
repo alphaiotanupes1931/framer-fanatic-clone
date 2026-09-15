@@ -7,7 +7,7 @@ import { Img } from "@/components/shared/smart-img";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, GripVertical, ImagePlus, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 
 /** Uploads an image to the shared event image bucket and returns its stored path. */
 export async function uploadFestivalImage(file: File): Promise<string> {
