@@ -244,6 +244,21 @@ export function ItemEditorDialog({
           {fields.map((f) =>
             f.type === "image" ? (
               <ImagePickerField key={f.key} label={f.label} value={form[f.key] ?? ""} onChange={(v) => set(f.key, v)} />
+            ) : f.type === "select" ? (
+              <label key={f.key} className="block">
+                <span className="text-xs font-semibold text-muted-foreground">{f.label}</span>
+                <select
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form[f.key] ?? ""}
+                  onChange={(e) => set(f.key, e.target.value)}
+                >
+                  {(f.options ?? []).map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </label>
             ) : (
               <label key={f.key} className="block">
                 <span className="text-xs font-semibold text-muted-foreground">{f.label}</span>
