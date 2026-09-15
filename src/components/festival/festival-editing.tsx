@@ -59,12 +59,14 @@ export function ImagePickerField({
   onChange,
   label = "Image",
   aspect = 1,
+  trigger,
 }: {
   value: string;
   onChange: (v: string) => void;
   label?: string;
   /** Starting crop shape; the person can still pick another one. */
   aspect?: number;
+  trigger?: React.ReactNode;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -102,52 +104,81 @@ export function ImagePickerField({
 
   return (
     <div>
-      <span className="text-xs font-semibold text-muted-foreground">{label}</span>
-      <div className="mt-1 flex items-center gap-3">
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
-          {value ? (
-            <>
-              <Img src={value} alt="" className="h-full w-full object-cover" />
-              <button
-                type="button"
-                onClick={() => onChange("")}
-                aria-label="Remove image"
-                className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </>
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-              {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
+      {trigger ? (
+        <>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => inputRef.current?.click()}
+            className="disabled:opacity-50"
+          >
+            {trigger}
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) {
+                setCropAspect(aspect);
+                setCropFile(f);
+              }
+              e.target.value = "";
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <span className="text-xs font-semibold text-muted-foreground">{label}</span>
+          <div className="mt-1 flex items-center gap-3">
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+              {value ? (
+                <>
+                  <Img src={value} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => onChange("")}
+                    aria-label="Remove image"
+                    className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </>
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                  {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {value ? (
-            <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => void adjustExisting()}>
-              {busy ? "Working…" : "Adjust image"}
-            </Button>
-          ) : null}
-          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-            {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
-          </Button>
-        </div>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) {
-              setCropAspect(aspect);
-              setCropFile(f);
-            }
-            e.target.value = "";
-          }}
-        />
-      </div>
+            <div className="flex flex-wrap gap-2">
+              {value ? (
+                <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => void adjustExisting()}>
+                  {busy ? "Working…" : "Adjust image"}
+                </Button>
+              ) : null}
+              <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+                {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
+              </Button>
+            </div>
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  setCropAspect(aspect);
+                  setCropFile(f);
+                }
+                e.target.value = "";
+              }}
+            />
+          </div>
+        </>
+      )}
 
       <ImageCropDialog
         file={cropFile}
@@ -190,8 +221,9 @@ export function ImagePickerField({
 export type FieldSpec = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "image";
+  type?: "text" | "textarea" | "image" | "select";
   placeholder?: string;
+  options?: string[];
 };
 
 export type ItemRecord = Record<string, string>;
@@ -243,6 +275,21 @@ export function ItemEditorDialog({
           {fields.map((f) =>
             f.type === "image" ? (
               <ImagePickerField key={f.key} label={f.label} value={form[f.key] ?? ""} onChange={(v) => set(f.key, v)} />
+            ) : f.type === "select" ? (
+              <label key={f.key} className="block">
+                <span className="text-xs font-semibold text-muted-foreground">{f.label}</span>
+                <select
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form[f.key] ?? ""}
+                  onChange={(e) => set(f.key, e.target.value)}
+                >
+                  {(f.options ?? []).map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </label>
             ) : (
               <label key={f.key} className="block">
                 <span className="text-xs font-semibold text-muted-foreground">{f.label}</span>
