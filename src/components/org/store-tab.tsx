@@ -315,6 +315,9 @@ function ProductForm({
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
         <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Listed for sale
       </label>
+      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <input type="checkbox" checked={needsShipping} onChange={(e) => setNeedsShipping(e.target.checked)} /> Physical item (ask the buyer for a shipping address)
+      </label>
       <p className="text-[11px] text-muted-foreground">
         Buyers pay the platform fee and card processing on top, so you receive the price you set.
       </p>
