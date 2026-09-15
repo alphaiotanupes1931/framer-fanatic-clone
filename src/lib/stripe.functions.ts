@@ -273,6 +273,10 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
     const breakdown = priceBreakdown(unitPriceCents * qty);
     const applicationFee = breakdown.platformFeeCents;
 
+    // Optional flat shipping charge set on the ticket type. Charged once per
+    // order on top of the tickets and paid out to the organizer.
+    const shippingCents = Math.max(0, tier?.shipping_cents ?? 0);
+
     // Show the buyer exactly who they are paying, straight from Stripe.
     const seller = await getSellerDetails(artist.stripe_account_id);
     const sellerName = seller?.businessName || artist.display_name || artist.username || "the organizer";
@@ -287,11 +291,26 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
       custom_text: {
         submit: { message: sellerLine },
       },
-      line_items: checkoutLineItems(breakdown, {
-        name: `${tier ? `${tier.name} - ${event.title}` : `Ticket: ${event.title}`}${qty > 1 ? ` x${qty}` : ""}`,
-        description: `${event.title} · Sold by ${sellerName} via Planet Baltimore`,
-        images: event.image_url ? [event.image_url] : undefined,
-      }),
+      line_items: [
+        ...checkoutLineItems(breakdown, {
+          name: `${tier ? `${tier.name} - ${event.title}` : `Ticket: ${event.title}`}${qty > 1 ? ` x${qty}` : ""}`,
+          description: `${event.title} · Sold by ${sellerName} via Planet Baltimore`,
+          images: event.image_url ? [event.image_url] : undefined,
+        }),
+        ...(shippingCents > 0
+          ? [{
+              quantity: 1,
+              price_data: {
+                currency: "usd",
+                unit_amount: shippingCents,
+                product_data: {
+                  name: "Shipping",
+                  description: `Shipping for ${event.title}`,
+                },
+              },
+            }]
+          : []),
+      ],
       payment_intent_data: {
         application_fee_amount: applicationFee,
         on_behalf_of: artist.stripe_account_id,
@@ -308,6 +327,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
         kind: "ticket",
         quantity: String(qty),
         ticket_type_id: tier?.id ?? "",
+        shipping_cents: String(shippingCents),
         artist_net_cents: String(breakdown.artistNetCents),
         platform_tax_cents: String(breakdown.platformTaxCents),
         stripe_fee_cents: String(breakdown.stripeFeeCents),
