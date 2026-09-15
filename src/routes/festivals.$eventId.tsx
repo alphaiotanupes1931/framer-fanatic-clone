@@ -1087,6 +1087,9 @@ function FestivalDetailPage() {
                     );
                   }}
                 />
+                {schedule.length > 0 && visibleSchedule.length === 0 && (
+                  <TabEmpty message="No scheduled activities match these filters." />
+                )}
               </div>
             </section>
 
