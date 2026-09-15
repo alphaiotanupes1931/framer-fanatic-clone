@@ -931,11 +931,19 @@ function FestivalDetailPage() {
                 </div>
                 {details?.tagline && <p className="max-w-2xl text-sm leading-relaxed text-background/80 sm:text-base">{details.tagline}</p>}
               </div>
-              <Button asChild size="lg" className="w-full shrink-0 sm:w-auto">
-                <Link to="/events/$eventId" params={{ eventId: event.id }}>
-                  <Ticket /> {isFree ? "RSVP" : "Buy tickets"}
-                </Link>
-              </Button>
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto lg:flex-nowrap">
+                <Button size="lg" variant="brand" className="w-full sm:w-auto" onClick={() => scrollTo("overview")}>
+                  <Compass /> Explore Festival
+                </Button>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={() => scrollTo("schedule")}>
+                  <CalendarDays /> View Schedule
+                </Button>
+                {showCreatorTools && (
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={() => setFullEditOpen(true)}>
+                    <Pencil /> Edit
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
