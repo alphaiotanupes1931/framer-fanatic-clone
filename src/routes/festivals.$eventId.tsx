@@ -172,7 +172,7 @@ type ScheduleItem = {
   image: string;
 };
 type Faq = { q: string; a: string };
-type UpdateItem = { title: string; date: string; body: string; image: string };
+type UpdateItem = { type: string; title: string; date: string; body: string; image: string; created_at?: string };
 
 type VendorItem = {
   category: string;
