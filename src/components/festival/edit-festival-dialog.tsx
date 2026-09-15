@@ -451,13 +451,11 @@ export function EditFestivalDialog({
     emptyState: emptyRows,
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Festival</DialogTitle>
-        </DialogHeader>
+  const body = (
+    <>
         <p className="text-sm text-muted-foreground">Update every part of your festival page. Changes go live immediately.</p>
+
+
 
         {loading ? (
           <div className="flex items-center gap-2 py-10 text-muted-foreground">
