@@ -41,6 +41,7 @@ import {
   Users,
 } from "lucide-react";
 import { PageBackButton } from "@/components/shared/page-back-button";
+import { useUserRole } from "@/hooks/use-user-role";
 import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
 
 export const Route = createFileRoute("/festivals/$eventId")({
@@ -662,7 +663,7 @@ function FestivalDetailPage() {
       .then(({ data }) => setSaved(!!data));
   }, [me, eventId]);
 
-  const isOwner = !!me && !!data && data.event.user_id === me;
+  const isOwner = !!me && !!data && (data.event.user_id === me || isAdmin);
   const showCreatorTools = isOwner && !previewAsVisitor;
   const event = data?.event ?? null;
   const details = data?.details ?? null;
