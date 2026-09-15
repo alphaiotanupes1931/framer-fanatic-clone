@@ -361,7 +361,7 @@ export function EditableList<T extends ItemRecord>({
             return (
             <div
               key={`${item.name ?? item.q ?? item.title ?? index}-${index}`}
-              className={`relative ${canDrag ? "cursor-grab select-none active:cursor-grabbing" : ""} ${dragIndex === index ? "opacity-50" : ""}`}
+              className={`relative ${canDrag ? "flex items-stretch gap-1.5 cursor-grab select-none active:cursor-grabbing" : ""} ${dragIndex === index ? "opacity-50" : ""}`}
               draggable={canDrag}
               onDragStart={canDrag ? (e) => {
                 e.dataTransfer.effectAllowed = "move";
@@ -379,16 +379,16 @@ export function EditableList<T extends ItemRecord>({
                   : undefined
               }
             >
-              {rendered}
               {canDrag && (
                 <span
                   aria-label="Drag to reorder"
                   title="Drag to reorder"
-                  className="pointer-events-none absolute -left-3 top-1/2 z-10 inline-flex -translate-y-1/2 items-center rounded-r-md bg-foreground/60 px-1 py-2 text-background shadow backdrop-blur-sm"
+                  className="pointer-events-none inline-flex shrink-0 items-center self-center rounded-md bg-foreground/60 px-0.5 py-3 text-background shadow"
                 >
                   <GripVertical className="h-4 w-4" />
                 </span>
               )}
+              <div className={canDrag ? "min-w-0 flex-1" : "contents"}>{rendered}</div>
               {canEdit && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
