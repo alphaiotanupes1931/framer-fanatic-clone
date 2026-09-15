@@ -50,6 +50,7 @@ import { PageBackButton } from "@/components/shared/page-back-button";
 import { useUserRole } from "@/hooks/use-user-role";
 import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
 import { EditFestivalDialog } from "@/components/festival/edit-festival-dialog";
+import { downloadIcs } from "@/lib/ics";
 
 export const Route = createFileRoute("/festivals/$eventId")({
   component: FestivalDetailPage,
