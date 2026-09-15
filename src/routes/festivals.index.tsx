@@ -657,7 +657,7 @@ function FestivalsPage() {
     });
 
   const activeCount = Object.values(active).reduce((n, list) => n + list.length, 0);
-  const festivalTarget = (row: Row) => (me?.id === row.user_id || isAdmin ? "/festivals/$eventId_/edit" : "/festivals/$eventId");
+  const festivalTarget = (row: Row) => (me?.id === row.user_id || isAdmin ? "/festivals/$eventId/edit" : "/festivals/$eventId");
 
   const directions = (r: Row) => {
     const dest = encodeURIComponent(r.address || r.venue_name || placeOf(r) || r.title);
