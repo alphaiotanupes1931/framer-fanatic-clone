@@ -183,6 +183,13 @@
       "when": 1789326673528,
       "tag": "0025_add_festival_updates",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1789431749120,
+      "tag": "0026_admins_can_edit_events_and_festival_details",
+      "breakpoints": true
     }
   ]
 }
