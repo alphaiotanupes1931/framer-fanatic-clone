@@ -383,36 +383,60 @@ export function EditFestivalDialog({
     }
     setSaving(true);
     const priceCents = ev.admission === "paid" ? Math.max(0, Math.round(Number(ev.price || 0) * 100)) : 0;
-    const evRes = await supabase
-      .from("events")
-      .update({
-        title: ev.title.trim(),
-        description: ev.description?.trim() || null,
-        image_url: ev.image_url || null,
-        starts_at: new Date(ev.starts_at).toISOString(),
-        ends_at: ev.ends_at ? new Date(ev.ends_at).toISOString() : null,
-        venue_name: ev.venue_name?.trim() || null,
-        address: ev.address?.trim() || null,
-        location: ev.venue_name?.trim() || ev.address?.trim() || null,
-        neighborhood: ev.neighborhood?.trim() || null,
-        category: ev.category?.trim() || categories[0] || null,
-        latitude: ev.latitude ? Number(ev.latitude) : null,
-        longitude: ev.longitude ? Number(ev.longitude) : null,
-        pricing_mode: ev.admission === "paid" ? "paid" : "free",
-        donations_enabled: ev.admission === "donation",
-        price_cents: priceCents,
-        gallery_urls: galleryFinal,
-        is_published: published,
-      } as never)
-      .eq("id", eventId);
-    if (evRes.error) {
-      setSaving(false);
-      toast.error(evRes.error.message);
-      return;
+    const eventFields = {
+      title: ev.title.trim(),
+      description: ev.description?.trim() || null,
+      image_url: ev.image_url || null,
+      starts_at: new Date(ev.starts_at).toISOString(),
+      ends_at: ev.ends_at ? new Date(ev.ends_at).toISOString() : null,
+      venue_name: ev.venue_name?.trim() || null,
+      address: ev.address?.trim() || null,
+      location: ev.venue_name?.trim() || ev.address?.trim() || null,
+      neighborhood: ev.neighborhood?.trim() || null,
+      category: ev.category?.trim() || categories[0] || (isCreate ? "festival" : null),
+      latitude: ev.latitude ? Number(ev.latitude) : null,
+      longitude: ev.longitude ? Number(ev.longitude) : null,
+      pricing_mode: ev.admission === "paid" ? "paid" : "free",
+      donations_enabled: ev.admission === "donation",
+      price_cents: priceCents,
+      gallery_urls: galleryFinal,
+      is_published: published,
+    };
+    let targetId = eventId ?? "";
+    if (isCreate) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData.session?.user?.id;
+      if (!uid) {
+        setSaving(false);
+        toast.error("Sign in to create a festival");
+        return;
+      }
+      const ins = await supabase
+        .from("events")
+        .insert({ ...eventFields, user_id: uid } as never)
+        .select("id")
+        .single();
+      if (ins.error) {
+        setSaving(false);
+        toast.error(
+          ins.error.message.includes("row-level security")
+            ? "Only Artists can post festivals. Upgrade in your profile."
+            : ins.error.message,
+        );
+        return;
+      }
+      targetId = (ins.data as { id: string }).id;
+    } else {
+      const upd = await supabase.from("events").update(eventFields as never).eq("id", eventId);
+      if (upd.error) {
+        setSaving(false);
+        toast.error(upd.error.message);
+        return;
+      }
     }
     const detRes = await supabase.from("festival_details").upsert(
       {
-        event_id: eventId,
+        event_id: targetId,
         tagline: det.tagline?.trim() || null,
         hours: det.hours?.trim() || null,
         price_label: det.price_label?.trim() || null,
