@@ -344,24 +344,37 @@ function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: Even
   };
 
   return (
-    <article className="flex gap-4 border-b border-border py-6 first:pt-2 last:border-0">
-      {item.image && (
-        <Img src={item.image} alt={item.name} className="h-24 w-24 shrink-0 rounded-xl object-cover" />
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] font-bold uppercase text-orange">{item.type || event.category || "Performer"}</div>
-        <h3 className="mt-1 font-display text-2xl font-extrabold text-foreground">{item.name}</h3>
+    <article className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card">
+      <div className="relative">
+        {item.image ? (
+          <Img src={item.image} alt={item.name} className="h-72 w-full object-cover" />
+        ) : (
+          <div className="h-72 w-full bg-muted" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
+        <span className="absolute left-3 top-3 rounded-md bg-black/70 px-2 py-1 text-[11px] font-bold text-white">
+          {item.type || event.category || "Performer"}
+        </span>
+        <h3 className="absolute bottom-3 left-4 right-4 font-display text-xl font-extrabold text-white">{item.name}</h3>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
         {(item.when || item.venue) && (
-          <p className="mt-2 text-sm font-semibold text-muted-foreground">
+          <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <CalendarDays className="h-4 w-4 shrink-0" />
             {[item.when, item.venue].filter(Boolean).join(" · ")}
           </p>
         )}
-        {item.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => void sharePerformer()}>
-            <Share2 /> Share
-          </Button>
-          <Button asChild variant="brand" size="sm">
+        {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" size="sm" aria-label="Save performer">
+              <Bookmark />
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => void sharePerformer()}>
+              <Share2 /> Share
+            </Button>
+          </div>
+          <Button asChild variant="outline" size="sm" className="border-orange text-orange">
             <Link to="/events/$eventId" params={{ eventId: event.id }}>
               <Ticket /> {isFree ? "RSVP" : "Tickets"}
             </Link>
@@ -1203,6 +1216,7 @@ function FestivalDetailPage() {
                 fields={PROGRAM_FIELDS}
                 onChange={(next) => saveDetails({ performers: next })}
                 reorderable
+                listClassName="grid gap-4 sm:grid-cols-2"
                 emptyState={<div className="mt-4"><TabEmpty message="Performers have not been announced yet." /></div>}
                 renderItem={(item) => <PerformerCard item={item} event={event} isFree={isFree} />}
               />
