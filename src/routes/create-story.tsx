@@ -78,7 +78,6 @@ function CreateStoryPage() {
   // Cover cropping: every picked cover goes through the crop dialog first,
   // and the original file is kept so the cover can be re-cropped.
   const [cropFile, setCropFile] = useState<File | null>(null);
-  const [cropAspect, setCropAspect] = useState(16 / 9);
   const coverOriginalRef = useRef<File | null>(null);
 
   const onPickCover = (file: File) => {
@@ -213,8 +212,8 @@ function CreateStoryPage() {
           <input ref={fileRef} type="file" accept="image/*" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) onPickCover(f); e.currentTarget.value = ""; }} />
           {form.cover_url ? (
-            <div className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
-              <Img src={form.cover_url} alt="Cover preview" className="max-h-80 w-full object-cover" />
+            <div className="group relative aspect-video overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
+              <Img src={form.cover_url} alt="Cover preview" className="h-full w-full object-cover" />
               <div className="absolute right-3 top-3 flex items-center gap-2">
                 <button type="button" onClick={recropCover} disabled={uploading || !coverOriginalRef.current}
                   className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow hover:bg-white disabled:opacity-50">Crop</button>
@@ -329,34 +328,13 @@ function CreateStoryPage() {
 
       <ImageCropDialog
         file={cropFile}
-        aspect={cropAspect}
+        aspect={16 / 9}
         maxEdge={1600}
         title="Crop your cover image"
         open={!!cropFile}
         onOpenChange={(open) => { if (!open) setCropFile(null); }}
         onCropped={(file) => void onCoverCropped(file)}
         circleGuide={false}
-        extraControls={
-          <div className="flex w-full items-center justify-center gap-2">
-            <span className="text-xs text-muted-foreground">Shape</span>
-            {[
-              { label: "1:1", value: 1 },
-              { label: "4:5", value: 4 / 5 },
-              { label: "16:9", value: 16 / 9 },
-            ].map((opt) => (
-              <button
-                key={opt.label}
-                type="button"
-                onClick={() => setCropAspect(opt.value)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  Math.abs(cropAspect - opt.value) < 0.01 ? "bg-[#d4580a] text-white" : "bg-secondary text-muted-foreground"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        }
       />
     </AppLayout>
   );

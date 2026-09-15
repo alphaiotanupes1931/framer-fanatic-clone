@@ -47,13 +47,6 @@ export async function uploadFestivalImage(file: File): Promise<string> {
   return path;
 }
 
-const CROP_SHAPES = [
-  { label: "1:1", value: 1 },
-  { label: "4:5", value: 4 / 5 },
-  { label: "4:3", value: 4 / 3 },
-  { label: "16:9", value: 16 / 9 },
-];
-
 export function ImagePickerField({
   value,
   onChange,
@@ -71,7 +64,6 @@ export function ImagePickerField({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
-  const [cropAspect, setCropAspect] = useState(aspect);
 
   /** Re-opens the crop tool with the photo that is already saved. */
   const adjustExisting = async () => {
@@ -82,7 +74,6 @@ export function ImagePickerField({
       const res = await fetch(url);
       if (!res.ok) throw new Error("Could not load that photo");
       const blob = await res.blob();
-      setCropAspect(aspect);
       setCropFile(new File([blob], "photo.jpg", { type: blob.type || "image/jpeg" }));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not load that photo");
@@ -122,7 +113,6 @@ export function ImagePickerField({
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) {
-                setCropAspect(aspect);
                 setCropFile(f);
               }
               e.target.value = "";
@@ -170,7 +160,6 @@ export function ImagePickerField({
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) {
-                  setCropAspect(aspect);
                   setCropFile(f);
                 }
                 e.target.value = "";
@@ -182,7 +171,7 @@ export function ImagePickerField({
 
       <ImageCropDialog
         file={cropFile}
-        aspect={cropAspect}
+        aspect={aspect}
         maxEdge={1440}
         title="Adjust your photo"
         open={!!cropFile}
@@ -194,25 +183,6 @@ export function ImagePickerField({
           void pick(f);
         }}
         circleGuide={false}
-        extraControls={
-          <div className="flex w-full items-center justify-center gap-2">
-            <span className="text-xs text-muted-foreground">Shape</span>
-            {CROP_SHAPES.map((s) => (
-              <button
-                key={s.label}
-                type="button"
-                onClick={() => setCropAspect(s.value)}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                  Math.abs(cropAspect - s.value) < 0.001
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border text-muted-foreground hover:border-primary/50"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        }
       />
     </div>
   );
@@ -224,6 +194,7 @@ export type FieldSpec = {
   type?: "text" | "textarea" | "image" | "select";
   placeholder?: string;
   options?: string[];
+  aspect?: number;
 };
 
 export type ItemRecord = Record<string, string>;
@@ -274,7 +245,7 @@ export function ItemEditorDialog({
         <div className="space-y-4">
           {fields.map((f) =>
             f.type === "image" ? (
-              <ImagePickerField key={f.key} label={f.label} value={form[f.key] ?? ""} onChange={(v) => set(f.key, v)} />
+              <ImagePickerField key={f.key} label={f.label} value={form[f.key] ?? ""} onChange={(v) => set(f.key, v)} aspect={f.aspect ?? 4 / 3} />
             ) : f.type === "select" ? (
               <label key={f.key} className="block">
                 <span className="text-xs font-semibold text-muted-foreground">{f.label}</span>

@@ -30,7 +30,7 @@ export function OrgPostCard({ post }: { post: OrgFeedPost }) {
         <SmartVideo src={post.video_url} className="max-h-[320px] w-full bg-black object-contain" controls />
       ) : first ? (
         <Link {...orgPath}>
-          <Img src={first} alt={post.title || post.org_name} className="max-h-[320px] w-full object-cover" />
+          <Img src={first} alt={post.title || post.org_name} className="max-h-[520px] w-full bg-muted object-contain" />
         </Link>
       ) : null}
 

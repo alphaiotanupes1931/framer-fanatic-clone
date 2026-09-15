@@ -55,7 +55,7 @@ const HIGHLIGHT_FIELDS: { key: string; label: string }[] = [
 ];
 
 const PROGRAM_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "name", label: "Name" },
   { key: "type", label: "Type / discipline", placeholder: "Music, dance, poetry" },
   { key: "when", label: "Date and time", placeholder: "Sat, Sep 22 · 9:00 pm" },
@@ -65,7 +65,7 @@ const PROGRAM_FIELDS: FieldSpec[] = [
 ];
 
 const SCHEDULE_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "name", label: "What is happening" },
   { key: "date", label: "Date", placeholder: "2026-09-22" },
   { key: "time", label: "Time", placeholder: "1:00 pm" },
@@ -76,7 +76,7 @@ const SCHEDULE_FIELDS: FieldSpec[] = [
 ];
 
 const VENDOR_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "category", label: "Category" },
   { key: "name", label: "Name" },
   { key: "booth", label: "Booth" },
@@ -90,7 +90,7 @@ const FAQ_FIELDS: FieldSpec[] = [
 ];
 
 const UPDATE_FIELDS: FieldSpec[] = [
-  { key: "image", label: "Photo", type: "image" },
+  { key: "image", label: "Photo", type: "image", aspect: 4 / 3 },
   { key: "title", label: "Headline" },
   { key: "date", label: "Timestamp" },
   { key: "body", label: "Message", type: "textarea" },

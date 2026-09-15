@@ -435,8 +435,8 @@ function EventDetail() {
         <PageBackButton destination="events" />
 
         {evt.image_url && (
-          <div className="overflow-hidden rounded-2xl border border-border bg-muted">
-            <EventImage src={evt.image_url} alt={evt.title} className="max-h-[520px] w-full object-cover" />
+          <div className="aspect-video overflow-hidden rounded-2xl border border-border bg-muted">
+            <EventImage src={evt.image_url} alt={evt.title} className="h-full w-full object-cover" />
           </div>
         )}
 

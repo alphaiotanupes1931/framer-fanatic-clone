@@ -520,7 +520,7 @@ function OrgProfile() {
       </Dialog>
 
       {/* Banner with floating actions */}
-      <div className="relative h-44 overflow-hidden rounded-2xl bg-neutral-100 sm:h-60">
+      <div className="relative aspect-[3/1] overflow-hidden rounded-2xl bg-neutral-100">
         {org.banner_url ? (
           <Img src={org.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="eager" decoding="async" />
         ) : canManage ? (

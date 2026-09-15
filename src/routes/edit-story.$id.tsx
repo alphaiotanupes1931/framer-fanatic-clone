@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { isValidLink, normalizeLink } from "@/components/shared/link-fields";
+import { ImageUpload } from "@/components/shared/image-upload";
 
 export const Route = createFileRoute("/edit-story/$id")({
   component: EditStoryPage,
@@ -43,7 +44,6 @@ function EditStoryPage() {
   const me = useCurrentProfile();
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const fileRef = useRef<HTMLInputElement>(null);
   const inlineImgRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
@@ -99,13 +99,6 @@ function EditStoryPage() {
     if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
     return signed.signedUrl;
   }, [me]);
-
-  const onPickCover = async (file: File) => {
-    setUploading(true);
-    try { const url = await upload(file); set("cover_url", url); toast.success("Cover updated"); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Upload failed"); }
-    finally { setUploading(false); }
-  };
 
   const exec = (cmd: string, value?: string) => {
     editorRef.current?.focus();
@@ -187,25 +180,7 @@ function EditStoryPage() {
 
         <div className="space-y-2">
           <div className="text-sm font-semibold text-neutral-800">Cover Image</div>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) onPickCover(f); e.currentTarget.value = ""; }} />
-          {form.cover_url ? (
-            <div className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
-              <Img src={form.cover_url} alt="Cover" className="max-h-80 w-full object-cover" />
-              <div className="absolute right-3 top-3 flex items-center gap-2">
-                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-                  className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow hover:bg-white">Replace</button>
-                <button type="button" onClick={() => set("cover_url", "")}
-                  className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-red-600 shadow hover:bg-white">Remove</button>
-              </div>
-            </div>
-          ) : (
-            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-              className="flex h-64 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 text-neutral-500 hover:border-orange-300 hover:bg-orange-50/40">
-              {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <ImageIcon className="h-7 w-7" />}
-              <span className="text-sm font-medium">Click to add cover image</span>
-            </button>
-          )}
+          <ImageUpload value={form.cover_url} onChange={(cover_url) => set("cover_url", cover_url)} label="Click to add cover image" bucket="story-covers" aspect={16 / 9} />
         </div>
 
         <div className="mt-8 space-y-3">

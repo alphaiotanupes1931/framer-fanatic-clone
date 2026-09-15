@@ -340,7 +340,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               <Img
                 src={current.url}
                 alt=""
-                className="max-h-[320px] w-full cursor-pointer object-cover"
+                className="max-h-[520px] w-full cursor-pointer bg-muted object-contain"
                 loading="lazy"
                 decoding="async"
                 referrerPolicy="no-referrer"

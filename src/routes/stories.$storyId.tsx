@@ -163,12 +163,12 @@ function StoryDetail() {
 
       <article className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-border bg-card">
         {story.cover_url ? (
-          <div className="w-full bg-muted">
+          <div className="aspect-video w-full bg-muted">
             <SmartImage
               src={story.cover_url}
               bucket="story-covers"
               alt={story.title}
-              className="max-h-[70vh] w-full object-contain"
+              className="h-full w-full object-cover"
               loading="eager"
             />
           </div>

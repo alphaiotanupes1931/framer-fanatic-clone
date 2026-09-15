@@ -347,7 +347,7 @@ function PublicProfilePage() {
       {/* Canonical person profile, matching the signed-in profile layout. */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card sm:rounded-3xl">
       <div
-        className="relative h-36 overflow-hidden bg-neutral-200 sm:h-56"
+        className="relative aspect-[3/1] overflow-hidden bg-neutral-200"
         style={
           bannerSrc
             ? { backgroundImage: `url(${bannerSrc})`, backgroundSize: "cover", backgroundPosition: "center" }

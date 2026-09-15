@@ -189,7 +189,7 @@ export function EventCard({ event, compact = false, onDeleted, draft = false, fe
   const cardContent = (
     <>
       {showImage ? (
-      <div className="relative aspect-[16/7] overflow-hidden bg-muted">
+      <div className="relative aspect-video overflow-hidden bg-muted">
         <Img
           src={resolvedImage}
           alt={event.title}
