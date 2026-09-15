@@ -192,11 +192,14 @@ export function EditFestivalDialog({
   onOpenChange,
   eventId,
   onSaved,
+  asPage = false,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   eventId: string;
   onSaved: () => void;
+  /** Render inline as a full page instead of inside a modal. */
+  asPage?: boolean;
 }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
