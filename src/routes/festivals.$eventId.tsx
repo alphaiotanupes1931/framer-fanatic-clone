@@ -303,7 +303,7 @@ function ProgramCard({ item, fallbackAction, eventId }: { item: ProgramItem; fal
         <h3 className="font-display text-xl font-extrabold leading-tight sm:text-2xl">{item.name}</h3>
         {(item.when || item.venue) && <p className="mt-1 text-xs font-semibold">{[item.when, item.venue].filter(Boolean).join(" · ")}</p>}
         {item.description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-background/85">{item.description}</p>}
-        <Button asChild variant={action.toLowerCase() === "free" ? "success" : "brand"} size="xs" className="mt-2 w-fit">
+        <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="xs" className="mt-2 w-fit border-orange text-orange hover:bg-orange hover:text-orange-foreground">
           <Link to="/events/$eventId" params={{ eventId }}><Ticket /> {action}</Link>
         </Button>
       </div>
@@ -659,8 +659,8 @@ function FestivalDetailPage() {
     let nearbyArtists: NearbyArtist[] = [];
     if (event.neighborhood) {
       const [orgsRes, artistsRes] = await Promise.all([
-        supabase.from("organizations").select("id,name,slug,type,subtype,tagline,bio").eq("is_public", true).ilike("neighborhood", event.neighborhood).limit(12),
-        supabase.from("profiles_public").select("id,display_name,username,category,bio").ilike("neighborhood", event.neighborhood).not("username", "is", null).limit(8),
+        supabase.from("organizations").select("id,name,slug,type,subtype,tagline,bio,avatar_url,banner_url").eq("is_public", true).ilike("neighborhood", event.neighborhood).limit(12),
+        supabase.from("profiles_public").select("id,display_name,username,category,bio,avatar_url,banner_url").ilike("neighborhood", event.neighborhood).not("username", "is", null).limit(8),
       ]);
       nearby = (orgsRes.data as NearbyOrg[] | null) ?? [];
       nearbyArtists = ((artistsRes.data as NearbyArtist[] | null) ?? []).filter((artist) => artist.id !== event.user_id);
@@ -993,14 +993,14 @@ function FestivalDetailPage() {
           </div>
         </div>
 
-        <div className={`grid gap-0 overflow-hidden rounded-2xl border border-border bg-card ${activeTab === "overview" ? "lg:grid-cols-[minmax(0,1fr)_340px]" : ""}`}>
+        <div className={`grid gap-4 ${activeTab === "overview" ? "lg:grid-cols-[minmax(0,1fr)_340px]" : ""}`}>
           {/* Main column */}
-          <div className="min-w-0 space-y-10 p-5 sm:p-8 lg:border-r lg:border-border">
+          <div className={`min-w-0 ${activeTab === "overview" ? "space-y-5" : "rounded-lg border border-border bg-card p-5 sm:p-8"}`}>
             <section id="festival-overview" className={`scroll-mt-24 space-y-6 ${activeTab !== "overview" ? "hidden" : ""}`}>
               {(headliners.length > 0 || showCreatorTools) && (
-                <div>
-                  <h2 className="font-display text-2xl font-extrabold text-foreground">Festival Headliners</h2>
-                  <div className="mt-2">
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-foreground"><Star className="h-5 w-5" /> Festival Headliners</h2>
+                  <div className="mt-3">
                     <EditableList
                       items={headliners}
                       canEdit={showCreatorTools}
@@ -1009,9 +1009,10 @@ function FestivalDetailPage() {
                       fields={PROGRAM_FIELDS}
                       onChange={(next) => saveDetails({ performers: next })}
                       reorderable
+                      listClassName="grid gap-3 sm:grid-cols-2"
                       emptyState={<TabEmpty message="No headliners added yet." />}
                       renderItem={(item) => (
-                        <ProgramRow item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
+                        <ProgramCard item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
                       )}
                     />
                   </div>
@@ -1019,9 +1020,9 @@ function FestivalDetailPage() {
               )}
 
               {(experiences.length > 0 || showCreatorTools) && (
-                <div className="border-t border-border pt-8">
-                  <h2 className="font-display text-2xl font-extrabold text-foreground">Featured Experiences</h2>
-                  <div className="mt-2">
+                <div>
+                  <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-foreground"><Sparkles className="h-5 w-5" /> Featured Experiences</h2>
+                  <div className="mt-3">
                     <EditableList
                       items={experiences}
                       canEdit={showCreatorTools}
@@ -1030,32 +1031,15 @@ function FestivalDetailPage() {
                       fields={PROGRAM_FIELDS}
                       onChange={(next) => saveDetails({ experiences: next })}
                       reorderable
+                      listClassName="grid gap-3 sm:grid-cols-2"
                       emptyState={<TabEmpty message="No featured experiences added yet." />}
                       renderItem={(item) => (
-                        <ProgramRow item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
+                        <ProgramCard item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
                       )}
                     />
                   </div>
                 </div>
               )}
-
-              <div className="border-t border-border pt-8">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
-                  {showCreatorTools && (
-                    <Button type="button" variant="outline" size="xs" onClick={() => openFullEdit()}>
-                      <Pencil /> Edit
-                    </Button>
-                  )}
-                </div>
-                {event.description ? (
-                  <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
-                ) : (
-                  <div className="mt-4">
-                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => openFullEdit()} />
-                  </div>
-                )}
-              </div>
 
               {(vendors.length > 0 || food.length > 0) && (
                 <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
@@ -1300,52 +1284,13 @@ function FestivalDetailPage() {
               </div>
             </section>
 
-            {(data!.nearby.length > 0 || data!.nearbyArtists.length > 0) && (
-              <section className="scroll-mt-24">
-                <h2 className="font-display text-lg font-extrabold text-foreground">
-                  Nearby on Planet Baltimore
-                </h2>
-                <div className="mt-4 space-y-6">
-                  {data!.nearby.length > 0 && (
-                    <div>
-                      <h3 className="mb-3 text-sm font-bold text-foreground">Nearby Arts Organizations ({data!.nearby.length})</h3>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {data!.nearby.map((o) => (
-                          <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="rounded-lg border border-border bg-card p-4 transition hover:border-orange">
-                            <div className="text-[11px] font-semibold uppercase text-orange">{(o.subtype || o.type).replaceAll("_", " ")}</div>
-                            <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
-                            {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{o.tagline || o.bio}</p>}
-                            <span className="mt-3 inline-block text-xs font-semibold text-orange">View</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {data!.nearbyArtists.length > 0 && (
-                    <div>
-                      <h3 className="mb-3 text-sm font-bold text-foreground">Nearby Artists ({data!.nearbyArtists.length})</h3>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {data!.nearbyArtists.map((artist) => (
-                          <Link key={artist.id} to="/u/$username" params={{ username: artist.username ?? "" }} className="rounded-lg border border-border bg-card p-4 transition hover:border-orange">
-                            {artist.category && <div className="text-[11px] font-semibold uppercase text-orange">{artist.category.replaceAll("_", " ")}</div>}
-                            <div className="mt-0.5 text-sm font-bold text-foreground">{titleCase(artist.display_name || artist.username || "Artist")}</div>
-                            {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{artist.bio}</p>}
-                            <span className="mt-3 inline-block text-xs font-semibold text-orange">View</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
           </div>
 
           {/* Sidebar */}
-          <aside className={`space-y-8 bg-muted/35 p-5 sm:p-8 lg:sticky lg:top-16 lg:self-start ${activeTab !== "overview" ? "hidden" : ""}`}>
-            <div>
-              <h2 className="font-display text-xl font-extrabold text-foreground">At a Glance</h2>
-              <div className="mt-4 space-y-3">
+          <aside className={`space-y-4 lg:sticky lg:top-16 lg:self-start ${activeTab !== "overview" ? "hidden" : ""}`}>
+            <div className="rounded-lg border border-border bg-card p-4">
+              <h2 className="font-display text-lg font-extrabold text-foreground">At a Glance</h2>
+              <div className="mt-2">
                 <GlanceRow label="Dates" value={dateRange(event)} />
                 <GlanceRow label="Hours" value={details?.hours || defaultHours(event)} />
                 <GlanceRow label="Price" value={priceLabel} />
@@ -1360,15 +1305,13 @@ function FestivalDetailPage() {
                 <GlanceRow label="Pet Policy" value={details?.pet_policy || ""} />
                 <GlanceRow label="Capacity" value={event.capacity ? `${event.capacity}` : ""} />
                 {details?.website && (
-                  <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Website
-                    </div>
+                  <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-3 border-t border-border py-2.5">
+                    <div className="text-sm text-muted-foreground">Website</div>
                     <a
                       href={details.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-0.5 inline-flex items-center gap-1 break-all text-sm font-medium text-orange underline underline-offset-2"
+                      className="inline-flex items-center justify-end gap-1 break-all text-right text-sm font-medium text-orange"
                     >
                       {details.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                       <ExternalLink className="h-3 w-3 shrink-0" />
@@ -1378,30 +1321,25 @@ function FestivalDetailPage() {
               </div>
             </div>
 
-            {(details?.expected_attendance || details?.footprint) && (
-              <div className="border-t border-border pt-6">
-                {details?.expected_attendance && (
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-orange" />
-                    <div>
-                      <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        Expected Attendance
-                      </div>
-                      <div className="text-sm font-bold text-foreground">
-                        {details.expected_attendance}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {details?.footprint && (
-                  <p className="mt-3 text-sm text-muted-foreground">{details.footprint}</p>
-                )}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-foreground"><Sparkles className="h-5 w-5" /> About the Festival</h2>
+                {showCreatorTools && <Button type="button" variant="ghost" size="icon-sm" onClick={() => openFullEdit()} aria-label="Edit festival details"><Pencil /></Button>}
               </div>
-            )}
+              {event.description ? <div className="prose prose-sm mt-3 max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: event.description }} /> : <div className="mt-3"><TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => openFullEdit()} /></div>}
+              {(details?.expected_attendance || details?.footprint || data!.organizer || details?.website) && (
+                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
+                  {details?.expected_attendance && <div><dt className="text-xs text-muted-foreground">Expected Attendance</dt><dd className="text-sm font-semibold text-foreground">{details.expected_attendance}</dd></div>}
+                  {details?.footprint && <div><dt className="text-xs text-muted-foreground">Festival Footprint</dt><dd className="text-sm font-semibold text-foreground">{details.footprint}</dd></div>}
+                  {data!.organizer && <div><dt className="text-xs text-muted-foreground">Organizer</dt><dd className="text-sm font-semibold text-foreground">{data!.organizer.name}</dd></div>}
+                  {details?.website && <div><dt className="text-xs text-muted-foreground">Website</dt><dd><a href={details.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-semibold text-orange"><ExternalLink className="h-3 w-3" /> Visit</a></dd></div>}
+                </dl>
+              )}
+              </div>
 
             {data!.organizer && (
-              <div className="border-t border-border pt-6">
-                <h3 className="font-display text-base font-extrabold text-foreground">Organizer</h3>
+              <div className="rounded-lg border border-border bg-card p-4">
+                <h3 className="flex items-center gap-2 font-display text-base font-extrabold text-foreground"><Users className="h-5 w-5" /> Organizer</h3>
                 <div className="mt-3 flex items-start gap-3">
                   {data!.organizer.avatar ? (
                     <Img
@@ -1444,6 +1382,16 @@ function FestivalDetailPage() {
             )}
           </aside>
         </div>
+
+        {activeTab === "overview" && (data!.nearby.length > 0 || data!.nearbyArtists.length > 0) && (
+          <section className="mt-8 scroll-mt-24">
+            <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-foreground"><MapPin className="h-5 w-5" /> Nearby on Planet Baltimore</h2>
+            <div className="mt-6 space-y-7">
+              {data!.nearby.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Sparkles className="h-4 w-4" /> Nearby Arts Organizations <span className="text-xs font-normal text-muted-foreground">({data!.nearby.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearby.map((o) => <NearbyCard key={o.id} href={`/o/${o.slug}`} image={o.banner_url || o.avatar_url} label={o.subtype || o.type} title={o.name} description={o.tagline || o.bio} />)}</div></div>}
+              {data!.nearbyArtists.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Users className="h-4 w-4" /> Nearby Artists <span className="text-xs font-normal text-muted-foreground">({data!.nearbyArtists.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearbyArtists.map((artist) => <NearbyCard key={artist.id} href={`/u/${artist.username ?? ""}`} image={artist.banner_url || artist.avatar_url} label={artist.category} title={titleCase(artist.display_name || artist.username || "Artist")} description={artist.bio} />)}</div></div>}
+            </div>
+          </section>
+        )}
       </div>
 
       {isOwner && details !== undefined && (
