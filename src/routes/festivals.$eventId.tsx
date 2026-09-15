@@ -435,9 +435,8 @@ function ScheduleRow({
   onAddCalendar,
 }: {
   item: ScheduleItem;
-  scheduled: boolean;
-  onToggle: () => void;
-  onAddCalendar: () => void;
+  saved: boolean;
+  onToggleSave: () => void;
 }) {
   return (
     <article className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-[58px_minmax(0,1fr)_auto] sm:items-start">
@@ -463,11 +462,8 @@ function ScheduleRow({
         </div>
       </div>
       <div className="flex flex-col gap-2 sm:w-40">
-        <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
-          {scheduled ? <Check /> : <Bookmark />} {scheduled ? "In My Schedule" : "My Schedule"}
-        </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onAddCalendar} aria-label="Add to calendar">
-          <CalendarPlus />
+        <Button type="button" variant={saved ? "default" : "outline"} size="sm" onClick={onToggleSave}>
+          {saved ? <Check /> : <Bookmark />} {saved ? "Saved" : "Save"}
         </Button>
       </div>
     </article>
