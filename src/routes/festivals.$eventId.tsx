@@ -430,9 +430,8 @@ function scheduleDateLabel(value: string) {
 
 function ScheduleRow({
   item,
-  scheduled,
-  onToggle,
-  onAddCalendar,
+  saved,
+  onToggleSave,
 }: {
   item: ScheduleItem;
   saved: boolean;
@@ -1190,9 +1189,8 @@ function FestivalDetailPage() {
                     return (
                       <ScheduleRow
                         item={item}
-                        scheduled={mySchedule.includes(index)}
-                        onToggle={() => toggleMySchedule(index)}
-                        onAddCalendar={() => addScheduleToCalendar(item)}
+                        saved={saved}
+                        onToggleSave={toggleSave}
                       />
                     );
                   }}
