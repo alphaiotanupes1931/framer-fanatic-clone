@@ -17,6 +17,7 @@ import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { bannerLabelForArtist } from "@/lib/artist-tabs";
+import { BannerWatermark } from "@/components/shared/banner-watermark";
 import {
   PersonAboutTab,
   PersonWritingsTab,
@@ -353,6 +354,7 @@ function PublicProfilePage() {
             : { backgroundColor: "#e7e5e0" }
         }
       >
+        {!profile.banner_url && <BannerWatermark />}
         {categoryLabel && (
           <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur sm:text-xs">
             {categoryLabel}
