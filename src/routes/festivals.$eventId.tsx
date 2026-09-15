@@ -1310,27 +1310,178 @@ function FestivalDetailPage() {
             </section>
 
             <section id="festival-updates" className={`scroll-mt-24 ${activeTab !== "updates" ? "hidden" : ""}`}>
-              <h2 className="font-display text-lg font-extrabold text-foreground">Updates</h2>
-              <div className="mt-4">
-                <EditableList
-                  items={updates}
-                  canEdit={showCreatorTools}
-                  addLabel="Post update"
-                  dialogTitle="Festival update"
-                  fields={UPDATE_FIELDS}
-                  onChange={(next) => saveDetails({ updates: next })}
-                  emptyState={<TabEmpty message="There are no festival updates yet." />}
-                  renderItem={(item) => (
-                    <article className="mb-4 rounded-xl border border-border bg-card p-4">
-                      {item.date && <div className="text-xs font-semibold text-orange">{item.date}</div>}
-                      <h3 className="mt-1 text-base font-extrabold text-foreground">{item.title}</h3>
+              <div className="space-y-4">
+                {showCreatorTools && (
+                  <div className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Megaphone className="h-4 w-4 text-orange" />
+                      <h3 className="font-display text-base font-extrabold">Post an Update</h3>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Followers of this festival receive a notification when you post.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {UPDATE_TYPES.map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setUpdateType(t)}
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                            updateType === t
+                              ? "border-orange bg-orange text-white"
+                              : "border-border bg-background text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                    <Textarea
+                      className="mt-3 min-h-[96px]"
+                      placeholder="Share a schedule change, weather alert, or announcement..."
+                      value={updateBody}
+                      onChange={(e) => setUpdateBody(e.target.value)}
+                    />
+                    {updateImage && (
+                      <div className="relative mt-3 inline-block">
+                        <Img src={updateImage} alt="" className="h-24 w-24 rounded-lg object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setUpdateImage(null)}
+                          className="absolute -right-2 -top-2 rounded-full bg-foreground p-1 text-background"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                    <div className="mt-3 flex items-center justify-between">
+                      <ImagePickerField
+                        label=""
+                        value={updateImage ?? ""}
+                        onChange={(v) => setUpdateImage(v || null)}
+                        trigger={
+                          <Button type="button" variant="outline" size="sm" className="gap-1.5">
+                            <ImagePlus className="h-4 w-4" /> Add Photos
+                          </Button>
+                        }
+                      />
+                      <Button
+                        type="button"
+                        variant="brand"
+                        size="sm"
+                        disabled={updatePosting || !updateBody.trim()}
+                        onClick={() => {
+                          setUpdatePosting(true);
+                          const next: UpdateItem[] = [
+                            {
+                              type: updateType,
+                              title: updateType,
+                              body: updateBody.trim(),
+                              date: "",
+                              image: updateImage ?? "",
+                              created_at: new Date().toISOString(),
+                            },
+                            ...updates,
+                          ];
+                          void saveDetails({ updates: next }).then(() => {
+                            setUpdateBody("");
+                            setUpdateImage(null);
+                            setUpdateType("Announcement");
+                            setUpdatePosting(false);
+                          });
+                        }}
+                      >
+                        <Megaphone className="mr-1.5 h-4 w-4" />
+                        {updatePosting ? "Posting…" : "Post & Notify"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {updates.length === 0 ? (
+                  <TabEmpty message="There are no festival updates yet." canEdit={showCreatorTools} />
+                ) : (
+                  updates.map((item, idx) => (
+                    <article
+                      key={idx}
+                      className="relative rounded-xl border border-border bg-card p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                            item.type === "Emergency"
+                              ? "bg-red-100 text-red-700"
+                              : item.type === "Weather Alert"
+                                ? "bg-blue-100 text-blue-700"
+                                : item.type === "Schedule Change"
+                                  ? "bg-purple-100 text-purple-700"
+                                  : "bg-orange/10 text-orange"
+                          }`}
+                        >
+                          {item.type || "Announcement"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {item.created_at ? formatUpdateDate(item.created_at) : item.date}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm font-semibold text-foreground">{item.title}</p>
                       {item.body && <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>}
                       {item.image && (
                         <Img src={item.image} alt="" className="mt-3 w-full rounded-lg object-cover" />
                       )}
+                      <div className="mt-3 flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={() =>
+                            externalShare({
+                              title: `${event.title} update`,
+                              text: item.body || item.title,
+                              url: siteUrl(`/festivals/${eventId}`),
+                            })
+                          }
+                        >
+                          <Share2 className="h-3.5 w-3.5" /> Share
+                        </Button>
+                        {showCreatorTools && (
+                          <>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const next = [...updates];
+                                next[idx] = { ...item };
+                                // Handled by EditableList-style dialog? For now inline edit is complex; use prompt
+                                const newBody = window.prompt("Edit update", item.body);
+                                if (newBody !== null) {
+                                  next[idx] = { ...item, body: newBody };
+                                  void saveDetails({ updates: next });
+                                }
+                              }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive"
+                              onClick={() => {
+                                const next = updates.filter((_, i) => i !== idx);
+                                void saveDetails({ updates: next });
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </article>
-                  )}
-                />
+                  ))
+                )}
               </div>
             </section>
 
