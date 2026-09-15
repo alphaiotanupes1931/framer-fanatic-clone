@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/shared/follow-button";
 import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { titleCase } from "@/lib/utils";
 import { PageBackButton } from "@/components/shared/page-back-button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -44,6 +45,8 @@ type TicketTier = {
 };
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
+type NearbyOrg = { id: string; name: string; slug: string; type: string; subtype: string | null; tagline: string | null; bio: string | null };
+type NearbyArtist = { id: string; display_name: string | null; username: string | null; category: string | null; bio: string | null };
 
 const SITE = "https://planetbaltimore.com";
 
@@ -178,6 +181,8 @@ function EventDetail() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [ownedForEvent, setOwnedForEvent] = useState(0);
   const [ownedByTier, setOwnedByTier] = useState<Record<string, number>>({});
+  const [nearbyOrgs, setNearbyOrgs] = useState<NearbyOrg[]>([]);
+  const [nearbyArtists, setNearbyArtists] = useState<NearbyArtist[]>([]);
 
   
 
@@ -218,6 +223,18 @@ function EventDetail() {
         if (uid) {
           const { data: sv } = await supabase.from("event_saves").select("event_id").eq("event_id", eventId).eq("user_id", uid).maybeSingle();
           setSaved(!!sv);
+        }
+        const neighborhood = (data as EventRow).neighborhood;
+        if (neighborhood) {
+          const [orgsRes, artistsRes] = await Promise.all([
+            supabase.from("organizations").select("id,name,slug,type,subtype,tagline,bio").eq("is_public", true).ilike("neighborhood", neighborhood).limit(12),
+            supabase.from("profiles_public").select("id,display_name,username,category,bio").ilike("neighborhood", neighborhood).not("username", "is", null).limit(8),
+          ]);
+          setNearbyOrgs((orgsRes.data as NearbyOrg[] | null) ?? []);
+          setNearbyArtists(((artistsRes.data as NearbyArtist[] | null) ?? []).filter((artist) => artist.id !== (data as EventRow).user_id));
+        } else {
+          setNearbyOrgs([]);
+          setNearbyArtists([]);
         }
       }
       const { data: tt } = await supabase
@@ -680,6 +697,44 @@ function EventDetail() {
                   <EventImage src={p} alt="Event photo" className="h-40 w-full object-cover transition-transform hover:scale-[1.03]" />
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {(nearbyOrgs.length > 0 || nearbyArtists.length > 0) && (
+          <div>
+            <h2 className="font-semibold text-foreground mb-3">Nearby on Planet Baltimore</h2>
+            <div className="space-y-6">
+              {nearbyOrgs.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-foreground mb-3">Nearby Arts Organizations ({nearbyOrgs.length})</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {nearbyOrgs.map((o) => (
+                      <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
+                        <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{(o.subtype || o.type).replaceAll("_", " ")}</div>
+                        <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
+                        {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{o.tagline || o.bio}</p>}
+                        <span className="mt-3 inline-block text-xs font-semibold" style={{ color: "#d4580a" }}>View</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {nearbyArtists.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-foreground mb-3">Nearby Artists ({nearbyArtists.length})</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {nearbyArtists.map((artist) => (
+                      <Link key={artist.id} to="/u/$username" params={{ username: artist.username ?? "" }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
+                        {artist.category && <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{artist.category.replaceAll("_", " ")}</div>}
+                        <div className="mt-0.5 text-sm font-bold text-foreground">{titleCase(artist.display_name || artist.username || "Artist")}</div>
+                        {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{artist.bio}</p>}
+                        <span className="mt-3 inline-block text-xs font-semibold" style={{ color: "#d4580a" }}>View</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
