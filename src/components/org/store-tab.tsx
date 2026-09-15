@@ -84,6 +84,7 @@ export function StoreTab({
 
   useEffect(() => {
     void load();
+    if (canManage) void loadOrders();
     getOrgPaymentStatus({ data: { orgId } })
       .then((r) => setPayoutsReady(!!r.ready))
       .catch(() => setPayoutsReady(false));
