@@ -18,7 +18,7 @@ type Org = {
 
 const TABS = [
   { key: "all", label: "All" },
-  { key: "community_assoc", label: "Associations" },
+  { key: "community_assoc", label: "Community Associations" },
   { key: "group", label: "Groups" },
 ] as const;
 
