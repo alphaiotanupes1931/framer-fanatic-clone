@@ -17,7 +17,29 @@ type Product = {
   inventory: number | null;
   is_active: boolean;
   sort_order: number;
+  requires_shipping: boolean | null;
 };
+
+type Order = {
+  id: string;
+  created_at: string;
+  quantity: number;
+  status: string;
+  buyer_total_cents: number;
+  ship_name: string | null;
+  ship_email: string | null;
+  ship_phone: string | null;
+  ship_address: Record<string, string | null> | null;
+  buyer_note: string | null;
+  product_id: string;
+};
+
+function formatAddress(a: Record<string, string | null> | null) {
+  if (!a) return null;
+  return [a.line1, a.line2, [a.city, a.state].filter(Boolean).join(", "), a.postal_code, a.country]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 const money = (c: number) => `$${(c / 100).toFixed(2).replace(/\.00$/, "")}`;
 
