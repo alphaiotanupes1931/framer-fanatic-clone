@@ -101,9 +101,12 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
           .select('retry_after_until, batch_size, send_delay_ms, auth_email_ttl_minutes, transactional_email_ttl_minutes')
           .single()
 
-        if (state?.retry_after_until && new Date(state.retry_after_until) > new Date()) {
-          return Response.json({ skipped: true, reason: 'rate_limited' })
-        }
+        // A provider throttle pauses bulk sending, but sign-in, sign-up and
+        // password-reset emails are time-critical and low volume, so they keep
+        // trying during the cooldown instead of waiting out the full window.
+        const coolingDown = Boolean(
+          state?.retry_after_until && new Date(state.retry_after_until) > new Date()
+        )
 
         const batchSize = state?.batch_size ?? DEFAULT_BATCH_SIZE
         const sendDelayMs = state?.send_delay_ms ?? DEFAULT_SEND_DELAY_MS
@@ -116,6 +119,8 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
 
         // 2. Process auth_emails first (priority), then transactional_emails
         for (const queue of ['auth_emails', 'transactional_emails']) {
+          if (coolingDown && queue !== 'auth_emails') continue
+
           const { data: messages, error: readError } = await supabase.rpc('read_email_batch', {
             queue_name: queue,
             batch_size: batchSize,
