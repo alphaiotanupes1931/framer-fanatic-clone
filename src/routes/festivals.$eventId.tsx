@@ -1436,11 +1436,11 @@ function FestivalDetailPage() {
                           size="sm"
                           className="gap-1.5"
                           onClick={() =>
-                            externalShare({
-                              title: `${event.title} update`,
-                              text: item.body || item.title,
-                              url: siteUrl(`/festivals/${eventId}`),
-                            })
+                            externalShare(
+                              siteUrl(`/festivals/${eventId}`),
+                              `${event.title} update`,
+                              item.body || item.title,
+                            )
                           }
                         >
                           <Share2 className="h-3.5 w-3.5" /> Share
