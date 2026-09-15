@@ -326,14 +326,6 @@ function NearbyCard({ href, image, label, title, description }: { href: string; 
     </Link>
   );
 }
-        </div>
-      </div>
-      <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="sm" className="w-fit">
-        <Link to="/events/$eventId" params={{ eventId }}>{action}</Link>
-      </Button>
-    </article>
-  );
-}
 
 function PerformerCard({ item, event, isFree }: { item: ProgramItem; event: EventRow; isFree: boolean }) {
   const performerUrl = `${siteUrl()}/festivals/${event.id}#festival-performers`;
