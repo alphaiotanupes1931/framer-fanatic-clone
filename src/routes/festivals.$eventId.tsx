@@ -900,7 +900,7 @@ function FestivalDetailPage() {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
-        <PageBackButton destination="festivals" />
+        <PageBackButton />
 
         <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           {showCreatorTools && (
