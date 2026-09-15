@@ -123,9 +123,16 @@ export function ImagePickerField({
             </div>
           )}
         </div>
-        <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-          {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {value ? (
+            <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => void adjustExisting()}>
+              {busy ? "Working…" : "Adjust image"}
+            </Button>
+          ) : null}
+          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+            {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
+          </Button>
+        </div>
         <input
           ref={inputRef}
           type="file"
