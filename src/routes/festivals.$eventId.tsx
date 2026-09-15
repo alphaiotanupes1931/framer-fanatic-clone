@@ -37,6 +37,8 @@ import {
   Send,
   Settings,
   Share2,
+  Sparkles,
+  Star,
   Ticket,
   Trash2,
   Users,
@@ -130,6 +132,8 @@ type NearbyOrg = {
   subtype: string | null;
   tagline: string | null;
   bio: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
 };
 
 type NearbyArtist = {
@@ -138,6 +142,8 @@ type NearbyArtist = {
   username: string | null;
   category: string | null;
   bio: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
 };
 
 type ProgramItem = {
@@ -283,22 +289,43 @@ function asProgramItems(v: unknown): ProgramItem[] {
     }));
 }
 
-function ProgramRow({ item, fallbackAction, eventId }: { item: ProgramItem; fallbackAction: string; eventId: string }) {
+function ProgramCard({ item, fallbackAction, eventId }: { item: ProgramItem; fallbackAction: string; eventId: string }) {
   const action = item.price || fallbackAction;
   return (
-    <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-      <div className="flex min-w-0 gap-4">
-        {item.image && (
-          <Img src={item.image} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
-        )}
-        <div className="min-w-0">
-        <h3 className="text-base font-bold text-foreground">{item.name}</h3>
-        {(item.when || item.venue) && (
-          <p className="mt-1 text-sm font-semibold text-muted-foreground">
-            {[item.when, item.venue].filter(Boolean).join(" · ")}
-          </p>
-        )}
-        {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+    <article className="group relative aspect-[1.05/1] min-h-64 overflow-hidden rounded-lg border border-border bg-foreground">
+      {item.image ? (
+        <Img src={item.image} alt={item.name} className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
+      ) : (
+        <div className="absolute inset-0 bg-primary/20" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/45 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-4 text-background">
+        <h3 className="font-display text-xl font-extrabold leading-tight sm:text-2xl">{item.name}</h3>
+        {(item.when || item.venue) && <p className="mt-1 text-xs font-semibold">{[item.when, item.venue].filter(Boolean).join(" · ")}</p>}
+        {item.description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-background/85">{item.description}</p>}
+        <Button asChild variant={action.toLowerCase() === "free" ? "success" : "brand"} size="xs" className="mt-2 w-fit">
+          <Link to="/events/$eventId" params={{ eventId }}><Ticket /> {action}</Link>
+        </Button>
+      </div>
+    </article>
+  );
+}
+
+function NearbyCard({ href, image, label, title, description }: { href: string; image: string | null; label?: string | null; title: string; description?: string | null }) {
+  return (
+    <Link to={href} className="block w-56 shrink-0 overflow-hidden rounded-lg border border-border bg-card transition hover:border-orange sm:w-64">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        {image ? <Img src={image} alt={title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-2xl font-bold text-muted-foreground">{title.charAt(0)}</div>}
+        {label && <span className="absolute left-2 top-2 rounded-full bg-foreground/70 px-2 py-1 text-[10px] font-semibold text-background">{label.replaceAll("_", " ")}</span>}
+      </div>
+      <div className="p-3">
+        <h4 className="text-sm font-bold text-foreground">{title}</h4>
+        {description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{description}</p>}
+        <span className="mt-2 inline-block text-xs font-semibold text-orange">View →</span>
+      </div>
+    </Link>
+  );
+}
         </div>
       </div>
       <Button asChild variant={action.toLowerCase() === "free" ? "outline" : "brand"} size="sm" className="w-fit">
@@ -458,11 +485,9 @@ function Tab({ id, label, active, onClick }: { id: string; label: string; active
 function GlanceRow({ label, value }: { label: string; value: string }) {
   if (!value.trim()) return null;
   return (
-    <div>
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
-      <div className="mt-0.5 text-sm font-medium text-foreground">{value}</div>
+    <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-3 border-b border-border py-2.5 last:border-0">
+      <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="text-right text-sm font-medium text-foreground">{value}</div>
     </div>
   );
 }
