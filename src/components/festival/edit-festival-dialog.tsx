@@ -770,14 +770,16 @@ export function EditFestivalDialog({
             </Section>
 
             <div className="sticky bottom-0 -mx-6 flex flex-wrap items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
-              <Button type="button" variant="outline" onClick={() => void remove()}>
-                <Trash2 /> Delete Festival
-              </Button>
+              {!isCreate && (
+                <Button type="button" variant="outline" onClick={() => void remove()}>
+                  <Trash2 /> Delete Festival
+                </Button>
+              )}
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="button" variant="brand" disabled={saving} onClick={() => void save()}>
-                {saving ? "Saving…" : "Save Changes"}
+                {saving ? "Saving…" : isCreate ? "Create Festival" : "Save Changes"}
               </Button>
             </div>
           </div>
@@ -791,7 +793,7 @@ export function EditFestivalDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Festival</DialogTitle>
+          <DialogTitle>{isCreate ? "Create Festival" : "Edit Festival"}</DialogTitle>
         </DialogHeader>
         {body}
       </DialogContent>
