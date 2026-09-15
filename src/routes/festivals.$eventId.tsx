@@ -24,7 +24,7 @@ import {
   Bookmark,
   BarChart3,
   CalendarDays,
-  CalendarPlus,
+  
   Music,
   Search,
   Check,
