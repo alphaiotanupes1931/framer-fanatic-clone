@@ -35,7 +35,7 @@ function prettyLabel(v: string) {
 // Filter chips read better in the plural ("Restaurants" not "Restaurant").
 // Mass nouns and already-plural words stay as they are.
 const NO_PLURAL = new Set([
-  "Retail", "Entertainment", "Health", "Cultural", "Community", "DIY / Alt",
+  "Retail", "Entertainment", "Health", "Cultural", "Community", "Diy / Alt",
   "Education", "Other", "Mutual Aid", "Advocacy", "Civic", "Nonprofit Support",
 ]);
 
