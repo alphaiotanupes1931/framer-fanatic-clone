@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { PageBackButton } from "@/components/shared/page-back-button";
 import { EditFestivalDialog } from "@/components/festival/edit-festival-dialog";
 
-export const Route = createFileRoute("/festivals/$eventId/edit")({
+export const Route = createFileRoute("/festivals/$eventId_/edit")({
   component: EditFestivalPage,
   head: () => ({
     meta: [
