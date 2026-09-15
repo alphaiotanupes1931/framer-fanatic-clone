@@ -192,7 +192,7 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
     );
     return (
       festival ? (
-        <Link to={canDelete ? "/festivals/$eventId/edit" : "/festivals/$eventId"} params={{ eventId: event.id }} className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0 sm:p-3.5">
+        <Link to="/festivals/$eventId" params={{ eventId: event.id }} className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0 sm:p-3.5">
           {compactContent}
         </Link>
       ) : (
@@ -263,7 +263,7 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-[1px] hover:shadow-sm active:translate-y-0">
       {festival ? (
-        <Link to={canDelete ? "/festivals/$eventId/edit" : "/festivals/$eventId"} params={{ eventId: event.id }} className="block">
+        <Link to="/festivals/$eventId" params={{ eventId: event.id }} className="block">
           {cardContent}
         </Link>
       ) : (
