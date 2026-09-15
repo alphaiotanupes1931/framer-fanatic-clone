@@ -203,6 +203,7 @@ export function EditFestivalDialog({
   asPage?: boolean;
 }) {
   const navigate = useNavigate();
+  const isCreate = !eventId;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [ev, setEv] = useState<Record<string, string>>({});
@@ -229,6 +230,10 @@ export function EditFestivalDialog({
 
   useEffect(() => {
     if (!open) return;
+    if (!eventId) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     void (async () => {
