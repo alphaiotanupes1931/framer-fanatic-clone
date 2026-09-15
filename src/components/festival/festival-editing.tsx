@@ -113,11 +113,49 @@ export function ImagePickerField({
           hidden
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void pick(f);
+            if (f) {
+              setCropAspect(aspect);
+              setCropFile(f);
+            }
             e.target.value = "";
           }}
         />
       </div>
+
+      <ImageCropDialog
+        file={cropFile}
+        aspect={cropAspect}
+        maxEdge={1440}
+        title="Adjust your photo"
+        open={!!cropFile}
+        onOpenChange={(open) => {
+          if (!open) setCropFile(null);
+        }}
+        onCropped={(f) => {
+          setCropFile(null);
+          void pick(f);
+        }}
+        circleGuide={false}
+        extraControls={
+          <div className="flex w-full items-center justify-center gap-2">
+            <span className="text-xs text-muted-foreground">Shape</span>
+            {CROP_SHAPES.map((s) => (
+              <button
+                key={s.label}
+                type="button"
+                onClick={() => setCropAspect(s.value)}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                  Math.abs(cropAspect - s.value) < 0.001
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
     </div>
   );
 }
