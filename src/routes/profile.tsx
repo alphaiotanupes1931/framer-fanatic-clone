@@ -357,7 +357,7 @@ function ProfilePage() {
               </div>
             </div>
           )}
-          {!publicPreview && !profile?.banner_url && !uploadingBanner && <BannerWatermark />}
+          {!profile?.banner_url && !uploadingBanner && <BannerWatermark />}
 
           {!publicPreview && (
           <>

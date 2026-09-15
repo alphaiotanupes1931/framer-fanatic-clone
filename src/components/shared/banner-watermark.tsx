@@ -1,5 +1,6 @@
 import { ImageIcon } from "lucide-react";
 import { BANNER_RATIO, BANNER_SIZE_INCHES, BANNER_SIZE_PX } from "@/lib/media-guidelines";
+import logoMark from "@/assets/pb-logo-mark.png.asset.json";
 
 /**
  * Clean sizing watermark shown inside an empty banner box so people know
@@ -10,8 +11,14 @@ export function BannerWatermark({ className = "" }: { className?: string }) {
     <div
       className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[linear-gradient(135deg,hsl(var(--muted))_0%,hsl(var(--background))_100%)] ${className}`}
     >
+      <img
+        src={logoMark.url}
+        alt=""
+        aria-hidden="true"
+        className="absolute left-[7%] h-[55%] max-h-36 w-auto opacity-[0.08] grayscale"
+      />
       {/* dashed guide frame in the exact banner ratio */}
-      <div className="flex w-[86%] max-w-md flex-col items-center gap-1.5 rounded-xl border-2 border-dashed border-foreground/15 px-4 py-3 text-center sm:gap-2 sm:py-4">
+      <div className="relative flex w-[86%] max-w-md flex-col items-center gap-1.5 rounded-xl border-2 border-dashed border-foreground/15 bg-background/30 px-4 py-3 text-center backdrop-blur-[1px] sm:gap-2 sm:py-4">
         <ImageIcon className="h-5 w-5 text-foreground/25" />
         <div className="text-base font-black tracking-tight text-foreground/45 sm:text-xl">
           {BANNER_SIZE_INCHES}
