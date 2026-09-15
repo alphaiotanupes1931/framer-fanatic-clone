@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { isValidLink, normalizeLink } from "@/components/shared/link-fields";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
+import { resolveMediaUrl } from "@/components/smart-image";
 
 export const Route = createFileRoute("/edit-post/$id")({
   component: EditPostPage,
@@ -66,6 +68,8 @@ function EditPostPage() {
   const [visibility, setVisibility] = useState<Visibility>("public");
   const [bg, setBg] = useState<{ bg: string; fg: string }>(BG_COLORS[0]);
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropIndex, setCropIndex] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -116,6 +120,28 @@ function EditPostPage() {
       toast.error(e instanceof Error ? e.message : "Upload failed", { id: tId });
       return null;
     } finally { setUploading(false); }
+  };
+
+  const editImage = async (url: string, index: number) => {
+    try {
+      const resolved = (await resolveMediaUrl(url, "post-media")) ?? url;
+      const response = await fetch(resolved);
+      if (!response.ok) throw new Error("Could not load that photo");
+      const blob = await response.blob();
+      setCropIndex(index);
+      setCropFile(new File([blob], "photo.jpg", { type: blob.type || "image/jpeg" }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not load that photo");
+    }
+  };
+
+  const saveCroppedImage = async (file: File) => {
+    const index = cropIndex;
+    setCropFile(null);
+    setCropIndex(null);
+    const url = await uploadFile(file);
+    if (!url) return;
+    setMediaUrls((current) => index === null ? [...current, url] : current.map((item, i) => i === index ? url : item));
   };
 
   const save = async () => {
@@ -229,7 +255,16 @@ function EditPostPage() {
               <Label className="text-sm font-medium">Media</Label>
               <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={async (e) => {
                 const files = Array.from(e.target.files ?? []);
-                for (const f of files) { const u = await uploadFile(f); if (u) setMediaUrls((p) => [...p, u]); }
+                for (const f of files) {
+                  if (f.type.startsWith("video/")) {
+                    const u = await uploadFile(f);
+                    if (u) setMediaUrls((p) => [...p, u]);
+                  } else {
+                    setCropIndex(null);
+                    setCropFile(f);
+                    break;
+                  }
+                }
                 if (fileRef.current) fileRef.current.value = "";
               }} />
               {mediaUrls.length > 0 && (
@@ -238,7 +273,12 @@ function EditPostPage() {
                     const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
                     return (
                       <div key={u + i} className="group relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                        {isVideo ? <SmartVideo src={u} className="h-32 w-full object-cover" /> : <Img src={u} alt="" className="h-32 w-full object-cover" />}
+                        {isVideo ? <SmartVideo src={u} className="h-32 w-full object-cover" /> : (
+                          <button type="button" onClick={() => void editImage(u, i)} className="block w-full" aria-label="Adjust image">
+                            <Img src={u} alt="" className="h-32 w-full object-cover" />
+                            <span className="absolute bottom-1 left-1 rounded-full bg-foreground/70 px-2 py-1 text-[11px] font-semibold text-background">Adjust</span>
+                          </button>
+                        )}
                         <button type="button" onClick={() => setMediaUrls((p) => p.filter((_, idx) => idx !== i))}
                           className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove">
                           <X className="h-3.5 w-3.5" />
@@ -303,6 +343,16 @@ function EditPostPage() {
           </div>
         </div>
       </div>
+      <ImageCropDialog
+        file={cropFile}
+        aspect={1}
+        maxEdge={1440}
+        title="Adjust your photo"
+        open={!!cropFile}
+        onOpenChange={(open) => { if (!open) { setCropFile(null); setCropIndex(null); } }}
+        onCropped={(file) => void saveCroppedImage(file)}
+        circleGuide={false}
+      />
     </AppLayout>
   );
 }
