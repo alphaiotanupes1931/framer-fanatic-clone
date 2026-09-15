@@ -250,6 +250,15 @@ function asUpdates(v: unknown): UpdateItem[] {
     }));
 }
 
+function formatUpdateDate(iso?: string) {
+  if (!iso) return "";
+  try {
+    return format(new Date(iso), "MMM d, h:mm a");
+  } catch {
+    return iso;
+  }
+}
+
 function asStringList(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
   return v
