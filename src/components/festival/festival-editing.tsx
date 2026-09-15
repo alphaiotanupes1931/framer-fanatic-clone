@@ -190,8 +190,9 @@ export function ImagePickerField({
 export type FieldSpec = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "image";
+  type?: "text" | "textarea" | "image" | "select";
   placeholder?: string;
+  options?: string[];
 };
 
 export type ItemRecord = Record<string, string>;
