@@ -11,4 +11,4 @@
 - [x] Apply shared controls, semantic colors, headers, cards, and spacing to Festivals
 - [ ] Migrate remaining high-traffic product areas to the shared interface system
 - [x] Match festival overview sections to supplied reference and verify owner/visitor layouts
-- [x] Route every festival card to editing when the signed-in user has edit access
+- [x] Keep festival cards on the Explore page and show inline editing controls to authorized users
