@@ -138,7 +138,7 @@ function CommunitiesPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="truncate text-[17px] font-bold text-neutral-900">{o.name}</div>
                     <span className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-[11px] font-semibold text-neutral-600">
-                      {o.type === "community_assoc" ? (<><ShieldCheck className="h-3 w-3" /> Association</>) : (<><Users className="h-3 w-3" /> Group</>)}
+                      {o.type === "community_assoc" ? (<><ShieldCheck className="h-3 w-3" /> Community Association</>) : (<><Users className="h-3 w-3" /> Group</>)}
                     </span>
                   </div>
                   {o.tagline && <div className="mt-1 truncate text-sm font-semibold text-neutral-800">{o.tagline}</div>}
