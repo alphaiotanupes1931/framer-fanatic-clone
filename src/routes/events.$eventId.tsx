@@ -45,6 +45,8 @@ type TicketTier = {
 };
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
+type NearbyOrg = { id: string; name: string; slug: string; type: string; subtype: string | null; tagline: string | null; bio: string | null };
+type NearbyArtist = { id: string; display_name: string | null; username: string | null; category: string | null; bio: string | null };
 
 const SITE = "https://planetbaltimore.com";
 
