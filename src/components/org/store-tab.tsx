@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Trash2, Pencil, ShoppingBag, X } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, ShoppingBag, X, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { ImageUpload } from "@/components/shared/image-upload";
