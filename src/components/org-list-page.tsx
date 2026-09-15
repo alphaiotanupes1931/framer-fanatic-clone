@@ -37,6 +37,7 @@ function prettyLabel(v: string) {
 const NO_PLURAL = new Set([
   "Retail", "Entertainment", "Health", "Cultural", "Community", "Diy / Alt",
   "Education", "Other", "Mutual Aid", "Advocacy", "Civic", "Nonprofit Support",
+  "Creative",
 ]);
 
 function pluralLabel(v: string) {
