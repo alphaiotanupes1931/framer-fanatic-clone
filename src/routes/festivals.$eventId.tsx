@@ -1417,6 +1417,14 @@ function FestivalDetailPage() {
           onSaved={() => void refetch()}
         />
       )}
+      {isOwner && (
+        <EditFestivalBasics
+          open={basicsOpen}
+          onOpenChange={setBasicsOpen}
+          event={event}
+          onSaved={() => void refetch()}
+        />
+      )}
       <ShareToUsersDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
