@@ -204,6 +204,13 @@
       "when": 1789433931182,
       "tag": "0028_ticket_types_shipping",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1789500835948,
+      "tag": "0029_product_shipping_details",
+      "breakpoints": true
     }
   ]
 }
