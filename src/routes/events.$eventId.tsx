@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/shared/follow-button";
 import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { titleCase } from "@/lib/utils";
 import { PageBackButton } from "@/components/shared/page-back-button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
