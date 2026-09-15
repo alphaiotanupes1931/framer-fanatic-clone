@@ -269,6 +269,7 @@ function ProductForm({
   const [inventory, setInventory] = useState(initial?.inventory != null ? String(initial.inventory) : "");
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
   const [active, setActive] = useState(initial?.is_active ?? true);
+  const [needsShipping, setNeedsShipping] = useState(initial?.requires_shipping ?? true);
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
