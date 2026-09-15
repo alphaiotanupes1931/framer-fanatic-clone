@@ -856,7 +856,7 @@ function FestivalDetailPage() {
       <AppLayout>
         <div className="mx-auto max-w-5xl space-y-4 px-4 py-16 text-center">
           <p className="text-sm text-muted-foreground">This festival could not be found.</p>
-          <PageBackButton destination="festivals" />
+          <PageBackButton />
         </div>
       </AppLayout>
     );
@@ -1427,7 +1427,7 @@ function FestivalDetailPage() {
                       <p className="mt-2 text-sm font-semibold text-foreground">{item.title}</p>
                       {item.body && <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>}
                       {item.image && (
-                        <Img src={item.image} alt="" className="mt-3 w-full rounded-lg object-cover" />
+                        <Img src={item.image} alt="" className="mt-3 max-h-64 w-full rounded-lg object-cover" />
                       )}
                       <div className="mt-3 flex items-center gap-2">
                         <Button
