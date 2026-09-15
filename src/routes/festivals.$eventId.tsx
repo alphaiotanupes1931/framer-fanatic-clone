@@ -788,6 +788,10 @@ function FestivalDetailPage() {
   const [scheduleRange, setScheduleRange] = useState("all");
   const [scheduleDate, setScheduleDate] = useState("all");
   const [scheduleQuery, setScheduleQuery] = useState("");
+  const [updateType, setUpdateType] = useState("Announcement");
+  const [updateBody, setUpdateBody] = useState("");
+  const [updateImage, setUpdateImage] = useState<string | null>(null);
+  const [updatePosting, setUpdatePosting] = useState(false);
   const scheduleDates = useMemo(
     () => Array.from(new Set(schedule.map((item) => item.date).filter(Boolean))),
     [schedule],
