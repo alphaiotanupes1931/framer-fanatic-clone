@@ -480,12 +480,28 @@ export function EditFestivalDialog({
       toast.error(detRes.error.message);
       return;
     }
-    toast.success("Festival updated");
+    if (isCreate && tickets.length > 0) {
+      await supabase.from("ticket_types").insert(
+        tickets.map((t, i) => ({
+          event_id: targetId,
+          name: t.name,
+          description: t.description,
+          price_cents: t.price_cents,
+          shipping_cents: t.shipping_cents ?? 0,
+          quantity: t.quantity,
+          max_per_buyer: t.max_per_buyer,
+          sort_order: i,
+        })) as never,
+      );
+    }
+    toast.success(isCreate ? (published ? "Festival published" : "Festival saved as draft") : "Festival updated");
     onOpenChange(false);
     onSaved();
+    if (isCreate && targetId) void navigate({ to: "/festivals/$eventId", params: { eventId: targetId } });
   };
 
   const remove = async () => {
+    if (!eventId) return;
     if (!window.confirm("Delete this festival? This cannot be undone.")) return;
     const res = await supabase.from("events").delete().eq("id", eventId);
     if (res.error) {
@@ -505,7 +521,11 @@ export function EditFestivalDialog({
 
   const body = (
     <>
-        <p className="text-sm text-muted-foreground">Update every part of your festival page. Changes go live immediately.</p>
+        <p className="text-sm text-muted-foreground">
+          {isCreate
+            ? "Fill in every part of your festival page. You can publish now or save it as a draft."
+            : "Update every part of your festival page. Changes go live immediately."}
+        </p>
 
 
 
