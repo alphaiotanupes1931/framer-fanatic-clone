@@ -1,7 +1,6 @@
 import { siteUrl } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, CalendarPlus, Upload } from "lucide-react";
-import { downloadIcs } from "@/lib/ics";
+import { Calendar, MapPin, Clock, Bookmark, Send, Share2, Trash2, Repeat2, Upload } from "lucide-react";
 import { ReportButton } from "@/components/shared/report-button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -35,7 +34,7 @@ type EventRow = {
   user_id?: string | null;
 };
 
-export function EventCard({ event, compact = false, onDeleted, showCalendar = true, draft = false, festival = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; showCalendar?: boolean; draft?: boolean; festival?: boolean }) {
+export function EventCard({ event, compact = false, onDeleted, draft = false, festival = false }: { event: EventRow; compact?: boolean; onDeleted?: (id: string) => void; draft?: boolean; festival?: boolean }) {
   const when = event.date ?? event.starts_at ?? null;
   const eventDate = when ? new Date(when) : null;
   const resolvedImage = useEventImageUrl(event.image_url);
@@ -128,23 +127,7 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
   };
   const sendExternal = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); void externalShare(eventUrl, event.title, event.description || undefined); };
 
-  const addToCalendar = (e: React.MouseEvent) => {
-    e.preventDefault(); e.stopPropagation();
-    if (!eventDate) { toast.error("This event has no date yet"); return; }
-    downloadIcs(
-      {
-        uid: `event-${event.id}@planetbaltimore.com`,
-        title: event.title,
-        start: eventDate,
-        end: event.ends_at ? new Date(event.ends_at) : null,
-        location: event.address || event.venue_name || event.neighborhood_name || event.neighborhood || "Baltimore",
-        description: previewText || null,
-        url: eventUrl,
-      },
-      event.title.replace(/[^\w\s-]/g, "").trim() || "event",
-    );
-    toast.success("Added to your calendar");
-  };
+  
 
   const tags = [
     event.is_free ? "Free" : event.price_cents ? `$${Math.round(event.price_cents / 100)}` : null,
@@ -282,12 +265,7 @@ export function EventCard({ event, compact = false, onDeleted, showCalendar = tr
               <Share2 className="h-3.5 w-3.5" />
               Share
             </button>
-            {showCalendar && (
-              <button type="button" onClick={addToCalendar} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-[#d4580a] hover:text-[#d4580a]" aria-label="Add to calendar">
-                <CalendarPlus className="h-3.5 w-3.5" />
-                Calendar
-              </button>
-            )}
+          
           </>
         )}
         {draft && (
