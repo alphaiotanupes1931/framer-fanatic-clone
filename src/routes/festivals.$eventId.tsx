@@ -43,6 +43,7 @@ import {
 import { PageBackButton } from "@/components/shared/page-back-button";
 import { useUserRole } from "@/hooks/use-user-role";
 import { EditableList, ImagePickerField, uploadFestivalImage, type FieldSpec } from "@/components/festival/festival-editing";
+import { EditFestivalDialog } from "@/components/festival/edit-festival-dialog";
 
 export const Route = createFileRoute("/festivals/$eventId")({
   component: FestivalDetailPage,
@@ -568,6 +569,7 @@ function FestivalDetailPage() {
   const [saved, setSaved] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [basicsOpen, setBasicsOpen] = useState(false);
+  const [fullEditOpen, setFullEditOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [previewAsVisitor, setPreviewAsVisitor] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -1012,7 +1014,7 @@ function FestivalDetailPage() {
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
                   {showCreatorTools && (
-                    <Button type="button" variant="outline" size="xs" onClick={() => setBasicsOpen(true)}>
+                    <Button type="button" variant="outline" size="xs" onClick={() => setFullEditOpen(true)}>
                       <Pencil /> Edit
                     </Button>
                   )}
@@ -1021,7 +1023,7 @@ function FestivalDetailPage() {
                   <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
                 ) : (
                   <div className="mt-4">
-                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setBasicsOpen(true)} />
+                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setFullEditOpen(true)} />
                   </div>
                 )}
               </div>
@@ -1424,6 +1426,14 @@ function FestivalDetailPage() {
           open={basicsOpen}
           onOpenChange={setBasicsOpen}
           event={event}
+          onSaved={() => void refetch()}
+        />
+      )}
+      {isOwner && (
+        <EditFestivalDialog
+          open={fullEditOpen}
+          onOpenChange={setFullEditOpen}
+          eventId={event.id}
           onSaved={() => void refetch()}
         />
       )}
