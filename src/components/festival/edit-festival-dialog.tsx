@@ -107,6 +107,7 @@ type TicketTypeRow = {
   name: string;
   description: string | null;
   price_cents: number;
+  shipping_cents: number | null;
   quantity: number | null;
   max_per_buyer: number | null;
 };
@@ -224,7 +225,7 @@ export function EditFestivalDialog({
   const [gallery, setGallery] = useState<string[]>([]);
   const [galleryText, setGalleryText] = useState("");
   const [tickets, setTickets] = useState<TicketTypeRow[]>([]);
-  const [ticketForm, setTicketForm] = useState({ name: "", description: "", price: "", quantity: "", max: "" });
+  const [ticketForm, setTicketForm] = useState({ name: "", description: "", price: "", shipping: "", quantity: "", max: "" });
 
   useEffect(() => {
     if (!open) return;
