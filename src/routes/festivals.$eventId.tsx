@@ -108,6 +108,7 @@ type TicketType = {
   name: string;
   description: string | null;
   price_cents: number;
+  shipping_cents: number | null;
   quantity: number | null;
   category: string;
 };
@@ -596,7 +597,7 @@ function FestivalDetailPage() {
       supabase.from("festival_details").select("*").eq("event_id", eventId).maybeSingle(),
       supabase
         .from("ticket_types")
-        .select("id,name,description,price_cents,quantity,category")
+        .select("id,name,description,price_cents,shipping_cents,quantity,category")
         .eq("event_id", eventId)
         .order("sort_order", { ascending: true }),
     ]);
@@ -1168,6 +1169,11 @@ function FestivalDetailPage() {
                       <div className="flex flex-shrink-0 items-center gap-3">
                         <span className="text-sm font-bold text-orange">
                           {t.price_cents > 0 ? `$${(t.price_cents / 100).toFixed(2)}` : "Free"}
+                          {t.shipping_cents ? (
+                            <span className="block text-right text-[11px] font-normal text-muted-foreground">
+                              + ${(t.shipping_cents / 100).toFixed(2)} shipping
+                            </span>
+                          ) : null}
                         </span>
                         <Button asChild variant="brand" size="sm">
                           <Link to="/events/$eventId" params={{ eventId: event.id }}>
