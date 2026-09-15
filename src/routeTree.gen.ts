@@ -51,6 +51,7 @@ import { Route as CreateArtsOrgRouteImport } from './routes/create-arts-org'
 import { Route as CreateArtistRouteImport } from './routes/create-artist'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityAssociationsRouteImport } from './routes/community-associations'
+import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as BusinessLoginRouteImport } from './routes/business-login'
@@ -308,6 +309,11 @@ const CommunityAssociationsRoute = CommunityAssociationsRouteImport.update({
   path: '/community-associations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunitiesRoute = CommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
@@ -548,6 +554,7 @@ export interface FileRoutesByFullPath {
   '/business-login': typeof BusinessLoginRoute
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
+  '/communities': typeof CommunitiesRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/create-artist': typeof CreateArtistRoute
@@ -637,6 +644,7 @@ export interface FileRoutesByTo {
   '/business-login': typeof BusinessLoginRoute
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
+  '/communities': typeof CommunitiesRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/create-artist': typeof CreateArtistRoute
@@ -727,6 +735,7 @@ export interface FileRoutesById {
   '/business-login': typeof BusinessLoginRoute
   '/businesses': typeof BusinessesRoute
   '/calendar': typeof CalendarRoute
+  '/communities': typeof CommunitiesRoute
   '/community-associations': typeof CommunityAssociationsRoute
   '/cookies': typeof CookiesRoute
   '/create-artist': typeof CreateArtistRoute
@@ -818,6 +827,7 @@ export interface FileRouteTypes {
     | '/business-login'
     | '/businesses'
     | '/calendar'
+    | '/communities'
     | '/community-associations'
     | '/cookies'
     | '/create-artist'
@@ -907,6 +917,7 @@ export interface FileRouteTypes {
     | '/business-login'
     | '/businesses'
     | '/calendar'
+    | '/communities'
     | '/community-associations'
     | '/cookies'
     | '/create-artist'
@@ -996,6 +1007,7 @@ export interface FileRouteTypes {
     | '/business-login'
     | '/businesses'
     | '/calendar'
+    | '/communities'
     | '/community-associations'
     | '/cookies'
     | '/create-artist'
@@ -1086,6 +1098,7 @@ export interface RootRouteChildren {
   BusinessLoginRoute: typeof BusinessLoginRoute
   BusinessesRoute: typeof BusinessesRoute
   CalendarRoute: typeof CalendarRoute
+  CommunitiesRoute: typeof CommunitiesRoute
   CommunityAssociationsRoute: typeof CommunityAssociationsRoute
   CookiesRoute: typeof CookiesRoute
   CreateArtistRoute: typeof CreateArtistRoute
@@ -1462,6 +1475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityAssociationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communities': {
+      id: '/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof CommunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -1801,6 +1821,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessLoginRoute: BusinessLoginRoute,
   BusinessesRoute: BusinessesRoute,
   CalendarRoute: CalendarRoute,
+  CommunitiesRoute: CommunitiesRoute,
   CommunityAssociationsRoute: CommunityAssociationsRoute,
   CookiesRoute: CookiesRoute,
   CreateArtistRoute: CreateArtistRoute,
