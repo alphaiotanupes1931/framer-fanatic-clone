@@ -39,7 +39,7 @@ type EventRow = {
 };
 
 type TicketTier = {
-  id: string; name: string; description: string | null; price_cents: number;
+  id: string; name: string; description: string | null; price_cents: number; shipping_cents: number | null;
   quantity: number | null; max_per_buyer: number | null;
   sale_starts_at: string | null; sale_ends_at: string | null; perks: string[] | null;
 };
@@ -239,7 +239,7 @@ function EventDetail() {
       }
       const { data: tt } = await supabase
         .from("ticket_types")
-        .select("id, name, description, price_cents, quantity, max_per_buyer, sale_starts_at, sale_ends_at, perks")
+        .select("id, name, description, price_cents, shipping_cents, quantity, max_per_buyer, sale_starts_at, sale_ends_at, perks")
         .eq("event_id", eventId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -540,6 +540,9 @@ function EventDetail() {
                           {t.price_cents > 0 ? `$${(t.price_cents / 100).toFixed(2)}` : "Free"}
                         </span>
                       </div>
+                      {t.shipping_cents ? (
+                        <p className="mt-0.5 text-xs text-muted-foreground">+ ${(t.shipping_cents / 100).toFixed(2)} shipping</p>
+                      ) : null}
                       {t.description && <p className="mt-0.5 text-xs text-muted-foreground">{t.description}</p>}
                       {t.perks && t.perks.length > 0 && (
                         <p className="mt-1 text-xs text-muted-foreground">Includes: {t.perks.join(", ")}</p>
@@ -559,7 +562,7 @@ function EventDetail() {
                     loading={buying}
                     label={limitReached ? "Ticket limit reached" : `Buy ${qty > 1 ? `${qty} tickets` : "ticket"}`}
 
-                    amount={`$${((selectedTier.price_cents * qty) / 100).toFixed(2)}`}
+                    amount={`$${(((selectedTier.price_cents * qty) + (selectedTier.shipping_cents ?? 0)) / 100).toFixed(2)}`}
                   />
                 </>
               ) : (

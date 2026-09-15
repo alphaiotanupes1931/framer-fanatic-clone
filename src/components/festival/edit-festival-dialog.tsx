@@ -107,6 +107,7 @@ type TicketTypeRow = {
   name: string;
   description: string | null;
   price_cents: number;
+  shipping_cents: number | null;
   quantity: number | null;
   max_per_buyer: number | null;
 };
@@ -224,7 +225,7 @@ export function EditFestivalDialog({
   const [gallery, setGallery] = useState<string[]>([]);
   const [galleryText, setGalleryText] = useState("");
   const [tickets, setTickets] = useState<TicketTypeRow[]>([]);
-  const [ticketForm, setTicketForm] = useState({ name: "", description: "", price: "", quantity: "", max: "" });
+  const [ticketForm, setTicketForm] = useState({ name: "", description: "", price: "", shipping: "", quantity: "", max: "" });
 
   useEffect(() => {
     if (!open) return;
@@ -234,7 +235,7 @@ export function EditFestivalDialog({
       const [e, d, t] = await Promise.all([
         supabase.from("events").select("*").eq("id", eventId).maybeSingle(),
         supabase.from("festival_details").select("*").eq("event_id", eventId).maybeSingle(),
-        supabase.from("ticket_types").select("id,name,description,price_cents,quantity,max_per_buyer").eq("event_id", eventId).order("sort_order"),
+        supabase.from("ticket_types").select("id,name,description,price_cents,shipping_cents,quantity,max_per_buyer").eq("event_id", eventId).order("sort_order"),
       ]);
       if (cancelled) return;
       const row = (e.data ?? {}) as Record<string, unknown>;
@@ -320,18 +321,19 @@ export function EditFestivalDialog({
         name: ticketForm.name.trim(),
         description: ticketForm.description.trim() || null,
         price_cents: Math.max(0, Math.round(Number(ticketForm.price) * 100)),
+        shipping_cents: Math.max(0, Math.round(Number(ticketForm.shipping || 0) * 100)),
         quantity: ticketForm.quantity ? Number(ticketForm.quantity) : null,
         max_per_buyer: ticketForm.max ? Number(ticketForm.max) : null,
         sort_order: tickets.length,
       } as never)
-      .select("id,name,description,price_cents,quantity,max_per_buyer")
+      .select("id,name,description,price_cents,shipping_cents,quantity,max_per_buyer")
       .single();
     if (res.error) {
       toast.error(res.error.message);
       return;
     }
     setTickets((t) => [...t, res.data as TicketTypeRow]);
-    setTicketForm({ name: "", description: "", price: "", quantity: "", max: "" });
+    setTicketForm({ name: "", description: "", price: "", shipping: "", quantity: "", max: "" });
     toast.success("Ticket type added");
   };
 
@@ -558,6 +560,7 @@ export function EditFestivalDialog({
                   <LabeledInput label="Name *" value={ticketForm.name} onChange={(v) => setTicketForm((f) => ({ ...f, name: v }))} />
                   <LabeledInput label="Description" value={ticketForm.description} onChange={(v) => setTicketForm((f) => ({ ...f, description: v }))} />
                   <LabeledInput label="Price ($) *" value={ticketForm.price} onChange={(v) => setTicketForm((f) => ({ ...f, price: v }))} />
+                  <LabeledInput label="Shipping ($)" placeholder="0.00" value={ticketForm.shipping} onChange={(v) => setTicketForm((f) => ({ ...f, shipping: v }))} />
                   <LabeledInput label="Quantity" value={ticketForm.quantity} onChange={(v) => setTicketForm((f) => ({ ...f, quantity: v }))} />
                   <LabeledInput label="Max / buyer" value={ticketForm.max} onChange={(v) => setTicketForm((f) => ({ ...f, max: v }))} />
                 </div>
@@ -574,7 +577,7 @@ export function EditFestivalDialog({
                       <div className="min-w-0">
                         <div className="text-sm font-bold text-foreground">{t.name}</div>
                         <div className="text-xs text-muted-foreground">
-                          {[`$${(t.price_cents / 100).toFixed(2).replace(/\.00$/, "")}`, t.quantity != null ? `${t.quantity} available` : null, t.max_per_buyer ? `max ${t.max_per_buyer}/buyer` : null]
+                          {[`$${(t.price_cents / 100).toFixed(2).replace(/\.00$/, "")}`, t.shipping_cents ? `+ $${(t.shipping_cents / 100).toFixed(2)} shipping` : null, t.quantity != null ? `${t.quantity} available` : null, t.max_per_buyer ? `max ${t.max_per_buyer}/buyer` : null]
                             .filter(Boolean)
                             .join(" · ")}
                         </div>

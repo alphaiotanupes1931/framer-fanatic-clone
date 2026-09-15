@@ -3193,6 +3193,7 @@ export type Database = {
           quantity: number | null
           sale_ends_at: string | null
           sale_starts_at: string | null
+          shipping_cents: number
           sort_order: number
           updated_at: string
         }
@@ -3209,6 +3210,7 @@ export type Database = {
           quantity?: number | null
           sale_ends_at?: string | null
           sale_starts_at?: string | null
+          shipping_cents?: number
           sort_order?: number
           updated_at?: string
         }
@@ -3225,6 +3227,7 @@ export type Database = {
           quantity?: number | null
           sale_ends_at?: string | null
           sale_starts_at?: string | null
+          shipping_cents?: number
           sort_order?: number
           updated_at?: string
         }

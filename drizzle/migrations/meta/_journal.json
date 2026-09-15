@@ -197,6 +197,13 @@
       "when": 1789432673267,
       "tag": "0027_festival_details_extra_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1789433931182,
+      "tag": "0028_ticket_types_shipping",
+      "breakpoints": true
     }
   ]
 }
