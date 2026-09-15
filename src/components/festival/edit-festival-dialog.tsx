@@ -285,7 +285,9 @@ export function EditFestivalDialog({
         tags: Array.isArray(dr.tags) ? (dr.tags as string[]).join("\n") : "",
       });
       setFeatured(dr.featured === true);
-      setCategories(Array.isArray(dr.categories) ? (dr.categories as string[]) : []);
+      const savedCategories = Array.isArray(dr.categories) ? (dr.categories as string[]) : [];
+      const primaryCategory = savedCategories[0] || String(row.category ?? "");
+      setCategories(primaryCategory ? [primaryCategory] : []);
       setAccessibility(Array.isArray(dr.accessibility) ? (dr.accessibility as string[]) : []);
       setTransit(asStringMap(dr.transit));
       setRules(asStringMap(dr.rules));
@@ -393,7 +395,7 @@ export function EditFestivalDialog({
       address: ev.address?.trim() || null,
       location: ev.venue_name?.trim() || ev.address?.trim() || null,
       neighborhood: ev.neighborhood?.trim() || null,
-      category: ev.category?.trim() || categories[0] || (isCreate ? "festival" : null),
+      category: categories[0] || ev.category?.trim() || (isCreate ? "festival" : null),
       latitude: ev.latitude ? Number(ev.latitude) : null,
       longitude: ev.longitude ? Number(ev.longitude) : null,
       pricing_mode: ev.admission === "paid" ? "paid" : "free",
@@ -457,7 +459,7 @@ export function EditFestivalDialog({
         admission_type: ev.admission,
         badges: (det.badges ?? "").split(",").map((s) => s.trim()).filter(Boolean),
         tags: lines(det.tags ?? ""),
-        categories,
+        categories: categories.slice(0, 1),
         accessibility,
         featured,
         transit,
@@ -560,23 +562,21 @@ export function EditFestivalDialog({
               <LabeledArea label="Footprint" rows={2} value={det.footprint ?? ""} onChange={setDetField("footprint")} />
             </Section>
 
-            <Section title="Categories & Audience">
-              <div>
-                <span className="text-xs font-semibold text-muted-foreground">Categories</span>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {CATEGORY_OPTIONS.map((c) => (
-                    <Button
-                      key={c}
-                      type="button"
-                      size="xs"
-                      variant={categories.includes(c) ? "brand" : "outline"}
-                      onClick={() => toggle(categories, c, setCategories)}
-                    >
-                      {c}
-                    </Button>
+            <Section title="Category & Audience">
+              <label className="block">
+                <span className="text-xs font-semibold text-muted-foreground">Category</span>
+                <select
+                  className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  value={categories[0] ?? ""}
+                  onChange={(e) => setCategories(e.target.value ? [e.target.value] : [])}
+                >
+                  <option value="">Select one category</option>
+                  {CATEGORY_OPTIONS.map((category) => (
+                    <option key={category} value={category}>{category}</option>
                   ))}
-                </div>
-              </div>
+                </select>
+                <span className="mt-1 block text-[11px] text-muted-foreground">Choose one category.</span>
+              </label>
               <LabeledArea label="Tags" rows={3} hint="One per line." value={det.tags ?? ""} onChange={setDetField("tags")} />
               <div className="grid gap-4 sm:grid-cols-2">
                 <LabeledInput label="Format" value={det.format ?? ""} onChange={setDetField("format")} placeholder="Street festival" />
