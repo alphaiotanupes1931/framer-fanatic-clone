@@ -89,6 +89,7 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as FestivalsEventIdEditRouteImport } from './routes/festivals.$eventId.edit'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiAdminCheckStripeWebhooksRouteImport } from './routes/api/admin/check-stripe-webhooks'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -499,6 +500,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FestivalsEventIdEditRoute = FestivalsEventIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => FestivalsEventIdRoute,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -609,7 +615,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
-  '/festivals/$eventId': typeof FestivalsEventIdRoute
+  '/festivals/$eventId': typeof FestivalsEventIdRouteWithChildren
   '/festivals/new': typeof FestivalsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
@@ -626,6 +632,7 @@ export interface FileRoutesByFullPath {
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/festivals/$eventId/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
   '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
@@ -699,7 +706,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
-  '/festivals/$eventId': typeof FestivalsEventIdRoute
+  '/festivals/$eventId': typeof FestivalsEventIdRouteWithChildren
   '/festivals/new': typeof FestivalsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
@@ -716,6 +723,7 @@ export interface FileRoutesByTo {
   '/videos': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/festivals/$eventId/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
   '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
@@ -790,7 +798,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/new': typeof EventsNewRoute
-  '/festivals/$eventId': typeof FestivalsEventIdRoute
+  '/festivals/$eventId': typeof FestivalsEventIdRouteWithChildren
   '/festivals/new': typeof FestivalsNewRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
@@ -807,6 +815,7 @@ export interface FileRoutesById {
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/festivals/$eventId/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug_/donate': typeof OSlugDonateRoute
   '/api/public/hooks/weekly-profile-reminders': typeof ApiPublicHooksWeeklyProfileRemindersRoute
@@ -899,6 +908,7 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
+    | '/festivals/$eventId/edit'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
     | '/api/public/hooks/weekly-profile-reminders'
@@ -989,6 +999,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
+    | '/festivals/$eventId/edit'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
     | '/api/public/hooks/weekly-profile-reminders'
@@ -1079,6 +1090,7 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
+    | '/festivals/$eventId/edit'
     | '/lovable/email/suppression'
     | '/o/$slug_/donate'
     | '/api/public/hooks/weekly-profile-reminders'
@@ -1153,7 +1165,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsNewRoute: typeof EventsNewRoute
-  FestivalsEventIdRoute: typeof FestivalsEventIdRoute
+  FestivalsEventIdRoute: typeof FestivalsEventIdRouteWithChildren
   FestivalsNewRoute: typeof FestivalsNewRoute
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
@@ -1741,6 +1753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/festivals/$eventId/edit': {
+      id: '/festivals/$eventId/edit'
+      path: '/edit'
+      fullPath: '/festivals/$eventId/edit'
+      preLoaderRoute: typeof FestivalsEventIdEditRouteImport
+      parentRoute: typeof FestivalsEventIdRoute
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -1812,6 +1831,17 @@ const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
   MarketplaceRouteChildren,
 )
 
+interface FestivalsEventIdRouteChildren {
+  FestivalsEventIdEditRoute: typeof FestivalsEventIdEditRoute
+}
+
+const FestivalsEventIdRouteChildren: FestivalsEventIdRouteChildren = {
+  FestivalsEventIdEditRoute: FestivalsEventIdEditRoute,
+}
+
+const FestivalsEventIdRouteWithChildren =
+  FestivalsEventIdRoute._addFileChildren(FestivalsEventIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1876,7 +1906,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsNewRoute: EventsNewRoute,
-  FestivalsEventIdRoute: FestivalsEventIdRoute,
+  FestivalsEventIdRoute: FestivalsEventIdRouteWithChildren,
   FestivalsNewRoute: FestivalsNewRoute,
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
