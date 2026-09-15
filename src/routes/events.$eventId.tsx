@@ -181,6 +181,8 @@ function EventDetail() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [ownedForEvent, setOwnedForEvent] = useState(0);
   const [ownedByTier, setOwnedByTier] = useState<Record<string, number>>({});
+  const [nearbyOrgs, setNearbyOrgs] = useState<NearbyOrg[]>([]);
+  const [nearbyArtists, setNearbyArtists] = useState<NearbyArtist[]>([]);
 
   
 
