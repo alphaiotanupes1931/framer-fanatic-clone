@@ -565,6 +565,7 @@ function FestivalDetailPage() {
   const [me, setMe] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [basicsOpen, setBasicsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [previewAsVisitor, setPreviewAsVisitor] = useState(false);
   const [publishing, setPublishing] = useState(false);
