@@ -601,15 +601,21 @@ export type Database = {
           admission_type: string | null
           age_range: string | null
           audience: string | null
+          badges: string[]
           categories: string[]
           event_id: string
           expected_attendance: string | null
           experiences: Json
+          facebook: string | null
           faqs: Json
+          featured: boolean
           food: Json
           footprint: string | null
           format: string | null
+          garages: Json
+          highlights: Json
           hours: string | null
+          instagram: string | null
           organizer_description: string | null
           organizer_name: string | null
           organizer_website: string | null
@@ -617,10 +623,12 @@ export type Database = {
           pet_policy: string | null
           price_label: string | null
           rain_or_shine: string | null
+          rules: Json
           schedule: Json
           tagline: string | null
           tags: string[]
           ticket_url: string | null
+          transit: Json
           updated_at: string
           updates: Json
           vendors: Json
@@ -631,15 +639,21 @@ export type Database = {
           admission_type?: string | null
           age_range?: string | null
           audience?: string | null
+          badges?: string[]
           categories?: string[]
           event_id: string
           expected_attendance?: string | null
           experiences?: Json
+          facebook?: string | null
           faqs?: Json
+          featured?: boolean
           food?: Json
           footprint?: string | null
           format?: string | null
+          garages?: Json
+          highlights?: Json
           hours?: string | null
+          instagram?: string | null
           organizer_description?: string | null
           organizer_name?: string | null
           organizer_website?: string | null
@@ -647,10 +661,12 @@ export type Database = {
           pet_policy?: string | null
           price_label?: string | null
           rain_or_shine?: string | null
+          rules?: Json
           schedule?: Json
           tagline?: string | null
           tags?: string[]
           ticket_url?: string | null
+          transit?: Json
           updated_at?: string
           updates?: Json
           vendors?: Json
@@ -661,15 +677,21 @@ export type Database = {
           admission_type?: string | null
           age_range?: string | null
           audience?: string | null
+          badges?: string[]
           categories?: string[]
           event_id?: string
           expected_attendance?: string | null
           experiences?: Json
+          facebook?: string | null
           faqs?: Json
+          featured?: boolean
           food?: Json
           footprint?: string | null
           format?: string | null
+          garages?: Json
+          highlights?: Json
           hours?: string | null
+          instagram?: string | null
           organizer_description?: string | null
           organizer_name?: string | null
           organizer_website?: string | null
@@ -677,10 +699,12 @@ export type Database = {
           pet_policy?: string | null
           price_label?: string | null
           rain_or_shine?: string | null
+          rules?: Json
           schedule?: Json
           tagline?: string | null
           tags?: string[]
           ticket_url?: string | null
+          transit?: Json
           updated_at?: string
           updates?: Json
           vendors?: Json
