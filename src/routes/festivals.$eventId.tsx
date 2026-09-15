@@ -411,29 +411,48 @@ function scheduleDateLabel(value: string) {
   return Number.isNaN(parsed.getTime()) ? value : format(parsed, "EEE, MMM d");
 }
 
-function ScheduleRow({ item, scheduled, onToggle }: { item: ScheduleItem; scheduled: boolean; onToggle: () => void }) {
+function ScheduleRow({
+  item,
+  scheduled,
+  onToggle,
+  onAddCalendar,
+}: {
+  item: ScheduleItem;
+  scheduled: boolean;
+  onToggle: () => void;
+  onAddCalendar: () => void;
+}) {
   return (
-    <article className="grid gap-4 border-b border-border py-5 last:border-0 sm:grid-cols-[70px_minmax(0,1fr)_auto] sm:items-start">
-      <div className="text-lg font-extrabold text-foreground">{item.time}</div>
-      <div className="flex min-w-0 gap-4">
+    <article className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-[58px_minmax(0,1fr)_auto] sm:items-start">
+      <div className="text-sm font-extrabold text-orange">{item.time}</div>
+      <div className="flex min-w-0 gap-3">
         {item.image && (
-          <Img src={item.image} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+          <Img src={item.image} alt={item.name} className="h-14 w-14 shrink-0 rounded-lg object-cover" />
         )}
         <div className="min-w-0">
-        <h3 className="text-base font-bold text-foreground">{item.name}</h3>
-        {(item.venue || item.type || item.price) && (
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold">
-            {item.venue && <span className="text-muted-foreground">{item.venue}</span>}
-            {item.type && <span className="rounded bg-muted px-2 py-1 text-foreground">{item.type}</span>}
-            {item.price && <span className="rounded bg-primary/10 px-2 py-1 text-orange">{item.price}</span>}
-          </div>
-        )}
-        {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
+          <h3 className="text-base font-bold text-foreground">{item.name}</h3>
+          {(item.venue || item.type || item.price) && (
+            <div className="mt-1 flex flex-wrap items-center gap-3 text-xs font-semibold text-muted-foreground">
+              {item.venue && (
+                <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {item.venue}</span>
+              )}
+              {item.type && (
+                <span className="inline-flex items-center gap-1"><Music className="h-3.5 w-3.5" /> {item.type}</span>
+              )}
+              {item.price && <span className="text-orange">{item.price}</span>}
+            </div>
+          )}
+          {item.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>}
         </div>
       </div>
-      <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
-        {scheduled ? <Check /> : <Plus />} {scheduled ? "In My Schedule" : "My Schedule"}
-      </Button>
+      <div className="flex flex-col gap-2 sm:w-40">
+        <Button type="button" variant={scheduled ? "default" : "outline"} size="sm" onClick={onToggle}>
+          {scheduled ? <Check /> : <Bookmark />} {scheduled ? "In My Schedule" : "My Schedule"}
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={onAddCalendar} aria-label="Add to calendar">
+          <CalendarPlus />
+        </Button>
+      </div>
     </article>
   );
 }
