@@ -980,6 +980,7 @@ function FestivalDetailPage() {
                       dialogTitle="Headliner"
                       fields={PROGRAM_FIELDS}
                       onChange={(next) => saveDetails({ performers: next })}
+                      reorderable
                       emptyState={<TabEmpty message="No headliners added yet." />}
                       renderItem={(item) => (
                         <ProgramRow item={item} fallbackAction={isFree ? "RSVP" : "Tickets"} eventId={event.id} />
@@ -1000,6 +1001,7 @@ function FestivalDetailPage() {
                       dialogTitle="Featured experience"
                       fields={PROGRAM_FIELDS}
                       onChange={(next) => saveDetails({ experiences: next })}
+                      reorderable
                       emptyState={<TabEmpty message="No featured experiences added yet." />}
                       renderItem={(item) => (
                         <ProgramRow item={item} fallbackAction={isFree ? "Free" : "Tickets"} eventId={event.id} />
@@ -1103,6 +1105,7 @@ function FestivalDetailPage() {
                 dialogTitle="Performer"
                 fields={PROGRAM_FIELDS}
                 onChange={(next) => saveDetails({ performers: next })}
+                reorderable
                 emptyState={<div className="mt-4"><TabEmpty message="Performers have not been announced yet." /></div>}
                 renderItem={(item) => <PerformerCard item={item} event={event} isFree={isFree} />}
               />
