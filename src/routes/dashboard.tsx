@@ -98,14 +98,15 @@ function Dashboard() {
   });
 
   // Groups and community associations keep their posts on their own pages.
-  const { data: excludeOrgIds = new Set<string>() } = useQuery({
+  const { data: excludeOrgIdList = [] } = useQuery({
     queryKey: ["home-exclude-org-ids"],
     queryFn: async () => {
       const { data } = await supabase.from("organizations").select("id").in("type", ["community_assoc", "group"]);
-      return new Set((data ?? []).map((o) => o.id));
+      return (data ?? []).map((o) => o.id as string);
     },
     staleTime: 300_000,
   });
+  const excludeOrgIds = useMemo(() => new Set(excludeOrgIdList), [excludeOrgIdList]);
 
 
 
