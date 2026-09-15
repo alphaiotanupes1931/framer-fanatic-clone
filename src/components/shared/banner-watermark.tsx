@@ -1,6 +1,5 @@
-import { ImageIcon } from "lucide-react";
 import { BANNER_RATIO, BANNER_SIZE_INCHES, BANNER_SIZE_PX } from "@/lib/media-guidelines";
-import logoMark from "@/assets/pb-logo-mark.png.asset.json";
+import logo from "@/assets/pb-logo.png";
 
 /**
  * Clean sizing watermark shown inside an empty banner box so people know
@@ -11,22 +10,20 @@ export function BannerWatermark({ className = "" }: { className?: string }) {
     <div
       className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[linear-gradient(135deg,hsl(var(--muted))_0%,hsl(var(--background))_100%)] ${className}`}
     >
-      <img
-        src={logoMark.url}
-        alt=""
-        aria-hidden="true"
-        className="absolute left-[7%] h-[55%] max-h-36 w-auto opacity-[0.08] grayscale"
-      />
       {/* dashed guide frame in the exact banner ratio */}
-      <div className="relative flex w-[86%] max-w-md flex-col items-center gap-1.5 rounded-xl border-2 border-dashed border-foreground/15 bg-background/30 px-4 py-3 text-center backdrop-blur-[1px] sm:gap-2 sm:py-4">
-        <ImageIcon className="h-5 w-5 text-foreground/25" />
-        <div className="text-base font-black tracking-tight text-foreground/45 sm:text-xl">
+      <div className="relative flex w-[86%] max-w-md flex-col items-center gap-2 rounded-xl border-2 border-dashed border-foreground/15 bg-background/40 px-4 py-4 text-center backdrop-blur-[1px] sm:gap-3 sm:py-5">
+        <img
+          src={logo}
+          alt="Planet Baltimore"
+          className="h-7 w-auto opacity-40 grayscale sm:h-9"
+        />
+        <div className="text-base font-black tracking-tight text-foreground/55 sm:text-xl">
           {BANNER_SIZE_INCHES}
         </div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/30 sm:text-[11px]">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/35 sm:text-[11px]">
           {BANNER_SIZE_PX} · {BANNER_RATIO}
         </div>
-        <div className="text-[10px] font-medium text-foreground/30 sm:text-[11px]">
+        <div className="text-[10px] font-medium leading-relaxed text-foreground/35 sm:text-[11px]">
           Resize your photo to this shape so nothing gets cropped
         </div>
       </div>
