@@ -1216,6 +1216,7 @@ function FestivalDetailPage() {
                 fields={PROGRAM_FIELDS}
                 onChange={(next) => saveDetails({ performers: next })}
                 reorderable
+                listClassName="grid gap-4 sm:grid-cols-2"
                 emptyState={<div className="mt-4"><TabEmpty message="Performers have not been announced yet." /></div>}
                 renderItem={(item) => <PerformerCard item={item} event={event} isFree={isFree} />}
               />
