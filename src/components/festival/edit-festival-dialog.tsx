@@ -319,6 +319,23 @@ export function EditFestivalDialog({
       toast.error("Ticket types need a name and a price");
       return;
     }
+    if (isCreate) {
+      setTickets((t) => [
+        ...t,
+        {
+          id: `new-${crypto.randomUUID()}`,
+          name: ticketForm.name.trim(),
+          description: ticketForm.description.trim() || null,
+          price_cents: Math.max(0, Math.round(Number(ticketForm.price) * 100)),
+          shipping_cents: Math.max(0, Math.round(Number(ticketForm.shipping || 0) * 100)),
+          quantity: ticketForm.quantity ? Number(ticketForm.quantity) : null,
+          max_per_buyer: ticketForm.max ? Number(ticketForm.max) : null,
+        },
+      ]);
+      setTicketForm({ name: "", description: "", price: "", shipping: "", quantity: "", max: "" });
+      toast.success("Ticket type added");
+      return;
+    }
     const res = await supabase
       .from("ticket_types")
       .insert({
@@ -343,6 +360,10 @@ export function EditFestivalDialog({
   };
 
   const removeTicketType = async (id: string) => {
+    if (id.startsWith("new-")) {
+      setTickets((t) => t.filter((x) => x.id !== id));
+      return;
+    }
     const res = await supabase.from("ticket_types").delete().eq("id", id);
     if (res.error) {
       toast.error(res.error.message);
