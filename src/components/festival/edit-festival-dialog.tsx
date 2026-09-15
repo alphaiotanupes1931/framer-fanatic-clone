@@ -543,7 +543,7 @@ export function EditFestivalDialog({
                 <LabeledInput label="Name" value={ev.title ?? ""} onChange={setEvField("title")} />
                 <LabeledArea label="Short description" rows={2} value={det.tagline ?? ""} onChange={setDetField("tagline")} />
                 <LabeledArea label="About the festival" rows={6} value={ev.description ?? ""} onChange={setEvField("description")} />
-                <ImagePickerField label="Festival image" value={ev.image_url ?? ""} onChange={setEvField("image_url")} />
+                <ImagePickerField label="Festival image" value={ev.image_url ?? ""} onChange={setEvField("image_url")} aspect={16 / 9} />
                 <LabeledInput label="Status badges (comma separated)" value={det.badges ?? ""} onChange={setDetField("badges")} placeholder="Free, Family friendly" />
               </div>
             </section>

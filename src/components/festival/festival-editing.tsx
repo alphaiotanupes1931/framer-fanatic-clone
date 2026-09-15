@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Img } from "@/components/shared/smart-img";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 import { toast } from "sonner";
@@ -45,17 +46,29 @@ export async function uploadFestivalImage(file: File): Promise<string> {
   return path;
 }
 
+const CROP_SHAPES = [
+  { label: "1:1", value: 1 },
+  { label: "4:5", value: 4 / 5 },
+  { label: "4:3", value: 4 / 3 },
+  { label: "16:9", value: 16 / 9 },
+];
+
 export function ImagePickerField({
   value,
   onChange,
   label = "Image",
+  aspect = 1,
 }: {
   value: string;
   onChange: (v: string) => void;
   label?: string;
+  /** Starting crop shape; the person can still pick another one. */
+  aspect?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropAspect, setCropAspect] = useState(aspect);
 
   const pick = async (file: File) => {
     setBusy(true);
@@ -101,11 +114,49 @@ export function ImagePickerField({
           hidden
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void pick(f);
+            if (f) {
+              setCropAspect(aspect);
+              setCropFile(f);
+            }
             e.target.value = "";
           }}
         />
       </div>
+
+      <ImageCropDialog
+        file={cropFile}
+        aspect={cropAspect}
+        maxEdge={1440}
+        title="Adjust your photo"
+        open={!!cropFile}
+        onOpenChange={(open) => {
+          if (!open) setCropFile(null);
+        }}
+        onCropped={(f) => {
+          setCropFile(null);
+          void pick(f);
+        }}
+        circleGuide={false}
+        extraControls={
+          <div className="flex w-full items-center justify-center gap-2">
+            <span className="text-xs text-muted-foreground">Shape</span>
+            {CROP_SHAPES.map((s) => (
+              <button
+                key={s.label}
+                type="button"
+                onClick={() => setCropAspect(s.value)}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                  Math.abs(cropAspect - s.value) < 0.001
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
     </div>
   );
 }
