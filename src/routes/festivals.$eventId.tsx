@@ -1102,32 +1102,65 @@ function FestivalDetailPage() {
             <section id="festival-schedule" className={`scroll-mt-24 ${activeTab !== "schedule" ? "hidden" : ""}`}>
               <div className="space-y-8">
                 {schedule.length > 0 && (
-                  <div className="space-y-4 border-b border-border pb-6">
+                  <div className="space-y-3">
                     <div className="flex flex-wrap gap-2">
                       {[["all", "All Time"], ["today", "Today"], ["weekend", "This Weekend"]].map(([value, label]) => (
-                        <Button key={value} type="button" size="sm" variant={scheduleRange === value ? "default" : "outline"} onClick={() => setScheduleRange(value)}>{label}</Button>
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setScheduleRange(value)}
+                          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${scheduleRange === value ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+                        >
+                          {label}
+                        </button>
                       ))}
                     </div>
                     {scheduleDates.length > 0 && (
-                      <div className="flex gap-1 overflow-x-auto border-b border-border">
-                        <button type="button" onClick={() => setScheduleDate("all")} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold ${scheduleDate === "all" ? "border-orange text-orange" : "border-transparent text-muted-foreground"}`}>All dates</button>
+                      <div className="flex flex-wrap gap-2">
                         {scheduleDates.map((date) => (
-                          <button key={date} type="button" onClick={() => setScheduleDate(date)} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold ${scheduleDate === date ? "border-orange text-orange" : "border-transparent text-muted-foreground"}`}>{scheduleDateLabel(date)}</button>
+                          <button
+                            key={date}
+                            type="button"
+                            onClick={() => setScheduleDate(scheduleDate === date ? "all" : date)}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${scheduleDate === date ? "bg-orange text-white" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+                          >
+                            {scheduleDateLabel(date)}
+                          </button>
                         ))}
                       </div>
                     )}
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        value={scheduleQuery}
+                        onChange={(e) => setScheduleQuery(e.target.value)}
+                        placeholder="Search schedule..."
+                        className="rounded-xl bg-muted/50 pl-9"
+                      />
+                    </div>
                   </div>
                 )}
 
                 {headliners.length > 0 && (
                   <div>
-                    <h2 className="font-display text-2xl font-extrabold text-foreground">Featured at the Festival</h2>
+                    <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <Star className="h-4 w-4" /> Featured at the festival
+                    </h2>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       {headliners.map((item, index) => (
-                        <article key={`${item.name}-${index}`} className="border-l-4 border-orange bg-muted/30 p-4">
-                          <span className="text-[11px] font-bold uppercase text-orange">Headliner</span>
-                          <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.name}</h3>
-                          {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+                        <article key={`${item.name}-${index}`} className="overflow-hidden rounded-xl border border-orange/40 bg-card">
+                          <div className="relative">
+                            {item.image ? (
+                              <Img src={item.image} alt={item.name} className="h-40 w-full object-cover" />
+                            ) : (
+                              <div className="h-40 w-full bg-muted" />
+                            )}
+                            <span className="absolute left-3 top-3 rounded-md bg-orange px-2 py-1 text-[11px] font-bold text-white">Headliner</span>
+                          </div>
+                          <div className="p-4">
+                            <h3 className="text-base font-extrabold text-foreground">{item.name}</h3>
+                            {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+                          </div>
                         </article>
                       ))}
                     </div>
@@ -1141,6 +1174,7 @@ function FestivalDetailPage() {
                   dialogTitle="Event or happening"
                   fields={SCHEDULE_FIELDS}
                   onChange={(next) => saveDetails({ schedule: next })}
+                  listClassName="space-y-3"
                   emptyState={<TabEmpty message="The festival schedule has not been posted yet." />}
                   renderItem={(item, index) => {
                     if (!visibleSchedule.includes(item)) return null;
@@ -1149,6 +1183,7 @@ function FestivalDetailPage() {
                         item={item}
                         scheduled={mySchedule.includes(index)}
                         onToggle={() => toggleMySchedule(index)}
+                        onAddCalendar={() => addScheduleToCalendar(item)}
                       />
                     );
                   }}
