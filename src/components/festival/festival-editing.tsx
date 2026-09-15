@@ -263,7 +263,8 @@ export function EditableList<T extends ItemRecord>({
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         emptyState
