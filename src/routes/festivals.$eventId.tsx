@@ -849,7 +849,7 @@ function FestivalDetailPage() {
                 <span className="text-xs font-bold uppercase">Creator tools</span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="secondary" onClick={() => setFullEditOpen(true)}>
+                <Button size="sm" variant="secondary" onClick={() => openFullEdit()}>
                   <Pencil /> Edit Festival
                 </Button>
                 <Button asChild size="sm" variant="secondary">
@@ -940,7 +940,7 @@ function FestivalDetailPage() {
                   <CalendarDays /> View Schedule
                 </Button>
                 {showCreatorTools && (
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={() => setFullEditOpen(true)}>
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={() => openFullEdit()}>
                     <Pencil /> Edit
                   </Button>
                 )}
@@ -1023,7 +1023,7 @@ function FestivalDetailPage() {
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="font-display text-2xl font-extrabold text-foreground">About the Festival</h2>
                   {showCreatorTools && (
-                    <Button type="button" variant="outline" size="xs" onClick={() => setFullEditOpen(true)}>
+                    <Button type="button" variant="outline" size="xs" onClick={() => openFullEdit()}>
                       <Pencil /> Edit
                     </Button>
                   )}
@@ -1032,7 +1032,7 @@ function FestivalDetailPage() {
                   <div className="prose prose-sm mt-4 max-w-none text-muted-foreground sm:prose-base" dangerouslySetInnerHTML={{ __html: event.description }} />
                 ) : (
                   <div className="mt-4">
-                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => setFullEditOpen(true)} />
+                    <TabEmpty message="No description has been added yet." canEdit={showCreatorTools} onEdit={() => openFullEdit()} />
                   </div>
                 )}
               </div>
