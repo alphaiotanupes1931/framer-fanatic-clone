@@ -239,7 +239,7 @@ export function OrgListPage({
                     : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
                 }`}
               >
-                {prettyLabel(s)}
+                {pluralLabel(s)}
               </button>
             ))}
           </div>
