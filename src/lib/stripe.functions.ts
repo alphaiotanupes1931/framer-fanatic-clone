@@ -569,7 +569,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
 
     const { data: product } = await supabaseAdmin
       .from("organization_products")
-      .select("id, org_id, name, description, price_cents, image_url, inventory, is_active")
+      .select("id, org_id, name, description, price_cents, image_url, inventory, is_active, requires_shipping")
       .eq("id", data.productId)
       .maybeSingle();
     if (!product || !product.is_active) throw new Error("This product is no longer available.");
