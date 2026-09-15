@@ -194,6 +194,8 @@ export function EditableList<T extends ItemRecord>({
   emptyState,
   onChange,
   renderItem,
+  reorderable = false,
+  listClassName,
 }: {
   items: T[];
   canEdit: boolean;
@@ -203,9 +205,13 @@ export function EditableList<T extends ItemRecord>({
   emptyState: React.ReactNode;
   onChange: (next: T[]) => Promise<void>;
   renderItem: (item: T, index: number) => React.ReactNode;
+  reorderable?: boolean;
+  listClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const canDrag = canEdit && reorderable;
 
   const save = async (item: ItemRecord) => {
     const next = [...items];
@@ -218,10 +224,23 @@ export function EditableList<T extends ItemRecord>({
     await onChange(items.filter((_, i) => i !== index));
   };
 
+  const move = async (from: number, to: number) => {
+    if (from === to || to < 0 || to >= items.length) return;
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    await onChange(next);
+  };
+
   return (
     <div>
       {canEdit && (
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex items-center justify-end gap-3">
+          {canDrag && items.length > 1 && (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <GripVertical className="h-3.5 w-3.5" /> drag to reorder
+            </span>
+          )}
           <Button
             type="button"
             variant="brand"
@@ -237,13 +256,37 @@ export function EditableList<T extends ItemRecord>({
       )}
 
       {items.length > 0 ? (
-        <div>
+        <div className={listClassName}>
           {items.map((item, index) => {
             const rendered = renderItem(item, index);
             if (rendered === null || rendered === undefined || rendered === false) return null;
             return (
-            <div key={`${item.name ?? item.q ?? item.title ?? index}-${index}`} className="relative">
+            <div
+              key={`${item.name ?? item.q ?? item.title ?? index}-${index}`}
+              className={`relative ${dragIndex === index ? "opacity-50" : ""}`}
+              draggable={canDrag}
+              onDragStart={canDrag ? () => setDragIndex(index) : undefined}
+              onDragEnd={canDrag ? () => setDragIndex(null) : undefined}
+              onDragOver={canDrag ? (e) => e.preventDefault() : undefined}
+              onDrop={
+                canDrag
+                  ? (e) => {
+                      e.preventDefault();
+                      if (dragIndex !== null) void move(dragIndex, index);
+                      setDragIndex(null);
+                    }
+                  : undefined
+              }
+            >
               {rendered}
+              {canDrag && (
+                <span
+                  aria-hidden
+                  className="absolute right-3 top-3 cursor-grab rounded-full bg-foreground/70 p-1.5 text-background active:cursor-grabbing"
+                >
+                  <GripVertical className="h-3.5 w-3.5" />
+                </span>
+              )}
               {canEdit && (
                 <div className="mb-4 flex gap-2">
                   <Button
@@ -260,6 +303,22 @@ export function EditableList<T extends ItemRecord>({
                   <Button type="button" variant="outline" size="xs" onClick={() => void remove(index)}>
                     <Trash2 /> Remove
                   </Button>
+                  {canDrag && items.length > 1 && (
+                    <>
+                      <Button type="button" variant="outline" size="xs" disabled={index === 0} onClick={() => void move(index, index - 1)}>
+                        <ArrowUp /> Up
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xs"
+                        disabled={index === items.length - 1}
+                        onClick={() => void move(index, index + 1)}
+                      >
+                        <ArrowDown /> Down
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -281,3 +340,4 @@ export function EditableList<T extends ItemRecord>({
     </div>
   );
 }
+
