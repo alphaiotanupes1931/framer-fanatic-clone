@@ -564,6 +564,7 @@ function Area({
 function FestivalDetailPage() {
   const { eventId } = Route.useParams();
   const [me, setMe] = useState<string | null>(null);
+  const { isAdmin } = useUserRole();
   const [saved, setSaved] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [basicsOpen, setBasicsOpen] = useState(false);
