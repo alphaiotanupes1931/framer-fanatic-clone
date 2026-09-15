@@ -601,7 +601,20 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       cancel_url: `${data.returnOrigin}/o/${org.slug}?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
-      shipping_address_collection: { allowed_countries: ["US"] },
+      ...(product.requires_shipping === false
+        ? {}
+        : {
+            shipping_address_collection: { allowed_countries: ["US"] as const },
+            phone_number_collection: { enabled: true },
+            custom_fields: [
+              {
+                key: "delivery_notes",
+                label: { type: "custom" as const, custom: "Delivery notes (optional)" },
+                type: "text" as const,
+                optional: true,
+              },
+            ],
+          }),
       line_items: checkoutLineItems(breakdown, {
         name: data.quantity > 1 ? `${product.name} x${data.quantity}` : product.name,
         description: product.description ?? undefined,
