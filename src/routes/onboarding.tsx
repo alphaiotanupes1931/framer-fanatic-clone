@@ -273,17 +273,34 @@ function Onboarding() {
     if (!userId) return;
     setBusy(true);
     try {
+      // People fill this in slowly on a phone, often on weak venue wifi. If the
+      // access token went stale in the meantime every write comes back as a
+      // permission error, so re-confirm who is signed in before saving.
+      const liveId = await ensureLiveSession();
+      if (!liveId) {
+        toast.error("Your sign-in expired. Please sign in again to finish setting up.");
+        navigate({ to: "/auth" });
+        return;
+      }
+      const uid = liveId;
+
       let avatar_url: string | null = null;
       if (file) {
-        const compressed = await compressAvatar(file);
-        const ext = compressed.name.split(".").pop() || "jpg";
-        const path = `${userId}/avatar-${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("avatars")
-          .upload(path, compressed, { upsert: true, contentType: compressed.type });
-        if (upErr) throw upErr;
-        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
-        avatar_url = signed?.signedUrl ?? null;
+        // A photo that will not upload must never block someone from getting in;
+        // they can add it later from their profile.
+        try {
+          const compressed = await compressAvatar(file);
+          const ext = compressed.name.split(".").pop() || "jpg";
+          const path = `${uid}/avatar-${Date.now()}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("avatars")
+            .upload(path, compressed, { upsert: true, contentType: compressed.type });
+          if (upErr) throw upErr;
+          const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, STORED_URL_TTL);
+          avatar_url = signed?.signedUrl ?? null;
+        } catch {
+          toast.message("We could not save your photo right now. You can add it from your profile.");
+        }
       }
 
       const { error } = await supabase
@@ -293,7 +310,7 @@ function Onboarding() {
             ? { ...(avatar_url ? { avatar_url } : {}), city: homeLocation, category: "Visitor", onboarded: true }
             : { ...(avatar_url ? { avatar_url } : {}), neighborhood, onboarded: true },
         )
-        .eq("id", userId);
+        .eq("id", uid);
       if (error) throw error;
 
       // Resident and visitor are the account's one canonical personal profile.
