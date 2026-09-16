@@ -70,6 +70,7 @@ function EditPostPage() {
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropIndex, setCropIndex] = useState<number | null>(null);
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
 
   useEffect(() => {
     (async () => {
