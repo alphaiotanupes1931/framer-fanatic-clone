@@ -23,6 +23,7 @@ import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { popPostAuthRedirect } from "@/lib/pending-join";
 import { clearStaffMode, getStaffMode } from "@/lib/staff-mode";
+import { ensureLiveSession } from "@/lib/session-health";
 
 export const Route = createFileRoute("/onboarding")({
   validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
