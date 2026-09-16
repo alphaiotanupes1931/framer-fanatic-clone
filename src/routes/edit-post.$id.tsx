@@ -135,13 +135,24 @@ function EditPostPage() {
     }
   };
 
+  // Photos chosen together are cropped one after another instead of dropping all but the first.
+  const openNextQueued = () => {
+    setCropQueue((queue) => {
+      const [next, ...rest] = queue;
+      if (next) { setCropIndex(null); setCropFile(next); }
+      return rest;
+    });
+  };
+
   const saveCroppedImage = async (file: File) => {
     const index = cropIndex;
     setCropFile(null);
     setCropIndex(null);
     const url = await uploadFile(file);
-    if (!url) return;
-    setMediaUrls((current) => index === null ? [...current, url] : current.map((item, i) => i === index ? url : item));
+    if (url) {
+      setMediaUrls((current) => index === null ? [...current, url] : current.map((item, i) => i === index ? url : item));
+    }
+    openNextQueued();
   };
 
   const save = async () => {
