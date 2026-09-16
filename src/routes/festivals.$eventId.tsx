@@ -476,8 +476,16 @@ function ScheduleRow({
         </div>
       </div>
       <div className="flex flex-col gap-2 sm:w-40">
-        <Button type="button" variant={saved ? "default" : "outline"} size="sm" onClick={onToggleSave}>
-          {saved ? <Check /> : <Bookmark />} {saved ? "Saved" : "Save"}
+        {/* This saves the whole festival to the visitor's Saved list, so once it is
+            saved the button stays in the saved state instead of un-saving it. */}
+        <Button
+          type="button"
+          variant={saved ? "default" : "outline"}
+          size="sm"
+          disabled={saved}
+          onClick={() => { if (!saved) onToggleSave(); }}
+        >
+          {saved ? <Check /> : <Bookmark />} {saved ? "Festival saved" : "Save festival"}
         </Button>
       </div>
     </article>

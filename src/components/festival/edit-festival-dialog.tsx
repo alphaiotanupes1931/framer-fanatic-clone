@@ -395,7 +395,9 @@ export function EditFestivalDialog({
       address: ev.address?.trim() || null,
       location: ev.venue_name?.trim() || ev.address?.trim() || null,
       neighborhood: ev.neighborhood?.trim() || null,
-      category: categories[0] || ev.category?.trim() || (isCreate ? "festival" : null),
+      // Always keep the event typed as a festival so it stays in the Festivals
+      // directory. The topical pick (Music, Food, ...) lives in festival_details.categories.
+      category: "festival",
       latitude: ev.latitude ? Number(ev.latitude) : null,
       longitude: ev.longitude ? Number(ev.longitude) : null,
       pricing_mode: ev.admission === "paid" ? "paid" : "free",

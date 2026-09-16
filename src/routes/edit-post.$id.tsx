@@ -70,6 +70,7 @@ function EditPostPage() {
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg" | "xl">("md");
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropIndex, setCropIndex] = useState<number | null>(null);
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -135,13 +136,24 @@ function EditPostPage() {
     }
   };
 
+  // Photos chosen together are cropped one after another instead of dropping all but the first.
+  const openNextQueued = () => {
+    setCropQueue((queue) => {
+      const [next, ...rest] = queue;
+      if (next) { setCropIndex(null); setCropFile(next); }
+      return rest;
+    });
+  };
+
   const saveCroppedImage = async (file: File) => {
     const index = cropIndex;
     setCropFile(null);
     setCropIndex(null);
     const url = await uploadFile(file);
-    if (!url) return;
-    setMediaUrls((current) => index === null ? [...current, url] : current.map((item, i) => i === index ? url : item));
+    if (url) {
+      setMediaUrls((current) => index === null ? [...current, url] : current.map((item, i) => i === index ? url : item));
+    }
+    openNextQueued();
   };
 
   const save = async () => {
@@ -255,17 +267,21 @@ function EditPostPage() {
               <Label className="text-sm font-medium">Media</Label>
               <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={async (e) => {
                 const files = Array.from(e.target.files ?? []);
+                if (fileRef.current) fileRef.current.value = "";
+                const images: File[] = [];
                 for (const f of files) {
                   if (f.type.startsWith("video/")) {
                     const u = await uploadFile(f);
                     if (u) setMediaUrls((p) => [...p, u]);
                   } else {
-                    setCropIndex(null);
-                    setCropFile(f);
-                    break;
+                    images.push(f);
                   }
                 }
-                if (fileRef.current) fileRef.current.value = "";
+                if (images.length) {
+                  setCropIndex(null);
+                  setCropFile(images[0]);
+                  setCropQueue(images.slice(1));
+                }
               }} />
               {mediaUrls.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
@@ -349,7 +365,7 @@ function EditPostPage() {
         maxEdge={1440}
         title="Adjust your photo"
         open={!!cropFile}
-        onOpenChange={(open) => { if (!open) { setCropFile(null); setCropIndex(null); } }}
+        onOpenChange={(open) => { if (!open) { setCropFile(null); setCropIndex(null); if (cropQueue.length) openNextQueued(); } }}
         onCropped={(file) => void saveCroppedImage(file)}
         circleGuide={false}
       />
