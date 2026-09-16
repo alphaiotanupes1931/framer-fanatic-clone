@@ -267,17 +267,21 @@ function EditPostPage() {
               <Label className="text-sm font-medium">Media</Label>
               <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={async (e) => {
                 const files = Array.from(e.target.files ?? []);
+                if (fileRef.current) fileRef.current.value = "";
+                const images: File[] = [];
                 for (const f of files) {
                   if (f.type.startsWith("video/")) {
                     const u = await uploadFile(f);
                     if (u) setMediaUrls((p) => [...p, u]);
                   } else {
-                    setCropIndex(null);
-                    setCropFile(f);
-                    break;
+                    images.push(f);
                   }
                 }
-                if (fileRef.current) fileRef.current.value = "";
+                if (images.length) {
+                  setCropIndex(null);
+                  setCropFile(images[0]);
+                  setCropQueue(images.slice(1));
+                }
               }} />
               {mediaUrls.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
