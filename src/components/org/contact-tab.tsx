@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Mail, Phone, Globe, MapPin, Send } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { deliverArtistInquiry } from "@/lib/inquiries.functions";
 
 const INTENTS = ["Commission", "Booking", "Press", "Collaboration", "General"];
