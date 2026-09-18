@@ -95,7 +95,7 @@ export function ReferralNetworkDialog({
   const [sendingTest, setSendingTest] = useState(false);
   const [parsedEmails, setParsedEmails] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [stats, setStats] = useState({ total: 0, joined: 0, points: 0 });
+  const [stats, setStats] = useState({ total: 0, joined: 0, points: 0, level1: 0, level2: 0, level3: 0 });
   const [invites, setInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
   const [resending, setResending] = useState<string | null>(null);
@@ -127,21 +127,32 @@ export function ReferralNetworkDialog({
       setLoadingInvites(false);
       return;
     }
-    const [invitesRes, joinedRes] = await Promise.all([
+    const [invitesRes, networkRes] = await Promise.all([
       supabase
         .from("invites")
         .select("id, email, created_at, clicked_at, accepted_at")
         .eq("invited_by", user.id)
         .order("created_at", { ascending: false }),
-      supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("referred_by", user.id),
+      // Counts all three referral levels, so points match the tiers shown above.
+      supabase.rpc("referral_network_stats", { _user_id: user.id }),
     ]);
     const inviteRows = invitesRes.data ?? [];
-    const joined = joinedRes.count ?? 0;
+    const net = (Array.isArray(networkRes.data) ? networkRes.data[0] : networkRes.data) as
+      | { level1: number; level2: number; level3: number; points: number }
+      | null
+      | undefined;
+    const level1 = net?.level1 ?? 0;
+    const level2 = net?.level2 ?? 0;
+    const level3 = net?.level3 ?? 0;
     setInvites(inviteRows);
-    setStats({ total: inviteRows.length, joined, points: joined * 5 });
+    setStats({
+      total: inviteRows.length,
+      joined: level1 + level2 + level3,
+      points: net?.points ?? level1 * 5,
+      level1,
+      level2,
+      level3,
+    });
     setLoadingInvites(false);
   };
 
@@ -408,6 +419,9 @@ export function ReferralNetworkDialog({
                   <div className="text-[10px] font-semibold text-foreground sm:text-xs">
                     {tier.label}
                   </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {tier.level === 1 ? stats.level1 : tier.level === 2 ? stats.level2 : stats.level3} joined
+                  </div>
                 </div>
               ))}
             </div>
@@ -627,7 +641,7 @@ export function ReferralNetworkDialog({
                 </div>
                 <div className="text-2xl font-bold text-primary">{stats.points}</div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Every friend who joins adds 5 points.
+                  Direct invites add 5 points, their invites 3, and the next level 1.
                 </p>
               </div>
             </TabsContent>

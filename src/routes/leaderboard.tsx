@@ -32,7 +32,7 @@ function LeaderboardPage() {
       const [{ data: profs }, { data: postRows }, { data: refRows }] = await Promise.all([
         (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").limit(100),
         supabase.from("posts").select("user_id, likes_count, comments_count").limit(5000),
-        supabase.from("profiles").select("referred_by").not("referred_by", "is", null).limit(5000),
+        supabase.from("profiles").select("id, referred_by").not("referred_by", "is", null).limit(5000),
       ]);
       const stats = new Map<string, { posts: number; likes: number; comments: number }>();
       for (const r of (postRows || []) as any[]) {
@@ -42,9 +42,30 @@ function LeaderboardPage() {
         s.comments += r.comments_count || 0;
         stats.set(r.user_id, s);
       }
-      const refs = new Map<string, number>();
+      // Referral points run three levels deep: 5 for a direct invite, 3 for
+      // the people they invite, 1 for the level after that.
+      const children = new Map<string, string[]>();
+      const parentOf = new Map<string, string>();
       for (const r of (refRows || []) as any[]) {
-        if (r.referred_by) refs.set(r.referred_by, (refs.get(r.referred_by) || 0) + 1);
+        if (!r.referred_by || !r.id) continue;
+        parentOf.set(r.id, r.referred_by);
+        children.set(r.referred_by, [...(children.get(r.referred_by) || []), r.id]);
+      }
+      const refs = new Map<string, number>();
+      const refPoints = new Map<string, number>();
+      for (const [parent, kids] of children) {
+        refs.set(parent, kids.length);
+      }
+      for (const [parent] of children) {
+        let level = [parent];
+        let points = 0;
+        for (const weight of [5, 3, 1]) {
+          const next = level.flatMap((id) => children.get(id) || []);
+          points += next.length * weight;
+          level = next;
+          if (level.length === 0) break;
+        }
+        refPoints.set(parent, points);
       }
       const results: Row[] = ((profs || []) as any[]).map((p) => {
         const s = stats.get(p.id) || { posts: 0, likes: 0, comments: 0 };
@@ -55,7 +76,7 @@ function LeaderboardPage() {
           comments: s.comments,
           likes: s.likes,
           referrals,
-          points: s.posts * 5 + s.comments * 2 + s.likes + referrals * 5,
+          points: s.posts * 5 + s.comments * 2 + s.likes + (refPoints.get(p.id) || 0),
         };
       });
       results.sort((a, b) => b.points - a.points);
