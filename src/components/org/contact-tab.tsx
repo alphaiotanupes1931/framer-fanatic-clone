@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail, Phone, Globe, MapPin, Send } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { deliverArtistInquiry } from "@/lib/inquiries.functions";
 
 const INTENTS = ["Commission", "Booking", "Press", "Collaboration", "General"];
 
@@ -33,19 +33,27 @@ export function ContactTab({
       return;
     }
     setSending(true);
-    const { data: sess } = await supabase.auth.getSession();
-    const { error } = await supabase.from("artist_inquiries").insert({
-      artist_id: ownerId,
-      sender_id: sess.session?.user.id ?? null,
-      intent: form.intent,
-      sender_name: form.sender_name.trim(),
-      sender_email: form.sender_email.trim(),
-      message: form.message.trim(),
-    });
+    // Saved and delivered server-side: the owner gets a message thread and an email.
+    try {
+      await deliverArtistInquiry({
+        data: {
+          artistId: ownerId,
+          intent: form.intent,
+          senderName: form.sender_name.trim(),
+          senderEmail: form.sender_email.trim(),
+          message: form.message.trim(),
+          pageName: name,
+          pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
+        },
+      });
+    } catch (e) {
+      setSending(false);
+      toast.error(e instanceof Error ? e.message : "Could not send your message");
+      return;
+    }
     setSending(false);
-    if (error) { toast.error(error.message); return; }
     setForm({ intent: INTENTS[0], sender_name: "", sender_email: "", message: "" });
-    toast.success("Message sent");
+    toast.success(`Message sent to ${name}`);
   };
 
   const rows = [

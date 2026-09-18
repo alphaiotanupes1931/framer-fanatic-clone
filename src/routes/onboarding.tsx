@@ -314,6 +314,10 @@ function Onboarding() {
         .eq("id", uid);
       if (error) throw error;
 
+      // Everyone starts connected to the Planet Baltimore team so their feed is
+      // never empty on day one. Failure here must not block onboarding.
+      try { await supabase.rpc("link_first_friends"); } catch { /* non-blocking */ }
+
       // Resident and visitor are the account's one canonical personal profile.
       // Artist, arts organization and business choices create separate owned pages.
       if (isVisitor) {

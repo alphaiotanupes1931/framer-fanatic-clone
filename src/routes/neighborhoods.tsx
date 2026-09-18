@@ -93,6 +93,7 @@ function NeighborhoodsPage() {
         supabase
           .from("events")
           .select("id, title, description, location, image_url, starts_at, price_cents")
+          .eq("is_private_org", false)
           .ilike("neighborhood", selected.name)
           .gte("starts_at", new Date().toISOString())
           .order("starts_at", { ascending: true }),

@@ -180,7 +180,8 @@ export const Event = {
     const { column, ascending } = parseOrder(order);
     let q = supabase.from("events")
       .select("id, user_id, title, description, image_url, starts_at, venue_name, neighborhood, is_published, status, created_at")
-      .eq("is_published", true);
+      .eq("is_published", true)
+      .eq("is_private_org", false);
     for (const [k, v] of Object.entries(where)) q = q.eq(k, v as never);
     const { data, error } = await q.order(column, { ascending }).limit(limit);
     if (error) throw error;
@@ -194,6 +195,7 @@ export const Event = {
       .from("events")
       .select("id, user_id, title, image_url, starts_at, venue_name, neighborhood, is_published, status, created_at")
       .eq("is_published", true)
+      .eq("is_private_org", false)
       .neq("status", "cancelled")
       .gte("starts_at", new Date().toISOString())
       .order("starts_at", { ascending: true })

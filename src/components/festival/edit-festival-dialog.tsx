@@ -611,7 +611,6 @@ export function EditFestivalDialog({
                   <LabeledInput label="Price (USD)" value={ev.price ?? ""} onChange={setEvField("price")} placeholder="25" />
                 )}
                 <LabeledInput label="Price label" value={det.price_label ?? ""} onChange={setDetField("price_label")} placeholder="Free or $55 to $120" />
-                <LabeledInput label="Ticket / registration link" value={det.ticket_url ?? ""} onChange={setDetField("ticket_url")} placeholder="https://" />
                 <label className="block">
                   <span className="text-xs font-semibold text-muted-foreground">Status</span>
                   <select

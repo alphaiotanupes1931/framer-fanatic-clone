@@ -361,6 +361,7 @@ function CalendarPage() {
       const { data } = await supabase
         .from("events")
         .select("id, title, starts_at, location, venue_name, description, image_url, neighborhood, category, organization_id")
+        .eq("is_private_org", false)
         .order("starts_at", { ascending: true });
       setEvents((data || []) as Ev[]);
     })();
