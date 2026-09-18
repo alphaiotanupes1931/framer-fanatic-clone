@@ -507,6 +507,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_exhibition: boolean
+          is_private_org: boolean
           is_published: boolean
           latitude: number | null
           location: string | null
@@ -537,6 +538,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_exhibition?: boolean
+          is_private_org?: boolean
           is_published?: boolean
           latitude?: number | null
           location?: string | null
@@ -567,6 +569,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_exhibition?: boolean
+          is_private_org?: boolean
           is_published?: boolean
           latitude?: number | null
           location?: string | null

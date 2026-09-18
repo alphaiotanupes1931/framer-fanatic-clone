@@ -225,6 +225,13 @@
       "when": 1789709894326,
       "tag": "0031_referral_levels_and_first_friend",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1789709931010,
+      "tag": "0032_private_group_events_flag",
+      "breakpoints": true
     }
   ]
 }
