@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, Phone, Globe, MapPin, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { deliverArtistInquiry } from "@/lib/inquiries.functions";
 
 const INTENTS = ["Commission", "Booking", "Press", "Collaboration", "General"];
 
@@ -34,18 +35,30 @@ export function ContactTab({
     }
     setSending(true);
     const { data: sess } = await supabase.auth.getSession();
-    const { error } = await supabase.from("artist_inquiries").insert({
+    const { data: inserted, error } = await supabase.from("artist_inquiries").insert({
       artist_id: ownerId,
       sender_id: sess.session?.user.id ?? null,
       intent: form.intent,
       sender_name: form.sender_name.trim(),
       sender_email: form.sender_email.trim(),
       message: form.message.trim(),
-    });
+    }).select("id").single();
+    if (!error && inserted?.id) {
+      // Deliver it to the owner's Planet Baltimore inbox and email.
+      try {
+        await deliverArtistInquiry({
+          data: {
+            inquiryId: inserted.id,
+            pageName: name,
+            pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
+          },
+        });
+      } catch { /* the inquiry is saved either way */ }
+    }
     setSending(false);
     if (error) { toast.error(error.message); return; }
     setForm({ intent: INTENTS[0], sender_name: "", sender_email: "", message: "" });
-    toast.success("Message sent");
+    toast.success(`Message sent to ${name}`);
   };
 
   const rows = [
