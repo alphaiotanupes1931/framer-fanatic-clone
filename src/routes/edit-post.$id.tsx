@@ -71,6 +71,7 @@ function EditPostPage() {
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropIndex, setCropIndex] = useState<number | null>(null);
   const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const appliedRef = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -365,8 +366,15 @@ function EditPostPage() {
         maxEdge={1440}
         title="Adjust your photo"
         open={!!cropFile}
-        onOpenChange={(open) => { if (!open) { setCropFile(null); setCropIndex(null); if (cropQueue.length) openNextQueued(); } }}
-        onCropped={(file) => void saveCroppedImage(file)}
+        onOpenChange={(open) => {
+          if (open) return;
+          setCropFile(null);
+          setCropIndex(null);
+          // Closing without applying means the person cancelled, so drop the rest.
+          if (appliedRef.current) appliedRef.current = false;
+          else setCropQueue([]);
+        }}
+        onCropped={(file) => { appliedRef.current = true; void saveCroppedImage(file); }}
         circleGuide={false}
       />
     </AppLayout>
