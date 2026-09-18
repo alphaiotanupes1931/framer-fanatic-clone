@@ -1,4 +1,4 @@
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn, getRequestHeader } from '@tanstack/react-start'
 
 const SITE_URL = 'https://www.planetbaltimore.com'
 
