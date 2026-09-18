@@ -34,29 +34,25 @@ export function ContactTab({
       return;
     }
     setSending(true);
-    const { data: sess } = await supabase.auth.getSession();
-    const { data: inserted, error } = await supabase.from("artist_inquiries").insert({
-      artist_id: ownerId,
-      sender_id: sess.session?.user.id ?? null,
-      intent: form.intent,
-      sender_name: form.sender_name.trim(),
-      sender_email: form.sender_email.trim(),
-      message: form.message.trim(),
-    }).select("id").single();
-    if (!error && inserted?.id) {
-      // Deliver it to the owner's Planet Baltimore inbox and email.
-      try {
-        await deliverArtistInquiry({
-          data: {
-            inquiryId: inserted.id,
-            pageName: name,
-            pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
-          },
-        });
-      } catch { /* the inquiry is saved either way */ }
+    // Saved and delivered server-side: the owner gets a message thread and an email.
+    try {
+      await deliverArtistInquiry({
+        data: {
+          artistId: ownerId,
+          intent: form.intent,
+          senderName: form.sender_name.trim(),
+          senderEmail: form.sender_email.trim(),
+          message: form.message.trim(),
+          pageName: name,
+          pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
+        },
+      });
+    } catch (e) {
+      setSending(false);
+      toast.error(e instanceof Error ? e.message : "Could not send your message");
+      return;
     }
     setSending(false);
-    if (error) { toast.error(error.message); return; }
     setForm({ intent: INTENTS[0], sender_name: "", sender_email: "", message: "" });
     toast.success(`Message sent to ${name}`);
   };
