@@ -71,6 +71,7 @@ function EditPostPage() {
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropIndex, setCropIndex] = useState<number | null>(null);
   const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const appliedRef = useRef(false);
 
   useEffect(() => {
     (async () => {
