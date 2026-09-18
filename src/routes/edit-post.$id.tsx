@@ -365,7 +365,7 @@ function EditPostPage() {
         maxEdge={1440}
         title="Adjust your photo"
         open={!!cropFile}
-        onOpenChange={(open) => { if (!open) { setCropFile(null); setCropIndex(null); if (cropQueue.length) openNextQueued(); } }}
+        onOpenChange={(open) => { if (!open) { setCropFile(null); setCropIndex(null); setCropQueue([]); } }}
         onCropped={(file) => void saveCroppedImage(file)}
         circleGuide={false}
       />

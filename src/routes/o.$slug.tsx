@@ -1754,7 +1754,11 @@ function TierForm({ orgId, initial, onCancel, onSaved }: {
     if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
     setUploading(true);
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `support-tiers/${orgId}/${Date.now()}-${safe}`;
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id;
+    if (!uid) { setUploading(false); toast.error("Please sign in again to upload"); return; }
+    // Storage rules require the first folder to be the signed-in user's id.
+    const path = `${uid}/support-tiers/${orgId}/${Date.now()}-${safe}`;
     const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
     if (upErr) { setUploading(false); toast.error(upErr.message); return; }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
