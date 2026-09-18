@@ -49,8 +49,8 @@ function DiscoverPage() {
   const { data: discover } = useCachedFetch("discover:all", async () => {
     const nowIso = new Date().toISOString();
     const [evUp, evPast, ar, gr, bu, ne, st] = await Promise.all([
-        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(40),
-        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(20),
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").eq("is_private_org", false).gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(40),
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").eq("is_private_org", false).lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(20),
         supabase.rpc("public_creators", { lim: 60 }),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "group").limit(40),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(40),

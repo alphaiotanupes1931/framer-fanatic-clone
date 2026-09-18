@@ -72,8 +72,8 @@ function SearchPage() {
         // finished: multi-day events stay until ends_at, single ones for 12
         // hours after they start.
         hasQ
-          ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").ilike("title", like).order("starts_at", { ascending: false }).limit(24)
-          : supabase.from("events").select("id,title,starts_at,venue_name,image_url").or(`ends_at.gte.${eventCutoff},and(ends_at.is.null,starts_at.gte.${eventCutoff})`).order("starts_at", { ascending: true }).limit(24),
+          ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").eq("is_private_org", false).ilike("title", like).order("starts_at", { ascending: false }).limit(24)
+          : supabase.from("events").select("id,title,starts_at,venue_name,image_url").eq("is_private_org", false).or(`ends_at.gte.${eventCutoff},and(ends_at.is.null,starts_at.gte.${eventCutoff})`).order("starts_at", { ascending: true }).limit(24),
         hasQ
           ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).ilike("name", like).limit(24)
           : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).order("created_at", { ascending: false }).limit(24),

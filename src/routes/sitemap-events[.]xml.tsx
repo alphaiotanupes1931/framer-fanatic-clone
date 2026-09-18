@@ -18,6 +18,7 @@ export const Route = createFileRoute("/sitemap-events.xml")({
           .from("events")
           .select("id, updated_at, starts_at")
           .eq("is_published", true)
+          .eq("is_private_org", false)
           .gte("starts_at", new Date(Date.now() - 30 * 864e5).toISOString())
           .order("starts_at", { ascending: true })
           .limit(2000);

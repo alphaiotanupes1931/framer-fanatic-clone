@@ -78,7 +78,7 @@ export function GlobalSearch({ className = "", compact = false }: { className?: 
       const [people, hoods, events, posts, stories] = await Promise.all([
         supabase.rpc("search_creators", { q: debounced, lim: 5 }),
         supabase.from("neighborhoods").select("id,name,region").ilike("name", like).order("name").limit(5),
-        supabase.from("events").select("id,title,starts_at,venue_name").ilike("title", like).order("starts_at", { ascending: true }).limit(5),
+        supabase.from("events").select("id,title,starts_at,venue_name").eq("is_private_org", false).ilike("title", like).order("starts_at", { ascending: true }).limit(5),
         supabase.from("posts").select("id,content,created_at").eq("is_deleted", false).eq("visibility", "public").ilike("content", like).order("created_at", { ascending: false }).limit(5),
         supabase.from("stories").select("id,title,excerpt,created_at").eq("status", "published").ilike("title", like).order("created_at", { ascending: false }).limit(5),
       ]);

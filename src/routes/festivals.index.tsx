@@ -439,6 +439,7 @@ function FestivalsPage() {
         "id,title,description,image_url,starts_at,ends_at,venue_name,address,neighborhood,category,price_cents,pricing_mode,donations_enabled,latitude,longitude,organization_id,user_id",
       )
       .eq("is_published", true)
+      .eq("is_private_org", false)
       .gte("starts_at", new Date(Date.now() - 12 * 3600 * 1000).toISOString())
       .order("starts_at", { ascending: true })
       .limit(300);
