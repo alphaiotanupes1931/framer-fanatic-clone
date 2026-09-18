@@ -1,48 +1,80 @@
-import { createServerFn, getRequestHeader } from '@tanstack/react-start'
+import { createServerFn } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/react-start/server'
 
 const SITE_URL = 'https://www.planetbaltimore.com'
 
+type InquiryInput = {
+  artistId: string
+  intent: string
+  senderName: string
+  senderEmail: string
+  message: string
+  pageName?: string
+  pageUrl?: string
+}
+
 /**
- * Delivers a page inquiry that was just stored in artist_inquiries: opens a
- * real Planet Baltimore message thread with the page owner (when the sender is
- * signed in) and emails the owner. Only fresh rows are delivered, so the
- * endpoint cannot be replayed to spam an owner.
+ * Saves a page inquiry and delivers it to the page owner: opens a real Planet
+ * Baltimore message thread (when the sender is signed in) and emails the owner.
+ * The row is written server-side so the sender never needs read access to
+ * artist_inquiries (the table is readable only by the page owner).
  */
 export const deliverArtistInquiry = createServerFn({ method: 'POST' })
-  .inputValidator((data: { inquiryId: string; pageName?: string; pageUrl?: string }) => {
-    if (!data?.inquiryId || typeof data.inquiryId !== 'string') throw new Error('inquiryId is required')
+  .inputValidator((data: InquiryInput) => {
+    if (!data?.artistId) throw new Error('artistId is required')
+    if (!data.senderName?.trim() || !data.senderEmail?.trim() || !data.message?.trim()) {
+      throw new Error('Name, email and message are required')
+    }
     return data
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const { sendInternalEmail } = await import('@/lib/email-internal.server')
 
-    const { data: inquiry } = await supabaseAdmin
+    // Identify the sender from the bearer token when one is attached.
+    let senderId: string | null = null
+    const authHeader = getRequest()?.headers?.get('authorization') ?? ''
+    if (authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice('Bearer '.length)
+      if (token.split('.').length === 3) {
+        const { data: userData } = await supabaseAdmin.auth.getUser(token)
+        senderId = userData?.user?.id ?? null
+      }
+    }
+
+    const intent = data.intent || 'General'
+    const senderName = data.senderName.trim()
+    const senderEmail = data.senderEmail.trim()
+    const message = data.message.trim()
+
+    const { data: inquiry, error: insertError } = await supabaseAdmin
       .from('artist_inquiries')
-      .select('id, artist_id, sender_id, intent, sender_name, sender_email, message, created_at')
-      .eq('id', data.inquiryId)
-      .maybeSingle()
-    if (!inquiry) return { delivered: false, reason: 'not_found' as const }
+      .insert({
+        artist_id: data.artistId,
+        sender_id: senderId,
+        intent,
+        sender_name: senderName,
+        sender_email: senderEmail,
+        message,
+      })
+      .select('id')
+      .single()
+    if (insertError || !inquiry) throw new Error(insertError?.message || 'Could not save your message')
 
-    const ageMs = Date.now() - new Date(inquiry.created_at).getTime()
-    if (ageMs > 10 * 60 * 1000) return { delivered: false, reason: 'expired' as const }
-
-    const intent = inquiry.intent || 'General'
-    const senderName = inquiry.sender_name || 'Someone'
     const body = [
       `${intent} inquiry from ${senderName}`,
-      inquiry.sender_email ? `Reply to: ${inquiry.sender_email}` : null,
+      senderEmail ? `Reply to: ${senderEmail}` : null,
       '',
-      inquiry.message,
+      message,
     ]
       .filter((line) => line !== null)
       .join('\n')
 
     // Message thread: only possible when the sender has an account.
     let messaged = false
-    if (inquiry.sender_id && inquiry.sender_id !== inquiry.artist_id) {
-      const a = inquiry.sender_id
-      const b = inquiry.artist_id
+    if (senderId && senderId !== data.artistId) {
+      const a = senderId
+      const b = data.artistId
       const { data: existing } = await supabaseAdmin
         .from('conversations')
         .select('id')
@@ -71,7 +103,7 @@ export const deliverArtistInquiry = createServerFn({ method: 'POST' })
     const { data: owner } = await supabaseAdmin
       .from('profiles')
       .select('email, display_name, username')
-      .eq('id', inquiry.artist_id)
+      .eq('id', data.artistId)
       .maybeSingle()
     if (owner?.email) {
       const result = await sendInternalEmail({
@@ -81,8 +113,8 @@ export const deliverArtistInquiry = createServerFn({ method: 'POST' })
         templateData: {
           intent,
           senderName,
-          senderEmail: inquiry.sender_email ?? '',
-          message: inquiry.message ?? '',
+          senderEmail,
+          message,
           pageName: data.pageName || owner.display_name || 'your page',
           pageUrl: data.pageUrl || SITE_URL,
         },
