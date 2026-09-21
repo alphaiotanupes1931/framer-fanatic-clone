@@ -124,22 +124,22 @@ function ActivityFeedPage() {
       const raw: Item[] = [];
       for (const p of posts.data || []) {
         if (p.is_deleted) continue;
-        raw.push({ id: `post-${p.id}`, kind: "post", actorId: p.user_id, actorName: "", action: "posted", detail: trim(p.content) || `a ${p.post_type || "post"}`, at: p.created_at, to: `/posts/${p.id}` });
+        raw.push({ id: `post-${p.id}`, kind: "post", actorId: p.user_id, actorName: "", action: "posted", detail: (p.content || "").replace(/\s+/g, " ").trim() || `a ${p.post_type || "post"}`, at: p.created_at, to: `/posts/${p.id}` });
       }
       for (const s of stories.data || [])
-        raw.push({ id: `story-${s.id}`, kind: "story", actorId: s.user_id, actorName: "", action: "published a story", detail: trim(s.title) || trim(s.excerpt), at: s.created_at });
+        raw.push({ id: `story-${s.id}`, kind: "story", actorId: s.user_id, actorName: "", action: "published a story", detail: (s.title || "").trim() || trim(s.excerpt, 500), at: s.created_at });
       for (const e of events.data || [])
-        raw.push({ id: `event-${e.id}`, kind: "event", actorId: e.user_id, actorName: "", action: "created an event", detail: `${trim(e.title)}${e.venue_name ? ` at ${e.venue_name}` : ""}${e.starts_at ? ` (${new Date(e.starts_at).toLocaleDateString()})` : ""}`, at: e.created_at, to: `/events/${e.id}` });
+        raw.push({ id: `event-${e.id}`, kind: "event", actorId: e.user_id, actorName: "", action: "created an event", detail: `${(e.title || "").trim()}${e.venue_name ? ` at ${e.venue_name}` : ""}${e.starts_at ? ` (${new Date(e.starts_at).toLocaleDateString()})` : ""}`, at: e.created_at, to: `/events/${e.id}` });
       for (const v of videos.data || [])
-        raw.push({ id: `video-${v.id}`, kind: "video", actorId: v.user_id, actorName: "", action: "uploaded a video", detail: trim(v.title), at: v.created_at });
+        raw.push({ id: `video-${v.id}`, kind: "video", actorId: v.user_id, actorName: "", action: "uploaded a video", detail: (v.title || "").trim(), at: v.created_at });
       for (const o of orgs.data || [])
-        raw.push({ id: `org-${o.id}`, kind: "page", actorId: o.owner_id, actorName: "", action: `created a ${o.type || "page"} page`, detail: trim(o.name), at: o.created_at, to: `/o/${o.slug}` });
+        raw.push({ id: `org-${o.id}`, kind: "page", actorId: o.owner_id, actorName: "", action: `created a ${o.type || "page"} page`, detail: (o.name || "").trim(), at: o.created_at, to: `/o/${o.slug}` });
       for (const c of comments.data || [])
-        raw.push({ id: `comment-${c.id}`, kind: "comment", actorId: c.user_id, actorName: "", action: "commented", detail: trim(c.body), at: c.created_at, to: `/posts/${c.post_id}` });
+        raw.push({ id: `comment-${c.id}`, kind: "comment", actorId: c.user_id, actorName: "", action: "commented", detail: (c.body || "").replace(/\s+/g, " ").trim(), at: c.created_at, to: `/posts/${c.post_id}` });
       for (const m of members.data || [])
         raw.push({ id: `member-${m.id}`, kind: "member", actorId: m.id, actorName: m.display_name || m.username || "Someone", action: "joined Planet Baltimore", detail: "", at: m.created_at });
       for (const l of listings.data || [])
-        raw.push({ id: `listing-${l.id}`, kind: "listing", actorId: l.seller_id, actorName: "", action: "listed an item", detail: trim(l.title), at: l.created_at });
+        raw.push({ id: `listing-${l.id}`, kind: "listing", actorId: l.seller_id, actorName: "", action: "listed an item", detail: (l.title || "").trim(), at: l.created_at });
 
       const ids = Array.from(new Set(raw.map((r) => r.actorId).filter(Boolean))) as string[];
       const names = new Map<string, string>();
