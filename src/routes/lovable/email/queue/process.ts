@@ -305,11 +305,27 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                 return Response.json({ processed: totalProcessed, stopped: 'rate_limited' })
               }
 
-              // 403s are permanent configuration or authorization failures for this
-              // message, so move straight to DLQ and stop processing the rest of the batch.
+              // 403s are permanent failures for this one message (most often a
+              // suppressed recipient). DLQ that message and keep draining the
+              // batch — one bad address must not stall the whole queue.
               if (isForbidden(error)) {
                 await moveToDlq(supabase, queue, msg, errorMsg.slice(0, 1000))
-                return Response.json({ processed: totalProcessed, stopped: 'forbidden' })
+                if (errorMsg.includes('recipient_suppressed') && typeof payload.to === 'string') {
+                  await supabase
+                    .from('suppressed_emails')
+                    .upsert(
+                      {
+                        email: payload.to.toLowerCase(),
+                        reason: 'provider_suppressed',
+                        metadata: { source: 'queue_worker', template: payload.label ?? queue },
+                      },
+                      { onConflict: 'email', ignoreDuplicates: true }
+                    )
+                }
+                if (i < messages.length - 1) {
+                  await new Promise((r) => setTimeout(r, sendDelayMs))
+                }
+                continue
               }
 
               // Log non-429 failures to track real retry attempts.
