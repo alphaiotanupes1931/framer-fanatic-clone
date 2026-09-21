@@ -336,7 +336,7 @@ function ActivityFeedPage() {
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm text-neutral-800">
                       <b className="font-bold">{i.actorName}</b> {i.action}
-                      {i.detail ? <span className="text-neutral-600">: {i.detail}</span> : null}
+                      {shown(i) ? <span className="text-neutral-600">: {shown(i)}</span> : null}
                     </span>
                     <span className="mt-0.5 block text-xs text-neutral-400">{fmt(i.at)} · {meta.label}</span>
                   </span>
