@@ -168,6 +168,8 @@ function ActivityFeedPage() {
 
   const visible = kinds.length ? items.filter((i) => kinds.includes(i.kind)) : items;
 
+  const shown = (i: Item) => (fullText ? i.detail : trim(i.detail));
+
   const rangeLabel = `${from.toLocaleDateString()} to ${to.toLocaleDateString()}`;
 
   const asText = () =>
@@ -176,7 +178,7 @@ function ActivityFeedPage() {
       rangeLabel,
       `${visible.length} entries`,
       "",
-      ...visible.map((i) => `${fmt(i.at)} - ${i.actorName} ${i.action}${i.detail ? `: ${i.detail}` : ""}`),
+      ...visible.map((i) => `${fmt(i.at)} - ${i.actorName} ${i.action}${shown(i) ? `: ${shown(i)}` : ""}`),
     ].join("\n");
 
   const copyAll = async () => {
