@@ -224,8 +224,9 @@ function ActivityFeedPage() {
       write(`${rangeLabel}  |  ${visible.length} entries`, font, 10, rgb(0.4, 0.4, 0.4));
       y -= 8;
       for (const i of visible) {
+        const detail = shown(i);
         write(`${fmt(i.at)} - ${i.actorName} ${i.action}`, bold, 10);
-        if (i.detail) write(i.detail, font, 10, rgb(0.35, 0.35, 0.35));
+        if (detail) write(detail, font, 10, rgb(0.35, 0.35, 0.35));
         y -= 6;
       }
       const bytes = await doc.save();
