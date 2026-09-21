@@ -272,6 +272,9 @@ function ActivityFeedPage() {
               </Button>
             ))}
             <div className="ml-auto flex flex-wrap gap-2">
+              <Button size="sm" variant={fullText ? "default" : "outline"} className={fullText ? "bg-orange-600 hover:bg-orange-700" : ""} onClick={() => setFullText((v) => !v)}>
+                Full text
+              </Button>
               <Button size="sm" variant="outline" onClick={copyAll}><Copy className="mr-2 h-4 w-4" /> Copy feed</Button>
               <Button size="sm" variant="outline" onClick={downloadPdf} disabled={building}>
                 {building ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
