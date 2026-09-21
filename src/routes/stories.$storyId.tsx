@@ -235,7 +235,8 @@ function StoryDetail() {
 
         <div>
           {story.content && (
-            /^\s*<[a-z]/i.test(story.content) ? (
+            /<\/?(?:br|div|p|span|strong|b|em|i|u|s|ul|ol|li|a|blockquote|h[1-6]|img|pre|code)\b[^>]*>/i.test(story.content) ||
+            /&(?:nbsp|amp|lt|gt|quot|#\d+);/i.test(story.content) ? (
               <div
                 className="prose prose-neutral mt-6 max-w-none text-[17px] leading-relaxed text-foreground/90"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(story.content) }}
