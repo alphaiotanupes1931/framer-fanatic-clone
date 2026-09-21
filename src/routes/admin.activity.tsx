@@ -88,6 +88,7 @@ function ActivityFeedPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [building, setBuilding] = useState(false);
+  const [fullText, setFullText] = useState(false);
 
   const { from, to } = useMemo(() => rangeFor(rangeKey, fromStr, toStr), [rangeKey, fromStr, toStr]);
 
