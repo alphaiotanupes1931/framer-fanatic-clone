@@ -246,6 +246,13 @@
       "when": 1790183376557,
       "tag": "0034_comp_tickets_manual_attendees",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790185982039,
+      "tag": "0035_product_pickup_option",
+      "breakpoints": true
     }
   ]
 }

@@ -1818,6 +1818,7 @@ export type Database = {
       }
       organization_products: {
         Row: {
+          contact_email: string | null
           created_at: string
           description: string | null
           id: string
@@ -1826,12 +1827,14 @@ export type Database = {
           is_active: boolean
           name: string
           org_id: string
+          pickup_address: string | null
           price_cents: number
           requires_shipping: boolean
           sort_order: number
           updated_at: string
         }
         Insert: {
+          contact_email?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1840,12 +1843,14 @@ export type Database = {
           is_active?: boolean
           name: string
           org_id: string
+          pickup_address?: string | null
           price_cents?: number
           requires_shipping?: boolean
           sort_order?: number
           updated_at?: string
         }
         Update: {
+          contact_email?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1854,6 +1859,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           org_id?: string
+          pickup_address?: string | null
           price_cents?: number
           requires_shipping?: boolean
           sort_order?: number
@@ -2595,6 +2601,7 @@ export type Database = {
           buyer_note: string | null
           buyer_total_cents: number
           created_at: string
+          fulfillment: string
           id: string
           org_id: string
           platform_fee_cents: number
@@ -2617,6 +2624,7 @@ export type Database = {
           buyer_note?: string | null
           buyer_total_cents?: number
           created_at?: string
+          fulfillment?: string
           id?: string
           org_id: string
           platform_fee_cents?: number
@@ -2639,6 +2647,7 @@ export type Database = {
           buyer_note?: string | null
           buyer_total_cents?: number
           created_at?: string
+          fulfillment?: string
           id?: string
           org_id?: string
           platform_fee_cents?: number
