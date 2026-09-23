@@ -161,7 +161,9 @@ const footer = { color: '#b3b3b3', fontSize: '12px', textAlign: 'center' as cons
 export const template = {
   component: TicketConfirmationEmail,
   subject: (data: Record<string, any>) =>
-    `Your ticket${(data['quantity'] ?? 1) > 1 ? 's' : ''} for ${data['eventTitle'] || 'your event'}`,
+    data['ticketName']
+      ? `You have received a ticket from Planet Baltimore: ${data['ticketName']}`
+      : `Your ticket${(data['quantity'] ?? 1) > 1 ? 's' : ''} for ${data['eventTitle'] || 'your event'}`,
   displayName: 'Ticket Confirmation',
   previewData: {
     buyerName: 'Terell',

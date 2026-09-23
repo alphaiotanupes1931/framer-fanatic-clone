@@ -132,6 +132,8 @@ export async function sendTicketConfirmation(args: {
   recipient?: { email: string; name: string }
   eventId: string
   ticketIds: string[]
+  /** Set for manually issued tickets; switches the subject line. */
+  ticketName?: string
   idempotencyKey: string
 }): Promise<{ sent: boolean; reason?: string }> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
@@ -185,6 +187,7 @@ export async function sendTicketConfirmation(args: {
       ticketUrl: `${SITE}/t/${ticketIds[0] ?? ''}`,
       pdfUrl,
       ticketCodes: ticketIds.map((id) => id.slice(0, 8).toUpperCase()),
+      ticketName: args.ticketName,
     },
   })
 }
