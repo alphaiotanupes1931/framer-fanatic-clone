@@ -311,16 +311,18 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
               if (isForbidden(error)) {
                 await moveToDlq(supabase, queue, msg, errorMsg.slice(0, 1000))
                 if (errorMsg.includes('recipient_suppressed') && typeof payload.to === 'string') {
-                  await supabase
+                  const { error: suppressErr } = await supabase
                     .from('suppressed_emails')
                     .upsert(
                       {
                         email: payload.to.toLowerCase(),
-                        reason: 'provider_suppressed',
-                        metadata: { source: 'queue_worker', template: payload.label ?? queue },
+                        // Table only allows unsubscribe/bounce/complaint.
+                        reason: 'bounce',
+                        metadata: { source: 'queue_worker', provider_reason: 'recipient_suppressed', template: payload.label ?? queue },
                       },
                       { onConflict: 'email', ignoreDuplicates: true }
                     )
+                  if (suppressErr) console.error('Failed to record suppressed recipient', suppressErr)
                 }
                 if (i < messages.length - 1) {
                   await new Promise((r) => setTimeout(r, sendDelayMs))
