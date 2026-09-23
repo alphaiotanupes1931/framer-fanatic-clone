@@ -103,7 +103,7 @@ export function StoreTab({
   };
 
   const buy = (p: Product) => {
-    if (p.requires_shipping !== false && p.pickup_address?.trim()) setChoosing(p);
+    if (p.requires_shipping !== false) setChoosing(p);
     else void startCheckout(p, "ship");
   };
 
@@ -204,7 +204,7 @@ export function StoreTab({
             </button>
             <button onClick={() => startCheckout(choosing, "pickup")} className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left hover:bg-accent">
               <MapPin className="mt-0.5 h-5 w-5 text-primary" />
-              <span><span className="block text-sm font-semibold text-foreground">Pick up</span><span className="text-xs text-muted-foreground">{choosing.pickup_address}</span></span>
+              <span><span className="block text-sm font-semibold text-foreground">Pick up</span><span className="text-xs text-muted-foreground">{choosing.pickup_address?.trim() || "Arrange pickup with the seller. No address needed at checkout."}</span></span>
             </button>
           </div>
         </div>

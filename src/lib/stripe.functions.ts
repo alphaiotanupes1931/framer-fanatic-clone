@@ -596,7 +596,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
     const net = product.price_cents * data.quantity;
     const breakdown = priceBreakdown(net);
 
-    const pickup = data.fulfillment === "pickup" && !!product.pickup_address?.trim();
+    const pickup = data.fulfillment === "pickup";
     const needsAddress = product.requires_shipping !== false && !pickup;
     let contact = product.contact_email?.trim() || "";
     if (!contact) {
@@ -605,7 +605,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
     }
     // Shown on the Stripe receipt email (payment description line).
     const receiptLine = [
-      pickup ? `PICKUP ADDRESS: ${product.pickup_address!.trim()}.` : null,
+      pickup ? (product.pickup_address?.trim() ? `PICKUP ADDRESS: ${product.pickup_address.trim()}.` : "LOCAL PICKUP: the seller will contact you to arrange pickup.") : null,
       contact ? `If you have any issues or questions, contact ${contact}.` : null,
     ].filter(Boolean).join(" ").slice(0, 900);
 
@@ -616,7 +616,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
       ...(!needsAddress
-        ? pickup
+        ? pickup && product.pickup_address?.trim()
           ? { custom_text: { submit: { message: `Pickup at: ${product.pickup_address!.trim()}`.slice(0, 1000) } } }
           : {}
         : {
