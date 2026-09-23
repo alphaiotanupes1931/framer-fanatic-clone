@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Trash2, Pencil, ShoppingBag, X, Package } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, ShoppingBag, X, Package, Truck, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { ImageUpload } from "@/components/shared/image-upload";
@@ -18,6 +18,8 @@ type Product = {
   is_active: boolean;
   sort_order: number;
   requires_shipping: boolean | null;
+  pickup_address: string | null;
+  contact_email: string | null;
 };
 
 type Order = {
@@ -32,6 +34,7 @@ type Order = {
   ship_address: Record<string, string | null> | null;
   buyer_note: string | null;
   product_id: string;
+  fulfillment: string | null;
 };
 
 function formatAddress(a: Record<string, string | null> | null) {
@@ -59,11 +62,12 @@ export function StoreTab({
   const [buying, setBuying] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [showOrders, setShowOrders] = useState(false);
+  const [choosing, setChoosing] = useState<Product | null>(null);
 
   const loadOrders = async () => {
     const { data } = await supabase
       .from("product_orders")
-      .select("id, created_at, quantity, status, buyer_total_cents, ship_name, ship_email, ship_phone, ship_address, buyer_note, product_id")
+      .select("id, created_at, quantity, status, buyer_total_cents, ship_name, ship_email, ship_phone, ship_address, buyer_note, product_id, fulfillment")
       .eq("org_id", orgId)
       .eq("status", "paid")
       .order("created_at", { ascending: false });
@@ -98,12 +102,18 @@ export function StoreTab({
     setItems((xs) => xs.filter((x) => x.id !== id));
   };
 
-  const buy = async (p: Product) => {
+  const buy = (p: Product) => {
+    if (p.requires_shipping !== false && p.pickup_address?.trim()) setChoosing(p);
+    else void startCheckout(p, "ship");
+  };
+
+  const startCheckout = async (p: Product, fulfillment: "ship" | "pickup") => {
+    setChoosing(null);
     setBuying(p.id);
     const pre = openExternalWindow();
     try {
       const res = await createProductCheckout({
-        data: { productId: p.id, quantity: 1, returnOrigin: window.location.origin },
+        data: { productId: p.id, quantity: 1, returnOrigin: window.location.origin, fulfillment },
       });
       if (res?.url) navigateExternal(res.url, pre);
       else closeExternalWindow(pre);
@@ -162,7 +172,9 @@ export function StoreTab({
                   </div>
                   <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
                     <div>{o.ship_name ?? "Buyer"}{o.ship_email ? ` · ${o.ship_email}` : ""}{o.ship_phone ? ` · ${o.ship_phone}` : ""}</div>
-                    {addr ? <div>{addr}</div> : <div>No shipping address on file (digital item).</div>}
+                    {o.fulfillment === "pickup" ? (
+                      <div className="font-semibold text-foreground">Local pickup</div>
+                    ) : addr ? <div>{addr}</div> : <div>No shipping address on file (digital item).</div>}
                     {o.buyer_note && <div className="italic">Note: {o.buyer_note}</div>}
                   </div>
                 </div>
@@ -176,6 +188,25 @@ export function StoreTab({
       {canManage && payoutsReady === false && (
         <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
           Payouts are not connected yet, so buyers cannot check out. Set up payouts from your dashboard to start selling.
+        </div>
+      )}
+
+      {choosing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4" onClick={() => setChoosing(null)}>
+          <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <div className="text-base font-bold text-foreground">How do you want to get it?</div>
+              <button onClick={() => setChoosing(null)} className="rounded-full p-1 text-muted-foreground hover:bg-accent"><X className="h-4 w-4" /></button>
+            </div>
+            <button onClick={() => startCheckout(choosing, "ship")} className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left hover:bg-accent">
+              <Truck className="mt-0.5 h-5 w-5 text-primary" />
+              <span><span className="block text-sm font-semibold text-foreground">Ship</span><span className="text-xs text-muted-foreground">Enter your address at checkout.</span></span>
+            </button>
+            <button onClick={() => startCheckout(choosing, "pickup")} className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left hover:bg-accent">
+              <MapPin className="mt-0.5 h-5 w-5 text-primary" />
+              <span><span className="block text-sm font-semibold text-foreground">Pick up</span><span className="text-xs text-muted-foreground">{choosing.pickup_address}</span></span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -270,6 +301,8 @@ function ProductForm({
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
   const [active, setActive] = useState(initial?.is_active ?? true);
   const [needsShipping, setNeedsShipping] = useState(initial?.requires_shipping ?? true);
+  const [pickupAddress, setPickupAddress] = useState(initial?.pickup_address ?? "");
+  const [contactEmail, setContactEmail] = useState(initial?.contact_email ?? "");
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -286,6 +319,8 @@ function ProductForm({
       inventory: inventory.trim() === "" ? null : Math.max(0, parseInt(inventory, 10) || 0),
       is_active: active,
       requires_shipping: needsShipping,
+      pickup_address: pickupAddress.trim() || null,
+      contact_email: contactEmail.trim() || null,
     };
     const { error } = initial
       ? await supabase.from("organization_products").update(payload).eq("id", initial.id)
@@ -318,6 +353,10 @@ function ProductForm({
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
         <input type="checkbox" checked={needsShipping} onChange={(e) => setNeedsShipping(e.target.checked)} /> Physical item (ask the buyer for a shipping address)
       </label>
+      {needsShipping && (
+        <input className={inputCls} placeholder="Pickup address (optional, lets buyers choose pick up)" value={pickupAddress} onChange={(e) => setPickupAddress(e.target.value)} />
+      )}
+      <input className={inputCls} type="email" placeholder="Contact email for buyer questions (optional)" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
       <p className="text-[11px] text-muted-foreground">
         Buyers pay the platform fee and card processing on top, so you receive the price you set.
       </p>

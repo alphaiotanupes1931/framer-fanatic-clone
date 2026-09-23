@@ -1,0 +1,2 @@
+ALTER TABLE public.organization_products ADD COLUMN IF NOT EXISTS pickup_address text, ADD COLUMN IF NOT EXISTS contact_email text;
+ALTER TABLE public.product_orders ADD COLUMN IF NOT EXISTS fulfillment text NOT NULL DEFAULT 'ship';
