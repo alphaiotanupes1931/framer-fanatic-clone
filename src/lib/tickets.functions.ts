@@ -58,3 +58,82 @@ export const emailMyCancellation = createServerFn({ method: "POST" })
       idempotencyKey: `ticket-cancel-${ticket.id}`,
     });
   });
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function assertHost(supabase: any, userId: string, eventId: string) {
+  const { data: ev } = await supabase.from("events").select("id, user_id").eq("id", eventId).maybeSingle();
+  if (!ev) throw new Error("Event not found");
+  if (ev.user_id !== userId) {
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Only the event organizer can add attendees");
+  }
+  return ev as { id: string; user_id: string };
+}
+
+/**
+ * Organizer adds an attendee by hand (cash at the door, special guest).
+ * Creates a $0 comp ticket that counts toward attendance and check-in.
+ */
+export const addCompAttendee = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { eventId: string; name: string; email: string }) => {
+    if (!input?.eventId) throw new Error("eventId is required");
+    if (!input.name?.trim()) throw new Error("Name is required");
+    if (!EMAIL_RE.test(input.email?.trim() ?? "")) throw new Error("Enter a valid email");
+    return { eventId: input.eventId, name: input.name.trim().slice(0, 120), email: input.email.trim().toLowerCase().slice(0, 254) };
+  })
+  .handler(async ({ data, context }) => {
+    const ev = await assertHost(context.supabase, context.userId, data.eventId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Link to an existing account when the email matches one, so it shows in their tickets.
+    const { data: prof } = await supabaseAdmin.from("profiles").select("id").ilike("email", data.email).limit(1).maybeSingle();
+    const { data: row, error } = await supabaseAdmin
+      .from("tickets")
+      .insert({
+        event_id: data.eventId,
+        buyer_id: prof?.id ?? null,
+        artist_id: ev.user_id,
+        buyer_total_cents: 0,
+        artist_net_cents: 0,
+        platform_tax_cents: 0,
+        status: "paid",
+        is_comp: true,
+        guest_name: data.name,
+        guest_email: data.email,
+        ticket_type_name: "Comp",
+      })
+      .select("id")
+      .single();
+    if (error || !row) throw new Error(error?.message || "Could not add attendee");
+    return { id: row.id as string };
+  });
+
+/** Emails a comp ticket (with QR/PDF link) to the manually added attendee. */
+export const sendCompTicket = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { ticketId: string }) => {
+    if (!input?.ticketId) throw new Error("ticketId is required");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: t } = await supabaseAdmin
+      .from("tickets")
+      .select("id, event_id, buyer_id, guest_name, guest_email, is_comp")
+      .eq("id", data.ticketId)
+      .maybeSingle();
+    if (!t || !t.guest_email) throw new Error("Ticket not found");
+    await assertHost(context.supabase, context.userId, t.event_id);
+    const { sendTicketConfirmation } = await import("@/lib/ticket-email.server");
+    const res = await sendTicketConfirmation({
+      buyerId: t.buyer_id,
+      recipient: { email: t.guest_email, name: t.guest_name || "Guest" },
+      eventId: t.event_id,
+      ticketIds: [t.id],
+      idempotencyKey: `comp-ticket-${t.id}-${Date.now()}`,
+    });
+    if (!res.sent) throw new Error("Could not send the ticket email");
+    await supabaseAdmin.from("tickets").update({ ticket_sent_at: new Date().toISOString() }).eq("id", t.id);
+    return { sent: true };
+  });

@@ -17,7 +17,8 @@ import { EventEditForm } from "@/components/organizer/event-edit-form";
 import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
 import { deleteEventDraft, listEventDrafts, type EventDraft } from "@/lib/event-drafts";
-import { FileText, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
+import { FileText, CreditCard, CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
+import { addCompAttendee, sendCompTicket } from "@/lib/tickets.functions";
 
 /** Stripe payout connection panel shown inside Organizer Studio. */
 function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
@@ -259,6 +260,7 @@ type MyEvent = {
 type Ticket = {
   id: string; status: string; buyer_total_cents: number; artist_net_cents: number;
   event_id: string; buyer_id: string; created_at: string;
+  is_comp?: boolean; guest_name?: string | null; guest_email?: string | null; ticket_sent_at?: string | null;
 };
 
 function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
@@ -532,14 +534,21 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
       .then(({ count }) => setPromoterCount(count ?? 0));
   }, [evt.id]);
 
+  const [reloadKey, setReloadKey] = useState(0);
   useEffect(() => {
     supabase.from("tickets")
-      .select("id,status,buyer_total_cents,artist_net_cents,event_id,buyer_id,created_at")
+      .select("id,status,buyer_total_cents,artist_net_cents,event_id,buyer_id,created_at,is_comp,guest_name,guest_email,ticket_sent_at")
       .eq("event_id", evt.id)
       .order("created_at", { ascending: false })
       .then(async ({ data }) => {
-        const rows = (data as Ticket[] | null) ?? [];
+        // Manually added guests may have no account; key them by ticket so they still show.
+        const rows = ((data as Ticket[] | null) ?? []).map((r) =>
+          r.guest_name || r.guest_email ? { ...r, buyer_id: r.buyer_id ?? `guest:${r.id}` } : r,
+        );
         setTickets(rows);
+        const guestMap: Record<string, { name: string | null; email: string | null; avatar_url: string | null }> = {};
+        for (const r of rows) if (r.guest_name || r.guest_email) guestMap[r.buyer_id] = { name: r.guest_name ?? null, email: r.guest_email ?? null, avatar_url: null };
+        setBuyers(guestMap);
         const ids = Array.from(new Set(rows.map((r) => r.buyer_id)));
         if (ids.length) {
           const { data: profs } = await supabase.rpc("event_buyer_contacts", { _event_id: evt.id });
@@ -549,10 +558,32 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
             email: (p as { email?: string | null }).email ?? null,
             avatar_url: (p as { avatar_url?: string | null }).avatar_url ?? null,
           };
-          setBuyers(map);
+          setBuyers({ ...map, ...guestMap });
         }
       });
-  }, [evt.id]);
+  }, [evt.id, reloadKey]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [guest, setGuest] = useState({ name: "", email: "" });
+  const [adding, setAdding] = useState(false);
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const addFn = useServerFn(addCompAttendee);
+  const sendFn = useServerFn(sendCompTicket);
+  const addGuest = async () => {
+    if (!guest.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guest.email.trim())) { toast.error("Enter a name and a valid email"); return; }
+    setAdding(true);
+    try {
+      await addFn({ data: { eventId: evt.id, name: guest.name, email: guest.email } });
+      toast.success(`${guest.name.trim()} added as a comp ticket`);
+      setGuest({ name: "", email: "" }); setShowAdd(false); setReloadKey((k) => k + 1);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Could not add attendee"); }
+    setAdding(false);
+  };
+  const sendTicket = async (id: string) => {
+    setSendingId(id);
+    try { await sendFn({ data: { ticketId: id } }); toast.success("Ticket sent"); setReloadKey((k) => k + 1); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Could not send ticket"); }
+    setSendingId(null);
+  };
 
   const paid = useMemo(() => (tickets ?? []).filter((t) => t.status === "paid"), [tickets]);
   const revenue = paid.reduce((s, t) => s + t.buyer_total_cents, 0);
@@ -631,7 +662,22 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
             </select>
             <button onClick={() => exportCsv("orders")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> Orders CSV</button>
             <button onClick={() => exportCsv("rsvps")} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"><Download className="h-4 w-4" /> RSVPs CSV</button>
+            <button onClick={() => setShowAdd((v) => !v)} className="inline-flex items-center gap-1.5 rounded-lg bg-[#d4580a] px-3 py-2 text-sm font-semibold text-white hover:opacity-90"><UserPlus className="h-4 w-4" /> Add Attendee Manually</button>
           </div>
+          {showAdd && (
+            <div className="rounded-xl border border-neutral-200 bg-white p-4">
+              <div className="text-sm font-semibold text-neutral-900">Add Attendee Manually</div>
+              <div className="mt-0.5 text-xs text-neutral-500">For cash payments or special guests. This is added as a free comp ticket.</div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <input aria-label="Attendee name" value={guest.name} onChange={(e) => setGuest({ ...guest, name: e.target.value })} placeholder="Full name" className="rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+                <input aria-label="Attendee email" type="email" value={guest.email} onChange={(e) => setGuest({ ...guest, email: e.target.value })} placeholder="Email" className="rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+              </div>
+              <div className="mt-3 flex gap-2">
+                <button onClick={addGuest} disabled={adding} className="rounded-lg bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{adding ? "Adding…" : "Add Attendee"}</button>
+                <button onClick={() => setShowAdd(false)} className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700">Cancel</button>
+              </div>
+            </div>
+          )}
           <div className="text-xs text-neutral-500">{filteredList.length} of {paid.length} orders</div>
           {tickets === null ? (
             <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center text-sm text-neutral-500">Loading…</div>
@@ -641,18 +687,25 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
             <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
               <table className="w-full text-sm">
                 <thead className="bg-neutral-50 text-left text-xs uppercase text-neutral-500">
-                  <tr><th className="px-4 py-3">Attendee</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Order</th><th className="px-4 py-3 text-right">Total</th><th className="px-4 py-3">Date</th></tr>
+                  <tr><th className="px-4 py-3">Attendee</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Order</th><th className="px-4 py-3 text-right">Total</th><th className="px-4 py-3">Date</th><th className="px-4 py-3"></th></tr>
                 </thead>
                 <tbody>
                   {filteredList.map((t) => {
                     const b = buyers[t.buyer_id];
                     return (
                       <tr key={t.id} className="border-t border-neutral-100">
-                        <td className="px-4 py-3 font-medium text-neutral-900">{b?.name ?? "Buyer"}</td>
+                        <td className="px-4 py-3 font-medium text-neutral-900">{b?.name ?? "Buyer"}{t.is_comp && <span className="ml-2 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-orange-700">Comp</span>}</td>
                         <td className="px-4 py-3 text-neutral-600">{b?.email ?? ""}</td>
                         <td className="px-4 py-3 font-mono text-xs text-neutral-500">{t.id.slice(0, 8)}</td>
                         <td className="px-4 py-3 text-right text-neutral-700">{fmt(t.buyer_total_cents)}</td>
                         <td className="px-4 py-3 text-neutral-500">{new Date(t.created_at).toLocaleDateString()}</td>
+                        <td className="px-4 py-3 text-right">
+                          {t.is_comp && t.guest_email && (
+                            <button onClick={() => sendTicket(t.id)} disabled={sendingId === t.id} className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-neutral-200 px-2.5 py-1.5 text-xs font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a] disabled:opacity-60">
+                              <Send className="h-3.5 w-3.5" /> {sendingId === t.id ? "Sending…" : t.ticket_sent_at ? "Resend Ticket" : "Send Ticket"}
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
@@ -677,7 +730,7 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
       )}
 
       {tab === "message" && (
-        <MessageTab eventId={evt.id} evtTitle={evt.title} recipients={paid.map((t) => t.buyer_id).filter(Boolean)} />
+        <MessageTab eventId={evt.id} evtTitle={evt.title} recipients={paid.map((t) => t.buyer_id).filter((id) => id && !id.startsWith("guest:"))} />
       )}
 
       {tab === "promoters" && (

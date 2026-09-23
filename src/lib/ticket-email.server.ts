@@ -127,18 +127,20 @@ async function expandOrderTickets(
  * Safe to call more than once: the idempotency key dedupes queued sends.
  */
 export async function sendTicketConfirmation(args: {
-  buyerId: string
+  buyerId: string | null
+  /** Overrides the account lookup, used for manually added (comp) guests. */
+  recipient?: { email: string; name: string }
   eventId: string
   ticketIds: string[]
   idempotencyKey: string
 }): Promise<{ sent: boolean; reason?: string }> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
-  const { data: buyer } = await supabaseAdmin
-    .from('profiles')
-    .select('email, display_name, username')
-    .eq('id', args.buyerId)
-    .maybeSingle()
+  const buyer = args.recipient
+    ? { email: args.recipient.email, display_name: args.recipient.name, username: null as string | null }
+    : args.buyerId
+      ? (await supabaseAdmin.from('profiles').select('email, display_name, username').eq('id', args.buyerId).maybeSingle()).data
+      : null
   if (!buyer?.email) return { sent: false, reason: 'no_buyer_email' }
 
   const { data: event } = await supabaseAdmin

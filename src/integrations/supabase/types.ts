@@ -3266,13 +3266,16 @@ export type Database = {
         Row: {
           artist_id: string
           artist_net_cents: number
-          buyer_id: string
+          buyer_id: string | null
           buyer_total_cents: number
           checked_in_at: string | null
           checked_in_by: string | null
           created_at: string
           event_id: string
+          guest_email: string | null
+          guest_name: string | null
           id: string
+          is_comp: boolean
           platform_tax_cents: number
           refunded_at: string | null
           refunded_cents: number | null
@@ -3280,6 +3283,7 @@ export type Database = {
           stripe_checkout_session_id: string | null
           stripe_fee_cents: number
           stripe_payment_intent_id: string | null
+          ticket_sent_at: string | null
           ticket_type_id: string | null
           ticket_type_name: string | null
           updated_at: string
@@ -3287,13 +3291,16 @@ export type Database = {
         Insert: {
           artist_id: string
           artist_net_cents: number
-          buyer_id: string
+          buyer_id?: string | null
           buyer_total_cents: number
           checked_in_at?: string | null
           checked_in_by?: string | null
           created_at?: string
           event_id: string
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
+          is_comp?: boolean
           platform_tax_cents: number
           refunded_at?: string | null
           refunded_cents?: number | null
@@ -3301,6 +3308,7 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number
           stripe_payment_intent_id?: string | null
+          ticket_sent_at?: string | null
           ticket_type_id?: string | null
           ticket_type_name?: string | null
           updated_at?: string
@@ -3308,13 +3316,16 @@ export type Database = {
         Update: {
           artist_id?: string
           artist_net_cents?: number
-          buyer_id?: string
+          buyer_id?: string | null
           buyer_total_cents?: number
           checked_in_at?: string | null
           checked_in_by?: string | null
           created_at?: string
           event_id?: string
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
+          is_comp?: boolean
           platform_tax_cents?: number
           refunded_at?: string | null
           refunded_cents?: number | null
@@ -3322,6 +3333,7 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           stripe_fee_cents?: number
           stripe_payment_intent_id?: string | null
+          ticket_sent_at?: string | null
           ticket_type_id?: string | null
           ticket_type_name?: string | null
           updated_at?: string

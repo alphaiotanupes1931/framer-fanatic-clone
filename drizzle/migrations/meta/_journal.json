@@ -239,6 +239,13 @@
       "when": 1789999265263,
       "tag": "0033_first_friend_ainsley",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790183376557,
+      "tag": "0034_comp_tickets_manual_attendees",
+      "breakpoints": true
     }
   ]
 }
