@@ -12,6 +12,7 @@ interface TicketConfirmationProps {
   imageUrl?: string
   quantity?: number
   totalPaid?: string
+  ticketName?: string
   ticketUrl?: string
   pdfUrl?: string
   ticketCodes?: string[]
@@ -25,6 +26,7 @@ export const TicketConfirmationEmail = ({
   imageUrl = '',
   quantity = 1,
   totalPaid = '',
+  ticketName = '',
   ticketUrl = 'https://www.planetbaltimore.com/tickets',
   pdfUrl = '',
   ticketCodes = [],
@@ -71,8 +73,8 @@ export const TicketConfirmationEmail = ({
             </Row>
             <Row>
               <Column style={cell}>
-                <Text style={cellLabel}>Total</Text>
-                <Text style={cellValue}>{totalPaid || 'Free'}</Text>
+                <Text style={cellLabel}>{ticketName ? 'Admission' : 'Total'}</Text>
+                <Text style={cellValue}>{ticketName || totalPaid || 'Free'}</Text>
               </Column>
               <Column style={cell}>
                 <Text style={cellLabel}>Status</Text>
@@ -162,7 +164,7 @@ export const template = {
   component: TicketConfirmationEmail,
   subject: (data: Record<string, any>) =>
     data['ticketName']
-      ? `You have received a ticket from Planet Baltimore: ${data['ticketName']}`
+      ? `You have received a ticket from Planet Baltimore: ${data['eventTitle'] || 'your event'}`
       : `Your ticket${(data['quantity'] ?? 1) > 1 ? 's' : ''} for ${data['eventTitle'] || 'your event'}`,
   displayName: 'Ticket Confirmation',
   previewData: {
