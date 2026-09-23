@@ -107,7 +107,7 @@ function LeaderboardPage() {
       <div className="h-6" />
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-neutral-200 bg-white px-6 py-4 text-sm text-neutral-600">
-          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><FileText className="h-4 w-4" /> <b>5 pts</b> / post</span>
+          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><FileText className="h-4 w-4" /> <b>5 pts</b> / post or story</span>
           <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><MessageCircle className="h-4 w-4" /> <b>2 pts</b> / comment</span>
           <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><Heart className="h-4 w-4" /> <b>1 pt</b> / like received</span>
           <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><Gift className="h-4 w-4" /> <b>5 pts</b> / referral</span>
