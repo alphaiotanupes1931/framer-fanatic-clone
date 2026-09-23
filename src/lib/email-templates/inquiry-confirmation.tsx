@@ -30,6 +30,7 @@ export const InquiryConfirmationEmail = ({
           {senderName ? `Hi ${senderName}, thanks` : 'Thanks'} for reaching out. {pageName} has your message and
           will reply to this email address directly.
         </Text>
+        <Text style={text}>Inquiry type: <strong>{intent}</strong></Text>
         <Text style={text}>Here is a copy of what you sent:</Text>
         <Text style={quote}>{message}</Text>
         <Hr style={hr} />

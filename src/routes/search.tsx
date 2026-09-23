@@ -20,7 +20,7 @@ type Person = { id: string; display_name: string | null; username: string | null
 type Org = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
 type Ev = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
 type Business = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
-type PostRow = { id: string; content: string; created_at: string; media_urls: string[] | null };
+type PostRow = { id: string; content: string; created_at: string; media_urls: string[] | null; image_url?: string | null; video_url?: string | null; link_title?: string | null; link_image?: string | null; repost_of_event_id?: string | null; repost_of_post_id?: string | null; preview_text?: string | null; preview_image?: string | null; preview_video?: string | null };
 type StoryRow = { id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string };
 type Hood = { id: string; name: string; region: string };
 
@@ -78,8 +78,8 @@ function SearchPage() {
           ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).ilike("name", like).limit(24)
           : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).order("created_at", { ascending: false }).limit(24),
         hasQ
-          ? supabase.from("posts").select("id,content,created_at,media_urls").eq("is_deleted", false).eq("visibility", "public").ilike("content", like).order("created_at", { ascending: false }).limit(24)
-          : supabase.from("posts").select("id,content,created_at,media_urls").eq("is_deleted", false).eq("visibility", "public").order("created_at", { ascending: false }).limit(12),
+          ? supabase.from("posts").select("id,content,created_at,media_urls,image_url,video_url,link_title,link_image,repost_of_event_id,repost_of_post_id").eq("is_deleted", false).eq("visibility", "public").ilike("content", like).order("created_at", { ascending: false }).limit(24)
+          : supabase.from("posts").select("id,content,created_at,media_urls,image_url,video_url,link_title,link_image,repost_of_event_id,repost_of_post_id").eq("is_deleted", false).eq("visibility", "public").order("created_at", { ascending: false }).limit(12),
         hasQ
           ? supabase.from("stories").select("id,title,excerpt,cover_url,created_at").eq("status", "published").ilike("title", like).order("created_at", { ascending: false }).limit(24)
           : supabase.from("stories").select("id,title,excerpt,cover_url,created_at").eq("status", "published").order("created_at", { ascending: false }).limit(12),
@@ -92,7 +92,25 @@ function SearchPage() {
       setOrgs((orgRes.data ?? []) as Org[]);
       setEvents((evRes.data ?? []) as Ev[]);
       setBusinesses((bizRes.data ?? []) as Business[]);
-      setPosts((postRes.data ?? []) as PostRow[]);
+      const rawPosts = (postRes.data ?? []) as PostRow[];
+      const evIds = rawPosts.map((p) => p.repost_of_event_id).filter(Boolean) as string[];
+      const rpIds = rawPosts.map((p) => p.repost_of_post_id).filter(Boolean) as string[];
+      const [evMap, rpMap] = await Promise.all([
+        evIds.length ? supabase.from("events").select("id,title,image_url").in("id", evIds).then((r) => new Map((r.data ?? []).map((e) => [e.id, e]))) : new Map(),
+        rpIds.length ? supabase.from("posts").select("id,content,media_urls,image_url,video_url").in("id", rpIds).then((r) => new Map((r.data ?? []).map((e) => [e.id, e]))) : new Map(),
+      ]);
+      if (cancelled) return;
+      const isVideo = (u?: string | null) => !!u && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(u);
+      setPosts(rawPosts.map((p) => {
+        const ev = p.repost_of_event_id ? evMap.get(p.repost_of_event_id) : null;
+        const rp = p.repost_of_post_id ? rpMap.get(p.repost_of_post_id) : null;
+        const media = [...(p.media_urls ?? []), p.image_url, p.link_image, ...((rp?.media_urls as string[] | undefined) ?? []), rp?.image_url, ev?.image_url].filter(Boolean) as string[];
+        const img = media.find((u) => !isVideo(u)) ?? null;
+        const vid = img ? null : (media.find(isVideo) ?? p.video_url ?? rp?.video_url ?? null);
+        const own = stripHtml(p.content ?? "").trim();
+        const text = own || p.link_title || (ev ? `Shared event: ${ev.title}` : "") || stripHtml(rp?.content ?? "").trim() || (vid ? "Video post" : "Post");
+        return { ...p, preview_text: text, preview_image: img, preview_video: vid };
+      }));
       setStories((storyRes.data ?? []) as StoryRow[]);
       setHoods((hoodRes.data ?? []) as Hood[]);
       setLoading(false);
@@ -225,12 +243,14 @@ function SearchPage() {
                   {posts.slice(0, tab === "All" ? 6 : 24).map((p) => (
                     <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted">
-                        {p.media_urls && p.media_urls[0]
-                          ? <Img src={p.media_urls[0]} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-                          : <FileText className="h-4 w-4 text-muted-foreground" />}
+                        {p.preview_image
+                          ? <Img src={p.preview_image} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                          : p.preview_video
+                            ? <video src={`${p.preview_video.split("#")[0]}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+                            : <FileText className="h-4 w-4 text-muted-foreground" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="line-clamp-2 text-sm font-medium text-foreground">{stripHtml(p.content)}</div>
+                        <div className="line-clamp-2 text-sm font-medium text-foreground">{p.preview_text}</div>
                         <div className="mt-0.5 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
                       </div>
                     </Link>

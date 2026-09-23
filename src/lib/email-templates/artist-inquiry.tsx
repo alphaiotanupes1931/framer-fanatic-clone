@@ -28,6 +28,7 @@ export const ArtistInquiryEmail = ({
       <Container style={container}>
         <Text style={badge}>{intent}</Text>
         <Heading style={h1}>New message about {pageName}</Heading>
+        <Text style={text}>Inquiry type: <strong>{intent}</strong></Text>
         <Text style={text}><strong>{senderName}</strong>{senderEmail ? ` (${senderEmail})` : ''} wrote:</Text>
         <Text style={quote}>{message}</Text>
         <Hr style={hr} />
