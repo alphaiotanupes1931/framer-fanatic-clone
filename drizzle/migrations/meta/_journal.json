@@ -253,6 +253,13 @@
       "when": 1790185982039,
       "tag": "0035_product_pickup_option",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790186223988,
+      "tag": "0036_post_media_read_products_exhibitions",
+      "breakpoints": true
     }
   ]
 }
