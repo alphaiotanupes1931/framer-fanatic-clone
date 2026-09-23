@@ -127,12 +127,11 @@ function SearchPage() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+              className={`inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
                 tab === t ? "border-orange bg-orange text-white" : "border-border bg-card text-foreground hover:bg-accent"
               }`}
             >
               {t}
-              <span className={`text-xs ${tab === t ? "opacity-80" : "text-muted-foreground"}`}>{totals[t]}</span>
             </button>
           ))}
         </div>
