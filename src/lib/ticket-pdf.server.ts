@@ -1,5 +1,8 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib'
-import QRCode from 'qrcode'
+// Core encoder only: the package entry pulls Node stream renderers that crash in the Worker.
+// @ts-expect-error no types for the deep import
+import QRCodeCore from 'qrcode/lib/core/qrcode.js'
+const QRCode = QRCodeCore as { create: (v: string, o: { errorCorrectionLevel: string }) => { modules: { size: number; data: Uint8Array } } }
 
 /** One page per ticket, styled to match the dark stub used in the app and emails. */
 export interface TicketPdfInput {
