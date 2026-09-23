@@ -26,7 +26,7 @@ function LeaderboardPage() {
   // pulls the raw rows once and aggregates in memory, and the result is cached
   // so revisiting the tab is instant.
   const { data: cachedRows } = useCachedFetch<Row[]>(
-    auth.signedIn ? "leaderboard:top100" : "leaderboard:anon",
+    auth.signedIn ? "leaderboard:top100:v2" : "leaderboard:anon",
     async () => {
       if (!auth.signedIn) return [];
       const [{ data: profs }, { data: postRows }, { data: refRows }, { data: storyRows }] = await Promise.all([
