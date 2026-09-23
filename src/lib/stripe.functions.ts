@@ -558,6 +558,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       productId: z.string().uuid(),
       quantity: z.number().int().min(1).max(20).default(1),
       returnOrigin: z.string().url(),
+      fulfillment: z.enum(["ship", "pickup"]).default("ship"),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -569,7 +570,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
 
     const { data: product } = await supabaseAdmin
       .from("organization_products")
-      .select("id, org_id, name, description, price_cents, image_url, inventory, is_active, requires_shipping")
+      .select("id, org_id, name, description, price_cents, image_url, inventory, is_active, requires_shipping, pickup_address, contact_email")
       .eq("id", data.productId)
       .maybeSingle();
     if (!product || !product.is_active) throw new Error("This product is no longer available.");
@@ -595,14 +596,29 @@ export const createProductCheckout = createServerFn({ method: "POST" })
     const net = product.price_cents * data.quantity;
     const breakdown = priceBreakdown(net);
 
+    const pickup = data.fulfillment === "pickup" && !!product.pickup_address?.trim();
+    const needsAddress = product.requires_shipping !== false && !pickup;
+    let contact = product.contact_email?.trim() || "";
+    if (!contact) {
+      const { data: ownerUser } = await supabaseAdmin.auth.admin.getUserById(org.owner_id);
+      contact = ownerUser?.user?.email ?? "";
+    }
+    // Shown on the Stripe receipt email (payment description line).
+    const receiptLine = [
+      pickup ? `PICKUP ADDRESS: ${product.pickup_address!.trim()}.` : null,
+      contact ? `If you have any issues or questions, contact ${contact}.` : null,
+    ].filter(Boolean).join(" ").slice(0, 900);
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       success_url: `${data.returnOrigin}/o/${org.slug}?purchase=success`,
       cancel_url: `${data.returnOrigin}/o/${org.slug}?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
-      ...(product.requires_shipping === false
-        ? {}
+      ...(!needsAddress
+        ? pickup
+          ? { custom_text: { submit: { message: `Pickup at: ${product.pickup_address!.trim()}`.slice(0, 1000) } } }
+          : {}
         : {
             shipping_address_collection: { allowed_countries: ["US"] as const },
             phone_number_collection: { enabled: true },
@@ -623,10 +639,12 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
         on_behalf_of: owner.stripe_account_id,
-              transfer_data: { destination: owner.stripe_account_id },
+        transfer_data: { destination: owner.stripe_account_id },
+        ...(receiptLine ? { description: receiptLine } : {}),
       },
       metadata: {
         kind: "product",
+        fulfillment: pickup ? "pickup" : "ship",
         product_id: product.id,
         org_id: org.id,
         seller_id: org.owner_id,
@@ -648,6 +666,7 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       stripe_fee_cents: breakdown.stripeFeeCents,
       status: "pending",
       stripe_checkout_session_id: session.id,
+      fulfillment: pickup ? "pickup" : "ship",
     } as never);
 
     return { url: session.url };
