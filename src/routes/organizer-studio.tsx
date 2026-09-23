@@ -17,7 +17,8 @@ import { EventEditForm } from "@/components/organizer/event-edit-form";
 import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
 import { deleteEventDraft, listEventDrafts, type EventDraft } from "@/lib/event-drafts";
-import { FileText, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
+import { FileText, CreditCard, CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
+import { addCompAttendee, sendCompTicket } from "@/lib/tickets.functions";
 
 /** Stripe payout connection panel shown inside Organizer Studio. */
 function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
