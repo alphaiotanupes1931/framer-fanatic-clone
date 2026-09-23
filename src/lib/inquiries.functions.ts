@@ -11,6 +11,7 @@ type InquiryInput = {
   message: string
   pageName?: string
   pageUrl?: string
+  pageEmail?: string | null
 }
 
 /**
@@ -98,29 +99,52 @@ export const deliverArtistInquiry = createServerFn({ method: 'POST' })
       }
     }
 
-    // Email the page owner.
-    let emailed = false
+    // Email the artist: the page's public contact email plus the owner's account email.
     const { data: owner } = await supabaseAdmin
       .from('profiles')
       .select('email, display_name, username')
       .eq('id', data.artistId)
       .maybeSingle()
-    if (owner?.email) {
-      const result = await sendInternalEmail({
-        templateName: 'artist-inquiry',
-        recipientEmail: owner.email,
-        idempotencyKey: `inquiry-${inquiry.id}`,
-        templateData: {
-          intent,
-          senderName,
-          senderEmail,
-          message,
-          pageName: data.pageName || owner.display_name || 'your page',
-          pageUrl: data.pageUrl || SITE_URL,
-        },
-      })
-      emailed = result.sent
+    const pageName = data.pageName || owner?.display_name || 'your page'
+    const pageUrl = data.pageUrl || SITE_URL
+    const isEmail = (e?: string | null) => !!e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim())
+    const recipients = Array.from(
+      new Set(
+        [data.pageEmail, owner?.email]
+          .filter(isEmail)
+          .map((e) => (e as string).trim().toLowerCase()),
+      ),
+    )
+    let emailed = false
+    for (const [i, recipientEmail] of recipients.entries()) {
+      try {
+        const result = await sendInternalEmail({
+          templateName: 'artist-inquiry',
+          recipientEmail,
+          idempotencyKey: `inquiry-${inquiry.id}-${i}`,
+          templateData: { intent, senderName, senderEmail, message, pageName, pageUrl },
+        })
+        emailed = emailed || result.sent
+      } catch (e) {
+        console.error('[inquiry] artist email failed', e)
+      }
     }
 
-    return { delivered: messaged || emailed, messaged, emailed }
+    // Confirmation copy to the person who sent the inquiry.
+    let confirmed = false
+    if (isEmail(senderEmail)) {
+      try {
+        const result = await sendInternalEmail({
+          templateName: 'inquiry-confirmation',
+          recipientEmail: senderEmail,
+          idempotencyKey: `inquiry-confirm-${inquiry.id}`,
+          templateData: { intent, senderName, message, pageName, pageUrl },
+        })
+        confirmed = result.sent
+      } catch (e) {
+        console.error('[inquiry] confirmation email failed', e)
+      }
+    }
+
+    return { delivered: messaged || emailed, messaged, emailed, confirmed }
   })

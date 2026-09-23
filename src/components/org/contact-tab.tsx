@@ -43,6 +43,7 @@ export function ContactTab({
           senderEmail: form.sender_email.trim(),
           message: form.message.trim(),
           pageName: name,
+          pageEmail: email ?? null,
           pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
         },
       });
