@@ -260,7 +260,7 @@ type MyEvent = {
 type Ticket = {
   id: string; status: string; buyer_total_cents: number; artist_net_cents: number;
   event_id: string; buyer_id: string; created_at: string;
-  is_comp?: boolean; guest_name?: string | null; guest_email?: string | null; ticket_sent_at?: string | null;
+  is_comp?: boolean; ticket_type_name?: string | null; guest_name?: string | null; guest_email?: string | null; ticket_sent_at?: string | null;
 };
 
 function fmt(c: number) { return `$${(c / 100).toFixed(2)}`; }
@@ -537,7 +537,7 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
   const [reloadKey, setReloadKey] = useState(0);
   useEffect(() => {
     supabase.from("tickets")
-      .select("id,status,buyer_total_cents,artist_net_cents,event_id,buyer_id,created_at,is_comp,guest_name,guest_email,ticket_sent_at")
+      .select("id,status,buyer_total_cents,artist_net_cents,event_id,buyer_id,created_at,is_comp,ticket_type_name,guest_name,guest_email,ticket_sent_at")
       .eq("event_id", evt.id)
       .order("created_at", { ascending: false })
       .then(async ({ data }) => {
@@ -563,7 +563,12 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
       });
   }, [evt.id, reloadKey]);
   const [showAdd, setShowAdd] = useState(false);
-  const [guest, setGuest] = useState({ name: "", email: "" });
+  const [guest, setGuest] = useState({ name: "", email: "", typeId: "" });
+  const [compTypes, setCompTypes] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    supabase.from("ticket_types").select("id,name").eq("event_id", evt.id).order("sort_order", { ascending: true })
+      .then(({ data }) => setCompTypes((data ?? []) as { id: string; name: string }[]));
+  }, [evt.id]);
   const [adding, setAdding] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const addFn = useServerFn(addCompAttendee);
@@ -572,9 +577,9 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
     if (!guest.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guest.email.trim())) { toast.error("Enter a name and a valid email"); return; }
     setAdding(true);
     try {
-      await addFn({ data: { eventId: evt.id, name: guest.name, email: guest.email } });
+      await addFn({ data: { eventId: evt.id, name: guest.name, email: guest.email, ticketTypeId: guest.typeId || null } });
       toast.success(`${guest.name.trim()} added as a comp ticket`);
-      setGuest({ name: "", email: "" }); setShowAdd(false); setReloadKey((k) => k + 1);
+      setGuest({ name: "", email: "", typeId: "" }); setShowAdd(false); setReloadKey((k) => k + 1);
     } catch (e) { toast.error(e instanceof Error ? e.message : "Could not add attendee"); }
     setAdding(false);
   };
@@ -671,6 +676,10 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <input aria-label="Attendee name" value={guest.name} onChange={(e) => setGuest({ ...guest, name: e.target.value })} placeholder="Full name" className="rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
                 <input aria-label="Attendee email" type="email" value={guest.email} onChange={(e) => setGuest({ ...guest, email: e.target.value })} placeholder="Email" className="rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
+                <select aria-label="Ticket type" value={guest.typeId} onChange={(e) => setGuest({ ...guest, typeId: e.target.value })} className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm sm:col-span-2">
+                  <option value="">Comp (no ticket type)</option>
+                  {compTypes.map((ct) => <option key={ct.id} value={ct.id}>{ct.name}</option>)}
+                </select>
               </div>
               <div className="mt-3 flex gap-2">
                 <button onClick={addGuest} disabled={adding} className="rounded-lg bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{adding ? "Adding…" : "Add Attendee"}</button>
@@ -697,7 +706,7 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
                         <td className="px-4 py-3 font-medium text-neutral-900">{b?.name ?? "Buyer"}{t.is_comp && <span className="ml-2 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-orange-700">Comp</span>}</td>
                         <td className="px-4 py-3 text-neutral-600">{b?.email ?? ""}</td>
                         <td className="px-4 py-3 font-mono text-xs text-neutral-500">{t.id.slice(0, 8)}</td>
-                        <td className="px-4 py-3 text-right text-neutral-700">{fmt(t.buyer_total_cents)}</td>
+                        <td className="px-4 py-3 text-right text-neutral-700">{t.is_comp ? (t.ticket_type_name || "Comp") : fmt(t.buyer_total_cents)}</td>
                         <td className="px-4 py-3 text-neutral-500">{new Date(t.created_at).toLocaleDateString()}</td>
                         <td className="px-4 py-3 text-right">
                           {t.is_comp && t.guest_email && (

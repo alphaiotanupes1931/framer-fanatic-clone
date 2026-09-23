@@ -77,17 +77,23 @@ async function assertHost(supabase: any, userId: string, eventId: string) {
  */
 export const addCompAttendee = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { eventId: string; name: string; email: string }) => {
+  .inputValidator((input: { eventId: string; name: string; email: string; ticketTypeId?: string | null }) => {
     if (!input?.eventId) throw new Error("eventId is required");
     if (!input.name?.trim()) throw new Error("Name is required");
     if (!EMAIL_RE.test(input.email?.trim() ?? "")) throw new Error("Enter a valid email");
-    return { eventId: input.eventId, name: input.name.trim().slice(0, 120), email: input.email.trim().toLowerCase().slice(0, 254) };
+    return { eventId: input.eventId, name: input.name.trim().slice(0, 120), email: input.email.trim().toLowerCase().slice(0, 254), ticketTypeId: input.ticketTypeId || null };
   })
   .handler(async ({ data, context }) => {
     const ev = await assertHost(context.supabase, context.userId, data.eventId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Link to an existing account when the email matches one, so it shows in their tickets.
     const { data: prof } = await supabaseAdmin.from("profiles").select("id").ilike("email", data.email).limit(1).maybeSingle();
+    let typeName = "Comp";
+    if (data.ticketTypeId) {
+      const { data: tt } = await supabaseAdmin.from("ticket_types").select("id, name, event_id").eq("id", data.ticketTypeId).maybeSingle();
+      if (!tt || tt.event_id !== data.eventId) throw new Error("Ticket type not found for this event");
+      typeName = tt.name;
+    }
     const { data: row, error } = await supabaseAdmin
       .from("tickets")
       .insert({
@@ -101,7 +107,8 @@ export const addCompAttendee = createServerFn({ method: "POST" })
         is_comp: true,
         guest_name: data.name,
         guest_email: data.email,
-        ticket_type_name: "Comp",
+        ticket_type_id: data.ticketTypeId,
+        ticket_type_name: typeName,
       })
       .select("id")
       .single();
@@ -120,7 +127,7 @@ export const sendCompTicket = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: t } = await supabaseAdmin
       .from("tickets")
-      .select("id, event_id, buyer_id, guest_name, guest_email, is_comp")
+      .select("id, event_id, buyer_id, guest_name, guest_email, is_comp, ticket_type_name")
       .eq("id", data.ticketId)
       .maybeSingle();
     if (!t || !t.guest_email) throw new Error("Ticket not found");
@@ -131,6 +138,7 @@ export const sendCompTicket = createServerFn({ method: "POST" })
       recipient: { email: t.guest_email, name: t.guest_name || "Guest" },
       eventId: t.event_id,
       ticketIds: [t.id],
+      ticketName: t.ticket_type_name || "Comp",
       idempotencyKey: `comp-ticket-${t.id}-${Date.now()}`,
     });
     if (!res.sent) throw new Error("Could not send the ticket email");
