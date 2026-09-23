@@ -29,13 +29,15 @@ function LeaderboardPage() {
     auth.signedIn ? "leaderboard:top100" : "leaderboard:anon",
     async () => {
       if (!auth.signedIn) return [];
-      const [{ data: profs }, { data: postRows }, { data: refRows }] = await Promise.all([
+      const [{ data: profs }, { data: postRows }, { data: refRows }, { data: storyRows }] = await Promise.all([
         (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").limit(100),
         supabase.from("posts").select("user_id, likes_count, comments_count").limit(5000),
         supabase.from("profiles").select("id, referred_by").not("referred_by", "is", null).limit(5000),
+        // Published stories count exactly like posts (5 points each, plus their likes and comments).
+        supabase.from("stories").select("user_id, likes_count, comments_count").eq("status", "published").limit(5000),
       ]);
       const stats = new Map<string, { posts: number; likes: number; comments: number }>();
-      for (const r of (postRows || []) as any[]) {
+      for (const r of [...((postRows || []) as any[]), ...((storyRows || []) as any[])]) {
         const s = stats.get(r.user_id) || { posts: 0, likes: 0, comments: 0 };
         s.posts += 1;
         s.likes += r.likes_count || 0;
