@@ -29,13 +29,15 @@ function LeaderboardPage() {
     auth.signedIn ? "leaderboard:top100" : "leaderboard:anon",
     async () => {
       if (!auth.signedIn) return [];
-      const [{ data: profs }, { data: postRows }, { data: refRows }] = await Promise.all([
+      const [{ data: profs }, { data: postRows }, { data: refRows }, { data: storyRows }] = await Promise.all([
         (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").limit(100),
         supabase.from("posts").select("user_id, likes_count, comments_count").limit(5000),
         supabase.from("profiles").select("id, referred_by").not("referred_by", "is", null).limit(5000),
+        // Published stories count exactly like posts (5 points each, plus their likes and comments).
+        supabase.from("stories").select("user_id, likes_count, comments_count").eq("status", "published").limit(5000),
       ]);
       const stats = new Map<string, { posts: number; likes: number; comments: number }>();
-      for (const r of (postRows || []) as any[]) {
+      for (const r of [...((postRows || []) as any[]), ...((storyRows || []) as any[])]) {
         const s = stats.get(r.user_id) || { posts: 0, likes: 0, comments: 0 };
         s.posts += 1;
         s.likes += r.likes_count || 0;
@@ -105,7 +107,7 @@ function LeaderboardPage() {
       <div className="h-6" />
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-neutral-200 bg-white px-6 py-4 text-sm text-neutral-600">
-          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><FileText className="h-4 w-4" /> <b>5 pts</b> / post</span>
+          <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><FileText className="h-4 w-4" /> <b>5 pts</b> / post or story</span>
           <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><MessageCircle className="h-4 w-4" /> <b>2 pts</b> / comment</span>
           <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><Heart className="h-4 w-4" /> <b>1 pt</b> / like received</span>
           <span className="flex items-center gap-2 transition-colors hover:text-orange-600"><Gift className="h-4 w-4" /> <b>5 pts</b> / referral</span>
