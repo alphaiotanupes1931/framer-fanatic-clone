@@ -69,7 +69,8 @@ function LeaderboardPage() {
         }
         refPoints.set(parent, points);
       }
-      const results: Row[] = ((profs || []) as any[]).map((p) => {
+      // Ainsley's main profile is excluded from Baltimore 100 (owner request).
+      const results: Row[] = ((profs || []) as any[]).filter((p) => p.username !== "ainsleyburrows").map((p) => {
         const s = stats.get(p.id) || { posts: 0, likes: 0, comments: 0 };
         const referrals = refs.get(p.id) || 0;
         return {
