@@ -45,6 +45,11 @@ function NewEventPage() {
   const { org: orgId, kind, draft: draftId } = Route.useSearch();
   const isExhibition = kind === "exhibition";
   const [orgName, setOrgName] = useState<string | null>(null);
+  // Pages the signed-in person can post an event for. Events posted for a
+  // group or community association stay on that page only.
+  type MyOrg = { id: string; name: string; type: string };
+  const [myOrgs, setMyOrgs] = useState<MyOrg[]>([]);
+  const [postToOrg, setPostToOrg] = useState<string>(orgId ?? "");
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
