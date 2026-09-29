@@ -260,6 +260,13 @@
       "when": 1790186223988,
       "tag": "0036_post_media_read_products_exhibitions",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790725402710,
+      "tag": "0037_profile_reminder_cron_timeout",
+      "breakpoints": true
     }
   ]
 }
