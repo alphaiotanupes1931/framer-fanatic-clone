@@ -163,12 +163,25 @@ function NewEventPage() {
   }, []);
 
   useEffect(() => {
-    if (!orgId) { setOrgName(null); return; }
+    if (!postToOrg) { setOrgName(null); return; }
     (async () => {
-      const { data } = await supabase.from("organizations").select("name").eq("id", orgId).maybeSingle();
+      const { data } = await supabase.from("organizations").select("name").eq("id", postToOrg).maybeSingle();
       setOrgName((data as { name: string } | null)?.name ?? null);
     })();
-  }, [orgId]);
+  }, [postToOrg]);
+
+  // Load the pages this person owns so they can post an event for one of them.
+  useEffect(() => {
+    if (!me) return;
+    (async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("id,name,type")
+        .eq("owner_id", me.id)
+        .order("name");
+      setMyOrgs((data ?? []) as MyOrg[]);
+    })();
+  }, [me?.id]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
