@@ -377,7 +377,7 @@ function NewEventPage() {
 
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
-        organization_id: orgId ?? null,
+        organization_id: postToOrg || null,
         is_exhibition: isExhibition,
         title: form.title.trim(),
         description: form.description.trim() || null,
