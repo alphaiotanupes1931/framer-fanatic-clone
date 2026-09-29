@@ -331,7 +331,10 @@ function PublicProfilePage() {
   // organization pages live at /o/$slug and are never selected by URL search.
   const isArtistView = false;
   // Saved is private to the owner; everyone else sees the public tabs only.
-  const tabs = isSelf ? PERSON_TABS : PERSON_TABS.filter((t) => t.key !== "saved");
+  // Visitors don't own pages, so hide the Pages tab for them only.
+  const tabs = PERSON_TABS.filter((t) =>
+    (isSelf || t.key !== "saved") && (profile?.role?.toLowerCase() !== "visitor" || t.key !== "pages"),
+  );
   const canEdit = !!isSelf;
 
   return (
