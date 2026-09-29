@@ -45,6 +45,11 @@ function NewEventPage() {
   const { org: orgId, kind, draft: draftId } = Route.useSearch();
   const isExhibition = kind === "exhibition";
   const [orgName, setOrgName] = useState<string | null>(null);
+  // Pages the signed-in person can post an event for. Events posted for a
+  // group or community association stay on that page only.
+  type MyOrg = { id: string; name: string; type: string };
+  const [myOrgs, setMyOrgs] = useState<MyOrg[]>([]);
+  const [postToOrg, setPostToOrg] = useState<string>(orgId ?? "");
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -158,12 +163,25 @@ function NewEventPage() {
   }, []);
 
   useEffect(() => {
-    if (!orgId) { setOrgName(null); return; }
+    if (!postToOrg) { setOrgName(null); return; }
     (async () => {
-      const { data } = await supabase.from("organizations").select("name").eq("id", orgId).maybeSingle();
+      const { data } = await supabase.from("organizations").select("name").eq("id", postToOrg).maybeSingle();
       setOrgName((data as { name: string } | null)?.name ?? null);
     })();
-  }, [orgId]);
+  }, [postToOrg]);
+
+  // Load the pages this person owns so they can post an event for one of them.
+  useEffect(() => {
+    if (!me) return;
+    (async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("id,name,type")
+        .eq("owner_id", me.id)
+        .order("name");
+      setMyOrgs((data ?? []) as MyOrg[]);
+    })();
+  }, [me?.id]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -359,7 +377,7 @@ function NewEventPage() {
 
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
-        organization_id: orgId ?? null,
+        organization_id: postToOrg || null,
         is_exhibition: isExhibition,
         title: form.title.trim(),
         description: form.description.trim() || null,
@@ -433,6 +451,34 @@ function NewEventPage() {
         <p className="text-xs text-neutral-500 mb-4">
           Fields marked with <span className="text-[#d4580a]">*</span> are required. Everything else is optional.
         </p>
+
+        {myOrgs.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-neutral-200 bg-card p-4">
+            <label className="mb-2 block text-sm font-semibold text-neutral-900">Post this event for</label>
+            <select
+              className={inputCls}
+              value={postToOrg}
+              onChange={(e) => setPostToOrg(e.target.value)}
+            >
+              <option value="">Just me (shows on the public Events page)</option>
+              {myOrgs.map((o) => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+            {(() => {
+              const sel = myOrgs.find((o) => o.id === postToOrg);
+              if (!sel) return null;
+              const isPrivate = sel.type === "group" || sel.type === "community_assoc";
+              return (
+                <p className="mt-2 text-xs text-neutral-500">
+                  {isPrivate
+                    ? `Private to ${sel.name}. This event shows on that page only, not on the public Events page.`
+                    : `This event shows on ${sel.name} and on the public Events page.`}
+                </p>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Flyer (required) */}
         <button
