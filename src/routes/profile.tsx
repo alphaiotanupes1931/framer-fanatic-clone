@@ -115,7 +115,9 @@ function ProfilePage() {
   const isArtist = roleIsArtist && !isResident && role?.toLowerCase() === "artist";
   const categoryTabs: Array<{ label: string; kind: string }> = [];
   void category; void isArtist;
-  const TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
+  const BASE_TABS: readonly string[] = publicPreview ? PUBLIC_PROFILE_TABS : FULL_PROFILE_TABS;
+  // Visitors don't own pages, so hide the Pages tab for them only.
+  const TABS: readonly string[] = role?.toLowerCase() === "visitor" ? BASE_TABS.filter((t) => t !== "My Pages") : BASE_TABS;
   // Deep links (and the Stripe return URL) decide which tab opens first.
   const [tab, setTab] = useState<Tab>(() => {
     if (purchase === "success") return "My Tickets";
