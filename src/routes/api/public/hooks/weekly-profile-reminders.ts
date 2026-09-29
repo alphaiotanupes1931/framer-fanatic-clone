@@ -89,9 +89,14 @@ export const Route = createFileRoute("/api/public/hooks/weekly-profile-reminders
 
         let sent = 0;
         let skipped = 0;
+        const week = new Date().toISOString().slice(0, 10);
 
+        // Pick everyone who needs a reminder first, then queue them in parallel
+        // chunks. Sending one at a time was too slow and the scheduler gave up
+        // after the first email.
+        const targets: Array<() => Promise<{ sent: boolean }>> = [];
         for (const p of rows) {
-          if (sent >= BATCH) break;
+          if (targets.length >= BATCH) break;
           const email = (p.email ?? "").toLowerCase();
           if (!email) continue;
 
@@ -104,19 +109,24 @@ export const Route = createFileRoute("/api/public/hooks/weekly-profile-reminders
             .filter((s) => !s.done)
             .map((s) => ({ label: s.label, hint: s.hint }));
 
-          const week = new Date().toISOString().slice(0, 10);
-          const result = await sendInternalEmail({
-            templateName: "profile-completion",
-            recipientEmail: email,
-            idempotencyKey: `profile-completion-${p.id}-${testEmail ? Date.now() : week}`,
-            templateData: {
-              name: (p.display_name || p.username || "there").split(" ")[0],
-              percent,
-              missing,
-              profileUrl: `${SITE}/edit-profile`,
-            },
-          });
-          if (result.sent) sent++; else skipped++;
+          targets.push(() =>
+            sendInternalEmail({
+              templateName: "profile-completion",
+              recipientEmail: email,
+              idempotencyKey: `profile-completion-${p.id}-${testEmail ? Date.now() : week}`,
+              templateData: {
+                name: (p.display_name || p.username || "there").split(" ")[0],
+                percent,
+                missing,
+                profileUrl: `${SITE}/edit-profile`,
+              },
+            }).catch(() => ({ sent: false })),
+          );
+        }
+
+        for (let i = 0; i < targets.length; i += 10) {
+          const results = await Promise.all(targets.slice(i, i + 10).map((fn) => fn()));
+          for (const r of results) { if (r.sent) sent++; else skipped++; }
         }
 
         return Response.json({ scanned: rows.length, sent, skipped });
