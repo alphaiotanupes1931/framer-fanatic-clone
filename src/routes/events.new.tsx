@@ -452,6 +452,34 @@ function NewEventPage() {
           Fields marked with <span className="text-[#d4580a]">*</span> are required. Everything else is optional.
         </p>
 
+        {myOrgs.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-neutral-200 bg-card p-4">
+            <label className="mb-2 block text-sm font-semibold text-neutral-900">Post this event for</label>
+            <select
+              className={inputCls}
+              value={postToOrg}
+              onChange={(e) => setPostToOrg(e.target.value)}
+            >
+              <option value="">Just me (shows on the public Events page)</option>
+              {myOrgs.map((o) => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+            {(() => {
+              const sel = myOrgs.find((o) => o.id === postToOrg);
+              if (!sel) return null;
+              const isPrivate = sel.type === "group" || sel.type === "community_assoc";
+              return (
+                <p className="mt-2 text-xs text-neutral-500">
+                  {isPrivate
+                    ? `Private to ${sel.name}. This event shows on that page only, not on the public Events page.`
+                    : `This event shows on ${sel.name} and on the public Events page.`}
+                </p>
+              );
+            })()}
+          </div>
+        )}
+
         {/* Flyer (required) */}
         <button
           type="button"
