@@ -267,6 +267,13 @@
       "when": 1790725402710,
       "tag": "0037_profile_reminder_cron_timeout",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790727459141,
+      "tag": "0038_attendance_visibility",
+      "breakpoints": true
     }
   ]
 }
