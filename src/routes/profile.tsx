@@ -2014,7 +2014,7 @@ function AttendingTab() {
   if (upcoming.length === 0) return <div className="py-12 text-center text-muted-foreground">You aren't attending any upcoming events yet.</div>;
   const OPTIONS = [
     { v: "public", label: "Public" },
-    { v: "friends", label: "Friends only" },
+    { v: "friends", label: "Friends" },
     { v: "private", label: "Private" },
   ];
   return (
