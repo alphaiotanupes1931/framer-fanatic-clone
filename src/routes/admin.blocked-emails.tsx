@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin-shell";
 import { getAdminToken } from "@/lib/admin-gate";
 import { Loader2, MailX, Search as SearchIcon, Download } from "lucide-react";
@@ -62,12 +61,16 @@ function AdminBlockedEmailsPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("suppressed_emails")
-      .select("id, email, reason, created_at, metadata")
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    setRows((data as BlockedEmail[]) ?? []);
+    try {
+      const { adminRpc } = await import("@/lib/admin-site.functions");
+      const res = await adminRpc({
+        data: { name: "admin_list_suppressed_emails", adminToken: getAdminToken() },
+      });
+      setRows(((res?.data as BlockedEmail[] | null) ?? []));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not load blocked emails");
+      setRows([]);
+    }
     setLoading(false);
   };
 
