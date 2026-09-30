@@ -269,11 +269,8 @@ export function PersonMembershipsTab({ userId, isSelf = false }: { userId: strin
         if (o.is_public === false) continue;
         merged.set(o.id, { ...o, membership_public: publicById.get(o.id) !== false });
       }
-      for (const o of owned ?? []) {
-        if (!MEMBERSHIP_TYPES.includes(o.type)) continue;
-        if (o.is_public === false && !isSelf) continue;
-        if (!merged.has(o.id)) merged.set(o.id, { ...o, membership_public: true });
-      }
+      // Groups and associations this person created show under Pages, not here.
+      for (const o of owned ?? []) merged.delete(o.id);
       setRows(Array.from(merged.values()));
       setLoading(false);
     })();
@@ -308,7 +305,7 @@ export function PersonMembershipsTab({ userId, isSelf = false }: { userId: strin
           <div className="min-w-0 flex-1">
             <div className="truncate font-semibold">{o.name}</div>
             <div className="truncate text-xs uppercase tracking-wider text-muted-foreground">
-              {[o.type, o.subtype].filter(Boolean).join(" · ")}
+              {[o.type === "community_assoc" ? "community association" : o.type === "arts_org" ? "arts organization" : o.type, o.subtype].filter(Boolean).join(" · ")}
             </div>
           </div>
           <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
@@ -345,7 +342,7 @@ export function PersonPagesTab({ userId, isSelf }: { userId: string; isSelf: boo
         .from("organizations")
         .select("id, name, slug, type, subtype, avatar_url, is_public")
         .eq("owner_id", userId)
-        .not("type", "in", "(resident,visitor,group,community_assoc)");
+        .not("type", "in", "(resident,visitor)");
       if (!isSelf) q = q.neq("is_public", false);
       const { data } = await q;
       if (cancelled) return;
@@ -367,7 +364,7 @@ export function PersonPagesTab({ userId, isSelf }: { userId: string; isSelf: boo
           <div className="min-w-0 flex-1">
             <div className="truncate font-semibold">{o.name}</div>
             <div className="truncate text-xs uppercase tracking-wider text-muted-foreground">
-              {[o.type, o.subtype].filter(Boolean).join(" · ")}
+              {[o.type === "community_assoc" ? "community association" : o.type === "arts_org" ? "arts organization" : o.type, o.subtype].filter(Boolean).join(" · ")}
             </div>
           </div>
           <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
