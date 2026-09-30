@@ -1,20 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
-import { isAdminUnlocked, getAdminToken } from "@/lib/admin-gate";
+import { getAdminToken } from "@/lib/admin-gate";
 import { adminRpc } from "@/lib/admin-site.functions";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Search as SearchIcon, Ban, CheckCircle2, Loader2, Download, Pencil, Upload, FileText, Star, MapPin, LayoutTemplate } from "lucide-react";
+import { Shield, Ban, Loader2, Pencil, FileText, MapPin, LayoutTemplate } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Trash2, Lock } from "lucide-react";
-import { SmartAvatarImage } from "@/components/shared/smart-img";
-import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminPage,
