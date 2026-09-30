@@ -81,6 +81,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as EditStoryIdRouteImport } from './routes/edit-story.$id'
 import { Route as EditPostIdRouteImport } from './routes/edit-post.$id'
 import { Route as EditEventEventIdRouteImport } from './routes/edit-event.$eventId'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -461,6 +462,11 @@ const EditEventEventIdRoute = EditEventEventIdRouteImport.update({
   path: '/edit-event/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminTrashRoute = AdminTrashRouteImport.update({
   id: '/admin/trash',
   path: '/admin/trash',
@@ -616,6 +622,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
+  '/admin/users': typeof AdminUsersRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -708,6 +715,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
+  '/admin/users': typeof AdminUsersRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -801,6 +809,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
+  '/admin/users': typeof AdminUsersRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -895,6 +904,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
+    | '/admin/users'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -987,6 +997,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
+    | '/admin/users'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -1079,6 +1090,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
+    | '/admin/users'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -1172,6 +1184,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
   AdminTrashRoute: typeof AdminTrashRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   EditEventEventIdRoute: typeof EditEventEventIdRoute
   EditPostIdRoute: typeof EditPostIdRoute
   EditStoryIdRoute: typeof EditStoryIdRoute
@@ -1711,6 +1724,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditEventEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/trash': {
       id: '/admin/trash'
       path: '/admin/trash'
@@ -1911,6 +1931,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
   AdminTrashRoute: AdminTrashRoute,
+  AdminUsersRoute: AdminUsersRoute,
   EditEventEventIdRoute: EditEventEventIdRoute,
   EditPostIdRoute: EditPostIdRoute,
   EditStoryIdRoute: EditStoryIdRoute,

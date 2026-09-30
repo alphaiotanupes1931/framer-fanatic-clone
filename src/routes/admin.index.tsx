@@ -155,6 +155,25 @@ function AdminPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 font-semibold text-foreground">
+              <Shield className="h-4 w-4 text-orange" /> Users
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Search, verify, edit, ban, and manage every account on the platform.
+            </p>
+          </div>
+          <Link
+            to="/admin/users"
+            className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-white hover:bg-orange/90"
+          >
+            <Shield className="h-3.5 w-3.5" /> Manage users
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-2xl border border-orange/40 bg-orange/5 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 font-semibold text-foreground">
               <FileText className="h-4 w-4 text-orange" /> Landing page content
             </div>
             <p className="mt-0.5 text-xs text-muted-foreground">
