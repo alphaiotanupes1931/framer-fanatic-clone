@@ -43,10 +43,6 @@ function AdminPage() {
   const [gateChecked, setGateChecked] = useState(false);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
-  const [busy, setBusy] = useState<string | null>(null);
-  const [editing, setEditing] = useState<AdminUser | null>(null);
-  const [onlyVerified, setOnlyVerified] = useState(true);
 
   useEffect(() => {
     (async () => {
