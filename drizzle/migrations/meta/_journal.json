@@ -281,6 +281,13 @@
       "when": 1790728377229,
       "tag": "0039_admin_list_suppressed_emails",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790804054501,
+      "tag": "0040_follow_counts_and_delayed_email",
+      "breakpoints": true
     }
   ]
 }
