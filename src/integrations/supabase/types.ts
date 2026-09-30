@@ -3658,6 +3658,16 @@ export type Database = {
           status: string
         }[]
       }
+      admin_list_suppressed_emails: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json
+          reason: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
