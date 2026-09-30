@@ -73,6 +73,7 @@ const ALLOWED_ADMIN_RPCS = new Set([
   "admin_purge_content",
   "admin_list_stripe_logs",
   "admin_clear_stripe_logs",
+  "admin_list_suppressed_emails",
 ]);
 
 export const adminRpc = createServerFn({ method: "POST" })
