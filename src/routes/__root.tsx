@@ -15,6 +15,7 @@ import { OnboardingTour } from "../components/onboarding-tour";
 import { OnboardingGuard } from "../components/onboarding-guard";
 import { Toaster } from "../components/ui/sonner";
 import { QueryPersistence } from "../components/query-persistence";
+import { supabase } from "@/integrations/supabase/client";
 
 const themeScript = `
   (function() {
@@ -147,11 +148,34 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function LastSeenHeartbeat() {
+  useEffect(() => {
+    let stopped = false;
+    const ping = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!stopped && data.session) await supabase.rpc("touch_last_seen");
+      } catch {}
+    };
+    void ping();
+    const id = setInterval(ping, 4 * 60 * 1000);
+    const onVis = () => { if (document.visibilityState === "visible") void ping(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      stopped = true;
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
       <QueryPersistence />
+      <LastSeenHeartbeat />
       <OnboardingGuard />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
