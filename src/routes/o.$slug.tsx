@@ -145,7 +145,7 @@ type OrgPost = {
   source?: "posts" | "org";
 };
 
-const DEFAULT_TABS = ["About", "Events", "Opportunities", "Press", "Updates", "Comments"] as const;
+const DEFAULT_TABS = ["About", "Events", "Shop", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
   "Posts", "Mission", "Events", "Members", "Threads",
   "Polls", "Shop", "Jobs", "Rules", "Invite",
@@ -155,17 +155,17 @@ const COMMUNITY_ASSOC_TABS = [
   "Polls", "Voting", "Minutes", "Board", "Shop", "Jobs", "Rules", "By Laws", "Invite", "About", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
-  "Posts", "Menu", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+  "Posts", "Menu", "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const SERVICE_TABS = [
-  "Posts", "Services", "Stories", "Events", "Promotions", "Reviews", "About", "Comments", "Invite",
+  "Posts", "Services", "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite",
 ] as const;
 const ARTS_ORG_TABS = [
-  "Posts", "Events", "Artists", "Exhibitions", "Support", "Opportunities", "Press", "Invite", "About", "Comments",
+  "Posts", "Events", "Artists", "Exhibitions", "Shop", "Support", "Opportunities", "Press", "Invite", "About", "Comments",
 ] as const;
 // Resident / Visitor pages are lightweight personal pages.
 const PERSON_PAGE_TABS = [
-  "Posts", "Stories", "Events", "About", "Comments", "Invite",
+  "Posts", "Stories", "Events", "Shop", "About", "Comments", "Invite",
 ] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,

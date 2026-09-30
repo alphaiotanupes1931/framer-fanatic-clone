@@ -95,11 +95,15 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               const quantity = Number(session.metadata?.quantity ?? "1") || 1;
               const amountCents = Number(session.metadata?.amount_cents ?? "0") || 0;
               const details = session.customer_details ?? null;
-              const shipping =
-                (session as unknown as { shipping_details?: { name?: string | null; address?: unknown } | null })
-                  .shipping_details ?? null;
+              type Ship = { name?: string | null; address?: unknown } | null;
+              const s = session as unknown as { shipping_details?: Ship; collected_information?: { shipping_details?: Ship } | null };
+              // Newer Stripe API versions move shipping under collected_information.
+              const shipping = s.collected_information?.shipping_details ?? s.shipping_details ?? null;
               const note =
-                (session.custom_fields ?? []).find((f) => f.key === "delivery_notes")?.text?.value ?? null;
+                (session.custom_fields ?? [])
+                  .filter((f) => f.text?.value)
+                  .map((f) => (f.key === "delivery_notes" ? f.text!.value : `${f.key === "pickup_notes" ? "Pickup notes" : f.key}: ${f.text!.value}`))
+                  .join(" | ") || null;
               await supabaseAdmin
                 .from("product_orders")
                 .update({
