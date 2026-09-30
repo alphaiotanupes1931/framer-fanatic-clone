@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin-shell";
 import { getAdminToken } from "@/lib/admin-gate";
 import { Loader2, MailX, Search as SearchIcon, Download } from "lucide-react";
