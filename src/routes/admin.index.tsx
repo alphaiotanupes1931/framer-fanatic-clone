@@ -226,6 +226,24 @@ function AdminPage() {
         </div>
       </div>
 
+      <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-neutral-900">Email groups</div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Email every business, arts organization, artist, group, resident and more at once.
+            </p>
+          </div>
+          <Link
+            to="/admin/email-groups"
+            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
+          >
+            Open email groups
+          </Link>
+        </div>
+      </div>
+
+
       <LocationStats unlocked={unlocked} />
 
 
