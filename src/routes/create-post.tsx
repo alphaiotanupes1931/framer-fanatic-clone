@@ -1,6 +1,7 @@
 import { MentionText } from "@/components/shared/mention-text";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import type * as React from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MentionField } from "@/components/shared/mention-input";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
+import { ImagePlus, Camera, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
@@ -417,6 +418,7 @@ function CreatePostPage() {
                 {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
                 {mediaUrls.length ? "Add more" : "Upload images or videos"}
               </Button>
+              <CameraCapture disabled={uploading} onFiles={handleFiles} />
               <p className="text-xs text-neutral-500">Max 50MB per video. Supports only landscape videos.</p>
             </div>
           )}
@@ -466,6 +468,7 @@ function CreatePostPage() {
                 {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <VideoIcon className="mr-2 h-4 w-4" />}
                 {mediaUrls.length ? "Add more" : "Upload videos or images"}
               </Button>
+              <CameraCapture disabled={uploading} onFiles={handleFiles} />
               <p className="text-xs text-neutral-500">Max 50MB per video. Supports only landscape videos.</p>
             </div>
           )}
@@ -642,5 +645,27 @@ function CreatePostPage() {
       />
     </AppLayout>
 
+  );
+}
+
+function CameraCapture({ disabled, onFiles }: { disabled?: boolean; onFiles: (files: File[]) => Promise<void> | void }) {
+  const photoRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const pick = (ref: React.RefObject<HTMLInputElement | null>) => async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (ref.current) ref.current.value = "";
+    if (files.length) await onFiles(files);
+  };
+  return (
+    <div className="flex flex-wrap gap-2">
+      <input ref={photoRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick(photoRef)} />
+      <input ref={videoRef} type="file" accept="video/*" capture="environment" className="hidden" onChange={pick(videoRef)} />
+      <Button type="button" variant="outline" size="sm" disabled={disabled} onClick={() => photoRef.current?.click()}>
+        <Camera className="mr-2 h-4 w-4" /> Take photo
+      </Button>
+      <Button type="button" variant="outline" size="sm" disabled={disabled} onClick={() => videoRef.current?.click()}>
+        <VideoIcon className="mr-2 h-4 w-4" /> Record video
+      </Button>
+    </div>
   );
 }
