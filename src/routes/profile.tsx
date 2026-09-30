@@ -2014,7 +2014,7 @@ function AttendingTab() {
   if (upcoming.length === 0) return <div className="py-12 text-center text-muted-foreground">You aren't attending any upcoming events yet.</div>;
   const OPTIONS = [
     { v: "public", label: "Public" },
-    { v: "friends", label: "Friends only" },
+    { v: "friends", label: "Friends" },
     { v: "private", label: "Private" },
   ];
   return (
@@ -2033,15 +2033,16 @@ function AttendingTab() {
             {(r.events?.venue_name || r.events?.location) && <div className="text-xs text-muted-foreground">📍 {r.events?.venue_name ?? r.events?.location}</div>}
           </div>
         </Link>
-          <div className="px-4 pb-4">
-            <div className="mb-1 text-xs text-muted-foreground">Who can see you're going</div>
-            <div className="flex rounded-full border border-border p-0.5 text-xs">
+          <div className="px-4 pb-3 pt-1 flex items-center justify-between gap-2 border-t border-border/60">
+            <span className="text-[10px] uppercase tracking-wide text-muted-foreground/80">Visible to</span>
+            <div className="flex items-center gap-0.5 rounded-full bg-muted p-0.5 text-[10px] leading-none">
               {OPTIONS.map((o) => (
                 <button
                   key={o.v}
                   type="button"
+                  title={o.label}
                   onClick={() => setVisibility(r.event_id, o.v)}
-                  className={`flex-1 rounded-full px-2 py-1 font-semibold transition ${current === o.v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  className={`rounded-full px-2 py-1 font-medium transition ${current === o.v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                 >
                   {o.label}
                 </button>
