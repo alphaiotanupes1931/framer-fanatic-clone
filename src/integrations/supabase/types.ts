@@ -47,6 +47,32 @@ export type Database = {
         }
         Relationships: []
       }
+      attendance_visibility: {
+        Row: {
+          event_id: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          event_id: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          event_id?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_visibility_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       close_friends: {
         Row: {
           created_at: string

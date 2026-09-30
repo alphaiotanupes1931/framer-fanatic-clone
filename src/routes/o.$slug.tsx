@@ -152,7 +152,7 @@ const ASSOC_TABS = [
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
   "Posts", "Mission", "Events", "Members", "Threads",
-  "Polls", "Voting", "Minutes", "Board", "Shop", "Jobs", "Rules", "By Laws", "Invite", "About", "Dues",
+  "Polls", "Voting", "Minutes", "Board", "Jobs", "Rules", "By Laws", "Invite", "About", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
   "Posts", "Menu", "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite",

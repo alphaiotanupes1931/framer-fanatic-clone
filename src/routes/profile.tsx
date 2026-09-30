@@ -1976,29 +1976,54 @@ function AttendingTab() {
   type Row = { id: string; event_id: string; events: { title: string; starts_at: string; location: string | null; venue_name: string | null; image_url: string | null } | null };
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uid, setUid] = useState<string | null>(null);
+  const [vis, setVis] = useState<Record<string, string>>({});
   useEffect(() => {
     (async () => {
       const { data: sess } = await supabase.auth.getSession();
-      const uid = sess.session?.user.id;
-      if (!uid) { setLoading(false); return; }
-      const { data } = await supabase
-        .from("tickets")
-        .select("id,event_id,events(title,starts_at,location,venue_name,image_url)")
-        .eq("buyer_id", uid)
-        .eq("status", "paid");
+      const u = sess.session?.user.id;
+      if (!u) { setLoading(false); return; }
+      setUid(u);
+      const [{ data }, { data: v }] = await Promise.all([
+        supabase
+          .from("tickets")
+          .select("id,event_id,events(title,starts_at,location,venue_name,image_url)")
+          .eq("buyer_id", u)
+          .eq("status", "paid"),
+        supabase.from("attendance_visibility").select("event_id,visibility").eq("user_id", u),
+      ]);
       setRows((data ?? []) as Row[]);
+      setVis(Object.fromEntries((v ?? []).map((r: any) => [r.event_id, r.visibility])));
       setLoading(false);
     })();
   }, []);
+  const setVisibility = async (eventId: string, visibility: string) => {
+    if (!uid) return;
+    const prev = vis[eventId];
+    setVis((m) => ({ ...m, [eventId]: visibility }));
+    const { error } = await supabase
+      .from("attendance_visibility")
+      .upsert({ user_id: uid, event_id: eventId, visibility }, { onConflict: "user_id,event_id" });
+    if (error) setVis((m) => ({ ...m, [eventId]: prev ?? "public" }));
+  };
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
   const now = Date.now();
-  const upcoming = rows.filter((r) => r.events && new Date(r.events.starts_at).getTime() >= now)
+  const seen = new Set<string>();
+  const upcoming = rows.filter((r) => r.events && new Date(r.events.starts_at).getTime() >= now && !seen.has(r.event_id) && (seen.add(r.event_id), true))
     .sort((a, b) => +new Date(a.events!.starts_at) - +new Date(b.events!.starts_at));
   if (upcoming.length === 0) return <div className="py-12 text-center text-muted-foreground">You aren't attending any upcoming events yet.</div>;
+  const OPTIONS = [
+    { v: "public", label: "Public" },
+    { v: "friends", label: "Friends only" },
+    { v: "private", label: "Private" },
+  ];
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {upcoming.map((r) => (
-        <Link key={r.id} to="/events/$eventId" params={{ eventId: r.event_id }} className="block rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
+      {upcoming.map((r) => {
+        const current = vis[r.event_id] ?? "public";
+        return (
+        <div key={r.id} className="rounded-2xl border border-border overflow-hidden hover:shadow-md transition">
+        <Link to="/events/$eventId" params={{ eventId: r.event_id }} className="block">
           {r.events?.image_url && <SmartImage src={r.events.image_url} alt={r.events.title} bucket="event-images" className="w-full h-40 object-cover" />}
           <div className="p-4 space-y-1.5">
             <div className="text-xs text-muted-foreground">
@@ -2008,7 +2033,24 @@ function AttendingTab() {
             {(r.events?.venue_name || r.events?.location) && <div className="text-xs text-muted-foreground">📍 {r.events?.venue_name ?? r.events?.location}</div>}
           </div>
         </Link>
-      ))}
+          <div className="px-4 pb-4">
+            <div className="mb-1 text-xs text-muted-foreground">Who can see you're going</div>
+            <div className="flex rounded-full border border-border p-0.5 text-xs">
+              {OPTIONS.map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => setVisibility(r.event_id, o.v)}
+                  className={`flex-1 rounded-full px-2 py-1 font-semibold transition ${current === o.v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        );
+      })}
     </div>
   );
 }
