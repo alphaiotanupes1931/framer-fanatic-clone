@@ -23,6 +23,7 @@ export async function sendInternalEmail(args: {
   recipientEmail: string
   idempotencyKey?: string
   templateData?: Record<string, unknown>
+  delaySeconds?: number
 }): Promise<{ sent: boolean; reason?: string }> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
   const template = TEMPLATES[args.templateName]
@@ -78,9 +79,8 @@ export async function sendInternalEmail(args: {
     status: 'pending',
   })
 
-  const { error: enqueueError } = await supabaseAdmin.rpc('enqueue_email', {
-    queue_name: 'transactional_emails',
-    payload: {
+  const delay = Math.max(0, Math.floor(args.delaySeconds ?? 0))
+  const payload = {
       message_id: messageId,
       to: recipient,
       from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
@@ -93,9 +93,12 @@ export async function sendInternalEmail(args: {
       idempotency_key: args.idempotencyKey || messageId,
       // Branded footer is embedded in the HTML above; omitting the token keeps
       // the provider from appending its own third-party unsubscribe link.
-      queued_at: new Date().toISOString(),
-    },
-  })
+      // TTL counts from when a delayed message becomes sendable.
+      queued_at: new Date(Date.now() + delay * 1000).toISOString(),
+  }
+  const { error: enqueueError } = delay > 0
+    ? await supabaseAdmin.rpc('enqueue_email_delayed', { queue_name: 'transactional_emails', payload, delay_seconds: delay })
+    : await supabaseAdmin.rpc('enqueue_email', { queue_name: 'transactional_emails', payload })
   if (enqueueError) {
     await supabaseAdmin.from('email_send_log').insert({
       message_id: messageId,

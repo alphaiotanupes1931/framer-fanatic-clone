@@ -145,6 +145,14 @@ function EmailGroupsPage() {
                 {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 Send to {sendable.length} {sendable.length === 1 ? "person" : "people"}
               </button>
+              <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-xs leading-relaxed text-neutral-600">
+                <p className="font-semibold text-neutral-800">How sending works</p>
+                <p className="mt-1">
+                  Emails go out 100 per hour to stay within our email service's limit. The first 100 send right away, the next 100 an hour later, and so on.
+                  {sendable.length > 100 && ` This send will take about ${Math.ceil(sendable.length / 100)} hours to reach everyone.`}
+                  {" "}You can close this page after pressing Send. Addresses that blocked our emails are skipped.
+                </p>
+              </div>
             </section>
           </div>
 

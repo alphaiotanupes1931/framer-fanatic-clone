@@ -3748,6 +3748,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      enqueue_email_delayed: {
+        Args: { delay_seconds: number; payload: Json; queue_name: string }
+        Returns: number
+      }
       event_buyer_contacts: {
         Args: { _event_id: string }
         Returns: {
@@ -3869,6 +3873,13 @@ export type Database = {
           id: string
           role: string
           username: string
+        }[]
+      }
+      public_follow_counts: {
+        Args: { _user_id: string }
+        Returns: {
+          followers: number
+          following: number
         }[]
       }
       public_org_stats: {
