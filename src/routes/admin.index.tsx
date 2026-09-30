@@ -80,54 +80,9 @@ function AdminPage() {
     if (unlocked) void load();
   }, [unlocked]);
 
-  const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    const base = onlyVerified ? users.filter((u) => !!u.email_confirmed_at) : users;
-    if (!s) return base;
-    return base.filter((u) =>
-      [u.email, u.display_name, u.username, u.neighborhood]
-        .filter(Boolean)
-        .some((v) => (v as string).toLowerCase().includes(s)),
-    );
-  }, [users, q, onlyVerified]);
-
   const liveCount = users.filter((u) => isLive(u.last_seen_at)).length;
   const bannedCount = users.filter((u) => u.banned).length;
   const verifiedCount = users.filter((u) => !!u.email_confirmed_at).length;
-
-  const toggleFounder = async (u: AdminUser) => {
-    setBusy(u.id);
-    try {
-      await adminRpc({ data: { name: "admin_set_founder", args: { _user_id: u.id, _is_founder: !u.is_founder }, adminToken: getAdminToken() } });
-    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
-    setBusy(null);
-    toast.success(u.is_founder ? "Founding member badge removed" : "Founding member badge granted");
-    setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, is_founder: !u.is_founder } : p)));
-  };
-
-  const toggleBan = async (u: AdminUser) => {
-    setBusy(u.id);
-    try {
-      await adminRpc({ data: { name: "admin_set_banned", args: { _user_id: u.id, _banned: !u.banned }, adminToken: getAdminToken() } });
-    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
-    setBusy(null);
-    toast.success(u.banned ? "Account unbanned" : "Account banned");
-    setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, banned: !u.banned } : p)));
-  };
-
-  const toggleShowcase = async (u: AdminUser) => {
-    setBusy(u.id);
-    try {
-      await adminRpc({ data: { name: "admin_set_showcase_hidden", args: { _user_id: u.id, _hidden: !u.hidden_from_showcase }, adminToken: getAdminToken() } });
-    } catch (e) { setBusy(null); return toast.error((e as Error).message); }
-    setBusy(null);
-    toast.success(u.hidden_from_showcase ? "Now visible in showcase" : "Hidden from showcase");
-    setUsers((prev) => prev.map((p) => (p.id === u.id ? { ...p, hidden_from_showcase: !u.hidden_from_showcase } : p)));
-  };
-
-  const onSaved = (id: string, patch: Partial<AdminUser>) => {
-    setUsers((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
-  };
 
   if (!gateChecked || !unlocked) {
     return (
