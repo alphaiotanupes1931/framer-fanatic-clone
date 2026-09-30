@@ -666,6 +666,7 @@ function CameraCapture({ disabled, onFiles }: { disabled?: boolean; onFiles: (fi
       <Button type="button" variant="outline" size="sm" disabled={disabled} onClick={() => videoRef.current?.click()}>
         <VideoIcon className="mr-2 h-4 w-4" /> Record video
       </Button>
+      <p className="w-full text-xs text-neutral-500">Camera works best on phones. On a computer these may open your files instead.</p>
     </div>
   );
 }

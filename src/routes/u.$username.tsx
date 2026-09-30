@@ -175,13 +175,13 @@ function PublicProfilePage() {
       setProfile(publicProfile || null);
       if (publicProfile) {
         setMuted(window.localStorage.getItem(`pb_mute_user_${publicProfile.id}`) === "1");
-        const [{ count: followers }, { count: following }, { count: posts }, { count: referrals }] = await Promise.all([
-          supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", publicProfile.id),
-          supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", publicProfile.id),
+        const [{ data: fc }, { count: posts }, { count: referrals }] = await Promise.all([
+          supabase.rpc("public_follow_counts", { _user_id: publicProfile.id }),
           supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id).eq("is_deleted", false).is("organization_id", null),
           supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", publicProfile.id),
         ]);
-        setStats({ followers: followers || 0, following: following || 0, posts: posts || 0, referrals: referrals || 0 });
+        const fcRow = Array.isArray(fc) ? fc[0] : fc;
+        setStats({ followers: Number(fcRow?.followers ?? 0), following: Number(fcRow?.following ?? 0), posts: posts || 0, referrals: referrals || 0 });
         if (me && me.id !== publicProfile.id) {
           const { data: f } = await supabase
             .from("follows")

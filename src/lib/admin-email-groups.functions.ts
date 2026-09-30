@@ -85,19 +85,22 @@ export const sendEmailBlast = createServerFn({ method: "POST" })
     const blastId = crypto.randomUUID();
     let sent = 0;
     let skipped = 0;
-    for (let i = 0; i < recipients.length; i += 10) {
-      const chunk = recipients.slice(i, i + 10);
+    // Provider allows ~100 emails/hour, so release 100 per hour.
+    const PER_HOUR = 100;
+    for (let i = 0; i < recipients.length; i += 6) {
+      const chunk = recipients.slice(i, i + 6);
       const results = await Promise.all(
-        chunk.map((to) =>
+        chunk.map((to, j) =>
           sendInternalEmail({
             templateName: "admin-broadcast",
             recipientEmail: to,
             idempotencyKey: `blast-${blastId}-${to}`,
             templateData: { subject, message },
+            delaySeconds: Math.floor((i + j) / PER_HOUR) * 3600,
           }).catch(() => ({ sent: false })),
         ),
       );
       for (const r of results) r.sent ? sent++ : skipped++;
     }
-    return { ok: true as const, sent, skipped };
+    return { ok: true as const, sent, skipped, hours: Math.ceil(recipients.length / PER_HOUR) };
   });
