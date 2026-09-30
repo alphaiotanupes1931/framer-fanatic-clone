@@ -615,17 +615,33 @@ export const createProductCheckout = createServerFn({ method: "POST" })
       cancel_url: `${data.returnOrigin}/o/${org.slug}?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
+      // Always collect a phone number and full billing name/address so the seller can reach the buyer.
+      phone_number_collection: { enabled: true },
+      billing_address_collection: "required" as const,
       ...(!needsAddress
-        ? pickup && product.pickup_address?.trim()
-          ? { custom_text: { submit: { message: `Pickup at: ${product.pickup_address!.trim()}`.slice(0, 1000) } } }
-          : {}
+        ? {
+            ...(pickup && product.pickup_address?.trim()
+              ? { custom_text: { submit: { message: `Pickup at: ${product.pickup_address!.trim()}`.slice(0, 1000) } } }
+              : {}),
+            ...(pickup
+              ? {
+                  custom_fields: [
+                    {
+                      key: "pickup_notes",
+                      label: { type: "custom" as const, custom: "Preferred pickup day/time (optional)" },
+                      type: "text" as const,
+                      optional: true,
+                    },
+                  ],
+                }
+              : {}),
+          }
         : {
-            shipping_address_collection: { allowed_countries: ["US"] as const },
-            phone_number_collection: { enabled: true },
+            shipping_address_collection: { allowed_countries: ["US", "CA"] as const },
             custom_fields: [
               {
                 key: "delivery_notes",
-                label: { type: "custom" as const, custom: "Delivery notes (optional)" },
+                label: { type: "custom" as const, custom: "Delivery notes, gate code, etc. (optional)" },
                 type: "text" as const,
                 optional: true,
               },
