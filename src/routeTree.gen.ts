@@ -85,6 +85,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminEmailGroupsRouteImport } from './routes/admin.email-groups'
 import { Route as AdminDesignSystemRouteImport } from './routes/admin.design-system'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlockedEmailsRouteImport } from './routes/admin.blocked-emails'
@@ -482,6 +483,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEmailGroupsRoute = AdminEmailGroupsRouteImport.update({
+  id: '/admin/email-groups',
+  path: '/admin/email-groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDesignSystemRoute = AdminDesignSystemRouteImport.update({
   id: '/admin/design-system',
   path: '/admin/design-system',
@@ -619,6 +625,7 @@ export interface FileRoutesByFullPath {
   '/admin/blocked-emails': typeof AdminBlockedEmailsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/design-system': typeof AdminDesignSystemRoute
+  '/admin/email-groups': typeof AdminEmailGroupsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
@@ -712,6 +719,7 @@ export interface FileRoutesByTo {
   '/admin/blocked-emails': typeof AdminBlockedEmailsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/design-system': typeof AdminDesignSystemRoute
+  '/admin/email-groups': typeof AdminEmailGroupsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
@@ -806,6 +814,7 @@ export interface FileRoutesById {
   '/admin/blocked-emails': typeof AdminBlockedEmailsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/design-system': typeof AdminDesignSystemRoute
+  '/admin/email-groups': typeof AdminEmailGroupsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
@@ -901,6 +910,7 @@ export interface FileRouteTypes {
     | '/admin/blocked-emails'
     | '/admin/content'
     | '/admin/design-system'
+    | '/admin/email-groups'
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
@@ -994,6 +1004,7 @@ export interface FileRouteTypes {
     | '/admin/blocked-emails'
     | '/admin/content'
     | '/admin/design-system'
+    | '/admin/email-groups'
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
@@ -1087,6 +1098,7 @@ export interface FileRouteTypes {
     | '/admin/blocked-emails'
     | '/admin/content'
     | '/admin/design-system'
+    | '/admin/email-groups'
     | '/admin/login'
     | '/admin/stripe-logs'
     | '/admin/trash'
@@ -1181,6 +1193,7 @@ export interface RootRouteChildren {
   AdminBlockedEmailsRoute: typeof AdminBlockedEmailsRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminDesignSystemRoute: typeof AdminDesignSystemRoute
+  AdminEmailGroupsRoute: typeof AdminEmailGroupsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
   AdminTrashRoute: typeof AdminTrashRoute
@@ -1752,6 +1765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/email-groups': {
+      id: '/admin/email-groups'
+      path: '/admin/email-groups'
+      fullPath: '/admin/email-groups'
+      preLoaderRoute: typeof AdminEmailGroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/design-system': {
       id: '/admin/design-system'
       path: '/admin/design-system'
@@ -1928,6 +1948,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBlockedEmailsRoute: AdminBlockedEmailsRoute,
   AdminContentRoute: AdminContentRoute,
   AdminDesignSystemRoute: AdminDesignSystemRoute,
+  AdminEmailGroupsRoute: AdminEmailGroupsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
   AdminTrashRoute: AdminTrashRoute,
