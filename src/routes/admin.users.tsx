@@ -17,6 +17,7 @@ import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
+  validateSearch: (s: Record<string, unknown>): { live?: boolean } => (s.live === true || s.live === "true" ? { live: true } : {}),
   head: () => ({ meta: [{ title: "Users - Admin - Planet Baltimore" }] }),
 });
 
@@ -53,6 +54,8 @@ function AdminUsersPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminUser | null>(null);
   const [onlyVerified, setOnlyVerified] = useState(true);
+  const search = Route.useSearch();
+  const [liveOnly, setLiveOnly] = useState(!!search.live);
 
   useEffect(() => {
     (async () => {
@@ -81,14 +84,16 @@ function AdminUsersPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    const base = onlyVerified ? users.filter((u) => !!u.email_confirmed_at) : users;
+    const base = liveOnly
+      ? users.filter((u) => isLive(u.last_seen_at))
+      : onlyVerified ? users.filter((u) => !!u.email_confirmed_at) : users;
     if (!s) return base;
     return base.filter((u) =>
       [u.email, u.display_name, u.username, u.neighborhood]
         .filter(Boolean)
         .some((v) => (v as string).toLowerCase().includes(s)),
     );
-  }, [users, q, onlyVerified]);
+  }, [users, q, onlyVerified, liveOnly]);
 
   const liveCount = users.filter((u) => isLive(u.last_seen_at)).length;
   const bannedCount = users.filter((u) => u.banned).length;
@@ -146,9 +151,17 @@ function AdminUsersPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <Stat label="Total users" value={users.length} />
         <Stat label="Verified" value={verifiedCount} accent="bg-sky-500" />
-        <Stat label="Live now" value={liveCount} accent="bg-emerald-500" />
+        <button type="button" onClick={() => setLiveOnly((v) => !v)} className={`rounded-xl text-left transition ${liveOnly ? "ring-2 ring-emerald-500" : "hover:ring-2 hover:ring-emerald-200"}`}>
+          <Stat label="Live now" value={liveCount} accent="bg-emerald-500" />
+        </button>
         <Stat label="Banned" value={bannedCount} accent="bg-rose-500" />
       </div>
+      {liveOnly && (
+        <div className="mt-3 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs text-emerald-800">
+          <span>Showing {liveCount} {liveCount === 1 ? "person" : "people"} active in the last 5 minutes.</span>
+          <button type="button" onClick={() => setLiveOnly(false)} className="font-semibold underline">Show everyone</button>
+        </div>
+      )}
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <div className="flex flex-1 items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2.5">
