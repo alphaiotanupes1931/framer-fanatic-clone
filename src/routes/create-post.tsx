@@ -419,7 +419,7 @@ function CreatePostPage() {
                 {mediaUrls.length ? "Add more" : "Upload images or videos"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Max 50MB per video. Supports only landscape videos.</p>
+              <p className="text-xs text-neutral-500">Max 50MB per video. Portrait and landscape both work, we detect it automatically.</p>
             </div>
           )}
 
@@ -469,7 +469,7 @@ function CreatePostPage() {
                 {mediaUrls.length ? "Add more" : "Upload videos or images"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Max 50MB per video. Supports only landscape videos.</p>
+              <p className="text-xs text-neutral-500">Max 50MB per video. Portrait and landscape both work, we detect it automatically.</p>
             </div>
           )}
 

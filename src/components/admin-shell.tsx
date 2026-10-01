@@ -1,11 +1,23 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
-import { Activity, LayoutTemplate, LogOut } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { LogOut } from "lucide-react";
 import { isAdminUnlocked, lockAdmin, refreshAdminUnlocked } from "@/lib/admin-gate";
 import pbLogo from "@/assets/pb-logo-dark.png";
 import { Toaster } from "@/components/ui/sonner";
 import { Img } from "@/components/shared/smart-img";
 import { Button } from "@/components/ui/button";
+
+const ADMIN_NAV = [
+  { to: "/admin", label: "Overview" },
+  { to: "/admin/users", label: "Users" },
+  { to: "/admin/activity", label: "Activity" },
+  { to: "/admin/email-groups", label: "Email groups" },
+  { to: "/admin/blocked-emails", label: "Blocked emails" },
+  { to: "/admin/content", label: "Landing page" },
+  { to: "/admin/stripe-logs", label: "Payment logs" },
+  { to: "/admin/trash", label: "Trash" },
+  { to: "/admin/design-system", label: "Design system" },
+] as const;
 
 export function AdminShell({
   title,
@@ -21,6 +33,7 @@ export function AdminShell({
     setUnlocked(isAdminUnlocked());
     void refreshAdminUnlocked().then(setUnlocked);
   }, []);
+  const path = useRouterState({ select: (st) => st.location.pathname }).replace(/\/$/, "") || "/admin";
   return (
     <div className="min-h-screen bg-neutral-50" style={{ minHeight: "100dvh" }}>
       <header className="border-b border-neutral-200 bg-white">
@@ -31,11 +44,8 @@ export function AdminShell({
           </Link>
           {unlocked && (
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link to="/admin/activity"><Activity /> Activity</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/admin/design-system"><LayoutTemplate /> Design system</Link>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/onboarding" search={{ preview: true }}>Onboarding preview</Link>
               </Button>
               <Button
                 variant="outline"
@@ -50,6 +60,24 @@ export function AdminShell({
             </div>
           )}
         </div>
+        {unlocked && (
+          <nav className="mx-auto flex w-full max-w-[1120px] gap-1 overflow-x-auto px-4 sm:px-6">
+            {ADMIN_NAV.map((n) => {
+              const active = path === n.to;
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition ${
+                    active ? "border-orange text-neutral-900" : "border-transparent text-neutral-500 hover:text-neutral-900"
+                  }`}
+                >
+                  {n.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
       </header>
       <main className="mx-auto w-full max-w-[1120px] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
         {(title || subtitle) && (

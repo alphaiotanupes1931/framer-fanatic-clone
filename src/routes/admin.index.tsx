@@ -85,164 +85,17 @@ function AdminPage() {
 
   return (
     <AdminShell
-      title="Admin"
-      subtitle="Manage users, monitor live activity, and moderate accounts."
+      title="Overview"
+      subtitle="Quick stats for Planet Baltimore. Use the menu above to open each admin section."
     >
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <Stat label="Total users" value={users.length} />
         <Stat label="Verified" value={verifiedCount} accent="bg-sky-500" />
-        <Stat label="Live now" value={liveCount} accent="bg-emerald-500" />
+        <Link to="/admin/users" search={{ live: true }} className="rounded-xl transition hover:ring-2 hover:ring-emerald-200">
+          <Stat label="Live now" value={liveCount} accent="bg-emerald-500" />
+        </Link>
         <Stat label="Banned" value={bannedCount} accent="bg-rose-500" />
       </div>
-
-      <div className="mt-6 rounded-2xl border border-orange/40 bg-orange/5 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 font-semibold text-foreground">
-              <Shield className="h-4 w-4 text-orange" /> Users
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Search, verify, edit, ban, and manage every account on the platform.
-            </p>
-          </div>
-          <Link
-            to="/admin/users"
-            className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-white hover:bg-orange/90"
-          >
-            <Shield className="h-3.5 w-3.5" /> Manage users
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-2xl border border-orange/40 bg-orange/5 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 font-semibold text-foreground">
-              <FileText className="h-4 w-4 text-orange" /> Landing page content
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Edit the hero headline, subtitle, CTA, and featured quote on the public homepage.
-            </p>
-          </div>
-          <Link
-            to="/admin/content"
-            className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-white hover:bg-orange/90"
-          >
-            <Pencil className="h-3.5 w-3.5" /> Edit content
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-              <Trash2 className="h-4 w-4 text-orange" /> Trash / Restore
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Anything deleted (profiles, posts, stories, events, orgs, videos) lands here. Restore or purge permanently.
-            </p>
-          </div>
-          <Link
-            to="/admin/trash"
-            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
-          >
-            <Trash2 className="h-3.5 w-3.5" /> Open Trash
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-lg border border-border bg-card p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <LayoutTemplate className="h-4 w-4 text-orange" /> Design system
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Review the approved buttons, colors, headings, forms, cards, tabs, and spacing used across the platform.
-            </p>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/admin/design-system">Open reference</Link>
-          </Button>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-              <FileText className="h-4 w-4 text-orange" /> Payment logs
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Every payment webhook and payout account error, including activation and profile issues.
-            </p>
-          </div>
-          <Link
-            to="/admin/stripe-logs"
-            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
-          >
-            View logs
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-              <FileText className="h-4 w-4 text-orange" /> Onboarding preview
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Replay the new member onboarding screen as many times as you want. Nothing is saved.
-            </p>
-          </div>
-          <Link
-            to="/onboarding"
-            search={{ preview: true }}
-            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
-          >
-            Replay onboarding
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-              <Ban className="h-4 w-4 text-orange" /> Blocked emails
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Addresses that unsubscribed, bounced, or marked our email as spam. We no longer send to them.
-            </p>
-          </div>
-          <Link
-            to="/admin/blocked-emails"
-            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
-          >
-            View blocked emails
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="text-sm font-semibold text-neutral-900">Email groups</div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Email every business, arts organization, artist, group, resident and more at once.
-            </p>
-          </div>
-          <Link
-            to="/admin/email-groups"
-            className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
-          >
-            Open email groups
-          </Link>
-        </div>
-      </div>
-
 
       <LocationStats unlocked={unlocked} />
 
