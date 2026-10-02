@@ -251,7 +251,7 @@ export function DiscussionTab({
             if (hidden) return null;
             const name = c.author?.display_name || c.author?.username || "Someone";
             const replies = repliesFor(c.id);
-            const authorProfilePath = c.author?.username ? { to: "/u/$username" as const, params: { username: c.author.username } } : null;
+            const authorProfilePath = c.author?.username ? { to: "/$username" as const, params: { username: c.author.username } } : null;
             return (
               <article key={c.id} className={`rounded-2xl border border-border bg-card p-3 ${c.is_muted ? "opacity-60" : ""}`}>
                 <header className="flex items-center gap-3">

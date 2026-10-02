@@ -132,7 +132,7 @@ export function EventSocial({ eventId, hostId }: { eventId: string; hostId?: str
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   {c.author?.username ? (
-                    <Link to="/u/$username" params={{ username: c.author.username }} className="text-sm font-semibold text-foreground hover:underline">{name}</Link>
+                    <Link to="/$username" params={{ username: c.author.username }} className="text-sm font-semibold text-foreground hover:underline">{name}</Link>
                   ) : (
                     <span className="text-sm font-semibold text-foreground">{name}</span>
                   )}

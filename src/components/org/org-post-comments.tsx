@@ -95,7 +95,7 @@ export function OrgPostComments({ orgId, postId }: { orgId: string; postId: stri
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   {a?.username
-                    ? <Link to="/u/$username" params={{ username: a.username }} className="text-sm font-semibold text-foreground hover:underline">{a.display_name || a.username}</Link>
+                    ? <Link to="/$username" params={{ username: a.username }} className="text-sm font-semibold text-foreground hover:underline">{a.display_name || a.username}</Link>
                     : <span className="text-sm font-semibold text-foreground">Member</span>}
                   <span className="text-[11px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
                   {me === c.user_id && (

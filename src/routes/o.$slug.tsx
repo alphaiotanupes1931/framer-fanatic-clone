@@ -957,7 +957,7 @@ function GroupRequests({ orgId, onApproved, onCountChange }: { orgId: string; on
         {rows.map((r) => (
           <li key={r.user_id} className="flex items-center justify-between gap-3 py-2.5">
             {r.username ? (
-              <Link to="/u/$username" params={{ username: r.username }} className="min-w-0 text-sm hover:text-[#d4580a]">
+              <Link to="/$username" params={{ username: r.username }} className="min-w-0 text-sm hover:text-[#d4580a]">
                 <div className="truncate font-medium text-neutral-900">{r.display_name || r.username || "Someone"}</div>
                 <div className="truncate text-xs text-neutral-500">@{r.username}</div>
               </Link>
@@ -1404,7 +1404,7 @@ function MembersTab({ orgId }: { orgId: string }) {
         {rows.map((p) => (
         <Link
           key={p.id}
-          to="/u/$username"
+          to="/$username"
           params={{ username: p.username || p.id }}
           className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 transition hover:border-orange-300 hover:shadow-sm"
         >

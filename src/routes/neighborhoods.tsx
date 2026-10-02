@@ -256,7 +256,7 @@ function NeighborhoodsPage() {
                         <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                           {artists.map((a) => (
                             <li key={a.id}>
-                              <Link to="/u/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                              <Link to="/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
                                 <Avatar className="h-12 w-12 rounded-lg">
                                   {a.avatar_url && <SmartAvatarImage src={a.avatar_url} />}
                                   <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}</AvatarFallback>

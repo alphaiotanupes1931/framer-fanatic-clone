@@ -38,7 +38,7 @@ export function MentionText({ text, className = "" }: { text: string; className?
       parts.push(
         <Link
           key={`m${m.index}`}
-          to="/u/$username"
+          to="/$username"
           params={{ username }}
           onClick={(e) => e.stopPropagation()}
           className="font-semibold text-[#d4580a] hover:underline"

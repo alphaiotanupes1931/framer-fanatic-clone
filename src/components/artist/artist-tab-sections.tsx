@@ -792,7 +792,7 @@ export function ArtistTalkTab({ profile }: { profile: { id: string; display_name
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-sm font-semibold truncate">
                       {c.author?.username ? (
-                        <Link to="/u/$username" params={{ username: c.author.username }} className="hover:underline">
+                        <Link to="/$username" params={{ username: c.author.username }} className="hover:underline">
                           {c.author.display_name || c.author.username}
                         </Link>
                       ) : (c.author?.display_name || "Someone")}

@@ -121,7 +121,7 @@ function DiscoverPage() {
             <SectionHead icon={Palette} title="Artists to Follow" to="/artists" />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {fArtists.slice(0, 6).map((a) => (
-                <Link key={a.id} to="/u/$username" params={{ username: a.username || a.id }}
+                <Link key={a.id} to="/$username" params={{ username: a.username || a.id }}
                   className="bg-card border border-border rounded-xl p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
                   <Avatar className="w-20 h-20 mx-auto mb-3">
                     <SmartAvatarImage src={a.avatar_url ?? undefined} />

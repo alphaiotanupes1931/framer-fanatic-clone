@@ -75,7 +75,7 @@ function ActorAvatarLink({
   const Icon = typeIcon;
   return (
     <Link
-      to="/u/$username"
+      to="/$username"
       params={{ username }}
       onClick={(e) => e.stopPropagation()}
       className="relative flex-shrink-0 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#d4580a]"
@@ -240,7 +240,7 @@ function NotificationsPage() {
       navigate({ to: "/events/$eventId", params: { eventId: evId } });
       return;
     }
-    if (n.actor?.username) navigate({ to: "/u/$username", params: { username: n.actor.username } });
+    if (n.actor?.username) navigate({ to: "/$username", params: { username: n.actor.username } });
   };
 
 
@@ -306,7 +306,7 @@ function NotificationsPage() {
                       <p className="text-sm text-foreground">
                         {n.actor?.username ? (
                           <Link
-                            to="/u/$username"
+                            to="/$username"
                             params={{ username: n.actor.username }}
                             className="font-semibold hover:underline"
                           >

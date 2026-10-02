@@ -543,7 +543,7 @@ function ProfilePage() {
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
                   {followerPreview.slice(0, 4).map((u) => (
-                    <Link key={u.id} to="/u/$username" params={{ username: u.username || u.id }}>
+                    <Link key={u.id} to="/$username" params={{ username: u.username || u.id }}>
                       <Img
                         src={(u as any).avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.display_name || u.username || "u")}`}
                         alt=""
@@ -556,7 +556,7 @@ function ProfilePage() {
                   <span>Followed by </span>
                   {followerPreview.slice(0, 2).map((u, i) => (
                     <span key={u.id}>
-                      <Link to="/u/$username" params={{ username: u.username || u.id }} className="font-semibold text-foreground hover:text-[#d4580a] transition-colors">
+                      <Link to="/$username" params={{ username: u.username || u.id }} className="font-semibold text-foreground hover:text-[#d4580a] transition-colors">
                         {(u.display_name || u.username || "user").split(" ")[0]}
                       </Link>
                       {i < Math.min(followerPreview.length, 2) - 1 && <span>, </span>}

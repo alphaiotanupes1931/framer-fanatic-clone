@@ -149,7 +149,7 @@ function VideoMeta({ video, onVideoChange }: { video: Video; onVideoChange: (v: 
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-700">
         {video.author?.username ? (
-          <Link to="/u/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
+          <Link to="/$username" params={{ username: video.author.username }} className="flex items-center gap-2 font-semibold hover:text-orange-600">
             {video.author.avatar_url ? (
               <Img src={video.author.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
             ) : (
