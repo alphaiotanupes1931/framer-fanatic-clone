@@ -130,7 +130,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     setSaving(true);
     try {
       const baseSlug = slugify(form.name);
-      const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+      const slug = baseSlug;
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type,

@@ -68,7 +68,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
     try {
       // Resident/Visitor pages are standalone pages (like artist pages).
       // They must NOT modify the account profile the user signed up with.
-      const slug = `${slugify(form.display_name) || kind}-${Math.random().toString(36).slice(2, 6)}`;
+      const slug = slugify(form.display_name) || kind;
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type: kind,

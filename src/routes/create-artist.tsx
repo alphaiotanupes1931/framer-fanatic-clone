@@ -90,7 +90,7 @@ function CreateArtistPage() {
     try {
       // Artist pages are standalone organization pages. They must NOT change
       // the owner's personal (resident/visitor) profile in any way.
-      const slug = `${slugify(form.display_name)}-${Math.random().toString(36).slice(2, 6)}`;
+      const slug = slugify(form.display_name);
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type: "artist",
