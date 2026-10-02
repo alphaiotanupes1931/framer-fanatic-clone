@@ -52,7 +52,7 @@ const US_STATES = [
 ];
 
 function slugify(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 60) || "page";
+  return orgSlug(s);
 }
 
 function validateCity(value: string) {
