@@ -708,7 +708,7 @@ function FestivalDetailPage() {
           name: titleCase(prof.display_name || prof.username || "Organizer"),
           bio: prof.bio,
           avatar: prof.avatar_url,
-          href: prof.username ? `/u/${prof.username}` : "#",
+          href: prof.username ? `/${prof.username}` : "#",
           website: prof.website,
         };
       }
@@ -1647,7 +1647,7 @@ function FestivalDetailPage() {
             <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-foreground"><MapPin className="h-5 w-5" /> Nearby on Planet Baltimore</h2>
             <div className="mt-6 space-y-7">
               {data!.nearby.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Sparkles className="h-4 w-4" /> Nearby Arts Organizations <span className="text-xs font-normal text-muted-foreground">({data!.nearby.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearby.map((o) => <NearbyCard key={o.id} href={`/o/${o.slug}`} image={o.banner_url || o.avatar_url} label={o.subtype || o.type} title={o.name} description={o.tagline || o.bio} />)}</div></div>}
-              {data!.nearbyArtists.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Users className="h-4 w-4" /> Nearby Artists <span className="text-xs font-normal text-muted-foreground">({data!.nearbyArtists.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearbyArtists.map((artist) => <NearbyCard key={artist.id} href={`/u/${artist.username ?? ""}`} image={artist.banner_url || artist.avatar_url} label={artist.category} title={titleCase(artist.display_name || artist.username || "Artist")} description={artist.bio} />)}</div></div>}
+              {data!.nearbyArtists.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Users className="h-4 w-4" /> Nearby Artists <span className="text-xs font-normal text-muted-foreground">({data!.nearbyArtists.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearbyArtists.map((artist) => <NearbyCard key={artist.id} href={`/${artist.username ?? ""}`} image={artist.banner_url || artist.avatar_url} label={artist.category} title={titleCase(artist.display_name || artist.username || "Artist")} description={artist.bio} />)}</div></div>}
             </div>
           </section>
         )}

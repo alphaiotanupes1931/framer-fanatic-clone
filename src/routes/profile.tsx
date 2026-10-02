@@ -714,19 +714,19 @@ function ProfilePage() {
       <ShareToUsersDialog
         open={shareInAppOpen}
         onClose={() => setShareInAppOpen(false)}
-        url={siteUrl(`/u/${profile?.username ?? ""}`)}
+        url={siteUrl(`/${profile?.username ?? ""}`)}
         title={profile?.display_name || profile?.username || "Profile"}
       />
       <ExternalShareDialog
         open={shareExternalOpen}
         onClose={() => setShareExternalOpen(false)}
-        url={siteUrl(`/u/${profile?.username ?? ""}`)}
+        url={siteUrl(`/${profile?.username ?? ""}`)}
         title={`${profile?.display_name || profile?.username || "Profile"} on Planet Baltimore`}
       />
       <InviteFriendsDialog
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
-        inviteUrl={siteUrl(`/u/${profile?.username ?? ""}`)}
+        inviteUrl={siteUrl(`/${profile?.username ?? ""}`)}
       />
       <ReferralNetworkDialog
         open={referralOpen}
@@ -1338,7 +1338,7 @@ function CVSection({ section, userId, items, canEdit, onChange }: {
 
 function ArtistInviteTab({ profile }: { profile: any }) {
   const url = typeof window !== "undefined" && profile?.username
-    ? siteUrl(`/u/${profile.username}`)
+    ? siteUrl(`/${profile.username}`)
     : "";
   return (
     <div className="rounded-xl border border-border p-6 space-y-4">

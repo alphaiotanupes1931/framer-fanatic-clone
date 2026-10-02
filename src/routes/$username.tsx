@@ -411,14 +411,14 @@ function PublicProfilePage() {
         {/* Category + actions moved below the name */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <ShareButtons
-            path={`/u/${profile.username}`}
+            path={`/${profile.username}`}
             title={profile.display_name || profile.username || ""}
             size="sm"
             buttonClassName="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 hover:text-[#d4580a]"
             preview={{
               type: "profile",
               id: profile.username || "",
-              url: `/u/${profile.username}`,
+              url: `/${profile.username}`,
               title: profile.display_name || profile.username || "",
               excerpt: profile.bio || null,
               image: profile.avatar_url || null,

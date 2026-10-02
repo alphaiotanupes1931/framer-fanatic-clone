@@ -122,7 +122,7 @@ export const Route = createFileRoute("/events/$eventId")({
       organizer: {
         "@type": "Organization",
         name: e.hostName || "Planet Baltimore",
-        url: e.hostUsername ? `${SITE}/u/${e.hostUsername}` : SITE,
+        url: e.hostUsername ? `${SITE}/${e.hostUsername}` : SITE,
       },
     };
     if (e.endsAt) jsonLd.endDate = e.endsAt;

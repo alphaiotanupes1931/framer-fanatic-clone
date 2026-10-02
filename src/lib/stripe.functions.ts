@@ -523,8 +523,8 @@ export const createArtworkCheckout = createServerFn({ method: "POST" })
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      success_url: `${data.returnOrigin}/u/${artistHandle}?purchase=success`,
-      cancel_url: `${data.returnOrigin}/u/${artistHandle}?purchase=cancelled`,
+      success_url: `${data.returnOrigin}/${artistHandle}?purchase=success`,
+      cancel_url: `${data.returnOrigin}/${artistHandle}?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
       line_items: checkoutLineItems(breakdown, {
