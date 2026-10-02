@@ -1,10 +1,14 @@
 import { redirect } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
-import { getOrgSeo } from "@/lib/org-access.functions";
+import { getOrgSeo, resolveOrgSlug } from "@/lib/org-access.functions";
 import { orgPrefix } from "@/lib/org-paths";
 
 /** Loader for typed page URLs: sends a page opened under the wrong letter to the right one. */
 export async function loadOrgSeo(slug: string, prefix: string) {
+  const resolved = await resolveOrgSlug({ data: { slug } });
+  if (resolved.slug && resolved.slug !== slug) {
+    throw redirect({ href: `/${orgPrefix(resolved.type)}/${resolved.slug}`, replace: true });
+  }
   let seo: Awaited<ReturnType<typeof getOrgSeo>>;
   try {
     seo = await getOrgSeo({ data: { slug } });

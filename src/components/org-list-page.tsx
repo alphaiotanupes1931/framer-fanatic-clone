@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { orgPath } from "@/lib/org-paths";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -272,7 +273,7 @@ export function OrgListPage({
             <h2 className="mb-3 text-lg font-bold text-neutral-900">Featured</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.slice(0, 3).map((o) => (
-                <Link key={`f-${o.id}`} to="/o/$slug" params={{ slug: o.slug }}
+                <Link key={`f-${o.id}`} to={orgPath(o.type, o.slug)}
                   className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                   <div className="relative h-40 bg-neutral-100">
                     <OrgCardCover name={o.name} bannerUrl={o.banner_url} avatarUrl={o.avatar_url} />
@@ -313,7 +314,7 @@ export function OrgListPage({
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(showFeatured ? items.slice(3) : items).map((o) => (
-              <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }}
+              <Link key={o.id} to={orgPath(o.type, o.slug)}
                 className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                 {isAdmin && (
                   <button

@@ -100,7 +100,7 @@ export function CommunityAssociationsPage() {
             {items.map((o) => (
               <Link
                 key={o.id}
-                to="/o/$slug"
+                to="/ca/$slug"
                 params={{ slug: o.slug }}
                 className="group flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-orange-300 hover:shadow-sm"
               >

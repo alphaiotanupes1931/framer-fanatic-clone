@@ -176,7 +176,7 @@ export function GroupsPage() {
                 </button>
               )}
               <Link
-                to="/o/$slug"
+                to="/g/$slug"
                 params={{ slug: o.slug }}
                 className="group block overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-md"
               >
