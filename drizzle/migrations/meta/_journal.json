@@ -288,6 +288,13 @@
       "when": 1790804054501,
       "tag": "0040_follow_counts_and_delayed_email",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790950355282,
+      "tag": "0041_organization_slug_aliases",
+      "breakpoints": true
     }
   ]
 }

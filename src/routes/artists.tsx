@@ -12,6 +12,7 @@ import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
+import { OrgLink } from "@/components/org/org-link";
 
 type Creator = {
   id: string;
@@ -258,9 +259,9 @@ function FindCreatorPage() {
               {filtered.map((c) => (
                 <div key={c.id} className="relative">
                   {c.page_slug ? (
-                    <Link to="/o/$slug" params={{ slug: c.page_slug }} className="block text-left">
+                    <OrgLink type="artist" slug={c.page_slug} className="block text-left">
                       <Card c={c} />
-                    </Link>
+                    </OrgLink>
                   ) : (
                     <Link
                       to="/$username"

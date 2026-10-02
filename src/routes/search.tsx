@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search as SearchIcon, MapPin, Calendar, FileText, BookOpen } from "lucide-react";
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
+import { OrgLink } from "@/components/org/org-link";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
@@ -186,7 +187,7 @@ function SearchPage() {
               <Section title="Organizations">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {orgs.slice(0, tab === "All" ? 6 : 24).map((o) => (
-                    <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <OrgLink key={o.id} type={o.type} slug={o.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
                         {o.avatar_url && <Img src={o.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
@@ -194,7 +195,7 @@ function SearchPage() {
                         <div className="truncate text-sm font-semibold text-foreground">{o.name}</div>
                         <div className="text-xs text-muted-foreground">{o.type.replace(/[_-]+/g, " ").split(" ").filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(" ")}{o.neighborhood ? ` · ${o.neighborhood}` : ""}</div>
                       </div>
-                    </Link>
+                    </OrgLink>
                   ))}
                 </div>
               </Section>
@@ -223,7 +224,7 @@ function SearchPage() {
               <Section title="Businesses">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {businesses.slice(0, tab === "All" ? 6 : 24).map((b) => (
-                    <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <OrgLink key={b.id} type={b.type} slug={b.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
                         {b.avatar_url && <Img src={b.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
@@ -231,7 +232,7 @@ function SearchPage() {
                         <div className="truncate text-sm font-semibold text-foreground">{b.name}</div>
                         <div className="text-xs text-muted-foreground">Business{b.neighborhood ? ` · ${b.neighborhood}` : ""}</div>
                       </div>
-                    </Link>
+                    </OrgLink>
                   ))}
                 </div>
               </Section>

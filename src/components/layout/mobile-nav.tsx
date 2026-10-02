@@ -50,7 +50,7 @@ export function MobileNav() {
         className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-3 border-t border-border bg-card/95 px-4 py-3 backdrop-blur-md lg:hidden"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 10px)" }}
       >
-        <Link to="/o/$slug" params={{ slug: staff.slug }} className="truncate text-sm font-semibold text-foreground">
+        <Link to="/b/$slug" params={{ slug: staff.slug }} className="truncate text-sm font-semibold text-foreground">
           {staff.name}
         </Link>
         <button onClick={signOut} className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">

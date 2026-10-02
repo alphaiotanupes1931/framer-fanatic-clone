@@ -4,6 +4,7 @@ import { Bookmark, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
+import { OrgLink } from "@/components/org/org-link";
 
 /** Long-form About for any person's public profile (read-only). */
 export function PersonAboutTab({ profile }: { profile: any }) {
@@ -298,7 +299,7 @@ export function PersonMembershipsTab({ userId, isSelf = false }: { userId: strin
     <div className="grid gap-3 sm:grid-cols-2">
       {rows.map((o) => (
         <div key={o.id} className="rounded-2xl border border-border bg-card p-4">
-        <Link to="/o/$slug" params={{ slug: o.slug }} className="group flex items-center gap-4">
+        <OrgLink type={o.type} slug={o.slug} className="group flex items-center gap-4">
           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
             {o.avatar_url && <SmartImage src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />}
           </div>
@@ -309,7 +310,7 @@ export function PersonMembershipsTab({ userId, isSelf = false }: { userId: strin
             </div>
           </div>
           <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
-        </Link>
+        </OrgLink>
         {isSelf && (
           <button
             type="button"
@@ -357,7 +358,7 @@ export function PersonPagesTab({ userId, isSelf }: { userId: string; isSelf: boo
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {orgs.map((o) => (
-        <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 hover:border-[#d4580a] hover:shadow-sm">
+        <OrgLink key={o.id} type={o.type} slug={o.slug} className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 hover:border-[#d4580a] hover:shadow-sm">
           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
             {o.avatar_url && <SmartImage src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />}
           </div>
@@ -368,7 +369,7 @@ export function PersonPagesTab({ userId, isSelf }: { userId: string; isSelf: boo
             </div>
           </div>
           <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#d4580a]" />
-        </Link>
+        </OrgLink>
       ))}
     </div>
   );

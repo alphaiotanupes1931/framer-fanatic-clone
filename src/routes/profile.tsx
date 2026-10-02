@@ -38,6 +38,7 @@ import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img
 import { STORED_URL_TTL, compressAvatar, compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { OrgLink } from "@/components/org/org-link";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -1848,7 +1849,7 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
                 key={o.id}
                 className="rounded-2xl border border-neutral-200 bg-white p-4 hover:border-[#d4580a] hover:shadow-sm"
               >
-                <a href={`/o/${o.slug}`} className="group flex items-center gap-4">
+                <OrgLink type={o.type} slug={o.slug} className="group flex items-center gap-4">
                   <Avatar className="h-12 w-12">
                     <SmartAvatarImage src={o.avatar_url ?? undefined} />
                     <AvatarFallback>{o.name?.[0] ?? "?"}</AvatarFallback>
@@ -1860,7 +1861,7 @@ function MyPagesTab({ profile, isArtist }: { profile: any; isArtist: boolean }) 
                     </div>
                   </div>
                   <ExternalLink className="h-4 w-4 text-neutral-400 group-hover:text-[#d4580a]" />
-                </a>
+                </OrgLink>
                 <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
                   <div className="flex items-center gap-2 text-xs text-neutral-500">
                     {o.is_public === false ? <LockIcon className="h-3.5 w-3.5" /> : <GlobeIcon className="h-3.5 w-3.5" />}

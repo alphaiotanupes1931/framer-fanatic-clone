@@ -8,6 +8,7 @@ import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { Img } from "@/components/shared/smart-img";
 import { Plus, MapPin, Search, Users, ShieldCheck } from "lucide-react";
 import { pageHead } from "@/lib/seo";
+import { OrgLink } from "@/components/org/org-link";
 
 type Org = {
   id: string; slug: string; name: string; bio: string | null;
@@ -49,9 +50,6 @@ function CommunitiesPage() {
     });
   }, [all, q, tab]);
 
-  const assocCount = all.filter((o) => o.type === "community_assoc").length;
-  const groupCount = all.filter((o) => o.type === "group").length;
-
   return (
     <AppLayout title="Communities" subtitle="Community associations and groups across Baltimore.">
       <div className="space-y-6">
@@ -78,7 +76,6 @@ function CommunitiesPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           {TABS.map((t) => {
-            const count = t.key === "all" ? all.length : t.key === "group" ? groupCount : assocCount;
             const active = tab === t.key;
             return (
               <button
@@ -91,7 +88,7 @@ function CommunitiesPage() {
                     : "rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
                 }
               >
-                {t.label} {loading ? "" : `(${count})`}
+                {t.label}
               </button>
             );
           })}
@@ -117,10 +114,10 @@ function CommunitiesPage() {
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {items.map((o) => (
-              <Link
+              <OrgLink
                 key={o.id}
-                to="/o/$slug"
-                params={{ slug: o.slug }}
+                type={o.type}
+                slug={o.slug}
                 className="group flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-orange-300 hover:shadow-sm"
               >
                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100">
@@ -152,7 +149,7 @@ function CommunitiesPage() {
                     )}
                   </div>
                 </div>
-              </Link>
+              </OrgLink>
             ))}
           </div>
         )}

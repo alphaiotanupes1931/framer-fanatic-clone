@@ -125,3 +125,37 @@ export const getOrgType = createServerFn({ method: "GET" })
       return { type: null };
     }
   });
+
+/** Resolve an old page slug after a page receives a cleaner public address. */
+export const resolveOrgSlug = createServerFn({ method: "GET" })
+  .inputValidator((data: { slug: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: current } = await supabaseAdmin
+        .from("organizations")
+        .select("slug, type")
+        .eq("slug", data.slug)
+        .maybeSingle();
+      if (current) return { slug: current.slug as string, type: current.type as string };
+
+      const { data: alias } = await supabaseAdmin
+        .from("organization_slug_aliases")
+        .select("organization_id")
+        .eq("old_slug", data.slug)
+        .maybeSingle();
+      if (!alias) return { slug: null, type: null };
+
+      const { data: organization } = await supabaseAdmin
+        .from("organizations")
+        .select("slug, type")
+        .eq("id", alias.organization_id)
+        .maybeSingle();
+      return {
+        slug: (organization?.slug as string | undefined) ?? null,
+        type: (organization?.type as string | undefined) ?? null,
+      };
+    } catch {
+      return { slug: null, type: null };
+    }
+  });
