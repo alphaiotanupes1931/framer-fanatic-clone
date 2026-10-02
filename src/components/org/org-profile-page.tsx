@@ -72,6 +72,7 @@ import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { resolveMediaUrl } from "@/components/smart-image";
 import { notifyGroupJoinRequest } from "@/lib/group-requests.functions";
 import { getOrgSeo, unlockOrgWithCode, setOrgAccessCode, getPrivateOrgFallback } from "@/lib/org-access.functions";
+import { orgPath } from "@/lib/org-paths";
 
 
 
@@ -612,14 +613,14 @@ export function OrgProfile() {
           />
           )}
           <ShareButtons
-            path={`/o/${org.slug}`}
+            path={orgPath(org.type, org.slug)}
             title={org.name}
             size="sm"
             buttonClassName="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white p-2 text-sm font-semibold text-neutral-700 hover:border-[#d4580a] hover:text-[#d4580a]"
             preview={{
               type: "organization",
               id: org.slug,
-              url: `/o/${org.slug}`,
+              url: orgPath(org.type, org.slug),
               title: org.name,
               excerpt: org.bio || null,
               image: org.banner_url || org.avatar_url || null,

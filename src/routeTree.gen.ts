@@ -67,13 +67,16 @@ import { Route as FestivalsIndexRouteImport } from './routes/festivals.index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VideosIdRouteImport } from './routes/videos.$id'
+import { Route as VSlugRouteImport } from './routes/v.$slug'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as TicketsTicketIdRouteImport } from './routes/tickets.$ticketId'
 import { Route as TTicketIdRouteImport } from './routes/t.$ticketId'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
+import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
 import { Route as OSlugRouteImport } from './routes/o.$slug'
 import { Route as MarketplaceListingIdRouteImport } from './routes/marketplace.$listingId'
+import { Route as GSlugRouteImport } from './routes/g.$slug'
 import { Route as FestivalsNewRouteImport } from './routes/festivals.new'
 import { Route as FestivalsEventIdRouteImport } from './routes/festivals.$eventId'
 import { Route as EventsNewRouteImport } from './routes/events.new'
@@ -82,6 +85,9 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as EditStoryIdRouteImport } from './routes/edit-story.$id'
 import { Route as EditPostIdRouteImport } from './routes/edit-post.$id'
 import { Route as EditEventEventIdRouteImport } from './routes/edit-event.$eventId'
+import { Route as CaSlugRouteImport } from './routes/ca.$slug'
+import { Route as BSlugRouteImport } from './routes/b.$slug'
+import { Route as AoSlugRouteImport } from './routes/ao.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
@@ -91,6 +97,7 @@ import { Route as AdminDesignSystemRouteImport } from './routes/admin.design-sys
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlockedEmailsRouteImport } from './routes/admin.blocked-emails'
 import { Route as AdminActivityRouteImport } from './routes/admin.activity'
+import { Route as ASlugRouteImport } from './routes/a.$slug'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as FestivalsEventIdEditRouteImport } from './routes/festivals.$eventId_.edit'
@@ -394,6 +401,11 @@ const VideosIdRoute = VideosIdRouteImport.update({
   path: '/videos/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VSlugRoute = VSlugRouteImport.update({
+  id: '/v/$slug',
+  path: '/v/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -414,6 +426,11 @@ const StoriesStoryIdRoute = StoriesStoryIdRouteImport.update({
   path: '/stories/$storyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RSlugRoute = RSlugRouteImport.update({
+  id: '/r/$slug',
+  path: '/r/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/posts/$postId',
   path: '/posts/$postId',
@@ -428,6 +445,11 @@ const MarketplaceListingIdRoute = MarketplaceListingIdRouteImport.update({
   id: '/$listingId',
   path: '/$listingId',
   getParentRoute: () => MarketplaceRoute,
+} as any)
+const GSlugRoute = GSlugRouteImport.update({
+  id: '/g/$slug',
+  path: '/g/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const FestivalsNewRoute = FestivalsNewRouteImport.update({
   id: '/festivals/new',
@@ -467,6 +489,21 @@ const EditPostIdRoute = EditPostIdRouteImport.update({
 const EditEventEventIdRoute = EditEventEventIdRouteImport.update({
   id: '/edit-event/$eventId',
   path: '/edit-event/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaSlugRoute = CaSlugRouteImport.update({
+  id: '/ca/$slug',
+  path: '/ca/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BSlugRoute = BSlugRouteImport.update({
+  id: '/b/$slug',
+  path: '/b/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AoSlugRoute = AoSlugRouteImport.update({
+  id: '/ao/$slug',
+  path: '/ao/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -512,6 +549,11 @@ const AdminBlockedEmailsRoute = AdminBlockedEmailsRouteImport.update({
 const AdminActivityRoute = AdminActivityRouteImport.update({
   id: '/admin/activity',
   path: '/admin/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ASlugRoute = ASlugRouteImport.update({
+  id: '/a/$slug',
+  path: '/a/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OSlugDonateRoute = OSlugDonateRouteImport.update({
@@ -628,6 +670,7 @@ export interface FileRoutesByFullPath {
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/welcome': typeof WelcomeRoute
+  '/a/$slug': typeof ASlugRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/blocked-emails': typeof AdminBlockedEmailsRoute
   '/admin/content': typeof AdminContentRoute
@@ -637,6 +680,9 @@ export interface FileRoutesByFullPath {
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/admin/users': typeof AdminUsersRoute
+  '/ao/$slug': typeof AoSlugRoute
+  '/b/$slug': typeof BSlugRoute
+  '/ca/$slug': typeof CaSlugRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -645,13 +691,16 @@ export interface FileRoutesByFullPath {
   '/events/new': typeof EventsNewRoute
   '/festivals/$eventId': typeof FestivalsEventIdRoute
   '/festivals/new': typeof FestivalsNewRoute
+  '/g/$slug': typeof GSlugRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/r/$slug': typeof RSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/v/$slug': typeof VSlugRoute
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -723,6 +772,7 @@ export interface FileRoutesByTo {
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/welcome': typeof WelcomeRoute
+  '/a/$slug': typeof ASlugRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/blocked-emails': typeof AdminBlockedEmailsRoute
   '/admin/content': typeof AdminContentRoute
@@ -732,6 +782,9 @@ export interface FileRoutesByTo {
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/admin/users': typeof AdminUsersRoute
+  '/ao/$slug': typeof AoSlugRoute
+  '/b/$slug': typeof BSlugRoute
+  '/ca/$slug': typeof CaSlugRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -740,13 +793,16 @@ export interface FileRoutesByTo {
   '/events/new': typeof EventsNewRoute
   '/festivals/$eventId': typeof FestivalsEventIdRoute
   '/festivals/new': typeof FestivalsNewRoute
+  '/g/$slug': typeof GSlugRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/r/$slug': typeof RSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/v/$slug': typeof VSlugRoute
   '/videos/$id': typeof VideosIdRoute
   '/admin': typeof AdminIndexRoute
   '/events': typeof EventsIndexRoute
@@ -819,6 +875,7 @@ export interface FileRoutesById {
   '/ticketing': typeof TicketingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/welcome': typeof WelcomeRoute
+  '/a/$slug': typeof ASlugRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/blocked-emails': typeof AdminBlockedEmailsRoute
   '/admin/content': typeof AdminContentRoute
@@ -828,6 +885,9 @@ export interface FileRoutesById {
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/admin/users': typeof AdminUsersRoute
+  '/ao/$slug': typeof AoSlugRoute
+  '/b/$slug': typeof BSlugRoute
+  '/ca/$slug': typeof CaSlugRoute
   '/edit-event/$eventId': typeof EditEventEventIdRoute
   '/edit-post/$id': typeof EditPostIdRoute
   '/edit-story/$id': typeof EditStoryIdRoute
@@ -836,13 +896,16 @@ export interface FileRoutesById {
   '/events/new': typeof EventsNewRoute
   '/festivals/$eventId': typeof FestivalsEventIdRoute
   '/festivals/new': typeof FestivalsNewRoute
+  '/g/$slug': typeof GSlugRoute
   '/marketplace/$listingId': typeof MarketplaceListingIdRoute
   '/o/$slug': typeof OSlugRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/r/$slug': typeof RSlugRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/v/$slug': typeof VSlugRoute
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -916,6 +979,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/unsubscribe'
     | '/welcome'
+    | '/a/$slug'
     | '/admin/activity'
     | '/admin/blocked-emails'
     | '/admin/content'
@@ -925,6 +989,9 @@ export interface FileRouteTypes {
     | '/admin/stripe-logs'
     | '/admin/trash'
     | '/admin/users'
+    | '/ao/$slug'
+    | '/b/$slug'
+    | '/ca/$slug'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -933,13 +1000,16 @@ export interface FileRouteTypes {
     | '/events/new'
     | '/festivals/$eventId'
     | '/festivals/new'
+    | '/g/$slug'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
+    | '/r/$slug'
     | '/stories/$storyId'
     | '/t/$ticketId'
     | '/tickets/$ticketId'
     | '/u/$username'
+    | '/v/$slug'
     | '/videos/$id'
     | '/admin/'
     | '/events/'
@@ -1011,6 +1081,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/unsubscribe'
     | '/welcome'
+    | '/a/$slug'
     | '/admin/activity'
     | '/admin/blocked-emails'
     | '/admin/content'
@@ -1020,6 +1091,9 @@ export interface FileRouteTypes {
     | '/admin/stripe-logs'
     | '/admin/trash'
     | '/admin/users'
+    | '/ao/$slug'
+    | '/b/$slug'
+    | '/ca/$slug'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -1028,13 +1102,16 @@ export interface FileRouteTypes {
     | '/events/new'
     | '/festivals/$eventId'
     | '/festivals/new'
+    | '/g/$slug'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
+    | '/r/$slug'
     | '/stories/$storyId'
     | '/t/$ticketId'
     | '/tickets/$ticketId'
     | '/u/$username'
+    | '/v/$slug'
     | '/videos/$id'
     | '/admin'
     | '/events'
@@ -1106,6 +1183,7 @@ export interface FileRouteTypes {
     | '/ticketing'
     | '/unsubscribe'
     | '/welcome'
+    | '/a/$slug'
     | '/admin/activity'
     | '/admin/blocked-emails'
     | '/admin/content'
@@ -1115,6 +1193,9 @@ export interface FileRouteTypes {
     | '/admin/stripe-logs'
     | '/admin/trash'
     | '/admin/users'
+    | '/ao/$slug'
+    | '/b/$slug'
+    | '/ca/$slug'
     | '/edit-event/$eventId'
     | '/edit-post/$id'
     | '/edit-story/$id'
@@ -1123,13 +1204,16 @@ export interface FileRouteTypes {
     | '/events/new'
     | '/festivals/$eventId'
     | '/festivals/new'
+    | '/g/$slug'
     | '/marketplace/$listingId'
     | '/o/$slug'
     | '/posts/$postId'
+    | '/r/$slug'
     | '/stories/$storyId'
     | '/t/$ticketId'
     | '/tickets/$ticketId'
     | '/u/$username'
+    | '/v/$slug'
     | '/videos/$id'
     | '/admin/'
     | '/events/'
@@ -1202,6 +1286,7 @@ export interface RootRouteChildren {
   TicketingRoute: typeof TicketingRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   WelcomeRoute: typeof WelcomeRoute
+  ASlugRoute: typeof ASlugRoute
   AdminActivityRoute: typeof AdminActivityRoute
   AdminBlockedEmailsRoute: typeof AdminBlockedEmailsRoute
   AdminContentRoute: typeof AdminContentRoute
@@ -1211,6 +1296,9 @@ export interface RootRouteChildren {
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
   AdminTrashRoute: typeof AdminTrashRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AoSlugRoute: typeof AoSlugRoute
+  BSlugRoute: typeof BSlugRoute
+  CaSlugRoute: typeof CaSlugRoute
   EditEventEventIdRoute: typeof EditEventEventIdRoute
   EditPostIdRoute: typeof EditPostIdRoute
   EditStoryIdRoute: typeof EditStoryIdRoute
@@ -1219,12 +1307,15 @@ export interface RootRouteChildren {
   EventsNewRoute: typeof EventsNewRoute
   FestivalsEventIdRoute: typeof FestivalsEventIdRoute
   FestivalsNewRoute: typeof FestivalsNewRoute
+  GSlugRoute: typeof GSlugRoute
   OSlugRoute: typeof OSlugRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
+  RSlugRoute: typeof RSlugRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
   TTicketIdRoute: typeof TTicketIdRoute
   TicketsTicketIdRoute: typeof TicketsTicketIdRoute
   UUsernameRoute: typeof UUsernameRoute
+  VSlugRoute: typeof VSlugRoute
   VideosIdRoute: typeof VideosIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
@@ -1652,6 +1743,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v/$slug': {
+      id: '/v/$slug'
+      path: '/v/$slug'
+      fullPath: '/v/$slug'
+      preLoaderRoute: typeof VSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -1680,6 +1778,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoriesStoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/$slug': {
+      id: '/r/$slug'
+      path: '/r/$slug'
+      fullPath: '/r/$slug'
+      preLoaderRoute: typeof RSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$postId': {
       id: '/posts/$postId'
       path: '/posts/$postId'
@@ -1700,6 +1805,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/marketplace/$listingId'
       preLoaderRoute: typeof MarketplaceListingIdRouteImport
       parentRoute: typeof MarketplaceRoute
+    }
+    '/g/$slug': {
+      id: '/g/$slug'
+      path: '/g/$slug'
+      fullPath: '/g/$slug'
+      preLoaderRoute: typeof GSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/festivals/new': {
       id: '/festivals/new'
@@ -1755,6 +1867,27 @@ declare module '@tanstack/react-router' {
       path: '/edit-event/$eventId'
       fullPath: '/edit-event/$eventId'
       preLoaderRoute: typeof EditEventEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/$slug': {
+      id: '/ca/$slug'
+      path: '/ca/$slug'
+      fullPath: '/ca/$slug'
+      preLoaderRoute: typeof CaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/b/$slug': {
+      id: '/b/$slug'
+      path: '/b/$slug'
+      fullPath: '/b/$slug'
+      preLoaderRoute: typeof BSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ao/$slug': {
+      id: '/ao/$slug'
+      path: '/ao/$slug'
+      fullPath: '/ao/$slug'
+      preLoaderRoute: typeof AoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -1818,6 +1951,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/activity'
       fullPath: '/admin/activity'
       preLoaderRoute: typeof AdminActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/a/$slug': {
+      id: '/a/$slug'
+      path: '/a/$slug'
+      fullPath: '/a/$slug'
+      preLoaderRoute: typeof ASlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/o/$slug_/donate': {
@@ -1965,6 +2105,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketingRoute: TicketingRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   WelcomeRoute: WelcomeRoute,
+  ASlugRoute: ASlugRoute,
   AdminActivityRoute: AdminActivityRoute,
   AdminBlockedEmailsRoute: AdminBlockedEmailsRoute,
   AdminContentRoute: AdminContentRoute,
@@ -1974,6 +2115,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminStripeLogsRoute: AdminStripeLogsRoute,
   AdminTrashRoute: AdminTrashRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AoSlugRoute: AoSlugRoute,
+  BSlugRoute: BSlugRoute,
+  CaSlugRoute: CaSlugRoute,
   EditEventEventIdRoute: EditEventEventIdRoute,
   EditPostIdRoute: EditPostIdRoute,
   EditStoryIdRoute: EditStoryIdRoute,
@@ -1982,12 +2126,15 @@ const rootRouteChildren: RootRouteChildren = {
   EventsNewRoute: EventsNewRoute,
   FestivalsEventIdRoute: FestivalsEventIdRoute,
   FestivalsNewRoute: FestivalsNewRoute,
+  GSlugRoute: GSlugRoute,
   OSlugRoute: OSlugRoute,
   PostsPostIdRoute: PostsPostIdRoute,
+  RSlugRoute: RSlugRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,
   TTicketIdRoute: TTicketIdRoute,
   TicketsTicketIdRoute: TicketsTicketIdRoute,
   UUsernameRoute: UUsernameRoute,
+  VSlugRoute: VSlugRoute,
   VideosIdRoute: VideosIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
