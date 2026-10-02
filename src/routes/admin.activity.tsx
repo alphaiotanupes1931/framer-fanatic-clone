@@ -10,6 +10,7 @@ import {
   Activity as ActivityIcon, Copy, Download, FileText, PenLine, Ticket, Video,
   Users, MessageCircle, UserPlus, ShoppingBag, Loader2,
 } from "lucide-react";
+import { orgPath } from "@/lib/org-paths";
 
 export const Route = createFileRoute("/admin/activity")({
   component: ActivityFeedPage,
@@ -133,7 +134,7 @@ function ActivityFeedPage() {
       for (const v of videos.data || [])
         raw.push({ id: `video-${v.id}`, kind: "video", actorId: v.user_id, actorName: "", action: "uploaded a video", detail: (v.title || "").trim(), at: v.created_at });
       for (const o of orgs.data || [])
-        raw.push({ id: `org-${o.id}`, kind: "page", actorId: o.owner_id, actorName: "", action: `created a ${o.type || "page"} page`, detail: (o.name || "").trim(), at: o.created_at, to: `/o/${o.slug}` });
+        raw.push({ id: `org-${o.id}`, kind: "page", actorId: o.owner_id, actorName: "", action: `created a ${o.type || "page"} page`, detail: (o.name || "").trim(), at: o.created_at, to: orgPath(o.type, o.slug) });
       for (const c of comments.data || [])
         raw.push({ id: `comment-${c.id}`, kind: "comment", actorId: c.user_id, actorName: "", action: "commented", detail: (c.body || "").replace(/\s+/g, " ").trim(), at: c.created_at, to: `/posts/${c.post_id}` });
       for (const m of members.data || [])

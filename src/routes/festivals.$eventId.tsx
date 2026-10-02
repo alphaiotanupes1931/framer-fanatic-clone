@@ -14,6 +14,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { pageHead } from "@/lib/seo";
+import { orgPath } from "@/lib/org-paths";
 import { externalShare } from "@/lib/share-preview";
 import { siteUrl, titleCase } from "@/lib/utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
@@ -682,7 +683,7 @@ function FestivalDetailPage() {
     if (event.organization_id) {
       const { data: org } = await supabase
         .from("organizations")
-        .select("name,slug,bio,avatar_url,website")
+        .select("name,slug,type,bio,avatar_url,website")
         .eq("id", event.organization_id)
         .maybeSingle();
       if (org) {
@@ -691,7 +692,7 @@ function FestivalDetailPage() {
           name: org.name,
           bio: org.bio,
           avatar: org.avatar_url,
-          href: `/o/${org.slug}`,
+          href: orgPath(org.type, org.slug),
           website: org.website,
         };
       }
@@ -1646,7 +1647,7 @@ function FestivalDetailPage() {
           <section className="mt-8 scroll-mt-24">
             <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-foreground"><MapPin className="h-5 w-5" /> Nearby on Planet Baltimore</h2>
             <div className="mt-6 space-y-7">
-              {data!.nearby.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Sparkles className="h-4 w-4" /> Nearby Arts Organizations <span className="text-xs font-normal text-muted-foreground">({data!.nearby.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearby.map((o) => <NearbyCard key={o.id} href={`/o/${o.slug}`} image={o.banner_url || o.avatar_url} label={o.subtype || o.type} title={o.name} description={o.tagline || o.bio} />)}</div></div>}
+              {data!.nearby.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Sparkles className="h-4 w-4" /> Nearby Arts Organizations <span className="text-xs font-normal text-muted-foreground">({data!.nearby.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearby.map((o) => <NearbyCard key={o.id} href={orgPath(o.type, o.slug)} image={o.banner_url || o.avatar_url} label={o.subtype || o.type} title={o.name} description={o.tagline || o.bio} />)}</div></div>}
               {data!.nearbyArtists.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Users className="h-4 w-4" /> Nearby Artists <span className="text-xs font-normal text-muted-foreground">({data!.nearbyArtists.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearbyArtists.map((artist) => <NearbyCard key={artist.id} href={`/${artist.username ?? ""}`} image={artist.banner_url || artist.avatar_url} label={artist.category} title={titleCase(artist.display_name || artist.username || "Artist")} description={artist.bio} />)}</div></div>}
             </div>
           </section>

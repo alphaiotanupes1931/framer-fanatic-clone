@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Canonical organization pages use type-prefixed short URLs through the shared page-link helpers, while `/o/:slug` remains redirect-only for compatibility.
