@@ -100,9 +100,18 @@ export function invalidateCurrentProfile() {
  * bounced to the sign-in screen.
  */
 const PUBLIC_PATH_PREFIXES = ["/events", "/t/", "/invite", "/auth", "/reset-password", "/business-login", "/u/", "/o/"];
+// Profiles live at /:username, so any root path that is not a known private
+// section must be treated as public (it may be someone's profile).
+const PRIVATE_PATH_PREFIXES = [
+  "/dashboard", "/profile", "/settings", "/messages", "/notifications",
+  "/saved", "/create-", "/edit-", "/admin", "/organizer-studio",
+  "/promoter-dashboard", "/ticket-sales-dashboard", "/scan", "/referrals",
+  "/reports", "/onboarding",
+];
 
 function isPublicPath(pathname: string) {
-  return PUBLIC_PATH_PREFIXES.some((p) => pathname.startsWith(p));
+  if (PUBLIC_PATH_PREFIXES.some((p) => pathname.startsWith(p))) return true;
+  return !PRIVATE_PATH_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
 export function useCurrentProfile() {

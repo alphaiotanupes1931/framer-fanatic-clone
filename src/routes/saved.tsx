@@ -389,7 +389,7 @@ function SavedTile({ post, onUnsave }: { post: SavedPost; onUnsave: () => void }
       </div>
       {post.author?.username && (
         <Link
-          to="/u/$username"
+          to="/$username"
           params={{ username: post.author.username }}
           className="absolute inset-x-0 top-0 flex items-center gap-2 bg-gradient-to-b from-black/55 to-transparent px-2.5 py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         >

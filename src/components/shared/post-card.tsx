@@ -90,7 +90,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   const isRepost = !!(post.repost_of_post_id || post.repost_of_event_id);
   const [isFeatured, setIsFeatured] = useState(!!post.featured);
   const [featuring, setFeaturing] = useState(false);
-  const authorProfilePath = post.author_username ? { to: "/u/$username" as const, params: { username: post.author_username } } : null;
+  const authorProfilePath = post.author_username ? { to: "/$username" as const, params: { username: post.author_username } } : null;
 
   const toggleFeatured = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();

@@ -66,7 +66,7 @@ function PodcastsPage() {
               return (
                 <Link
                   key={p.id}
-                  to="/u/$username"
+                  to="/$username"
                   params={{ username: p.username || p.id }}
                   className="group flex gap-4 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-orange-300 hover:shadow-sm"
                 >

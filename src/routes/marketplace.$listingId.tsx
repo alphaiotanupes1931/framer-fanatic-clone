@@ -170,7 +170,7 @@ function ListingDetail() {
           {seller && (
             <div className="rounded-3xl border border-border bg-card p-5">
               <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Seller</div>
-              <Link to="/u/$username" params={{ username: seller.username || seller.id }} className="flex items-center gap-3">
+              <Link to="/$username" params={{ username: seller.username || seller.id }} className="flex items-center gap-3">
                 <Avatar className="h-11 w-11">
                   {seller.avatar_url && <SmartAvatarImage src={seller.avatar_url} alt="" />}
                   <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>

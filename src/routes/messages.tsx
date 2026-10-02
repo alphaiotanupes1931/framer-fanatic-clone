@@ -49,7 +49,7 @@ function SharePreviewCard({ preview, mine }: { preview: SharePreview; mine: bool
   if (preview.type === "story") return <Link to="/stories/$storyId" params={{ storyId: preview.id }}>{inner}</Link>;
   if (preview.type === "event") return <Link to="/events/$eventId" params={{ eventId: preview.id }}>{inner}</Link>;
   if (preview.type === "video") return <Link to="/videos/$id" params={{ id: preview.id }}>{inner}</Link>;
-  if (preview.type === "profile") return <Link to="/u/$username" params={{ username: preview.id }}>{inner}</Link>;
+  if (preview.type === "profile") return <Link to="/$username" params={{ username: preview.id }}>{inner}</Link>;
   if (preview.type === "organization") return <Link to="/o/$slug" params={{ slug: preview.id }}>{inner}</Link>;
   return <Link to="/posts/$postId" params={{ postId: preview.id }}>{inner}</Link>;
 }
@@ -734,7 +734,7 @@ function MessagesPage() {
                 >
                   {!c.is_group && c.other?.username ? (
                     <Link
-                      to="/u/$username"
+                      to="/$username"
                       params={{ username: c.other.username }}
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -763,12 +763,12 @@ function MessagesPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
-                            navigate({ to: "/u/$username", params: { username: c.other!.username! } });
+                            navigate({ to: "/$username", params: { username: c.other!.username! } });
                           }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               e.stopPropagation();
-                              navigate({ to: "/u/$username", params: { username: c.other!.username! } });
+                              navigate({ to: "/$username", params: { username: c.other!.username! } });
                             }
                           }}
                           className="truncate text-sm font-semibold text-foreground hover:underline"
@@ -863,7 +863,7 @@ function MessagesPage() {
                   <ArrowLeft className="h-5 w-5" />
                 </button>
                 {!active.is_group && active.other?.username ? (
-                  <Link to="/u/$username" params={{ username: active.other.username }}>
+                  <Link to="/$username" params={{ username: active.other.username }}>
                     <Avatar className="h-9 w-9">
                       {active.other?.avatar_url && (
                         <SmartAvatarImage src={active.other.avatar_url} alt="" />
@@ -923,7 +923,7 @@ function MessagesPage() {
                 <div className="min-w-0">
                   {!active.is_group && active.other?.username ? (
                     <Link
-                      to="/u/$username"
+                      to="/$username"
                       params={{ username: active.other.username }}
                       className="block truncate font-semibold text-foreground hover:underline"
                     >
@@ -936,7 +936,7 @@ function MessagesPage() {
                   )}
                   {active.other?.username ? (
                     <Link
-                      to="/u/$username"
+                      to="/$username"
                       params={{ username: active.other.username }}
                       className="block truncate text-xs text-muted-foreground hover:underline"
                     >
@@ -989,7 +989,7 @@ function MessagesPage() {
                       {!mine && (
                         <div className="w-7 shrink-0">
                           {showAvatar && sender?.username ? (
-                            <Link to="/u/$username" params={{ username: sender.username }}>
+                            <Link to="/$username" params={{ username: sender.username }}>
                               <Avatar className="h-7 w-7">
                                 {sender.avatar_url && (
                                   <SmartAvatarImage src={sender.avatar_url} alt="" />
@@ -1032,7 +1032,7 @@ function MessagesPage() {
                             {showSenderName && (
                               sender?.username ? (
                                 <Link
-                                  to="/u/$username"
+                                  to="/$username"
                                   params={{ username: sender.username }}
                                   className="mb-1 block truncate text-xs font-semibold text-primary hover:underline"
                                 >
@@ -1366,7 +1366,7 @@ function MessagesPage() {
                   p.username ? (
                     <Link
                       key={p.id}
-                      to="/u/$username"
+                      to="/$username"
                       params={{ username: p.username }}
                       onClick={() => setMembersOpen(false)}
                       className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted"

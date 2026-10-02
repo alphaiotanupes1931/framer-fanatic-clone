@@ -98,7 +98,7 @@ export function RightSidebar() {
             {artists.map((a: any) => (
               <Link
                 key={a.id}
-                to="/u/$username"
+                to="/$username"
                 params={{ username: a.username || a.id }}
                 className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-slate-50"
               >

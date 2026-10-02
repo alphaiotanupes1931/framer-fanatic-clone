@@ -6,7 +6,7 @@ const PATHS: Record<string, (id: string) => string> = {
   post: (id) => `/posts/${id}`,
   story: (id) => `/stories/${id}`,
   event: (id) => `/events/${id}`,
-  user: (id) => `/u/${id}`,
+  user: (id) => `/${id}`,
   video: (id) => `/videos/${id}`,
   comment: () => `/reports`,
   message: () => `/reports`,

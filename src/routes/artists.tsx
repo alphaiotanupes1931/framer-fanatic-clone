@@ -263,7 +263,7 @@ function FindCreatorPage() {
                     </Link>
                   ) : (
                     <Link
-                      to="/u/$username"
+                      to="/$username"
                       params={{ username: c.username || c.id }}
                       className="block text-left"
                     >

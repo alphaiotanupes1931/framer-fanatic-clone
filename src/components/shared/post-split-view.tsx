@@ -169,7 +169,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
   const isOwner = meId && meId === post.user_id;
   const isRepost = !!(post.repost_of_post_id || post.repost_of_event_id);
   const isTextOnly = !hasMedia;
-  const authorProfilePath = author?.username ? { to: "/u/$username" as const, params: { username: author.username } } : null;
+  const authorProfilePath = author?.username ? { to: "/$username" as const, params: { username: author.username } } : null;
 
   return (
     <div className={`grid overflow-hidden bg-background ${isTextOnly ? "md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "md:grid-cols-[minmax(0,1.2fr)_minmax(320px,420px)]"}`}>

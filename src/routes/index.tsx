@@ -785,13 +785,13 @@ function DailyCreators() {
           href={
             c.kind === "business" || c.kind === "arts_org"
               ? c.slug ? `/o/${c.slug}` : "#"
-              : c.username ? `/u/${c.username}` : "#"
+              : c.username ? `/${c.username}` : "#"
           }
           onClick={(e) => {
             const target =
               c.kind === "business" || c.kind === "arts_org"
                 ? c.slug ? `/o/${c.slug}` : null
-                : c.username ? `/u/${c.username}` : null;
+                : c.username ? `/${c.username}` : null;
             if (!target) { e.preventDefault(); return; }
             if (!signedIn) {
               e.preventDefault();

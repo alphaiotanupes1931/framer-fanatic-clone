@@ -164,7 +164,7 @@ function SearchPage() {
               <Section title="People">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {people.slice(0, tab === "All" ? 6 : 24).map((p) => (
-                    <Link key={p.id} to="/u/$username" params={{ username: p.username || p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <Link key={p.id} to="/$username" params={{ username: p.username || p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
                       <Avatar className="h-11 w-11 shrink-0">
                         {p.avatar_url && <SmartAvatarImage src={p.avatar_url} />}
                         <AvatarFallback>{(p.display_name || p.username || "U").slice(0, 2).toUpperCase()}</AvatarFallback>

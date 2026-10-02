@@ -543,7 +543,7 @@ function ProfilePage() {
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
                   {followerPreview.slice(0, 4).map((u) => (
-                    <Link key={u.id} to="/u/$username" params={{ username: u.username || u.id }}>
+                    <Link key={u.id} to="/$username" params={{ username: u.username || u.id }}>
                       <Img
                         src={(u as any).avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.display_name || u.username || "u")}`}
                         alt=""
@@ -556,7 +556,7 @@ function ProfilePage() {
                   <span>Followed by </span>
                   {followerPreview.slice(0, 2).map((u, i) => (
                     <span key={u.id}>
-                      <Link to="/u/$username" params={{ username: u.username || u.id }} className="font-semibold text-foreground hover:text-[#d4580a] transition-colors">
+                      <Link to="/$username" params={{ username: u.username || u.id }} className="font-semibold text-foreground hover:text-[#d4580a] transition-colors">
                         {(u.display_name || u.username || "user").split(" ")[0]}
                       </Link>
                       {i < Math.min(followerPreview.length, 2) - 1 && <span>, </span>}
@@ -714,19 +714,19 @@ function ProfilePage() {
       <ShareToUsersDialog
         open={shareInAppOpen}
         onClose={() => setShareInAppOpen(false)}
-        url={siteUrl(`/u/${profile?.username ?? ""}`)}
+        url={siteUrl(`/${profile?.username ?? ""}`)}
         title={profile?.display_name || profile?.username || "Profile"}
       />
       <ExternalShareDialog
         open={shareExternalOpen}
         onClose={() => setShareExternalOpen(false)}
-        url={siteUrl(`/u/${profile?.username ?? ""}`)}
+        url={siteUrl(`/${profile?.username ?? ""}`)}
         title={`${profile?.display_name || profile?.username || "Profile"} on Planet Baltimore`}
       />
       <InviteFriendsDialog
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
-        inviteUrl={siteUrl(`/u/${profile?.username ?? ""}`)}
+        inviteUrl={siteUrl(`/${profile?.username ?? ""}`)}
       />
       <ReferralNetworkDialog
         open={referralOpen}
@@ -1338,7 +1338,7 @@ function CVSection({ section, userId, items, canEdit, onChange }: {
 
 function ArtistInviteTab({ profile }: { profile: any }) {
   const url = typeof window !== "undefined" && profile?.username
-    ? siteUrl(`/u/${profile.username}`)
+    ? siteUrl(`/${profile.username}`)
     : "";
   return (
     <div className="rounded-xl border border-border p-6 space-y-4">

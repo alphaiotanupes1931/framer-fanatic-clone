@@ -306,7 +306,7 @@ function AuthorLink({ handle, className, children }: { handle: string | null; cl
   if (!handle) return <div className={className}>{children}</div>;
   return (
     <Link
-      to="/u/$username"
+      to="/$username"
       params={{ username: handle }}
       className={className}
       onClick={(e) => e.stopPropagation()}

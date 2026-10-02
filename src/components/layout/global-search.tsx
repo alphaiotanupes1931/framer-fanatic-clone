@@ -92,7 +92,7 @@ export function GlobalSearch({ className = "", compact = false }: { className?: 
           title: p.display_name || p.username || "Someone",
           subtitle: [p.username ? `@${p.username}` : null, p.neighborhood].filter(Boolean).join(" · "),
           avatar: p.avatar_url,
-          go: () => navigate({ to: "/u/$username", params: { username: p.username || p.id } }),
+          go: () => navigate({ to: "/$username", params: { username: p.username || p.id } }),
         });
       }
       for (const n of (hoods.data ?? []) as { id: string; name: string; region: string }[]) {

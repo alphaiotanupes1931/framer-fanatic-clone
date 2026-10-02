@@ -92,7 +92,7 @@ export function LikesListDialog({
               return (
                 <Link
                   key={person.id}
-                  to="/u/$username"
+                  to="/$username"
                   params={{ username: person.username || person.id }}
                   onClick={() => onOpenChange(false)}
                   className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary"

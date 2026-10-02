@@ -206,7 +206,7 @@ function StoryDetail() {
         </div>
 
         {author?.username ? (
-          <Link to="/u/$username" params={{ username: author.username }} className="mt-5 flex items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-3">
+          <Link to="/$username" params={{ username: author.username }} className="mt-5 flex items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-3">
             <Avatar className="h-11 w-11">
               {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
               <AvatarFallback className="bg-[#d4580a]/10 text-[#d4580a]">{initials}</AvatarFallback>

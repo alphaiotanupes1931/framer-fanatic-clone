@@ -122,7 +122,7 @@ export const Route = createFileRoute("/events/$eventId")({
       organizer: {
         "@type": "Organization",
         name: e.hostName || "Planet Baltimore",
-        url: e.hostUsername ? `${SITE}/u/${e.hostUsername}` : SITE,
+        url: e.hostUsername ? `${SITE}/${e.hostUsername}` : SITE,
       },
     };
     if (e.endsAt) jsonLd.endDate = e.endsAt;
@@ -484,7 +484,7 @@ function EventDetail() {
         )}
 
         {host && (
-          <Link to="/u/$username" params={{ username: host.username || host.id }} className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors">
+          <Link to="/$username" params={{ username: host.username || host.id }} className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors">
             <Avatar className="w-10 h-10">
               <SmartAvatarImage src={host.avatar_url ?? undefined} />
               <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>{(host.display_name || host.username || "?").charAt(0)}</AvatarFallback>
@@ -728,7 +728,7 @@ function EventDetail() {
                   <h3 className="text-sm font-bold text-foreground mb-3">Nearby Artists ({nearbyArtists.length})</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {nearbyArtists.map((artist) => (
-                      <Link key={artist.id} to="/u/$username" params={{ username: artist.username ?? "" }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
+                      <Link key={artist.id} to="/$username" params={{ username: artist.username ?? "" }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
                         {artist.category && <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{artist.category.replaceAll("_", " ")}</div>}
                         <div className="mt-0.5 text-sm font-bold text-foreground">{titleCase(artist.display_name || artist.username || "Artist")}</div>
                         {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{artist.bio}</p>}
