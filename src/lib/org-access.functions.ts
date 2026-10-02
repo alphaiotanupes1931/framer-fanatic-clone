@@ -131,18 +131,21 @@ export const resolveOrgSlug = createServerFn({ method: "GET" })
   .inputValidator((data: { slug: string }) => data)
   .handler(async ({ data }) => {
     try {
+      // Shared URLs are lowercase, but people often type the page name with
+      // capitals. Resolve those to the canonical slug before loading the page.
+      const slug = data.slug.toLowerCase();
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: current } = await supabaseAdmin
         .from("organizations")
         .select("slug, type")
-        .eq("slug", data.slug)
+        .eq("slug", slug)
         .maybeSingle();
       if (current) return { slug: current.slug as string, type: current.type as string };
 
       const { data: alias } = await supabaseAdmin
         .from("organization_slug_aliases")
         .select("organization_id")
-        .eq("old_slug", data.slug)
+        .eq("old_slug", slug)
         .maybeSingle();
       if (!alias) return { slug: null, type: null };
 
