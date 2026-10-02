@@ -46,6 +46,8 @@ export function clearStaffMode() {
 
 /** Paths an employee may visit while signed in through a staff login. */
 export function isStaffAllowedPath(pathname: string, slug: string): boolean {
+  const m = pathname.match(/^\/(o|a|ao|b|ca|g|r|v)\/([^/]+)/);
+  if (m && m[2] === slug) return true;
   if (pathname === `/o/${slug}`) return true;
   if (pathname.startsWith(`/o/${slug}/`)) return true;
   // Employees get the business page and nothing else on the owner's account.

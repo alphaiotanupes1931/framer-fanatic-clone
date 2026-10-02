@@ -99,7 +99,7 @@ export function invalidateCurrentProfile() {
  * Routes signed-out visitors (and search crawlers) may read without being
  * bounced to the sign-in screen.
  */
-const PUBLIC_PATH_PREFIXES = ["/events", "/t/", "/invite", "/auth", "/reset-password", "/business-login", "/u/", "/o/"];
+const PUBLIC_PATH_PREFIXES = ["/events", "/t/", "/invite", "/auth", "/reset-password", "/business-login", "/u/", "/o/", "/a/", "/ao/", "/b/", "/ca/", "/g/", "/r/", "/v/"];
 // Profiles live at /:username, so any root path that is not a known private
 // section must be treated as public (it may be someone's profile).
 const PRIVATE_PATH_PREFIXES = [
