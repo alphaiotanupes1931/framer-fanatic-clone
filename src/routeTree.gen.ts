@@ -67,6 +67,7 @@ import { Route as FestivalsIndexRouteImport } from './routes/festivals.index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VideosIdRouteImport } from './routes/videos.$id'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as TicketsTicketIdRouteImport } from './routes/tickets.$ticketId'
 import { Route as TTicketIdRouteImport } from './routes/t.$ticketId'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
@@ -393,6 +394,11 @@ const VideosIdRoute = VideosIdRouteImport.update({
   path: '/videos/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TicketsTicketIdRoute = TicketsTicketIdRouteImport.update({
   id: '/tickets/$ticketId',
   path: '/tickets/$ticketId',
@@ -645,6 +651,7 @@ export interface FileRoutesByFullPath {
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
+  '/u/$username': typeof UUsernameRoute
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -739,6 +746,7 @@ export interface FileRoutesByTo {
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
+  '/u/$username': typeof UUsernameRoute
   '/videos/$id': typeof VideosIdRoute
   '/admin': typeof AdminIndexRoute
   '/events': typeof EventsIndexRoute
@@ -834,6 +842,7 @@ export interface FileRoutesById {
   '/stories/$storyId': typeof StoriesStoryIdRoute
   '/t/$ticketId': typeof TTicketIdRoute
   '/tickets/$ticketId': typeof TicketsTicketIdRoute
+  '/u/$username': typeof UUsernameRoute
   '/videos/$id': typeof VideosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -930,6 +939,7 @@ export interface FileRouteTypes {
     | '/stories/$storyId'
     | '/t/$ticketId'
     | '/tickets/$ticketId'
+    | '/u/$username'
     | '/videos/$id'
     | '/admin/'
     | '/events/'
@@ -1024,6 +1034,7 @@ export interface FileRouteTypes {
     | '/stories/$storyId'
     | '/t/$ticketId'
     | '/tickets/$ticketId'
+    | '/u/$username'
     | '/videos/$id'
     | '/admin'
     | '/events'
@@ -1118,6 +1129,7 @@ export interface FileRouteTypes {
     | '/stories/$storyId'
     | '/t/$ticketId'
     | '/tickets/$ticketId'
+    | '/u/$username'
     | '/videos/$id'
     | '/admin/'
     | '/events/'
@@ -1212,6 +1224,7 @@ export interface RootRouteChildren {
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
   TTicketIdRoute: typeof TTicketIdRoute
   TicketsTicketIdRoute: typeof TicketsTicketIdRoute
+  UUsernameRoute: typeof UUsernameRoute
   VideosIdRoute: typeof VideosIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
@@ -1639,6 +1652,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tickets/$ticketId': {
       id: '/tickets/$ticketId'
       path: '/tickets/$ticketId'
@@ -1967,6 +1987,7 @@ const rootRouteChildren: RootRouteChildren = {
   StoriesStoryIdRoute: StoriesStoryIdRoute,
   TTicketIdRoute: TTicketIdRoute,
   TicketsTicketIdRoute: TicketsTicketIdRoute,
+  UUsernameRoute: UUsernameRoute,
   VideosIdRoute: VideosIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
