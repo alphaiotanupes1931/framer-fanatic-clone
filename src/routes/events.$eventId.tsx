@@ -27,6 +27,7 @@ import { emailMyTickets } from "@/lib/tickets.functions";
 import { isPaidEvent } from "@/lib/event-pricing";
 import { ensureLiveSession } from "@/lib/session-health";
 import { setPostAuthRedirect } from "@/lib/pending-join";
+import { OrgLink } from "@/components/org/org-link";
 
 type EventRow = {
   id: string; user_id: string; title: string; description: string | null;
@@ -713,12 +714,12 @@ function EventDetail() {
                   <h3 className="text-sm font-bold text-foreground mb-3">Nearby Arts Organizations ({nearbyOrgs.length})</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {nearbyOrgs.map((o) => (
-                      <Link key={o.id} to="/o/$slug" params={{ slug: o.slug }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
+                      <OrgLink key={o.id} type={o.type} slug={o.slug} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
                         <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{(o.subtype || o.type).replaceAll("_", " ")}</div>
                         <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
                         {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{o.tagline || o.bio}</p>}
                         <span className="mt-3 inline-block text-xs font-semibold" style={{ color: "#d4580a" }}>View</span>
-                      </Link>
+                      </OrgLink>
                     ))}
                   </div>
                 </div>
