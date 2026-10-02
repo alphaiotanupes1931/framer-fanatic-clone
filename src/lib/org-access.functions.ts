@@ -147,7 +147,22 @@ export const resolveOrgSlug = createServerFn({ method: "GET" })
         .select("organization_id")
         .eq("old_slug", slug)
         .maybeSingle();
-      if (!alias) return { slug: null, type: null };
+      if (!alias) {
+        // People often type a shorter version of the page name (for example
+        // "ainsleyburrows" for "ainsleyburrowsmighty") or add dashes. Use the
+        // joined form and send them to the page only when exactly one matches.
+        const joined = slug.replace(/[^a-z0-9]/g, "");
+        if (joined.length < 4) return { slug: null, type: null };
+        const { data: exact } = await supabaseAdmin
+          .from("organizations").select("slug, type").eq("slug", joined).maybeSingle();
+        if (exact) return { slug: exact.slug as string, type: exact.type as string };
+        const { data: starts } = await supabaseAdmin
+          .from("organizations").select("slug, type").like("slug", `${joined}%`).limit(2);
+        if (starts && starts.length === 1) {
+          return { slug: starts[0].slug as string, type: starts[0].type as string };
+        }
+        return { slug: null, type: null };
+      }
 
       const { data: organization } = await supabaseAdmin
         .from("organizations")
