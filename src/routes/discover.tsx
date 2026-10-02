@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, Palette, TrendingUp, Users, Building2, MapPin, BookOpen } from "lucide-react";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
+import { OrgLink } from "@/components/org/org-link";
 
 type EventRow = { id: string; title: string; description: string | null; image_url: string | null; starts_at: string; location: string | null; category?: string | null };
 type Creator = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood?: string | null; role?: string | null };
@@ -149,7 +150,7 @@ function DiscoverPage() {
             <SectionHead icon={Building2} title="Businesses" to="/businesses" />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {fBiz.slice(0, 6).map((b) => (
-                <Link key={b.id} to="/o/$slug" params={{ slug: b.slug }}
+                <OrgLink key={b.id} type={b.type} slug={b.slug}
                   className="bg-card border border-border rounded-xl p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all duration-200 group">
                   <Avatar className="w-20 h-20 mx-auto mb-3 rounded-xl">
                     <SmartAvatarImage src={b.avatar_url ?? undefined} className="rounded-xl" />
@@ -157,7 +158,7 @@ function DiscoverPage() {
                   </Avatar>
                   <p className="font-semibold truncate group-hover:text-[#d4580a] transition-colors">{b.name}</p>
                   <p className="text-xs text-muted-foreground truncate capitalize">{b.neighborhood || "Business"}</p>
-                </Link>
+                </OrgLink>
               ))}
             </div>
           </section>
@@ -198,7 +199,7 @@ function DiscoverPage() {
 
 function OrgRow({ o }: { o: Org }) {
   return (
-    <Link to="/o/$slug" params={{ slug: o.slug }}
+    <OrgLink type={o.type} slug={o.slug}
       className="flex items-center gap-3 bg-card border border-border rounded-xl p-3 hover:shadow-md hover:-translate-y-[1px] transition-all duration-200">
       <Avatar className="w-14 h-14 rounded-xl flex-shrink-0">
         <SmartAvatarImage src={o.avatar_url ?? undefined} className="rounded-xl" />
@@ -208,7 +209,7 @@ function OrgRow({ o }: { o: Org }) {
         <p className="text-sm font-semibold truncate">{o.name}</p>
         {o.neighborhood && <p className="text-xs text-muted-foreground truncate">{o.neighborhood}</p>}
       </div>
-    </Link>
+    </OrgLink>
   );
 }
 

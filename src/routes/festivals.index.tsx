@@ -13,6 +13,7 @@ import { pageHead } from "@/lib/seo";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { siteUrl } from "@/lib/utils";
+import { OrgLink } from "@/components/org/org-link";
 
 import { externalShare } from "@/lib/share-preview";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
@@ -1065,13 +1066,13 @@ function FestivalsPage() {
                     {o.bio && <p className="line-clamp-2 text-xs text-muted-foreground">{o.bio}</p>}
                     <div className="flex flex-wrap items-center gap-3">
                       <OrgFollowButton orgId={o.id} meId={me?.id} />
-                      <Link
-                        to="/o/$slug"
-                        params={{ slug: o.slug }}
+                      <OrgLink
+                        type="arts_org"
+                        slug={o.slug}
                         className="text-xs font-semibold text-orange"
                       >
                         View Organization →
-                      </Link>
+                      </OrgLink>
                     </div>
                   </div>
                 ))}

@@ -11,6 +11,7 @@ import { EventImage } from "@/components/event-image";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
+import { OrgLink } from "@/components/org/org-link";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
@@ -276,7 +277,7 @@ function NeighborhoodsPage() {
                       <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                         {activeOrgs.map((o) => (
                           <li key={o.id}>
-                            <Link to="/o/$slug" params={{ slug: o.slug }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                            <OrgLink type={o.type} slug={o.slug} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
                               <Avatar className="h-12 w-12 rounded-lg">
                                 {o.avatar_url && <SmartAvatarImage src={o.avatar_url} className="rounded-lg object-cover" />}
                                 <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{o.name.slice(0, 1).toUpperCase()}</AvatarFallback>
@@ -285,7 +286,7 @@ function NeighborhoodsPage() {
                                 <div className="truncate text-[15px] font-semibold text-foreground">{o.name}</div>
                                 {o.bio && <div className="truncate text-xs text-muted-foreground">{o.bio}</div>}
                               </div>
-                            </Link>
+                            </OrgLink>
                           </li>
                         ))}
                       </ul>
