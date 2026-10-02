@@ -38,6 +38,7 @@ export const getOrgSeo = createServerFn({ method: "GET" })
       return {
         indexable: true as const,
         name: row.name as string,
+        type: row.type as string,
         description: ((row.bio as string | null) ?? "").replace(/\s+/g, " ").slice(0, 155),
       };
     } catch {
@@ -108,5 +109,19 @@ export const getPrivateOrgFallback = createServerFn({ method: "GET" })
       };
     } catch {
       return null;
+    }
+  });
+
+/** Page kind by slug (not sensitive), used to send old /o/ links to the short URL. */
+export const getOrgType = createServerFn({ method: "GET" })
+  .inputValidator((data: { slug: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: row } = await supabaseAdmin
+        .from("organizations").select("type").eq("slug", data.slug).maybeSingle();
+      return { type: (row?.type as string | undefined) ?? null };
+    } catch {
+      return { type: null };
     }
   });
