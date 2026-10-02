@@ -334,7 +334,7 @@ function Onboarding() {
         return;
       }
 
-      const slug = `${slugify(pageName)}-${Math.random().toString(36).slice(2, 6)}`;
+      const slug = slugify(pageName);
       const { data: org, error: orgErr } = await supabase.from("organizations").insert({
         owner_id: uid,
         type: kind,
