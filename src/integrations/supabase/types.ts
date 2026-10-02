@@ -1948,6 +1948,32 @@ export type Database = {
           },
         ]
       }
+      organization_slug_aliases: {
+        Row: {
+          created_at: string
+          old_slug: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          old_slug: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          old_slug?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_slug_aliases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_sponsors: {
         Row: {
           blurb: string | null
