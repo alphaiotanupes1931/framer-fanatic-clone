@@ -9,4 +9,4 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Canonical organization pages use type-prefixed short URLs through the shared page-link helpers, while `/o/:slug` remains redirect-only for compatibility.
+- Canonical organization pages use type-prefixed, dashless slugs through shared page-link helpers; the database allocates collision-safe slugs and aliases old slugs, while `/o/:slug` remains redirect-only for compatibility.

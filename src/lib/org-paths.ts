@@ -17,3 +17,8 @@ export function orgPrefix(type: string | null | undefined): string {
 export function orgPath(type: string | null | undefined, slug: string): string {
   return `/${orgPrefix(type)}/${slug}`;
 }
+
+/** New page addresses are joined lowercase words; the database resolves collisions. */
+export function orgSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 60) || "page";
+}

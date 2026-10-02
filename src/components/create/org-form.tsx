@@ -18,10 +18,7 @@ import {
 } from "@/lib/staff-login.functions";
 import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
 import { StaffVerifyScreen } from "@/components/create/staff-verify-screen";
-
-function slugify(s: string) {
-  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "org";
-}
+import { orgSlug } from "@/lib/org-paths";
 
 export type OrgType = "arts_org" | "business" | "community_assoc" | "group";
 
@@ -129,7 +126,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     }
     setSaving(true);
     try {
-      const baseSlug = slugify(form.name);
+      const baseSlug = orgSlug(form.name);
       const slug = baseSlug;
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,

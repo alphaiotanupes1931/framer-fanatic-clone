@@ -7,3 +7,4 @@
 ## Active
 - [x] Verify admin "Live now" heartbeat works in browser (last_seen_at updates)
 - [x] Verify smaller attending privacy toggle renders
+- [ ] Remove dashes from all page links, preserve redirects, and verify collisions and page loading
