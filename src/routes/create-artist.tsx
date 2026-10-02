@@ -14,6 +14,7 @@ import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 import { setMyProfileKind } from "@/lib/profile-kind";
 import { useExistingPage, ExistingPageNotice } from "@/components/create/existing-page-notice";
+import { orgSlug } from "@/lib/org-paths";
 
 export const Route = createFileRoute("/create-artist")({
   component: CreateArtistPage,
@@ -27,10 +28,6 @@ export const Route = createFileRoute("/create-artist")({
 });
 
 const CATEGORIES = ["Music", "DJ", "Podcast", "Visual Art", "Photography", "Video", "Literary", "Fashion", "Mixed Media", "Performance", "Other"];
-
-function slugify(s: string) {
-  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "artist";
-}
 
 function CreateArtistPage() {
   const me = useCurrentProfile();
@@ -90,7 +87,7 @@ function CreateArtistPage() {
     try {
       // Artist pages are standalone organization pages. They must NOT change
       // the owner's personal (resident/visitor) profile in any way.
-      const slug = slugify(form.display_name);
+      const slug = orgSlug(form.display_name);
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type: "artist",

@@ -10,7 +10,7 @@ import { BANNER_SPEC } from "@/lib/media-guidelines";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { slugify } from "@/lib/categories";
+import { orgSlug } from "@/lib/org-paths";
 import { useExistingPage, ExistingPageNotice } from "@/components/create/existing-page-notice";
 
 export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visitor"; saveLabel: string }) {
@@ -68,7 +68,7 @@ export function ProfileKindForm({ kind, saveLabel }: { kind: "resident" | "visit
     try {
       // Resident/Visitor pages are standalone pages (like artist pages).
       // They must NOT modify the account profile the user signed up with.
-      const slug = slugify(form.display_name) || kind;
+      const slug = orgSlug(form.display_name);
       const { data, error } = await supabase.from("organizations").insert({
         owner_id: me.id,
         type: kind,

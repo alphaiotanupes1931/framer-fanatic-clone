@@ -24,6 +24,7 @@ import { setMyProfileKind } from "@/lib/profile-kind";
 import { popPostAuthRedirect } from "@/lib/pending-join";
 import { clearStaffMode, getStaffMode } from "@/lib/staff-mode";
 import { ensureLiveSession } from "@/lib/session-health";
+import { orgSlug } from "@/lib/org-paths";
 
 export const Route = createFileRoute("/onboarding")({
   validateSearch: (search: Record<string, unknown>): { preview?: boolean } =>
@@ -50,10 +51,6 @@ const US_STATES = [
   "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
   "VA", "WA", "WV", "WI", "WY",
 ];
-
-function slugify(s: string) {
-  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "page";
-}
 
 function validateCity(value: string) {
   const v = value.trim();
@@ -334,7 +331,7 @@ function Onboarding() {
         return;
       }
 
-      const slug = slugify(pageName);
+      const slug = orgSlug(pageName);
       const { data: org, error: orgErr } = await supabase.from("organizations").insert({
         owner_id: uid,
         type: kind,
