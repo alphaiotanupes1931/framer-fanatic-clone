@@ -24,8 +24,8 @@ const registry: Record<string, Prefetcher> = {
       todayStart.setHours(0, 0, 0, 0);
       const nowIso = todayStart.toISOString();
       const [evUp, evPast, ar, gr, bu, ne, st] = await Promise.all([
-        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(40),
-        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(20),
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").neq("is_published", false).gte("starts_at", nowIso).order("starts_at", { ascending: true }).limit(40),
+        supabase.from("events").select("id,title,description,image_url,starts_at,location,venue_name").neq("is_published", false).lt("starts_at", nowIso).order("starts_at", { ascending: false }).limit(20),
         supabase.rpc("public_creators", { lim: 60 }),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "group").limit(40),
         supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").eq("type", "business").limit(40),
@@ -142,6 +142,7 @@ const registry: Record<string, Prefetcher> = {
       const { data } = await supabase
         .from("events")
         .select("*")
+        .neq("is_published", false)
         .gte("starts_at", new Date().toISOString())
         .order("starts_at", { ascending: true })
         .limit(24);

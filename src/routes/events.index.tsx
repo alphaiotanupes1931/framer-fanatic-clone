@@ -193,6 +193,7 @@ function EventsPage() {
       const { data } = await supabase
         .from("events").select("*")
         .eq("is_private_org", false)
+        .neq("is_published", false)
         .gte("starts_at", cutoff.toISOString())
         .order("starts_at", { ascending: true }).limit(24);
       const rows = (data as EventRow[] | null) ?? [];
