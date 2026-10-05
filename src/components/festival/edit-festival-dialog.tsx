@@ -374,7 +374,9 @@ export function EditFestivalDialog({
     setTickets((t) => t.filter((x) => x.id !== id));
   };
 
-  const save = async () => {
+  const save = async (publishOverride?: boolean) => {
+    const pub = publishOverride ?? published;
+    if (publishOverride !== undefined) setPublished(publishOverride);
     if (!ev.title?.trim()) {
       toast.error("Give your festival a name");
       return;
@@ -404,7 +406,7 @@ export function EditFestivalDialog({
       donations_enabled: ev.admission === "donation",
       price_cents: priceCents,
       gallery_urls: galleryFinal,
-      is_published: published,
+      is_published: pub,
     };
     let targetId = eventId ?? "";
     if (isCreate) {
@@ -498,7 +500,7 @@ export function EditFestivalDialog({
         })) as never,
       );
     }
-    toast.success(isCreate ? (published ? "Festival published" : "Festival saved as draft") : "Festival updated");
+    toast.success(pub ? (isCreate || !published ? "Festival published" : "Festival updated") : "Draft saved. Find it anytime under Festivals, Drafts.");
     onOpenChange(false);
     onSaved();
     if (isCreate && targetId) void navigate({ to: "/festivals/$eventId", params: { eventId: targetId } });
@@ -611,17 +613,6 @@ export function EditFestivalDialog({
                   <LabeledInput label="Price (USD)" value={ev.price ?? ""} onChange={setEvField("price")} placeholder="25" />
                 )}
                 <LabeledInput label="Price label" value={det.price_label ?? ""} onChange={setDetField("price_label")} placeholder="Free or $55 to $120" />
-                <label className="block">
-                  <span className="text-xs font-semibold text-muted-foreground">Status</span>
-                  <select
-                    className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                    value={published ? "published" : "draft"}
-                    onChange={(e) => setPublished(e.target.value === "published")}
-                  >
-                    <option value="published">Published</option>
-                    <option value="draft">Draft</option>
-                  </select>
-                </label>
               </div>
             </Section>
 
@@ -779,9 +770,25 @@ export function EditFestivalDialog({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="button" variant="brand" disabled={saving} onClick={() => void save()}>
-                {saving ? "Saving…" : isCreate ? "Create Festival" : "Save Changes"}
-              </Button>
+              {(isCreate || !published) ? (
+                <>
+                  <Button type="button" variant="outline" disabled={saving} onClick={() => void save(false)}>
+                    {saving ? "Saving…" : "Save as Draft"}
+                  </Button>
+                  <Button type="button" variant="brand" disabled={saving} onClick={() => void save(true)}>
+                    {saving ? "Saving…" : "Publish Festival"}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button type="button" variant="outline" disabled={saving} onClick={() => void save(false)}>
+                    Move to Drafts
+                  </Button>
+                  <Button type="button" variant="brand" disabled={saving} onClick={() => void save(true)}>
+                    {saving ? "Saving…" : "Save Changes"}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}
