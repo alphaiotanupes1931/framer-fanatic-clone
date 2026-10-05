@@ -23,7 +23,8 @@ import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
 import { EventSocial } from "@/components/event-social";
 import { RichHtml } from "@/components/rich-html";
 import { getPublicEvent } from "@/lib/events.functions";
-import { emailMyTickets } from "@/lib/tickets.functions";
+import { emailMyTickets, cancelEvent } from "@/lib/tickets.functions";
+import { Textarea } from "@/components/ui/textarea";
 import { isPaidEvent } from "@/lib/event-pricing";
 import { ensureLiveSession } from "@/lib/session-health";
 import { setPostAuthRedirect } from "@/lib/pending-join";
@@ -168,6 +169,24 @@ function EventDetail() {
   const [isAdmin, setIsAdmin] = useState(false);
   const checkoutFn = useServerFn(createTicketCheckout);
   const [shareOpen, setShareOpen] = useState(false);
+  const cancelFn = useServerFn(cancelEvent);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelNote, setCancelNote] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const doCancel = async () => {
+    if (!evt) return;
+    setCancelling(true);
+    try {
+      const r = await cancelFn({ data: { eventId: evt.id, note: cancelNote } });
+      setEvt({ ...evt, status: "cancelled" });
+      setCancelOpen(false);
+      toast.success(r.total ? `Event cancelled. ${r.sent} of ${r.total} guests emailed.` : "Event cancelled. No one had RSVPed yet.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not cancel the event");
+    } finally {
+      setCancelling(false);
+    }
+  };
   const [photoViewerIdx, setPhotoViewerIdx] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
   const [savingBk, setSavingBk] = useState(false);
@@ -338,6 +357,7 @@ function EventDetail() {
 
   const rsvp = async () => {
     if (!evt) return;
+    if (evt.status === "cancelled") { toast.error("This event was cancelled"); return; }
     if (!(await requireUser())) return;
     setRsvping(true);
     try {
@@ -456,6 +476,11 @@ function EventDetail() {
             {evt.neighborhood && <Badge variant="outline" className="border-0 bg-accent/10 text-accent">{evt.neighborhood}</Badge>}
           </div>
           <h1 className="text-2xl font-bold text-foreground">{evt.title}</h1>
+          {evt.status === "cancelled" && (
+            <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
+              This event has been cancelled.
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl">
@@ -752,12 +777,34 @@ function EventDetail() {
                 <Edit3 className="w-4 h-4" />Edit Event
               </Button>
             )}
+            {evt.status !== "cancelled" && (
+              <Button variant="outline" size="sm" onClick={() => setCancelOpen(true)} className="gap-2">
+                <X className="w-4 h-4" />Cancel Event
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={remove} className="text-destructive hover:bg-destructive/10 hover:border-destructive transition-all duration-150">
               <Trash2 className="w-4 h-4 mr-2" />Delete Event
             </Button>
           </div>
         )}
       </div>
+      {cancelOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => !cancelling && setCancelOpen(false)}>
+          <div className="w-full max-w-md space-y-4 rounded-2xl bg-card p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <h2 className="text-lg font-bold text-foreground">Cancel this event?</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Everyone who RSVPed or has a ticket gets an email saying it's cancelled. The event stays on the page marked as cancelled.</p>
+            </div>
+            <Textarea value={cancelNote} onChange={(e) => setCancelNote(e.target.value)} rows={4} maxLength={2000} placeholder="Message to your guests (optional), like the reason or a new date" />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" disabled={cancelling} onClick={() => setCancelOpen(false)}>Keep event</Button>
+              <Button size="sm" disabled={cancelling} onClick={doCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                {cancelling ? "Cancelling..." : "Cancel event and notify"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {photoViewerIdx !== null && evt.gallery_urls && evt.gallery_urls[photoViewerIdx] && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
