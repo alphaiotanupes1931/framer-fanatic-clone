@@ -145,3 +145,22 @@ export const sendCompTicket = createServerFn({ method: "POST" })
     await supabaseAdmin.from("tickets").update({ ticket_sent_at: new Date().toISOString() }).eq("id", t.id);
     return { sent: true };
   });
+
+/**
+ * Organizer cancels an event: marks it cancelled and emails everyone who
+ * RSVPed or holds a ticket, with an optional note.
+ */
+export const cancelEvent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { eventId: string; note?: string }) => {
+    if (!input?.eventId) throw new Error("eventId is required");
+    return { eventId: input.eventId, note: (input.note ?? "").trim().slice(0, 2000) };
+  })
+  .handler(async ({ data, context }) => {
+    await assertHost(context.supabase, context.userId, data.eventId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("events").update({ status: "cancelled" }).eq("id", data.eventId);
+    if (error) throw new Error("Could not cancel the event");
+    const { sendEventCancelledNotices } = await import("@/lib/ticket-email.server");
+    return sendEventCancelledNotices({ eventId: data.eventId, note: data.note });
+  });
