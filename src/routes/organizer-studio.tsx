@@ -187,49 +187,104 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
   );
 }
 
-/** Unfinished events saved locally from the create-event page. */
-function DraftsSection() {
-  const [drafts, setDrafts] = useState<EventDraft[]>([]);
-
-  useEffect(() => {
-    const sync = () => setDrafts(listEventDrafts());
-    sync();
-    window.addEventListener("pb:event-drafts", sync);
-    return () => window.removeEventListener("pb:event-drafts", sync);
-  }, []);
-
-  if (drafts.length === 0) return null;
-
+/** Every draft on one page: unpublished events and festivals saved to the
+ *  account, plus unfinished event drafts kept on this device. */
+function DraftsTab({
+  localDrafts, onDiscardLocal, dbDrafts, festivalIds,
+  onEdit, onDuplicate, onDelete, onToggle, togglingId,
+}: {
+  localDrafts: EventDraft[];
+  onDiscardLocal: (id: string) => void;
+  dbDrafts: MyEvent[];
+  festivalIds: Set<string>;
+  onEdit: (e: MyEvent) => void;
+  onDuplicate: (e: MyEvent) => void;
+  onDelete: (e: MyEvent) => void;
+  onToggle: (e: MyEvent) => void;
+  togglingId: string | null;
+}) {
+  if (localDrafts.length === 0 && dbDrafts.length === 0) {
+    return (
+      <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">
+        No drafts yet. Start an event or festival and pick Save Draft, or duplicate one of your events, and it will wait here.
+      </div>
+    );
+  }
   return (
-    <div className="mb-6">
-      <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-neutral-700">
-        <FileText className="h-4 w-4 text-[#d4580a]" /> Drafts
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {drafts.map((d) => (
-          <div key={d.id} className="group flex items-start justify-between gap-3 rounded-xl border border-dashed border-neutral-300 bg-white p-4 transition hover:border-[#d4580a]/50">
-            <Link
-              to="/events/new"
-              search={{ draft: d.id, ...(d.org ? { org: d.org } : {}), ...(d.kind ? { kind: d.kind } : {}) }}
-              className="min-w-0 flex-1"
-            >
-              <div className="truncate font-semibold text-neutral-900 group-hover:text-[#d4580a]">
-                {d.form.title.trim() || "Untitled event"}
-              </div>
-              <div className="mt-1 text-xs text-neutral-500">
-                {d.pricing === "paid" ? "Paid tickets" : "Free"} · saved {new Date(d.updated_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-              </div>
-            </Link>
-            <button
-              onClick={() => { deleteEventDraft(d.id); setDrafts(listEventDrafts()); }}
-              title="Discard draft"
-              className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+    <div className="space-y-8">
+      {dbDrafts.length > 0 && (
+        <div>
+          <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-neutral-700">
+            <FileText className="h-4 w-4 text-[#d4580a]" /> Saved to your account ({dbDrafts.length})
           </div>
-        ))}
-      </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {dbDrafts.map((e) => (
+              <div key={e.id} className="group rounded-xl border border-dashed border-neutral-300 bg-white p-4 transition hover:border-[#d4580a]/50">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold text-neutral-900">{e.title}</div>
+                    <div className="mt-1 flex items-center gap-1.5 text-xs text-neutral-500">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {new Date(e.starts_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    </div>
+                    {(e.venue_name || e.location) && (
+                      <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-neutral-500"><MapPin className="h-3 w-3" /> {e.venue_name || e.location}</div>
+                    )}
+                    {festivalIds.has(e.id) && <span className="mt-1.5 inline-block rounded-full bg-[#d4580a]/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-[#d4580a]">Festival</span>}
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex gap-1">
+                      <button onClick={() => onEdit(e)} title="Edit" aria-label="Edit" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => onDuplicate(e)} title="Duplicate as draft" aria-label="Duplicate as draft" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Copy className="h-4 w-4" /></button>
+                      <button onClick={() => onDelete(e)} title="Delete" aria-label="Delete" className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                    <button
+                      onClick={() => onToggle(e)}
+                      disabled={togglingId === e.id}
+                      className="rounded-full bg-[#d4580a] px-2.5 py-1 text-xs font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+                    >
+                      {togglingId === e.id ? "Working…" : "Publish"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {localDrafts.length > 0 && (
+        <div>
+          <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-neutral-700">
+            <FileText className="h-4 w-4 text-[#d4580a]" /> Saved on this device ({localDrafts.length})
+          </div>
+          <p className="mb-2 text-xs text-neutral-500">These unfinished event drafts live only on this device until you open and finish them.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {localDrafts.map((d) => (
+              <div key={d.id} className="group flex items-start justify-between gap-3 rounded-xl border border-dashed border-neutral-300 bg-white p-4 transition hover:border-[#d4580a]/50">
+                <Link
+                  to="/events/new"
+                  search={{ draft: d.id, ...(d.org ? { org: d.org } : {}), ...(d.kind ? { kind: d.kind } : {}) }}
+                  className="min-w-0 flex-1"
+                >
+                  <div className="truncate font-semibold text-neutral-900 group-hover:text-[#d4580a]">
+                    {d.form.title.trim() || "Untitled event"}
+                  </div>
+                  <div className="mt-1 text-xs text-neutral-500">
+                    {d.pricing === "paid" ? "Paid tickets" : "Free"} · saved {new Date(d.updated_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                  </div>
+                </Link>
+                <button
+                  onClick={() => onDiscardLocal(d.id)}
+                  title="Discard draft"
+                  className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -269,7 +324,7 @@ function OrganizerStudioPage() {
   const me = useCurrentProfile();
   const { event: focusEventId, edit: focusEdit, tab: focusTab } = Route.useSearch();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"manage" | "stripe" | "campaign">(focusTab === "stripe" || focusTab === "campaign" ? focusTab : "manage");
+  const [tab, setTab] = useState<"manage" | "drafts" | "stripe" | "campaign">(focusTab === "stripe" || focusTab === "campaign" || focusTab === "drafts" ? focusTab : "manage");
   const [stripeReady, setStripeReady] = useState<boolean | null>(null);
   const refreshStatusFn = useServerFn(refreshConnectStatus);
   useEffect(() => {
@@ -280,6 +335,13 @@ function OrganizerStudioPage() {
       .catch(() => setStripeReady(!!me.stripe_charges_enabled));
   }, [me?.id, me?.stripe_account_id]);
   const [events, setEvents] = useState<MyEvent[] | null>(null);
+  const [localDrafts, setLocalDrafts] = useState<EventDraft[]>([]);
+  useEffect(() => {
+    const sync = () => setLocalDrafts(listEventDrafts());
+    sync();
+    window.addEventListener("pb:event-drafts", sync);
+    return () => window.removeEventListener("pb:event-drafts", sync);
+  }, []);
   const [selected, setSelected] = useState<MyEvent | null>(null);
   const [overview, setOverview] = useState<{ revenue: number; net: number; orders: number; promoters: number } | null>(null);
   const [ticketsDirty, setTicketsDirty] = useState(false);
@@ -420,6 +482,8 @@ function OrganizerStudioPage() {
     load();
   };
 
+  const dbDrafts = (events ?? []).filter((e) => !e.is_published);
+
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
@@ -438,8 +502,14 @@ function OrganizerStudioPage() {
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm sm:grid-cols-5">
           <button onClick={() => { setTab("manage"); setSelected(null); }} className={`rounded-full py-2 font-semibold transition ${tab === "manage" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>Manage Events</button>
+          <button onClick={() => { setTab("drafts"); setSelected(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "drafts" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
+            <FileText className="h-4 w-4" /> Drafts
+            {dbDrafts.length + localDrafts.length > 0 && (
+              <span className={`rounded-full px-1.5 text-[10px] font-bold ${tab === "drafts" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-700"}`}>{dbDrafts.length + localDrafts.length}</span>
+            )}
+          </button>
           <button
             onClick={() => setTab("stripe")}
             className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${
@@ -484,9 +554,20 @@ function OrganizerStudioPage() {
           <StripeTab onStatus={setStripeReady} />
         ) : tab === "campaign" ? (
           <CampaignTab events={events ?? []} />
+        ) : tab === "drafts" ? (
+          <DraftsTab
+            localDrafts={localDrafts}
+            onDiscardLocal={(id) => { deleteEventDraft(id); setLocalDrafts(listEventDrafts()); }}
+            dbDrafts={dbDrafts}
+            festivalIds={festivalIds}
+            onEdit={editEvent}
+            onDuplicate={(e) => void duplicate(e)}
+            onDelete={(e) => void remove(e)}
+            onToggle={(e) => void togglePublished(e)}
+            togglingId={togglingId}
+          />
         ) : !selected ? (
           <>
-            <DraftsSection />
             <div className="text-sm font-semibold text-neutral-700">Select an event</div>
 
             {events === null ? (
