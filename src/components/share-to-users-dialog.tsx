@@ -557,7 +557,7 @@ export function ShareToUsersDialog({
         <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
           <div>
             <div className="text-lg font-bold text-neutral-900">Share with followers</div>
-            <div className="mt-0.5 text-xs text-neutral-500">You can only send this to people you follow (or who follow you).</div>
+            <div className="mt-0.5 text-xs text-neutral-500">You can only send this to people who follow you.</div>
           </div>
           <button type="button" onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100" aria-label="Close">
             <X className="h-5 w-5" />
