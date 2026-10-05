@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReportButton } from "@/components/shared/report-button";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
+import { FollowOrganizerDialog } from "@/components/tickets/follow-organizer-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { repostEvent } from "@/lib/repost";
 import { SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
@@ -169,6 +170,7 @@ function EventDetail() {
   const [isAdmin, setIsAdmin] = useState(false);
   const checkoutFn = useServerFn(createTicketCheckout);
   const [shareOpen, setShareOpen] = useState(false);
+  const [followPromptOpen, setFollowPromptOpen] = useState(false);
   const cancelFn = useServerFn(cancelEvent);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelNote, setCancelNote] = useState("");
@@ -372,6 +374,7 @@ function EventDetail() {
       const n = result?.quantity ?? qty;
       setRsvped(true);
       if (me) await loadOwned(me);
+      setFollowPromptOpen(true);
 
       toast.success(n > 1 ? `${n} tickets reserved. Check your email for your tickets.` : "You're going! Check your email for your ticket.");
       void emailMyTickets({ data: { eventId: evt.id } }).catch((err) => {
@@ -854,6 +857,7 @@ function EventDetail() {
           )}
         </div>
       )}
+      <FollowOrganizerDialog eventId={evt?.id ?? null} me={me} open={followPromptOpen} onOpenChange={setFollowPromptOpen} />
       <ShareToUsersDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}

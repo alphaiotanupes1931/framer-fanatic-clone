@@ -45,11 +45,12 @@ export const Route = createFileRoute("/profile")({
   // ?preview=public renders this same page the way other people see it.
   // ?tab=... deep-links a tab; Stripe returns here with ?purchase=success&session_id=...
   validateSearch: (search: Record<string, unknown>) => {
-    const out: { preview?: "public"; tab?: string; purchase?: string; session_id?: string } = {};
+    const out: { preview?: "public"; tab?: string; purchase?: string; session_id?: string; event_id?: string } = {};
     if (search.preview === "public") out.preview = "public";
     if (typeof search.tab === "string") out.tab = search.tab;
     if (typeof search.purchase === "string") out.purchase = search.purchase;
     if (typeof search.session_id === "string") out.session_id = search.session_id;
+    if (typeof search.event_id === "string") out.event_id = search.event_id;
     return out;
   },
 
@@ -102,7 +103,7 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { preview, tab: tabParam, purchase, session_id: purchaseSessionId } = Route.useSearch();
+  const { preview, tab: tabParam, purchase, session_id: purchaseSessionId, event_id: purchaseEventId } = Route.useSearch();
   // Public preview: same profile, rendered without any owner-only controls.
   const publicPreview = preview === "public";
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();

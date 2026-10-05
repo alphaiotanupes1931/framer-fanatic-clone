@@ -284,7 +284,7 @@ export const createTicketCheckout = createServerFn({ method: "POST" })
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      success_url: `${data.returnOrigin}/profile?tab=My%20Tickets&purchase=success&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${data.returnOrigin}/profile?tab=My%20Tickets&purchase=success&event_id=${event.id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${data.returnOrigin}/events?purchase=cancelled`,
       customer_email: (context.claims as { email?: string } | null)?.email,
       branding_settings: CHECKOUT_BRANDING,
