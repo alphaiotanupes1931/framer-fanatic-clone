@@ -539,7 +539,12 @@ function EventDetail() {
 
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
           <div className="flex flex-col gap-4 p-4 sm:p-5">
-          {soldOut ? (
+          {evt.status === "cancelled" ? (
+            <div className="rounded-2xl border border-border bg-muted/50 p-5 text-center">
+              <div className="text-base font-bold text-foreground">Event cancelled</div>
+              <p className="mt-1 text-xs text-muted-foreground">RSVPs and ticket sales are closed for this event.</p>
+            </div>
+          ) : soldOut ? (
             <div className="rounded-2xl border border-border bg-muted/50 p-5 text-center">
               <div className="text-base font-bold text-foreground">Sold out</div>
               <p className="mt-1 text-xs text-muted-foreground">Every ticket for this event has been claimed, so checkout is closed.</p>
