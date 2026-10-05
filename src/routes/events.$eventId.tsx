@@ -293,6 +293,7 @@ function EventDetail() {
   };
 
   const buy = async () => {
+    if (evt?.status === "cancelled") { toast.error("This event was cancelled"); return; }
     if (!evt) return;
     if (!(await requireUser())) return;
     setBuying(true);
