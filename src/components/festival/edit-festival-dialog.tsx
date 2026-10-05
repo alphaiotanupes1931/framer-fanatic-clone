@@ -613,17 +613,6 @@ export function EditFestivalDialog({
                   <LabeledInput label="Price (USD)" value={ev.price ?? ""} onChange={setEvField("price")} placeholder="25" />
                 )}
                 <LabeledInput label="Price label" value={det.price_label ?? ""} onChange={setDetField("price_label")} placeholder="Free or $55 to $120" />
-                <label className="block">
-                  <span className="text-xs font-semibold text-muted-foreground">Status</span>
-                  <select
-                    className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                    value={published ? "published" : "draft"}
-                    onChange={(e) => setPublished(e.target.value === "published")}
-                  >
-                    <option value="published">Published</option>
-                    <option value="draft">Draft</option>
-                  </select>
-                </label>
               </div>
             </Section>
 
