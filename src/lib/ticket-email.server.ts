@@ -270,3 +270,59 @@ export async function sendTicketCancellation(args: {
     },
   })
 }
+
+/**
+ * Tells everyone holding an active ticket or RSVP that the organizer
+ * cancelled the event. One email per address, with the organizer's note.
+ */
+export async function sendEventCancelledNotices(args: { eventId: string; note?: string }) {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+  const { sendInternalEmail } = await import('@/lib/email-internal.server')
+  const { data: event } = await supabaseAdmin
+    .from('events')
+    .select('id, title, starts_at, venue_name, address, location, image_url')
+    .eq('id', args.eventId)
+    .maybeSingle()
+  if (!event) return { sent: 0, total: 0 }
+  const { data: tickets } = await supabaseAdmin
+    .from('tickets')
+    .select('buyer_id, guest_name, guest_email, status')
+    .eq('event_id', args.eventId)
+    .not('status', 'in', '(failed,refunded)')
+  const buyerIds = [...new Set((tickets ?? []).map((t) => t.buyer_id).filter(Boolean) as string[])]
+  const { data: profiles } = buyerIds.length
+    ? await supabaseAdmin.from('profiles').select('id, email, display_name').in('id', buyerIds)
+    : { data: [] as { id: string; email: string | null; display_name: string | null }[] }
+  const byId = new Map((profiles ?? []).map((p) => [p.id, p]))
+  const recipients = new Map<string, string>()
+  for (const t of tickets ?? []) {
+    const p = t.buyer_id ? byId.get(t.buyer_id) : null
+    const email = (p?.email || t.guest_email || '').toLowerCase().trim()
+    if (email && !recipients.has(email)) recipients.set(email, p?.display_name || t.guest_name || 'there')
+  }
+  const imageUrl = await emailSafeImageUrl(event.image_url, supabaseAdmin as any)
+  const location = [event.venue_name, event.address || event.location].filter(Boolean).join(', ')
+  let sent = 0
+  for (const [email, name] of recipients) {
+    try {
+      const r = await sendInternalEmail({
+        templateName: 'event-cancelled',
+        recipientEmail: email,
+        idempotencyKey: `event-cancelled-${event.id}-${email}`,
+        templateData: {
+          name,
+          eventTitle: event.title,
+          eventDate: formatDate(event.starts_at),
+          eventLocation: location,
+          imageUrl,
+          note: args.note || '',
+          eventUrl: `https://www.planetbaltimore.com/events/${event.id}`,
+        },
+      })
+      if (r.sent) sent++
+    } catch (e) {
+      console.error('event cancelled email failed', e)
+    }
+  }
+  return { sent, total: recipients.size }
+}

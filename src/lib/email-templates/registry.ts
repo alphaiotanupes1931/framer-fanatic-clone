@@ -28,6 +28,7 @@ import { template as profileCompletionTemplate } from './profile-completion'
 import { template as artistInquiryTemplate } from './artist-inquiry'
 import { template as inquiryConfirmationTemplate } from './inquiry-confirmation'
 import { template as adminBroadcastTemplate } from './admin-broadcast'
+import { template as eventCancelledTemplate } from './event-cancelled'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'referral-invite': referralInviteTemplate,
@@ -41,4 +42,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'artist-inquiry': artistInquiryTemplate,
   'inquiry-confirmation': inquiryConfirmationTemplate,
   'admin-broadcast': adminBroadcastTemplate,
+  'event-cancelled': eventCancelledTemplate,
 }
