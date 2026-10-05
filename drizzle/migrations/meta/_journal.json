@@ -309,6 +309,13 @@
       "when": 1790955050069,
       "tag": "0043_dashless_organization_slugs",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1791230691062,
+      "tag": "0044_share_followers_only",
+      "breakpoints": true
     }
   ]
 }
