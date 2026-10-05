@@ -1,3 +1,4 @@
+import { resolveOrgSlug } from "@/lib/org-access.functions";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,7 @@ import { SidebarProvider, useSidebar } from "@/components/layout/sidebar-context
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { isStaffAllowedPath, useStaffMode } from "@/lib/staff-mode";
+import { isStaffAllowedPath, setStaffMode, useStaffMode } from "@/lib/staff-mode";
 import { ensureLiveSession } from "@/lib/session-health";
 
 
@@ -220,7 +221,20 @@ function useStaffRouteGuard() {
   useEffect(() => {
     if (!staff) return;
     if (isStaffAllowedPath(pathname, staff.slug)) return;
-    navigate({ to: "/o/$slug", params: { slug: staff.slug }, replace: true });
+    let cancelled = false;
+    // Page addresses can change (old ones become aliases). Refresh the saved
+    // address first, or the guard and the alias redirect bounce forever.
+    void resolveOrgSlug({ data: { slug: staff.slug } })
+      .catch(() => ({ slug: null as string | null }))
+      .then((r) => {
+        if (cancelled) return;
+        if (r.slug && r.slug !== staff.slug) {
+          setStaffMode({ ...staff, slug: r.slug });
+          return;
+        }
+        navigate({ to: "/o/$slug", params: { slug: staff.slug }, replace: true });
+      });
+    return () => { cancelled = true; };
   }, [staff, pathname, navigate]);
 }
 
