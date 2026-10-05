@@ -435,7 +435,7 @@ function NewEventPage() {
               onClick={saveDraft}
               className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3.5 py-2 text-sm font-semibold text-neutral-600 hover:border-[#d4580a]/50 hover:text-[#d4580a]"
             >
-              <Save className="h-4 w-4" /> Draft
+              <Save className="h-4 w-4" /> Save Draft
             </button>
             <button
               onClick={submit}
