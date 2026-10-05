@@ -1,3 +1,4 @@
+import { FollowOrganizerDialog } from "@/components/tickets/follow-organizer-dialog";
 import { BannerWatermark } from "@/components/shared/banner-watermark";
 import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib/external-nav";
 import { emailMyCancellation } from "@/lib/tickets.functions";
@@ -45,11 +46,12 @@ export const Route = createFileRoute("/profile")({
   // ?preview=public renders this same page the way other people see it.
   // ?tab=... deep-links a tab; Stripe returns here with ?purchase=success&session_id=...
   validateSearch: (search: Record<string, unknown>) => {
-    const out: { preview?: "public"; tab?: string; purchase?: string; session_id?: string } = {};
+    const out: { preview?: "public"; tab?: string; purchase?: string; session_id?: string; event_id?: string } = {};
     if (search.preview === "public") out.preview = "public";
     if (typeof search.tab === "string") out.tab = search.tab;
     if (typeof search.purchase === "string") out.purchase = search.purchase;
     if (typeof search.session_id === "string") out.session_id = search.session_id;
+    if (typeof search.event_id === "string") out.event_id = search.event_id;
     return out;
   },
 
@@ -102,9 +104,10 @@ type Tab = string;
 
 function ProfilePage() {
   const profile = useCurrentProfile();
-  const { preview, tab: tabParam, purchase, session_id: purchaseSessionId } = Route.useSearch();
+  const { preview, tab: tabParam, purchase, session_id: purchaseSessionId, event_id: purchaseEventId } = Route.useSearch();
   // Public preview: same profile, rendered without any owner-only controls.
   const publicPreview = preview === "public";
+  const [purchaseFollowOpen, setPurchaseFollowOpen] = useState(true);
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
   const category = (profile as { category?: string | null } | null)?.category ?? null;
   // Banners are stored as signed storage URLs, which expire. Re-sign at render
@@ -313,6 +316,9 @@ function ProfilePage() {
 
   return (
     <AppLayout title="" hero={false}>
+      {purchase === "success" && purchaseEventId && (
+        <FollowOrganizerDialog eventId={purchaseEventId} me={profile?.id ?? null} open={purchaseFollowOpen} onOpenChange={setPurchaseFollowOpen} />
+      )}
       {!profile && (
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-center">
