@@ -107,7 +107,7 @@ function ProfilePage() {
   const { preview, tab: tabParam, purchase, session_id: purchaseSessionId, event_id: purchaseEventId } = Route.useSearch();
   // Public preview: same profile, rendered without any owner-only controls.
   const publicPreview = preview === "public";
-  const [purchaseFollowOpen, setPurchaseFollowOpen] = useState(true);
+  const [purchaseFollowOpen, setPurchaseFollowOpen] = useState(false);
   const { isArtist: roleIsArtist, isResident, isAdmin } = useUserRole();
   const category = (profile as { category?: string | null } | null)?.category ?? null;
   // Banners are stored as signed storage URLs, which expire. Re-sign at render
@@ -316,9 +316,6 @@ function ProfilePage() {
 
   return (
     <AppLayout title="" hero={false}>
-      {purchase === "success" && purchaseEventId && (
-        <FollowOrganizerDialog eventId={purchaseEventId} me={profile?.id ?? null} open={purchaseFollowOpen} onOpenChange={setPurchaseFollowOpen} />
-      )}
       {!profile && (
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-center">
@@ -753,7 +750,10 @@ function ProfilePage() {
           )}
         </DialogContent>
       </Dialog>
-      {purchase === "success" && <PurchaseConfirmation sessionId={purchaseSessionId} />}
+      {purchase === "success" && <PurchaseConfirmation sessionId={purchaseSessionId} onClose={() => { if (purchaseEventId) setPurchaseFollowOpen(true); }} />}
+      {purchase === "success" && purchaseEventId && (
+        <FollowOrganizerDialog eventId={purchaseEventId} me={profile?.id ?? null} open={purchaseFollowOpen} onOpenChange={setPurchaseFollowOpen} />
+      )}
 
       {postViewerIdx !== null && myPosts[postViewerIdx] && (
         <div
@@ -1423,7 +1423,7 @@ function ArtistEventsTab({ userId }: { userId: string }) {
  * It confirms the order with Stripe (in case the webhook is slow or missed),
  * which also triggers the receipt email, then links straight to the ticket.
  */
-function PurchaseConfirmation({ sessionId }: { sessionId?: string }) {
+function PurchaseConfirmation({ sessionId, onClose }: { sessionId?: string; onClose?: () => void }) {
   const reconcile = useServerFn(reconcileMyTickets);
   const [open, setOpen] = useState(true);
   const [state, setState] = useState<"working" | "done" | "pending">("working");
@@ -1454,6 +1454,7 @@ function PurchaseConfirmation({ sessionId }: { sessionId?: string }) {
     return () => { cancelled = true; };
   }, [sessionId]);
 
+  useEffect(() => { if (!open) onClose?.(); }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
