@@ -369,6 +369,48 @@ function OrganizerStudioPage() {
     load();
   };
 
+  const [festivalIds, setFestivalIds] = useState<Set<string>>(new Set());
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  useEffect(() => {
+    const ids = (events ?? []).map((e) => e.id);
+    if (ids.length === 0) { setFestivalIds(new Set()); return; }
+    supabase.from("festival_details").select("event_id").in("event_id", ids)
+      .then(({ data }) => setFestivalIds(new Set(((data as { event_id: string }[] | null) ?? []).map((d) => d.event_id))));
+  }, [events]);
+
+  const editEvent = (e: MyEvent) => {
+    if (festivalIds.has(e.id)) void navigate({ to: "/festivals/$eventId/edit", params: { eventId: e.id } });
+    else setSelected(e);
+  };
+
+  const togglePublished = async (e: MyEvent) => {
+    setTogglingId(e.id);
+    try {
+      const next = !e.is_published;
+      if (next) {
+        const [{ data: paidTiers }, { data: evtRow }] = await Promise.all([
+          supabase.from("ticket_types").select("id").eq("event_id", e.id).gt("price_cents", 0).limit(1),
+          supabase.from("events").select("donations_enabled").eq("id", e.id).maybeSingle(),
+        ]);
+        const needsStripe = (paidTiers?.length ?? 0) > 0 || (e.price_cents ?? 0) > 0 || !!(evtRow as { donations_enabled?: boolean | null } | null)?.donations_enabled;
+        if (needsStripe) {
+          let ready = false;
+          try { ready = !!(await refreshStatusFn()).chargesEnabled; } catch { ready = !!me?.stripe_charges_enabled; }
+          if (!ready) {
+            setPublishStripeError("This event has paid tickets or donations. You will need to set up a Stripe account before you can publish it.");
+            return;
+          }
+        }
+      }
+      const { error } = await supabase.from("events").update({ is_published: next } as never).eq("id", e.id);
+      if (error) return void toast.error(error.message);
+      toast.success(next ? "Published. It is now live." : "Moved to Drafts. Only you can see it.");
+      load();
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const remove = async (e: MyEvent) => {
     if (!window.confirm(`Delete "${e.title}"? This cannot be undone.`)) return;
     const { error } = await supabase.from("events").delete().eq("id", e.id);
@@ -472,11 +514,23 @@ function OrganizerStudioPage() {
                           )}
                         </button>
                         <div className="flex flex-col items-end gap-2">
-                          {isPast && <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-neutral-500">Past</span>}
-                          <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
-                            <button onClick={() => duplicate(e)} title="Duplicate" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Copy className="h-4 w-4" /></button>
-                            <button onClick={() => remove(e)} title="Delete" className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                          <div className="flex gap-1">
+                            {festivalIds.has(e.id) && <span className="rounded-full bg-[#d4580a]/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-[#d4580a]">Festival</span>}
+                            {!e.is_published && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-700">Draft</span>}
+                            {isPast && <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-neutral-500">Past</span>}
                           </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => editEvent(e)} title="Edit" aria-label="Edit" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Pencil className="h-4 w-4" /></button>
+                            <button onClick={() => duplicate(e)} title="Duplicate as draft" aria-label="Duplicate as draft" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Copy className="h-4 w-4" /></button>
+                            <button onClick={() => remove(e)} title="Delete" aria-label="Delete" className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                          </div>
+                          <button
+                            onClick={() => void togglePublished(e)}
+                            disabled={togglingId === e.id}
+                            className={`rounded-full px-2.5 py-1 text-xs font-semibold transition disabled:opacity-60 ${e.is_published ? "border border-neutral-300 text-neutral-700 hover:bg-neutral-100" : "bg-[#d4580a] text-white hover:brightness-110"}`}
+                          >
+                            {togglingId === e.id ? "Working…" : e.is_published ? "Move to Drafts" : "Publish"}
+                          </button>
                         </div>
                       </div>
                     </div>
