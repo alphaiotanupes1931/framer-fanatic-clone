@@ -657,11 +657,6 @@ export function OrgProfile() {
               <Lock className="h-3 w-3" /> Private
             </span>
           )}
-          {isAssoc && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
-              <Star className="h-3 w-3" /> Grant Founding
-            </span>
-          )}
         </div>
         {org.subtype && (
           <div className="mt-2">
