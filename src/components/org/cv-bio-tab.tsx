@@ -166,7 +166,7 @@ export function CvBioTab({
         <Title className="h-5 w-5 text-[#d4580a]" /> {preset.title}
       </h2>
       {canManage && !edit && (
-        <button onClick={() => setEdit(true)} className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold hover:bg-secondary">
+        <button onClick={() => setEdit(true)} className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold hover:bg-hover">
           <Pencil className="h-4 w-4" /> Edit Bio
         </button>
       )}
@@ -221,7 +221,7 @@ export function CvBioTab({
                 )}
                 <button
                   onClick={() => setCollapsed((c) => ({ ...c, [s.key]: open }))}
-                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary"
+                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-hover"
                   aria-label={open ? "Collapse" : "Expand"}
                 >
                   {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

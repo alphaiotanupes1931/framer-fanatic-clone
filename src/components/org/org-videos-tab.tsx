@@ -128,7 +128,7 @@ export function OrgVideosTab({
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 px-3 py-6 text-sm text-muted-foreground hover:bg-muted"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 px-3 py-6 text-sm text-muted-foreground hover:bg-hover"
           >
             <Upload className="h-4 w-4" /> {file ? file.name : "Upload a video file (up to 200MB)"}
           </button>

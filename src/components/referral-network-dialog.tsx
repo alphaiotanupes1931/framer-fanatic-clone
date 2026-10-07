@@ -494,7 +494,7 @@ export function ReferralNetworkDialog({
                     const text = `Join me on Planet Baltimore! ${inviteUrl}`;
                     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteUrl)}&quote=${encodeURIComponent(text)}`, "_blank");
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted transition sm:text-sm"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-hover transition sm:text-sm"
                 >
                   Facebook
                 </button>
@@ -504,7 +504,7 @@ export function ReferralNetworkDialog({
                     const text = `Join me on Planet Baltimore! ${inviteUrl}`;
                     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteUrl)}`, "_blank");
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted transition sm:text-sm"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-hover transition sm:text-sm"
                 >
                   LinkedIn
                 </button>
@@ -531,7 +531,7 @@ export function ReferralNetworkDialog({
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="flex w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border p-4 text-center transition hover:border-primary hover:bg-muted/40"
+                  className="flex w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border p-4 text-center transition hover:border-primary hover:bg-hover/40"
                 >
                   <Upload className="h-5 w-5 text-muted-foreground" />
                   <span className="text-xs font-semibold text-foreground">Upload a CSV or text file</span>

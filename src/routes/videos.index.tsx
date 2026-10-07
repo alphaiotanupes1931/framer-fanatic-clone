@@ -370,7 +370,7 @@ function VideoCard({ v, onChanged }: { v: Video; onChanged?: () => void }) {
               toast.success(v.featured ? "Removed from featured" : "Marked as featured");
               onChanged?.();
             }}
-            className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${v.featured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}
+            className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${v.featured ? "bg-white text-neutral-900 hover:bg-hover" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}
           >
             <Star className={`h-3.5 w-3.5 ${v.featured ? "" : "fill-yellow-900"}`} />
             {v.featured ? "Unfeature" : "Feature"}

@@ -410,7 +410,7 @@ export function OrgProfile() {
       <button
         onClick={() => (window.history.length > 1 ? window.history.back() : navigate({ to: "/dashboard" }))}
         aria-label="Back"
-        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100"
+        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 hover:bg-hover"
       >
         <ArrowLeft className="h-5 w-5" />
       </button>
@@ -729,7 +729,7 @@ export function OrgProfile() {
                 className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition ${
                   active
                     ? "bg-[#d4580a] text-white shadow-sm"
-                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+                    : "text-neutral-500 hover:bg-hover hover:text-neutral-800"
                 }`}
               >
                 {Icon && <Icon className="h-4 w-4" />}
@@ -936,7 +936,7 @@ function GroupRequests({ orgId, onApproved, onCountChange }: { orgId: string; on
             )}
             <div className="flex shrink-0 gap-2">
               <button disabled={busy === r.user_id} onClick={() => act(r.user_id, true)} className="rounded-full bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-neutral-800 disabled:opacity-60">Approve</button>
-              <button disabled={busy === r.user_id} onClick={() => act(r.user_id, false)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60">Decline</button>
+              <button disabled={busy === r.user_id} onClick={() => act(r.user_id, false)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-hover disabled:opacity-60">Decline</button>
             </div>
           </li>
         ))}
@@ -1190,7 +1190,7 @@ function EventsTab({ orgId: _orgId, canManage: _canManage }: { orgId: string; ca
         </a>
         <a
           href="/organizer-studio"
-          className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-card px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-hover"
         >
           <CalendarIcon className="h-4 w-4" /> Organizer Studio
           <ExternalLink className="h-3.5 w-3.5 opacity-60" />
@@ -1310,9 +1310,9 @@ function CalendarTab({ orgId: _orgId }: { orgId: string }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
-        <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} className="rounded-full p-2 hover:bg-neutral-100"><ChevronLeft className="h-5 w-5" /></button>
+        <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} className="rounded-full p-2 hover:bg-hover"><ChevronLeft className="h-5 w-5" /></button>
         <div className="text-lg font-semibold">{monthLabel}</div>
-        <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))} className="rounded-full p-2 hover:bg-neutral-100"><ChevronRight className="h-5 w-5" /></button>
+        <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))} className="rounded-full p-2 hover:bg-hover"><ChevronRight className="h-5 w-5" /></button>
       </div>
       <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
         <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-600">
@@ -1653,7 +1653,7 @@ function SupportTabImpl({ org, canManage }: { org: Org; canManage: boolean }) {
                   </a>
                   {canManage && (
                     <>
-                      <button onClick={() => setEditing(t)} className="rounded-full p-2 text-neutral-500 hover:bg-neutral-100"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => setEditing(t)} className="rounded-full p-2 text-neutral-500 hover:bg-hover"><Pencil className="h-4 w-4" /></button>
                       <button onClick={() => remove(t.id)} className="rounded-full p-2 text-neutral-500 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
                     </>
                   )}
@@ -2449,7 +2449,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
                     )}
                     {canManage && (
                       <div className="flex flex-wrap gap-2">
-                        <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
+                        <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-hover">
                           <Pencil className="h-3.5 w-3.5" /> Edit
                         </button>
                         <button onClick={() => { void remove(p.id); setActive(null); }} className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">

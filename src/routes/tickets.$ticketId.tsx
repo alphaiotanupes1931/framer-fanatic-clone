@@ -294,7 +294,7 @@ function TicketDetailPage() {
         </div>
 
         {t.events?.address && (
-          <a href={`https://maps.google.com/?q=${encodeURIComponent(t.events.address)}`} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-100 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-200">
+          <a href={`https://maps.google.com/?q=${encodeURIComponent(t.events.address)}`} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-100 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-hover">
             <MapPin className="h-4 w-4" /> Directions
           </a>
         )}

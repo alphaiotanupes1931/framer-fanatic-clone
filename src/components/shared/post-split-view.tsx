@@ -256,11 +256,11 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
                 onClick={togglePin}
                 aria-label={post.is_pinned ? "Unpin post" : "Pin post to top"}
                 title={post.is_pinned ? "Unpin" : "Pin to top"}
-                className={`rounded-full p-1.5 hover:bg-accent ${post.is_pinned ? "text-[#d4580a]" : "text-muted-foreground hover:text-foreground"}`}
+                className={`rounded-full p-1.5 hover:bg-hover ${post.is_pinned ? "text-[#d4580a]" : "text-muted-foreground hover:text-foreground"}`}
               >
                 {post.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
               </button>
-              <Link to="/edit-post/$id" params={{ id: post.id }} aria-label="Edit post" className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground">
+              <Link to="/edit-post/$id" params={{ id: post.id }} aria-label="Edit post" className="rounded-full p-1.5 text-muted-foreground hover:bg-hover hover:text-foreground">
                 <Pencil className="h-4 w-4" />
               </Link>
               <button
@@ -268,7 +268,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
                 onClick={remove}
                 aria-label="Delete post"
                 title="Delete post"
-                className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-hover hover:text-foreground"
               >
                 <Trash2 className="h-4 w-4" />
               </button>

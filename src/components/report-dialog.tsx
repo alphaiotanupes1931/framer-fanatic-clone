@@ -54,7 +54,7 @@ export function ReportDialog({
           <h3 className="flex items-center gap-2 text-base font-semibold text-neutral-900">
             <Flag className="h-4 w-4 text-[#d4580a]" /> Report content
           </h3>
-          <button onClick={onClose} className="rounded p-1 text-neutral-500 hover:bg-neutral-100"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} className="rounded p-1 text-neutral-500 hover:bg-hover"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3 py-4">
           <label className="block text-sm font-medium text-neutral-700">Reason</label>

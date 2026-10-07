@@ -62,7 +62,7 @@ export function RightSidebar() {
         type="button"
         onClick={() => setRightCollapsed(!rightCollapsed)}
         aria-label={rightCollapsed ? "Show panel" : "Hide panel"}
-        className={`fixed top-1/2 z-40 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-slate-200 bg-white p-1.5 shadow-sm transition-all duration-300 hover:bg-slate-50 xl:flex ${rightCollapsed ? "right-0" : "right-[280px]"}`}
+        className={`fixed top-1/2 z-40 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-slate-200 bg-white p-1.5 shadow-sm transition-all duration-300 hover:bg-hover xl:flex ${rightCollapsed ? "right-0" : "right-[280px]"}`}
       >
         {rightCollapsed ? <ChevronLeft className="h-4 w-4 text-slate-600" /> : <ChevronRight className="h-4 w-4 text-slate-600" />}
       </button>
@@ -75,7 +75,7 @@ export function RightSidebar() {
                 key={s.id}
                 to="/stories/$storyId"
                 params={{ storyId: s.id }}
-                className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-slate-50"
+                className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-hover"
               >
                 <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
                   {s.cover_url ? (
@@ -100,7 +100,7 @@ export function RightSidebar() {
                 key={a.id}
                 to="/$username"
                 params={{ username: a.username || a.id }}
-                className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-slate-50"
+                className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-hover"
               >
                 <div className="flex-shrink-0">
                   <Avatar className="h-10 w-10 rounded-full">
@@ -120,7 +120,7 @@ export function RightSidebar() {
         {hydrated && events.length > 0 && (
           <SuggestionSection title="Upcoming Events" icon={Calendar} seeAllLink="/events">
             {events.map((e: any) => (
-              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-slate-50">
+              <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-hover">
                 <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
                   {e.image_url ? (
                     <EventImage src={e.image_url} alt={e.title} className="h-full w-full rounded-full object-cover" />

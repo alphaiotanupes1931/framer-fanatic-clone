@@ -175,7 +175,7 @@ export function DuesTab({ orgId, ownerId, canManage, me }: { orgId: string; owne
                   </div>
                   {canManage && (
                     <div className="flex shrink-0 items-center gap-1">
-                      <button onClick={() => toggleActive(t)} title={t.is_active ? "Hide" : "Show"} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100">
+                      <button onClick={() => toggleActive(t)} title={t.is_active ? "Hide" : "Show"} className="rounded-full p-1.5 text-neutral-500 hover:bg-hover">
                         {t.is_active ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                       </button>
                       <button onClick={() => removeTier(t.id)} className="rounded-full p-1.5 text-red-500 hover:bg-red-50">
@@ -297,7 +297,7 @@ function TierForm({ orgId, onCancel, onSaved }: { orgId: string; onCancel: () =>
       </div>
       <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What this tier includes (optional)" rows={2} className="mt-3 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm" />
       <div className="mt-3 flex justify-end gap-2">
-        <button onClick={onCancel} className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">Cancel</button>
+        <button onClick={onCancel} className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-hover">Cancel</button>
         <button onClick={save} disabled={saving} className="inline-flex items-center gap-1.5 rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
           {saving && <Loader2 className="h-4 w-4 animate-spin" />} Save
         </button>

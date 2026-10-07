@@ -175,7 +175,7 @@ function NeighborhoodsPage() {
                 <button
                   onClick={() => setSelected(null)}
                   aria-label="Close"
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground sm:h-10 sm:w-10"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-hover hover:text-foreground sm:h-10 sm:w-10"
                 >
                   <X className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
@@ -212,7 +212,7 @@ function NeighborhoodsPage() {
                            className={`flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-lg px-1.5 py-2 text-[11px] font-medium transition sm:shrink-0 sm:gap-1.5 sm:rounded-full sm:px-3.5 sm:text-sm ${
                             active
                               ? "bg-orange/10 text-orange"
-                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                              : "text-muted-foreground hover:bg-hover hover:text-foreground"
                           }`}
                         >
                            <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -231,7 +231,7 @@ function NeighborhoodsPage() {
                         <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                           {events.map((ev) => (
                             <li key={ev.id}>
-                              <Link to="/events/$eventId" params={{ eventId: ev.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                              <Link to="/events/$eventId" params={{ eventId: ev.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-hover/60">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
                                   {ev.image_url ? <EventImage src={ev.image_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <Calendar className="h-5 w-5 text-muted-foreground" />}
                                 </div>
@@ -257,7 +257,7 @@ function NeighborhoodsPage() {
                         <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                           {artists.map((a) => (
                             <li key={a.id}>
-                              <Link to="/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                              <Link to="/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-hover/60">
                                 <Avatar className="h-12 w-12 rounded-lg">
                                   {a.avatar_url && <SmartAvatarImage src={a.avatar_url} />}
                                   <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}</AvatarFallback>
@@ -277,7 +277,7 @@ function NeighborhoodsPage() {
                       <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                         {activeOrgs.map((o) => (
                           <li key={o.id}>
-                            <OrgLink type={o.type} slug={o.slug} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-accent/60">
+                            <OrgLink type={o.type} slug={o.slug} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-hover/60">
                               <Avatar className="h-12 w-12 rounded-lg">
                                 {o.avatar_url && <SmartAvatarImage src={o.avatar_url} className="rounded-lg object-cover" />}
                                 <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{o.name.slice(0, 1).toUpperCase()}</AvatarFallback>

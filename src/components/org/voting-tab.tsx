@@ -253,7 +253,7 @@ function CreateVotingDialog({ orgId, onClose, onCreated }: { orgId: string; onCl
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
           <h2 className="text-base font-bold text-neutral-900">Create Voting</h2>
-          <button onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100">
+          <button onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-neutral-500 hover:bg-hover">
             <X className="h-4 w-4" />
           </button>
         </div>

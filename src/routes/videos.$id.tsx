@@ -73,7 +73,7 @@ function VideoDetail() {
             <Img src={pbLogo} alt="Planet Baltimore" width={32} height={32} className="h-8 w-8 object-contain" />
             <span className="font-display text-base sm:text-lg font-extrabold tracking-tight uppercase">Planet Baltimore</span>
           </Link>
-          <Link to="/videos" className="rounded-full p-2 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Close">
+          <Link to="/videos" className="rounded-full p-2 text-neutral-600 hover:bg-hover hover:text-neutral-900" aria-label="Close">
             <X className="h-5 w-5" />
           </Link>
         </div>

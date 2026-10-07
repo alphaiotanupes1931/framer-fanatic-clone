@@ -34,7 +34,7 @@ export function ShareButtons({
   const icon = size === "sm" ? "h-4 w-4" : "h-5 w-5";
   const btn =
     buttonClassName ??
-    "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted";
+    "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-hover";
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>

@@ -113,7 +113,7 @@ function EditProfilePage() {
       </div>
 
       <div className="mt-6 flex items-center justify-end gap-3">
-        <Link to="/profile" className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:bg-secondary">Cancel</Link>
+        <Link to="/profile" className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:bg-hover">Cancel</Link>
         <button type="button" onClick={save} disabled={saving} className="rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#b8480a] disabled:opacity-60">
           {saving ? "Saving..." : "Save changes"}
         </button>

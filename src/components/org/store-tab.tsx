@@ -137,7 +137,7 @@ export function StoreTab({
           <div className="flex items-center gap-2">
             <button
               onClick={() => { setShowOrders((v) => !v); void loadOrders(); }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-accent"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-hover"
             >
               <Package className="h-3.5 w-3.5" /> Orders{orders.length ? ` (${orders.length})` : ""}
             </button>
@@ -196,13 +196,13 @@ export function StoreTab({
           <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div className="text-base font-bold text-foreground">How do you want to get it?</div>
-              <button onClick={() => setChoosing(null)} className="rounded-full p-1 text-muted-foreground hover:bg-accent"><X className="h-4 w-4" /></button>
+              <button onClick={() => setChoosing(null)} className="rounded-full p-1 text-muted-foreground hover:bg-hover"><X className="h-4 w-4" /></button>
             </div>
-            <button onClick={() => startCheckout(choosing, "ship")} className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left hover:bg-accent">
+            <button onClick={() => startCheckout(choosing, "ship")} className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left hover:bg-hover">
               <Truck className="mt-0.5 h-5 w-5 text-primary" />
               <span><span className="block text-sm font-semibold text-foreground">Ship</span><span className="text-xs text-muted-foreground">Enter your address at checkout.</span></span>
             </button>
-            <button onClick={() => startCheckout(choosing, "pickup")} className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left hover:bg-accent">
+            <button onClick={() => startCheckout(choosing, "pickup")} className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left hover:bg-hover">
               <MapPin className="mt-0.5 h-5 w-5 text-primary" />
               <span><span className="block text-sm font-semibold text-foreground">Pick up</span><span className="text-xs text-muted-foreground">{choosing.pickup_address?.trim() || "Arrange pickup with the seller. No address needed at checkout."}</span></span>
             </button>
@@ -257,7 +257,7 @@ export function StoreTab({
                       {buying === p.id ? "Starting checkout…" : payoutsReady === false ? "Not available" : "Buy now"}
                     </button>
                     <div className="flex gap-2">
-                    <button onClick={() => setEditing(p)} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-accent">
+                    <button onClick={() => setEditing(p)} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-hover">
                       <Pencil className="h-3 w-3" /> Edit
                     </button>
                     <button onClick={() => remove(p.id)} className="inline-flex items-center justify-center rounded-full border border-border px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10">
@@ -338,7 +338,7 @@ function ProductForm({
     <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-bold text-foreground">{initial ? "Edit product" : "New product"}</div>
-        <button onClick={onCancel} className="rounded-full p-1 text-muted-foreground hover:bg-accent"><X className="h-4 w-4" /></button>
+        <button onClick={onCancel} className="rounded-full p-1 text-muted-foreground hover:bg-hover"><X className="h-4 w-4" /></button>
       </div>
       <input className={inputCls} placeholder="Product name" value={name} onChange={(e) => setName(e.target.value)} />
       <textarea className={inputCls} rows={3} placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />

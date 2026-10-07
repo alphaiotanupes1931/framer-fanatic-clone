@@ -141,7 +141,7 @@ function Welcome() {
                       type="button"
                       aria-pressed={on}
                       onClick={() => toggle(pickedCreators, setPickedCreators, c.id)}
-                      className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${on ? "border-[#d4580a] bg-orange-50" : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"}`}
+                      className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${on ? "border-[#d4580a] bg-orange-50" : "border-neutral-200 hover:border-neutral-300 hover:bg-hover"}`}
                     >
                       <Avatar className="h-10 w-10 rounded-full">
                         <SmartAvatarImage src={c.avatar_url ?? undefined} className="rounded-full object-cover" />

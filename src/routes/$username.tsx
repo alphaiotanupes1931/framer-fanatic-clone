@@ -342,7 +342,7 @@ function PublicProfilePage() {
       <button
         onClick={() => (window.history.length > 1 ? window.history.back() : navigate({ to: "/artists" }))}
         aria-label="Back"
-        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100"
+        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-700 hover:bg-hover"
       >
         <ArrowLeft className="h-5 w-5" />
       </button>
@@ -402,7 +402,7 @@ function PublicProfilePage() {
               type="button"
               onClick={toggleFounder}
               disabled={founderSaving}
-              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 disabled:opacity-60"
+              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-neutral-600 hover:bg-hover disabled:opacity-60"
             >
               <Star className="h-3 w-3" /> {isFounder ? "Remove Founding" : "Grant Founding"}
             </button>
@@ -462,7 +462,7 @@ function PublicProfilePage() {
                         <button
                           key={n.id}
                           onClick={() => updateNeighborhood(n.name)}
-                          className={`w-full px-3 py-2 text-left text-sm hover:bg-neutral-100 ${profile.neighborhood === n.name ? "font-semibold text-[#d4580a]" : "text-neutral-700"}`}
+                          className={`w-full px-3 py-2 text-left text-sm hover:bg-hover ${profile.neighborhood === n.name ? "font-semibold text-[#d4580a]" : "text-neutral-700"}`}
                         >
                           {n.name}
                         </button>
@@ -534,7 +534,7 @@ function PublicProfilePage() {
                   <button
                     key={t}
                     onClick={() => updatePageType(t)}
-                    className={`w-full px-3 py-2 text-left text-sm hover:bg-neutral-100 ${profile.category === t ? "font-semibold text-[#d4580a]" : "text-neutral-700"}`}
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-hover ${profile.category === t ? "font-semibold text-[#d4580a]" : "text-neutral-700"}`}
                   >
                     {t}
                   </button>

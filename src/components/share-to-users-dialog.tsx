@@ -484,14 +484,14 @@ export function ShareToUsersDialog({
               <button
                 type="button"
                 onClick={() => { openDetails(); toast.dismiss(); }}
-                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-[#d4580a] hover:bg-neutral-100"
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-[#d4580a] hover:bg-hover"
               >
                 View details
               </button>
               <button
                 type="button"
                 onClick={() => { void copyLink(); toast.dismiss(); }}
-                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-[#d4580a] hover:bg-neutral-100"
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-[#d4580a] hover:bg-hover"
               >
                 Copy link
               </button>
@@ -506,14 +506,14 @@ export function ShareToUsersDialog({
               <button
                 type="button"
                 onClick={() => { openDetails(); toast.dismiss(); }}
-                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-amber-700 hover:bg-neutral-100"
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-amber-700 hover:bg-hover"
               >
                 View details
               </button>
               <button
                 type="button"
                 onClick={() => { void copyLink(); toast.dismiss(); }}
-                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-amber-700 hover:bg-neutral-100"
+                className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-amber-700 hover:bg-hover"
               >
                 Copy link
               </button>
@@ -559,7 +559,7 @@ export function ShareToUsersDialog({
             <div className="text-lg font-bold text-neutral-900">Share with followers</div>
             <div className="mt-0.5 text-xs text-neutral-500">You can only send this to people who follow you.</div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100" aria-label="Close">
+          <button type="button" onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-hover" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -644,7 +644,7 @@ export function ShareToUsersDialog({
                     <button
                       type="button"
                       onClick={() => toggle(p.id)}
-                      className="rounded-full p-0.5 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
+                      className="rounded-full p-0.5 text-neutral-400 hover:bg-hover hover:text-neutral-700"
                       aria-label={`Remove ${p.display_name || p.username}`}
                     >
                       <X className="h-3 w-3" />
@@ -686,7 +686,7 @@ export function ShareToUsersDialog({
                         type="button"
                         key={p.id}
                         onClick={() => toggle(p.id)}
-                        className="flex w-full items-center gap-3 border-b border-neutral-100 px-4 py-2.5 text-left last:border-b-0 hover:bg-neutral-50"
+                        className="flex w-full items-center gap-3 border-b border-neutral-100 px-4 py-2.5 text-left last:border-b-0 hover:bg-hover"
                       >
                         <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
                           {p.avatar_url ? (
@@ -718,7 +718,7 @@ export function ShareToUsersDialog({
                     type="button"
                     onClick={() => void loadMore()}
                     disabled={loadingMore}
-                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 disabled:text-neutral-400 disabled:hover:bg-transparent"
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-700 hover:bg-hover disabled:text-neutral-400 disabled:hover:bg-transparent"
                   >
                     {loadingMore ? "Loading…" : "Load more"} <ChevronRight className="h-4 w-4" />
                   </button>
@@ -791,7 +791,7 @@ export function ShareToUsersDialog({
                         <button
                           type="button"
                           onClick={() => setEditingNote(false)}
-                          className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
+                          className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-hover"
                         >
                           Cancel
                         </button>
@@ -942,7 +942,7 @@ export function ShareToUsersDialog({
               type="button"
               disabled={sending}
               onClick={() => { setStep('select'); setEditingNote(false); setPendingNote(""); }}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 hover:bg-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               Back to edit
             </button>

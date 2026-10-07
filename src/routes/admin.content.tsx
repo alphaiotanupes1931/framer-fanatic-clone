@@ -238,7 +238,7 @@ function AdminContentPage() {
                   href="/"
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                  className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-hover"
                 >
                   Open landing page ↗
                 </a>
@@ -279,7 +279,7 @@ function AdminContentPage() {
                           <button
                             type="button"
                             onClick={() => setValues((v) => ({ ...v, [c.key]: "" }))}
-                            className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-50"
+                            className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-neutral-600 hover:bg-hover"
                             title="Clear"
                           >
                             Clear
@@ -391,7 +391,7 @@ function AdminContentPage() {
                               <button
                                 type="button"
                                 onClick={() => setValues((v) => ({ ...v, [colorKey]: "" }))}
-                                className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-50"
+                                className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-neutral-600 hover:bg-hover"
                               >
                                 Clear
                               </button>

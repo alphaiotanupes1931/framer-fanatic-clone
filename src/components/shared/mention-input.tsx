@@ -136,7 +136,7 @@ export function MentionField({
               <button
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); pick(p); }}
-                className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm ${i === active ? "bg-accent" : "hover:bg-accent"}`}
+                className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm ${i === active ? "bg-accent" : "hover:bg-hover"}`}
               >
                 <Avatar className="h-6 w-6">
                   {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}

@@ -42,7 +42,7 @@ export function TextDocTab({
         {canManage && !edit && (
           <button
             onClick={() => { setDraft(value); setEdit(true); }}
-            className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-sm font-medium hover:bg-muted"
+            className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-sm font-medium hover:bg-hover"
           >
             <Pencil className="h-4 w-4" /> Edit
           </button>
@@ -62,7 +62,7 @@ export function TextDocTab({
             <button onClick={save} disabled={saving} className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
               <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
             </button>
-            <button onClick={() => { setEdit(false); setDraft(value); }} className="flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-muted">
+            <button onClick={() => { setEdit(false); setDraft(value); }} className="flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-hover">
               <X className="h-4 w-4" /> Cancel
             </button>
           </div>

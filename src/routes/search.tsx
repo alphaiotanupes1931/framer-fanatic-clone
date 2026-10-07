@@ -147,7 +147,7 @@ function SearchPage() {
               key={t}
               onClick={() => setTab(t)}
               className={`inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
-                tab === t ? "border-orange bg-orange text-white" : "border-border bg-card text-foreground hover:bg-accent"
+                tab === t ? "border-orange bg-orange text-white" : "border-border bg-card text-foreground hover:bg-hover"
               }`}
             >
               {t}
@@ -165,7 +165,7 @@ function SearchPage() {
               <Section title="People">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {people.slice(0, tab === "All" ? 6 : 24).map((p) => (
-                    <Link key={p.id} to="/$username" params={{ username: p.username || p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <Link key={p.id} to="/$username" params={{ username: p.username || p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <Avatar className="h-11 w-11 shrink-0">
                         {p.avatar_url && <SmartAvatarImage src={p.avatar_url} />}
                         <AvatarFallback>{(p.display_name || p.username || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -187,7 +187,7 @@ function SearchPage() {
               <Section title="Organizations">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {orgs.slice(0, tab === "All" ? 6 : 24).map((o) => (
-                    <OrgLink key={o.id} type={o.type} slug={o.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <OrgLink key={o.id} type={o.type} slug={o.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
                         {o.avatar_url && <Img src={o.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
@@ -205,7 +205,7 @@ function SearchPage() {
               <Section title="Events">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {events.slice(0, tab === "All" ? 6 : 24).map((e) => (
-                    <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="overflow-hidden rounded-xl border border-border bg-card hover:bg-accent">
+                    <Link key={e.id} to="/events/$eventId" params={{ eventId: e.id }} className="overflow-hidden rounded-xl border border-border bg-card hover:bg-hover">
                       {e.image_url && <EventImage src={e.image_url} alt="" className="h-32 w-full object-cover" />}
                       <div className="p-3">
                         <div className="text-sm font-semibold text-foreground line-clamp-1">{e.title}</div>
@@ -224,7 +224,7 @@ function SearchPage() {
               <Section title="Businesses">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {businesses.slice(0, tab === "All" ? 6 : 24).map((b) => (
-                    <OrgLink key={b.id} type={b.type} slug={b.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <OrgLink key={b.id} type={b.type} slug={b.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
                         {b.avatar_url && <Img src={b.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
@@ -242,7 +242,7 @@ function SearchPage() {
               <Section title="Posts">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {posts.slice(0, tab === "All" ? 6 : 24).map((p) => (
-                    <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <Link key={p.id} to="/posts/$postId" params={{ postId: p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted">
                         {p.preview_image
                           ? <Img src={p.preview_image} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
@@ -264,7 +264,7 @@ function SearchPage() {
               <Section title="Stories">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {stories.slice(0, tab === "All" ? 6 : 24).map((s) => (
-                    <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <Link key={s.id} to="/stories/$storyId" params={{ storyId: s.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted">
                         {s.cover_url
                           ? <Img src={s.cover_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
@@ -284,7 +284,7 @@ function SearchPage() {
               <Section title="Neighborhoods">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {hoods.slice(0, tab === "All" ? 6 : 24).map((n) => (
-                    <Link key={n.id} to="/neighborhoods" search={{ n: n.name }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent">
+                    <Link key={n.id} to="/neighborhoods" search={{ n: n.name }} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-muted"><MapPin className="h-4 w-4 text-muted-foreground" /></span>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{n.name}</div>

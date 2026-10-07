@@ -177,7 +177,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
             <div className="space-y-4 p-6">
               <div className="flex items-start justify-between gap-4">
                 <h2 className="text-2xl font-bold leading-tight text-foreground">{active.title}</h2>
-                <button onClick={() => setActive(null)} className="rounded-full p-1 text-muted-foreground hover:bg-accent"><X className="h-5 w-5" /></button>
+                <button onClick={() => setActive(null)} className="rounded-full p-1 text-muted-foreground hover:bg-hover"><X className="h-5 w-5" /></button>
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span>{timeAgo(active.created_at)}</span>

@@ -214,7 +214,7 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
             <div className="max-h-[86vh] overflow-y-auto border-t border-border p-6 md:border-l md:border-t-0">
               <div className="flex items-start justify-between gap-3">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{lot(idx)}</div>
-                <button onClick={() => setIdx(null)} aria-label="Close" className="rounded-full border border-border p-1.5 hover:bg-muted">
+                <button onClick={() => setIdx(null)} aria-label="Close" className="rounded-full border border-border p-1.5 hover:bg-hover">
                   <X className="h-4 w-4" />
                 </button>
               </div>

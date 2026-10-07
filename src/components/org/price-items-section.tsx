@@ -135,7 +135,7 @@ export function PriceItemsSection({
                       </div>
                       {canManage && (
                         <div className="flex shrink-0 gap-1">
-                          <button onClick={() => setEditId(it.id)} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Edit"><Pencil className="h-4 w-4" /></button>
+                          <button onClick={() => setEditId(it.id)} className="rounded-full p-1.5 text-neutral-500 hover:bg-hover hover:text-neutral-900" aria-label="Edit"><Pencil className="h-4 w-4" /></button>
                           <button onClick={() => remove(it.id)} className="rounded-full p-1.5 text-neutral-500 hover:bg-red-50 hover:text-red-600" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
                         </div>
                       )}
@@ -223,7 +223,7 @@ function PriceItemForm({
       <input value={section} onChange={(e) => setSection(e.target.value)} placeholder={`Section (optional) — ${hints.exampleSection}`} className={inputCls} />
       <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optional)" rows={2} className={inputCls} />
       <div className="flex justify-end gap-2 pt-1">
-        <button onClick={onCancel} className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-100"><X className="h-3.5 w-3.5" /> Cancel</button>
+        <button onClick={onCancel} className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-hover"><X className="h-3.5 w-3.5" /> Cancel</button>
         <button onClick={save} disabled={saving} className="inline-flex items-center gap-1 rounded-full bg-[#d4580a] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#b84907] disabled:opacity-50">
           {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />} Save
         </button>

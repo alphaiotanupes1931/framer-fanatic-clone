@@ -173,7 +173,7 @@ function StripeTab({ onStatus }: { onStatus: (ready: boolean) => void }) {
                   </button>
                   <button
                     onClick={() => setCheckOpen(false)}
-                    className="w-full rounded-full bg-neutral-100 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-200"
+                    className="w-full rounded-full bg-neutral-100 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-hover"
                   >
                     Not now
                   </button>
@@ -234,8 +234,8 @@ function DraftsTab({
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex gap-1">
-                      <button onClick={() => onEdit(e)} title="Edit" aria-label="Edit" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => onDuplicate(e)} title="Duplicate as draft" aria-label="Duplicate as draft" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Copy className="h-4 w-4" /></button>
+                      <button onClick={() => onEdit(e)} title="Edit" aria-label="Edit" className="rounded p-1 text-neutral-400 hover:bg-hover hover:text-neutral-700"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => onDuplicate(e)} title="Duplicate as draft" aria-label="Duplicate as draft" className="rounded p-1 text-neutral-400 hover:bg-hover hover:text-neutral-700"><Copy className="h-4 w-4" /></button>
                       <button onClick={() => onDelete(e)} title="Delete" aria-label="Delete" className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
                     </div>
                     <button
@@ -601,14 +601,14 @@ function OrganizerStudioPage() {
                             {isPast && <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-neutral-500">Past</span>}
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => editEvent(e)} title="Edit" aria-label="Edit" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Pencil className="h-4 w-4" /></button>
-                            <button onClick={() => duplicate(e)} title="Duplicate as draft" aria-label="Duplicate as draft" className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"><Copy className="h-4 w-4" /></button>
+                            <button onClick={() => editEvent(e)} title="Edit" aria-label="Edit" className="rounded p-1 text-neutral-400 hover:bg-hover hover:text-neutral-700"><Pencil className="h-4 w-4" /></button>
+                            <button onClick={() => duplicate(e)} title="Duplicate as draft" aria-label="Duplicate as draft" className="rounded p-1 text-neutral-400 hover:bg-hover hover:text-neutral-700"><Copy className="h-4 w-4" /></button>
                             <button onClick={() => remove(e)} title="Delete" aria-label="Delete" className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
                           </div>
                           <button
                             onClick={() => void togglePublished(e)}
                             disabled={togglingId === e.id}
-                            className={`rounded-full px-2.5 py-1 text-xs font-semibold transition disabled:opacity-60 ${e.is_published ? "border border-neutral-300 text-neutral-700 hover:bg-neutral-100" : "bg-[#d4580a] text-white hover:brightness-110"}`}
+                            className={`rounded-full px-2.5 py-1 text-xs font-semibold transition disabled:opacity-60 ${e.is_published ? "border border-neutral-300 text-neutral-700 hover:bg-hover" : "bg-[#d4580a] text-white hover:brightness-110"}`}
                           >
                             {togglingId === e.id ? "Working…" : e.is_published ? "Move to Drafts" : "Publish"}
                           </button>
@@ -781,7 +781,7 @@ function EventDetail({ evt, onBack, initialTab, onTicketsDirtyChange, saveTicket
       {/* Sub-tabs */}
       <div className="flex flex-wrap gap-1.5 border-b border-neutral-200 pb-2">
         {tabs.map(({ id, label, icon: Icon }) => (
-          <button key={id} onClick={() => setTab(id as typeof tab)} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition ${tab === id ? "bg-[#d4580a] text-white" : "text-neutral-600 hover:bg-neutral-100"}`}>
+          <button key={id} onClick={() => setTab(id as typeof tab)} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition ${tab === id ? "bg-[#d4580a] text-white" : "text-neutral-600 hover:bg-hover"}`}>
             <Icon className="h-3.5 w-3.5" /> {label}
           </button>
         ))}
@@ -1129,14 +1129,14 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
                       onClick={() => move(i, -1)}
                       disabled={i === 0}
                       aria-label="Move up"
-                      className="rounded p-0.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="rounded p-0.5 text-neutral-400 hover:bg-hover hover:text-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent"
                     ><ChevronUp className="h-4 w-4" /></button>
                     <button
                       type="button"
                       onClick={() => move(i, 1)}
                       disabled={i === (types?.length ?? 0) - 1}
                       aria-label="Move down"
-                      className="rounded p-0.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="rounded p-0.5 text-neutral-400 hover:bg-hover hover:text-neutral-900 disabled:opacity-30 disabled:hover:bg-transparent"
                     ><ChevronDown className="h-4 w-4" /></button>
                   </div>
                   <div>
@@ -1152,7 +1152,7 @@ function TicketsTab({ evt, soldCount, onDirtyChange, saveSignal, onSaved }: { ev
                       const { error } = await supabase.from("ticket_types").delete().eq("id", t.id);
                        if (error) toast.error(error.message); else { toast.success("Deleted"); setHasTicketEdits(true); load(); }
                     }}
-                    className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-red-600"
+                    className="rounded-lg p-2 text-neutral-400 hover:bg-hover hover:text-red-600"
                   ><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
@@ -1248,7 +1248,7 @@ function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; 
                   key={c.key}
                   type="button"
                   onClick={() => setCategory(c.key)}
-                  className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition ${active ? "border-neutral-900 bg-white text-neutral-900" : "border-neutral-200 bg-neutral-50 text-neutral-700 hover:bg-neutral-100"}`}
+                  className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition ${active ? "border-neutral-900 bg-white text-neutral-900" : "border-neutral-200 bg-neutral-50 text-neutral-700 hover:bg-hover"}`}
                 >
                   <Icon className="h-4 w-4" /> {c.label}
                 </button>
@@ -1315,7 +1315,7 @@ function NewTicketTypeForm({ eventId, onCancel, onCreated }: { eventId: string; 
             disabled={!canSubmit}
             className="flex-1 rounded-lg bg-[#d4580a] py-3 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:bg-neutral-300"
           >{gate.checking ? "Checking your Stripe account…" : saving ? "Creating..." : "Create Ticket Type"}</button>
-          <button onClick={onCancel} className="rounded-lg border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">Cancel</button>
+          <button onClick={onCancel} className="rounded-lg border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 hover:bg-hover">Cancel</button>
         </div>
       </div>
     </div>
@@ -1464,7 +1464,7 @@ function CheckInTab({
                     key={t.id}
                     onClick={() => void toggle(t.id)}
                     disabled={busyId === t.id}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-neutral-50 disabled:opacity-60"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-hover disabled:opacity-60"
                   >
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-neutral-900">{b?.name ?? "Attendee"}</div>
@@ -2152,10 +2152,10 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
               className="hidden"
               onChange={(e) => { if (e.target.files?.length) void uploadFiles(e.target.files); if (fileRef.current) fileRef.current.value = ""; }}
             />
-            <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+            <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-hover">
               <Upload className="h-4 w-4" /> Upload CSV files
             </button>
-            <button onClick={() => void createEmptyAudience()} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+            <button onClick={() => void createEmptyAudience()} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-hover">
               <Plus className="h-4 w-4" /> New audience
             </button>
           </div>
@@ -2173,10 +2173,10 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
         </div>
 
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-neutral-100 pt-4">
-          <button onClick={() => setPreview((v) => !v)} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+          <button onClick={() => setPreview((v) => !v)} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-hover">
             <Eye className="h-4 w-4" /> {preview ? "Hide preview" : "Preview"}
           </button>
-          <button onClick={copyAll} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+          <button onClick={copyAll} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-800 transition hover:bg-hover">
             <Copy className="h-4 w-4" /> Copy draft
           </button>
           <div className="flex-1" />
@@ -2279,7 +2279,7 @@ function AudienceEditor({
             <div className="text-base font-semibold text-neutral-900">{audience.title}</div>
             <div className="text-xs text-neutral-500">{contacts?.length ?? 0} contacts</div>
           </div>
-          <button onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100">
+          <button onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-hover">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -2312,7 +2312,7 @@ function AudienceEditor({
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <button onClick={onRename} className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 hover:bg-neutral-50">
+          <button onClick={onRename} className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 hover:bg-hover">
             Rename
           </button>
           <button onClick={onDelete} className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">

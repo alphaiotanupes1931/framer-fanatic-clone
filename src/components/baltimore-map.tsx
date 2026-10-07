@@ -286,7 +286,7 @@ function EventPopup({
             <button
               type="button"
               onClick={prev}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-hover"
               aria-label="Previous event"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -307,7 +307,7 @@ function EventPopup({
             <button
               type="button"
               onClick={next}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-hover"
               aria-label="Next event"
             >
               <ChevronRight className="h-4 w-4" />

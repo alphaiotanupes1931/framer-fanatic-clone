@@ -162,7 +162,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
             </Avatar>
             <span className="truncate text-xs font-extrabold text-slate-800 hover:text-[#d4580a]">{story.author_name}</span>
           </AuthorLink>
-          {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">{story.category}</Badge>}
+          {story.category && <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-hover">{story.category}</Badge>}
           {isFeatured && <span className="inline-flex items-center gap-1 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-yellow-900">★ Featured</span>}
           {story.created_at && <span className={`${isOwner ? "mr-9" : "ml-auto"} text-[11px] text-slate-500`}>{timeAgo(story.created_at)}</span>}
         </div>
@@ -171,7 +171,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           <div className="relative mt-3 aspect-video overflow-hidden bg-muted">
             <Img src={story.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" />
             {isAdmin && (
-              <button onClick={toggleFeatured} disabled={featuring} className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${isFeatured ? "bg-white text-neutral-900 hover:bg-neutral-100" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}>
+              <button onClick={toggleFeatured} disabled={featuring} className={`absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition ${isFeatured ? "bg-white text-neutral-900 hover:bg-hover" : "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"}`}>
                 <Star className={`h-3.5 w-3.5 ${isFeatured ? "" : "fill-yellow-900"}`} /> {isFeatured ? "Unfeature" : "Feature"}
               </button>
             )}
@@ -204,7 +204,7 @@ export function StoryCard({ story, featured = false, currentUserId, isAdmin: isA
           <div className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-foreground">
             <span className="truncate hover:text-[#d4580a]">{story.author_name || "Someone"}</span>
             {story.category && (
-              <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-slate-100">
+              <Badge variant="secondary" className="h-5 rounded-full border-0 bg-slate-100 px-2 text-[10px] font-bold capitalize leading-none text-slate-600 hover:bg-hover">
                 {story.category}
               </Badge>
             )}

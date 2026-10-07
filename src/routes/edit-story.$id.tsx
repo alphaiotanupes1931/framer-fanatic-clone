@@ -156,7 +156,7 @@ function EditStoryPage() {
     finally { setBusy(false); }
   };
 
-  const tbBtn = "inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900";
+  const tbBtn = "inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 hover:bg-hover hover:text-neutral-900";
 
   if (loading) return <AppLayout><div className="p-8 text-sm text-muted-foreground">Loading…</div></AppLayout>;
 
@@ -233,7 +233,7 @@ function EditStoryPage() {
           <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
             <div className="flex flex-wrap items-center gap-1 border-b border-neutral-200 bg-neutral-50 p-1.5">
               <select onChange={(e) => { exec("formatBlock", e.target.value); e.currentTarget.value = "p"; }} defaultValue="p"
-                className="h-8 rounded-md border border-transparent bg-transparent px-2 text-sm hover:bg-neutral-100">
+                className="h-8 rounded-md border border-transparent bg-transparent px-2 text-sm hover:bg-hover">
                 <option value="p">Normal</option><option value="h1">Heading 1</option>
                 <option value="h2">Heading 2</option><option value="h3">Heading 3</option>
               </select>
