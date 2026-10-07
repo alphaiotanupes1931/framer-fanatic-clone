@@ -6,8 +6,9 @@ export async function getOrgFollowerIds(orgId: string): Promise<string[]> {
   async function readIds(table: "organization_members" | "organization_followers") {
     const ids: string[] = [];
     for (let offset = 0; ; offset += 1000) {
-      let query = supabase.from(table).select("user_id").eq("organization_id", orgId).order("user_id").range(offset, offset + 999);
-      if (table === "organization_members") query = query.eq("status", "approved");
+      const query = table === "organization_members"
+        ? supabase.from("organization_members").select("user_id").eq("organization_id", orgId).eq("status", "approved").order("user_id").range(offset, offset + 999)
+        : supabase.from("organization_followers").select("user_id").eq("organization_id", orgId).order("user_id").range(offset, offset + 999);
       const { data, error } = await query;
       if (error) throw error;
       ids.push(...(data ?? []).map((row) => row.user_id));

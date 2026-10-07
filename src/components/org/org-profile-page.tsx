@@ -62,7 +62,7 @@ import { DiscussionTab } from "@/components/org/discussion-tab";
 import { InviteFriendsDialog } from "@/components/invite-friends-dialog";
 import { BannerWatermark } from "@/components/shared/banner-watermark";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
