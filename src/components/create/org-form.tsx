@@ -202,8 +202,8 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         <Input value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={120} placeholder={`Your ${kindLabel.toLowerCase()} name`} />
       </Field>
       <Field label="Short description" required={strict || type === "group" || type === "community_assoc"}>
-        <Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} maxLength={160} placeholder="One line describing what you do" />
-        <p className="text-xs text-neutral-500">This shows right under your page name. Keep it short: 160 characters max ({form.tagline.length}/160).</p>
+        <Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} maxLength={320} placeholder="One line describing what you do" />
+        <p className="text-xs text-neutral-500">This shows right under your page name. Keep it short: 320 characters max ({form.tagline.length}/320).</p>
       </Field>
       <Field label="About" required={strict}>
         <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={2000} />
