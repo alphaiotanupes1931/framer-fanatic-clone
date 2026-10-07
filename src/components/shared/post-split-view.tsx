@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Send, Bookmark, Trash2, Pencil, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
 import { ReportButton } from "@/components/shared/report-button";
 import { toast } from "sonner";
