@@ -224,7 +224,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
         </div>
       )}
       <div className="flex min-w-0 flex-col">
-        <header className="flex items-center gap-3 border-b border-border py-4 pl-4 pr-10">
+        <header className="flex items-center gap-3 border-b border-border py-4 pl-4 pr-12">
           {author && authorProfilePath ? (
             <Link {...authorProfilePath} className="flex min-w-0 items-center gap-2.5">
               <Avatar className="h-9 w-9 shrink-0">
