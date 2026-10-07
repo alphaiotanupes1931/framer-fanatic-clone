@@ -81,7 +81,7 @@ import { orgPath } from "@/lib/org-paths";
 
 type Org = {
   id: string; owner_id: string; type: string; subtype: string | null;
-  name: string; slug: string; bio: string | null; website: string | null;
+  name: string; slug: string; bio: string | null; tagline: string | null; website: string | null;
   phone: string | null; email: string | null; address: string | null;
   neighborhood: string | null; avatar_url: string | null; banner_url: string | null;
   hours: Record<string, { open: string; close: string } | null> | null;
