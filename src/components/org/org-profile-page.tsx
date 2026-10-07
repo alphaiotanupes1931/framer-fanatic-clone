@@ -815,7 +815,7 @@ export function OrgProfile() {
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
           {tab === "Members" && <MembersTab orgId={org.id} />}
           {tab === "Leaderboard" && <MembersTab orgId={org.id} />}
-          {tab === "Invite" && <InviteTab orgName={org.name} orgSlug={org.slug} />}
+          {tab === "Invite" && <InviteTab orgName={org.name} orgSlug={org.slug} isCommunityAssoc={isAssoc} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
           {(tab === "Minutes" || tab === "Resources") && (
@@ -1014,21 +1014,24 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
   return <OrgPostList orgId={org.id} kind={kind} canManage={canManage} />;
 }
 
-function InviteTab({ orgName, orgSlug }: { orgName: string; orgSlug: string }) {
+function InviteTab({ orgName, orgSlug, isCommunityAssoc }: { orgName: string; orgSlug: string; isCommunityAssoc?: boolean }) {
   const [open, setOpen] = useState(false);
+  const label = isCommunityAssoc ? "Invite Community Members to Join" : "Invite Friends to Join";
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 py-6">
       <button
         onClick={() => setOpen(true)}
-        title={`Invite friends to ${orgName}`}
+        title={isCommunityAssoc ? `Invite community members to ${orgName}` : `Invite friends to ${orgName}`}
         className="w-full rounded-2xl bg-neutral-500 px-6 py-4 text-center text-base font-semibold text-white transition hover:bg-neutral-600"
       >
-        Invite Friends to Join
+        {label}
       </button>
-      <p className="text-center text-xs text-neutral-500">
-        Your link brings them straight to {orgName}, so they join this page and not just the site.
-      </p>
+      {!isCommunityAssoc && (
+        <p className="text-center text-xs text-neutral-500">
+          Your link brings them straight to {orgName}, so they join this page and not just the site.
+        </p>
+      )}
       <InviteFriendsDialog open={open} onClose={() => setOpen(false)} group={{ slug: orgSlug, name: orgName }} />
     </div>
   );
