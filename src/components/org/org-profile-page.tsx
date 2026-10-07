@@ -81,7 +81,7 @@ import { orgPath } from "@/lib/org-paths";
 
 type Org = {
   id: string; owner_id: string; type: string; subtype: string | null;
-  name: string; slug: string; bio: string | null; website: string | null;
+  name: string; slug: string; bio: string | null; tagline: string | null; website: string | null;
   phone: string | null; email: string | null; address: string | null;
   neighborhood: string | null; avatar_url: string | null; banner_url: string | null;
   hours: Record<string, { open: string; close: string } | null> | null;
@@ -673,6 +673,9 @@ export function OrgProfile() {
                 .join(" ")}
             </span>
           </div>
+        )}
+        {(org.type === "group" || org.type === "community_assoc") && org.tagline && (
+          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{org.tagline}</p>
         )}
         {org.bio && org.type !== "group" && org.type !== "community_assoc" && (
           /<[a-z][\s\S]*>/i.test(org.bio) ? (

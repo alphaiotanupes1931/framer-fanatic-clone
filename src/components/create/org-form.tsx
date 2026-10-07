@@ -108,14 +108,14 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       form.neighborhood.trim().length > 0 &&
       /.+@.+\..+/.test(form.email.trim())
     : type === "group"
-      ? form.name.trim().length > 1
-      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0;
+      ? form.name.trim().length > 1 && form.tagline.trim().length > 1
+      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0 && form.tagline.trim().length > 1;
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!form.neighborhood.trim() && type !== "group") { toast.error("Neighborhood is required"); return; }
     if (!canSubmit) {
-      toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name is required" : "Name and neighborhood are required");
+      toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name and short description are required" : "Name, neighborhood and short description are required");
       return;
     }
     if (supportsStaffLogin && staffFilled) {
@@ -201,8 +201,9 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       <Field label="Name" required>
         <Input value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={120} placeholder={`Your ${kindLabel.toLowerCase()} name`} />
       </Field>
-      <Field label="Tagline" required={strict}>
+      <Field label="Short description" required={strict || type === "group" || type === "community_assoc"}>
         <Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} maxLength={160} placeholder="One line describing what you do" />
+        <p className="text-xs text-neutral-500">This shows right under your page name. Keep it short: 160 characters max ({form.tagline.length}/160).</p>
       </Field>
       <Field label="About" required={strict}>
         <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4} maxLength={2000} />
