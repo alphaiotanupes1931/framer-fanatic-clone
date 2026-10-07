@@ -18,7 +18,7 @@ type Doc = {
 
 const DOC_TYPES = ["Document", "Meeting Minutes", "Budget", "Map", "By Laws", "Agenda", "Newsletter", "Other"];
 
-export function DocumentsTab({ orgId, canManage, me, label = "Document", docType, emptyTitle, emptyHint }: { orgId: string; canManage: boolean; me: string | null; label?: string; docType?: string; emptyTitle?: string; emptyHint?: string }) {
+export function DocumentsTab({ orgId, canManage, me, label = "Document", docType, excludeDocType, emptyTitle, emptyHint }: { orgId: string; canManage: boolean; me: string | null; label?: string; docType?: string; excludeDocType?: string; emptyTitle?: string; emptyHint?: string }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -29,11 +29,12 @@ export function DocumentsTab({ orgId, canManage, me, label = "Document", docType
       .select("id, name, description, doc_type, file_url, file_name, created_at, uploaded_by")
       .eq("org_id", orgId);
     if (docType) q = q.eq("doc_type", docType);
+    if (excludeDocType) q = q.neq("doc_type", excludeDocType);
     const { data, error } = await q.order("created_at", { ascending: false });
     if (error) { toast.error("Could not load documents"); setLoading(false); return; }
     setDocs((data ?? []) as Doc[]);
     setLoading(false);
-  }, [orgId, docType]);
+  }, [orgId, docType, excludeDocType]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -157,7 +158,7 @@ function UploadDialog({ orgId, me, onClose, onDone, fixedType, label = "Document
               <label className="mb-1 block text-sm font-medium text-neutral-700">Document Type</label>
               <select value={docType} onChange={(e) => setDocType(e.target.value)}
                 className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#d4580a]">
-                {DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                {DOC_TYPES.filter((t) => t !== "By Laws").map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
           )}

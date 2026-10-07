@@ -819,7 +819,7 @@ export function OrgProfile() {
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
           {(tab === "Minutes" || tab === "Resources") && (
-            <DocumentsTab orgId={org.id} canManage={canManage} me={me} label="Document" />
+            <DocumentsTab orgId={org.id} canManage={canManage} me={me} label="Document" excludeDocType="By Laws" />
           )}
           {tab === "By Laws" && (
             <DocumentsTab
