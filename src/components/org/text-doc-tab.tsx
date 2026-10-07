@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { FileText, Pencil, Save, X } from "lucide-react";
+import { ChevronDown, FileText, Pencil, Save, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function TextDocTab({
-  orgId, canManage, field, title, emptyTitle, emptyHint, initialValue, onSaved,
+  orgId, canManage, field, title, emptyTitle, emptyHint, initialValue, onSaved, collapsible,
 }: {
   orgId: string;
   canManage: boolean;
@@ -14,11 +14,13 @@ export function TextDocTab({
   emptyHint: string;
   initialValue: string | null;
   onSaved?: (value: string) => void;
+  collapsible?: boolean;
 }) {
   const [value, setValue] = useState(initialValue ?? "");
   const [draft, setDraft] = useState(initialValue ?? "");
   const [edit, setEdit] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => { setValue(initialValue ?? ""); setDraft(initialValue ?? ""); }, [initialValue, orgId]);
 
@@ -32,6 +34,59 @@ export function TextDocTab({
     setEdit(false);
     toast.success("Saved");
   };
+
+  const body = edit ? (
+    <div className="space-y-3">
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        rows={16}
+        placeholder={`Write your ${title.toLowerCase()} here...`}
+        className="w-full rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none focus:border-primary"
+      />
+      <div className="flex gap-2">
+        <button onClick={save} disabled={saving} className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+          <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
+        </button>
+        <button onClick={() => { setEdit(false); setDraft(value); }} className="flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-hover">
+          <X className="h-4 w-4" /> Cancel
+        </button>
+      </div>
+    </div>
+  ) : value.trim() ? (
+    <div className="whitespace-pre-wrap rounded-2xl border border-border bg-background p-6 text-sm leading-relaxed text-neutral-800">
+      {value}
+    </div>
+  ) : (
+    <div className="rounded-2xl border border-dashed border-border py-16 text-center">
+      <FileText className="mx-auto mb-3 h-8 w-8 text-neutral-400" />
+      <p className="text-sm text-neutral-600">{emptyTitle}</p>
+      <p className="mt-1 text-xs text-neutral-500">{emptyHint}</p>
+    </div>
+  );
+
+  if (collapsible) {
+    return (
+      <div className="rounded-2xl border border-border bg-background">
+        <div className="flex items-center gap-2 px-5 py-4">
+          <button onClick={() => setOpen((v) => !v)} className="flex flex-1 items-center gap-2 text-left">
+            <FileText className="h-5 w-5 text-[#d4580a]" />
+            <span className="text-lg font-bold text-neutral-900">{title}</span>
+            <ChevronDown className={`ml-auto h-5 w-5 text-neutral-500 transition-transform ${open ? "rotate-180" : ""}`} />
+          </button>
+          {canManage && !edit && (
+            <button
+              onClick={() => { setDraft(value); setOpen(true); setEdit(true); }}
+              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-sm font-medium hover:bg-hover"
+            >
+              <Pencil className="h-4 w-4" /> Edit
+            </button>
+          )}
+        </div>
+        {open && <div className="px-5 pb-5">{body}</div>}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 py-2">
@@ -48,36 +103,31 @@ export function TextDocTab({
           </button>
         )}
       </div>
+      {body}
+    </div>
+  );
+}
 
-      {edit ? (
-        <div className="space-y-3">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={16}
-            placeholder={`Write your ${title.toLowerCase()} here...`}
-            className="w-full rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none focus:border-primary"
-          />
-          <div className="flex gap-2">
-            <button onClick={save} disabled={saving} className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
-              <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
-            </button>
-            <button onClick={() => { setEdit(false); setDraft(value); }} className="flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-hover">
-              <X className="h-4 w-4" /> Cancel
-            </button>
-          </div>
-        </div>
-      ) : value.trim() ? (
-        <div className="whitespace-pre-wrap rounded-2xl border border-border bg-background p-6 text-sm leading-relaxed text-neutral-800">
-          {value}
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-dashed border-border py-16 text-center">
-          <FileText className="mx-auto mb-3 h-8 w-8 text-neutral-400" />
-          <p className="text-sm text-neutral-600">{emptyTitle}</p>
-          <p className="mt-1 text-xs text-neutral-500">{emptyHint}</p>
-        </div>
-      )}
+export function CollapsibleCard({
+  title, icon, children, action,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border border-border bg-background">
+      <div className="flex items-center gap-2 px-5 py-4">
+        <button onClick={() => setOpen((v) => !v)} className="flex flex-1 items-center gap-2 text-left">
+          {icon}
+          <span className="text-lg font-bold text-neutral-900">{title}</span>
+          <ChevronDown className={`ml-auto h-5 w-5 text-neutral-500 transition-transform ${open ? "rotate-180" : ""}`} />
+        </button>
+        {action}
+      </div>
+      {open && <div className="px-5 pb-5">{children}</div>}
     </div>
   );
 }

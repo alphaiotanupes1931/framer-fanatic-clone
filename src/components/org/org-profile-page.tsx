@@ -46,7 +46,7 @@ import { BoardTab } from "@/components/org/board-tab";
 import { ArtistsTab } from "@/components/org/artists-tab";
 import { EventImage } from "@/components/event-image";
 import { OpportunitiesTab } from "@/components/org/opportunities-tab";
-import { TextDocTab } from "@/components/org/text-doc-tab";
+import { TextDocTab, CollapsibleCard } from "@/components/org/text-doc-tab";
 import { CvBioTab } from "@/components/org/cv-bio-tab";
 import { ContactTab } from "@/components/org/contact-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
@@ -768,17 +768,15 @@ export function OrgProfile() {
           ) : (
           <>
           {tab === "About" && (
-            <div className="space-y-8">
-              {isArtsOrg
-                ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
-                : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
+            <div className="space-y-4">
+              <CollapsibleCard title="About" icon={<FileText className="h-5 w-5 text-[#d4580a]" />}>
+                {isArtsOrg
+                  ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
+                  : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
+              </CollapsibleCard>
               {(isGroup || isAssoc) && <>
-                <section className="border-t border-border pt-6">
-                  <TextDocTab orgId={org.id} canManage={canManage} field="mission" title="Mission" emptyTitle="No mission statement yet." emptyHint="" initialValue={org.mission ?? null} onSaved={(mission) => setOrg((current) => current ? { ...current, mission } : current)} />
-                </section>
-                <section className="border-t border-border pt-6">
-                  <TextDocTab orgId={org.id} canManage={canManage} field="rules" title="Rules" emptyTitle="No rules posted yet." emptyHint="" initialValue={org.rules ?? null} onSaved={(rules) => setOrg((current) => current ? { ...current, rules } : current)} />
-                </section>
+                <TextDocTab orgId={org.id} canManage={canManage} field="mission" title="Mission" collapsible emptyTitle="No mission statement yet." emptyHint="" initialValue={org.mission ?? null} onSaved={(mission) => setOrg((current) => current ? { ...current, mission } : current)} />
+                <TextDocTab orgId={org.id} canManage={canManage} field="rules" title="Rules" collapsible emptyTitle="No rules posted yet." emptyHint="" initialValue={org.rules ?? null} onSaved={(rules) => setOrg((current) => current ? { ...current, rules } : current)} />
               </>}
             </div>
           )}
@@ -1127,9 +1125,9 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
           <button onClick={save} className="w-full rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Save</button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
           <div className="rounded-2xl border border-border p-4">
-            <h3 className="mb-2 text-sm font-semibold">About</h3>
+
             {org.bio && /<[a-z][\s\S]*>/i.test(org.bio) ? (
               <RichHtml html={org.bio} className="text-sm text-neutral-700" />
             ) : (
