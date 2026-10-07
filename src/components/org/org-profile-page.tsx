@@ -1125,9 +1125,9 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
           <button onClick={save} className="w-full rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white">Save</button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
           <div className="rounded-2xl border border-border p-4">
-            <h3 className="mb-2 text-sm font-semibold">About</h3>
+
             {org.bio && /<[a-z][\s\S]*>/i.test(org.bio) ? (
               <RichHtml html={org.bio} className="text-sm text-neutral-700" />
             ) : (
