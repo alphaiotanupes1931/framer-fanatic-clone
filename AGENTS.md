@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Canonical organization pages use type-prefixed, dashless slugs through shared page-link helpers; the database allocates collision-safe slugs and aliases old slugs, while `/o/:slug` remains redirect-only for compatibility.
+- Page follower counts and lists share a deduplicated audience reader combining approved memberships and explicit follows, because existing Follow controls persist memberships; pending requests remain excluded.
