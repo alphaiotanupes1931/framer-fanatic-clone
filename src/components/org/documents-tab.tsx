@@ -158,7 +158,7 @@ function UploadDialog({ orgId, me, onClose, onDone, fixedType, label = "Document
               <label className="mb-1 block text-sm font-medium text-neutral-700">Document Type</label>
               <select value={docType} onChange={(e) => setDocType(e.target.value)}
                 className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#d4580a]">
-                {DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                {DOC_TYPES.filter((t) => t !== "By Laws").map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
           )}
