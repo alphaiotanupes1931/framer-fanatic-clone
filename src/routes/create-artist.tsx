@@ -39,6 +39,7 @@ function CreateArtistPage() {
   const [form, setForm] = useState({
     display_name: "",
     category: "Music",
+    subcategory: "",
     neighborhood: "",
     bio: "",
     website: "",
@@ -92,6 +93,7 @@ function CreateArtistPage() {
         owner_id: me.id,
         type: "artist",
         subtype: form.category,
+        subcategory: form.subcategory.trim() || null,
         name: form.display_name.trim(),
         slug,
         neighborhood: form.neighborhood.trim() || null,
@@ -132,10 +134,17 @@ function CreateArtistPage() {
               </select>
             </div>
             <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Subcategory</Label>
+              <Input value={form.subcategory} onChange={(e) => set("subcategory", e.target.value)} maxLength={40} placeholder="e.g. Jazz, Spoken Word, Muralist" />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
               <Label className="text-sm font-medium">Neighborhood</Label>
               <Input value={form.neighborhood} onChange={(e) => set("neighborhood", e.target.value)} maxLength={80} />
             </div>
           </div>
+          {form.subcategory.trim() && (
+            <p className="-mt-2 text-xs text-muted-foreground">Your page will show: {form.category} / {form.subcategory.trim()}</p>
+          )}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Bio</Label>
             <RichTextEditor value={form.bio} onChange={(v) => set("bio", v)} placeholder="Tell people about yourself and your work..." minHeight={120} />

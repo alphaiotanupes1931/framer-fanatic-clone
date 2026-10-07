@@ -671,6 +671,7 @@ export function OrgProfile() {
                 .filter(Boolean)
                 .map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
                 .join(" ")}
+              {(org as { subcategory?: string | null }).subcategory?.trim() ? ` / ${(org as { subcategory?: string | null }).subcategory!.trim()}` : ""}
             </span>
           </div>
         )}
