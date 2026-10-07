@@ -2325,6 +2325,7 @@ export type Database = {
           pinned_at: string | null
           rules: string | null
           slug: string
+          subcategory: string | null
           subtype: string | null
           tagline: string | null
           type: string
@@ -2354,6 +2355,7 @@ export type Database = {
           pinned_at?: string | null
           rules?: string | null
           slug: string
+          subcategory?: string | null
           subtype?: string | null
           tagline?: string | null
           type: string
@@ -2383,6 +2385,7 @@ export type Database = {
           pinned_at?: string | null
           rules?: string | null
           slug?: string
+          subcategory?: string | null
           subtype?: string | null
           tagline?: string | null
           type?: string

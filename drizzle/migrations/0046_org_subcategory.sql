@@ -1,0 +1,1 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS subcategory text CHECK (subcategory IS NULL OR char_length(subcategory) <= 40);
