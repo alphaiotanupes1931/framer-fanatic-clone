@@ -678,7 +678,7 @@ export function OrgProfile() {
           /<[a-z][\s\S]*>/i.test(org.bio) ? (
             <RichHtml html={org.bio} className="mt-3 max-w-3xl text-[15px] text-neutral-700" />
           ) : (
-            <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700 whitespace-pre-wrap">{org.bio}</p>
+            <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700 whitespace-pre-wrap">{decodeEntities(org.bio)}</p>
           )
         )}
         <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
@@ -943,6 +943,18 @@ function GroupRequests({ orgId, onApproved, onCountChange }: { orgId: string; on
   );
 }
 
+// Plain-text descriptions can carry HTML entities (e.g. "&amp;"); decode them so readers see "&".
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, " ");
+}
+
 function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org: Org; canManage: boolean; onChange: (o: Org) => void; initialEdit?: boolean; onEditClose?: () => void }) {
   return AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose });
 }
@@ -1131,7 +1143,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
             {org.bio && /<[a-z][\s\S]*>/i.test(org.bio) ? (
               <RichHtml html={org.bio} className="text-sm text-neutral-700" />
             ) : (
-              <p className="text-sm text-neutral-700 whitespace-pre-wrap">{org.bio || "No description yet."}</p>
+              <p className="text-sm text-neutral-700 whitespace-pre-wrap">{org.bio ? decodeEntities(org.bio) : "No description yet."}</p>
             )}
           </div>
           {org.hours && days.some((d) => org.hours?.[d]) && (
