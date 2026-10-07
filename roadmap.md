@@ -10,3 +10,4 @@
 - [x] Verify admin "Live now" heartbeat works in browser (last_seen_at updates)
 - [x] Verify smaller attending privacy toggle renders
 - [x] Remove dashes from all page links, preserve redirects, and verify collisions and page loading
+- [x] Replace grey hover fills with the warm brand tint across all buttons and tabs. Verified the Followers chip and page tabs render a warm peach tint in the browser.
