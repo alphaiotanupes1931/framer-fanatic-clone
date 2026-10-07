@@ -153,7 +153,7 @@
   /* Hover feedback is a faint warm wash pulled from the brand orange, never a
      grey block. Declared once here so every theme (which overrides --orange and
      --foreground on the same element) re-derives it automatically. */
-  --hover: color-mix(in oklab, var(--orange) 11%, transparent);
+  --hover: transparent;
   --hover-foreground: var(--foreground);
 
   --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
