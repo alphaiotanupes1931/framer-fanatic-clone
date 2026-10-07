@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Send, Bookmark, Trash2, Pencil, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
 import { ReportButton } from "@/components/shared/report-button";
 import { toast } from "sonner";
@@ -264,22 +263,19 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
               <Link to="/edit-post/$id" params={{ id: post.id }} aria-label="Edit post" className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground">
                 <Pencil className="h-4 w-4" />
               </Link>
+              <button
+                type="button"
+                onClick={remove}
+                aria-label="Delete post"
+                title="Delete post"
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
           )}
         </header>
-        {isOwner && (
-          <div className="flex border-b border-border px-4 py-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={remove}
-              aria-label="Delete post"
-              className="h-11 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" /> Delete post
-            </Button>
-          </div>
-        )}
+
 
         <div className="flex-1 overflow-y-auto">
           {post.link_url && (
