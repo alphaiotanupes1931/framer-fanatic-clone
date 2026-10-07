@@ -1071,6 +1071,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
   const [form, setForm] = useState({
     name: org.name ?? "", bio: org.bio ?? "", website: org.website ?? "", phone: org.phone ?? "",
     email: org.email ?? "", address: org.address ?? "", neighborhood: org.neighborhood ?? "",
+    tagline: org.tagline ?? "",
   });
   const days = ["mon","tue","wed","thu","fri","sat","sun"] as const;
   const dayLabels: Record<string,string> = { mon:"Mon",tue:"Tue",wed:"Wed",thu:"Thu",fri:"Fri",sat:"Sat",sun:"Sun" };
@@ -1085,6 +1086,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
     const { error } = await supabase.from("organizations").update({
       name: form.name.trim(), bio: form.bio || null, website: form.website || null, phone: form.phone || null,
       email: form.email || null, address: form.address || null, neighborhood: form.neighborhood || null,
+      tagline: form.tagline.trim() || null,
       hours,
     }).eq("id", org.id);
     if (error) return toast.error(error.message);
@@ -1106,6 +1108,12 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
       {edit ? (
         <div className="space-y-3 rounded-2xl border border-border bg-neutral-50 p-4 text-sm">
           <input value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="Name" className="w-full rounded-lg border border-border px-3 py-2 font-semibold" />
+          {(org.type === "group" || org.type === "community_assoc") && (
+            <div>
+              <input value={form.tagline} onChange={(e) => setForm({...form, tagline: e.target.value})} maxLength={320} placeholder="Short description" className="w-full rounded-lg border border-border px-3 py-2" />
+              <p className="mt-1 text-xs text-neutral-500">This shows right under your page name. Keep it short: 320 characters max ({form.tagline.length}/320).</p>
+            </div>
+          )}
           <RichTextEditor value={form.bio} onChange={(v) => setForm({...form, bio: v})} placeholder="About" minHeight={120} />
           <div className="grid grid-cols-2 gap-2">
             <input value={form.website} onChange={(e) => setForm({...form, website: e.target.value})} placeholder="Website" className="rounded-lg border border-border px-3 py-2" />
