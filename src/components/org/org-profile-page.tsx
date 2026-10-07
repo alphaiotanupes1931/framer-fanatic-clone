@@ -1,4 +1,7 @@
 import { OrgPostComments } from "@/components/org/org-post-comments";
+import { OrgFollowersList } from "@/components/org/org-followers-list";
+import { getOrgFollowerIds } from "@/lib/org-followers";
+import { Button } from "@/components/ui/button";
 import { PostSplitView } from "@/components/shared/post-split-view";
 
 import { StaffLoginCard } from "@/components/org/staff-login-card";
@@ -100,11 +103,11 @@ type OrgPost = {
 
 const DEFAULT_TABS = ["About", "Events", "Shop", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
-  "Posts", "Mission", "Events", "Members", "Threads",
+  "Posts", "Mission", "Events", "Followers", "Threads",
   "Polls", "Shop", "Rules", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
-  "Posts", "Mission", "Events", "Members", "Threads",
+  "Posts", "Mission", "Events", "Followers", "Threads",
   "Polls", "Voting", "Minutes", "Board", "Rules", "By Laws", "Invite", "About", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
@@ -122,7 +125,7 @@ const PERSON_PAGE_TABS = [
 ] as const;
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
-  Members: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
+  Followers: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
   Resources: Folder, Jobs: Briefcase, Leaderboard: Trophy, Rules: FileText,
   Invite: UserPlus, Comments: MessageSquare, About: FileText, Requests: UserPlus,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
@@ -145,6 +148,7 @@ export function OrgProfile() {
   const [memberStatus, setMemberStatus] = useState<"none" | "pending" | "approved">("none");
   const [pendingCount, setPendingCount] = useState(0);
   const [memberCount, setMemberCount] = useState(0);
+  const [followersOpen, setFollowersOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [editAbout, setEditAbout] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -266,14 +270,11 @@ export function OrgProfile() {
   }, [org]);
   useEffect(() => {
     if (!org) return;
-    (async () => {
-      const { count } = await supabase
-        .from("organization_members")
-        .select("user_id", { count: "exact", head: true })
-        .eq("organization_id", org.id)
-        .eq("status", "approved");
-      setMemberCount(count ?? 0);
-    })();
+    let cancelled = false;
+    getOrgFollowerIds(org.id).then((ids) => {
+      if (!cancelled) setMemberCount(ids.length);
+    }).catch(() => { if (!cancelled) setMemberCount(0); });
+    return () => { cancelled = true; };
   }, [org, joined]);
   useEffect(() => {
     if (!org) return;
@@ -678,7 +679,13 @@ export function OrgProfile() {
           )
         )}
         <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500">
-          <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {memberCount} {memberCount === 1 ? "member" : "members"}</span>
+           <Button variant="ghost" className="h-auto gap-1.5 p-0 font-normal text-muted-foreground" onClick={() => setFollowersOpen(true)}><Users className="h-4 w-4" /> {memberCount} Followers</Button>
+           <Dialog open={followersOpen} onOpenChange={setFollowersOpen}>
+             <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-xl">
+               <DialogHeader className="pr-10"><DialogTitle>Followers</DialogTitle><DialogDescription>{org.name}</DialogDescription></DialogHeader>
+               {followersOpen && <OrgFollowersList orgId={org.id} />}
+             </DialogContent>
+           </Dialog>
           {org.website && (
             <>
               <span className="text-neutral-300">·</span>
@@ -808,8 +815,7 @@ export function OrgProfile() {
             </div>
           )}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
-          {tab === "Members" && <MembersTab orgId={org.id} />}
-          {tab === "Leaderboard" && <MembersTab orgId={org.id} />}
+           {(tab === "Followers" || tab === "Members" || tab === "Leaderboard") && <OrgFollowersList orgId={org.id} />}
           {tab === "Invite" && <InviteTab orgName={org.name} orgSlug={org.slug} isCommunityAssoc={isAssoc} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
@@ -933,7 +939,7 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
 // switcher above is skipped here so it never renders twice.
 const SHARED_TABS = new Set([
   "About", "Posts", "Events", "Exhibitions", "Exhibition", "Opportunities", "Press",
-  "Updates", "Artists", "Support", "Menu", "Feed", "Services", "Calendar", "Members",
+   "Updates", "Artists", "Support", "Menu", "Feed", "Services", "Calendar", "Members", "Followers",
   "Leaderboard", "Invite", "Polls", "Voting", "Minutes", "Resources", "By Laws", "Rules",
   "Gallery", "Announcements", "Promotions", "Jobs", "Stories", "Threads", "Reviews",
   "Board", "Comments", "Dues",
@@ -1331,43 +1337,6 @@ function CalendarTab({ orgId: _orgId }: { orgId: string }) {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function MembersTab({ orgId }: { orgId: string }) {
-  const [rows, setRows] = useState<Array<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null }>>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      const { data: mem } = await supabase.from("organization_members").select("user_id").eq("organization_id", orgId);
-      const ids = Array.from(new Set(((mem ?? []) as { user_id: string }[]).map((r) => r.user_id)));
-      if (ids.length === 0) { setRows([]); setLoading(false); return; }
-      const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
-      setRows((profs ?? []) as typeof rows);
-      setLoading(false);
-    })();
-  }, [orgId]);
-  if (loading) return <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>;
-  if (rows.length === 0) return <div className="py-14 text-center text-sm text-neutral-500">No members yet.</div>;
-  return (
-    <div className="grid gap-3 sm:grid-cols-2">
-        {rows.map((p) => (
-        <Link
-          key={p.id}
-          to="/$username"
-          params={{ username: p.username || p.id }}
-          className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 transition hover:border-orange-300 hover:shadow-sm"
-        >
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-neutral-200">
-            {p.avatar_url && <Img src={p.avatar_url} alt="" className="h-full w-full object-cover" />}
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-neutral-900">{p.display_name || p.username || "Member"}</div>
-            {p.neighborhood && <div className="truncate text-xs text-neutral-500">{p.neighborhood}</div>}
-          </div>
-        </Link>
-      ))}
     </div>
   );
 }
