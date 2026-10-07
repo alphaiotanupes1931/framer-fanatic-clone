@@ -103,12 +103,12 @@ type OrgPost = {
 
 const DEFAULT_TABS = ["About", "Events", "Shop", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
-  "Posts", "Mission", "Events", "Followers", "Threads",
-  "Polls", "Shop", "Rules", "Invite",
+  "Posts", "About", "Events", "Followers", "Threads",
+  "Polls", "Shop", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
-  "Posts", "Mission", "Events", "Followers", "Threads",
-  "Polls", "Voting", "Minutes", "Board", "Rules", "By Laws", "Invite", "About", "Dues",
+  "Posts", "About", "Events", "Followers", "Threads",
+  "Polls", "Voting", "Minutes", "Board", "By Laws", "Invite", "Dues",
 ] as const;
 const RESTAURANT_TABS = [
   "Posts", "Menu", "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite",
@@ -287,7 +287,10 @@ export function OrgProfile() {
     // Deep links may use any casing (?tab=portfolio); match the real tab label
     // case-insensitively so the right content renders instead of the fallback.
     const match = wanted
-      ? VISIBLE_TABS.find((t) => t.toLowerCase() === wanted.toLowerCase())
+      ? VISIBLE_TABS.find((t) => t.toLowerCase() === (
+          (org.type === "group" || org.type === "community_assoc") && ["mission", "rules"].includes(wanted.toLowerCase())
+            ? "about" : wanted.toLowerCase()
+        ))
       : undefined;
     setTab(match ?? "Posts");
   }, [org]);
@@ -764,9 +767,20 @@ export function OrgProfile() {
             </div>
           ) : (
           <>
-          {tab === "About" && (isArtsOrg
-            ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
-            : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />
+          {tab === "About" && (
+            <div className="space-y-8">
+              {isArtsOrg
+                ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
+                : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
+              {(isGroup || isAssoc) && <>
+                <section className="border-t border-border pt-6">
+                  <TextDocTab orgId={org.id} canManage={canManage} field="mission" title="Mission" emptyTitle="No mission statement yet." emptyHint="" initialValue={org.mission ?? null} onSaved={(mission) => setOrg((current) => current ? { ...current, mission } : current)} />
+                </section>
+                <section className="border-t border-border pt-6">
+                  <TextDocTab orgId={org.id} canManage={canManage} field="rules" title="Rules" emptyTitle="No rules posted yet." emptyHint="" initialValue={org.rules ?? null} onSaved={(rules) => setOrg((current) => current ? { ...current, rules } : current)} />
+                </section>
+              </>}
+            </div>
           )}
           {tab === "Events" && <EventsTab orgId={org.id} canManage={canManage} />}
           {(tab === "Exhibitions" || tab === "Exhibition") && <ExhibitionsTab orgId={org.id} canManage={canManage} />}

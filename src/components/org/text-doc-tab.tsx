@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function TextDocTab({
-  orgId, canManage, field, title, emptyTitle, emptyHint, initialValue,
+  orgId, canManage, field, title, emptyTitle, emptyHint, initialValue, onSaved,
 }: {
   orgId: string;
   canManage: boolean;
@@ -13,6 +13,7 @@ export function TextDocTab({
   emptyTitle: string;
   emptyHint: string;
   initialValue: string | null;
+  onSaved?: (value: string) => void;
 }) {
   const [value, setValue] = useState(initialValue ?? "");
   const [draft, setDraft] = useState(initialValue ?? "");
@@ -27,6 +28,7 @@ export function TextDocTab({
     setSaving(false);
     if (error) { toast.error("Could not save. Please try again."); return; }
     setValue(draft);
+    onSaved?.(draft);
     setEdit(false);
     toast.success("Saved");
   };
