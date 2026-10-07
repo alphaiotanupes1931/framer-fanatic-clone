@@ -674,6 +674,9 @@ export function OrgProfile() {
             </span>
           </div>
         )}
+        {(org.type === "group" || org.type === "community_assoc") && org.tagline && (
+          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{org.tagline}</p>
+        )}
         {org.bio && org.type !== "group" && org.type !== "community_assoc" && (
           /<[a-z][\s\S]*>/i.test(org.bio) ? (
             <RichHtml html={org.bio} className="mt-3 max-w-3xl text-[15px] text-neutral-700" />
