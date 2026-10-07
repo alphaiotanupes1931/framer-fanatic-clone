@@ -108,14 +108,14 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       form.neighborhood.trim().length > 0 &&
       /.+@.+\..+/.test(form.email.trim())
     : type === "group"
-      ? form.name.trim().length > 1
-      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0;
+      ? form.name.trim().length > 1 && form.tagline.trim().length > 1
+      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0 && form.tagline.trim().length > 1;
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!form.neighborhood.trim() && type !== "group") { toast.error("Neighborhood is required"); return; }
     if (!canSubmit) {
-      toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name is required" : "Name and neighborhood are required");
+      toast.error(strict ? "Please fill in every required field" : type === "group" ? "Name and short description are required" : "Name, neighborhood and short description are required");
       return;
     }
     if (supportsStaffLogin && staffFilled) {
