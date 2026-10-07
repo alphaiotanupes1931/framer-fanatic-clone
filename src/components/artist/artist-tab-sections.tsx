@@ -384,7 +384,7 @@ export function ArtistBookCollaborateTab({ profile }: { profile: any }) {
           {intents.map((i) => {
             const Icon = i.icon;
             return (
-              <button key={i.key} type="button" onClick={() => setIntent(i.key)} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-muted"}`}>
+              <button key={i.key} type="button" onClick={() => setIntent(i.key)} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-hover"}`}>
                 <Icon className="h-4 w-4" /> {i.key}
               </button>
             );
@@ -644,7 +644,7 @@ export function ArtistInviteTab({ profile }: { profile: any }) {
       </div>
       <button
         onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-200 px-6 py-4 text-base font-semibold text-neutral-800 transition hover:bg-neutral-300"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-200 px-6 py-4 text-base font-semibold text-neutral-800 transition hover:bg-hover"
       >
         <UserPlus className="h-5 w-5" /> Invite Friends
       </button>
@@ -1007,7 +1007,7 @@ export function ArtistAvailableWorksTab({ userId, canEdit }: { userId: string; c
                   <div className="mt-3 flex items-center justify-between gap-2">
                     {canEdit ? (
                       <div className="flex gap-2">
-                        <button onClick={() => startEdit(it)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">Edit</button>
+                        <button onClick={() => startEdit(it)} className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-hover">Edit</button>
                         <button onClick={() => remove(it.id)} className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"><Trash2 className="h-3 w-3" /> Delete</button>
                       </div>
                     ) : soldOut ? (

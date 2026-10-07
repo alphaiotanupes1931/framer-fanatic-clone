@@ -89,7 +89,7 @@ export function BoardTab({ orgId, canManage }: { orgId: string; canManage: boole
               </div>
               {canManage && (
                 <div className="flex flex-col gap-1">
-                  <button onClick={() => setEditing(m)} className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100" aria-label="Edit member">
+                  <button onClick={() => setEditing(m)} className="rounded-lg p-2 text-neutral-500 hover:bg-hover" aria-label="Edit member">
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button onClick={() => void remove(m.id)} className="rounded-lg p-2 text-neutral-500 hover:bg-red-50 hover:text-red-600" aria-label="Remove member">
@@ -149,7 +149,7 @@ function MemberDialog({ orgId, member, nextOrder, onClose, onDone }: {
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
           <h3 className="text-lg font-bold text-neutral-900">{member ? "Edit Member" : "Add Board Member"}</h3>
-          <button onClick={onClose} className="rounded-lg p-1 text-neutral-500 hover:bg-neutral-100"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-1 text-neutral-500 hover:bg-hover"><X className="h-5 w-5" /></button>
         </div>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto p-5">
           <ImageUpload value={photo} onChange={setPhoto} label="Upload photo (optional)" />
@@ -175,7 +175,7 @@ function MemberDialog({ orgId, member, nextOrder, onClose, onDone }: {
           </div>
         </div>
         <div className="flex gap-3 border-t border-neutral-200 p-4">
-          <button onClick={onClose} className="flex-1 rounded-lg border border-neutral-300 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">Cancel</button>
+          <button onClick={onClose} className="flex-1 rounded-lg border border-neutral-300 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-hover">Cancel</button>
           <button onClick={() => void save()} disabled={!name.trim() || saving}
             className="flex-1 rounded-lg bg-[#d4580a] py-2.5 text-sm font-semibold text-white disabled:bg-neutral-300">
             {saving ? "Saving..." : member ? "Save Changes" : "Add Member"}

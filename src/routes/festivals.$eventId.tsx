@@ -1338,7 +1338,7 @@ function FestivalDetailPage() {
                           className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                             updateType === t
                               ? "border-orange bg-orange text-white"
-                              : "border-border bg-background text-foreground hover:bg-muted"
+                              : "border-border bg-background text-foreground hover:bg-hover"
                           }`}
                         >
                           {t}

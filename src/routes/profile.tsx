@@ -516,7 +516,7 @@ function ProfilePage() {
                 <div className="absolute top-7 left-0 z-30 bg-card border border-border rounded-xl shadow-xl w-56 max-h-60 overflow-y-auto">
                   {neighborhoods.map((n) => (
                     <button key={n.id} onClick={() => selectNeighborhood(n)}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors ${primaryHood === n.name ? "font-medium" : "text-foreground"}`}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-hover transition-colors ${primaryHood === n.name ? "font-medium" : "text-foreground"}`}
                       style={primaryHood === n.name ? { color: "#d4580a" } : undefined}
                     >{n.name}</button>
                   ))}
@@ -948,7 +948,7 @@ function ArtistBookCollaborateTab({ profile }: { profile: any }) {
           {intents.map((i) => (
             <button key={i.key} type="button" onClick={() => setIntent(i.key)}
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-                intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-muted"
+                intent === i.key ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-border hover:bg-hover"
               }`}>
               <span>{i.icon}</span> {i.key}
             </button>
@@ -1801,7 +1801,7 @@ function StripeTab() {
         </div>
       </div>
 
-      <Link to="/settings" hash="stripe" className="block rounded-2xl border border-border bg-card p-4 text-sm font-semibold text-foreground hover:bg-accent">
+      <Link to="/settings" hash="stripe" className="block rounded-2xl border border-border bg-card p-4 text-sm font-semibold text-foreground hover:bg-hover">
         Open full payout settings <ExternalLink className="ml-2 inline h-3.5 w-3.5 text-muted-foreground" />
       </Link>
     </div>

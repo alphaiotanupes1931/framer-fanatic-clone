@@ -697,7 +697,7 @@ function MessagesPage() {
               <h2 className="truncate text-base font-semibold text-foreground">Inbox</h2>
               <button
                 onClick={openNew}
-                className="rounded-full p-2 text-foreground transition hover:bg-muted"
+                className="rounded-full p-2 text-foreground transition hover:bg-hover"
                 aria-label="New message"
                 title="New message"
               >
@@ -724,7 +724,7 @@ function MessagesPage() {
               filteredConvs.map((c) => (
                 <div
                   key={c.id}
-                  className={`group relative flex w-full items-center rounded-xl transition hover:bg-muted/60 ${
+                  className={`group relative flex w-full items-center rounded-xl transition hover:bg-hover/60 ${
                     active?.id === c.id ? "bg-muted/70" : ""
                   }`}
                 >
@@ -826,7 +826,7 @@ function MessagesPage() {
           <div className="border-t border-border p-3">
             <button
               onClick={() => setBroadcastOpen(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground"
+              className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-hover hover:text-foreground"
             >
               <Users className="h-3.5 w-3.5" /> Message all followers
             </button>
@@ -857,7 +857,7 @@ function MessagesPage() {
                 <button
                   type="button"
                   onClick={() => setActive(null)}
-                  className="rounded-full p-1.5 text-muted-foreground hover:bg-muted md:hidden"
+                  className="rounded-full p-1.5 text-muted-foreground hover:bg-hover md:hidden"
                   aria-label="Back to conversations"
                 >
                   <ArrowLeft className="h-5 w-5" />
@@ -877,7 +877,7 @@ function MessagesPage() {
                   <button
                     type="button"
                     onClick={() => setMembersOpen(true)}
-                    className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-muted"
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-hover"
                   >
                     {active.image_url ? (
                       <Avatar className="h-10 w-10">
@@ -948,7 +948,7 @@ function MessagesPage() {
                 <button
                   type="button"
                   onClick={() => setMsgSearchOpen((v) => !v)}
-                  className="ml-auto rounded-full p-2 text-muted-foreground hover:bg-muted"
+                  className="ml-auto rounded-full p-2 text-muted-foreground hover:bg-hover"
                   aria-label="Search in conversation"
                   title="Search in conversation"
                 >
@@ -1014,7 +1014,7 @@ function MessagesPage() {
                       {mine && (
                         <button
                           onClick={() => void deleteMessage(m)}
-                          className="mb-2 rounded-full p-1.5 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-destructive group-hover/msg:opacity-100"
+                          className="mb-2 rounded-full p-1.5 text-muted-foreground opacity-0 transition hover:bg-hover hover:text-destructive group-hover/msg:opacity-100"
                           aria-label="Delete message"
                           title="Delete for me"
                         >
@@ -1063,7 +1063,7 @@ function MessagesPage() {
                       {!mine && (
                         <button
                           onClick={() => void deleteMessage(m)}
-                          className="mb-2 rounded-full p-1.5 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-destructive group-hover/msg:opacity-100"
+                          className="mb-2 rounded-full p-1.5 text-muted-foreground opacity-0 transition hover:bg-hover hover:text-destructive group-hover/msg:opacity-100"
                           aria-label="Delete message"
                           title="Delete for me"
                         >
@@ -1175,7 +1175,7 @@ function MessagesPage() {
                 <button
                   onClick={() => setNewStep("pick")}
                   disabled={creatingGroup}
-                  className="flex-1 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50"
+                  className="flex-1 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-hover disabled:opacity-50"
                 >
                   Back
                 </button>
@@ -1230,7 +1230,7 @@ function MessagesPage() {
                   <button
                     key={p.id}
                     onClick={() => togglePerson(p)}
-                    className={`flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-muted ${isSelected ? "bg-primary/5" : ""}`}
+                    className={`flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-hover ${isSelected ? "bg-primary/5" : ""}`}
                   >
                     <Avatar className="h-9 w-9">
                       {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}
@@ -1346,7 +1346,7 @@ function MessagesPage() {
                   <button
                     type="button"
                     onClick={() => { setRenameValue(active?.title || ""); setRenaming(true); }}
-                    className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    className="rounded-full p-1.5 text-muted-foreground transition hover:bg-hover hover:text-foreground"
                     aria-label="Rename group"
                     title="Rename group"
                   >
@@ -1369,7 +1369,7 @@ function MessagesPage() {
                       to="/$username"
                       params={{ username: p.username }}
                       onClick={() => setMembersOpen(false)}
-                      className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted"
+                      className="flex items-center gap-3 rounded-lg p-2 hover:bg-hover"
                     >
                       <Avatar className="h-10 w-10">
                         {p.avatar_url && <SmartAvatarImage src={p.avatar_url} alt="" />}

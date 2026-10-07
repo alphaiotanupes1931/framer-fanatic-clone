@@ -427,7 +427,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
             tabIndex={0}
             onClick={() => navigate({ to: "/posts/$postId", params: { postId: post.id } })}
             onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/posts/$postId", params: { postId: post.id } }); }}
-            className="order-3 block cursor-pointer px-4 py-2.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground hover:bg-accent/30 sm:px-6 sm:py-3"
+            className="order-3 block cursor-pointer px-4 py-2.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground hover:bg-hover/30 sm:px-6 sm:py-3"
           >
             <MentionText text={post.content} />
           </div>
@@ -525,7 +525,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl bg-white p-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
               <h3 className="text-sm font-semibold">Comments</h3>
-              <button onClick={() => setCommentsOpen(false)} className="rounded p-1 text-neutral-500 hover:bg-neutral-100"><X className="h-4 w-4" /></button>
+              <button onClick={() => setCommentsOpen(false)} className="rounded p-1 text-neutral-500 hover:bg-hover"><X className="h-4 w-4" /></button>
             </div>
             <div className="max-h-[50vh] space-y-3 overflow-y-auto py-3">
               {comments.length === 0 ? (

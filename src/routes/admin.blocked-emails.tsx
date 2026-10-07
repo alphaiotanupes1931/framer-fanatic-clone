@@ -122,7 +122,7 @@ function AdminBlockedEmailsPage() {
           />
           <button
             onClick={load}
-            className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+            className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-hover"
           >
             Refresh
           </button>
@@ -154,7 +154,7 @@ function AdminBlockedEmailsPage() {
             URL.revokeObjectURL(url);
             toast.success("Exported " + filtered.length + " blocked emails");
           }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-xs font-medium text-neutral-700 hover:bg-hover"
         >
           <Download className="h-3.5 w-3.5" /> Export
         </button>

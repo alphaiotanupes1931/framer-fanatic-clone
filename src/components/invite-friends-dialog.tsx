@@ -225,13 +225,13 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
               <button
                 type="button"
                 onClick={() => void externalShare(shareUrl, group ? `Join ${group.name} on Planet Baltimore` : "Join me on Planet Baltimore")}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-hover"
               >
                 <Share2 className="h-3.5 w-3.5" /> Share
               </button>
               <a
                 href={`sms:?&body=${encodeURIComponent(group ? `Join ${group.name} on Planet Baltimore! ${shareUrl}` : `Join me on Planet Baltimore! ${shareUrl}`)}`}
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-hover"
               >
                 Text
               </a>
@@ -243,7 +243,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
                     "_blank",
                   )
                 }
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-hover"
               >
                 Facebook
               </button>
@@ -255,7 +255,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
                     "_blank",
                   )
                 }
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium transition hover:bg-hover"
               >
                 LinkedIn
               </button>
@@ -289,7 +289,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-5 text-center transition hover:border-primary hover:bg-muted/40"
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-5 text-center transition hover:border-primary hover:bg-hover/40"
             >
               <Upload className="h-5 w-5 text-muted-foreground" />
               <span className="text-xs font-semibold text-foreground">Upload a CSV or text file</span>

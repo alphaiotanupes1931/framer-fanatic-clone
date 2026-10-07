@@ -92,13 +92,13 @@ function AdminStripeLogsPage() {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Link
           to="/admin"
-          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-hover"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back
         </Link>
         <button
           onClick={() => void load()}
-          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-hover"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </button>
@@ -129,7 +129,7 @@ function AdminStripeLogsPage() {
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                statusFilter === s ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-50"
+                statusFilter === s ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-hover"
               }`}
             >
               {s === "ok" ? "Success" : s}
@@ -156,7 +156,7 @@ function AdminStripeLogsPage() {
               <div key={r.id} className="border-b border-neutral-100 last:border-b-0">
                 <button
                   onClick={() => setExpanded(open ? null : r.id)}
-                  className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-neutral-50"
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-hover"
                 >
                   {isError ? (
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />

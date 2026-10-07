@@ -300,7 +300,7 @@ export function TicketVerifyView({ ticketId }: { ticketId: string }) {
                     className={`relative z-10 grid h-24 w-24 place-items-center rounded-full transition-all duration-500 ${
                       glow
                         ? "scale-105 bg-emerald-500 text-white shadow-[0_0_50px_rgba(16,185,129,0.85)]"
-                        : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
+                        : "bg-neutral-100 text-neutral-400 hover:bg-hover"
                     }`}
                   >
                     <Check

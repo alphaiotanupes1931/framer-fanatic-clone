@@ -201,7 +201,7 @@ export function GlobalSearch({ className = "", compact = false }: { className?: 
                         type="button"
                         onMouseEnter={() => setCursor(flat.findIndex((x) => x.key === h.key))}
                         onClick={() => pick(h)}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition ${active ? "bg-accent" : "hover:bg-accent"}`}
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition ${active ? "bg-accent" : "hover:bg-hover"}`}
                       >
                         {h.kind === "Creators" ? (
                           <Avatar className="h-8 w-8 shrink-0">
@@ -227,7 +227,7 @@ export function GlobalSearch({ className = "", compact = false }: { className?: 
           <button
             type="button"
             onClick={seeAll}
-            className="mt-1 w-full rounded-xl px-3 py-2 text-center text-sm font-semibold text-orange hover:bg-accent"
+            className="mt-1 w-full rounded-xl px-3 py-2 text-center text-sm font-semibold text-orange hover:bg-hover"
           >
             See all results for "{debounced}"
           </button>

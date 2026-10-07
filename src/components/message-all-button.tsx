@@ -160,7 +160,7 @@ export function MessageAllButton({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100"
+                className="rounded-full p-1.5 text-neutral-500 hover:bg-hover"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -218,7 +218,7 @@ export function MessageAllButton({
                       key={p.id}
                       type="button"
                       onClick={() => toggle(p)}
-                      className={`flex w-full items-center gap-3 border-b border-neutral-100 px-5 py-3 text-left transition hover:bg-neutral-50 ${
+                      className={`flex w-full items-center gap-3 border-b border-neutral-100 px-5 py-3 text-left transition hover:bg-hover ${
                         isSel ? "bg-orange-50" : ""
                       }`}
                     >
@@ -253,7 +253,7 @@ export function MessageAllButton({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+                className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-hover"
               >
                 Cancel
               </button>

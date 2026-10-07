@@ -94,7 +94,7 @@ export function FollowListDialog({
                 to="/$username"
                 params={{ username: person.username || person.id }}
                 onClick={() => onOpenChange(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary"
+                className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-hover"
               >
                 <Avatar className="h-11 w-11">
                   <SmartAvatarImage src={person.avatar_url ?? undefined} alt="" />

@@ -157,7 +157,7 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
       <div className="flex items-center justify-between px-2">
         <button
           onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
-          className="rounded-full p-2 hover:bg-neutral-100"
+          className="rounded-full p-2 hover:bg-hover"
           aria-label="Previous month"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -165,7 +165,7 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
         <div className="text-lg font-semibold text-neutral-900">{monthLabel}</div>
         <button
           onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
-          className="rounded-full p-2 hover:bg-neutral-100"
+          className="rounded-full p-2 hover:bg-hover"
           aria-label="Next month"
         >
           <ChevronRight className="h-5 w-5" />
@@ -213,7 +213,7 @@ function MonthlyGrid({ events }: { events: Ev[] }) {
                     <button
                       type="button"
                       onClick={() => setDayOpen({ date: c.date, events: dayEvents })}
-                      className="block w-full rounded px-1 py-0.5 text-left text-[10px] font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-[#d4580a]"
+                      className="block w-full rounded px-1 py-0.5 text-left text-[10px] font-semibold text-neutral-500 hover:bg-hover hover:text-[#d4580a]"
                     >
                       +{dayEvents.length - 2 >= 50 ? "50+" : dayEvents.length - 2} more
                     </button>
@@ -292,7 +292,7 @@ function DayEventsDialog({ data, onClose }: { data: { date: Date; events: Ev[] }
                       key={t}
                       onClick={() => setType(t)}
                       className={`whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-semibold transition ${
-                        type === t ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                        type === t ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-hover"
                       }`}
                     >
                       {t}
@@ -520,7 +520,7 @@ function CalendarPage() {
                       className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition ${
                         active
                           ? "bg-neutral-800 text-white"
-                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-hover"
                       }`}
                     >
                       {t}
@@ -659,7 +659,7 @@ function EventPopup() {
                   type="button"
                   onClick={() => step(-1)}
                   aria-label="Previous event"
-                  className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-700 hover:bg-hover"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -670,7 +670,7 @@ function EventPopup() {
                   type="button"
                   onClick={() => step(1)}
                   aria-label="Next event"
-                  className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-neutral-200 text-neutral-700 hover:bg-hover"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -710,7 +710,7 @@ function EventPopup() {
                 </Link>
                 <button
                   onClick={() => setEv(null)}
-                  className="inline-flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+                  className="inline-flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-hover"
                 >
                   Close
                 </button>

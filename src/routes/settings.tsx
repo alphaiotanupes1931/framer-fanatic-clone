@@ -92,7 +92,7 @@ function SettingsPage() {
         <aside className="space-y-2">
           {SECTIONS.map((s) => (
             <button key={s.id} onClick={() => setSection(s.id)}
-              className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${section===s.id ? "border-orange/40 bg-orange/10 text-foreground" : "border-border bg-card text-foreground hover:bg-accent"}`}>
+              className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${section===s.id ? "border-orange/40 bg-orange/10 text-foreground" : "border-border bg-card text-foreground hover:bg-hover"}`}>
               <s.icon className={`h-4 w-4 ${section===s.id ? "text-orange" : "text-muted-foreground"}`} />
               <div className="flex-1">
                 <div className="text-sm font-semibold">{s.label}</div>
@@ -189,11 +189,11 @@ function HelpSection() {
           <div className="text-sm font-semibold text-[#d4580a]">Redo onboarding</div>
           <div className="mt-1 text-xs text-muted-foreground">Restart the full welcome flow, pick your neighborhood, and follow suggested artists again.</div>
         </button>
-        <button onClick={replayTour} className="rounded-xl border border-border bg-card p-4 text-left transition hover:bg-accent">
+        <button onClick={replayTour} className="rounded-xl border border-border bg-card p-4 text-left transition hover:bg-hover">
           <div className="text-sm font-semibold text-foreground">Replay the onboarding tour</div>
           <div className="mt-1 text-xs text-muted-foreground">Walk through every feature again, step by step.</div>
         </button>
-        <a href="mailto:help@planetbaltimore.com" className="rounded-xl border border-border bg-card p-4 text-left transition hover:bg-accent">
+        <a href="mailto:help@planetbaltimore.com" className="rounded-xl border border-border bg-card p-4 text-left transition hover:bg-hover">
           <div className="text-sm font-semibold text-foreground">Contact support</div>
           <div className="mt-1 text-xs text-muted-foreground">help@planetbaltimore.com — we usually reply within a day.</div>
         </a>
@@ -245,7 +245,7 @@ function AppearanceSection() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => setTheme("light")}
-            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${!isDark ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}
+            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${!isDark ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-hover"}`}
           >
             <Sun className="h-5 w-5 text-orange" />
             <div>
@@ -256,7 +256,7 @@ function AppearanceSection() {
           </button>
           <button
             onClick={() => setTheme("dark")}
-            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${isDark ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}
+            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${isDark ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-hover"}`}
           >
             <Moon className="h-5 w-5 text-orange" />
             <div>
@@ -277,7 +277,7 @@ function AppearanceSection() {
             <button
               key={id}
               onClick={() => setTheme(id)}
-              className={`group rounded-xl border p-3 text-left transition ${active ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-accent"}`}
+              className={`group rounded-xl border p-3 text-left transition ${active ? "border-orange ring-2 ring-orange/30" : "border-border hover:bg-hover"}`}
             >
               <div
                 className="relative mb-3 h-20 w-full overflow-hidden rounded-lg border border-border"
@@ -424,8 +424,8 @@ function PrivacySafetySection() {
         ))}
       </div>
       <div className="flex flex-wrap gap-3 text-sm">
-        <a href="/privacy" className="rounded-full border border-border px-4 py-2 font-medium text-foreground hover:bg-accent">Read full Privacy Policy</a>
-        <a href="/terms" className="rounded-full border border-border px-4 py-2 font-medium text-foreground hover:bg-accent">Terms of Service</a>
+        <a href="/privacy" className="rounded-full border border-border px-4 py-2 font-medium text-foreground hover:bg-hover">Read full Privacy Policy</a>
+        <a href="/terms" className="rounded-full border border-border px-4 py-2 font-medium text-foreground hover:bg-hover">Terms of Service</a>
         <a href="mailto:help@planetbaltimore.com" className="rounded-full bg-orange px-4 py-2 font-semibold text-white hover:brightness-110">Contact safety team</a>
       </div>
     </div>

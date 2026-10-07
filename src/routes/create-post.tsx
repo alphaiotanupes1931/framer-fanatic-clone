@@ -566,7 +566,7 @@ function CreatePostPage() {
                     key={r.id}
                     type="button"
                     onClick={() => { setExcluded((x) => [...x, r]); setExcludeQuery(""); setExcludeResults([]); }}
-                    className="flex w-full items-center gap-2 border-b border-neutral-100 px-3 py-2 text-left text-sm last:border-b-0 hover:bg-neutral-50"
+                    className="flex w-full items-center gap-2 border-b border-neutral-100 px-3 py-2 text-left text-sm last:border-b-0 hover:bg-hover"
                   >
                     {r.avatar_url ? (
                       <Img src={r.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />

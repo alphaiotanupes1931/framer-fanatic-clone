@@ -115,7 +115,7 @@ function ReportsPage() {
           <button
             key={s}
             onClick={() => setFilter(s)}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium capitalize transition ${filter === s ? "bg-[#d4580a] text-white" : "bg-muted text-muted-foreground hover:bg-muted/70"}`}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium capitalize transition ${filter === s ? "bg-[#d4580a] text-white" : "bg-muted text-muted-foreground hover:bg-hover/70"}`}
           >
             {s}
           </button>

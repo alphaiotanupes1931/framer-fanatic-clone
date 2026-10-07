@@ -145,7 +145,7 @@ export function PollsTab({ orgId, canManage, me }: { orgId: string; canManage: b
                       <button
                         onClick={() => void toggleClosed(p)}
                         aria-label={p.is_closed ? "Reopen poll" : "Close poll"}
-                        className="rounded-full p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
+                        className="rounded-full p-2 text-neutral-500 transition hover:bg-hover hover:text-neutral-800"
                       >
                         {p.is_closed ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                       </button>
@@ -247,7 +247,7 @@ function CreatePollDialog({ orgId, onClose, onCreated }: { orgId: string; onClos
           <h2 className="flex items-center gap-2 text-base font-bold text-neutral-900">
             <BarChart3 className="h-4 w-4" /> Create Poll
           </h2>
-          <button onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100">
+          <button onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-neutral-500 hover:bg-hover">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -279,7 +279,7 @@ function CreatePollDialog({ orgId, onClose, onCreated }: { orgId: string; onClos
                     <button
                       onClick={() => setOptions((cur) => cur.filter((_, idx) => idx !== i))}
                       aria-label={`Remove option ${i + 1}`}
-                      className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-red-600"
+                      className="rounded-full p-2 text-neutral-400 hover:bg-hover hover:text-red-600"
                     >
                       <X className="h-4 w-4" />
                     </button>

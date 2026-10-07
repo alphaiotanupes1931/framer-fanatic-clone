@@ -899,10 +899,10 @@ function QtyStepper({ label, qty, max, onChange }: { label: string; qty: number;
       <span className="text-sm font-medium text-foreground">{label}</span>
       <div className="flex items-center gap-1 rounded-full bg-background p-1 shadow-sm">
         <button type="button" onClick={() => onChange(Math.max(1, qty - 1))} disabled={qty <= 1}
-          className="grid h-8 w-8 place-items-center rounded-full text-lg leading-none transition hover:bg-secondary disabled:opacity-30" aria-label="Fewer tickets">−</button>
+          className="grid h-8 w-8 place-items-center rounded-full text-lg leading-none transition hover:bg-hover disabled:opacity-30" aria-label="Fewer tickets">−</button>
         <span className="w-7 text-center text-sm font-bold tabular-nums">{qty}</span>
         <button type="button" onClick={() => onChange(Math.min(max, qty + 1))} disabled={qty >= max}
-          className="grid h-8 w-8 place-items-center rounded-full text-lg leading-none transition hover:bg-secondary disabled:opacity-30" aria-label="More tickets">+</button>
+          className="grid h-8 w-8 place-items-center rounded-full text-lg leading-none transition hover:bg-hover disabled:opacity-30" aria-label="More tickets">+</button>
       </div>
     </div>
   );

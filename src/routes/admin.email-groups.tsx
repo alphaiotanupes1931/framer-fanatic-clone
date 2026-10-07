@@ -112,7 +112,7 @@ function EmailGroupsPage() {
                       key={g.key}
                       onClick={() => toggleGroup(g.key)}
                       className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                        on ? "border-orange bg-orange text-primary-foreground" : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+                        on ? "border-orange bg-orange text-primary-foreground" : "border-neutral-200 bg-white text-neutral-700 hover:bg-hover"
                       }`}
                     >
                       {g.label} <span className="opacity-70">({counts[g.key] ?? 0})</span>
@@ -164,7 +164,7 @@ function EmailGroupsPage() {
             <div className="mt-3 max-h-[560px] space-y-1 overflow-y-auto">
               {list.length === 0 && <p className="py-6 text-center text-xs text-neutral-400">Choose a group to see emails.</p>}
               {list.map((r) => (
-                <label key={r.email} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-neutral-50 ${r.blocked ? "opacity-50" : ""}`}>
+                <label key={r.email} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-hover ${r.blocked ? "opacity-50" : ""}`}>
                   <input
                     type="checkbox"
                     disabled={r.blocked}

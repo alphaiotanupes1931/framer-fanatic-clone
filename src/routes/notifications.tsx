@@ -280,7 +280,7 @@ function NotificationsPage() {
               return (
                 <li key={n.id}>
                   <div
-                    className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/60 ${!n.is_read ? "bg-[#d4580a]/5" : ""}`}
+                    className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-hover/60 ${!n.is_read ? "bg-[#d4580a]/5" : ""}`}
                   >
                     {n.actor?.username ? (
                       <ActorAvatarLink

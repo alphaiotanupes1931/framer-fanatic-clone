@@ -100,7 +100,7 @@ function StaffSidebar({ slug, name }: { slug: string; name: string }) {
           <p className="mt-1 text-sm font-semibold text-slate-900">{name}</p>
           <p className="mt-1 text-xs text-slate-600">You are signed in as staff, so personal areas are hidden.</p>
         </div>
-        <Link to="/b/$slug" params={{ slug }} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100">
+        <Link to="/b/$slug" params={{ slug }} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-hover">
           <Store className="h-5 w-5 text-slate-500" /> Business page
         </Link>
       </div>
@@ -151,7 +151,7 @@ function FullSidebar() {
         to={item.to}
         onClick={gateSignup}
         {...prefetchHandlers(item.to)}
-        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-hover hover:text-slate-900"}`}
       >
         <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-150 ${active ? "scale-110 text-slate-900" : "text-slate-500"}`} />
         <span className="flex-1 truncate">{item.label}</span>
@@ -174,7 +174,7 @@ function FullSidebar() {
           <Link
             to={item.to}
             {...prefetchHandlers(item.to)}
-            className={`relative flex w-10 items-center justify-center rounded-lg py-2 transition-all ${active ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
+            className={`relative flex w-10 items-center justify-center rounded-lg py-2 transition-all ${active ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-hover hover:text-slate-900"}`}
           >
             <Icon className="h-5 w-5" />
             {badge > 0 && (
@@ -205,7 +205,7 @@ function FullSidebar() {
         <nav className="space-y-0.5">
           <button
             onClick={() => setAccountOpen((o) => !o)}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${accountActive ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${accountActive ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-600 hover:bg-hover hover:text-slate-900"}`}
           >
             <User className={`h-5 w-5 flex-shrink-0 transition-transform duration-150 ${accountActive ? "scale-110 text-slate-900" : "text-slate-500"}`} />
             <span className="flex-1 truncate text-left">Account</span>
@@ -216,12 +216,12 @@ function FullSidebar() {
             <div className="mt-0.5 space-y-0.5 border-l-2 border-slate-200 pl-3 ml-3">
               {subItems.map((item) => renderNavLink(item))}
               {user ? (
-                <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]">
+                <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-hover hover:text-slate-900 active:scale-[0.98]">
                   <LogOut className="h-5 w-5 flex-shrink-0 text-slate-500" />
                   <span className="truncate">Log out</span>
                 </button>
               ) : (
-                <Link to="/auth" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98]">
+                <Link to="/auth" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-150 hover:bg-hover hover:text-slate-900 active:scale-[0.98]">
                   <LogIn className="h-5 w-5 flex-shrink-0 text-slate-500" />
                   <span className="truncate">Log in</span>
                 </Link>
@@ -238,7 +238,7 @@ function FullSidebar() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className={`relative flex w-10 items-center justify-center rounded-lg py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${accountActive ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
+            className={`relative flex w-10 items-center justify-center rounded-lg py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${accountActive ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-hover hover:text-slate-900"}`}
             aria-label="Account"
           >
             <User className="h-5 w-5" />
@@ -290,7 +290,7 @@ function FullSidebar() {
                 <Img src={pbLogo} alt="Planet Baltimore" width={24} height={24} className="h-6 w-6 object-contain dark:hidden" />
                 <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 object-contain dark:block" />
               </Link>
-              <button onClick={() => setCollapsed(!collapsed)} aria-label="Expand sidebar" className="flex items-center justify-center rounded-lg p-1 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
+              <button onClick={() => setCollapsed(!collapsed)} aria-label="Expand sidebar" className="flex items-center justify-center rounded-lg p-1 text-slate-500 transition-all hover:bg-hover hover:text-slate-900">
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -301,7 +301,7 @@ function FullSidebar() {
                 <Img src={pbLogoWhite} alt="" aria-hidden="true" width={24} height={24} className="hidden h-6 w-6 shrink-0 object-contain dark:block" />
                 <span className="truncate font-display text-sm font-extrabold uppercase tracking-wide text-slate-900">Planet Baltimore</span>
               </Link>
-              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="ml-1 flex shrink-0 items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900">
+              <button onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="ml-1 flex shrink-0 items-center justify-center rounded-lg p-1.5 text-slate-500 transition-all hover:bg-hover hover:text-slate-900">
                 <ChevronLeft className="h-4 w-4" />
               </button>
             </>
@@ -386,7 +386,7 @@ function FullSidebar() {
             <button
               onClick={() => setCollapsed(!collapsed)}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="flex items-center justify-center rounded-lg p-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900"
+              className="flex items-center justify-center rounded-lg p-2 text-slate-500 transition-all hover:bg-hover hover:text-slate-900"
             >
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </button>

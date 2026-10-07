@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 
 const tbBtn =
-  "inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900";
+  "inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 transition hover:bg-hover hover:text-neutral-900";
 
 export interface RichTextEditorProps {
   value: string; // HTML
@@ -48,7 +48,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 140, 
         <select
           onChange={(e) => { exec("formatBlock", e.target.value); e.currentTarget.value = "p"; }}
           defaultValue="p"
-          className="h-8 rounded-md border border-transparent bg-transparent px-2 text-sm hover:bg-neutral-100"
+          className="h-8 rounded-md border border-transparent bg-transparent px-2 text-sm hover:bg-hover"
         >
           <option value="p">Normal</option>
           <option value="h2">Heading</option>

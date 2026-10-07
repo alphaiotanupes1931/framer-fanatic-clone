@@ -549,7 +549,7 @@ function SignedInEvents({ events, dataLoading, reload }: { events: EventRow[]; d
                       type="button"
                       onClick={() => fileRef.current?.click()}
                       disabled={uploading}
-                      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium hover:bg-hover disabled:opacity-60"
                     >
                       {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
                       {form.image_url ? "Replace image" : "Upload event image"}

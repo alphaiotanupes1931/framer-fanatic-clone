@@ -52,7 +52,7 @@ export function OrgFollowersList({ orgId }: { orgId: string }) {
         : filtered.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">{people.length ? "No followers match your search." : "No followers yet."}</p>
         : <div className="grid gap-3 sm:grid-cols-2">{filtered.map((p) => {
           const name = titleCase(p.display_name || p.username || "Follower");
-          return <Link key={p.id} to="/$username" params={{ username: p.username || p.id }} className="flex min-w-0 items-center gap-3 rounded-lg border border-border bg-background p-3 transition hover:bg-accent">
+          return <Link key={p.id} to="/$username" params={{ username: p.username || p.id }} className="flex min-w-0 items-center gap-3 rounded-lg border border-border bg-background p-3 transition hover:bg-hover">
             <Avatar className="h-10 w-10 shrink-0"><SmartAvatarImage src={p.avatar_url ?? undefined} alt="" /><AvatarFallback>{name.charAt(0)}</AvatarFallback></Avatar>
             <div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{name}</p>{p.username && <p className="truncate text-xs text-muted-foreground">@{p.username}</p>}{p.neighborhood && <p className="truncate text-xs text-muted-foreground">{p.neighborhood}</p>}</div>
           </Link>;

@@ -174,7 +174,7 @@ function AdminUsersPage() {
           />
           <button
             onClick={load}
-            className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+            className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-hover"
           >
             Refresh
           </button>
@@ -195,7 +195,7 @@ function AdminUsersPage() {
             URL.revokeObjectURL(url);
             toast.success("Exported " + filtered.length + " users");
           }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-xs font-medium text-neutral-700 hover:bg-hover"
         >
           <Download className="h-3.5 w-3.5" />
           Export name and email
@@ -203,7 +203,7 @@ function AdminUsersPage() {
         <button
           onClick={() => setOnlyVerified((v) => !v)}
           className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition ${
-            onlyVerified ? "bg-neutral-900 text-white" : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+            onlyVerified ? "bg-neutral-900 text-white" : "border border-neutral-200 bg-white text-neutral-700 hover:bg-hover"
           }`}
           title="Only show accounts that confirmed their email"
         >
@@ -292,7 +292,7 @@ function AdminUsersPage() {
                   <div className="flex items-center justify-end gap-1.5">
                     <button
                       onClick={() => setEditing(u)}
-                      className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                      className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-hover"
                       title="Edit user"
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -304,7 +304,7 @@ function AdminUsersPage() {
                       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
                         u.is_founder
                           ? "bg-amber-500 text-white hover:bg-amber-600"
-                          : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+                          : "border border-neutral-200 bg-white text-neutral-700 hover:bg-hover"
                       }`}
                     >
                       <Star className="h-3.5 w-3.5" />
@@ -315,7 +315,7 @@ function AdminUsersPage() {
                       title={u.hidden_from_showcase ? "Show in Baltimore showcase" : "Hide from Baltimore showcase"}
                       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
                         u.hidden_from_showcase
-                          ? "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:bg-neutral-100"
+                          ? "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:bg-hover"
                           : "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                       }`}
                     >
@@ -450,7 +450,7 @@ function EditUserDialog({
               {avatarUrl && <SmartAvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-neutral-900 text-white">{initials}</AvatarFallback>
             </Avatar>
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-hover">
               {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
               {uploading ? "Uploading..." : "Change photo"}
               <input

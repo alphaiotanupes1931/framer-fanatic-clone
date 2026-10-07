@@ -32,7 +32,7 @@ export function CookieBanner() {
           <div className="flex flex-shrink-0 gap-1.5">
             <button
               onClick={() => decide("declined")}
-              className="rounded-full border border-white/20 px-3 py-1 text-[11px] font-medium hover:bg-white/10 md:px-4 md:py-1.5 md:text-xs dark:border-border dark:hover:bg-accent"
+              className="rounded-full border border-white/20 px-3 py-1 text-[11px] font-medium hover:bg-white/10 md:px-4 md:py-1.5 md:text-xs dark:border-border dark:hover:bg-hover"
             >
               Decline
             </button>

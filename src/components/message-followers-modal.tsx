@@ -102,7 +102,7 @@ export function MessageFollowersModal({ open, onClose }: { open: boolean; onClos
             <Users className="h-5 w-5 text-neutral-700" />
             <div className="text-lg font-bold text-neutral-900">Message Followers</div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100" aria-label="Close">
+          <button type="button" onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-hover" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -146,7 +146,7 @@ export function MessageFollowersModal({ open, onClose }: { open: boolean; onClos
                 <div className="p-6 text-center text-sm text-neutral-500">You don't have any followers yet.</div>
               ) : (
                 followers.map((f) => (
-                  <label key={f.id} className="flex cursor-pointer items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0 hover:bg-neutral-50">
+                  <label key={f.id} className="flex cursor-pointer items-center gap-3 border-b border-neutral-100 px-4 py-2.5 last:border-b-0 hover:bg-hover">
                     <input type="checkbox" checked={!!selected[f.id]} onChange={() => toggle(f.id)} className="h-4 w-4 accent-[#d4580a]" />
                     <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#d4580a]/10 text-xs font-bold text-[#d4580a]">
                       {f.avatar_url ? <Img src={f.avatar_url} alt="" className="h-full w-full object-cover" /> : initials(f.display_name || f.username)}

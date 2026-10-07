@@ -869,7 +869,7 @@ function FestivalsPage() {
                         key={r.id}
                         to="/festivals/$eventId"
                         params={{ eventId: r.id }}
-                        className="flex items-center gap-4 py-3 transition hover:bg-muted/50"
+                        className="flex items-center gap-4 py-3 transition hover:bg-hover/50"
                       >
                         <div className="w-14 shrink-0 rounded-lg border border-border bg-muted/60 py-1.5 text-center">
                           <div className="text-[10px] font-bold uppercase text-muted-foreground">

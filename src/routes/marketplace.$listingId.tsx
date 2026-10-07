@@ -152,11 +152,11 @@ function ListingDetail() {
                 size="sm"
                 label
                 className="justify-center"
-                buttonClassName="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent"
+                buttonClassName="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-hover"
               />
               {isOwner && (
                 <>
-                  <button onClick={markSold} className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent">
+                  <button onClick={markSold} className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-hover">
                     Mark as {item.status === "sold" ? "active" : "sold"}
                   </button>
                   <button onClick={remove} className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">

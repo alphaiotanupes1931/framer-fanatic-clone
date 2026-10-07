@@ -171,7 +171,7 @@ function NewListingDialog({ onClose, onCreated, sellerId }: { onClose: () => voi
           <ImageUpload value={form.photo} onChange={(url) => setForm({ ...form, photo: url })} label="Upload listing photo (optional)" />
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent">Cancel</button>
+          <button onClick={onClose} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-hover">Cancel</button>
           <button onClick={submit} disabled={saving} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Posting…" : "Post"}</button>
         </div>
       </div>

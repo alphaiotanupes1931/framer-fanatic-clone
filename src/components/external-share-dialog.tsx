@@ -92,7 +92,7 @@ export function ExternalShareDialog({
       <div className="w-full max-w-md overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
           <div className="text-lg font-bold text-neutral-900">Share</div>
-          <button onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100" aria-label="Close"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-full p-1.5 text-neutral-500 hover:bg-hover" aria-label="Close"><X className="h-5 w-5" /></button>
         </div>
 
         <div className="px-5">
@@ -145,7 +145,7 @@ export function ExternalShareDialog({
         <div className="px-5 py-4">
           <div className="flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2">
             <div className="min-w-0 flex-1 truncate text-xs text-neutral-700">{url}</div>
-            <button onClick={copy} className="flex items-center gap-1.5 rounded-md bg-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-300">
+            <button onClick={copy} className="flex items-center gap-1.5 rounded-md bg-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-hover">
               <Copy className="h-3.5 w-3.5" /> Copy
             </button>
           </div>
