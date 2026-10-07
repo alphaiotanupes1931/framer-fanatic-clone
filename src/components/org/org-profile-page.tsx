@@ -671,6 +671,7 @@ export function OrgProfile() {
                 .filter(Boolean)
                 .map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
                 .join(" ")}
+              {(org as { subcategory?: string | null }).subcategory?.trim() ? ` / ${(org as { subcategory?: string | null }).subcategory!.trim()}` : ""}
             </span>
           </div>
         )}
@@ -1072,6 +1073,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
     name: org.name ?? "", bio: org.bio ?? "", website: org.website ?? "", phone: org.phone ?? "",
     email: org.email ?? "", address: org.address ?? "", neighborhood: org.neighborhood ?? "",
     tagline: org.tagline ?? "",
+    subcategory: (org as { subcategory?: string | null }).subcategory ?? "",
   });
   const days = ["mon","tue","wed","thu","fri","sat","sun"] as const;
   const dayLabels: Record<string,string> = { mon:"Mon",tue:"Tue",wed:"Wed",thu:"Thu",fri:"Fri",sat:"Sat",sun:"Sun" };
@@ -1087,6 +1089,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
       name: form.name.trim(), bio: form.bio || null, website: form.website || null, phone: form.phone || null,
       email: form.email || null, address: form.address || null, neighborhood: form.neighborhood || null,
       tagline: form.tagline.trim() || null,
+      subcategory: form.subcategory.trim() || null,
       hours,
     }).eq("id", org.id);
     if (error) return toast.error(error.message);
@@ -1108,6 +1111,12 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
       {edit ? (
         <div className="space-y-3 rounded-2xl border border-border bg-neutral-50 p-4 text-sm">
           <input value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="Name" className="w-full rounded-lg border border-border px-3 py-2 font-semibold" />
+          {org.type === "artist" && (
+            <div>
+              <input value={form.subcategory} onChange={(e) => setForm({...form, subcategory: e.target.value})} maxLength={40} placeholder="Subcategory (e.g. Jazz, Spoken Word)" className="w-full rounded-lg border border-border px-3 py-2" />
+              <p className="mt-1 text-xs text-neutral-500">Shows next to your category, like {org.subtype ?? "Music"} / {form.subcategory.trim() || "Jazz"}.</p>
+            </div>
+          )}
           {(org.type === "group" || org.type === "community_assoc") && (
             <div>
               <input value={form.tagline} onChange={(e) => setForm({...form, tagline: e.target.value})} maxLength={320} placeholder="Short description" className="w-full rounded-lg border border-border px-3 py-2" />
