@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { externalShare } from "@/lib/share-preview";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
+import { EmailQuotaNotice, useEmailQuota } from "@/components/shared/email-quota-notice";
 
 interface InviteFriendsDialogProps {
   open: boolean;
@@ -47,6 +48,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
   const [shareUrl, setShareUrl] = useState(buildInviteUrl(null, undefined, group?.slug));
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { quota, refresh: refreshQuota } = useEmailQuota(open);
 
   useEffect(() => {
     if (!open) return;
@@ -133,6 +135,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
           logRows.push({ email: to, invited_by: session.user.id, invite_url: trackedUrl, token });
         } else {
           const body = await res.json().catch(() => ({}));
+          if (res.status === 429) { failures.unshift(body.error || "Sending limit reached"); break; }
           failures.push(`${to}: ${body.error || res.statusText}`);
         }
       }
@@ -157,7 +160,16 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
       return;
     }
     setParsed(emails);
-    const { sent, failures } = await sendInvites(emails, { record: true });
+    const batch = emails.slice(0, quota.remaining);
+    const leftover = emails.slice(batch.length);
+    const { sent, failures } = await sendInvites(batch, { record: true });
+    void refreshQuota();
+    if (sent > 0 && leftover.length > 0) {
+      setText(leftover.join("\n"));
+      setParsed(leftover);
+      toast.success(`Sent ${sent}. ${leftover.length} more are saved here, send them when the timer ends.`);
+      return;
+    }
     if (sent > 0) {
       setSent(true);
       toast.success(`Invite${sent === 1 ? "" : "s"} sent to ${sent} ${sent === 1 ? "person" : "people"}${failures.length ? `, ${failures.length} failed` : ""}`);
@@ -326,9 +338,10 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
               />
             </div>
 
+            <EmailQuotaNotice quota={quota} />
             <Button
               onClick={handleSendInvite}
-              disabled={sending || sent || (!text.trim() && parsed.length === 0)}
+              disabled={sending || sent || quota.remaining <= 0 || (!text.trim() && parsed.length === 0)}
               className="w-full gap-2"
             >
               {sending ? (

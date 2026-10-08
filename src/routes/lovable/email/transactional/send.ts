@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { render } from '@react-email/render'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { EMAIL_WINDOW_MINUTES, QUOTA_TEMPLATES, computeQuota, formatWait } from '@/lib/email-quota'
 import { createFileRoute } from '@tanstack/react-router'
 import { withBrandedUnsubscribeHtml, withBrandedUnsubscribeText } from '@/lib/branded-unsubscribe'
 import { TEMPLATES } from '@/lib/email-templates/registry'
@@ -30,9 +31,37 @@ function generateToken(): string {
     .join('')
 }
 
+async function readQuota(supabase: SupabaseClient<any, any>, userId: string) {
+  const since = new Date(Date.now() - EMAIL_WINDOW_MINUTES * 60_000).toISOString()
+  const { data } = await supabase
+    .from('email_send_log')
+    .select('created_at, template_name')
+    .eq('status', 'pending')
+    .eq('metadata->>sender_id', userId)
+    .gte('created_at', since)
+    .limit(500)
+  const times = (data ?? [])
+    .filter((r: any) => QUOTA_TEMPLATES.has(r.template_name))
+    .map((r: any) => Date.parse(r.created_at))
+  return computeQuota(times, Date.now())
+}
+
 export const Route = createFileRoute("/lovable/email/transactional/send")({
   server: {
     handlers: {
+      // Lets the invite screens show how many sends are left and a countdown.
+      GET: async ({ request }) => {
+        const supabaseUrl = import.meta.env['VITE_SUPABASE_URL']
+        const key = process.env['SUPABASE_SERVICE_ROLE_KEY']
+        const auth = request.headers.get('Authorization')
+        if (!supabaseUrl || !key || !auth?.startsWith('Bearer ')) {
+          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+        const supabase = createClient(supabaseUrl, key)
+        const { data: { user } } = await supabase.auth.getUser(auth.slice(7).trim())
+        if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        return Response.json(await readQuota(supabase, user.id))
+      },
       POST: async ({ request }) => {
         const supabaseUrl = import.meta.env['VITE_SUPABASE_URL']
         const supabaseServiceKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
@@ -87,6 +116,18 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             { error: 'templateName is required' },
             { status: 400 }
           )
+        }
+
+        // Per-person limit on invite-style emails so nobody can exhaust the
+        // provider's sending cap and stall everyone's email.
+        if (QUOTA_TEMPLATES.has(templateName)) {
+          const quota = await readQuota(supabase, user.id)
+          if (quota.remaining <= 0) {
+            return Response.json(
+              { error: `Sending limit reached. Try again in ${formatWait(quota.waitSeconds)}.`, ...quota },
+              { status: 429 }
+            )
+          }
         }
 
         // 1. Look up template from registry (early — needed to resolve recipient)
@@ -269,12 +310,14 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
         // 5. Enqueue the pre-rendered email for async processing by the dispatcher.
         // The dispatcher (process-email-queue) handles sending, retries, and rate-limit backoff.
 
-        // Log pending BEFORE enqueue so we have a record even if enqueue crashes
+        // Log pending BEFORE enqueue so we have a record even if enqueue crashes.
+        // sender_id lets the per-person invite limit count this send.
         await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: effectiveRecipient,
           status: 'pending',
+          metadata: { sender_id: user.id },
         })
 
         const { error: enqueueError } = await supabase.rpc('enqueue_email', {
