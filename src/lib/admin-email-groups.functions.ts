@@ -104,3 +104,43 @@ export const sendEmailBlast = createServerFn({ method: "POST" })
     }
     return { ok: true as const, sent, skipped, hours: Math.ceil(recipients.length / PER_HOUR) };
   });
+
+// Provider sends about 100 emails per hour, so a full day allows about 2,400.
+export const EMAIL_HOURLY_CAP = 100;
+export const EMAIL_DAILY_CAP = EMAIL_HOURLY_CAP * 24;
+
+export const getEmailUsage = createServerFn({ method: "POST" })
+  .inputValidator((data: { adminToken?: string | null }) => data)
+  .handler(async ({ data }) => {
+    if (!(await hasAdminAccess(data.adminToken))) throw new Error("Admin gate is locked");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const now = new Date();
+    const ny = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+    const startOfDay = new Date(now.getTime() - ((ny.getHours() * 60 + ny.getMinutes()) * 60 + ny.getSeconds()) * 1000);
+    const hourAgo = now.getTime() - 3600_000;
+    const ids = new Map<string, number>();
+    for (let from = 0; from < 50000; from += 1000) {
+      const { data: rows, error } = await supabaseAdmin
+        .from("email_send_log")
+        .select("message_id, created_at, status")
+        .gte("created_at", startOfDay.toISOString())
+        .in("status", ["sent", "pending"])
+        .range(from, from + 999);
+      if (error) throw new Error(error.message);
+      for (const r of rows ?? []) {
+        const t = new Date(r.created_at as string).getTime();
+        const k = String(r.message_id ?? t);
+        ids.set(k, Math.max(ids.get(k) ?? 0, t));
+      }
+      if ((rows ?? []).length < 1000) break;
+    }
+    const today = ids.size;
+    const lastHour = [...ids.values()].filter((t) => t >= hourAgo).length;
+    return {
+      sentToday: today,
+      leftToday: Math.max(0, EMAIL_DAILY_CAP - today),
+      dailyCap: EMAIL_DAILY_CAP,
+      leftThisHour: Math.max(0, EMAIL_HOURLY_CAP - lastHour),
+      hourlyCap: EMAIL_HOURLY_CAP,
+    };
+  });

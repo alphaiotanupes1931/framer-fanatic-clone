@@ -97,6 +97,8 @@ function AdminPage() {
         <Stat label="Banned" value={bannedCount} accent="bg-rose-500" />
       </div>
 
+      <EmailUsageCard />
+
       <LocationStats unlocked={unlocked} />
 
 
@@ -326,5 +328,29 @@ function LocationStats({ unlocked }: { unlocked: boolean }) {
         </div>
       )}
     </div>
+  );
+}
+
+function EmailUsageCard() {
+  const [u, setU] = useState<null | { sentToday: number; leftToday: number; dailyCap: number; leftThisHour: number; hourlyCap: number }>(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const { getEmailUsage } = await import("@/lib/admin-email-groups.functions");
+        setU(await getEmailUsage({ data: { adminToken: getAdminToken() } }));
+      } catch (e) { toast.error((e as Error).message); }
+    })();
+  }, []);
+  return (
+    <section className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Emails today</div>
+      {!u ? <Loader2 className="mt-2 h-4 w-4 animate-spin text-neutral-400" /> : (
+        <div className="mt-2 grid grid-cols-3 gap-3">
+          <div><div className="text-2xl font-semibold text-neutral-900">{u.leftToday.toLocaleString()}</div><div className="text-xs text-neutral-500">left today (of {u.dailyCap.toLocaleString()})</div></div>
+          <div><div className="text-2xl font-semibold text-neutral-900">{u.leftThisHour}</div><div className="text-xs text-neutral-500">left this hour (of {u.hourlyCap})</div></div>
+          <div><div className="text-2xl font-semibold text-neutral-900">{u.sentToday}</div><div className="text-xs text-neutral-500">sent today</div></div>
+        </div>
+      )}
+    </section>
   );
 }
