@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { EventEditForm } from "@/components/organizer/event-edit-form";
 import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
+import { EmailQuotaNotice, useEmailQuota } from "@/components/shared/email-quota-notice";
 import { deleteEventDraft, listEventDrafts, type EventDraft } from "@/lib/event-drafts";
 import { FileText, CreditCard, CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
 import { addCompAttendee, sendCompTicket } from "@/lib/tickets.functions";
@@ -1861,6 +1862,7 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
   const [audiences, setAudiences] = useState<Audience[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const { quota, refresh: refreshQuota } = useEmailQuota();
   const [openAudience, setOpenAudience] = useState<Audience | null>(null);
 
   const [fromName, setFromName] = useState("Planet Baltimore");
@@ -2005,7 +2007,11 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
 
       let sent = 0;
       const failures: string[] = [];
-      for (const recipientEmail of recipients) {
+      const batch = recipients.slice(0, quota.remaining);
+      if (batch.length < recipients.length) {
+        failures.push(`${recipients.length - batch.length} not sent yet: you can send ${quota.limit} every 15 minutes`);
+      }
+      for (const recipientEmail of batch) {
         const response = await fetch("/lovable/email/transactional/send", {
           method: "POST",
           headers: {
@@ -2027,6 +2033,7 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
         });
         const result = await response.json().catch(() => ({}));
         if (response.ok && result.success !== false) sent += 1;
+        else if (response.status === 429) { failures.unshift(result.error || "Sending limit reached"); break; }
         else failures.push(result.error || result.reason || "Delivery failed");
       }
 

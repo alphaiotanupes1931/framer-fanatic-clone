@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
+import { EmailQuotaNotice, useEmailQuota } from "@/components/shared/email-quota-notice";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Gift,
@@ -93,6 +94,7 @@ export function ReferralNetworkDialog({
   const [sending, setSending] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
+  const { quota, refresh: refreshQuota } = useEmailQuota(open);
   const [parsedEmails, setParsedEmails] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0, level1: 0, level2: 0, level3: 0 });
@@ -235,6 +237,7 @@ export function ReferralNetworkDialog({
         sentEmails.push(to);
       } else {
         const body = await res.json().catch(() => ({}));
+        if (res.status === 429) { failures.unshift(body.error || "Sending limit reached"); break; }
         failures.push(`${to}: ${body.error || res.statusText}`);
       }
     }
@@ -328,11 +331,14 @@ export function ReferralNetworkDialog({
     }
     setSending(true);
     try {
-      const { sent, failures } = await deliverInvites(emails, { record: true });
+      const batch = emails.slice(0, quota.remaining);
+      const leftover = emails.slice(batch.length);
+      const { sent, failures } = await deliverInvites(batch, { record: true });
+      void refreshQuota();
       if (sent > 0) {
-        toast.success(`Invite email sent to ${sent} ${sent === 1 ? "person" : "people"}`);
-        setEmail("");
-        setParsedEmails([]);
+        toast.success(`Invite email sent to ${sent} ${sent === 1 ? "person" : "people"}${leftover.length ? `. ${leftover.length} more saved, send them when the timer ends.` : ""}`);
+        setEmail(leftover.join("\n"));
+        setParsedEmails(leftover);
         loadStats();
       }
       if (failures.length > 0) {
@@ -583,9 +589,10 @@ export function ReferralNetworkDialog({
                     minHeight={110}
                   />
                 </div>
+                <EmailQuotaNotice quota={quota} />
                 <Button
                   onClick={handleSendInvite}
-                  disabled={sending || !email.trim()}
+                  disabled={sending || quota.remaining <= 0 || !email.trim()}
                   className="w-full gap-2 bg-primary hover:opacity-90"
                 >
                   {sending ? (
