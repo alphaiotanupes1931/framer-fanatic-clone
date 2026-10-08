@@ -121,7 +121,17 @@ function AuthPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      if (/not confirmed/i.test(error.message) || (error as { code?: string }).code === "email_not_confirmed") {
+        const target = email.trim();
+        await supabase.auth.resend({ type: "signup", email: target });
+        setAwaitingConfirm(target);
+        return toast.message("We sent you a verification email", {
+          description: "You must verify your email to continue. Check your inbox and spam folder.",
+        });
+      }
+      return toast.error(error.message);
+    }
     toast.success("Signed in");
     // Apply any role/category chosen at signup, once the confirmed session exists.
     try {
@@ -258,7 +268,7 @@ function AuthPage() {
           <CardTitle className="text-2xl">{awaitingConfirm ? "Confirm your email" : "Welcome"}</CardTitle>
           <CardDescription>
             {awaitingConfirm
-              ? `We sent a confirmation link to ${awaitingConfirm}. Click it to activate your account, then sign in.`
+              ? `We sent you a verification email at ${awaitingConfirm}. You must verify to continue. Click the link in it, then sign in.`
               : "Sign in or create a new account"}
           </CardDescription>
         </CardHeader>
