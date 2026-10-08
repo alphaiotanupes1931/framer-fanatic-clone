@@ -100,7 +100,6 @@ import { Route as VideosIndexRouteImport } from './routes/videos.index'
 import { Route as VideosIdRouteImport } from './routes/videos.$id'
 import { Route as ApiAdminCheckStripeWebhooksRouteImport } from './routes/api/admin/check-stripe-webhooks'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
-import { Route as ApiPublicTmpBarbieTestRouteImport } from './routes/api/public/tmp-barbie-test'
 import { Route as FestivalsEventIdEditRouteImport } from './routes/festivals.$eventId_.edit'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as OSlugDonateRouteImport } from './routes/o.$slug_.donate'
@@ -568,11 +567,6 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicTmpBarbieTestRoute = ApiPublicTmpBarbieTestRouteImport.update({
-  id: '/api/public/tmp-barbie-test',
-  path: '/api/public/tmp-barbie-test',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FestivalsEventIdEditRoute = FestivalsEventIdEditRouteImport.update({
   id: '/festivals/$eventId_/edit',
   path: '/festivals/$eventId/edit',
@@ -715,7 +709,6 @@ export interface FileRoutesByFullPath {
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
-  '/api/public/tmp-barbie-test': typeof ApiPublicTmpBarbieTestRoute
   '/festivals/$eventId/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
@@ -818,7 +811,6 @@ export interface FileRoutesByTo {
   '/videos': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
-  '/api/public/tmp-barbie-test': typeof ApiPublicTmpBarbieTestRoute
   '/festivals/$eventId/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug/donate': typeof OSlugDonateRoute
@@ -922,7 +914,6 @@ export interface FileRoutesById {
   '/videos/': typeof VideosIndexRoute
   '/api/admin/check-stripe-webhooks': typeof ApiAdminCheckStripeWebhooksRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
-  '/api/public/tmp-barbie-test': typeof ApiPublicTmpBarbieTestRoute
   '/festivals/$eventId_/edit': typeof FestivalsEventIdEditRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/o/$slug_/donate': typeof OSlugDonateRoute
@@ -1027,7 +1018,6 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
-    | '/api/public/tmp-barbie-test'
     | '/festivals/$eventId/edit'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
@@ -1130,7 +1120,6 @@ export interface FileRouteTypes {
     | '/videos'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
-    | '/api/public/tmp-barbie-test'
     | '/festivals/$eventId/edit'
     | '/lovable/email/suppression'
     | '/o/$slug/donate'
@@ -1233,7 +1222,6 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/api/admin/check-stripe-webhooks'
     | '/api/public/stripe-webhook'
-    | '/api/public/tmp-barbie-test'
     | '/festivals/$eventId_/edit'
     | '/lovable/email/suppression'
     | '/o/$slug_/donate'
@@ -1336,7 +1324,6 @@ export interface RootRouteChildren {
   VideosIndexRoute: typeof VideosIndexRoute
   ApiAdminCheckStripeWebhooksRoute: typeof ApiAdminCheckStripeWebhooksRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
-  ApiPublicTmpBarbieTestRoute: typeof ApiPublicTmpBarbieTestRoute
   FestivalsEventIdEditRoute: typeof FestivalsEventIdEditRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   OSlugDonateRoute: typeof OSlugDonateRoute
@@ -1987,13 +1974,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/tmp-barbie-test': {
-      id: '/api/public/tmp-barbie-test'
-      path: '/api/public/tmp-barbie-test'
-      fullPath: '/api/public/tmp-barbie-test'
-      preLoaderRoute: typeof ApiPublicTmpBarbieTestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/festivals/$eventId_/edit': {
       id: '/festivals/$eventId_/edit'
       path: '/festivals/$eventId/edit'
@@ -2163,7 +2143,6 @@ const rootRouteChildren: RootRouteChildren = {
   VideosIndexRoute: VideosIndexRoute,
   ApiAdminCheckStripeWebhooksRoute: ApiAdminCheckStripeWebhooksRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
-  ApiPublicTmpBarbieTestRoute: ApiPublicTmpBarbieTestRoute,
   FestivalsEventIdEditRoute: FestivalsEventIdEditRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   OSlugDonateRoute: OSlugDonateRoute,
