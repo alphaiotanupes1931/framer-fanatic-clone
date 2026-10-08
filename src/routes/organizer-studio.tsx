@@ -2044,6 +2044,7 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
       toast.error(error instanceof Error ? error.message : "The invitation could not be sent", { id: toastId });
     } finally {
       setSending(false);
+      void refreshQuota();
     }
   };
 
@@ -2187,7 +2188,8 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
             <Copy className="h-4 w-4" /> Copy draft
           </button>
           <div className="flex-1" />
-          <button onClick={() => void send()} disabled={sending} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:opacity-60">
+          <div className="w-full sm:w-auto"><EmailQuotaNotice quota={quota} /></div>
+          <button onClick={() => void send()} disabled={sending || quota.remaining <= 0} className="inline-flex items-center gap-2 rounded-full bg-[#d4580a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#b8480a] disabled:cursor-not-allowed disabled:opacity-60">
             <Send className="h-4 w-4" /> {sending ? "Sending…" : `Send to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"}`}
           </button>
         </div>
