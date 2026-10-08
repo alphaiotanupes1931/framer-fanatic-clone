@@ -773,11 +773,17 @@ export function OrgProfile() {
           <>
           {tab === "About" && (
             <div className="space-y-4">
-              <CollapsibleCard title="About" icon={<FileText className="h-5 w-5 text-[#d4580a]" />}>
-                {isArtsOrg
+              {(isGroup || isAssoc) ? (
+                <CollapsibleCard title="About" icon={<FileText className="h-5 w-5 text-[#d4580a]" />}>
+                  {isArtsOrg
+                    ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
+                    : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
+                </CollapsibleCard>
+              ) : (
+                isArtsOrg
                   ? <ArtsOrgAboutTab org={org} canManage={canManage} onChange={setOrg} />
-                  : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />}
-              </CollapsibleCard>
+                  : <AboutTab org={org} canManage={canManage} onChange={setOrg} initialEdit={editAbout} onEditClose={() => setEditAbout(false)} />
+              )}
               {(isGroup || isAssoc) && <>
                 <TextDocTab orgId={org.id} canManage={canManage} field="mission" title="Mission" collapsible emptyTitle="No mission statement yet." emptyHint="" initialValue={org.mission ?? null} onSaved={(mission) => setOrg((current) => current ? { ...current, mission } : current)} />
                 <TextDocTab orgId={org.id} canManage={canManage} field="rules" title="Rules" collapsible emptyTitle="No rules posted yet." emptyHint="" initialValue={org.rules ?? null} onSaved={(rules) => setOrg((current) => current ? { ...current, rules } : current)} />
