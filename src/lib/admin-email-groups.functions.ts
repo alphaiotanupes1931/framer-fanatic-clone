@@ -85,29 +85,25 @@ export const sendEmailBlast = createServerFn({ method: "POST" })
     const blastId = crypto.randomUUID();
     let sent = 0;
     let skipped = 0;
-    // Provider allows ~100 emails/hour, so release 100 per hour.
-    const PER_HOUR = 100;
     for (let i = 0; i < recipients.length; i += 6) {
       const chunk = recipients.slice(i, i + 6);
       const results = await Promise.all(
-        chunk.map((to, j) =>
+        chunk.map((to) =>
           sendInternalEmail({
             templateName: "admin-broadcast",
             recipientEmail: to,
             idempotencyKey: `blast-${blastId}-${to}`,
             templateData: { subject, message },
-            delaySeconds: Math.floor((i + j) / PER_HOUR) * 3600,
           }).catch(() => ({ sent: false })),
         ),
       );
       for (const r of results) r.sent ? sent++ : skipped++;
     }
-    return { ok: true as const, sent, skipped, hours: Math.ceil(recipients.length / PER_HOUR) };
+    return { ok: true as const, sent, skipped };
   });
 
-// Provider sends about 100 emails per hour, so a full day allows about 2,400.
-export const EMAIL_HOURLY_CAP = 100;
-export const EMAIL_DAILY_CAP = EMAIL_HOURLY_CAP * 24;
+// Resend Pro plan includes 50,000 emails per calendar month.
+export const EMAIL_MONTHLY_CAP = 50000;
 
 export const getEmailUsage = createServerFn({ method: "POST" })
   .inputValidator((data: { adminToken?: string | null }) => data)
@@ -115,32 +111,30 @@ export const getEmailUsage = createServerFn({ method: "POST" })
     if (!(await hasAdminAccess(data.adminToken))) throw new Error("Admin gate is locked");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const now = new Date();
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const ny = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
-    const startOfDay = new Date(now.getTime() - ((ny.getHours() * 60 + ny.getMinutes()) * 60 + ny.getSeconds()) * 1000);
-    const hourAgo = now.getTime() - 3600_000;
+    const startOfDay = now.getTime() - ((ny.getHours() * 60 + ny.getMinutes()) * 60 + ny.getSeconds()) * 1000;
     const ids = new Map<string, number>();
-    for (let from = 0; from < 50000; from += 1000) {
+    for (let from = 0; from < 200000; from += 1000) {
       const { data: rows, error } = await supabaseAdmin
         .from("email_send_log")
-        .select("message_id, created_at, status")
-        .gte("created_at", startOfDay.toISOString())
-        .in("status", ["sent", "pending"])
+        .select("message_id, created_at")
+        .gte("created_at", startOfMonth.toISOString())
+        .eq("status", "sent")
         .range(from, from + 999);
       if (error) throw new Error(error.message);
       for (const r of rows ?? []) {
         const t = new Date(r.created_at as string).getTime();
-        const k = String(r.message_id ?? t);
-        ids.set(k, Math.max(ids.get(k) ?? 0, t));
+        ids.set(String(r.message_id ?? t), t);
       }
       if ((rows ?? []).length < 1000) break;
     }
-    const today = ids.size;
-    const lastHour = [...ids.values()].filter((t) => t >= hourAgo).length;
+    const sentMonth = ids.size;
+    const sentToday = [...ids.values()].filter((t) => t >= startOfDay).length;
     return {
-      sentToday: today,
-      leftToday: Math.max(0, EMAIL_DAILY_CAP - today),
-      dailyCap: EMAIL_DAILY_CAP,
-      leftThisHour: Math.max(0, EMAIL_HOURLY_CAP - lastHour),
-      hourlyCap: EMAIL_HOURLY_CAP,
+      sentMonth,
+      sentToday,
+      monthlyCap: EMAIL_MONTHLY_CAP,
+      leftMonth: Math.max(0, EMAIL_MONTHLY_CAP - sentMonth),
     };
   });

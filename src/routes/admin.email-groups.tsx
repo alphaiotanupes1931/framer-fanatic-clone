@@ -148,8 +148,7 @@ function EmailGroupsPage() {
               <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-xs leading-relaxed text-neutral-600">
                 <p className="font-semibold text-neutral-800">How sending works</p>
                 <p className="mt-1">
-                  Emails go out 100 per hour to stay within our email service's limit. The first 100 send right away, the next 100 an hour later, and so on.
-                  {sendable.length > 100 && ` This send will take about ${Math.ceil(sendable.length / 100)} hours to reach everyone.`}
+                  Emails start going out right away, with no hourly wait. Each one counts toward the 50,000 monthly limit shown on the Overview page.
                   {" "}You can close this page after pressing Send. Addresses that blocked our emails are skipped.
                 </p>
               </div>
