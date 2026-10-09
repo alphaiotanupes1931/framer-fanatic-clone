@@ -35,6 +35,7 @@ export function useEmailQuota(active = true) {
 
 export function EmailQuotaNotice({ quota }: { quota: EmailQuota }) {
   const waiting = quota.remaining <= 0 && quota.waitSeconds > 0;
+  if (!waiting) return null;
   return (
     <div className={`flex items-start gap-2 rounded-xl border px-3 py-2 text-xs ${waiting ? "border-primary/40 bg-primary/5 text-foreground" : "border-border text-muted-foreground"}`}>
       <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
