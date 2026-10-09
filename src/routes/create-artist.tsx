@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressAvatar } from "@/lib/image-compress";
 import { setMyProfileKind } from "@/lib/profile-kind";
-import { useExistingPage, ExistingPageNotice } from "@/components/create/existing-page-notice";
 import { orgSlug } from "@/lib/org-paths";
 
 export const Route = createFileRoute("/create-artist")({
@@ -34,7 +33,6 @@ function CreateArtistPage() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const { page: existingArtistPage, loading: checkingExisting, refetch: refetchExisting } = useExistingPage("artist", me?.id);
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     display_name: "",
@@ -51,7 +49,6 @@ function CreateArtistPage() {
   const uploadAvatar = async (file: File) => {
     file = await compressAvatar(file);
     if (!me) { toast.error("Please sign in"); return; }
-    if (existingArtistPage) { toast.error("You already have an Artist page."); return; }
     if (file.size > 25 * 1024 * 1024) { toast.error("Image is too large (max 25MB)"); return; }
     setUploading(true);
     try {
@@ -115,9 +112,8 @@ function CreateArtistPage() {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
-        <HeroBanner title="Create Artist Page" subtitle="Set up your artist page. One artist page per account." />
-        {existingArtistPage ? <ExistingPageNotice label="Artist" page={existingArtistPage} refetch={refetchExisting} /> : (
-        <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
+        <HeroBanner title="Create Artist Page" subtitle="Set up a new artist page. You can create as many as you like." />
+                <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Artist name<span className="text-orange"> *</span></Label>
             <Input value={form.display_name} onChange={(e) => set("display_name", e.target.value)} maxLength={80} />
@@ -184,13 +180,12 @@ function CreateArtistPage() {
             <ImageUpload value={form.banner_url} onChange={(v) => setForm((f) => ({ ...f, banner_url: v }))} label="Upload banner image" bucket="avatars" aspect={3} />
           </div>
           <div className="flex justify-end">
-            <Button onClick={submit} disabled={!canSubmit || saving || checkingExisting}>
+            <Button onClick={submit} disabled={!canSubmit || saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Artist Page
             </Button>
           </div>
         </div>
-        )}
       </div>
     </AppLayout>
   );
