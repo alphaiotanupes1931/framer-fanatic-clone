@@ -1,6 +1,6 @@
 // Shared limits for emails a person sends to other people (invites).
 // Keeps one sender from burning through the monthly email allowance.
-export const EMAIL_BATCH_LIMIT = 200;
+export const EMAIL_BATCH_LIMIT = 50_000; // effectively no cap; matches the monthly allowance
 export const EMAIL_WINDOW_MINUTES = 15;
 export const QUOTA_TEMPLATES = new Set(["referral-invite", "event-invitation"]);
 
