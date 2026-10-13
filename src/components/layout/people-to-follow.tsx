@@ -70,3 +70,35 @@ export function PeopleToFollow({ userId }: { userId: string }) {
     </section>
   );
 }
+
+/** Mobile/tablet: horizontal swipe row of compact cards (hidden where the right sidebar shows). */
+export function PeopleToFollowRow({ userId }: { userId: string }) {
+  const { data = [] } = useQuery({ queryKey: ["people-to-follow", userId], queryFn: () => loadSuggestions(userId), staleTime: 5 * 60000 });
+  if (!data.length) return null;
+  return (
+    <section className="xl:hidden">
+      <div className="mb-2 flex items-center gap-2 px-1">
+        <UserPlus className="h-4 w-4 text-slate-700" />
+        <h3 className="text-sm font-semibold tracking-tight text-slate-900">People to Follow</h3>
+      </div>
+      <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1">
+        {data.map((p) => {
+          const name = titleCase(p.display_name || p.username || "");
+          return (
+            <div key={p.id} className="flex w-36 shrink-0 snap-start flex-col items-center rounded-xl border border-slate-200 bg-white p-3 text-center shadow-sm">
+              <Link to="/$username" params={{ username: p.username || p.id }} className="flex w-full flex-col items-center">
+                <Avatar className="h-14 w-14 rounded-full">
+                  <SmartAvatarImage src={p.avatar_url ?? undefined} className="rounded-full object-cover" />
+                  <AvatarFallback className="rounded-full bg-slate-100 text-base font-bold text-slate-600">{name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <p className="mt-2 w-full truncate text-sm font-bold text-slate-900">{name}</p>
+                <p className="w-full truncate text-[11px] text-slate-500">{p.reason}</p>
+              </Link>
+              <div className="mt-2"><FollowButton userId={p.id} currentUserId={userId} compact /></div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
