@@ -30,6 +30,7 @@ import {
   ArtistEventsGrouped,
 } from "@/components/artist/artist-tab-sections";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { RepostTile } from "@/components/shared/repost-tile";
 import { useSmartImageUrl } from "@/components/smart-image";
 import { PostSplitView } from "@/components/shared/post-split-view";
 import { RichHtml } from "@/components/rich-html";
@@ -719,7 +720,9 @@ function CanonicalPostsGrid({ posts, onOpen }: { posts: any[]; onOpen: (index: n
             onClick={() => onOpen(index)}
             className="group relative aspect-square overflow-hidden rounded-md bg-neutral-100 text-left"
           >
-            {thumbnail ? (
+            {(post.repost_of_post_id || post.repost_of_event_id) && !thumbnail ? (
+              <RepostTile postId={post.repost_of_post_id} eventId={post.repost_of_event_id} />
+            ) : thumbnail ? (
               isVideo ? (
                 <SmartVideo src={thumbnail} className="h-full w-full object-cover" muted playsInline preload="metadata" />
               ) : (

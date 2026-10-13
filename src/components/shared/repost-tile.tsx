@@ -3,7 +3,7 @@ import { Repeat2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Img } from "@/components/shared/smart-img";
 
-type Preview = { thumb: string | null; text: string; bg: string | null; color: string | null };
+type Preview = { thumb: string | null; text: string; bg: string | null; color: string | null; bucket?: string };
 
 /** Grid tile for a repost: shows the original post/event, with a small repost badge. */
 export function RepostTile({ postId, eventId }: { postId?: string | null; eventId?: string | null }) {
@@ -26,7 +26,7 @@ export function RepostTile({ postId, eventId }: { postId?: string | null; eventI
       if (eventId) {
         const { data } = await supabase.from("events").select("title, image_url").eq("id", eventId).maybeSingle();
         if (cancelled) return;
-        setPreview({ thumb: data?.image_url ?? null, text: data?.title || "", bg: null, color: null });
+        setPreview({ thumb: data?.image_url ?? null, text: data?.title || "", bg: null, color: null, bucket: "event-images" });
       }
     })();
     return () => { cancelled = true; };
@@ -37,7 +37,7 @@ export function RepostTile({ postId, eventId }: { postId?: string | null; eventI
   return (
     <>
       {preview?.thumb && !isVideo ? (
-        <Img src={preview.thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
+        <Img src={preview.thumb} bucket={preview.bucket} alt="" className="h-full w-full object-cover" loading="lazy" />
       ) : (
         <div
           className="flex h-full w-full items-center justify-center p-3 text-center font-semibold leading-snug text-foreground"
