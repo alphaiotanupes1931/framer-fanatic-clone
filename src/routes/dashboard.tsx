@@ -15,6 +15,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { Post, Story, Event, Follow, OrgPost } from "@/lib/entities";
 import { OrgPostCard } from "@/components/shared/org-post-card";
+import { PeopleToFollowRow } from "@/components/layout/people-to-follow";
 
 
 export const Route = createFileRoute("/dashboard")({
@@ -307,6 +308,8 @@ function Dashboard() {
         </div>
 
         {activeFilter === "On Planet" && <OnboardingCard />}
+
+        {currentUser && <PeopleToFollowRow userId={currentUser.id} />}
 
         {activeFilter === "Discover" && (
           <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent/5 p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">
