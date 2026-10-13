@@ -9,6 +9,8 @@ import { useSidebar } from "@/components/layout/sidebar-context";
 import type { ReactNode, ComponentType } from "react";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 import { useHydrated } from "@/hooks/use-hydrated";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { PeopleToFollow } from "@/components/layout/people-to-follow";
 
 function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode; seeAllLink?: string }) {
   return (
@@ -30,6 +32,7 @@ function SuggestionSection({ title, icon: Icon, children, seeAllLink }: { title:
 export function RightSidebar() {
   const { rightCollapsed, setRightCollapsed } = useSidebar();
   const hydrated = useHydrated();
+  const { user } = useCurrentUser();
   const { data: stories = [] } = useQuery({
     queryKey: ["sidebar-trending-stories"],
     queryFn: () => Story.trending(5),
@@ -68,6 +71,7 @@ export function RightSidebar() {
       </button>
       <aside className={`fixed right-0 top-0 z-30 hidden h-screen w-[280px] overflow-y-auto border-l border-slate-200 bg-slate-50 transition-transform duration-300 xl:block ${rightCollapsed ? "translate-x-full" : "translate-x-0"}`}>
       <div className="px-4 pb-6 pt-12">
+        {hydrated && user && <PeopleToFollow userId={user.id} />}
         {hydrated && stories.length > 0 && (
           <SuggestionSection title="Trending Stories" icon={TrendingUp} seeAllLink="/stories">
             {stories.map((s: any, i: number) => (
