@@ -88,7 +88,7 @@ export function RepostEmbed({ postId, eventId }: { postId?: string | null; event
         params={{ eventId: data.id }}
         className="mx-3 my-2 block overflow-hidden rounded-xl border border-border transition hover:border-[#d4580a] sm:mx-5"
       >
-        {data.image && <Img src={data.image} alt="" className="max-h-[220px] w-full object-cover" loading="lazy" />}
+        {data.image && <Img src={data.image} bucket="event-images" alt="" className="max-h-[520px] w-full bg-muted object-contain" loading="lazy" />}
         <div className="p-3">
           <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Event</div>
           <div className="mt-0.5 text-sm font-semibold text-foreground break-words">{data.title}</div>
