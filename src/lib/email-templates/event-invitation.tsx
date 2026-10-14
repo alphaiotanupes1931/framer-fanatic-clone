@@ -16,6 +16,7 @@ export const EventInvitationEmail = ({
   fromName = 'Planet Baltimore',
   subject = 'You are invited',
   messageDocument = [],
+  imageUrl = '',
   eventTitle = 'View event details',
   eventUrl = 'https://www.planetbaltimore.com/events',
 }: EventInvitationProps) => (
@@ -46,6 +47,9 @@ export const EventInvitationEmail = ({
             return <Text key={index} style={messageParagraph}>{content}</Text>
           })}
         </Section>
+        {imageUrl && /^https:\/\//.test(imageUrl) ? (
+          <Img src={imageUrl} alt="" width="512" style={inviteImage} />
+        ) : null}
         <Button style={button} href={eventUrl}>{eventTitle}</Button>
         <Text style={signature}>Sent by {fromName}</Text>
       </Container>
@@ -80,6 +84,7 @@ const messageList = { margin: '0 0 14px', padding: '0' }
 const messageListItem = { margin: '0 0 6px', fontSize: '16px', lineHeight: '24px' }
 const button = { backgroundColor: '#d4580a', borderRadius: '9999px', color: '#ffffff', fontSize: '15px', fontWeight: '700', padding: '12px 22px', textDecoration: 'none', display: 'inline-block', margin: '0 0 20px' }
 const signature = { color: '#737373', fontSize: '13px', lineHeight: '20px' }
+const inviteImage = { display: 'block', width: '100%', maxWidth: '512px', height: 'auto', borderRadius: '12px', margin: '0 0 20px' }
 
 export const template = {
   component: EventInvitationEmail,
