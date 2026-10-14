@@ -10,12 +10,13 @@ import {
   Plus, Ticket, Users, CheckSquare, MessageSquare, Megaphone, Banknote, LineChart,
   Copy, Trash2, ExternalLink, Calendar, Download, Camera, List, Mail, Send,
   Zap, Crown, Star, Tag, MapPin, PartyPopper, AlertTriangle, GraduationCap,
-  ChevronUp, ChevronDown, Upload, Eye, X, Pencil,
+  ChevronUp, ChevronDown, Upload, Eye, X, Pencil, ImagePlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EventEditForm } from "@/components/organizer/event-edit-form";
 import { RichTextEditor, richHtmlToPlainText, richHtmlIsEmpty } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
+import { compressImage } from "@/lib/image-compress";
 import { EmailQuotaNotice, useEmailQuota } from "@/components/shared/email-quota-notice";
 import { deleteEventDraft, listEventDrafts, type EventDraft } from "@/lib/event-drafts";
 import { FileText, CreditCard, CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
