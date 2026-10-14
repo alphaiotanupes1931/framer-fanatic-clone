@@ -263,6 +263,7 @@ export function ReferralNetworkDialog({
             inviterName,
             personalMessageDocument: richHtmlToEmailDocument(message),
             inviteUrl: trackedUrl,
+            imageUrl: imageUrl || undefined,
           },
         }),
       });
