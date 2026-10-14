@@ -337,6 +337,13 @@
       "when": 1791938694053,
       "tag": "0047_admins_manage_org_members",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1792009421699,
+      "tag": "0048_message_images",
+      "breakpoints": true
     }
   ]
 }
