@@ -149,6 +149,8 @@ export function ReferralNetworkDialog({
   useEffect(() => {
     if (open) {
       setMessage(defaultMessage);
+      setImageUrl("");
+      setImagePreview("");
       loadStats();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
