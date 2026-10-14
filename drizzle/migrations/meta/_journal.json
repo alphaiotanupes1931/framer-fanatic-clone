@@ -330,6 +330,13 @@
       "when": 1791403486249,
       "tag": "0046_org_subcategory",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1791938694053,
+      "tag": "0047_admins_manage_org_members",
+      "breakpoints": true
     }
   ]
 }

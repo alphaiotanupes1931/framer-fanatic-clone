@@ -241,7 +241,7 @@ export function OrgProfile() {
         autoJoinDone.current = true;
         clearPendingGroup();
         if (!row && me !== org.owner_id) {
-          const pending = org.type === "group";
+          const pending = org.type === "group" || org.type === "community_assoc";
           const { error } = await supabase
             .from("organization_members")
             .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
@@ -258,7 +258,7 @@ export function OrgProfile() {
     })();
   }, [org, me]);
   useEffect(() => {
-    if (!org || org.type !== "group") return;
+    if (!org || (org.type !== "group" && org.type !== "community_assoc")) return;
     (async () => {
       const { count } = await supabase
         .from("organization_members")
@@ -335,7 +335,7 @@ export function OrgProfile() {
     ? COMMUNITY_ASSOC_TABS
     : ASSOC_TABS;
   const VISIBLE_TABS: readonly string[] =
-    isGroup && canManage ? ["Requests", ...TABS] : TABS;
+    (isGroup || isAssoc) && canManage ? ["Requests", ...TABS] : TABS;
 
   const handleFileUpload = async (field: "avatar_url" | "banner_url", file: File) => {
     file = await compressImage(file);
@@ -385,7 +385,7 @@ export function OrgProfile() {
         setMemberStatus("none");
         toast.success(memberStatus === "pending" ? "Request cancelled" : `Left ${org.name}`);
       } else {
-        const pending = isGroup;
+        const pending = isGroup || isAssoc;
         const { error } = await supabase.from("organization_members")
           .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
         if (error) throw error;
@@ -395,7 +395,7 @@ export function OrgProfile() {
           void notifyGroupJoinRequest({ data: { organizationId: org.id } }).catch(() => {});
         }
         toast.success(pending
-          ? "Request sent. The group creator will review it."
+          ? `Request sent. The ${isAssoc ? "association" : "group"} creator will review it.`
           : `${isAssoc ? "Joined" : "Following"} ${org.name}`);
       }
     } catch (e: unknown) {
@@ -644,9 +644,9 @@ export function OrgProfile() {
               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-60 ${joined ? "border border-neutral-200 bg-neutral-100 text-neutral-700" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
             >
               <Users className="h-4 w-4" />{" "}
-              {isGroup
+              {isGroup || isAssoc
                 ? memberStatus === "approved" ? "Joined" : memberStatus === "pending" ? "Request pending" : "Request to join"
-                : isAssoc ? (joined ? "Joined" : "Join") : (joined ? "Following" : "Follow")}
+                : (joined ? "Following" : "Follow")}
             </button>
           )}
         </div>
@@ -749,17 +749,17 @@ export function OrgProfile() {
         </div>
 
         <div className="py-8">
-          {isGroup && canManage && tab === "Requests" && (
+          {(isGroup || isAssoc) && canManage && tab === "Requests" && (
             <GroupRequests orgId={org.id} onApproved={() => setMemberCount((c) => c + 1)} onCountChange={setPendingCount} />
           )}
-          {isGroup && !canManage && memberStatus !== "approved" ? (
+          {(isGroup || isAssoc) && !canManage && memberStatus !== "approved" ? (
             <div className="mx-auto max-w-md rounded-2xl border border-neutral-200 bg-white p-8 text-center">
               <Users className="mx-auto h-8 w-8 text-neutral-400" />
-              <h2 className="mt-3 text-lg font-bold text-neutral-900">This group is members only</h2>
+              <h2 className="mt-3 text-lg font-bold text-neutral-900">This {isAssoc ? "association" : "group"} is members only</h2>
               <p className="mt-1 text-sm text-neutral-500">
                 {memberStatus === "pending"
-                  ? "Your request is waiting for the group creator to approve it."
-                  : "Request to join and the group creator will review your request."}
+                  ? `Your request is waiting for the ${isAssoc ? "association" : "group"} creator to approve it.`
+                  : `Request to join and the ${isAssoc ? "association" : "group"} creator will review your request.`}
               </p>
               <button
                 onClick={toggleJoin}
