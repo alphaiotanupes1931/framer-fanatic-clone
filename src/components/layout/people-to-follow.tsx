@@ -76,7 +76,7 @@ export function PeopleToFollowRow({ userId }: { userId: string }) {
   const { data = [] } = useQuery({ queryKey: ["people-to-follow", userId], queryFn: () => loadSuggestions(userId), staleTime: 5 * 60000 });
   if (!data.length) return null;
   return (
-    <section className="xl:hidden">
+    <section>
       <div className="mb-2 flex items-center gap-2 px-1">
         <UserPlus className="h-4 w-4 text-slate-700" />
         <h3 className="text-sm font-semibold tracking-tight text-slate-900">People to Follow</h3>
