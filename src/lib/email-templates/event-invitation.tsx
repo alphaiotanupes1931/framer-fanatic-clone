@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Body, Button, Container, Head, Heading, Html, Link, Preview, Section, Text } from '@react-email/components'
+import { Body, Button, Container, Head, Heading, Html, Img, Link, Preview, Section, Text } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import type { RichEmailDocument, RichEmailInline } from '@/lib/rich-email'
 
@@ -7,6 +7,7 @@ interface EventInvitationProps {
   fromName?: string
   subject?: string
   messageDocument?: RichEmailDocument
+  imageUrl?: string
   eventTitle?: string
   eventUrl?: string
 }
