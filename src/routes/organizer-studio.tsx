@@ -2149,6 +2149,41 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
             placeholder="Write your email here, or start from a template above."
             minHeight={220}
           />
+          {imagePreview ? (
+            <div className="relative mt-2 inline-block">
+              <img src={imagePreview} alt="Invite image" className="max-h-48 rounded-lg border border-neutral-200 object-contain" />
+              <button
+                type="button"
+                aria-label="Remove image"
+                onClick={() => { setImageUrl(""); setImagePreview(""); }}
+                className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : null}
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => imageRef.current?.click()}
+              disabled={uploadingImage}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+            >
+              <ImagePlus className="h-4 w-4" />
+              {uploadingImage ? "Adding image..." : "Add image"}
+            </button>
+            <input
+              ref={imageRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImage(f);
+                if (imageRef.current) imageRef.current.value = "";
+              }}
+            />
+          </div>
         </div>
 
         <div className="mt-5 border-t border-neutral-100 pt-4">
