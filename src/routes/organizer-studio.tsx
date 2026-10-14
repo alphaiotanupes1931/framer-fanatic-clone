@@ -1876,6 +1876,36 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
   const [preview, setPreview] = useState(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImage = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 15 * 1024 * 1024) { toast.error("Image must be under 15MB"); return; }
+    setUploadingImage(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) throw new Error("Please sign in first");
+      const small = await compressImage(file, { maxEdge: 1200 }).catch(() => file);
+      const ext = small.type === "image/png" ? "png" : small.type === "image/webp" ? "webp" : "jpg";
+      const path = `${uid}/invite-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("post-media").upload(path, small, { contentType: small.type || "image/jpeg" });
+      if (error) throw error;
+      // Long-lived link so the picture still loads when recipients open the email later.
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Could not prepare the image");
+      setImageUrl(signed.signedUrl);
+      setImagePreview(URL.createObjectURL(small));
+      toast.success("Image added");
+    } catch (err: any) {
+      toast.error(err.message || "Could not add the image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const loadAudiences = async () => {
     setLoading(true);
