@@ -29,6 +29,7 @@ import {
   Upload,
   Trash2,
   RefreshCw,
+  ImagePlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
