@@ -12,13 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Camera, Check, MessageSquare, Pencil, Plus, Search, Send, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, Camera, Check, MessageSquare, Pencil, Plus, Search, Send, Trash2, Users, X, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MentionText } from "@/components/shared/mention-text";
 import { parseSharePreview, type SharePreview } from "@/lib/share-preview";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
-import { compressAvatar, STORED_URL_TTL } from "@/lib/image-compress";
+import { compressAvatar, compressImage, STORED_URL_TTL } from "@/lib/image-compress";
 
 const SHARE_LABELS: Record<SharePreview["type"], string> = {
   story: "Story",
@@ -93,6 +93,7 @@ type Msg = {
   content: string;
   created_at: string;
   deleted_for?: string[] | null;
+  image_url?: string | null;
 };
 
 function initials(p?: Profile | null) {
@@ -117,6 +118,9 @@ function MessagesPage() {
   const [active, setActive] = useState<Conv | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [draft, setDraft] = useState("");
+  const [chatImage, setChatImage] = useState<{ url: string; preview: string } | null>(null);
+  const [chatImageUploading, setChatImageUploading] = useState(false);
+  const chatImageRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
   const [newOpen, setNewOpen] = useState(false);
   const [people, setPeople] = useState<Profile[]>([]);
@@ -439,10 +443,34 @@ function MessagesPage() {
     );
   }, [convs, search]);
 
+  const pickChatImage = async (file: File) => {
+    if (!active || !me) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 15 * 1024 * 1024) { toast.error("Image must be under 15MB"); return; }
+    setChatImageUploading(true);
+    try {
+      const small = await compressImage(file, { maxEdge: 1600 }).catch(() => file);
+      const ext = small.type === "image/png" ? "png" : small.type === "image/webp" ? "webp" : "jpg";
+      // Folder includes the conversation so only its members can view the photo.
+      const path = `${me.id}/chat/${active.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("post-media").upload(path, small, { contentType: small.type || "image/jpeg" });
+      if (error) throw error;
+      const { data } = await supabase.storage.from("post-media").createSignedUrl(path, STORED_URL_TTL);
+      if (!data?.signedUrl) throw new Error("Could not prepare the image");
+      setChatImage({ url: data.signedUrl, preview: URL.createObjectURL(small) });
+    } catch (err: any) {
+      toast.error(err.message || "Could not add the image");
+    } finally {
+      setChatImageUploading(false);
+    }
+  };
+
   const send = async () => {
-    if (!active || !me || !draft.trim()) return;
+    if (!active || !me || (!draft.trim() && !chatImage)) return;
     const content = draft.trim();
+    const image_url = chatImage?.url ?? null;
     setDraft("");
+    setChatImage(null);
     // Optimistic: render immediately so chat feels instant.
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const optimistic: Msg = {
@@ -450,12 +478,13 @@ function MessagesPage() {
       conversation_id: active.id,
       sender_id: me.id,
       content,
+      image_url,
       created_at: new Date().toISOString(),
     };
     setMsgs((prev) => [...prev, optimistic]);
     const { data: inserted, error } = await supabase
       .from("messages")
-      .insert({ conversation_id: active.id, sender_id: me.id, content })
+      .insert({ conversation_id: active.id, sender_id: me.id, content, image_url })
       .select()
       .single();
     if (error) {
@@ -476,7 +505,7 @@ function MessagesPage() {
       .from("conversations")
       .update({
         last_message_at: new Date().toISOString(),
-        last_message_preview: content.slice(0, 140),
+        last_message_preview: (content || "Sent a photo").slice(0, 140),
       })
       .eq("id", active.id);
     void loadConvs();
@@ -1049,8 +1078,13 @@ function MessagesPage() {
                                 <SharePreviewCard preview={shared.preview} mine={mine} />
                                 {shared.note && <div className="whitespace-pre-wrap break-words"><MentionText text={shared.note} /></div>}
                               </div>
-                            ) : (
+                            ) : m.content ? (
                               <div className="whitespace-pre-wrap break-words"><MentionText text={m.content} /></div>
+                            ) : null}
+                            {m.image_url && (
+                              <a href={m.image_url} target="_blank" rel="noreferrer" className={`block ${m.content ? "mt-2" : ""}`}>
+                                <Img src={m.image_url} alt="Photo" className="max-h-80 w-full rounded-2xl object-contain" />
+                              </a>
                             )}
                             {showTime && (
                               <div className="mt-1 text-[10px] text-muted-foreground">
@@ -1075,7 +1109,31 @@ function MessagesPage() {
                 })}
               </div>
               <div className="shrink-0 border-t border-border bg-card px-4 py-3 sm:px-6 sm:py-4">
+                {chatImage && (
+                  <div className="relative mb-2 inline-block">
+                    <img src={chatImage.preview} alt="Photo to send" className="max-h-32 rounded-xl border border-border object-contain" />
+                    <button type="button" aria-label="Remove photo" onClick={() => setChatImage(null)} className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-background/90 text-foreground shadow">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
                 <div className="flex items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => chatImageRef.current?.click()}
+                    disabled={chatImageUploading}
+                    aria-label="Add photo"
+                    className="rounded-full p-2.5 text-muted-foreground disabled:opacity-40"
+                  >
+                    {chatImageUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                  </button>
+                  <input
+                    ref={chatImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void pickChatImage(f); }}
+                  />
                   <textarea
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
@@ -1097,7 +1155,7 @@ function MessagesPage() {
                   />
                   <button
                     onClick={send}
-                    disabled={!draft.trim()}
+                    disabled={(!draft.trim() && !chatImage) || chatImageUploading}
                     className="rounded-full bg-primary p-2.5 text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
                     aria-label="Send"
                   >
