@@ -10,6 +10,7 @@ import {
   Text,
   Link,
   Section,
+  Img,
 } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import type { RichEmailDocument, RichEmailInline } from '@/lib/rich-email'
@@ -20,6 +21,7 @@ interface ReferralInviteProps {
   personalMessageIntro?: string
   personalMessageDocument?: RichEmailDocument
   inviteUrl?: string
+  imageUrl?: string
 }
 
 export const ReferralInviteEmail = ({
@@ -28,6 +30,7 @@ export const ReferralInviteEmail = ({
   personalMessageIntro = '',
   personalMessageDocument = [],
   inviteUrl = 'https://www.planetbaltimore.com/invite',
+  imageUrl = '',
 }: ReferralInviteProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -59,6 +62,9 @@ export const ReferralInviteEmail = ({
                 })
               : personalMessage ? <Text style={messageParagraph}>{personalMessage}</Text> : null}
           </Section>
+        ) : null}
+        {imageUrl && /^https:\/\//.test(imageUrl) ? (
+          <Img src={imageUrl} alt="" width="512" style={inviteImage} />
         ) : null}
         <Text style={text}>
           Planet Baltimore is where the city's artists, residents, businesses and
@@ -120,6 +126,7 @@ const button = {
   display: 'inline-block',
   margin: '8px 0 20px',
 }
+const inviteImage = { display: 'block', width: '100%', maxWidth: '512px', height: 'auto', borderRadius: '12px', margin: '0 0 20px' }
 const footer = { color: '#9ca3af', fontSize: '12px', lineHeight: '18px' }
 
 export const template = {
