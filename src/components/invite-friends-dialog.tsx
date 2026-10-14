@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { UserPlus, Upload, Loader2, Check, Copy, Share2, Link2, Send } from "lucide-react";
+import { UserPlus, Upload, Loader2, Check, Copy, Share2, Link2, Send, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { externalShare } from "@/lib/share-preview";
+import { compressImage } from "@/lib/image-compress";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { richHtmlToEmailDocument } from "@/lib/rich-email";
 import { EmailQuotaNotice, useEmailQuota } from "@/components/shared/email-quota-notice";
@@ -48,6 +49,36 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
   const [shareUrl, setShareUrl] = useState(buildInviteUrl(null, undefined, group?.slug));
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImage = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 15 * 1024 * 1024) { toast.error("Image must be under 15MB"); return; }
+    setUploadingImage(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) throw new Error("Please sign in first");
+      const small = await compressImage(file, { maxEdge: 1200 }).catch(() => file);
+      const ext = small.type === "image/png" ? "png" : small.type === "image/webp" ? "webp" : "jpg";
+      const path = `${uid}/invite-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("post-media").upload(path, small, { contentType: small.type || "image/jpeg" });
+      if (error) throw error;
+      // Long-lived link so the picture still loads when friends open the email later.
+      const { data: signed, error: sErr } = await supabase.storage.from("post-media").createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Could not prepare the image");
+      setImageUrl(signed.signedUrl);
+      setImagePreview(URL.createObjectURL(small));
+      toast.success("Image added");
+    } catch (err: any) {
+      toast.error(err.message || "Could not add the image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
   const { quota, refresh: refreshQuota } = useEmailQuota(open);
 
   useEffect(() => {
@@ -126,6 +157,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
               personalMessageIntro: group ? `${inviterName} invited you to join ${group.name} on Planet Baltimore.` : "",
               personalMessageDocument: richHtmlToEmailDocument(message),
               inviteUrl: trackedUrl,
+              imageUrl: imageUrl || undefined,
             },
           }),
         });
@@ -202,6 +234,8 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
     setText("");
     setParsed([]);
     setMessage("");
+    setImageUrl("");
+    setImagePreview("");
     setTestEmail("");
     setSent(false);
     setSending(false);
@@ -336,12 +370,39 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
                 placeholder="Tell them why they'd love Planet Baltimore..."
                 minHeight={120}
               />
+              <div className="mt-2">
+                {imagePreview ? (
+                  <div className="relative inline-block">
+                    <img src={imagePreview} alt="Invite image" className="max-h-48 rounded-lg border border-border object-contain" />
+                    <button
+                      type="button"
+                      aria-label="Remove image"
+                      onClick={() => { setImageUrl(""); setImagePreview(""); }}
+                      className="absolute right-1.5 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <Button type="button" variant="outline" size="sm" className="gap-1.5" disabled={uploadingImage} onClick={() => imageRef.current?.click()}>
+                    {uploadingImage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+                    {uploadingImage ? "Adding image..." : "Add image"}
+                  </Button>
+                )}
+                <input
+                  ref={imageRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void handleImage(f); }}
+                />
+              </div>
             </div>
 
             <EmailQuotaNotice quota={quota} />
             <Button
               onClick={handleSendInvite}
-              disabled={sending || sent || quota.remaining <= 0 || (!text.trim() && parsed.length === 0)}
+              disabled={sending || sent || uploadingImage || quota.remaining <= 0 || (!text.trim() && parsed.length === 0)}
               className="w-full gap-2"
             >
               {sending ? (
