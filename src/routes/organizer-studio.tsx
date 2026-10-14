@@ -2057,6 +2057,7 @@ function CampaignTab({ events }: { events: MyEvent[] }) {
               fromName: fromName.trim() || "Planet Baltimore",
               subject: subject.trim(),
               messageDocument: richHtmlToEmailDocument(withEventLink(body)),
+              imageUrl: imageUrl || undefined,
               eventTitle: `View ${evt.title} details and tickets`,
               eventUrl: eventLink,
             },
