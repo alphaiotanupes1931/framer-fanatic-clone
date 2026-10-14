@@ -623,6 +623,36 @@ export function ReferralNetworkDialog({
                     placeholder="Tell them why they'd love Planet Baltimore..."
                     minHeight={110}
                   />
+                  {imagePreview ? (
+                    <div className="relative mt-2 inline-block">
+                      <img src={imagePreview} alt="Invite image" className="max-h-48 rounded-lg border border-border object-contain" />
+                      <button
+                        type="button"
+                        aria-label="Remove image"
+                        onClick={() => { setImageUrl(""); setImagePreview(""); }}
+                        className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : null}
+                  <div className="mt-2">
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" disabled={uploadingImage} onClick={() => imageRef.current?.click()}>
+                      <ImagePlus className="h-4 w-4" />
+                      {uploadingImage ? "Adding image..." : "Add image"}
+                    </Button>
+                    <input
+                      ref={imageRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleImage(f);
+                        if (imageRef.current) imageRef.current.value = "";
+                      }}
+                    />
+                  </div>
                 </div>
                 <EmailQuotaNotice quota={quota} />
                 <Button
