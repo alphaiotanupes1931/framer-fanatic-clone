@@ -328,7 +328,7 @@ function Viewer({ item, canManage, onClose, onSave, onDelete, onPrevious, onNext
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/95 p-3" onClick={onClose}>
       <Button variant="ghost" size="icon" aria-label="Previous photo" title="Previous photo" onClick={(event) => { event.stopPropagation(); onPrevious(); }} className="fixed left-2 top-1/2 z-[71] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft /></Button>
       <Button variant="ghost" size="icon" aria-label="Next photo" title="Next photo" onClick={(event) => { event.stopPropagation(); onNext(); }} className="fixed right-2 top-1/2 z-[71] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft className="rotate-180" /></Button>
-      <div onClick={(e) => e.stopPropagation()} className="relative grid max-h-[94vh] w-full max-w-5xl overflow-hidden rounded-2xl bg-card shadow-2xl md:grid-cols-[minmax(0,1.4fr)_360px]">
+      <div onClick={(e) => e.stopPropagation()} className="relative grid max-h-[94vh] w-full max-w-5xl overflow-hidden rounded-2xl bg-card shadow-2xl md:grid-cols-[minmax(0,1fr)_minmax(200px,0.33fr)]">
         <SmartImage src={item.url} alt="" className="max-h-[86vh] w-full object-contain p-4" />
         <div className="space-y-4 overflow-y-auto border-t border-border p-5 md:border-l md:border-t-0">
           <div className="flex justify-end">
