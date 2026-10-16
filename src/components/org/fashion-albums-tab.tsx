@@ -261,10 +261,11 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
 }
 
 /** Lookbook viewer: whole photo beside its title and caption, with album-scoped arrows. */
-function StoryViewer({ title, items, start = 0, onClose }: { title: string; items: Item[]; start?: number; onClose: () => void }) {
+function StoryViewer({ title, items, start = 0, canManage = false, onClose, onSave }: { title: string; items: Item[]; start?: number; canManage?: boolean; onClose: () => void; onSave: (id: string, d: string) => void }) {
   const [i, setI] = useState(start);
+  const [text, setText] = useState(items[start]?.description ?? "");
   const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [i]);
+  useEffect(() => { scrollRef.current?.scrollTo(0, 0); setText(items[i]?.description ?? ""); }, [i]);
   const it = items[i];
   const next = () => setI((index) => (index + 1) % items.length);
   const prev = () => setI((index) => (index - 1 + items.length) % items.length);
@@ -326,7 +327,7 @@ function Viewer({ item, canManage, onClose, onSave, onDelete, onPrevious, onNext
               <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} placeholder="Caption / description"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
               <div className="flex gap-2">
-                <button onClick={() => onSave(item.id, text)} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Save caption</button>
+                <button onClick={() => onSave(item.id, text)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Edit caption</button>
                 <button onClick={() => onDelete(item.id)} aria-label="Delete item" className="rounded-full border border-border px-3 py-2 text-destructive"><Trash2 className="h-4 w-4" /></button>
               </div>
             </>
