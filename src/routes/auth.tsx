@@ -403,25 +403,6 @@ function AuthPage() {
                     </button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>I'm signing up as</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setRole("resident")}
-                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "resident" ? "border-primary bg-primary/10" : "border-input"}`}
-                    >
-                      Resident
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRole("visitor")}
-                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "visitor" ? "border-primary bg-primary/10" : "border-input"}`}
-                    >
-                      Visitor
-                    </button>
-                  </div>
-                </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Creating…" : "Create account"}
                 </Button>

@@ -421,37 +421,45 @@ function Onboarding() {
               <div className="space-y-3">
                 <Label>How do you want to join? <span className="text-orange-600">*</span></Label>
                 <div className="grid gap-3">
-                  {JOIN_OPTIONS.map((o) => (
-                    <button
-                      key={o.value}
-                      type="button"
-                      onClick={() => chooseKind(o.value)}
-                      className={`rounded-xl border p-4 text-left transition ${
-                        kind === o.value
-                          ? "border-orange-500 bg-orange-50"
-                          : "border-neutral-200 hover:border-orange-400 hover:bg-orange-50"
-                      }`}
-                    >
-                      <p className={`font-semibold ${kind === o.value ? "text-orange-700" : "text-neutral-900"}`}>
-                        {o.label}
-                      </p>
-                      <p className="text-xs text-neutral-500">{o.blurb}</p>
-                    </button>
-                  ))}
                   <button
                     type="button"
                     onClick={() => chooseKind("visitor")}
                     className={`rounded-xl border p-4 text-left transition ${
-                      isVisitor
-                        ? "border-orange-500 bg-orange-50"
-                        : "border-neutral-200 hover:border-orange-400 hover:bg-orange-50"
+                      isVisitor ? "border-orange-500 bg-orange-50" : "border-neutral-200"
                     }`}
                   >
-                    <p className={`font-semibold ${isVisitor ? "text-orange-700" : "text-neutral-900"}`}>
-                      Visitor
-                    </p>
-                    <p className="text-xs text-neutral-500">I am from somewhere else. Set me up with a visitor page.</p>
+                    <p className={`font-semibold ${isVisitor ? "text-orange-700" : "text-neutral-900"}`}>Visitor</p>
+                    <p className="text-xs text-neutral-500">Outside of Baltimore City.</p>
                   </button>
+                  <div
+                    className={`rounded-xl border transition ${
+                      audience === "resident" ? "border-orange-500 bg-orange-50" : "border-neutral-200"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => { setAudience("resident"); }}
+                      className="w-full p-4 text-left"
+                    >
+                      <p className={`font-semibold ${audience === "resident" ? "text-orange-700" : "text-neutral-900"}`}>Resident</p>
+                    </button>
+                    {audience === "resident" && (
+                      <div className="space-y-2 px-4 pb-4">
+                        <Label className="text-xs text-neutral-600">What are you creating?</Label>
+                        <Select value={kind || undefined} onValueChange={(v) => chooseKind(v as JoinKind)}>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Choose one" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {JOIN_OPTIONS.map((o) => (
+                              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {selected && <p className="text-xs text-neutral-500">{selected.blurb}</p>}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2">
