@@ -285,7 +285,7 @@ function StoryViewer({ title, items, onClose }: { title: string; items: Item[]; 
         <button onClick={onClose} aria-label="Close"><X className="h-6 w-6" /></button>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center">
-        <SmartImage src={it.url} alt={it.description ?? title} className="h-full w-full object-contain" />
+        <SmartImage src={it.url} alt={it.description ?? title} className="h-full w-full object-cover" />
         <button aria-label="Previous photo" onClick={prev} className="absolute inset-y-0 left-0 w-1/3" />
         <button aria-label="Next photo" onClick={next} className="absolute inset-y-0 right-0 w-2/3" />
       </div>
