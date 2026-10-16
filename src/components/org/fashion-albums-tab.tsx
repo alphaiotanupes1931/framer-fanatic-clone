@@ -180,13 +180,6 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
             </button>
           )}
         </div>
-        {coverOf(openAlbum) && (
-          <div className="w-full max-w-[300px]">
-            <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`}
-              className={`aspect-[3/4] w-full rounded-2xl border border-border ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
-          </div>
-        )}
-
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-2xl font-semibold">{openAlbum}</h3>
           {canManage && (
@@ -195,6 +188,15 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
             </button>
           )}
         </div>
+        {coverOf(openAlbum) && (
+          <div className="w-full max-w-[300px]">
+            <div className="relative">
+              <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`}
+                className={`aspect-[3/4] w-full rounded-2xl border border-border ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
+              <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold shadow-sm">Cover photo</span>
+            </div>
+          </div>
+        )}
         <input ref={coverRef} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => void changeCover(e.target.files)} />
         {form}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
