@@ -21,7 +21,9 @@ async function uploadImage(file: File): Promise<string> {
 }
 
 /** Fashion artists: albums (name only) holding items (image + caption). */
-export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; canManage?: boolean }) {
+export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_line" }: { orgId: string; canManage?: boolean; section?: "fashion_line" | "lookbook" }) {
+  const noun = section === "lookbook" ? "Lookbook" : "Fashion Line";
+  const scope = (q: any) => section === "lookbook" ? q.eq("section", "lookbook") : q.or("section.is.null,section.eq.fashion_line");
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [openAlbum, setOpenAlbum] = useState<string | null>(null);
@@ -37,10 +39,10 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await scope(supabase
       .from("organization_artworks")
       .select("id, media_url, description, title, album, album_cover, order_index, created_at")
-      .eq("org_id", orgId)
+      .eq("org_id", orgId))
       .order("order_index", { ascending: true })
       .order("created_at", { ascending: true });
     setItems((data ?? []).map((a: any) => ({
@@ -71,11 +73,11 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
 
   const save = async () => {
     const name = (openAlbum ?? albumName).trim();
-    if (!name) { toast.error("Add a fashion line name"); return; }
+    if (!name) { toast.error(`Add a ${noun.toLowerCase()} name`); return; }
     if (!drafts.length) { toast.error("Add at least one image"); return; }
     const albumCover = openAlbum ? coverOf(openAlbum) : (cover || null);
     const rows = drafts.map((d, i) => ({
-      org_id: orgId, album: name, title: name, media_url: d.url, album_cover: albumCover,
+      org_id: orgId, album: name, title: name, media_url: d.url, album_cover: albumCover, section,
       description: d.description.trim() || null, order_index: items.length + i,
     }));
     const { error } = await supabase.from("organization_artworks").insert(rows);
@@ -90,7 +92,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
     setBusy(true);
     try {
       const url = await uploadImage(f);
-      const { error } = await supabase.from("organization_artworks").update({ album_cover: url }).eq("org_id", orgId).eq("album", openAlbum);
+      const { error } = await scope(supabase.from("organization_artworks").update({ album_cover: url }).eq("org_id", orgId).eq("album", openAlbum));
       if (error) throw error;
       toast.success("Cover updated"); void load();
     } catch (e: any) { toast.error(e?.message ?? "Upload failed"); }
@@ -117,7 +119,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
       {!openAlbum && (
         <>
           <input value={albumName} onChange={(e) => setAlbumName(e.target.value)}
-            placeholder="Fashion line name (e.g. Ken Hall International Fall 2026)"
+            placeholder={`${noun} name (e.g. Ken Hall International Fall 2026)`}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
           <div className="flex items-center gap-3">
             {cover && <SmartImage src={cover} alt="Cover" className="h-20 w-20 rounded-lg object-cover" />}
@@ -167,7 +169,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
           <button onClick={() => { setOpenAlbum(null); reset(); }} className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-            <ChevronLeft className="h-4 w-4" /> All fashion lines
+            <ChevronLeft className="h-4 w-4" /> All {noun.toLowerCase()}s
           </button>
           {canManage && (
             <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
@@ -208,7 +210,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
         <div className="flex justify-end">
           <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
             className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-            {formOpen ? "Close" : "+ Add Fashion Line"}
+            {formOpen ? "Close" : `+ Add ${noun}`}
           </button>
         </div>
       )}
@@ -216,8 +218,8 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
       {!albums.length ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <ImageIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No fashion lines yet.</p>
-          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add Fashion Line" to name a line, then add items with captions.</p>}
+          <p className="text-sm text-muted-foreground">No {noun.toLowerCase()}s yet.</p>
+          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add {noun}" to name one, then add items with captions.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
