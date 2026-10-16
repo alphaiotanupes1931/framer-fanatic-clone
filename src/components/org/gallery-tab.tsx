@@ -16,7 +16,7 @@ type Work = {
 
 const emptyForm = { title: "", medium: "", dimensions: "", description: "", media_url: "" };
 
-export function GalleryTab({ orgId, canManage = false }: { orgId: string; canManage?: boolean }) {
+export function GalleryTab({ orgId, canManage = false, itemNoun = "Work" }: { orgId: string; canManage?: boolean; itemNoun?: string }) {
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
   const [idx, setIdx] = useState<number | null>(null);
@@ -100,7 +100,7 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
             onClick={() => { setOpen((v) => !v); setEditingId(null); setForm(emptyForm); }}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
           >
-            {open ? "Close" : "+ Add Work"}
+            {open ? "Close" : `+ Add ${itemNoun}`}
           </button>
         </div>
       )}
@@ -150,7 +150,7 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <ImageIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No work in the portfolio yet.</p>
-          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use “Add Work” to add a piece with its title, medium, dimensions and caption.</p>}
+          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use “Add {itemNoun}” to add a piece with its title, medium, dimensions and caption.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 py-2 sm:grid-cols-2 lg:grid-cols-3">

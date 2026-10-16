@@ -980,6 +980,8 @@ const SHARED_TABS = new Set([
 ]);
 
 function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; canManage: boolean; me: string | null }) {
+  // Only fashion artist pages call the things on their portfolio tab "items".
+  const isFashionArtist = org.type === "artist" && /fashion/i.test((org.subtype ?? "").toLowerCase());
   if (SHARED_TABS.has(tab)) return null;
   if (tab === "Talk") return <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Say something to this artist…" />;
   if (tab === "CV/Bio" || tab === "Bio/CV")
@@ -1003,7 +1005,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
       </div>
     );
   if (tab === "Portfolio" || tab === "Fashion Line" || tab === "Lookbook" || tab === "Collections")
-    return <GalleryTab orgId={org.id} canManage={canManage} />;
+    return <GalleryTab orgId={org.id} canManage={canManage} itemNoun={isFashionArtist ? "Item" : "Work"} />;
   if (tab === "Album" || tab === "Albums" || tab === "Music" || tab === "Discography")
     return <MusicTab orgId={org.id} canManage={canManage} mode="album" />;
   if (tab === "Singles" || tab === "Tracks" || tab === "Beats" || tab === "Mixes" || tab === "Sets")
