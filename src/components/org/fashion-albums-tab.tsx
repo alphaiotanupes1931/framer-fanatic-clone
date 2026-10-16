@@ -260,7 +260,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
   );
 }
 
-/** Full-screen, story-style lookbook viewer. Photos are shown whole, never cropped. */
+/** Lookbook viewer: whole photo beside its title and caption, with album-scoped arrows. */
 function StoryViewer({ title, items, start = 0, onClose }: { title: string; items: Item[]; start?: number; onClose: () => void }) {
   const [i, setI] = useState(start);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -276,19 +276,18 @@ function StoryViewer({ title, items, start = 0, onClose }: { title: string; item
   });
   if (!it) return null;
   return (
-    <div className="fixed inset-0 z-[80] flex flex-col bg-background text-foreground">
-      <div className="flex gap-1 px-3 pt-3">
-        {items.map((_, j) => (
-          <div key={j} className={`h-1 flex-1 rounded-full ${j <= i ? "bg-foreground" : "bg-foreground/20"}`} />
-        ))}
-      </div>
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="truncate font-semibold">{title}</div>
-        <button onClick={onClose} aria-label="Close"><X className="h-6 w-6" /></button>
-      </div>
-      <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto">
-        <SmartImage src={it.url} alt={it.description ?? title} className="block h-auto w-full" />
-        {it.description && <p className="whitespace-pre-wrap px-5 py-4 text-center text-sm">{it.description}</p>}
+    <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[80] flex items-center justify-center bg-background/95 px-12 py-5 text-foreground">
+      <div className="relative grid max-h-[90dvh] w-full max-w-6xl overflow-y-auto rounded-lg bg-background shadow-2xl md:h-[86dvh] md:grid-cols-[minmax(0,1.5fr)_minmax(280px,1fr)] md:overflow-hidden">
+        <div ref={scrollRef} className="min-h-0 overflow-y-auto p-3 md:p-6">
+          <SmartImage src={it.url} alt={it.description ?? title} className="block h-auto w-full md:h-full md:object-contain" />
+        </div>
+        <div className="min-h-0 space-y-5 border-t border-border p-5 md:overflow-y-auto md:border-l md:border-t-0 md:p-6">
+          <div className="flex justify-end">
+            <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close" title="Close" className="border border-border hover:bg-transparent hover:text-foreground"><X /></Button>
+          </div>
+          <h3 className="break-words text-2xl font-semibold">{title}</h3>
+          {it.description && <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{it.description}</p>}
+        </div>
       </div>
       <Button variant="ghost" size="icon" aria-label="Previous photo" title="Previous photo" onClick={prev} className="fixed left-2 top-1/2 z-[81] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft /></Button>
       <Button variant="ghost" size="icon" aria-label="Next photo" title="Next photo" onClick={next} className="fixed right-2 top-1/2 z-[81] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft className="rotate-180" /></Button>
