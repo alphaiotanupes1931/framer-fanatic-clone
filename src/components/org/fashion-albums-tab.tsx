@@ -247,12 +247,18 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
             return (
               <div key={a} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
                 <button onClick={() => (section === "lookbook" ? (setStoryStart(0), setStory(a)) : setOpenAlbum(a))} className="block w-full">
-                  <SmartImage src={coverOf(a) ?? list[0].url} alt={a} className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
+                  <SmartImage src={coverOf(a) ?? list[0].url} alt={a} className={`w-full ${section === "lookbook" ? "aspect-[2/3] bg-muted object-cover" : "aspect-[3/4] object-cover"}`} />
                 </button>
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
                     <div className="truncate font-semibold">{a}</div>
                     {section !== "lookbook" && <div className="text-xs text-muted-foreground">{list.length} {list.length === 1 ? "photo" : "photos"}</div>}
+                    {section === "lookbook" && canManage && (
+                      <button onClick={() => { reset(); setOpenAlbum(a); setFormOpen(true); }}
+                        className="mt-2 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
+                        Add item
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
