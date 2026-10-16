@@ -140,7 +140,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
       )}
       {drafts.map((d, i) => (
         <div key={d.url} className="flex gap-3">
-          <SmartImage src={d.url} alt="" className="h-24 w-24 shrink-0 rounded-lg object-cover" />
+          <SmartImage src={d.url} alt="" className={`h-24 w-24 shrink-0 rounded-lg ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
           <textarea value={d.description} rows={3} placeholder="Caption / description"
             onChange={(e) => setDrafts((all) => all.map((x, j) => j === i ? { ...x, description: e.target.value } : x))}
             className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm" />
@@ -194,7 +194,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {list.map((it) => (
             <button key={it.id} onClick={() => setViewer(it)} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
-              <SmartImage src={it.url} alt={it.description ?? openAlbum} className="aspect-[3/4] w-full object-cover" />
+              <SmartImage src={it.url} alt={it.description ?? openAlbum} className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
               {it.description && <p className="line-clamp-2 px-3 py-2 text-sm text-muted-foreground">{it.description}</p>}
             </button>
           ))}
