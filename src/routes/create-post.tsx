@@ -64,18 +64,24 @@ function CreatePostPage() {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { orgId?: string };
   const orgId = typeof search.orgId === "string" ? search.orgId : null;
-  const [org, setOrg] = useState<{ id: string; name: string; slug: string } | null>(null);
+  const [org, setOrg] = useState<{ id: string; name: string; slug: string; type: string } | null>(null);
 
   useEffect(() => {
     if (!orgId) { setOrg(null); return; }
     supabase
       .from("organizations")
-      .select("id, name, slug")
+      .select("id, name, slug, type")
       .eq("id", orgId)
       .maybeSingle()
       .then(({ data }) => setOrg(data ?? null));
   }, [orgId]);
+
+  // Groups and Community Associations post plainly: no category, neighborhood,
+  // tag or audience pickers.
+  const isCommunityPost = org?.type === "group" || org?.type === "community_assoc";
+
   const imageRef = useRef<HTMLInputElement>(null);
+
   const videoRef = useRef<HTMLInputElement>(null);
 
   const [postType, setPostType] = useState<PostType>("text");
@@ -473,9 +479,12 @@ function CreatePostPage() {
             </div>
           )}
 
+          {/* Groups and Community Associations post without extra fields. */}
+          {!isCommunityPost && (<>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">Category</Label>
+
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -592,8 +601,10 @@ function CreatePostPage() {
               </div>
             )}
           </div>
+          </>)}
 
           <div className="flex justify-end">
+
             <Button onClick={submit} disabled={!canSubmit || saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Post
