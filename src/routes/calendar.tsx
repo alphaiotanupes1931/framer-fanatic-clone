@@ -22,7 +22,7 @@ function openEventPopup(ev: Ev, list?: Ev[]) {
 
 export const Route = createFileRoute("/calendar")({
   validateSearch: (search: Record<string, unknown>): { view?: string; monthlyOrganizer?: string; upcomingOrganizer?: string } => ({
-    view: typeof search.view === "string" ? search.view : "upcoming",
+    view: typeof search.view === "string" ? search.view : "monthly",
     monthlyOrganizer: typeof search.monthlyOrganizer === "string" ? search.monthlyOrganizer : "all",
     upcomingOrganizer: typeof search.upcomingOrganizer === "string" ? search.upcomingOrganizer : "all",
   }),
@@ -348,7 +348,7 @@ function CalendarPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const showMonthly = search.view === "monthly";
-  const organizer = activeCalendarOrganizer(search.view ?? "upcoming", search.monthlyOrganizer ?? "all", search.upcomingOrganizer ?? "all");
+  const organizer = activeCalendarOrganizer(search.view ?? "monthly", search.monthlyOrganizer ?? "all", search.upcomingOrganizer ?? "all");
   const [events, setEvents] = useState<Ev[]>([]);
   const [selected, setSelected] = useState<Date | undefined>(new Date());
   const [neighborhood, setNeighborhood] = useState<string>("");
