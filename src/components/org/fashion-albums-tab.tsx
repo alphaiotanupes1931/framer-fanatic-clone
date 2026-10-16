@@ -272,10 +272,10 @@ function StoryViewer({ title, items, onClose }: { title: string; items: Item[]; 
   });
   if (!it) return null;
   return (
-    <div className="fixed inset-0 z-[80] flex flex-col bg-foreground text-background">
+    <div className="fixed inset-0 z-[80] flex flex-col bg-background text-foreground">
       <div className="flex gap-1 px-3 pt-3">
         {items.map((_, j) => (
-          <div key={j} className={`h-1 flex-1 rounded-full ${j <= i ? "bg-background" : "bg-background/30"}`} />
+          <div key={j} className={`h-1 flex-1 rounded-full ${j <= i ? "bg-foreground" : "bg-foreground/20"}`} />
         ))}
       </div>
       <div className="flex items-center justify-between px-4 py-3">
@@ -283,7 +283,7 @@ function StoryViewer({ title, items, onClose }: { title: string; items: Item[]; 
         <button onClick={onClose} aria-label="Close"><X className="h-6 w-6" /></button>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center">
-        <SmartImage src={it.url} alt={it.description ?? title} className="max-h-full max-w-full object-contain" />
+        <SmartImage src={it.url} alt={it.description ?? title} className="h-full w-full object-contain" />
         <button aria-label="Previous photo" onClick={prev} className="absolute inset-y-0 left-0 w-1/3" />
         <button aria-label="Next photo" onClick={next} className="absolute inset-y-0 right-0 w-2/3" />
       </div>
