@@ -6,6 +6,7 @@
 
 ## Active
 - [x] Replace calendar organizer tabs with independent Monthly Calendar and Upcoming dropdowns. Verified view switching, retained filters, all four choices, six rule tests and passing page validation.
+- [x] Make Calendar open on Monthly Calendar with All by default, from every entry point. Verified bare /calendar, the Events page Calendar chip, and switching to Upcoming.
 - [x] Include all public pages owned by people matched in Search and label each profile/page type. Verified Ainsley Burrows and all four public pages, Artists filter, Fashion LN, and five search rule tests.
 - [x] Combine Mission and Rules into About on Groups and Community Associations. Verified Harwood content and both tab lists; private group content remains membership-protected.
 - [x] Rename page audience to Followers and verify searchable follower list.
