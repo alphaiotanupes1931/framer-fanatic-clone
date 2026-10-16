@@ -312,8 +312,6 @@ export function OrgProfile() {
   const isPersonPage = org.type === "resident" || org.type === "visitor";
   const isBusiness = !isAssoc && !isGroup && !isArtsOrg && !isPersonPage;
   const subLower = (org.subtype ?? "").toLowerCase();
-  // Only fashion artist pages call the things on their portfolio tab "items".
-  const isFashionArtist = isArtist && /fashion/i.test(subLower);
   const isRestaurant = isBusiness && /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(subLower);
   const isService = isBusiness && !isRestaurant;
   // Artist pages are standalone: their tab set comes from the artist category
