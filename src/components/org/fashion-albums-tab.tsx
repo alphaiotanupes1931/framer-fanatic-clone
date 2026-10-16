@@ -32,6 +32,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [busy, setBusy] = useState(false);
   const [viewer, setViewer] = useState<Item | null>(null);
+  const [story, setStory] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
   const newCoverRef = useRef<HTMLInputElement>(null);
