@@ -42,6 +42,8 @@ function SearchPage() {
   const [people, setPeople] = useState<Person[]>([]);
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [events, setEvents] = useState<Ev[]>([]);
+  const [fests, setFests] = useState<Festiv[]>([]);
+  const [prods, setProds] = useState<Product[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [stories, setStories] = useState<StoryRow[]>([]);
@@ -63,7 +65,7 @@ function SearchPage() {
       const hasQ = debounced.length > 0;
       const like = `%${debounced}%`;
       const eventCutoff = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
-      const [pplRes, orgRes, evRes, bizRes, postRes, storyRes, hoodRes] = await Promise.all([
+      const [pplRes, orgRes, evRes, bizRes, postRes, storyRes, hoodRes, festRes, prodRes] = await Promise.all([
         hasQ
           ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
           : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
@@ -89,6 +91,14 @@ function SearchPage() {
         hasQ
           ? supabase.from("neighborhoods").select("id,name,region").ilike("name", like).order("name").limit(24)
           : supabase.from("neighborhoods").select("id,name,region").order("name").limit(12),
+        // Festivals are events whose category or title reads as a festival.
+        hasQ
+          ? supabase.from("events").select("id,title,category,starts_at,venue_name,image_url").eq("is_private_org", false).or(`title.ilike.${like},category.ilike.${like},description.ilike.${like}`).order("starts_at", { ascending: false }).limit(100)
+          : supabase.from("events").select("id,title,category,starts_at,venue_name,image_url").eq("is_private_org", false).or(`ends_at.gte.${eventCutoff},and(ends_at.is.null,starts_at.gte.${eventCutoff})`).order("starts_at", { ascending: true }).limit(100),
+        // Shop items are active products on visible pages; RLS hides the rest.
+        hasQ
+          ? supabase.from("organization_products").select("id,name,description,price_cents,image_url,organizations:org_id(name,slug,type,avatar_url)").eq("is_active", true).or(`name.ilike.${like},description.ilike.${like}`).order("created_at", { ascending: false }).limit(24)
+          : supabase.from("organization_products").select("id,name,description,price_cents,image_url,organizations:org_id(name,slug,type,avatar_url)").eq("is_active", true).order("created_at", { ascending: false }).limit(12),
       ]);
       if (cancelled) return;
       setPeople((pplRes.data ?? []) as Person[]);
@@ -116,6 +126,8 @@ function SearchPage() {
       }));
       setStories((storyRes.data ?? []) as StoryRow[]);
       setHoods((hoodRes.data ?? []) as Hood[]);
+      setFests(((festRes.data ?? []) as Festiv[]).filter((f) => /festival/i.test(f.category ?? "") || /festival|fest\b|block party|street fair|celebration/i.test(f.title)).slice(0, 24));
+      setProds((prodRes.data ?? []) as Product[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -123,9 +135,9 @@ function SearchPage() {
 
   const totals = useMemo(() => ({
     People: people.length, Organizations: orgs.length, Events: events.length, Businesses: businesses.length,
-    Posts: posts.length, Stories: stories.length, Neighborhoods: hoods.length,
-    All: people.length + orgs.length + events.length + businesses.length + posts.length + stories.length + hoods.length,
-  }), [people, orgs, events, businesses, posts, stories, hoods]);
+    Posts: posts.length, Stories: stories.length, Neighborhoods: hoods.length, Festivals: fests.length, "Shop items": prods.length,
+    All: people.length + orgs.length + events.length + businesses.length + posts.length + stories.length + hoods.length + fests.length + prods.length,
+  }), [people, orgs, events, businesses, posts, stories, hoods, fests, prods]);
 
   return (
     <AppLayout>
