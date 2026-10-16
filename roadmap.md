@@ -5,7 +5,7 @@
 - [x] Redesign Updates tab to match reference screenshot and seed sample content
 
 ## Active
-- [ ] Include all public pages owned by people matched in Search and label each profile/page type.
+- [x] Include all public pages owned by people matched in Search and label each profile/page type. Verified Ainsley Burrows and all four public pages, Artists filter, Fashion LN, and five search rule tests.
 - [x] Combine Mission and Rules into About on Groups and Community Associations. Verified Harwood content and both tab lists; private group content remains membership-protected.
 - [x] Rename page audience to Followers and verify searchable follower list.
 - [x] Verify admin "Live now" heartbeat works in browser (last_seen_at updates)
