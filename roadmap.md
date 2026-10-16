@@ -14,3 +14,5 @@
 
 - [x] Fashion Line cover images (test)
 - [x] Lookbook and Fashion Line keep separate items
+- [x] Verify photo arrows in Fashion Line and Lookbook albums
+- [x] Remove numeric photo counts from Lookbook cards

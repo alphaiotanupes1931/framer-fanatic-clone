@@ -3,6 +3,7 @@ import { ChevronLeft, Image as ImageIcon, Loader2, Trash2, X } from "lucide-reac
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
+import { Button } from "@/components/ui/button";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
 type Item = { id: string; url: string; description: string | null; album: string; cover: string | null };
@@ -168,6 +169,12 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
   // Inside one album
   if (openAlbum) {
     const list = items.filter((i) => i.album === openAlbum);
+    const albumCover = coverOf(openAlbum);
+    const moveViewer = (direction: number) => {
+      if (!viewer || !list.length) return;
+      const index = list.findIndex((item) => item.id === viewer.id);
+      setViewer(list[(index + direction + list.length) % list.length]);
+    };
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
@@ -192,9 +199,9 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
         <input ref={coverRef} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => void changeCover(e.target.files)} />
         {form}
         <div className="grid grid-cols-3 gap-4">
-          {coverOf(openAlbum) && (
+          {albumCover && (
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-              <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`}
+              <SmartImage src={albumCover} alt={`${openAlbum} cover`}
                 className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
               <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold shadow-sm">Cover photo</span>
             </div>
@@ -206,7 +213,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
             </button>
           ))}
         </div>
-        {viewer && <Viewer item={viewer} canManage={canManage} onClose={() => setViewer(null)} onSave={updateCaption} onDelete={remove} />}
+        {viewer && <Viewer key={viewer.id} item={viewer} canManage={canManage} onPrevious={() => moveViewer(-1)} onNext={() => moveViewer(1)} onClose={() => setViewer(null)} onSave={updateCaption} onDelete={remove} />}
         {story && <StoryViewer title={story} start={storyStart} items={list} onClose={() => setStory(null)} />}
       </div>
     );
@@ -241,7 +248,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
                     <div className="truncate font-semibold">{a}</div>
-                    <div className="text-xs text-muted-foreground">{list.length} {list.length === 1 ? "photo" : "photos"}</div>
+                    {section !== "lookbook" && <div className="text-xs text-muted-foreground">{list.length} {list.length === 1 ? "photo" : "photos"}</div>}
                   </div>
                 </div>
               </div>
@@ -259,8 +266,8 @@ function StoryViewer({ title, items, start = 0, onClose }: { title: string; item
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [i]);
   const it = items[i];
-  const next = () => (i < items.length - 1 ? setI(i + 1) : onClose());
-  const prev = () => setI(Math.max(0, i - 1));
+  const next = () => setI((index) => (index + 1) % items.length);
+  const prev = () => setI((index) => (index - 1 + items.length) % items.length);
   useEffect(() => {
     const k = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); if (e.key === "ArrowRight") next(); if (e.key === "ArrowLeft") prev(); };
     window.addEventListener("keydown", k);
@@ -283,19 +290,32 @@ function StoryViewer({ title, items, start = 0, onClose }: { title: string; item
         <SmartImage src={it.url} alt={it.description ?? title} className="block h-auto w-full" />
         {it.description && <p className="whitespace-pre-wrap px-5 py-4 text-center text-sm">{it.description}</p>}
       </div>
-      {i > 0 && <button aria-label="Previous photo" onClick={prev} className="fixed left-2 top-1/2 z-[81] -translate-y-1/2 rounded-full bg-background/80 p-2 shadow"><ChevronLeft className="h-6 w-6" /></button>}
-      <button aria-label="Next photo" onClick={next} className="fixed right-2 top-1/2 z-[81] -translate-y-1/2 rounded-full bg-background/80 p-2 shadow"><ChevronLeft className="h-6 w-6 rotate-180" /></button>
+      <Button variant="ghost" size="icon" aria-label="Previous photo" title="Previous photo" onClick={prev} className="fixed left-2 top-1/2 z-[81] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft /></Button>
+      <Button variant="ghost" size="icon" aria-label="Next photo" title="Next photo" onClick={next} className="fixed right-2 top-1/2 z-[81] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft className="rotate-180" /></Button>
     </div>
   );
 }
 
-function Viewer({ item, canManage, onClose, onSave, onDelete }: {
+function Viewer({ item, canManage, onClose, onSave, onDelete, onPrevious, onNext }: {
   item: Item; canManage: boolean; onClose: () => void;
+  onPrevious: () => void; onNext: () => void;
   onSave: (id: string, d: string) => void; onDelete: (id: string) => void;
 }) {
   const [text, setText] = useState(item.description ?? "");
+  useEffect(() => {
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.target instanceof HTMLElement && (event.target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName))) return;
+      if (event.key === "ArrowLeft") { event.preventDefault(); onPrevious(); }
+      if (event.key === "ArrowRight") { event.preventDefault(); onNext(); }
+    };
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
+  }, [onClose, onPrevious, onNext]);
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/95 p-3" onClick={onClose}>
+      <Button variant="ghost" size="icon" aria-label="Previous photo" title="Previous photo" onClick={(event) => { event.stopPropagation(); onPrevious(); }} className="fixed left-2 top-1/2 z-[71] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft /></Button>
+      <Button variant="ghost" size="icon" aria-label="Next photo" title="Next photo" onClick={(event) => { event.stopPropagation(); onNext(); }} className="fixed right-2 top-1/2 z-[71] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft className="rotate-180" /></Button>
       <div onClick={(e) => e.stopPropagation()} className="relative grid max-h-[94vh] w-full max-w-5xl overflow-hidden rounded-2xl bg-card shadow-2xl md:grid-cols-[minmax(0,1.4fr)_360px]">
         <SmartImage src={item.url} alt="" className="max-h-[86vh] w-full object-contain p-4" />
         <div className="space-y-4 overflow-y-auto border-t border-border p-5 md:border-l md:border-t-0">
