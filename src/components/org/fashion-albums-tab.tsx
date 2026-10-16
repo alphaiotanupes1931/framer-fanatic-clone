@@ -233,7 +233,6 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {albums.map((a) => {
             const list = items.filter((i) => i.album === a);
-            const isLook = section === "lookbook";
             return (
               <div key={a} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
                 <button onClick={() => setOpenAlbum(a)} className="block w-full">
