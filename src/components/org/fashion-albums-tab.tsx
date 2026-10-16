@@ -120,8 +120,9 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
       {!openAlbum && (
         <>
           <input value={albumName} onChange={(e) => setAlbumName(e.target.value)}
-            placeholder={`${noun} name (e.g. Ken Hall International Fall 2026)`}
+            placeholder={`${noun} name`}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+
           <div className="flex items-center gap-3">
             {cover && <SmartImage src={cover} alt="Cover" className="h-20 w-20 rounded-lg object-cover" />}
             <button type="button" onClick={() => newCoverRef.current?.click()} disabled={busy}
