@@ -66,8 +66,8 @@ function SearchPage() {
           ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
           : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
         hasQ
-          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group"]).ilike("name", like).limit(24)
-          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group"]).order("created_at", { ascending: false }).limit(24),
+          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group", "artist"]).ilike("name", like).limit(24)
+          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group", "artist"]).order("created_at", { ascending: false }).limit(24),
         // Keyword searches return past events too (people look up events they
         // attended). The default browse list only shows events that have not
         // finished: multi-day events stay until ends_at, single ones for 12
