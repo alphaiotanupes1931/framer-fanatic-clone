@@ -452,12 +452,13 @@ function CalendarPage() {
           const label = view === "monthly" ? "Monthly Calendar" : "Upcoming";
           const selectedLabel = CALENDAR_ORGANIZERS.find((option) => option.id === value)?.label;
           return (
-            <DropdownMenu key={view}>
+            <DropdownMenu key={view} onOpenChange={(open) => {
+              if (open) navigate({ search: (prev) => ({ ...prev, view }) });
+            }}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   aria-label={label}
-                  onClick={() => navigate({ search: (prev) => ({ ...prev, view }) })}
                   className={`h-auto min-h-11 max-w-full flex-wrap whitespace-normal px-4 py-2.5 font-semibold tracking-normal ${active
                     ? "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
                     : "border-border bg-background text-foreground hover:bg-background hover:text-foreground"}`}
