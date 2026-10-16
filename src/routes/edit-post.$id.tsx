@@ -58,6 +58,8 @@ function EditPostPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [orgType, setOrgType] = useState<string | null>(null);
+
   const [postType, setPostType] = useState<string>("text");
   const [content, setContent] = useState("");
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
@@ -78,7 +80,16 @@ function EditPostPage() {
       const { data, error } = await supabase.from("posts").select("*").eq("id", id).maybeSingle();
       if (error || !data) { toast.error("Post not found"); navigate({ to: "/dashboard" }); return; }
       setOwnerId(data.user_id);
+      if (data.organization_id) {
+        const { data: orgRow } = await supabase
+          .from("organizations")
+          .select("type")
+          .eq("id", data.organization_id)
+          .maybeSingle();
+        setOrgType(orgRow?.type ?? null);
+      }
       setPostType(data.post_type || "text");
+
       setContent(data.content || "");
       const urls: string[] = Array.isArray(data.media_urls) && data.media_urls.length
         ? data.media_urls
@@ -100,6 +111,11 @@ function EditPostPage() {
       setLoading(false);
     })();
   }, [id, navigate]);
+
+  // Groups and Community Associations post plainly: no category, neighborhood,
+  // tag or audience pickers.
+  const isCommunityPost = orgType === "group" || orgType === "community_assoc";
+
 
   const uploadFile = async (file: File) => {
     file = await compressImage(file);
@@ -313,9 +329,11 @@ function EditPostPage() {
           )}
 
 
+          {!isCommunityPost && (<>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">Category</Label>
+
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -358,9 +376,11 @@ function EditPostPage() {
               })}
             </div>
           </div>
+          </>)}
         </div>
       </div>
       <ImageCropDialog
+
         file={cropFile}
         aspect={1}
         maxEdge={1440}
