@@ -24,8 +24,10 @@ type Business = { id: string; name: string; slug: string; type: string; avatar_u
 type PostRow = { id: string; content: string; created_at: string; media_urls: string[] | null; image_url?: string | null; video_url?: string | null; link_title?: string | null; link_image?: string | null; repost_of_event_id?: string | null; repost_of_post_id?: string | null; preview_text?: string | null; preview_image?: string | null; preview_video?: string | null };
 type StoryRow = { id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string };
 type Hood = { id: string; name: string; region: string };
+type Festiv = { id: string; title: string; category: string | null; starts_at: string; venue_name: string | null; image_url: string | null };
+type Product = { id: string; name: string; description: string | null; price_cents: number | null; image_url: string | null; organizations: { name: string; slug: string; type: string; avatar_url: string | null } | null };
 
-const TABS = ["All", "People", "Organizations", "Events", "Businesses", "Posts", "Stories", "Neighborhoods"] as const;
+const TABS = ["All", "People", "Organizations", "Events", "Festivals", "Businesses", "Shop items", "Posts", "Stories", "Neighborhoods"] as const;
 type Tab = (typeof TABS)[number];
 
 function stripHtml(s: string) {
@@ -40,6 +42,8 @@ function SearchPage() {
   const [people, setPeople] = useState<Person[]>([]);
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [events, setEvents] = useState<Ev[]>([]);
+  const [fests, setFests] = useState<Festiv[]>([]);
+  const [prods, setProds] = useState<Product[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [stories, setStories] = useState<StoryRow[]>([]);
@@ -61,7 +65,7 @@ function SearchPage() {
       const hasQ = debounced.length > 0;
       const like = `%${debounced}%`;
       const eventCutoff = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
-      const [pplRes, orgRes, evRes, bizRes, postRes, storyRes, hoodRes] = await Promise.all([
+      const [pplRes, orgRes, evRes, bizRes, postRes, storyRes, hoodRes, festRes, prodRes] = await Promise.all([
         hasQ
           ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
           : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
@@ -87,6 +91,14 @@ function SearchPage() {
         hasQ
           ? supabase.from("neighborhoods").select("id,name,region").ilike("name", like).order("name").limit(24)
           : supabase.from("neighborhoods").select("id,name,region").order("name").limit(12),
+        // Festivals are events whose category or title reads as a festival.
+        hasQ
+          ? supabase.from("events").select("id,title,category,starts_at,venue_name,image_url").eq("is_private_org", false).or(`title.ilike.${like},category.ilike.${like},description.ilike.${like}`).order("starts_at", { ascending: false }).limit(100)
+          : supabase.from("events").select("id,title,category,starts_at,venue_name,image_url").eq("is_private_org", false).or(`ends_at.gte.${eventCutoff},and(ends_at.is.null,starts_at.gte.${eventCutoff})`).order("starts_at", { ascending: true }).limit(100),
+        // Shop items are active products on visible pages; RLS hides the rest.
+        hasQ
+          ? supabase.from("organization_products").select("id,name,description,price_cents,image_url,organizations:org_id(name,slug,type,avatar_url)").eq("is_active", true).or(`name.ilike.${like},description.ilike.${like}`).order("created_at", { ascending: false }).limit(24)
+          : supabase.from("organization_products").select("id,name,description,price_cents,image_url,organizations:org_id(name,slug,type,avatar_url)").eq("is_active", true).order("created_at", { ascending: false }).limit(12),
       ]);
       if (cancelled) return;
       setPeople((pplRes.data ?? []) as Person[]);
@@ -114,6 +126,8 @@ function SearchPage() {
       }));
       setStories((storyRes.data ?? []) as StoryRow[]);
       setHoods((hoodRes.data ?? []) as Hood[]);
+      setFests(((festRes.data ?? []) as Festiv[]).filter((f) => /festival/i.test(f.category ?? "") || /festival|fest\b|block party|street fair|celebration/i.test(f.title)).slice(0, 24));
+      setProds((prodRes.data ?? []) as Product[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -121,14 +135,14 @@ function SearchPage() {
 
   const totals = useMemo(() => ({
     People: people.length, Organizations: orgs.length, Events: events.length, Businesses: businesses.length,
-    Posts: posts.length, Stories: stories.length, Neighborhoods: hoods.length,
-    All: people.length + orgs.length + events.length + businesses.length + posts.length + stories.length + hoods.length,
-  }), [people, orgs, events, businesses, posts, stories, hoods]);
+    Posts: posts.length, Stories: stories.length, Neighborhoods: hoods.length, Festivals: fests.length, "Shop items": prods.length,
+    All: people.length + orgs.length + events.length + businesses.length + posts.length + stories.length + hoods.length + fests.length + prods.length,
+  }), [people, orgs, events, businesses, posts, stories, hoods, fests, prods]);
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        <HeroBanner title="Search" subtitle="Find posts, stories, events, creators, neighborhoods, businesses and organizations across Baltimore." />
+        <HeroBanner title="Search" subtitle="Find posts, stories, events, festivals, shop items, creators, neighborhoods, businesses and organizations across Baltimore." />
 
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
@@ -220,6 +234,25 @@ function SearchPage() {
               </Section>
             )}
 
+            {(tab === "All" || tab === "Festivals") && fests.length > 0 && (
+              <Section title="Festivals">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {fests.slice(0, tab === "All" ? 6 : 24).map((f) => (
+                    <Link key={f.id} to="/festivals/$eventId" params={{ eventId: f.id }} className="overflow-hidden rounded-xl border border-border bg-card hover:bg-hover">
+                      {f.image_url && <EventImage src={f.image_url} alt="" className="h-32 w-full object-cover" />}
+                      <div className="p-3">
+                        <div className="text-sm font-semibold text-foreground line-clamp-1">{f.title}</div>
+                        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" /> {new Date(f.starts_at).toLocaleDateString()}
+                          {f.venue_name && <span className="truncate">· {f.venue_name}</span>}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </Section>
+            )}
+
             {(tab === "All" || tab === "Businesses") && businesses.length > 0 && (
               <Section title="Businesses">
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -231,6 +264,26 @@ function SearchPage() {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{b.name}</div>
                         <div className="text-xs text-muted-foreground">Business{b.neighborhood ? ` · ${b.neighborhood}` : ""}</div>
+                      </div>
+                    </OrgLink>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {(tab === "All" || tab === "Shop items") && prods.length > 0 && (
+              <Section title="Shop items">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {prods.slice(0, tab === "All" ? 6 : 24).map((p) => (
+                    <OrgLink key={p.id} type={p.organizations?.type ?? "business"} slug={p.organizations?.slug ?? ""} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
+                      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
+                        {p.image_url && <Img src={p.image_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-foreground">{p.name}</div>
+                        <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                          {p.price_cents != null ? `$${(p.price_cents / 100).toFixed(2)}` : "Item"}{p.organizations?.name ? ` · ${p.organizations.name}` : ""}
+                        </div>
                       </div>
                     </OrgLink>
                   ))}
