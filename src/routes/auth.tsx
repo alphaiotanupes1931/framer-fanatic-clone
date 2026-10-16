@@ -52,7 +52,7 @@ function AuthPage() {
   const [showSignInPw, setShowSignInPw] = useState(false);
   const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
-  const [role, setRole] = useState<"artist" | "resident" | "visitor">("resident");
+  const [role] = useState<"artist" | "resident" | "visitor">("resident");
   const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
   const [referrerName, setReferrerName] = useState<string | null>(null);
   const [invited, setInvited] = useState(false);
