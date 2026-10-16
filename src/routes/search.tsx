@@ -142,7 +142,7 @@ function SearchPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <HeroBanner title="Search" subtitle="Find posts, stories, events, creators, neighborhoods, businesses and organizations across Baltimore." />
+        <HeroBanner title="Search" subtitle="Find posts, stories, events, festivals, shop items, creators, neighborhoods, businesses and organizations across Baltimore." />
 
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
