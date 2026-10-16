@@ -188,18 +188,16 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
             </button>
           )}
         </div>
-        {coverOf(openAlbum) && (
-          <div className="w-full max-w-[300px]">
-            <div className="relative">
-              <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`}
-                className={`aspect-[3/4] w-full rounded-2xl border border-border ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
-              <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold shadow-sm">Cover photo</span>
-            </div>
-          </div>
-        )}
         <input ref={coverRef} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => void changeCover(e.target.files)} />
         {form}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-3 gap-4">
+          {coverOf(openAlbum) && (
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
+              <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`}
+                className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
+              <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold shadow-sm">Cover photo</span>
+            </div>
+          )}
           {list.map((it) => (
             <button key={it.id} onClick={() => setViewer(it)} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
               <SmartImage src={it.url} alt={it.description ?? openAlbum} className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
