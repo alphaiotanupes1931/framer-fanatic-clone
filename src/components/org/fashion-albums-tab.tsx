@@ -180,8 +180,12 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
           )}
         </div>
         {coverOf(openAlbum) && (
-          <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`} className="max-h-[420px] w-full rounded-2xl object-cover" />
+          <div className="w-full max-w-[300px]">
+            <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`}
+              className={`aspect-[3/4] w-full rounded-2xl border border-border ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
+          </div>
         )}
+
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-2xl font-semibold">{openAlbum}</h3>
           {canManage && (
