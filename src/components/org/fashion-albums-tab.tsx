@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SmartImage } from "@/components/smart-image";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 
-type Item = { id: string; url: string; description: string | null; album: string };
+type Item = { id: string; url: string; description: string | null; album: string; cover: string | null };
 type Draft = { url: string; description: string };
 
 async function uploadImage(file: File): Promise<string> {
@@ -21,7 +21,9 @@ async function uploadImage(file: File): Promise<string> {
 }
 
 /** Fashion artists: albums (name only) holding items (image + caption). */
-export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; canManage?: boolean }) {
+export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_line" }: { orgId: string; canManage?: boolean; section?: "fashion_line" | "lookbook" }) {
+  const noun = section === "lookbook" ? "Lookbook" : "Fashion Line";
+  const scope = (q: any) => section === "lookbook" ? q.eq("section", "lookbook") : q.or("section.is.null,section.eq.fashion_line");
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [openAlbum, setOpenAlbum] = useState<string | null>(null);
@@ -31,25 +33,30 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
   const [busy, setBusy] = useState(false);
   const [viewer, setViewer] = useState<Item | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
+  const newCoverRef = useRef<HTMLInputElement>(null);
+  const [cover, setCover] = useState("");
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await scope(supabase
       .from("organization_artworks")
-      .select("id, media_url, description, title, album, order_index, created_at")
-      .eq("org_id", orgId)
+      .select("id, media_url, description, title, album, album_cover, order_index, created_at")
+      .eq("org_id", orgId))
       .order("order_index", { ascending: true })
       .order("created_at", { ascending: true });
     setItems((data ?? []).map((a: any) => ({
       id: a.id, url: a.media_url, description: a.description ?? null,
       album: (a.album || a.title || "Untitled Album") as string,
+      cover: a.album_cover ?? null,
     })));
     setLoading(false);
   };
   useEffect(() => { void load(); }, [orgId]);
 
   const albums = Array.from(new Set(items.map((i) => i.album)));
-  const reset = () => { setFormOpen(false); setAlbumName(""); setDrafts([]); };
+  const coverOf = (a: string) => items.find((i) => i.album === a && i.cover)?.cover ?? null;
+  const reset = () => { setFormOpen(false); setAlbumName(""); setDrafts([]); setCover(""); };
 
   const pickFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -66,10 +73,11 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
 
   const save = async () => {
     const name = (openAlbum ?? albumName).trim();
-    if (!name) { toast.error("Add a fashion line name"); return; }
+    if (!name) { toast.error(`Add a ${noun.toLowerCase()} name`); return; }
     if (!drafts.length) { toast.error("Add at least one image"); return; }
+    const albumCover = openAlbum ? coverOf(openAlbum) : (cover || null);
     const rows = drafts.map((d, i) => ({
-      org_id: orgId, album: name, title: name, media_url: d.url,
+      org_id: orgId, album: name, title: name, media_url: d.url, album_cover: albumCover, section,
       description: d.description.trim() || null, order_index: items.length + i,
     }));
     const { error } = await supabase.from("organization_artworks").insert(rows);
@@ -77,6 +85,19 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
     toast.success(drafts.length === 1 ? "Item added" : `${drafts.length} items added`);
     if (!openAlbum) setOpenAlbum(name);
     reset(); void load();
+  };
+
+  const changeCover = async (files: FileList | null) => {
+    const f = files?.[0]; if (!f || !openAlbum) return;
+    setBusy(true);
+    try {
+      const url = await uploadImage(f);
+      const { error } = await scope(supabase.from("organization_artworks").update({ album_cover: url }).eq("org_id", orgId).eq("album", openAlbum));
+      if (error) throw error;
+      toast.success("Cover updated"); void load();
+    } catch (e: any) { toast.error(e?.message ?? "Upload failed"); }
+    setBusy(false);
+    if (coverRef.current) coverRef.current.value = "";
   };
 
   const updateCaption = async (id: string, description: string) => {
@@ -96,9 +117,26 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
   const form = canManage && formOpen && (
     <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
       {!openAlbum && (
-        <input value={albumName} onChange={(e) => setAlbumName(e.target.value)}
-          placeholder="Fashion line name (e.g. Ken Hall International Fall 2026)"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <>
+          <input value={albumName} onChange={(e) => setAlbumName(e.target.value)}
+            placeholder={`${noun} name (e.g. Ken Hall International Fall 2026)`}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <div className="flex items-center gap-3">
+            {cover && <SmartImage src={cover} alt="Cover" className="h-20 w-20 rounded-lg object-cover" />}
+            <button type="button" onClick={() => newCoverRef.current?.click()} disabled={busy}
+              className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
+              {cover ? "Change cover image" : "Add cover image"}
+            </button>
+            {cover && <button type="button" aria-label="Remove cover" onClick={() => setCover("")} className="text-muted-foreground"><X className="h-4 w-4" /></button>}
+            <input ref={newCoverRef} type="file" accept="image/*,.heic,.heif" hidden
+              onChange={async (e) => {
+                const f = e.target.files?.[0]; if (!f) return;
+                setBusy(true);
+                try { setCover(await uploadImage(f)); } catch (err: any) { toast.error(err?.message ?? "Upload failed"); }
+                setBusy(false); e.target.value = "";
+              }} />
+          </div>
+        </>
       )}
       {drafts.map((d, i) => (
         <div key={d.url} className="flex gap-3">
@@ -131,7 +169,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
           <button onClick={() => { setOpenAlbum(null); reset(); }} className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-            <ChevronLeft className="h-4 w-4" /> All fashion lines
+            <ChevronLeft className="h-4 w-4" /> All {noun.toLowerCase()}s
           </button>
           {canManage && (
             <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
@@ -140,7 +178,18 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
             </button>
           )}
         </div>
-        <h3 className="text-2xl font-semibold">{openAlbum}</h3>
+        {coverOf(openAlbum) && (
+          <SmartImage src={coverOf(openAlbum)!} alt={`${openAlbum} cover`} className="max-h-[420px] w-full rounded-2xl object-cover" />
+        )}
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-2xl font-semibold">{openAlbum}</h3>
+          {canManage && (
+            <button onClick={() => coverRef.current?.click()} disabled={busy} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
+              {busy ? "Uploading..." : coverOf(openAlbum) ? "Change cover" : "Add cover image"}
+            </button>
+          )}
+        </div>
+        <input ref={coverRef} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => void changeCover(e.target.files)} />
         {form}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {list.map((it) => (
@@ -161,7 +210,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
         <div className="flex justify-end">
           <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
             className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-            {formOpen ? "Close" : "+ Add Fashion Line"}
+            {formOpen ? "Close" : `+ Add ${noun}`}
           </button>
         </div>
       )}
@@ -169,8 +218,8 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
       {!albums.length ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <ImageIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No fashion lines yet.</p>
-          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add Fashion Line" to name a line, then add items with captions.</p>}
+          <p className="text-sm text-muted-foreground">No {noun.toLowerCase()}s yet.</p>
+          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add {noun}" to name one, then add items with captions.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
@@ -178,7 +227,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
             const list = items.filter((i) => i.album === a);
             return (
               <button key={a} onClick={() => setOpenAlbum(a)} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
-                <SmartImage src={list[0].url} alt={a} className="aspect-[3/4] w-full object-cover" />
+                <SmartImage src={coverOf(a) ?? list[0].url} alt={a} className="aspect-[3/4] w-full object-cover" />
                 <div className="px-3 py-2">
                   <div className="truncate font-semibold">{a}</div>
                   <div className="text-xs text-muted-foreground">{list.length} {list.length === 1 ? "item" : "items"}</div>

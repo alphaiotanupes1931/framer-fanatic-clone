@@ -1103,6 +1103,7 @@ export type Database = {
       organization_artworks: {
         Row: {
           album: string | null
+          album_cover: string | null
           created_at: string
           description: string | null
           dimensions: string | null
@@ -1111,11 +1112,13 @@ export type Database = {
           medium: string | null
           order_index: number
           org_id: string
+          section: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
           album?: string | null
+          album_cover?: string | null
           created_at?: string
           description?: string | null
           dimensions?: string | null
@@ -1124,11 +1127,13 @@ export type Database = {
           medium?: string | null
           order_index?: number
           org_id: string
+          section?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
           album?: string | null
+          album_cover?: string | null
           created_at?: string
           description?: string | null
           dimensions?: string | null
@@ -1137,6 +1142,7 @@ export type Database = {
           medium?: string | null
           order_index?: number
           org_id?: string
+          section?: string | null
           title?: string | null
           updated_at?: string
         }
