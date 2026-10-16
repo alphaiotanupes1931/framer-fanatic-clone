@@ -1,0 +1,1 @@
+ALTER TABLE public.organization_artworks ADD COLUMN IF NOT EXISTS section text;

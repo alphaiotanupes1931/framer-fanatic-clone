@@ -11,3 +11,6 @@
 - [x] Verify smaller attending privacy toggle renders
 - [x] Remove dashes from all page links, preserve redirects, and verify collisions and page loading
 - [x] Replace grey hover fills with the warm brand tint across all buttons and tabs. Verified the Followers chip and page tabs render a warm peach tint in the browser.
+
+- [ ] Fashion Line cover images (test)
+- [ ] Lookbook and Fashion Line keep separate items

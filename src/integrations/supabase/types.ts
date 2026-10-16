@@ -1112,6 +1112,7 @@ export type Database = {
           medium: string | null
           order_index: number
           org_id: string
+          section: string | null
           title: string | null
           updated_at: string
         }
@@ -1126,6 +1127,7 @@ export type Database = {
           medium?: string | null
           order_index?: number
           org_id: string
+          section?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -1140,6 +1142,7 @@ export type Database = {
           medium?: string | null
           order_index?: number
           org_id?: string
+          section?: string | null
           title?: string | null
           updated_at?: string
         }
