@@ -214,7 +214,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
           ))}
         </div>
         {viewer && <Viewer key={viewer.id} item={viewer} canManage={canManage} onPrevious={() => moveViewer(-1)} onNext={() => moveViewer(1)} onClose={() => setViewer(null)} onSave={updateCaption} onDelete={remove} />}
-        {story && <StoryViewer title={story} start={storyStart} items={list} onClose={() => setStory(null)} />}
+        {story && <StoryViewer title={story} start={storyStart} items={list} canManage={canManage} onSave={updateCaption} onClose={() => setStory(null)} />}
       </div>
     );
   }
@@ -261,10 +261,11 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
 }
 
 /** Lookbook viewer: whole photo beside its title and caption, with album-scoped arrows. */
-function StoryViewer({ title, items, start = 0, onClose }: { title: string; items: Item[]; start?: number; onClose: () => void }) {
+function StoryViewer({ title, items, start = 0, canManage = false, onClose, onSave }: { title: string; items: Item[]; start?: number; canManage?: boolean; onClose: () => void; onSave: (id: string, d: string) => void }) {
   const [i, setI] = useState(start);
+  const [text, setText] = useState(items[start]?.description ?? "");
   const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [i]);
+  useEffect(() => { scrollRef.current?.scrollTo(0, 0); setText(items[i]?.description ?? ""); }, [i]);
   const it = items[i];
   const next = () => setI((index) => (index + 1) % items.length);
   const prev = () => setI((index) => (index - 1 + items.length) % items.length);
@@ -278,7 +279,7 @@ function StoryViewer({ title, items, start = 0, onClose }: { title: string; item
   return (
     <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[80] flex items-center justify-center bg-background/95 px-12 py-5 text-foreground">
       <div className="relative grid max-h-[90dvh] w-full max-w-6xl overflow-y-auto rounded-lg bg-background shadow-2xl md:h-[min(86dvh,760px)] md:grid-cols-[minmax(0,1.5fr)_minmax(280px,1fr)] md:overflow-hidden">
-        <div ref={scrollRef} className="min-h-0 overflow-y-auto p-3 md:p-6">
+        <div ref={scrollRef} onClick={next} className="min-h-0 cursor-pointer overflow-y-auto p-3 md:p-6">
           <SmartImage src={it.url} alt={it.description ?? title} className="block h-auto w-full md:h-full md:object-contain" />
         </div>
         <div className="min-h-0 space-y-5 border-t border-border p-5 md:overflow-y-auto md:border-l md:border-t-0 md:p-6">
@@ -287,6 +288,13 @@ function StoryViewer({ title, items, start = 0, onClose }: { title: string; item
           </div>
           <h3 className="break-words text-2xl font-semibold">{title}</h3>
           {it.description && <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{it.description}</p>}
+          {canManage && (
+            <div className="space-y-2">
+              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={4} placeholder="Caption / description"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs" />
+              <button onClick={() => onSave(it.id, text)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Edit caption</button>
+            </div>
+          )}
         </div>
       </div>
       <Button variant="ghost" size="icon" aria-label="Previous photo" title="Previous photo" onClick={prev} className="fixed left-2 top-1/2 z-[81] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft /></Button>
@@ -326,7 +334,7 @@ function Viewer({ item, canManage, onClose, onSave, onDelete, onPrevious, onNext
               <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} placeholder="Caption / description"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
               <div className="flex gap-2">
-                <button onClick={() => onSave(item.id, text)} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Save caption</button>
+                <button onClick={() => onSave(item.id, text)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Edit caption</button>
                 <button onClick={() => onDelete(item.id)} aria-label="Delete item" className="rounded-full border border-border px-3 py-2 text-destructive"><Trash2 className="h-4 w-4" /></button>
               </div>
             </>
