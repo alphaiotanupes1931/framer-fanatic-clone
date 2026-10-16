@@ -271,6 +271,26 @@ function SearchPage() {
               </Section>
             )}
 
+            {(tab === "All" || tab === "Shop items") && prods.length > 0 && (
+              <Section title="Shop items">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {prods.slice(0, tab === "All" ? 6 : 24).map((p) => (
+                    <OrgLink key={p.id} type={p.organizations?.type ?? "business"} slug={p.organizations?.slug ?? ""} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
+                      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
+                        {p.image_url && <Img src={p.image_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-foreground">{p.name}</div>
+                        <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                          {p.price_cents != null ? `$${(p.price_cents / 100).toFixed(2)}` : "Item"}{p.organizations?.name ? ` · ${p.organizations.name}` : ""}
+                        </div>
+                      </div>
+                    </OrgLink>
+                  ))}
+                </div>
+              </Section>
+            )}
+
             {(tab === "All" || tab === "Posts") && posts.length > 0 && (
               <Section title="Posts">
                 <div className="grid gap-3 sm:grid-cols-2">
