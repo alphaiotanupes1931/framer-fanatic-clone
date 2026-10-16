@@ -150,7 +150,7 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <ImageIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No work in the portfolio yet.</p>
-          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use “Add Work” to add a piece with its title, medium, dimensions and caption.</p>}
+          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use “Add {itemNoun}” to add a piece with its title, medium, dimensions and caption.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 py-2 sm:grid-cols-2 lg:grid-cols-3">
