@@ -36,10 +36,14 @@ type Ev = {
   organization_id: string | null;
 };
 
+function plainText(html: string | null) {
+  return (html ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, " ").trim();
+}
+
 const ORGANIZERS = [
   { id: "all", label: "All", icon: "calendar" },
   { id: "business", label: "Businesses", icon: "business" },
-  { id: "community", label: "Communities", icon: "community" },
+  { id: "artist", label: "Artists", icon: "arts" },
   { id: "arts", label: "Arts Orgs", icon: "arts" },
 ] as const;
 
@@ -325,7 +329,7 @@ function DayEventsDialog({ data, onClose }: { data: { date: Date; events: Ev[] }
                           {where ? ` · ${where}` : ""}
                         </div>
                         {e.description && (
-                          <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{e.description}</p>
+                          <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{plainText(e.description)}</p>
                         )}
                       </div>
                     </button>
@@ -389,7 +393,7 @@ function CalendarPage() {
       if (organizer !== "all") {
         const orgType = e.organization_id ? orgTypeById[e.organization_id] : null;
         if (organizer === "business" && orgType !== "business") return false;
-        if (organizer === "community" && orgType !== "community_assoc") return false;
+        if (organizer === "artist" && orgType !== "artist") return false;
         if (organizer === "arts" && orgType !== "arts_org") return false;
       }
       return true;
@@ -697,7 +701,7 @@ function EventPopup() {
                 </div>
               )}
               {ev.description && (
-                <p className="line-clamp-5 text-sm leading-relaxed text-neutral-600">{ev.description}</p>
+                <p className="line-clamp-5 text-sm leading-relaxed text-neutral-600">{plainText(ev.description)}</p>
               )}
               <div className="flex gap-2 pt-2">
                 <Link
@@ -779,7 +783,7 @@ function ForYouCard({ event }: { event: Ev }) {
         )}
         {event.description && (
           <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">
-            "{event.description}"
+            "{plainText(event.description)}"
           </p>
         )}
       </div>
@@ -835,7 +839,7 @@ function UpcomingRow({ event }: { event: Ev }) {
             </div>
           )}
           {event.description && (
-            <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{event.description}</p>
+            <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-neutral-500">{plainText(event.description)}</p>
           )}
         </div>
       </div>
