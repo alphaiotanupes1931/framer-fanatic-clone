@@ -231,9 +231,9 @@ export function OrgListPage({
         {subs.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setSub("")}
+              onClick={() => { setSub(""); setArtsOnly(false); }}
               className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
-                sub === ""
+                sub === "" && !artsOnly
                   ? "bg-[#d4580a] text-white"
                   : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
               }`}
@@ -241,12 +241,16 @@ export function OrgListPage({
               All
             </button>
             {type === "business" && (
-              <Link
-                to="/arts-orgs"
-                className="rounded-full border border-neutral-200 bg-white px-5 py-2 text-sm font-semibold text-neutral-600 transition hover:border-orange-300"
+              <button
+                onClick={() => { setArtsOnly((v) => !v); setSub(""); }}
+                className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                  artsOnly
+                    ? "bg-[#d4580a] text-white"
+                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                }`}
               >
                 Arts Orgs
-              </Link>
+              </button>
             )}
             {subs.map((s) => (
               <button
