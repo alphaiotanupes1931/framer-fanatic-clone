@@ -260,6 +260,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
           })}
         </div>
       )}
+      {story && <StoryViewer title={story} start={storyStart} items={items.filter((i) => i.album === story)} canManage={canManage} onSave={updateCaption} onClose={() => setStory(null)} />}
     </div>
   );
 }
