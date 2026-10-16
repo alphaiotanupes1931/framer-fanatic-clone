@@ -234,6 +234,25 @@ function SearchPage() {
               </Section>
             )}
 
+            {(tab === "All" || tab === "Festivals") && fests.length > 0 && (
+              <Section title="Festivals">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {fests.slice(0, tab === "All" ? 6 : 24).map((f) => (
+                    <Link key={f.id} to="/festivals/$eventId" params={{ eventId: f.id }} className="overflow-hidden rounded-xl border border-border bg-card hover:bg-hover">
+                      {f.image_url && <EventImage src={f.image_url} alt="" className="h-32 w-full object-cover" />}
+                      <div className="p-3">
+                        <div className="text-sm font-semibold text-foreground line-clamp-1">{f.title}</div>
+                        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" /> {new Date(f.starts_at).toLocaleDateString()}
+                          {f.venue_name && <span className="truncate">· {f.venue_name}</span>}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </Section>
+            )}
+
             {(tab === "All" || tab === "Businesses") && businesses.length > 0 && (
               <Section title="Businesses">
                 <div className="grid gap-3 sm:grid-cols-2">
