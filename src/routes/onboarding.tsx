@@ -33,13 +33,15 @@ export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Welcome - set up your profile" }] }),
 });
 
-type JoinKind = "resident" | "artist" | "arts_org" | "business";
+type JoinKind = "resident" | "artist" | "arts_org" | "business" | "group" | "community";
 
 const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string; blurb: string }> = [
   { value: "resident", label: "Personal", nameLabel: "Your name", blurb: "Resident, neighbor, community member." },
   { value: "artist", label: "Artist", nameLabel: "Artist name", blurb: "Musician, painter, DJ, photographer, filmmaker." },
   { value: "business", label: "Business", nameLabel: "Business name", blurb: "Coffee shop, daycare, studio, store, restaurant." },
   { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name", blurb: "Theater, gallery, collective, festival, venue." },
+  { value: "group", label: "Group", nameLabel: "Your name", blurb: "Set up your profile, then create your group." },
+  { value: "community", label: "Community", nameLabel: "Your name", blurb: "Set up your profile, then create your community." },
 ];
 
 
@@ -319,8 +321,14 @@ function Onboarding() {
       // Artist, arts organization and business choices create separate owned pages.
       if (isVisitor) {
         await setMyProfileKind("visitor");
-      } else if (kind === "resident") {
+      } else if (kind === "resident" || kind === "group" || kind === "community") {
         await setMyProfileKind("resident");
+      }
+
+      if (kind === "group" || kind === "community") {
+        clearDraft();
+        await navigate({ to: kind === "group" ? "/create-community" : "/create-community-association" });
+        return;
       }
 
       if (isVisitor || kind === "resident") {
@@ -442,10 +450,10 @@ function Onboarding() {
                       className="w-full p-4 text-left"
                     >
                       <p className={`font-semibold ${audience === "resident" ? "text-orange-700" : "text-neutral-900"}`}>Resident</p>
+                      <p className="text-xs text-neutral-500">Within Baltimore City.</p>
                     </button>
                     {audience === "resident" && (
                       <div className="space-y-2 px-4 pb-4">
-                        <Label className="text-xs text-neutral-600">What are you creating?</Label>
                         <Select value={kind || undefined} onValueChange={(v) => chooseKind(v as JoinKind)}>
                           <SelectTrigger className="bg-background">
                             <SelectValue placeholder="Choose one" />
