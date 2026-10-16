@@ -24,8 +24,10 @@ type Business = { id: string; name: string; slug: string; type: string; avatar_u
 type PostRow = { id: string; content: string; created_at: string; media_urls: string[] | null; image_url?: string | null; video_url?: string | null; link_title?: string | null; link_image?: string | null; repost_of_event_id?: string | null; repost_of_post_id?: string | null; preview_text?: string | null; preview_image?: string | null; preview_video?: string | null };
 type StoryRow = { id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string };
 type Hood = { id: string; name: string; region: string };
+type Festiv = { id: string; title: string; category: string | null; starts_at: string; venue_name: string | null; image_url: string | null };
+type Product = { id: string; name: string; description: string | null; price_cents: number | null; image_url: string | null; organizations: { name: string; slug: string; type: string; avatar_url: string | null } | null };
 
-const TABS = ["All", "People", "Organizations", "Events", "Businesses", "Posts", "Stories", "Neighborhoods"] as const;
+const TABS = ["All", "People", "Organizations", "Events", "Festivals", "Businesses", "Shop items", "Posts", "Stories", "Neighborhoods"] as const;
 type Tab = (typeof TABS)[number];
 
 function stripHtml(s: string) {
