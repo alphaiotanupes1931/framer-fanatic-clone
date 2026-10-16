@@ -465,7 +465,7 @@ function CalendarPage() {
           return (
             <button
               key={o.id}
-              onClick={() => setOrganizer(o.id)}
+              onClick={() => { setOrganizer(o.id); setShowMonthly(false); }}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
                 active
                   ? "bg-neutral-800 text-white"
