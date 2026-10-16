@@ -66,7 +66,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
 
   const save = async () => {
     const name = (openAlbum ?? albumName).trim();
-    if (!name) { toast.error("Add an album name"); return; }
+    if (!name) { toast.error("Add a fashion line name"); return; }
     if (!drafts.length) { toast.error("Add at least one image"); return; }
     const rows = drafts.map((d, i) => ({
       org_id: orgId, album: name, title: name, media_url: d.url,
@@ -97,7 +97,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
     <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
       {!openAlbum && (
         <input value={albumName} onChange={(e) => setAlbumName(e.target.value)}
-          placeholder="Album name (e.g. Ken Hall International Fall 2026)"
+          placeholder="Fashion line name (e.g. Ken Hall International Fall 2026)"
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
       )}
       {drafts.map((d, i) => (
@@ -131,12 +131,12 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
           <button onClick={() => { setOpenAlbum(null); reset(); }} className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-            <ChevronLeft className="h-4 w-4" /> All albums
+            <ChevronLeft className="h-4 w-4" /> All fashion lines
           </button>
           {canManage && (
             <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-              {formOpen ? "Close" : "+ Add Items"}
+              {formOpen ? "Close" : "+ Add Item"}
             </button>
           )}
         </div>
@@ -161,7 +161,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
         <div className="flex justify-end">
           <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
             className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-            {formOpen ? "Close" : "+ Add Album"}
+            {formOpen ? "Close" : "+ Add Fashion Line"}
           </button>
         </div>
       )}
@@ -169,8 +169,8 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
       {!albums.length ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <ImageIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No albums yet.</p>
-          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add Album" to name an album and add items with captions.</p>}
+          <p className="text-sm text-muted-foreground">No fashion lines yet.</p>
+          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add Fashion Line" to name a line, then add items with captions.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
