@@ -4,11 +4,13 @@ import { AppLayout } from "@/components/app-layout";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronLeft, ChevronRight, MapPin, Filter, Star, List, LayoutGrid, CalendarDays } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronDown, MapPin, Filter, Star, List, LayoutGrid, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EventImage } from "@/components/event-image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { pageHead } from "@/lib/seo";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
+import { CALENDAR_ORGANIZERS, activeCalendarOrganizer, calendarOrganizer, matchesCalendarOrganizer } from "@/lib/calendar-filters";
 
 type EventPopupDetail = { list: Ev[]; index: number };
 
@@ -19,6 +21,11 @@ function openEventPopup(ev: Ev, list?: Ev[]) {
 }
 
 export const Route = createFileRoute("/calendar")({
+  validateSearch: (search: Record<string, unknown>): { view?: string; monthlyOrganizer?: string; upcomingOrganizer?: string } => ({
+    view: typeof search.view === "string" ? search.view : "upcoming",
+    monthlyOrganizer: typeof search.monthlyOrganizer === "string" ? search.monthlyOrganizer : "all",
+    upcomingOrganizer: typeof search.upcomingOrganizer === "string" ? search.upcomingOrganizer : "all",
+  }),
   component: CalendarPage,
   head: () => pageHead({ path: "/calendar", title: "Baltimore Event Calendar by Date | Planet Baltimore", description: "See everything happening in Baltimore on a full monthly calendar you can plan around." }),
 });
@@ -39,13 +46,6 @@ type Ev = {
 function plainText(html: string | null) {
   return (html ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, " ").trim();
 }
-
-const ORGANIZERS = [
-  { id: "all", label: "All", icon: "calendar" },
-  { id: "business", label: "Businesses", icon: "business" },
-  { id: "artist", label: "Artists", icon: "arts" },
-  { id: "arts", label: "Arts Orgs", icon: "arts" },
-] as const;
 
 const EVENT_TYPES = [
   "All Types", "Music", "Art", "Community", "Education", "Food",
@@ -345,9 +345,12 @@ function DayEventsDialog({ data, onClose }: { data: { date: Date; events: Ev[] }
 }
 
 function CalendarPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const showMonthly = search.view === "monthly";
+  const organizer = activeCalendarOrganizer(search.view ?? "upcoming", search.monthlyOrganizer ?? "all", search.upcomingOrganizer ?? "all");
   const [events, setEvents] = useState<Ev[]>([]);
   const [selected, setSelected] = useState<Date | undefined>(new Date());
-  const [organizer, setOrganizer] = useState<string>("all");
   const [neighborhood, setNeighborhood] = useState<string>("");
   const [eventType, setEventType] = useState<string>("All Types");
   const [neighborhoods, setNeighborhoods] = useState<{ id: string; name: string }[]>([]);
@@ -358,7 +361,6 @@ function CalendarPage() {
     el.scrollBy({ left: dir * (el.clientWidth - 40), behavior: "smooth" });
   };
   const [upcomingView, setUpcomingView] = useState<"list" | "grid">("list");
-  const [showMonthly, setShowMonthly] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -390,12 +392,7 @@ function CalendarPage() {
     return events.filter((e) => {
       if (neighborhood && e.neighborhood !== neighborhood) return false;
       if (eventType !== "All Types" && (e.category ?? "").toLowerCase() !== eventType.toLowerCase()) return false;
-      if (organizer !== "all") {
-        const orgType = e.organization_id ? orgTypeById[e.organization_id] : null;
-        if (organizer === "business" && orgType !== "business") return false;
-        if (organizer === "artist" && orgType !== "artist") return false;
-        if (organizer === "arts" && orgType !== "arts_org") return false;
-      }
+      if (!matchesCalendarOrganizer(organizer, e.organization_id ? orgTypeById[e.organization_id] : null)) return false;
       return true;
     });
   }, [events, neighborhood, eventType, organizer, orgTypeById]);
@@ -447,34 +444,43 @@ function CalendarPage() {
         }
       />
 
-      {/* Organizer filter pills */}
+      {/* Separate calendar and event-card views, each with its own filter. */}
       <div className="mt-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setShowMonthly(true)}
-          className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-            showMonthly
-              ? "bg-[#d4580a] text-white"
-              : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
-          }`}
-        >
-          <CalendarDays className="h-4 w-4" />
-          Monthly Calendar
-        </button>
-        {ORGANIZERS.map((o) => {
-          const active = organizer === o.id;
+        {(["monthly", "upcoming"] as const).map((view) => {
+          const active = view === "monthly" ? showMonthly : !showMonthly;
+          const value = calendarOrganizer((view === "monthly" ? search.monthlyOrganizer : search.upcomingOrganizer) ?? "all");
+          const label = view === "monthly" ? "Monthly Calendar" : "Upcoming";
+          const selectedLabel = CALENDAR_ORGANIZERS.find((option) => option.id === value)?.label;
           return (
-            <button
-              key={o.id}
-              onClick={() => { setOrganizer(o.id); setShowMonthly(false); }}
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                active
-                  ? "bg-neutral-800 text-white"
-                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
-              }`}
-            >
-              <OrgIcon id={o.icon} />
-              {o.label}
-            </button>
+            <DropdownMenu key={view} onOpenChange={(open) => {
+              if (open) navigate({ search: (prev) => ({ ...prev, view }) });
+            }}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  aria-label={label}
+                  className={`h-auto min-h-11 max-w-full flex-wrap whitespace-normal px-4 py-2.5 font-semibold tracking-normal ${active
+                    ? "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                    : "border-border bg-background text-foreground hover:bg-background hover:text-foreground"}`}
+                >
+                  {view === "monthly" ? <CalendarDays /> : <List />}
+                  {label}
+                  {value !== "all" && <span className="text-xs font-normal">({selectedLabel})</span>}
+                  <ChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-48">
+                <DropdownMenuRadioGroup value={value} onValueChange={(next) => navigate({
+                  search: (prev) => ({ ...prev, view, [view === "monthly" ? "monthlyOrganizer" : "upcomingOrganizer"]: next }),
+                })}>
+                  {CALENDAR_ORGANIZERS.map((option) => (
+                    <DropdownMenuRadioItem key={option.id} value={option.id} className="cursor-pointer focus:bg-transparent focus:text-foreground">
+                      {option.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           );
         })}
       </div>
