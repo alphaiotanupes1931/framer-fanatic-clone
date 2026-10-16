@@ -32,6 +32,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [busy, setBusy] = useState(false);
   const [viewer, setViewer] = useState<Item | null>(null);
+  const [storyStart, setStoryStart] = useState(0);
   const [story, setStory] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
@@ -199,13 +200,14 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
             </div>
           )}
           {list.map((it) => (
-            <button key={it.id} onClick={() => setViewer(it)} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
+            <button key={it.id} onClick={() => (section === "lookbook" ? (setStoryStart(list.indexOf(it)), setStory(openAlbum)) : setViewer(it))} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
               <SmartImage src={it.url} alt={it.description ?? openAlbum} className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
               {it.description && <p className="line-clamp-2 px-3 py-2 text-sm text-muted-foreground">{it.description}</p>}
             </button>
           ))}
         </div>
         {viewer && <Viewer item={viewer} canManage={canManage} onClose={() => setViewer(null)} onSave={updateCaption} onDelete={remove} />}
+        {story && <StoryViewer title={story} start={storyStart} items={list} onClose={() => setStory(null)} />}
       </div>
     );
   }
@@ -231,10 +233,9 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {albums.map((a) => {
             const list = items.filter((i) => i.album === a);
-            const isLook = section === "lookbook";
             return (
               <div key={a} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
-                <button onClick={() => (isLook ? setStory(a) : setOpenAlbum(a))} className="block w-full">
+                <button onClick={() => setOpenAlbum(a)} className="block w-full">
                   <SmartImage src={coverOf(a) ?? list[0].url} alt={a} className="aspect-[3/4] w-full object-cover" />
                 </button>
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
@@ -242,25 +243,21 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
                     <div className="truncate font-semibold">{a}</div>
                     <div className="text-xs text-muted-foreground">{list.length} {list.length === 1 ? "photo" : "photos"}</div>
                   </div>
-                  {isLook && canManage && (
-                    <button onClick={() => setOpenAlbum(a)} className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-semibold">Edit</button>
-                  )}
                 </div>
               </div>
             );
           })}
         </div>
       )}
-      {story && (
-        <StoryViewer title={story} items={items.filter((i) => i.album === story)} onClose={() => setStory(null)} />
-      )}
     </div>
   );
 }
 
 /** Full-screen, story-style lookbook viewer. Photos are shown whole, never cropped. */
-function StoryViewer({ title, items, onClose }: { title: string; items: Item[]; onClose: () => void }) {
-  const [i, setI] = useState(0);
+function StoryViewer({ title, items, start = 0, onClose }: { title: string; items: Item[]; start?: number; onClose: () => void }) {
+  const [i, setI] = useState(start);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [i]);
   const it = items[i];
   const next = () => (i < items.length - 1 ? setI(i + 1) : onClose());
   const prev = () => setI(Math.max(0, i - 1));
@@ -282,12 +279,12 @@ function StoryViewer({ title, items, onClose }: { title: string; items: Item[]; 
         <div className="truncate font-semibold">{title}</div>
         <button onClick={onClose} aria-label="Close"><X className="h-6 w-6" /></button>
       </div>
-      <div className="relative flex min-h-0 flex-1 items-center justify-center">
-        <SmartImage src={it.url} alt={it.description ?? title} className="h-full w-full object-cover" />
-        <button aria-label="Previous photo" onClick={prev} className="absolute inset-y-0 left-0 w-1/3" />
-        <button aria-label="Next photo" onClick={next} className="absolute inset-y-0 right-0 w-2/3" />
+      <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto">
+        <SmartImage src={it.url} alt={it.description ?? title} className="block h-auto w-full" />
+        {it.description && <p className="whitespace-pre-wrap px-5 py-4 text-center text-sm">{it.description}</p>}
       </div>
-      {it.description && <p className="whitespace-pre-wrap px-5 py-4 text-center text-sm">{it.description}</p>}
+      {i > 0 && <button aria-label="Previous photo" onClick={prev} className="fixed left-2 top-1/2 z-[81] -translate-y-1/2 rounded-full bg-background/80 p-2 shadow"><ChevronLeft className="h-6 w-6" /></button>}
+      <button aria-label="Next photo" onClick={next} className="fixed right-2 top-1/2 z-[81] -translate-y-1/2 rounded-full bg-background/80 p-2 shadow"><ChevronLeft className="h-6 w-6 rotate-180" /></button>
     </div>
   );
 }
