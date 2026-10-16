@@ -52,7 +52,7 @@ function AuthPage() {
   const [showSignInPw, setShowSignInPw] = useState(false);
   const [showSignUpPw, setShowSignUpPw] = useState(false);
   const [displayName, setDisplayName] = useState("");
-  const [role, setRole] = useState<"artist" | "resident" | "visitor">("resident");
+  const [role] = useState<"artist" | "resident" | "visitor">("resident");
   const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
   const [referrerName, setReferrerName] = useState<string | null>(null);
   const [invited, setInvited] = useState(false);
@@ -400,25 +400,6 @@ function AuthPage() {
                       className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
                     >
                       {showSignUpPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>I'm signing up as</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setRole("resident")}
-                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "resident" ? "border-primary bg-primary/10" : "border-input"}`}
-                    >
-                      Resident
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRole("visitor")}
-                      className={`rounded-md border px-3 py-2 text-sm transition ${role === "visitor" ? "border-primary bg-primary/10" : "border-input"}`}
-                    >
-                      Visitor
                     </button>
                   </div>
                 </div>
