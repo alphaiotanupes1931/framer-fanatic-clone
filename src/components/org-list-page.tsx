@@ -104,6 +104,7 @@ export function OrgListPage({
   const subs = subtypesFor(type);
   const [q, setQ] = useState("");
   const [sub, setSub] = useState<string>("");
+  const [artsOnly, setArtsOnly] = useState(false);
   const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
   const [view, setView] = useState<"list" | "map">("list");
 
@@ -111,11 +112,11 @@ export function OrgListPage({
   // filter that list in memory so typing and tab switching are instant.
   const { data: all, loading, setData, refetch } = useCachedFetch<Org[]>(`orglist:${type}`, async () => {
     const [{ data }, statsRes] = await Promise.all([
-      supabase
-        .from("organizations")
-        .select("*")
-        .eq("type", type)
-        .order("created_at", { ascending: false }),
+      // The Businesses page also lists arts organizations so "All" covers both;
+      // the Arts Orgs chip narrows the same list instead of leaving the page.
+      (type === "business"
+        ? supabase.from("organizations").select("*").in("type", ["business", "arts_org"]).order("created_at", { ascending: false })
+        : supabase.from("organizations").select("*").eq("type", type).order("created_at", { ascending: false })),
       supabase.rpc("public_org_stats", { _type: type }),
     ]);
     const stats = new Map<string, { follower_count: number; last_active_at: string | null }>(
@@ -133,6 +134,7 @@ export function OrgListPage({
 
   const items = useMemo(() => {
     let list = all ?? [];
+    if (artsOnly) list = list.filter((o) => o.type === "arts_org");
     if (sub) list = list.filter((o) => o.subtype === sub);
     const needle = q.trim().toLowerCase();
     if (needle) {
@@ -162,7 +164,7 @@ export function OrgListPage({
       if (sort === "newest" && bp !== ap) return bp - ap;
       return time(bn.created_at) - time(an.created_at);
     });
-  }, [all, sub, q, sort]);
+  }, [all, sub, q, sort, artsOnly]);
 
   const handleDelete = async (e: React.MouseEvent, o: Org) => {
     e.preventDefault();
