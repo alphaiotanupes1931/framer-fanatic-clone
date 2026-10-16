@@ -14,3 +14,4 @@
 - Group and community About composes the existing details and text-document editors, synchronizing saved mission and rules into page state so tab changes preserve current content without changing storage or permissions.
 - Fashion album photo navigation stays scoped to the opened album in both viewers, so arrows never mix separate fashion lines or lookbooks.
 - Search combines direct page-name matches with public pages owned by matched profiles, deduplicating by page ID so separately named artist and business pages remain discoverable.
+- Calendar view and separate per-view organizer filters live in URL search parameters so switching views preserves each selection and browser history.
