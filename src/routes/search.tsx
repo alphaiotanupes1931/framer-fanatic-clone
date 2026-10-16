@@ -9,25 +9,35 @@ import { Search as SearchIcon, MapPin, Calendar, FileText, BookOpen } from "luci
 import { EmptyState, ListSkeleton } from "@/components/shared/empty-state";
 import { Img, SmartAvatarImage } from "@/components/shared/smart-img";
 import { OrgLink } from "@/components/org/org-link";
+import { mergeSearchPages, pageTypeLabel, type SearchPageResult } from "@/lib/search-pages";
+import { titleCase } from "@/lib/utils";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
   validateSearch: (search: Record<string, unknown>): { q?: string } =>
     typeof search.q === "string" && search.q ? { q: search.q } : {},
-  head: () => ({ meta: [{ title: "Search - Planet Baltimore" }] }),
+  head: () => ({ meta: [
+    { title: "Search People and Pages | Planet Baltimore" },
+    { name: "description", content: "Find people, artist pages, businesses, communities, events and more on Planet Baltimore." },
+    { property: "og:title", content: "Search People and Pages | Planet Baltimore" },
+    { property: "og:description", content: "Discover Baltimore people and all their public pages, plus events, stories and shop items." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 type Person = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; neighborhood: string | null; role: string | null };
-type Org = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
+type Org = SearchPageResult & { owner_name?: string };
 type Ev = { id: string; title: string; starts_at: string; venue_name: string | null; image_url: string | null };
-type Business = { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null };
+type Business = Org;
 type PostRow = { id: string; content: string; created_at: string; media_urls: string[] | null; image_url?: string | null; video_url?: string | null; link_title?: string | null; link_image?: string | null; repost_of_event_id?: string | null; repost_of_post_id?: string | null; preview_text?: string | null; preview_image?: string | null; preview_video?: string | null };
 type StoryRow = { id: string; title: string; excerpt: string | null; cover_url: string | null; created_at: string };
 type Hood = { id: string; name: string; region: string };
 type Festiv = { id: string; title: string; category: string | null; starts_at: string; venue_name: string | null; image_url: string | null };
 type Product = { id: string; name: string; description: string | null; price_cents: number | null; image_url: string | null; organizations: { name: string; slug: string; type: string; avatar_url: string | null } | null };
 
-const TABS = ["All", "People", "Organizations", "Events", "Festivals", "Businesses", "Shop items", "Posts", "Stories", "Neighborhoods"] as const;
+const TABS = ["All", "People", "Artists", "Organizations", "Events", "Festivals", "Businesses", "Shop items", "Posts", "Stories", "Neighborhoods"] as const;
+const PAGE_FIELDS = "id,name,slug,type,avatar_url,neighborhood,owner_id,is_public,hidden_from_showcase";
 type Tab = (typeof TABS)[number];
 
 function stripHtml(s: string) {
@@ -67,11 +77,11 @@ function SearchPage() {
       const eventCutoff = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
       const [pplRes, orgRes, evRes, bizRes, postRes, storyRes, hoodRes, festRes, prodRes] = await Promise.all([
         hasQ
-          ? supabase.rpc("search_creators", { q: debounced, lim: 24 })
+          ? supabase.rpc("search_creators", { q: debounced.replace(/^@/, ""), lim: 100 })
           : supabase.from("profiles").select("id,display_name,username,avatar_url,neighborhood,role").order("created_at", { ascending: false }).limit(24),
         hasQ
-          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group", "artist"]).ilike("name", like).limit(24)
-          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["community_assoc", "group", "artist"]).order("created_at", { ascending: false }).limit(24),
+          ? supabase.from("organizations").select(PAGE_FIELDS).eq("is_public", true).eq("hidden_from_showcase", false).ilike("name", like).limit(100)
+          : supabase.from("organizations").select(PAGE_FIELDS).eq("is_public", true).eq("hidden_from_showcase", false).order("created_at", { ascending: false }).limit(24),
         // Keyword searches return past events too (people look up events they
         // attended). The default browse list only shows events that have not
         // finished: multi-day events stay until ends_at, single ones for 12
@@ -80,8 +90,8 @@ function SearchPage() {
           ? supabase.from("events").select("id,title,starts_at,venue_name,image_url").eq("is_private_org", false).ilike("title", like).order("starts_at", { ascending: false }).limit(24)
           : supabase.from("events").select("id,title,starts_at,venue_name,image_url").eq("is_private_org", false).or(`ends_at.gte.${eventCutoff},and(ends_at.is.null,starts_at.gte.${eventCutoff})`).order("starts_at", { ascending: true }).limit(24),
         hasQ
-          ? supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).ilike("name", like).limit(24)
-          : supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org"]).order("created_at", { ascending: false }).limit(24),
+          ? supabase.from("organizations").select(PAGE_FIELDS).eq("is_public", true).eq("hidden_from_showcase", false).in("type", ["business", "arts_org"]).ilike("name", like).limit(100)
+          : supabase.from("organizations").select(PAGE_FIELDS).eq("is_public", true).eq("hidden_from_showcase", false).in("type", ["business", "arts_org"]).order("created_at", { ascending: false }).limit(24),
         hasQ
           ? supabase.from("posts").select("id,content,created_at,media_urls,image_url,video_url,link_title,link_image,repost_of_event_id,repost_of_post_id").eq("is_deleted", false).eq("visibility", "public").ilike("content", like).order("created_at", { ascending: false }).limit(24)
           : supabase.from("posts").select("id,content,created_at,media_urls,image_url,video_url,link_title,link_image,repost_of_event_id,repost_of_post_id").eq("is_deleted", false).eq("visibility", "public").order("created_at", { ascending: false }).limit(12),
@@ -101,10 +111,25 @@ function SearchPage() {
           : supabase.from("organization_products").select("id,name,description,price_cents,image_url,organizations:org_id(name,slug,type,avatar_url)").eq("is_active", true).order("created_at", { ascending: false }).limit(12),
       ]);
       if (cancelled) return;
-      setPeople((pplRes.data ?? []) as Person[]);
-      setOrgs((orgRes.data ?? []) as Org[]);
+      const matchedPeople = (pplRes.data ?? []) as Person[];
+      const ownedPages: SearchPageResult[] = [];
+      if (hasQ && matchedPeople.length) {
+        for (let offset = 0; ; offset += 1000) {
+          const result = await supabase.from("organizations").select(PAGE_FIELDS)
+            .eq("is_public", true).eq("hidden_from_showcase", false)
+            .in("owner_id", matchedPeople.map((p) => p.id)).order("id").range(offset, offset + 999);
+          if (cancelled) return;
+          const batch = result.data ?? [];
+          ownedPages.push(...batch);
+          if (batch.length < 1000) break;
+        }
+      }
+      const allPages = mergeSearchPages([...(orgRes.data ?? []), ...(bizRes.data ?? [])], ownedPages)
+        .map((page) => ({ ...page, owner_name: matchedPeople.find((p) => p.id === page.owner_id)?.display_name ?? undefined }));
+      setPeople(matchedPeople);
+      setOrgs(allPages.filter((page) => !["business", "arts_org"].includes(page.type)));
       setEvents((evRes.data ?? []) as Ev[]);
-      setBusinesses((bizRes.data ?? []) as Business[]);
+      setBusinesses(allPages.filter((page) => ["business", "arts_org"].includes(page.type)));
       const rawPosts = (postRes.data ?? []) as PostRow[];
       const evIds = rawPosts.map((p) => p.repost_of_event_id).filter(Boolean) as string[];
       const rpIds = rawPosts.map((p) => p.repost_of_post_id).filter(Boolean) as string[];
@@ -134,7 +159,7 @@ function SearchPage() {
   }, [debounced]);
 
   const totals = useMemo(() => ({
-    People: people.length, Organizations: orgs.length, Events: events.length, Businesses: businesses.length,
+    People: people.length, Artists: orgs.filter((o) => o.type === "artist").length, Organizations: orgs.filter((o) => o.type !== "artist").length, Events: events.length, Businesses: businesses.length,
     Posts: posts.length, Stories: stories.length, Neighborhoods: hoods.length, Festivals: fests.length, "Shop items": prods.length,
     All: people.length + orgs.length + events.length + businesses.length + posts.length + stories.length + hoods.length + fests.length + prods.length,
   }), [people, orgs, events, businesses, posts, stories, hoods, fests, prods]);
@@ -178,14 +203,15 @@ function SearchPage() {
             {(tab === "All" || tab === "People") && people.length > 0 && (
               <Section title="People">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {people.slice(0, tab === "All" ? 6 : 24).map((p) => (
+                  {people.slice(0, debounced ? people.length : tab === "All" ? 6 : 24).map((p) => (
                     <Link key={p.id} to="/$username" params={{ username: p.username || p.id }} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <Avatar className="h-11 w-11 shrink-0">
                         {p.avatar_url && <SmartAvatarImage src={p.avatar_url} />}
                         <AvatarFallback>{(p.display_name || p.username || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold text-foreground">{p.display_name || p.username}</div>
+                        <div className="truncate text-sm font-semibold text-foreground">{titleCase(p.display_name || p.username)}</div>
+                        <div className="text-xs text-muted-foreground">Main profile{p.role ? ` · ${titleCase(p.role)}` : ""}</div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                           {p.username && <span className="truncate">@{p.username}</span>}
                           {p.neighborhood && <span className="inline-flex items-center gap-0.5 whitespace-nowrap"><MapPin className="h-3 w-3" /> {p.neighborhood}</span>}
@@ -197,23 +223,27 @@ function SearchPage() {
               </Section>
             )}
 
-            {(tab === "All" || tab === "Organizations") && orgs.length > 0 && (
-              <Section title="Organizations">
+            {(["Artists", "Organizations"] as const).map((category) => {
+              const pages = orgs.filter((o) => category === "Artists" ? o.type === "artist" : o.type !== "artist");
+              return (tab === "All" || tab === category) && pages.length > 0 && (
+              <Section key={category} title={category}>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {orgs.slice(0, tab === "All" ? 6 : 24).map((o) => (
+                  {pages.slice(0, debounced ? pages.length : tab === "All" ? 6 : 24).map((o) => (
                     <OrgLink key={o.id} type={o.type} slug={o.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
                         {o.avatar_url && <Img src={o.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{o.name}</div>
-                        <div className="text-xs text-muted-foreground">{o.type.replace(/[_-]+/g, " ").split(" ").filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(" ")}{o.neighborhood ? ` · ${o.neighborhood}` : ""}</div>
+                        <div className="text-xs text-muted-foreground">{pageTypeLabel(o.type)}{o.neighborhood ? ` · ${o.neighborhood}` : ""}</div>
+                        {o.owner_name && <div className="text-xs text-muted-foreground">By {titleCase(o.owner_name)}</div>}
                       </div>
                     </OrgLink>
                   ))}
                 </div>
               </Section>
-            )}
+              );
+            })}
 
             {(tab === "All" || tab === "Events") && events.length > 0 && (
               <Section title="Events">
@@ -256,14 +286,15 @@ function SearchPage() {
             {(tab === "All" || tab === "Businesses") && businesses.length > 0 && (
               <Section title="Businesses">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {businesses.slice(0, tab === "All" ? 6 : 24).map((b) => (
+                  {businesses.slice(0, debounced ? businesses.length : tab === "All" ? 6 : 24).map((b) => (
                     <OrgLink key={b.id} type={b.type} slug={b.slug} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-hover">
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted">
                         {b.avatar_url && <Img src={b.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-foreground">{b.name}</div>
-                        <div className="text-xs text-muted-foreground">Business{b.neighborhood ? ` · ${b.neighborhood}` : ""}</div>
+                        <div className="text-xs text-muted-foreground">{pageTypeLabel(b.type)}{b.neighborhood ? ` · ${b.neighborhood}` : ""}</div>
+                        {b.owner_name && <div className="text-xs text-muted-foreground">By {titleCase(b.owner_name)}</div>}
                       </div>
                     </OrgLink>
                   ))}
