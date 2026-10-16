@@ -136,7 +136,7 @@ export function FashionAlbumsTab({ orgId, canManage = false }: { orgId: string; 
           {canManage && (
             <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-              {formOpen ? "Close" : "+ Add Items"}
+              {formOpen ? "Close" : "+ Add Item"}
             </button>
           )}
         </div>
