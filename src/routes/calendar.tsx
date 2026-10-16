@@ -450,7 +450,7 @@ function CalendarPage() {
       {/* Organizer filter pills */}
       <div className="mt-6 flex flex-wrap gap-2">
         <button
-          onClick={() => setShowMonthly((v) => !v)}
+          onClick={() => setShowMonthly(true)}
           className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
             showMonthly
               ? "bg-[#d4580a] text-white"
@@ -465,7 +465,7 @@ function CalendarPage() {
           return (
             <button
               key={o.id}
-              onClick={() => setOrganizer(o.id)}
+              onClick={() => { setOrganizer(o.id); setShowMonthly(false); }}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
                 active
                   ? "bg-neutral-800 text-white"
