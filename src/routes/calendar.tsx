@@ -21,7 +21,7 @@ function openEventPopup(ev: Ev, list?: Ev[]) {
 }
 
 export const Route = createFileRoute("/calendar")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { view?: string; monthlyOrganizer?: string; upcomingOrganizer?: string } => ({
     view: typeof search.view === "string" ? search.view : "upcoming",
     monthlyOrganizer: typeof search.monthlyOrganizer === "string" ? search.monthlyOrganizer : "all",
     upcomingOrganizer: typeof search.upcomingOrganizer === "string" ? search.upcomingOrganizer : "all",
@@ -348,7 +348,7 @@ function CalendarPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const showMonthly = search.view === "monthly";
-  const organizer = activeCalendarOrganizer(search.view, search.monthlyOrganizer, search.upcomingOrganizer);
+  const organizer = activeCalendarOrganizer(search.view ?? "upcoming", search.monthlyOrganizer ?? "all", search.upcomingOrganizer ?? "all");
   const [events, setEvents] = useState<Ev[]>([]);
   const [selected, setSelected] = useState<Date | undefined>(new Date());
   const [neighborhood, setNeighborhood] = useState<string>("");
@@ -448,7 +448,7 @@ function CalendarPage() {
       <div className="mt-6 flex flex-wrap gap-2">
         {(["monthly", "upcoming"] as const).map((view) => {
           const active = view === "monthly" ? showMonthly : !showMonthly;
-          const value = calendarOrganizer(view === "monthly" ? search.monthlyOrganizer : search.upcomingOrganizer);
+          const value = calendarOrganizer((view === "monthly" ? search.monthlyOrganizer : search.upcomingOrganizer) ?? "all");
           const label = view === "monthly" ? "Monthly Calendar" : "Upcoming";
           const selectedLabel = CALENDAR_ORGANIZERS.find((option) => option.id === value)?.label;
           return (
