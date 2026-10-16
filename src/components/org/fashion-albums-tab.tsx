@@ -189,7 +189,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
           )}
         </div>
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-2xl font-semibold">{openAlbum}</h3>
+          <h3 className="text-lg font-semibold">{openAlbum}</h3>
           {canManage && (
             <button onClick={() => coverRef.current?.click()} disabled={busy} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
               {busy ? "Uploading..." : coverOf(openAlbum) ? "Change cover" : "Add cover image"}
@@ -199,17 +199,21 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
         <input ref={coverRef} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => void changeCover(e.target.files)} />
         {form}
         <div className="grid grid-cols-3 gap-4">
-          {albumCover && (
+          {albumCover && (section === "lookbook" ? (
+            <button onClick={() => { setStoryStart(0); setStory(openAlbum); }} className="relative overflow-hidden rounded-2xl border border-border bg-card text-left">
+              <SmartImage src={albumCover} alt={`${openAlbum} cover`} className="aspect-[3/4] w-full bg-muted object-contain" />
+              <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold shadow-sm">Cover photo</span>
+            </button>
+          ) : (
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-              <SmartImage src={albumCover} alt={`${openAlbum} cover`}
-                className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
+              <SmartImage src={albumCover} alt={`${openAlbum} cover`} className="aspect-[3/4] w-full object-cover" />
               <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold shadow-sm">Cover photo</span>
             </div>
-          )}
+          ))}
           {list.map((it) => (
             <button key={it.id} onClick={() => (section === "lookbook" ? (setStoryStart(list.indexOf(it)), setStory(openAlbum)) : setViewer(it))} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
               <SmartImage src={it.url} alt={it.description ?? openAlbum} className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
-              {it.description && <p className="line-clamp-2 px-3 py-2 text-sm text-muted-foreground">{it.description}</p>}
+              {it.description && <p className="line-clamp-2 px-3 py-2 text-xs text-muted-foreground">{it.description}</p>}
             </button>
           ))}
         </div>
@@ -242,8 +246,8 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
             const list = items.filter((i) => i.album === a);
             return (
               <div key={a} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
-                <button onClick={() => setOpenAlbum(a)} className="block w-full">
-                  <SmartImage src={coverOf(a) ?? list[0].url} alt={a} className="aspect-[3/4] w-full object-cover" />
+                <button onClick={() => (section === "lookbook" ? (setStoryStart(0), setStory(a)) : setOpenAlbum(a))} className="block w-full">
+                  <SmartImage src={coverOf(a) ?? list[0].url} alt={a} className={`aspect-[3/4] w-full ${section === "lookbook" ? "bg-muted object-contain" : "object-cover"}`} />
                 </button>
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
@@ -256,6 +260,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
           })}
         </div>
       )}
+      {story && <StoryViewer title={story} start={storyStart} items={items.filter((i) => i.album === story)} canManage={canManage} onSave={updateCaption} onClose={() => setStory(null)} />}
     </div>
   );
 }
@@ -286,7 +291,7 @@ function StoryViewer({ title, items, start = 0, canManage = false, onClose, onSa
           <div className="flex justify-end">
             <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close" title="Close" className="border border-border hover:bg-transparent hover:text-foreground"><X /></Button>
           </div>
-          <h3 className="break-words text-2xl font-semibold">{title}</h3>
+          <h3 className="break-words text-lg font-semibold">{title}</h3>
           {it.description && <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{it.description}</p>}
           {canManage && (
             <div className="space-y-2">
