@@ -1102,6 +1102,7 @@ export type Database = {
       }
       organization_artworks: {
         Row: {
+          album: string | null
           created_at: string
           description: string | null
           dimensions: string | null
@@ -1114,6 +1115,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          album?: string | null
           created_at?: string
           description?: string | null
           dimensions?: string | null
@@ -1126,6 +1128,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          album?: string | null
           created_at?: string
           description?: string | null
           dimensions?: string | null
