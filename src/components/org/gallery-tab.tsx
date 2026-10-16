@@ -16,7 +16,7 @@ type Work = {
 
 const emptyForm = { title: "", medium: "", dimensions: "", description: "", media_url: "" };
 
-export function GalleryTab({ orgId, canManage = false }: { orgId: string; canManage?: boolean }) {
+export function GalleryTab({ orgId, canManage = false, itemNoun = "Work" }: { orgId: string; canManage?: boolean; itemNoun?: string }) {
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
   const [idx, setIdx] = useState<number | null>(null);
@@ -100,7 +100,7 @@ export function GalleryTab({ orgId, canManage = false }: { orgId: string; canMan
             onClick={() => { setOpen((v) => !v); setEditingId(null); setForm(emptyForm); }}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
           >
-            {open ? "Close" : "+ Add Work"}
+            {open ? "Close" : `+ Add ${itemNoun}`}
           </button>
         </div>
       )}
