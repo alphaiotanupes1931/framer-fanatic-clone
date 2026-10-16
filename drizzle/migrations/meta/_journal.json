@@ -344,6 +344,13 @@
       "when": 1792009421699,
       "tag": "0048_message_images",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1792175097812,
+      "tag": "0049_artwork_album",
+      "breakpoints": true
     }
   ]
 }

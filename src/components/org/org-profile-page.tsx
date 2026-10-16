@@ -50,6 +50,7 @@ import { TextDocTab, CollapsibleCard } from "@/components/org/text-doc-tab";
 import { CvBioTab } from "@/components/org/cv-bio-tab";
 import { ContactTab } from "@/components/org/contact-tab";
 import { GalleryTab } from "@/components/org/gallery-tab";
+import { FashionAlbumsTab } from "@/components/org/fashion-albums-tab";
 import { ExhibitionsTab } from "@/components/org/exhibitions-tab";
 import { MusicTab } from "@/components/org/music-tab";
 import { OrgVideosTab } from "@/components/org/org-videos-tab";
@@ -1005,7 +1006,9 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
       </div>
     );
   if (tab === "Portfolio" || tab === "Fashion Line" || tab === "Lookbook" || tab === "Collections")
-    return <GalleryTab orgId={org.id} canManage={canManage} itemNoun={isFashionArtist ? "Item" : "Work"} />;
+    return isFashionArtist
+      ? <FashionAlbumsTab orgId={org.id} canManage={canManage} />
+      : <GalleryTab orgId={org.id} canManage={canManage} />;
   if (tab === "Album" || tab === "Albums" || tab === "Music" || tab === "Discography")
     return <MusicTab orgId={org.id} canManage={canManage} mode="album" />;
   if (tab === "Singles" || tab === "Tracks" || tab === "Beats" || tab === "Mixes" || tab === "Sets")
