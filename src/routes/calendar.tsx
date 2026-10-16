@@ -37,7 +37,7 @@ type Ev = {
 };
 
 const ORGANIZERS = [
-  { id: "all", label: "All Organizers", icon: "calendar" },
+  { id: "all", label: "All", icon: "calendar" },
   { id: "business", label: "Businesses", icon: "business" },
   { id: "community", label: "Communities", icon: "community" },
   { id: "arts", label: "Arts Orgs", icon: "arts" },
@@ -445,6 +445,17 @@ function CalendarPage() {
 
       {/* Organizer filter pills */}
       <div className="mt-6 flex flex-wrap gap-2">
+        <button
+          onClick={() => setShowMonthly((v) => !v)}
+          className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+            showMonthly
+              ? "bg-[#d4580a] text-white"
+              : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+          }`}
+        >
+          <CalendarDays className="h-4 w-4" />
+          Monthly Calendar
+        </button>
         {ORGANIZERS.map((o) => {
           const active = organizer === o.id;
           return (
@@ -462,17 +473,6 @@ function CalendarPage() {
             </button>
           );
         })}
-        <button
-          onClick={() => setShowMonthly((v) => !v)}
-          className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-            showMonthly
-              ? "bg-[#d4580a] text-white"
-              : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
-          }`}
-        >
-          <CalendarDays className="h-4 w-4" />
-          Monthly Calendar
-        </button>
       </div>
 
       {/* Full-width monthly calendar when active */}
