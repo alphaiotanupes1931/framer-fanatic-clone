@@ -277,7 +277,7 @@ function StoryViewer({ title, items, start = 0, onClose }: { title: string; item
   if (!it) return null;
   return (
     <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[80] flex items-center justify-center bg-background/95 px-12 py-5 text-foreground">
-      <div className="relative grid max-h-[90dvh] w-full max-w-6xl overflow-y-auto rounded-lg bg-background shadow-2xl md:h-[86dvh] md:grid-cols-[minmax(0,1.5fr)_minmax(280px,1fr)] md:overflow-hidden">
+      <div className="relative grid max-h-[90dvh] w-full max-w-6xl overflow-y-auto rounded-lg bg-background shadow-2xl md:h-[min(86dvh,760px)] md:grid-cols-[minmax(0,1.5fr)_minmax(280px,1fr)] md:overflow-hidden">
         <div ref={scrollRef} className="min-h-0 overflow-y-auto p-3 md:p-6">
           <SmartImage src={it.url} alt={it.description ?? title} className="block h-auto w-full md:h-full md:object-contain" />
         </div>
