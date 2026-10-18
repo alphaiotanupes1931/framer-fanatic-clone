@@ -706,6 +706,12 @@ export function OrgProfile() {
               <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.neighborhood}</span>
             </>
           )}
+          {supportsStaffLoginType(org.type) && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <EmployeeLoginLink />
+            </>
+          )}
           {org.email && (
             <>
               <span className="text-neutral-300">·</span>

@@ -334,7 +334,6 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
               </div>
             </div>
           )}
-          <p className="text-xs text-neutral-500">{staffCopy.footer}</p>
         </div>
       )}
       <div className="flex justify-end">
