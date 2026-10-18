@@ -105,7 +105,7 @@ type OrgPost = {
 const DEFAULT_TABS = ["About", "Events", "Shop", "Opportunities", "Press", "Updates", "Comments"] as const;
 const ASSOC_TABS = [
   "Posts", "About", "Events", "Followers", "Threads",
-  "Polls", "Shop", "Invite",
+  "Polls", "Documents", "Shop", "Invite",
 ] as const;
 const COMMUNITY_ASSOC_TABS = [
   "Posts", "About", "Events", "Followers", "Threads",
@@ -127,7 +127,7 @@ const PERSON_PAGE_TABS = [
 const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Posts: List, Announcements: Megaphone, Events: CalendarIcon, Calendar: CalendarIcon,
   Followers: Users, Threads: MessageCircle, Polls: BarChart3, Gallery: ImageIcon,
-  Resources: Folder, Jobs: Briefcase, Leaderboard: Trophy, Rules: FileText,
+  Resources: Folder, Documents: Folder, Jobs: Briefcase, Leaderboard: Trophy, Rules: FileText,
   Invite: UserPlus, Comments: MessageSquare, About: FileText, Requests: UserPlus,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText, Mission: Heart,
@@ -842,7 +842,7 @@ export function OrgProfile() {
           {tab === "Invite" && <InviteTab orgName={org.name} orgSlug={org.slug} isCommunityAssoc={isAssoc} />}
           {tab === "Polls" && <PollsTab orgId={org.id} canManage={canManage} me={me} />}
           {tab === "Voting" && <VotingTab orgId={org.id} canManage={canManage} me={me} />}
-          {(tab === "Minutes" || tab === "Resources") && (
+          {(tab === "Minutes" || tab === "Resources" || tab === "Documents") && (
             <DocumentsTab orgId={org.id} canManage={canManage} me={me} label="Document" excludeDocType="By Laws" />
           )}
           {tab === "By Laws" && (
@@ -975,7 +975,7 @@ function AboutTab({ org, canManage, onChange, initialEdit, onEditClose }: { org:
 const SHARED_TABS = new Set([
   "About", "Posts", "Events", "Exhibitions", "Exhibition", "Opportunities", "Press",
    "Updates", "Artists", "Support", "Menu", "Feed", "Services", "Calendar", "Members", "Followers",
-  "Leaderboard", "Invite", "Polls", "Voting", "Minutes", "Resources", "By Laws", "Rules",
+  "Leaderboard", "Invite", "Polls", "Voting", "Minutes", "Resources", "Documents", "By Laws", "Rules",
   "Gallery", "Announcements", "Promotions", "Jobs", "Stories", "Threads", "Reviews",
   "Board", "Comments", "Dues",
 ]);
