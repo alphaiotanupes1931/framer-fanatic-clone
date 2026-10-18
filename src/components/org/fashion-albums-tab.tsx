@@ -47,8 +47,7 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
       .from("organization_artworks")
       .select("id, media_url, description, title, album, album_cover, order_index, created_at")
       .eq("org_id", orgId))
-      .order("order_index", { ascending: true })
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false });
     setItems((data ?? []).map((a: any) => ({
       id: a.id, url: a.media_url, description: a.description ?? null,
       album: (a.album || a.title || "Untitled Album") as string,
