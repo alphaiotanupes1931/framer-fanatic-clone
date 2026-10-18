@@ -2415,18 +2415,6 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
               if (p.source === "posts") {
                 return (
                   <div className="relative">
-                    {idx > 0 && (
-                      <button type="button" onClick={goPrev} aria-label="Previous post"
-                        className="absolute left-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75">
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                    )}
-                    {idx > -1 && idx < items.length - 1 && (
-                      <button type="button" onClick={goNext} aria-label="Next post"
-                        className="absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75">
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    )}
                     <PostSplitView postId={p.id} meId={meId} onDeleted={() => { setActive(null); setItems((prev) => prev.filter((it) => it.id !== p.id)); }} />
                   </div>
                 );
