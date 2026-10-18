@@ -27,3 +27,7 @@
 - [x] Remove the Gifts tab from the Referral Network dialog (2026-10-18)
 
 - [x] Rename the referral "Parse emails" button to "Complete upload" (2026-10-18)
+- [x] Artist search: all artist pages, owner names, spelling tolerance
+- [x] Groups: Documents tab for uploads
+- [x] Top search bar: pages incl. Arts Orgs
+- [x] Back arrows return to previous page

@@ -50,6 +50,11 @@ function normalize(v?: string | null) {
   return (v ?? "").toLowerCase().replace(/[_-]+/g, " ").trim();
 }
 
+/** Lowercase, drop punctuation and collapse doubled letters so "Ken Hall" finds "Kenn Hall". */
+function fuzzy(v?: string | null) {
+  return (v ?? "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/(.)\1+/g, "$1").replace(/\s+/g, " ").trim();
+}
+
 function matchesCategory(c: Creator, cat: Category) {
   if (cat === "All") return true;
   // Only actual artists — never residents/visitors.
@@ -89,11 +94,11 @@ function FindCreatorPage() {
         supabase.rpc("public_artists", { lim: 96, search: q || undefined, sort_by: sort }),
         supabase
           .from("organizations")
-          .select("id,name,slug,avatar_url,neighborhood,bio,subtype,created_at")
+          .select("id,name,slug,avatar_url,neighborhood,bio,subtype,created_at,owner_id")
           .eq("type", "artist")
           .eq("hidden_from_showcase", false)
           .order("created_at", { ascending: false })
-          .limit(96),
+          .range(0, 1999),
         supabase.rpc("public_org_stats", { _type: "artist" }),
       ]);
       const profileArtists = ((profilesRes.data as (Creator & { created_at: string })[]) ?? []) as Creator[];
@@ -101,14 +106,24 @@ function FindCreatorPage() {
         (((statsRes.data as { org_id: string; follower_count: number; last_active_at: string | null }[]) ?? [])
           .map((s) => [s.org_id, { follower_count: Number(s.follower_count ?? 0), last_active_at: s.last_active_at }])),
       );
-      const needle = q.trim().toLowerCase();
-      const pageArtists: Creator[] = ((pagesRes.data as {
+      const needle = fuzzy(q);
+      const pageRows = ((pagesRes.data as {
         id: string; name: string; slug: string; avatar_url: string | null;
-        neighborhood: string | null; bio: string | null; subtype: string | null; created_at: string;
-      }[]) ?? [])
+        neighborhood: string | null; bio: string | null; subtype: string | null; created_at: string; owner_id: string;
+      }[]) ?? []);
+      // Searching a person's name also finds their artist page.
+      const ownerNames = new Map<string, string>();
+      if (needle) {
+        const ids = [...new Set(pageRows.map((o) => o.owner_id))];
+        const { data: owners } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
+        for (const o of (owners ?? []) as { id: string; display_name: string | null; username: string | null }[]) {
+          ownerNames.set(o.id, `${o.display_name ?? ""} ${o.username ?? ""}`);
+        }
+      }
+      const pageArtists: Creator[] = pageRows
         .filter((o) =>
           !needle ||
-          [o.name, o.neighborhood, o.bio].some((v) => (v ?? "").toLowerCase().includes(needle)),
+          [o.name, o.neighborhood, o.bio, ownerNames.get(o.owner_id)].some((v) => fuzzy(v).includes(needle)),
         )
         .map((o) => ({
           id: o.id,

@@ -1,3 +1,4 @@
+import { goBackOnClick } from "@/lib/go-back";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,7 +84,7 @@ function EditProfilePage() {
     <AppLayout hero={false}>
     <div className="mx-auto max-w-2xl">
       <div className="mb-6 flex items-center gap-3">
-        <Link to="/profile" className="rounded-full bg-secondary p-2 hover:bg-secondary/80" aria-label="Back">
+        <Link to="/profile" onClick={goBackOnClick} className="rounded-full bg-secondary p-2 hover:bg-secondary/80" aria-label="Back">
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <h1 className="text-2xl font-bold">Edit Profile</h1>

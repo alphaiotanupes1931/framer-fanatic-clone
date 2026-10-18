@@ -1,3 +1,4 @@
+import { goBackOnClick } from "@/lib/go-back";
 import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -165,7 +166,7 @@ function TicketDetailPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-lg px-4 py-6">
         <div className="mb-4 flex items-center justify-between gap-2">
-          <Link to="/profile" className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">
+          <Link to="/profile" onClick={goBackOnClick} className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-[#d4580a]">
             <ArrowLeft className="h-4 w-4" /> My tickets
           </Link>
           {siblings.length > 1 && idx >= 0 && (

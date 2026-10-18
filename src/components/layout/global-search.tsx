@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { Search as SearchIcon, MapPin, Calendar, FileText, BookOpen, User, Loader2 } from "lucide-react";
+import { orgPath } from "@/lib/org-paths";
+import { pageTypeLabel } from "@/lib/search-pages";
+import { Search as SearchIcon, MapPin, Calendar, FileText, BookOpen, User, Loader2, Building2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 
 /** One row in the dropdown. `to` is resolved by the click handler. */
 type Hit = {
   key: string;
-  kind: "Creators" | "Neighborhoods" | "Events" | "Posts" | "Stories";
+  kind: "Creators" | "Pages" | "Neighborhoods" | "Events" | "Posts" | "Stories";
   title: string;
   subtitle?: string;
   avatar?: string | null;
@@ -17,13 +19,14 @@ type Hit = {
 
 const KIND_ICON = {
   Creators: User,
+  Pages: Building2,
   Neighborhoods: MapPin,
   Events: Calendar,
   Posts: FileText,
   Stories: BookOpen,
 } as const;
 
-const ORDER: Hit["kind"][] = ["Creators", "Neighborhoods", "Events", "Posts", "Stories"];
+const ORDER: Hit["kind"][] = ["Creators", "Pages", "Neighborhoods", "Events", "Posts", "Stories"];
 
 function stripHtml(s: string) {
   return s.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -75,12 +78,14 @@ export function GlobalSearch({ className = "", compact = false }: { className?: 
     setLoading(true);
     const like = `%${debounced}%`;
     void (async () => {
-      const [people, hoods, events, posts, stories] = await Promise.all([
+      const [people, hoods, events, posts, stories, pages] = await Promise.all([
         supabase.rpc("search_creators", { q: debounced, lim: 5 }),
         supabase.from("neighborhoods").select("id,name,region").ilike("name", like).order("name").limit(5),
         supabase.from("events").select("id,title,starts_at,venue_name").eq("is_private_org", false).ilike("title", like).order("starts_at", { ascending: true }).limit(5),
         supabase.from("posts").select("id,content,created_at").eq("is_deleted", false).eq("visibility", "public").ilike("content", like).order("created_at", { ascending: false }).limit(5),
         supabase.from("stories").select("id,title,excerpt,created_at").eq("status", "published").ilike("title", like).order("created_at", { ascending: false }).limit(5),
+        // Every public page kind, so arts orgs show up next to businesses.
+        supabase.from("organizations").select("id,name,slug,type,avatar_url,neighborhood").in("type", ["business", "arts_org", "artist", "group", "community_assoc"]).eq("hidden_from_showcase", false).neq("is_public", false).ilike("name", like).limit(8),
       ]);
       if (cancelled) return;
 
@@ -93,6 +98,16 @@ export function GlobalSearch({ className = "", compact = false }: { className?: 
           subtitle: [p.username ? `@${p.username}` : null, p.neighborhood].filter(Boolean).join(" · "),
           avatar: p.avatar_url,
           go: () => navigate({ to: "/$username", params: { username: p.username || p.id } }),
+        });
+      }
+      for (const o of (pages.data ?? []) as { id: string; name: string; slug: string; type: string; avatar_url: string | null; neighborhood: string | null }[]) {
+        next.push({
+          key: `o-${o.id}`,
+          kind: "Pages",
+          title: o.name,
+          subtitle: [pageTypeLabel(o.type), o.neighborhood].filter(Boolean).join(" · "),
+          avatar: o.avatar_url,
+          go: () => navigate({ href: orgPath(o.type, o.slug) }),
         });
       }
       for (const n of (hoods.data ?? []) as { id: string; name: string; region: string }[]) {

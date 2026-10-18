@@ -1,3 +1,4 @@
+import { goBackOnClick } from "@/lib/go-back";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -164,7 +165,7 @@ function EditStoryPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl px-4 py-6">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <Link to="/stories/$storyId" params={{ storyId: id }} className="inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900">
+          <Link to="/stories/$storyId" params={{ storyId: id }} onClick={goBackOnClick} className="inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900">
             <ArrowLeft className="h-4 w-4" /> Back to story
           </Link>
           <div className="flex items-center gap-2">
