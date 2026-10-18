@@ -526,6 +526,7 @@ export type Database = {
           capacity: number | null
           category: string | null
           created_at: string
+          deleted_at: string | null
           description: string | null
           donations_enabled: boolean
           ends_at: string | null
@@ -557,6 +558,7 @@ export type Database = {
           capacity?: number | null
           category?: string | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           donations_enabled?: boolean
           ends_at?: string | null
@@ -588,6 +590,7 @@ export type Database = {
           capacity?: number | null
           category?: string | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           donations_enabled?: boolean
           ends_at?: string | null
@@ -2323,6 +2326,7 @@ export type Database = {
           bylaws: string | null
           created_at: string
           cv: Json
+          deleted_at: string | null
           email: string | null
           hidden_from_showcase: boolean
           hours: Json | null
@@ -2353,6 +2357,7 @@ export type Database = {
           bylaws?: string | null
           created_at?: string
           cv?: Json
+          deleted_at?: string | null
           email?: string | null
           hidden_from_showcase?: boolean
           hours?: Json | null
@@ -2383,6 +2388,7 @@ export type Database = {
           bylaws?: string | null
           created_at?: string
           cv?: Json
+          deleted_at?: string | null
           email?: string | null
           hidden_from_showcase?: boolean
           hours?: Json | null
@@ -2545,6 +2551,7 @@ export type Database = {
           comments_count: number
           content: string
           created_at: string
+          deleted_at: string | null
           excluded_user_ids: string[]
           featured: boolean
           featured_at: string | null
@@ -2578,6 +2585,7 @@ export type Database = {
           comments_count?: number
           content: string
           created_at?: string
+          deleted_at?: string | null
           excluded_user_ids?: string[]
           featured?: boolean
           featured_at?: string | null
@@ -2611,6 +2619,7 @@ export type Database = {
           comments_count?: number
           content?: string
           created_at?: string
+          deleted_at?: string | null
           excluded_user_ids?: string[]
           featured?: boolean
           featured_at?: string | null
@@ -2838,6 +2847,7 @@ export type Database = {
           category: string | null
           city: string | null
           created_at: string
+          deleted_at: string | null
           display_name: string | null
           email: string | null
           geo_lat: number | null
@@ -2871,6 +2881,7 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
+          deleted_at?: string | null
           display_name?: string | null
           email?: string | null
           geo_lat?: number | null
@@ -2904,6 +2915,7 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
+          deleted_at?: string | null
           display_name?: string | null
           email?: string | null
           geo_lat?: number | null
@@ -3072,6 +3084,7 @@ export type Database = {
           content: string | null
           cover_url: string | null
           created_at: string
+          deleted_at: string | null
           excerpt: string | null
           featured: boolean
           featured_at: string | null
@@ -3094,6 +3107,7 @@ export type Database = {
           content?: string | null
           cover_url?: string | null
           created_at?: string
+          deleted_at?: string | null
           excerpt?: string | null
           featured?: boolean
           featured_at?: string | null
@@ -3116,6 +3130,7 @@ export type Database = {
           content?: string | null
           cover_url?: string | null
           created_at?: string
+          deleted_at?: string | null
           excerpt?: string | null
           featured?: boolean
           featured_at?: string | null
@@ -3563,6 +3578,7 @@ export type Database = {
           category: string | null
           comments_muted: boolean
           created_at: string
+          deleted_at: string | null
           description: string | null
           featured: boolean
           id: string
@@ -3577,6 +3593,7 @@ export type Database = {
           category?: string | null
           comments_muted?: boolean
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           featured?: boolean
           id?: string
@@ -3591,6 +3608,7 @@ export type Database = {
           category?: string | null
           comments_muted?: boolean
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           featured?: boolean
           id?: string
@@ -3709,6 +3727,17 @@ export type Database = {
           reason: string
         }[]
       }
+      admin_list_trash: {
+        Args: never
+        Returns: {
+          deleted_at: string
+          id: string
+          kind: string
+          owner_id: string
+          owner_name: string
+          title: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
@@ -3737,6 +3766,14 @@ export type Database = {
           total: number
         }[]
       }
+      admin_purge_content: {
+        Args: { _id: string; _kind: string }
+        Returns: undefined
+      }
+      admin_restore_content: {
+        Args: { _id: string; _kind: string }
+        Returns: undefined
+      }
       admin_set_banned: {
         Args: { _banned: boolean; _user_id: string }
         Returns: undefined
@@ -3751,6 +3788,10 @@ export type Database = {
       }
       admin_set_showcase_hidden: {
         Args: { _hidden: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_soft_delete: {
+        Args: { _id: string; _kind: string }
         Returns: undefined
       }
       admin_toggle_content_pin: {

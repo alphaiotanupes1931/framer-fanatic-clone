@@ -372,6 +372,13 @@
       "when": 1792347367033,
       "tag": "0052_restore_own_invite_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1792348452944,
+      "tag": "0053_admin_trash_functions",
+      "breakpoints": true
     }
   ]
 }
