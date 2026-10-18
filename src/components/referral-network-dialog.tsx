@@ -34,6 +34,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compress";
+import { parseReferralEmails, removeReferralEmails, referralRecipientsKey } from "@/lib/referral-recipients";
 
 interface ReferralNetworkDialogProps {
   open: boolean;
@@ -98,6 +99,22 @@ export function ReferralNetworkDialog({
   const [sendingTest, setSendingTest] = useState(false);
   const { quota, refresh: refreshQuota } = useEmailQuota(open);
   const [parsedEmails, setParsedEmails] = useState<string[]>([]);
+  const updateRecipients = (raw: string, parsed = false) => {
+    setEmail(raw);
+    setParsedEmails(parsed ? parseReferralEmails(raw) : []);
+    if (profile?.id) {
+      try { localStorage.setItem(referralRecipientsKey(profile.id), raw); } catch { /* Storage may be unavailable. */ }
+    }
+  };
+
+  useEffect(() => {
+    if (!open || !profile?.id) return;
+    try {
+      const saved = localStorage.getItem(referralRecipientsKey(profile.id)) ?? "";
+      setEmail(saved);
+      setParsedEmails(parseReferralEmails(saved));
+    } catch { /* Keep the current list when storage is unavailable. */ }
+  }, [open, profile?.id]);
   const fileRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState("");
@@ -193,8 +210,7 @@ export function ReferralNetworkDialog({
   };
 
 
-  const extractEmails = (raw: string) =>
-    Array.from(new Set((raw.match(EMAIL_RE) || []).map((e) => e.toLowerCase())));
+  const extractEmails = parseReferralEmails;
 
   const handleParse = () => {
     const found = extractEmails(email);
@@ -202,7 +218,7 @@ export function ReferralNetworkDialog({
       toast.error("No valid emails found");
       return;
     }
-    setParsedEmails(found);
+    updateRecipients(found.join("\n"), true);
     toast.success(`Found ${found.length} email${found.length === 1 ? "" : "s"}`);
   };
 
@@ -217,8 +233,7 @@ export function ReferralNetworkDialog({
       toast.error("No emails found in that file");
       return;
     }
-    setEmail((prev) => (prev ? `${prev}\n${content}` : content));
-    setParsedEmails(found);
+    updateRecipients(found.join("\n"), true);
     toast.success(`Found ${found.length} email${found.length === 1 ? "" : "s"}`);
   };
 
@@ -294,14 +309,14 @@ export function ReferralNetworkDialog({
   };
 
   const handleDeleteInvite = async (invite: any) => {
-    setInvites((prev) => prev.filter((i) => i.id !== invite.id));
-    setSelected((prev) => prev.filter((id) => id !== invite.id));
-    const { error } = await supabase.from("invites").delete().eq("id", invite.id);
-    if (error) {
+    const { data, error } = await supabase.from("invites").delete().eq("id", invite.id).select("id");
+    if (error || !data?.some((row) => row.id === invite.id)) {
       toast.error("Could not delete invite");
-      loadStats();
       return;
     }
+    setInvites((prev) => prev.filter((i) => i.id !== invite.id));
+    setSelected((prev) => prev.filter((id) => id !== invite.id));
+    updateRecipients(removeReferralEmails(email, [invite.email]), true);
     toast.success("Invite deleted");
     loadStats();
   };
@@ -319,7 +334,7 @@ export function ReferralNetworkDialog({
     }
   };
 
-  const visibleInvites = useMemo(() => invites.slice(0, 20), [invites]);
+  const visibleInvites = invites;
   const allSelected = visibleInvites.length > 0 && selected.length === visibleInvites.length;
 
   const toggleSelect = (id: string) =>
@@ -349,22 +364,27 @@ export function ReferralNetworkDialog({
     if (!window.confirm(`Delete ${selected.length} invite${selected.length === 1 ? "" : "s"}?`)) return;
     const ids = [...selected];
     setBulkBusy(true);
-    setInvites((prev) => prev.filter((i: any) => !ids.includes(i.id)));
-    setSelected([]);
-    const { error } = await supabase.from("invites").delete().in("id", ids);
-    if (error) toast.error("Could not delete some invites");
-    else toast.success(`Deleted ${ids.length} invite${ids.length === 1 ? "" : "s"}`);
+    const { data, error } = await supabase.from("invites").delete().in("id", ids).select("id");
+    const deletedIds = new Set((data ?? []).map((row) => row.id));
+    if (error || deletedIds.size !== ids.length) toast.error("Could not delete some invites");
+    if (deletedIds.size > 0) {
+      updateRecipients(removeReferralEmails(email, invites.filter((invite) => deletedIds.has(invite.id)).map((invite) => invite.email)), true);
+      setInvites((prev) => prev.filter((invite) => !deletedIds.has(invite.id)));
+      setSelected((prev) => prev.filter((id) => !deletedIds.has(id)));
+      toast.success(`Deleted ${deletedIds.size} invite${deletedIds.size === 1 ? "" : "s"}`);
+    }
     setBulkBusy(false);
     loadStats();
   };
 
   const handleSendInvite = async () => {
-    const emails = parsedEmails.length > 0 ? parsedEmails : extractEmails(email);
+    const emails = extractEmails(email);
     if (emails.length === 0) {
       toast.error("Please enter at least one valid email");
       return;
     }
     setSending(true);
+    updateRecipients(emails.join("\n"), true);
     try {
       const batch = emails.slice(0, quota.remaining);
       const leftover = emails.slice(batch.length);
@@ -372,8 +392,6 @@ export function ReferralNetworkDialog({
       void refreshQuota();
       if (sent > 0) {
         toast.success(`Invite email sent to ${sent} ${sent === 1 ? "person" : "people"}${leftover.length ? `. ${leftover.length} more saved, send them when the timer ends.` : ""}`);
-        setEmail(leftover.join("\n"));
-        setParsedEmails(leftover);
         loadStats();
       }
       if (failures.length > 0) {
@@ -409,8 +427,6 @@ export function ReferralNetworkDialog({
 
   const handleClose = () => {
     setTab("link");
-    setEmail("");
-    setParsedEmails([]);
     setMessage(defaultMessage);
     setCopied(false);
     onClose();
@@ -560,7 +576,9 @@ export function ReferralNetworkDialog({
                   </label>
                   <Textarea
                     value={email}
-                    onChange={(e) => { setEmail(e.target.value); setParsedEmails([]); }}
+                    aria-label="Email addresses"
+                    disabled={sending}
+                    onChange={(e) => updateRecipients(e.target.value)}
                     placeholder="Paste a whole list here: friend@example.com, another@example.com..."
                     rows={4}
                   />
@@ -598,7 +616,14 @@ export function ReferralNetworkDialog({
                       {parsedEmails.length} recipient{parsedEmails.length === 1 ? "" : "s"} ready
                     </div>
                     <div className="max-h-24 overflow-y-auto text-[11px] text-muted-foreground">
-                      {parsedEmails.join(", ")}
+                      {parsedEmails.map((address) => (
+                        <div key={address} className="flex items-center justify-between gap-2 py-0.5">
+                          <span className="min-w-0 break-all">{address}</span>
+                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" aria-label={`Remove ${address}`} disabled={sending} onClick={() => updateRecipients(removeReferralEmails(email, [address]), true)}>
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ) : (
