@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { parseLimit } from "@/lib/usage-metrics";
 import { DailyBars, StatCard, UsageBar } from "@/components/admin/usage-bits";
 import { Button } from "@/components/ui/button";
+import { EmailUsageCard } from "@/components/admin/email-usage-card";
 
 export const Route = createFileRoute("/admin/email-usage")({
   component: AdminEmailUsagePage,
@@ -120,6 +121,7 @@ function AdminEmailUsagePage() {
           <div className="mt-1 text-2xl font-bold text-neutral-900">$20 / month</div>
           <div className="mt-1 text-xs text-neutral-500">Email service on the upgraded plan</div>
         </div>
+        <EmailUsageCard />
         <div>
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">This month</div>
           <UsageBar used={monthSent} limit={limit} format={fmt} unitLabel="emails per month" onSaveLimit={saveLimit} />
