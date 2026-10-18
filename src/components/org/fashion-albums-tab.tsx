@@ -334,25 +334,35 @@ function Viewer({ item, canManage, onClose, onSave, onDelete, onPrevious, onNext
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/95 p-3" onClick={onClose}>
       <Button variant="ghost" size="icon" aria-label="Previous photo" title="Previous photo" onClick={(event) => { event.stopPropagation(); onPrevious(); }} className="fixed left-2 top-1/2 z-[71] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft /></Button>
       <Button variant="ghost" size="icon" aria-label="Next photo" title="Next photo" onClick={(event) => { event.stopPropagation(); onNext(); }} className="fixed right-2 top-1/2 z-[71] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft className="rotate-180" /></Button>
-      <div onClick={(e) => e.stopPropagation()} className="relative grid max-h-[94vh] w-full max-w-5xl overflow-hidden rounded-2xl bg-card shadow-2xl md:grid-cols-[minmax(0,1fr)_minmax(200px,0.33fr)]">
+      <div onClick={(e) => e.stopPropagation()} className={`relative grid max-h-[94vh] w-full overflow-hidden rounded-2xl bg-card shadow-2xl ${showPanel ? "max-w-5xl md:grid-cols-[minmax(0,1fr)_minmax(200px,0.33fr)]" : "max-w-3xl"}`}>
         <SmartImage src={item.url} alt="" className="max-h-[86vh] w-full object-contain p-4" />
-        <div className="space-y-4 overflow-y-auto border-t border-border p-5 md:border-l md:border-t-0">
-          <div className="flex justify-end">
-            <button onClick={onClose} aria-label="Close" className="rounded-full border border-border p-1.5"><X className="h-4 w-4" /></button>
+        {showPanel && (
+          <div className="space-y-4 overflow-y-auto border-t border-border p-5 md:border-l md:border-t-0">
+            <div className="flex justify-end">
+              <button onClick={onClose} aria-label="Close" className="rounded-full border border-border p-1.5"><X className="h-4 w-4" /></button>
+            </div>
+            {canManage ? (
+              <>
+                <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} placeholder="Caption / description (optional)"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+                <div className="flex gap-2">
+                  <button onClick={() => onSave(item.id, text)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Edit caption</button>
+                  <button onClick={() => onDelete(item.id)} aria-label="Delete item" className="rounded-full border border-border px-3 py-2 text-destructive"><Trash2 className="h-4 w-4" /></button>
+                </div>
+              </>
+            ) : (
+              <p className="whitespace-pre-wrap text-base">{item.description}</p>
+            )}
           </div>
-          {canManage ? (
-            <>
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} placeholder="Caption / description"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-              <div className="flex gap-2">
-                <button onClick={() => onSave(item.id, text)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Edit caption</button>
-                <button onClick={() => onDelete(item.id)} aria-label="Delete item" className="rounded-full border border-border px-3 py-2 text-destructive"><Trash2 className="h-4 w-4" /></button>
-              </div>
-            </>
-          ) : (
-            item.description && <p className="whitespace-pre-wrap text-base">{item.description}</p>
-          )}
-        </div>
+        )}
+        {!showPanel && (
+          <>
+            <button onClick={onClose} aria-label="Close" className="absolute right-3 top-3 rounded-full border border-border bg-background/90 p-1.5"><X className="h-4 w-4" /></button>
+            {canManage && (
+              <button onClick={() => setAdding(true)} className="absolute bottom-4 right-4 rounded-full border border-border bg-background/90 px-3 py-1.5 text-xs font-semibold shadow-sm">Add caption</button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
