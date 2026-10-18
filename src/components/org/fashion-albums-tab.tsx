@@ -295,24 +295,34 @@ function StoryViewer({ title, items, start = 0, canManage = false, onClose, onSa
   if (!it) return null;
   return (
     <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[80] flex items-center justify-center bg-background/95 px-12 py-5 text-foreground">
-      <div className="relative grid max-h-[90dvh] w-full max-w-6xl overflow-y-auto rounded-lg bg-background shadow-2xl md:h-[min(86dvh,760px)] md:grid-cols-[minmax(0,1fr)_minmax(200px,0.33fr)] md:overflow-hidden">
+      <div className={`relative grid max-h-[90dvh] w-full overflow-y-auto rounded-lg bg-background shadow-2xl md:h-[min(86dvh,760px)] md:overflow-hidden ${showPanel ? "max-w-6xl md:grid-cols-[minmax(0,1fr)_minmax(200px,0.33fr)]" : "max-w-4xl"}`}>
         <div ref={scrollRef} onClick={next} className="min-h-0 cursor-pointer overflow-y-auto p-3 md:p-6">
           <SmartImage src={it.url} alt={it.description ?? title} className="block h-auto w-full md:h-full md:object-contain" />
         </div>
-        <div className="min-h-0 space-y-4 border-t border-border p-4 md:overflow-y-auto md:border-l md:border-t-0 md:p-5">
-          <div className="flex justify-end">
-            <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close" title="Close" className="border border-border hover:bg-transparent hover:text-foreground"><X /></Button>
-          </div>
-          <h3 className="break-words text-base font-semibold leading-snug">{title}</h3>
-          {it.description && <p className="whitespace-pre-wrap break-words text-xs leading-relaxed">{it.description}</p>}
-          {canManage && (
-            <div className="space-y-2">
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="Caption / description"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs" />
-              <button onClick={() => onSave(it.id, text)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Edit caption</button>
+        {showPanel && (
+          <div className="min-h-0 space-y-4 border-t border-border p-4 md:overflow-y-auto md:border-l md:border-t-0 md:p-5">
+            <div className="flex justify-end">
+              <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close" title="Close" className="border border-border hover:bg-transparent hover:text-foreground"><X /></Button>
             </div>
-          )}
-        </div>
+            <h3 className="break-words text-base font-semibold leading-snug">{title}</h3>
+            {hasCaption(it.description) && <p className="whitespace-pre-wrap break-words text-xs leading-relaxed">{it.description}</p>}
+            {canManage && (
+              <div className="space-y-2">
+                <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="Caption / description (optional)"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs" />
+                <button onClick={() => onSave(it.id, text)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Edit caption</button>
+              </div>
+            )}
+          </div>
+        )}
+        {!showPanel && (
+          <>
+            <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close" title="Close" className="absolute right-3 top-3 z-[81] border border-border bg-background/90 hover:bg-transparent hover:text-foreground"><X /></Button>
+            {canManage && (
+              <button onClick={() => setAdding(true)} className="absolute bottom-4 right-4 z-[81] rounded-full border border-border bg-background/90 px-3 py-1.5 text-xs font-semibold shadow-sm">Add caption</button>
+            )}
+          </>
+        )}
       </div>
       <Button variant="ghost" size="icon" aria-label="Previous photo" title="Previous photo" onClick={prev} className="fixed left-2 top-1/2 z-[81] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft /></Button>
       <Button variant="ghost" size="icon" aria-label="Next photo" title="Next photo" onClick={next} className="fixed right-2 top-1/2 z-[81] -translate-y-1/2 bg-background/80 shadow hover:bg-background/80 hover:text-foreground"><ChevronLeft className="rotate-180" /></Button>
