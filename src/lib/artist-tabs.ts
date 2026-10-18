@@ -141,8 +141,7 @@ const LITERARY: ArtistTab[] = [
 const FASHION: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
   { key: "cv", label: "CV/Bio", Icon: FileText },
-  { key: "fashion_line", label: "Fashion Line", Icon: Layers },
-  { key: "lookbook", label: "Lookbook", Icon: Shirt },
+  { key: "fashion_line", label: "Lookbook", Icon: Layers },
   { key: "drops", label: "Drops", Icon: Package },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "saved", label: "Saved", Icon: Bookmark },

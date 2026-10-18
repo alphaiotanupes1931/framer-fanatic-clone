@@ -23,7 +23,7 @@ async function uploadImage(file: File): Promise<string> {
 
 /** Fashion artists: albums (name only) holding items (image + caption). */
 export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_line" }: { orgId: string; canManage?: boolean; section?: "fashion_line" | "lookbook" }) {
-  const noun = section === "lookbook" ? "Lookbook" : "Fashion Line";
+  const noun = "Lookbook";
   const scope = (q: any) => section === "lookbook" ? q.eq("section", "lookbook") : q.or("section.is.null,section.eq.fashion_line");
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1007,7 +1007,7 @@ function ArtistTabContent({ tab, org, canManage, me }: { tab: string; org: Org; 
     );
   if (tab === "Portfolio" || tab === "Fashion Line" || tab === "Lookbook" || tab === "Collections")
     return isFashionArtist
-      ? <FashionAlbumsTab key={tab} orgId={org.id} canManage={canManage} section={tab === "Lookbook" ? "lookbook" : "fashion_line"} />
+      ? <FashionAlbumsTab key={tab} orgId={org.id} canManage={canManage} section="fashion_line" />
       : <GalleryTab orgId={org.id} canManage={canManage} />;
   if (tab === "Album" || tab === "Albums" || tab === "Music" || tab === "Discography")
     return <MusicTab orgId={org.id} canManage={canManage} mode="album" />;
