@@ -1,3 +1,4 @@
+import { getFollowedPages } from "@/lib/followed-pages";
 import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { goBackOnClick } from "@/lib/go-back";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -178,13 +179,14 @@ function PublicProfilePage() {
       setProfile(publicProfile || null);
       if (publicProfile) {
         setMuted(window.localStorage.getItem(`pb_mute_user_${publicProfile.id}`) === "1");
-        const [{ data: fc }, { count: posts }, { count: referrals }] = await Promise.all([
+        const [{ data: fc }, { count: posts }, { count: referrals }, followedPages] = await Promise.all([
           supabase.rpc("public_follow_counts", { _user_id: publicProfile.id }),
           supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", publicProfile.id).eq("is_deleted", false).is("organization_id", null),
           supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", publicProfile.id),
+          getFollowedPages(publicProfile.id),
         ]);
         const fcRow = Array.isArray(fc) ? fc[0] : fc;
-        setStats({ followers: Number(fcRow?.followers ?? 0), following: Number(fcRow?.following ?? 0), posts: posts || 0, referrals: referrals || 0 });
+        setStats({ followers: Number(fcRow?.followers ?? 0), following: Number(fcRow?.following ?? 0) + followedPages.length, posts: posts || 0, referrals: referrals || 0 });
         if (me && me.id !== publicProfile.id) {
           const { data: f } = await supabase
             .from("follows")
