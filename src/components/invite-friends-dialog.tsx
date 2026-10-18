@@ -108,7 +108,7 @@ export function InviteFriendsDialog({ open, onClose, group }: InviteFriendsDialo
     }
     const content = await file.text();
     setText((prev) => (prev ? prev + "\n" + content : content));
-    toast.success("File loaded, click Parse Emails");
+    toast.success("File loaded, ready to send");
   };
 
   const parseEmails = () => {
