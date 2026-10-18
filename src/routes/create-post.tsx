@@ -425,7 +425,7 @@ function CreatePostPage() {
                 {mediaUrls.length ? "Add more" : "Upload images or videos"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Max 50MB per video. Portrait and landscape both work, we detect it automatically.</p>
+              <p className="text-xs text-neutral-500">Max 50MB per video</p>
             </div>
           )}
 
@@ -475,7 +475,7 @@ function CreatePostPage() {
                 {mediaUrls.length ? "Add more" : "Upload videos or images"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Max 50MB per video. Portrait and landscape both work, we detect it automatically.</p>
+              <p className="text-xs text-neutral-500">Max 50MB per video</p>
             </div>
           )}
 
@@ -677,7 +677,7 @@ function CameraCapture({ disabled, onFiles }: { disabled?: boolean; onFiles: (fi
       <Button type="button" variant="outline" size="sm" disabled={disabled} onClick={() => videoRef.current?.click()}>
         <VideoIcon className="mr-2 h-4 w-4" /> Record video
       </Button>
-      <p className="w-full text-xs text-neutral-500">Camera works best on phones. On a computer these may open your files instead.</p>
+      <p className="w-full text-xs text-neutral-500">Camera only works on mobile</p>
     </div>
   );
 }
