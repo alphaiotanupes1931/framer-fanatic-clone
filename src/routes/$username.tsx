@@ -1,3 +1,4 @@
+import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { goBackOnClick } from "@/lib/go-back";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -280,11 +281,13 @@ function PublicProfilePage() {
     if (!me || !profile) { navigate({ to: "/auth" }); return; }
     // Optimistic: the button flips instantly and the request runs behind it.
     const wasFollowing = isFollowing;
+    const mode = wasFollowing ? null : await chooseFollowMode();
+    if (!wasFollowing && !mode) return;
     setIsFollowing(!wasFollowing);
     setStats((s) => ({ ...s, followers: Math.max(0, s.followers + (wasFollowing ? -1 : 1)) }));
     const { error } = wasFollowing
       ? await supabase.from("follows").delete().eq("follower_id", me.id).eq("following_id", profile.id)
-      : await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id });
+      : await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id, allow_dms: mode!.allowDms });
     if (error) {
       setIsFollowing(wasFollowing);
       setStats((s) => ({ ...s, followers: Math.max(0, s.followers + (wasFollowing ? 1 : -1)) }));

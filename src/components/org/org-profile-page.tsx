@@ -1,3 +1,4 @@
+import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { OrgPostComments } from "@/components/org/org-post-comments";
 import { OrgFollowersList } from "@/components/org/org-followers-list";
 import { EmployeeLoginLink } from "@/components/org/employee-login-link";
@@ -246,7 +247,7 @@ export function OrgProfile() {
           const pending = org.type === "group" || org.type === "community_assoc";
           const { error } = await supabase
             .from("organization_members")
-            .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
+            .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved", allow_dms: mode.allowDms });
           if (!error) {
             setJoined(true);
             setMemberStatus(pending ? "pending" : "approved");
@@ -377,6 +378,9 @@ export function OrgProfile() {
 
   const toggleJoin = async () => {
     if (!me) { toast.error("Please sign in first"); return; }
+    const pendingJoin = isGroup || isAssoc;
+    const mode = !joined && !pendingJoin ? await chooseFollowMode() : { allowDms: true };
+    if (!mode) return;
     setJoining(true);
     try {
       if (joined) {

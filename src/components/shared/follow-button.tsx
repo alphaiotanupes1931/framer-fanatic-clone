@@ -3,6 +3,7 @@ import { UserPlus, UserCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { invalidateConnections } from "@/lib/connections";
+import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 
 /**
  * Small inline follow toggle so people can follow a creator straight from a
@@ -43,11 +44,13 @@ export function FollowButton({
     e.preventDefault();
     e.stopPropagation();
     if (busy) return;
-    setBusy(true);
     const next = !following;
+    const mode = next ? await chooseFollowMode() : null;
+    if (next && !mode) return;
+    setBusy(true);
     setFollowing(next);
     const res = next
-      ? await supabase.from("follows").insert({ follower_id: currentUserId, following_id: userId })
+      ? await supabase.from("follows").insert({ follower_id: currentUserId, following_id: userId, allow_dms: mode!.allowDms })
       : await supabase.from("follows").delete().eq("follower_id", currentUserId).eq("following_id", userId);
     setBusy(false);
     if (res.error) { setFollowing(!next); toast.error(res.error.message); return; }
