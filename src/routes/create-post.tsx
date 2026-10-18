@@ -422,7 +422,7 @@ function CreatePostPage() {
                 {mediaUrls.length ? "Add more" : "Upload images or videos"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Max 50MB per video</p>
+              <p className="text-xs text-neutral-500">Camera only works on mobile. Max 50MB per video.</p>
             </div>
           )}
 
@@ -472,13 +472,13 @@ function CreatePostPage() {
                 {mediaUrls.length ? "Add more" : "Upload videos or images"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Max 50MB per video</p>
+              <p className="text-xs text-neutral-500">Camera only works on mobile. Max 50MB per video.</p>
             </div>
           )}
 
           {/* Groups and Community Associations post without extra fields. */}
           {!isCommunityPost && (<>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">Category</Label>
 
@@ -510,7 +510,7 @@ function CreatePostPage() {
             />
           </div>
 
-          <div className="mt-6 space-y-2">
+          <div className="mt-10 space-y-2">
             <Label className="text-sm font-medium">Who can see this?</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {visibilityOpts.map(({ id, label, hint, Icon }) => {
@@ -668,7 +668,6 @@ function CameraCapture({ disabled, onFiles }: { disabled?: boolean; onFiles: (fi
       <Button type="button" variant="outline" size="sm" disabled={disabled} onClick={() => videoRef.current?.click()}>
         <VideoIcon className="mr-2 h-4 w-4" /> Record video
       </Button>
-      <p className="w-full text-xs text-neutral-500">Camera only works on mobile</p>
     </div>
   );
 }
