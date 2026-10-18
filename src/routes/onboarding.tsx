@@ -41,7 +41,7 @@ const JOIN_OPTIONS: Array<{ value: JoinKind; label: string; nameLabel: string; b
   { value: "business", label: "Business", nameLabel: "Business name", blurb: "Coffee shop, daycare, studio, store, restaurant." },
   { value: "arts_org", label: "Arts Organization", nameLabel: "Organization name", blurb: "Theater, gallery, collective, festival, venue." },
   { value: "group", label: "Group", nameLabel: "Your name", blurb: "Set up your profile, then create your group." },
-  { value: "community", label: "Community", nameLabel: "Your name", blurb: "Set up your profile, then create your community." },
+  { value: "community", label: "Community Association", nameLabel: "Your name", blurb: "Set up your profile, then create your community association." },
 ];
 
 
