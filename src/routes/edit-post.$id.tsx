@@ -1,3 +1,4 @@
+import { goBackOnClick } from "@/lib/go-back";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppLayout, useCurrentProfile } from "@/components/app-layout";
@@ -216,7 +217,7 @@ function EditPostPage() {
     <AppLayout>
       <div className="mx-auto w-full max-w-3xl px-4 py-6">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <Link to="/posts/$postId" params={{ postId: id }} className="inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900">
+          <Link to="/posts/$postId" params={{ postId: id }} onClick={goBackOnClick} className="inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900">
             <ArrowLeft className="h-4 w-4" /> Back to post
           </Link>
           <Button onClick={save} disabled={saving} className="gap-2 bg-neutral-800 text-white hover:bg-neutral-900">

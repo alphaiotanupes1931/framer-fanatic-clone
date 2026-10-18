@@ -1,3 +1,4 @@
+import { goBackOnClick } from "@/lib/go-back";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -320,7 +321,7 @@ function PublicProfilePage() {
   if (!profile) {
     return (
       <AppLayout title="Profile not found" hero={false}>
-        <Link to="/artists" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/artists" onClick={goBackOnClick} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to creators
         </Link>
       </AppLayout>

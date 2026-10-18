@@ -423,7 +423,7 @@ function NewEventPage() {
     <AppLayout>
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between mb-8">
-          <button onClick={() => navigate({ to: "/calendar" })} className="p-2 -ml-2 rounded-full hover:bg-hover" aria-label="Back">
+          <button onClick={() => (window.history.length > 1 ? window.history.back() : navigate({ to: "/calendar" }))} className="p-2 -ml-2 rounded-full hover:bg-hover" aria-label="Back">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-xl font-bold">{isExhibition ? "Create Event" : "Create Event"}</h1>
