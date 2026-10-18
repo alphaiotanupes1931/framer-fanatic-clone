@@ -48,8 +48,8 @@ export function FollowListDialog({
         return;
       }
       const result = mode === "followers"
-        ? await supabase.from("follows").select("follower_id").eq("following_id", profileId)
-        : await supabase.from("follows").select("following_id").eq("follower_id", profileId);
+        ? await supabase.from("follows").select("follower_id, allow_dms").eq("following_id", profileId)
+        : await supabase.from("follows").select("following_id, allow_dms").eq("follower_id", profileId);
       const { data: rows, error } = result;
       if (cancelled) return;
       if (error) {
@@ -57,9 +57,12 @@ export function FollowListDialog({
         setLoading(false);
         return;
       }
-      const ids = Array.from(new Set((rows ?? []).map((row) => (
-        "follower_id" in row ? row.follower_id : row.following_id
-      ))));
+      const dmById = new Map<string, boolean>();
+      const ids = Array.from(new Set((rows ?? []).map((row) => {
+        const id = "follower_id" in row ? row.follower_id : row.following_id;
+        dmById.set(id, (row as { allow_dms?: boolean | null }).allow_dms !== false);
+        return id;
+      })));
       if (!ids.length) {
         setPeople([]);
         setLoading(false);
@@ -67,7 +70,7 @@ export function FollowListDialog({
       }
       const { data } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
       if (!cancelled) {
-        setPeople((data ?? []) as FollowPerson[]);
+        setPeople(((data ?? []) as FollowPerson[]).map((p) => ({ ...p, allowDms: dmById.get(p.id) ?? null })));
         setLoading(false);
       }
     })();
