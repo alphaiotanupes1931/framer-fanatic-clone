@@ -22,3 +22,13 @@ export function parseLimit(v: unknown): number | null {
   const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
   return Number.isFinite(n) && n > 0 ? n : null;
 }
+
+/** Current Cloud file storage rate, in credits per GB-hour. */
+export const FILE_STORAGE_CREDITS_PER_GB_HOUR = 0.00014384;
+
+/** Storage charge for one month: only GB-hours above the free GB line are billed. */
+export function monthlyStorageCharge(gbHours: number, hoursInMonth: number, freeGb: number, dollarsPerCredit: number) {
+  const billableGbHours = Math.max(0, gbHours - Math.max(0, freeGb) * hoursInMonth);
+  const credits = billableGbHours * FILE_STORAGE_CREDITS_PER_GB_HOUR;
+  return { billableGbHours, credits, dollars: credits * Math.max(0, dollarsPerCredit) };
+}
