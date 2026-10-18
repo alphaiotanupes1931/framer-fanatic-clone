@@ -11,6 +11,7 @@ type FollowPerson = {
   username: string | null;
   avatar_url: string | null;
   neighborhood: string | null;
+  allowDms: boolean | null;
 };
 
 const formatName = (value: string) => value.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -41,14 +42,14 @@ export function FollowListDialog({
           .eq("referred_by", profileId)
           .order("created_at", { ascending: false });
         if (!cancelled) {
-          setPeople(error ? [] : ((data ?? []) as FollowPerson[]));
+          setPeople(error ? [] : ((data ?? []) as FollowPerson[]).map((p) => ({ ...p, allowDms: null })));
           setLoading(false);
         }
         return;
       }
       const result = mode === "followers"
-        ? await supabase.from("follows").select("follower_id").eq("following_id", profileId)
-        : await supabase.from("follows").select("following_id").eq("follower_id", profileId);
+        ? await supabase.from("follows").select("follower_id, allow_dms").eq("following_id", profileId)
+        : await supabase.from("follows").select("following_id, allow_dms").eq("follower_id", profileId);
       const { data: rows, error } = result;
       if (cancelled) return;
       if (error) {
@@ -56,9 +57,12 @@ export function FollowListDialog({
         setLoading(false);
         return;
       }
-      const ids = Array.from(new Set((rows ?? []).map((row) => (
-        "follower_id" in row ? row.follower_id : row.following_id
-      ))));
+      const dmById = new Map<string, boolean>();
+      const ids = Array.from(new Set((rows ?? []).map((row) => {
+        const id = "follower_id" in row ? row.follower_id : row.following_id;
+        dmById.set(id, (row as { allow_dms?: boolean | null }).allow_dms !== false);
+        return id;
+      })));
       if (!ids.length) {
         setPeople([]);
         setLoading(false);
@@ -66,7 +70,7 @@ export function FollowListDialog({
       }
       const { data } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
       if (!cancelled) {
-        setPeople((data ?? []) as FollowPerson[]);
+        setPeople(((data ?? []) as Omit<FollowPerson, "allowDms">[]).map((p) => ({ ...p, allowDms: dmById.get(p.id) ?? null })));
         setLoading(false);
       }
     })();
@@ -96,16 +100,21 @@ export function FollowListDialog({
                 onClick={() => onOpenChange(false)}
                 className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-hover"
               >
-                <Avatar className="h-11 w-11">
+                <Avatar className="h-11 w-11 shrink-0">
                   <SmartAvatarImage src={person.avatar_url ?? undefined} alt="" />
                   <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground">{name}</p>
                   <p className="truncate text-xs text-muted-foreground">
                     {person.username ? `@${person.username}` : person.neighborhood || "Baltimore"}
                   </p>
                 </div>
+                {person.allowDms !== null && (
+                  <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                    {person.allowDms ? "Posts & Messages" : "Posts Only"}
+                  </span>
+                )}
               </Link>
             );
           })}
