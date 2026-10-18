@@ -395,7 +395,7 @@ function OrgFollowButton({ orgId, meId }: { orgId: string; meId?: string | null 
     setBusy(true);
     setFollowing(next);
     const { error } = next
-      ? await supabase.from("organization_followers").insert({ organization_id: orgId, user_id: meId, allow_dms: mode!.allowDms })
+      ? await supabase.from("organization_followers").insert({ organization_id: orgId, user_id: meId, allow_dms: mode!.allowDms } as never)
       : await supabase
           .from("organization_followers")
           .delete()

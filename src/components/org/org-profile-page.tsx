@@ -247,7 +247,7 @@ export function OrgProfile() {
           const pending = org.type === "group" || org.type === "community_assoc";
           const { error } = await supabase
             .from("organization_members")
-            .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved", allow_dms: mode.allowDms });
+            .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
           if (!error) {
             setJoined(true);
             setMemberStatus(pending ? "pending" : "approved");
@@ -393,7 +393,7 @@ export function OrgProfile() {
       } else {
         const pending = isGroup || isAssoc;
         const { error } = await supabase.from("organization_members")
-          .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved" });
+          .insert({ organization_id: org.id, user_id: me, status: pending ? "pending" : "approved", allow_dms: mode.allowDms } as never);
         if (error) throw error;
         setJoined(true);
         setMemberStatus(pending ? "pending" : "approved");

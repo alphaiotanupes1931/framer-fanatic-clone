@@ -287,7 +287,7 @@ function PublicProfilePage() {
     setStats((s) => ({ ...s, followers: Math.max(0, s.followers + (wasFollowing ? -1 : 1)) }));
     const { error } = wasFollowing
       ? await supabase.from("follows").delete().eq("follower_id", me.id).eq("following_id", profile.id)
-      : await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id, allow_dms: mode!.allowDms });
+      : await supabase.from("follows").insert({ follower_id: me.id, following_id: profile.id, allow_dms: mode!.allowDms } as never);
     if (error) {
       setIsFollowing(wasFollowing);
       setStats((s) => ({ ...s, followers: Math.max(0, s.followers + (wasFollowing ? 1 : -1)) }));

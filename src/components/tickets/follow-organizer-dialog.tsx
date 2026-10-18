@@ -55,7 +55,7 @@ export function FollowOrganizerDialog({ eventId, me, open, onOpenChange }: {
     const mode = await chooseFollowMode();
     if (!mode) return;
     setBusy(true);
-    const { error } = await supabase.from("follows").insert({ follower_id: me, following_id: host.id, allow_dms: mode.allowDms });
+    const { error } = await supabase.from("follows").insert({ follower_id: me, following_id: host.id, allow_dms: mode.allowDms } as never);
     setBusy(false);
     if (error && !/duplicate/i.test(error.message)) { toast.error(error.message); return; }
     invalidateConnections();

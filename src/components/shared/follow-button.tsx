@@ -50,7 +50,7 @@ export function FollowButton({
     setBusy(true);
     setFollowing(next);
     const res = next
-      ? await supabase.from("follows").insert({ follower_id: currentUserId, following_id: userId, allow_dms: mode!.allowDms })
+      ? await supabase.from("follows").insert({ follower_id: currentUserId, following_id: userId, allow_dms: mode!.allowDms } as never)
       : await supabase.from("follows").delete().eq("follower_id", currentUserId).eq("following_id", userId);
     setBusy(false);
     if (res.error) { setFollowing(!next); toast.error(res.error.message); return; }
