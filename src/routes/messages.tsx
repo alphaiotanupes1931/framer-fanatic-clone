@@ -607,7 +607,7 @@ function MessagesPage() {
         .from("follows")
         .select("follower_id")
         .eq("following_id", me.id)
-        .eq("allow_dms", true);
+        .eq("allow_dms" as never, true as never);
       const ids = (followers || []).map((f: { follower_id: string }) => f.follower_id);
       if (!ids.length) {
         toast.info("You don't have any followers yet.");
