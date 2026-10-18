@@ -70,7 +70,7 @@ export function FollowListDialog({
       }
       const { data } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
       if (!cancelled) {
-        setPeople(((data ?? []) as FollowPerson[]).map((p) => ({ ...p, allowDms: dmById.get(p.id) ?? null })));
+        setPeople(((data ?? []) as Omit<FollowPerson, "allowDms">[]).map((p) => ({ ...p, allowDms: dmById.get(p.id) ?? null })));
         setLoading(false);
       }
     })();
