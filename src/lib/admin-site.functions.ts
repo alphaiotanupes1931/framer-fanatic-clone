@@ -77,6 +77,7 @@ const ALLOWED_ADMIN_RPCS = new Set([
   "admin_storage_summary",
   "admin_storage_daily",
   "admin_storage_top_uploaders",
+  "admin_storage_monthly",
   "admin_email_log",
   "admin_email_stats",
   "admin_email_templates",
