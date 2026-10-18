@@ -515,10 +515,8 @@ export function ReferralNetworkDialog({
               <TabsTrigger value="email" className="flex-1 gap-1.5 text-xs sm:text-sm">
                 <Mail className="h-3.5 w-3.5" /> Email
               </TabsTrigger>
-              <TabsTrigger value="gifts" className="flex-1 gap-1.5 text-xs sm:text-sm">
-                <Gift className="h-3.5 w-3.5" /> Gifts
-              </TabsTrigger>
             </TabsList>
+
 
             <TabsContent value="link" className="mt-3 space-y-3">
               <div className="rounded-lg border border-border bg-muted/20 p-3">
@@ -730,19 +728,8 @@ export function ReferralNetworkDialog({
                 </div>
               </div>
             </TabsContent>
-
-            <TabsContent value="gifts" className="mt-3 space-y-3">
-              <div className="rounded-lg border border-border bg-muted/20 p-3 text-center">
-                <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  All referral points go toward Baltimore 100
-                </div>
-                <div className="text-2xl font-bold text-primary">{stats.points}</div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Direct invites add 5 points, their invites 3, and the next level 1.
-                </p>
-              </div>
-            </TabsContent>
           </Tabs>
+
 
           {/* Recent invites */}
           <div className="mt-4">
