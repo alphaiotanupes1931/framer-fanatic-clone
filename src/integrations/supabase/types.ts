@@ -754,16 +754,19 @@ export type Database = {
       }
       follows: {
         Row: {
+          allow_dms: boolean
           created_at: string
           follower_id: string
           following_id: string
         }
         Insert: {
+          allow_dms?: boolean
           created_at?: string
           follower_id: string
           following_id: string
         }
         Update: {
+          allow_dms?: boolean
           created_at?: string
           follower_id?: string
           following_id?: string
@@ -1577,16 +1580,19 @@ export type Database = {
       }
       organization_followers: {
         Row: {
+          allow_dms: boolean
           created_at: string
           organization_id: string
           user_id: string
         }
         Insert: {
+          allow_dms?: boolean
           created_at?: string
           organization_id: string
           user_id: string
         }
         Update: {
+          allow_dms?: boolean
           created_at?: string
           organization_id?: string
           user_id?: string
@@ -1603,6 +1609,7 @@ export type Database = {
       }
       organization_members: {
         Row: {
+          allow_dms: boolean
           created_at: string
           is_public: boolean
           organization_id: string
@@ -1611,6 +1618,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          allow_dms?: boolean
           created_at?: string
           is_public?: boolean
           organization_id: string
@@ -1619,6 +1627,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          allow_dms?: boolean
           created_at?: string
           is_public?: boolean
           organization_id?: string
