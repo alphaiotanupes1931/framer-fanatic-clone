@@ -5,9 +5,6 @@ export const MAX_MEDIA_MB = 200;
 
 /** Uploads an audio/video file to storage and returns a long-lived signed URL. */
 export async function uploadMediaFile(file: File, orgId: string, kind: "audio" | "video"): Promise<string> {
-  if (file.size > MAX_MEDIA_MB * 1024 * 1024) {
-    throw new Error(`File must be under ${MAX_MEDIA_MB}MB`);
-  }
   // Storage rules require the first folder to be the signed-in user's id.
   const { data: userData } = await supabase.auth.getUser();
   const uid = userData.user?.id;
