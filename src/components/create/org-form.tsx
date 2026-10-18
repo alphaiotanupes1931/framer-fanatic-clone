@@ -198,7 +198,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
 
   return (
     <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
-      <Field label="Name" required>
+      <Field label={type === "business" ? "Business name" : "Name"} required>
         <Input value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={120} placeholder={`Your ${kindLabel.toLowerCase()} name`} />
       </Field>
       <Field label="Short description" required={strict || type === "group" || type === "community_assoc"}>
@@ -228,17 +228,19 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} maxLength={200} placeholder="contact@yourorg.org" />
         </Field>
       </div>
+      <Field label="Website">
+        <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
+      </Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Website">
-          <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
-        </Field>
         <Field label="Phone">
           <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} maxLength={40} />
         </Field>
         <Field label="Address">
           <Input value={form.address} onChange={(e) => set("address", e.target.value)} maxLength={200} />
         </Field>
-        <Field label="Logo / avatar">
+      </div>
+      <div className="grid grid-cols-[1fr_2fr] gap-4">
+        <Field label="Logo">
           <ImageUpload value={form.avatar_url} onChange={(v) => set("avatar_url", v)} label="Upload logo" bucket="avatars" aspect={1} />
         </Field>
         <Field label="Banner image">
