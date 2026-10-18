@@ -83,13 +83,13 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
   };
 
   return (
-    <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
+    <div className={`mt-4 rounded-xl border border-neutral-200 bg-white ${open || rows.length || codeFor ? "p-4" : "inline-block w-fit px-3 py-2"}`}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <KeyRound className="h-4 w-4 text-[#d4580a]" />
           <div>
             <p className="text-sm font-semibold text-neutral-900">{copy.cardTitle}</p>
-            <p className="text-xs text-neutral-600">{copy.description}</p>
+            {open && <p className="text-xs text-neutral-600">{copy.description}</p>}
           </div>
         </div>
         <Button
@@ -182,7 +182,7 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
           </div>
           <div className="sm:col-span-2 flex items-center justify-between">
             <p className="text-xs text-neutral-500">
-              {replaceId ? "Changing the email means the new address has to be verified before it can sign in." : `Staff sign in at ${loginUrl}`}
+              {replaceId ? "Changing the email means the new address has to be verified before it can sign in." : ""}
             </p>
             <Button size="sm" onClick={save} disabled={busy || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username.trim()) || password.length < 8}>
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save
