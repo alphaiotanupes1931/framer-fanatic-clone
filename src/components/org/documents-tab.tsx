@@ -16,6 +16,17 @@ type Doc = {
   uploaded_by: string;
 };
 
+async function openDoc(url: string) {
+  const w = window.open("", "_blank");
+  let out = url;
+  const m = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/]+)\/([^?]+)/);
+  if (m) {
+    const { data } = await supabase.storage.from(m[1]).createSignedUrl(decodeURIComponent(m[2]), 3600);
+    if (data?.signedUrl) out = data.signedUrl; else toast.error("Could not open document");
+  }
+  if (w) w.location.href = out; else window.location.href = out;
+}
+
 const DOC_TYPES = ["Document", "Meeting Minutes", "Budget", "Map", "By Laws", "Agenda", "Newsletter", "Other"];
 
 export function DocumentsTab({ orgId, canManage, me, label = "Document", docType, excludeDocType, emptyTitle, emptyHint }: { orgId: string; canManage: boolean; me: string | null; label?: string; docType?: string; excludeDocType?: string; emptyTitle?: string; emptyHint?: string }) {
@@ -77,14 +88,14 @@ export function DocumentsTab({ orgId, canManage, me, label = "Document", docType
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <a href={d.file_url} target="_blank" rel="noreferrer" className="truncate font-semibold text-neutral-900 hover:underline">{d.name}</a>
+                  <a href={d.file_url} onClick={(e) => { e.preventDefault(); void openDoc(d.file_url); }} target="_blank" rel="noreferrer" className="truncate font-semibold text-neutral-900 hover:underline">{d.name}</a>
                   <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-600">{d.doc_type}</span>
                 </div>
                 {d.description && <p className="mt-1 text-sm text-neutral-600">{d.description}</p>}
                 <p className="mt-1 text-xs text-neutral-400">{timeAgo(d.created_at)}</p>
               </div>
               <div className="flex items-center gap-1">
-                <a href={d.file_url} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-neutral-500 hover:bg-hover" aria-label="Open document">
+                <a href={d.file_url} onClick={(e) => { e.preventDefault(); void openDoc(d.file_url); }} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-neutral-500 hover:bg-hover" aria-label="Open document">
                   <Download className="h-4 w-4" />
                 </a>
                 {(canManage || me === d.uploaded_by) && (
