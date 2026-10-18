@@ -5,15 +5,19 @@ import { AdminShell } from "@/components/admin-shell";
 import { getAdminToken, refreshAdminUnlocked } from "@/lib/admin-gate";
 import { adminRpc, saveSiteContent } from "@/lib/admin-site.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBytes, GB, parseLimit } from "@/lib/usage-metrics";
-import { DailyBars, StatCard, UsageBar } from "@/components/admin/usage-bits";
+import { formatBytes, parseLimit, monthlyStorageCharge } from "@/lib/usage-metrics";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { DailyBars, StatCard } from "@/components/admin/usage-bits";
 
 export const Route = createFileRoute("/admin/storage")({
   component: AdminStoragePage,
   head: () => ({ meta: [{ title: "Admin: Storage - Planet Baltimore" }] }),
 });
 
-const LIMIT_KEY = "admin_storage_limit_gb";
+const FREE_KEY = "admin_storage_free_gb";
+const RATE_KEY = "admin_dollars_per_credit";
+type Month = { month: string; gb_hours: number; end_bytes: number; added_bytes: number };
 type Summary = { bucket: string; kind: string; files: number; bytes: number };
 type Daily = { day: string; files: number; bytes: number };
 type Uploader = { user_id: string; display_name: string | null; username: string | null; files: number; bytes: number };
@@ -36,7 +40,9 @@ function AdminStoragePage() {
   const [summary, setSummary] = useState<Summary[]>([]);
   const [daily, setDaily] = useState<Daily[]>([]);
   const [top, setTop] = useState<Uploader[]>([]);
-  const [limitGb, setLimitGb] = useState<number | null>(null);
+  const [months, setMonths] = useState<Month[]>([]);
+  const [freeGb, setFreeGb] = useState("");
+  const [rate, setRate] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { void refreshAdminUnlocked().then((u) => { setOk(u); if (!u) navigate({ to: "/admin/login" }); }); }, [navigate]);
@@ -47,16 +53,20 @@ function AdminStoragePage() {
       setLoading(true);
       try {
         const t = getAdminToken();
-        const [s, d, u, lim] = await Promise.all([
+        const [s, d, u, lim, mo] = await Promise.all([
           adminRpc({ data: { name: "admin_storage_summary", adminToken: t } }),
           adminRpc({ data: { name: "admin_storage_daily", args: { _days: days }, adminToken: t } }),
           adminRpc({ data: { name: "admin_storage_top_uploaders", args: { _limit: 10 }, adminToken: t } }),
-          supabase.from("site_content").select("value").eq("key", LIMIT_KEY).maybeSingle(),
+          supabase.from("site_content").select("key, value").in("key", [FREE_KEY, RATE_KEY]),
+          adminRpc({ data: { name: "admin_storage_monthly", adminToken: t } }),
         ]);
+        setMonths((mo.data as Month[]) ?? []);
         setSummary((s.data as Summary[]) ?? []);
         setDaily((d.data as Daily[]) ?? []);
         setTop((u.data as Uploader[]) ?? []);
-        setLimitGb(parseLimit(lim.data?.value));
+        const kv = new Map((lim.data ?? []).map((r: any) => [r.key, r.value]));
+        setFreeGb(String(parseLimit(kv.get(FREE_KEY)) ?? ""));
+        setRate(String(parseLimit(kv.get(RATE_KEY)) ?? ""));
       } catch (e) { toast.error((e as Error).message); }
       setLoading(false);
     })();
@@ -73,17 +83,48 @@ function AdminStoragePage() {
   const periodBytes = filled.reduce((a, r) => a + r.value, 0);
   const today = filled[filled.length - 1];
 
-  const saveLimit = async (v: string) => {
-    const n = parseLimit(v);
-    await saveSiteContent({ data: { rows: [{ key: LIMIT_KEY, value: n ? String(n) : "" }], adminToken: getAdminToken() } });
-    setLimitGb(n); toast.success("Plan limit saved");
+  const saveSettings = async () => {
+    await saveSiteContent({ data: { rows: [{ key: FREE_KEY, value: freeGb }, { key: RATE_KEY, value: rate }], adminToken: getAdminToken() } });
+    toast.success("Saved");
   };
+  const freeN = parseLimit(freeGb) ?? 0;
+  const rateN = parseLimit(rate) ?? 0;
+  const monthRows = months.map((m) => {
+    const start = new Date(m.month + "T00:00:00");
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+    const hours = (end.getTime() - start.getTime()) / 3600000;
+    return { ...m, label: start.toLocaleDateString("en-US", { month: "long", year: "numeric" }), ...monthlyStorageCharge(Number(m.gb_hours), hours, freeN, rateN) };
+  });
 
   return (
     <AdminShell title="Storage" subtitle="Space used by photos, videos, PDFs and other uploads">
       {loading ? <div className="p-8 text-sm text-neutral-500">Loading...</div> : (
         <div className="space-y-6">
-          <UsageBar used={total} limit={limitGb ? limitGb * GB : null} format={formatBytes} unitLabel="storage in GB" onSaveLimit={saveLimit} />
+          <section className="rounded-xl border border-neutral-200 bg-white p-5">
+            <h2 className="text-sm font-semibold text-neutral-900">Storage charges by month</h2>
+            <p className="mt-1 text-xs text-neutral-500">Only storage above the free line is charged. Estimates update as people upload and use the current storage rate.</p>
+            <div className="mt-3 flex flex-wrap items-end gap-3">
+              <label className="text-xs text-neutral-600">Free storage (GB)<Input type="number" min="0" value={freeGb} onChange={(e) => setFreeGb(e.target.value)} className="mt-1 h-8 w-32" /></label>
+              <label className="text-xs text-neutral-600">Price per credit ($)<Input type="number" min="0" step="0.01" value={rate} onChange={(e) => setRate(e.target.value)} className="mt-1 h-8 w-32" /></label>
+              <Button size="sm" onClick={() => void saveSettings()}>Save</Button>
+            </div>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="text-xs uppercase text-neutral-500"><tr><th className="py-2">Month</th><th>Stored at end</th><th>Added</th><th>Over free line</th><th className="text-right">Charge so far</th></tr></thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {monthRows.map((m) => (
+                    <tr key={m.month}>
+                      <td className="py-2 font-medium text-neutral-900">{m.label}</td>
+                      <td className="text-neutral-700">{formatBytes(Number(m.end_bytes))}</td>
+                      <td className="text-neutral-700">{formatBytes(Number(m.added_bytes))}</td>
+                      <td className="text-neutral-700">{m.billableGbHours.toFixed(0)} GB-hours</td>
+                      <td className="text-right font-semibold text-neutral-900">{rateN ? `$${m.dollars.toFixed(2)}` : `${m.credits.toFixed(3)} credits`}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <StatCard label="Total used" value={formatBytes(total)} hint={`${totalFiles.toLocaleString()} files`} />
             <StatCard label="Added today" value={formatBytes(today?.value ?? 0)} hint={`${today?.files ?? 0} files`} />

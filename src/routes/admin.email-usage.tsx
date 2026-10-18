@@ -115,6 +115,11 @@ function AdminEmailUsagePage() {
   return (
     <AdminShell title="Email usage" subtitle="Emails sent this month and delivery results">
       <div className="space-y-6">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+          <div className="text-xs font-medium uppercase tracking-wide text-neutral-500">Client charge</div>
+          <div className="mt-1 text-2xl font-bold text-neutral-900">$20 / month</div>
+          <div className="mt-1 text-xs text-neutral-500">Email service on the upgraded plan</div>
+        </div>
         <div>
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">This month</div>
           <UsageBar used={monthSent} limit={limit} format={fmt} unitLabel="emails per month" onSaveLimit={saveLimit} />
