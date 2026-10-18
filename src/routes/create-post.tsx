@@ -33,9 +33,6 @@ const CATEGORIES = [
   "General","Music","Art","Community","Event","Food","Nightlife","Wellness","Fashion","Sports","News","Question","Other",
 ];
 
-const POST_TAGS = [
-  "Process","Announcement","Studio","Behind the Scenes","Work in Progress","New Release","Show","Collaboration","Sale","Tutorial",
-];
 
 const BG_COLORS = [
   { name: "None",        bg: "",         fg: "#0F172A" },
@@ -503,23 +500,17 @@ function CreatePostPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="mt-6 space-y-2">
             <Label className="text-sm font-medium">Tag (optional)</Label>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setTag("")}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${tag === "" ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
-                None
-              </button>
-              {POST_TAGS.map((t) => (
-                <button key={t} type="button" onClick={() => setTag(t)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium ${tag === t ? "border-[#d4580a] bg-[#d4580a]/10 text-[#d4580a]" : "border-neutral-200 text-neutral-600 hover:border-orange-300"}`}>
-                  {t}
-                </button>
-              ))}
-            </div>
+            <Input
+              value={tag}
+              onChange={(e) => setTag(e.target.value)}
+              placeholder="Type your own tag..."
+              maxLength={40}
+            />
           </div>
 
-          <div className="space-y-2">
+          <div className="mt-6 space-y-2">
             <Label className="text-sm font-medium">Who can see this?</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {visibilityOpts.map(({ id, label, hint, Icon }) => {
