@@ -15,7 +15,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { Post, Story, Event, Follow, OrgPost } from "@/lib/entities";
 import { OrgPostCard } from "@/components/shared/org-post-card";
-import { SmartVideo } from "@/components/shared/smart-img";
+import { SmartVideo, SmartAvatarImage } from "@/components/shared/smart-img";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PeopleToFollowRow } from "@/components/layout/people-to-follow";
 
 
@@ -42,7 +43,10 @@ function FeedVideoCard({ video }: { video: any }) {
       <article className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
         {a && (
           <Link to="/$username" params={{ username: a.username ?? a.id }} className="flex items-center gap-2 p-3">
-            {a.avatar_url ? <img src={a.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" /> : <div className="h-9 w-9 rounded-full bg-neutral-200" />}
+            <Avatar className="h-9 w-9">
+              {a.avatar_url && <SmartAvatarImage src={a.avatar_url} alt="" className="object-cover" />}
+              <AvatarFallback>{(a.display_name ?? a.username ?? "?").slice(0, 1).toUpperCase()}</AvatarFallback>
+            </Avatar>
             <span className="text-sm font-semibold text-neutral-900">{a.display_name ?? a.username}</span>
           </Link>
         )}

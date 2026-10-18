@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-/** Inline "Employee login" link that opens the staff sign-in form in place. */
+/** Inline "Login access" link that opens the staff sign-in form in place. */
 export function EmployeeLoginLink() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -40,12 +40,12 @@ export function EmployeeLoginLink() {
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5">
-        <KeyRound className="h-4 w-4" /> Employee login
+        <KeyRound className="h-4 w-4" /> Login access
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Employee login</DialogTitle>
+            <DialogTitle>Login access</DialogTitle>
             <DialogDescription>Use the staff email and password the page owner gave you.</DialogDescription>
           </DialogHeader>
           <form className="space-y-4" onSubmit={submit}>

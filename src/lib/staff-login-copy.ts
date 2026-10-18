@@ -33,7 +33,7 @@ export const STAFF_LOGIN_COPY: Record<StaffLoginType, StaffLoginCopy> = {
   business: {
     ...BASE,
     title: "Staff login (optional)",
-    cardTitle: "Employee login",
+    cardTitle: "Login access",
     description:
       "Create a separate staff email and password your employees can use to sign in and manage this business page, without ever using your own login. You can change or remove it later.",
     emailLabel: "Staff email",
