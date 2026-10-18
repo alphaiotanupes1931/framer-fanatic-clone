@@ -632,7 +632,7 @@ export function ReferralNetworkDialog({
                     disabled={!email.trim()}
                     className="w-full gap-2 border-primary text-primary hover:bg-primary/10"
                   >
-                    <Mail className="h-4 w-4" /> Parse emails
+                    <Mail className="h-4 w-4" /> Complete upload
                   </Button>
                 )}
 
