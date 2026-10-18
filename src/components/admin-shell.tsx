@@ -14,6 +14,8 @@ const ADMIN_NAV = [
   { to: "/admin/email-groups", label: "Email groups" },
   { to: "/admin/blocked-emails", label: "Blocked emails" },
   { to: "/admin/content", label: "Landing page" },
+  { to: "/admin/storage", label: "Storage" },
+  { to: "/admin/email-usage", label: "Email usage" },
   { to: "/admin/stripe-logs", label: "Payment logs" },
   { to: "/admin/trash", label: "Trash" },
   { to: "/admin/design-system", label: "Design system" },
