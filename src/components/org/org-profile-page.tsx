@@ -1,5 +1,6 @@
 import { OrgPostComments } from "@/components/org/org-post-comments";
 import { OrgFollowersList } from "@/components/org/org-followers-list";
+import { EmployeeLoginLink } from "@/components/org/employee-login-link";
 import { Button } from "@/components/ui/button";
 import { PostSplitView } from "@/components/shared/post-split-view";
 
