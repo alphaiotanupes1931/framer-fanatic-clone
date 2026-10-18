@@ -11,6 +11,7 @@ type FollowPerson = {
   username: string | null;
   avatar_url: string | null;
   neighborhood: string | null;
+  allowDms: boolean | null;
 };
 
 const formatName = (value: string) => value.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
