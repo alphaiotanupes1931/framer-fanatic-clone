@@ -148,6 +148,8 @@ export function ReferralNetworkDialog({
   };
   const [stats, setStats] = useState({ total: 0, joined: 0, points: 0, level1: 0, level2: 0, level3: 0 });
   const [invites, setInvites] = useState<any[]>([]);
+  const [inviteScope, setInviteScope] = useState<"recent" | "all">("recent");
+  const [inviteSearch, setInviteSearch] = useState("");
   const [loadingInvites, setLoadingInvites] = useState(false);
   const [resending, setResending] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
@@ -180,12 +182,22 @@ export function ReferralNetworkDialog({
       setLoadingInvites(false);
       return;
     }
+    const fetchAllInvites = async () => {
+      const all: any[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data } = await supabase
+          .from("invites")
+          .select("id, email, created_at, clicked_at, accepted_at")
+          .eq("invited_by", user.id)
+          .order("created_at", { ascending: false })
+          .range(from, from + 999);
+        all.push(...(data ?? []));
+        if (!data || data.length < 1000) break;
+      }
+      return { data: all };
+    };
     const [invitesRes, networkRes] = await Promise.all([
-      supabase
-        .from("invites")
-        .select("id, email, created_at, clicked_at, accepted_at")
-        .eq("invited_by", user.id)
-        .order("created_at", { ascending: false }),
+      fetchAllInvites(),
       // Counts all three referral levels, so points match the tiers shown above.
       supabase.rpc("referral_network_stats", { _user_id: user.id }),
     ]);
@@ -334,7 +346,22 @@ export function ReferralNetworkDialog({
     }
   };
 
-  const visibleInvites = invites;
+  // Most recent send = newest invites with no gap over 10 minutes between them.
+  const recentSendIds = (() => {
+    const ids = new Set<string>();
+    let prev: number | null = null;
+    for (const i of invites) {
+      const t = new Date(i.created_at).getTime();
+      if (prev !== null && prev - t > 10 * 60 * 1000) break;
+      ids.add(i.id);
+      prev = t;
+    }
+    return ids;
+  })();
+  const q = inviteSearch.trim().toLowerCase();
+  const visibleInvites = invites.filter(
+    (i: any) => (inviteScope === "all" || recentSendIds.has(i.id)) && (!q || String(i.email).toLowerCase().includes(q)),
+  );
   const allSelected = visibleInvites.length > 0 && selected.length === visibleInvites.length;
 
   const toggleSelect = (id: string) =>
@@ -735,7 +762,7 @@ export function ReferralNetworkDialog({
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between gap-2">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Recent invites
+                {inviteScope === "recent" ? "Most recent send" : "All invites"} ({visibleInvites.length})
               </h3>
               {invites.length > 0 && (
                 <button
@@ -747,6 +774,25 @@ export function ReferralNetworkDialog({
                 </button>
               )}
             </div>
+            {invites.length > 0 && (
+              <div className="mb-2 flex items-center gap-2">
+                <input
+                  type="search"
+                  value={inviteSearch}
+                  onChange={(e) => setInviteSearch(e.target.value)}
+                  placeholder="Search by name or email"
+                  aria-label="Search invites"
+                  className="h-8 min-w-0 flex-1 rounded-md border border-border bg-background px-2 text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setInviteScope((s) => (s === "recent" ? "all" : "recent")); setSelected([]); }}
+                  className="h-8 shrink-0 rounded-md border border-border px-2 text-[11px] font-medium text-foreground"
+                >
+                  {inviteScope === "recent" ? "Show all" : "Most recent send"}
+                </button>
+              </div>
+            )}
             {selected.length > 0 && (
               <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
                 <span className="text-xs font-medium text-foreground">
