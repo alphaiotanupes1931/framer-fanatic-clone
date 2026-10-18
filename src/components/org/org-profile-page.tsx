@@ -1,5 +1,6 @@
 import { OrgPostComments } from "@/components/org/org-post-comments";
 import { OrgFollowersList } from "@/components/org/org-followers-list";
+import { EmployeeLoginLink } from "@/components/org/employee-login-link";
 import { getOrgFollowerIds } from "@/lib/org-followers";
 import { Button } from "@/components/ui/button";
 import { PostSplitView } from "@/components/shared/post-split-view";
@@ -704,6 +705,12 @@ export function OrgProfile() {
             <>
               <span className="text-neutral-300">·</span>
               <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {org.neighborhood}</span>
+            </>
+          )}
+          {supportsStaffLoginType(org.type) && (
+            <>
+              <span className="text-neutral-300">·</span>
+              <EmployeeLoginLink />
             </>
           )}
           {org.email && (
