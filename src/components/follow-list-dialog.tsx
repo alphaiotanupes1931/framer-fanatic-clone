@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Search, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 
@@ -29,9 +31,11 @@ export function FollowListDialog({
 }) {
   const [people, setPeople] = useState<FollowPerson[]>([]);
   const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     if (!open || !profileId) return;
+    setQuery("");
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -77,20 +81,54 @@ export function FollowListDialog({
     return () => { cancelled = true; };
   }, [open, profileId, mode]);
 
+  const term = query.trim().toLowerCase();
+  const shown = useMemo(() => {
+    if (!term) return people;
+    return people.filter((person) =>
+      `${person.display_name ?? ""} ${person.username ?? ""} ${person.neighborhood ?? ""}`
+        .toLowerCase()
+        .includes(term),
+    );
+  }, [people, term]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] w-[calc(100%_-_2rem)] max-w-md overflow-hidden rounded-xl p-0">
         <DialogHeader className="border-b border-border px-5 py-4 text-left">
           <DialogTitle>{mode === "followers" ? "Followers" : mode === "following" ? "Following" : "Referrals"}</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[65vh] overflow-y-auto p-2">
+        <div className="border-b border-border px-4 py-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search people"
+              aria-label="Search people"
+              className="h-10 pl-9 pr-9 text-sm"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="max-h-[58vh] overflow-y-auto p-2">
           {loading ? (
             <p className="p-6 text-center text-sm text-muted-foreground">Loading people...</p>
           ) : people.length === 0 ? (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {mode === "followers" ? "No followers yet." : mode === "following" ? "Not following anyone yet." : "No successful referrals yet."}
             </p>
-          ) : people.map((person) => {
+          ) : shown.length === 0 ? (
+            <p className="p-6 text-center text-sm text-muted-foreground">No one matches that search.</p>
+          ) : shown.map((person) => {
             const name = formatName(person.display_name || person.username || "User");
             return (
               <Link
