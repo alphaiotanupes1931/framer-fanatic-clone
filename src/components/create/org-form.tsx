@@ -289,9 +289,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
                 <p className="text-xs text-red-600">{staffEmailError}</p>
               ) : isVerified ? (
                 <p className="text-xs text-green-700">This email is verified. The staff login will work as soon as the page is created.</p>
-              ) : (
-                <p className="text-xs text-neutral-500">Tap Send code to verify this email now, or verify it after the page is created.</p>
-              )}
+              ) : null}
             </Field>
             <Field label={staffCopy.passwordLabel}>
               <Input
