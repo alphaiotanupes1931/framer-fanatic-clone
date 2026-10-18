@@ -228,9 +228,6 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} maxLength={200} placeholder="contact@yourorg.org" />
         </Field>
       </div>
-      <Field label="Website">
-        <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
-      </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Phone">
           <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} maxLength={40} />
@@ -239,19 +236,19 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           <Input value={form.address} onChange={(e) => set("address", e.target.value)} maxLength={200} />
         </Field>
       </div>
-      <div className="grid grid-cols-[1fr_2fr] gap-4">
+      <Field label="Website">
+        <Input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" maxLength={200} />
+      </Field>
+      <div className="!mt-10 grid grid-cols-[1fr_2fr] gap-4">
         <Field label="Logo">
           <ImageUpload value={form.avatar_url} onChange={(v) => set("avatar_url", v)} label="Upload logo" bucket="avatars" aspect={1} />
         </Field>
         <Field label="Banner image">
           <ImageUpload value={form.banner_url} onChange={(v) => set("banner_url", v)} label="Upload background" bucket="avatars" aspect={3} hint={BANNER_SPEC} />
-          {!form.banner_url && (
-            <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{BANNER_SPEC}</p>
-          )}
         </Field>
       </div>
       {supportsStaffLogin && (
-        <div className="space-y-4 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4">
+        <div className="!mt-10 space-y-4 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4">
           <div>
             <h3 className="text-sm font-semibold text-neutral-900">{staffCopy.title}</h3>
             <p className="mt-1 text-xs text-neutral-600">
