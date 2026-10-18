@@ -3685,6 +3685,40 @@ export type Database = {
       admin_delete_event: { Args: { _id: string }; Returns: undefined }
       admin_delete_organization: { Args: { _id: string }; Returns: undefined }
       admin_delete_profile: { Args: { _id: string }; Returns: undefined }
+      admin_email_log: {
+        Args: {
+          _end: string
+          _limit?: number
+          _offset?: number
+          _start: string
+          _status?: string
+          _template?: string
+        }
+        Returns: {
+          created_at: string
+          error_message: string
+          message_id: string
+          recipient_email: string
+          status: string
+          template_name: string
+          total: number
+        }[]
+      }
+      admin_email_stats: {
+        Args: { _end: string; _start: string; _template?: string }
+        Returns: {
+          day: string
+          emails: number
+          status: string
+          template_name: string
+        }[]
+      }
+      admin_email_templates: {
+        Args: never
+        Returns: {
+          template_name: string
+        }[]
+      }
       admin_list_events: {
         Args: never
         Returns: {
@@ -3793,6 +3827,33 @@ export type Database = {
       admin_soft_delete: {
         Args: { _id: string; _kind: string }
         Returns: undefined
+      }
+      admin_storage_daily: {
+        Args: { _days?: number }
+        Returns: {
+          bytes: number
+          day: string
+          files: number
+        }[]
+      }
+      admin_storage_summary: {
+        Args: never
+        Returns: {
+          bucket: string
+          bytes: number
+          files: number
+          kind: string
+        }[]
+      }
+      admin_storage_top_uploaders: {
+        Args: { _limit?: number }
+        Returns: {
+          bytes: number
+          display_name: string
+          files: number
+          user_id: string
+          username: string
+        }[]
       }
       admin_toggle_content_pin: {
         Args: { _content_id: string; _content_type: string; _pinned: boolean }
