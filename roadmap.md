@@ -25,3 +25,5 @@
 
 
 - [x] Remove the Gifts tab from the Referral Network dialog (2026-10-18)
+
+- [x] Rename the referral "Parse emails" button to "Complete upload" (2026-10-18)
