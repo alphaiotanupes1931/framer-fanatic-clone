@@ -15,6 +15,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { Post, Story, Event, Follow, OrgPost } from "@/lib/entities";
 import { OrgPostCard } from "@/components/shared/org-post-card";
+import { SmartVideo } from "@/components/shared/smart-img";
 import { PeopleToFollowRow } from "@/components/layout/people-to-follow";
 
 
@@ -30,7 +31,30 @@ type FeedItem =
   | { type: "post"; date: string; data: any; isNew?: boolean; reason?: string }
   | { type: "orgpost"; date: string; data: any; isNew?: boolean; reason?: string }
   | { type: "story"; date: string; data: any; isNew?: boolean; reason?: string }
-  | { type: "event"; date: string; data: any; isNew?: boolean; reason?: string };
+  | { type: "event"; date: string; data: any; isNew?: boolean; reason?: string }
+  | { type: "video"; date: string; data: any; isNew?: boolean; reason?: string };
+
+function FeedVideoCard({ video }: { video: any }) {
+  const a = video.author;
+  return (
+    <div className="space-y-0">
+      <span className="relative left-3 top-1 z-10 inline-flex h-4 items-center rounded-t-md bg-slate-100 px-2 text-[9px] font-extrabold uppercase leading-none text-slate-500">Video</span>
+      <article className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+        {a && (
+          <Link to="/$username" params={{ username: a.username ?? a.id }} className="flex items-center gap-2 p-3">
+            {a.avatar_url ? <img src={a.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" /> : <div className="h-9 w-9 rounded-full bg-neutral-200" />}
+            <span className="text-sm font-semibold text-neutral-900">{a.display_name ?? a.username}</span>
+          </Link>
+        )}
+        <SmartVideo src={video.video_url} controls playsInline preload="metadata" className={`w-full bg-black ${video.orientation === "portrait" ? "max-h-[640px] object-contain" : ""}`} />
+        <div className="p-3">
+          <h3 className="font-semibold text-neutral-900">{video.title}</h3>
+          {video.description && <p className="mt-1 line-clamp-3 text-sm text-neutral-600">{video.description}</p>}
+        </div>
+      </article>
+    </div>
+  );
+}
 
 
 function shuffleSeed<T>(arr: T[], seed: number): T[] {
@@ -117,6 +141,19 @@ function Dashboard() {
     staleTime: 120000,
   });
 
+  const { data: videos = [] } = useQuery({
+    queryKey: ["home-videos"],
+    queryFn: async () => {
+      const { data } = await supabase.from("videos").select("id, user_id, title, description, video_url, orientation, created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(15);
+      const rows = data ?? [];
+      const ids = [...new Set(rows.map((v) => v.user_id))];
+      const { data: people } = ids.length ? await supabase.rpc("public_profiles_by_ids", { _ids: ids }) : { data: [] as any[] };
+      const map = new Map((people ?? []).map((p: any) => [p.id, p]));
+      return rows.map((v) => ({ ...v, author: map.get(v.user_id) ?? null }));
+    },
+    staleTime: 120000,
+  });
+
   const { data: events = [], isLoading: loadingEvents } = useQuery({
     queryKey: ["home-events"],
     queryFn: () => Event.upcoming(15),
@@ -195,7 +232,7 @@ function Dashboard() {
         }));
 
       // Strict newest -> oldest across all content types.
-      const merged: FeedItem[] = [...storyStream, ...postStream, ...orgPostStream, ...eventStream].sort(
+      const merged: FeedItem[] = [...storyStream, ...postStream, ...orgPostStream, ...eventStream, ...(videos as any[]).map((v) => ({ type: "video" as const, date: v.created_at, data: v, reason: followedIds.has(v.user_id) ? "Following" : undefined }))].sort(
         (a, b) => +new Date(b.date) - +new Date(a.date),
       );
       return merged.slice(0, 60);
@@ -210,6 +247,7 @@ function Dashboard() {
         ...fp.map((p) => ({ type: "post" as const, date: p.created_at, data: p })),
         ...fs.map((s) => ({ type: "story" as const, date: s.created_at, data: s })),
         ...fe.map((e) => ({ type: "event" as const, date: e.created_at, data: e })),
+        ...(videos as any[]).filter((v) => followedIds.has(v.user_id)).map((v) => ({ type: "video" as const, date: v.created_at, data: v })),
       ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
     }
 
@@ -237,10 +275,11 @@ function Dashboard() {
       ...(orgPosts as any[]).map((p) => ({ type: "orgpost" as const, date: p.created_at, data: p, isNew: true })),
       ...(stories as any[]).map((s) => ({ type: "story" as const, date: s.created_at, data: s, isNew: true })),
       ...(events as any[]).map((e) => ({ type: "event" as const, date: e.created_at, data: e, isNew: true })),
+      ...(videos as any[]).map((v) => ({ type: "video" as const, date: v.created_at, data: v, isNew: true })),
     ];
     const dayOfYear = Math.floor(Date.now() / 86400000);
     return shuffleSeed(all, dayOfYear).slice(0, 40);
-  }, [activeFilter, posts, orgPosts, stories, events, follows, currentUser, excludeOrgIds]);
+  }, [activeFilter, posts, orgPosts, stories, events, videos, follows, currentUser, excludeOrgIds]);
 
 
   const orderedFeedItems = useMemo(
@@ -364,6 +403,7 @@ function Dashboard() {
               const inner = (() => {
                 if (item.type === "post") return <PostCard post={item.data} currentUserId={currentUser?.id} onDelete={handleDeletePost} onPinnedChange={(id, pinned, pinnedAt) => qc.setQueryData<any[]>(["home-posts"], (old = []) => old.map((post) => post.id === id ? { ...post, featured: pinned, featured_at: pinnedAt } : post))} reason={item.reason} />;
                 if (item.type === "orgpost") return <OrgPostCard post={item.data} />;
+                if (item.type === "video") return <FeedVideoCard video={item.data} />;
 
                 if (item.type === "story") return (
                   <div className="space-y-0">
