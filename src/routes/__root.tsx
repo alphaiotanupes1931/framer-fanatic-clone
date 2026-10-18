@@ -15,6 +15,7 @@ import { CookieBanner } from "../components/cookie-banner";
 import { OnboardingTour } from "../components/onboarding-tour";
 import { OnboardingGuard } from "../components/onboarding-guard";
 import { Toaster } from "../components/ui/sonner";
+import { FollowModeHost } from "../components/shared/follow-mode-dialog";
 import { QueryPersistence } from "../components/query-persistence";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -183,6 +184,7 @@ function RootComponent() {
       <CookieBanner />
       <OnboardingTour />
       <Toaster />
+      <FollowModeHost />
     </QueryClientProvider>
   );
 }

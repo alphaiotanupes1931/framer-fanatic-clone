@@ -1,3 +1,4 @@
+import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Img } from "@/components/shared/smart-img";
 import { useEffect, useMemo, useState } from "react";
@@ -388,11 +389,13 @@ function OrgFollowButton({ orgId, meId }: { orgId: string; meId?: string | null 
 
   const toggle = async () => {
     if (busy) return;
-    setBusy(true);
     const next = !following;
+    const mode = next ? await chooseFollowMode() : null;
+    if (next && !mode) return;
+    setBusy(true);
     setFollowing(next);
     const { error } = next
-      ? await supabase.from("organization_followers").insert({ organization_id: orgId, user_id: meId })
+      ? await supabase.from("organization_followers").insert({ organization_id: orgId, user_id: meId, allow_dms: mode!.allowDms } as never)
       : await supabase
           .from("organization_followers")
           .delete()

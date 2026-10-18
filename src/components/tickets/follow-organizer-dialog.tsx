@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
 import { invalidateConnections } from "@/lib/connections";
+import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { titleCase } from "@/lib/utils";
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
@@ -51,8 +52,10 @@ export function FollowOrganizerDialog({ eventId, me, open, onOpenChange }: {
 
   const follow = async () => {
     if (!host || !me || busy) return;
+    const mode = await chooseFollowMode();
+    if (!mode) return;
     setBusy(true);
-    const { error } = await supabase.from("follows").insert({ follower_id: me, following_id: host.id });
+    const { error } = await supabase.from("follows").insert({ follower_id: me, following_id: host.id, allow_dms: mode.allowDms } as never);
     setBusy(false);
     if (error && !/duplicate/i.test(error.message)) { toast.error(error.message); return; }
     invalidateConnections();
