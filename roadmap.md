@@ -23,3 +23,5 @@
 - [x] Remove numeric photo counts from Lookbook cards
 - [x] Hide Category, Neighborhood, Tag and audience options when posting to Groups and Community Associations. Verified on Boom Selecta, Founding 100 and Greenmount West; other pages keep every option.
 
+
+- [x] Remove the Gifts tab from the Referral Network dialog (2026-10-18)
