@@ -140,12 +140,6 @@ export function FollowListDialog({
             const name = person.pageType ? (person.display_name || "Page") : formatName(person.display_name || person.username || "User");
             const body = (
               <>
-                key={person.id}
-                to="/$username"
-                params={{ username: person.username || person.id }}
-                onClick={() => onOpenChange(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-hover"
-              >
                 <Avatar className="h-11 w-11 shrink-0">
                   <SmartAvatarImage src={person.avatar_url ?? undefined} alt="" />
                   <AvatarFallback>{name.charAt(0)}</AvatarFallback>
