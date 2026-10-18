@@ -5,6 +5,8 @@
 - [x] Redesign Updates tab to match reference screenshot and seed sample content
 
 ## Active
+- [x] Update referral parsing and retained recipient lists, restore own-invite deletion, and pass three recipient rule tests.
+- [ ] Verify referral deletion and retained recipients in the signed-in screen and provide screenshot proof. Blocked: preview is signed out and requesting user has no matching account for automatic sign-in.
 - [x] Replace calendar organizer tabs with independent Monthly Calendar and Upcoming dropdowns. Verified view switching, retained filters, all four choices, six rule tests and passing page validation.
 - [x] Make Calendar open on Monthly Calendar with All by default, from every entry point. Verified bare /calendar, the Events page Calendar chip, and switching to Upcoming.
 - [x] Include all public pages owned by people matched in Search and label each profile/page type. Verified Ainsley Burrows and all four public pages, Artists filter, Fashion LN, and five search rule tests.
