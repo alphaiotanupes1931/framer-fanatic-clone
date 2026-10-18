@@ -16,8 +16,6 @@ export const Route = createFileRoute("/admin/storage")({
   head: () => ({ meta: [{ title: "Admin: Storage - Planet Baltimore" }] }),
 });
 
-const FREE_KEY = "admin_storage_free_gb";
-const RATE_KEY = "admin_dollars_per_credit";
 type Month = { month: string; gb_hours: number; end_bytes: number; added_bytes: number };
 type Summary = { bucket: string; kind: string; files: number; bytes: number };
 type Daily = { day: string; files: number; bytes: number };
