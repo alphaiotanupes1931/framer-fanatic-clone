@@ -31,11 +31,19 @@ export function PageBackButton({
     );
   }
 
+  // Always return to the page the person came from; the fixed destination is
+  // only used when there is no earlier page (opened from a shared link).
   return (
     <Button asChild variant="outline" size="sm" className="w-fit">
-      <Link to={resolvedTo} aria-label={resolvedLabel}>
+      <Link
+        to={resolvedTo}
+        aria-label="Back"
+        onClick={(e) => {
+          if (window.history.length > 1) { e.preventDefault(); router.history.back(); }
+        }}
+      >
         <ArrowLeft />
-        {resolvedLabel}
+        Back
       </Link>
     </Button>
   );
