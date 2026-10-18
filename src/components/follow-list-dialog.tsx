@@ -42,7 +42,7 @@ export function FollowListDialog({
           .eq("referred_by", profileId)
           .order("created_at", { ascending: false });
         if (!cancelled) {
-          setPeople(error ? [] : ((data ?? []) as FollowPerson[]));
+          setPeople(error ? [] : ((data ?? []) as FollowPerson[]).map((p) => ({ ...p, allowDms: null })));
           setLoading(false);
         }
         return;
