@@ -78,7 +78,7 @@ function VideosSignedIn() {
     if (!me) { toast.error("Please sign in"); return; }
     if (!file.type.startsWith("video/")) { toast.error("Please choose a video file"); return; }
     const cap = 100 * 1024 * 1024;
-    if (file.size > cap) { toast.error("Video must be under 100MB"); return; }
+    void cap;
     setLocalPreview(URL.createObjectURL(file));
     setUploading(true);
     const tId = toast.loading("Uploading video...");
@@ -245,7 +245,7 @@ function VideosSignedIn() {
               <label className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-6 text-sm text-neutral-600 hover:border-orange-400 hover:bg-orange-50 ${uploading ? "opacity-60 pointer-events-none" : "cursor-pointer"}`}>
                 <Upload className="h-5 w-5 text-orange-600" />
                 <span className="font-semibold">{uploading ? "Uploading..." : "Upload video file"}</span>
-                <span className="text-xs text-neutral-500">MP4, MOV, WebM up to 100MB</span>
+                <span className="text-xs text-neutral-500">MP4, MOV, WebM</span>
                 <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
               </label>
               {localPreview && (
