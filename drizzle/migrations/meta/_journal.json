@@ -386,6 +386,13 @@
       "when": 1792351847120,
       "tag": "0054_admin_usage_stats",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1792352441837,
+      "tag": "0055_admin_storage_monthly",
+      "breakpoints": true
     }
   ]
 }
