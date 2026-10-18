@@ -100,16 +100,21 @@ export function FollowListDialog({
                 onClick={() => onOpenChange(false)}
                 className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-hover"
               >
-                <Avatar className="h-11 w-11">
+                <Avatar className="h-11 w-11 shrink-0">
                   <SmartAvatarImage src={person.avatar_url ?? undefined} alt="" />
                   <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground">{name}</p>
                   <p className="truncate text-xs text-muted-foreground">
                     {person.username ? `@${person.username}` : person.neighborhood || "Baltimore"}
                   </p>
                 </div>
+                {person.allowDms !== null && (
+                  <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                    {person.allowDms ? "Posts & Messages" : "Posts Only"}
+                  </span>
+                )}
               </Link>
             );
           })}
