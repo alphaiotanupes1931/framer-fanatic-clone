@@ -379,6 +379,13 @@
       "when": 1792348452944,
       "tag": "0053_admin_trash_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1792351847120,
+      "tag": "0054_admin_usage_stats",
+      "breakpoints": true
     }
   ]
 }

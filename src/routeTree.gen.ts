@@ -68,7 +68,9 @@ import { Route as AdminBlockedEmailsRouteImport } from './routes/admin.blocked-e
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminDesignSystemRouteImport } from './routes/admin.design-system'
 import { Route as AdminEmailGroupsRouteImport } from './routes/admin.email-groups'
+import { Route as AdminEmailUsageRouteImport } from './routes/admin.email-usage'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminStorageRouteImport } from './routes/admin.storage'
 import { Route as AdminStripeLogsRouteImport } from './routes/admin.stripe-logs'
 import { Route as AdminTrashRouteImport } from './routes/admin.trash'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -406,9 +408,19 @@ const AdminEmailGroupsRoute = AdminEmailGroupsRouteImport.update({
   path: '/admin/email-groups',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEmailUsageRoute = AdminEmailUsageRouteImport.update({
+  id: '/admin/email-usage',
+  path: '/admin/email-usage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStorageRoute = AdminStorageRouteImport.update({
+  id: '/admin/storage',
+  path: '/admin/storage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminStripeLogsRoute = AdminStripeLogsRouteImport.update({
@@ -676,7 +688,9 @@ export interface FileRoutesByFullPath {
   '/admin/content': typeof AdminContentRoute
   '/admin/design-system': typeof AdminDesignSystemRoute
   '/admin/email-groups': typeof AdminEmailGroupsRoute
+  '/admin/email-usage': typeof AdminEmailUsageRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/storage': typeof AdminStorageRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/admin/users': typeof AdminUsersRoute
@@ -778,7 +792,9 @@ export interface FileRoutesByTo {
   '/admin/content': typeof AdminContentRoute
   '/admin/design-system': typeof AdminDesignSystemRoute
   '/admin/email-groups': typeof AdminEmailGroupsRoute
+  '/admin/email-usage': typeof AdminEmailUsageRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/storage': typeof AdminStorageRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/admin/users': typeof AdminUsersRoute
@@ -881,7 +897,9 @@ export interface FileRoutesById {
   '/admin/content': typeof AdminContentRoute
   '/admin/design-system': typeof AdminDesignSystemRoute
   '/admin/email-groups': typeof AdminEmailGroupsRoute
+  '/admin/email-usage': typeof AdminEmailUsageRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/storage': typeof AdminStorageRoute
   '/admin/stripe-logs': typeof AdminStripeLogsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/admin/users': typeof AdminUsersRoute
@@ -985,7 +1003,9 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/design-system'
     | '/admin/email-groups'
+    | '/admin/email-usage'
     | '/admin/login'
+    | '/admin/storage'
     | '/admin/stripe-logs'
     | '/admin/trash'
     | '/admin/users'
@@ -1087,7 +1107,9 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/design-system'
     | '/admin/email-groups'
+    | '/admin/email-usage'
     | '/admin/login'
+    | '/admin/storage'
     | '/admin/stripe-logs'
     | '/admin/trash'
     | '/admin/users'
@@ -1189,7 +1211,9 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/design-system'
     | '/admin/email-groups'
+    | '/admin/email-usage'
     | '/admin/login'
+    | '/admin/storage'
     | '/admin/stripe-logs'
     | '/admin/trash'
     | '/admin/users'
@@ -1292,7 +1316,9 @@ export interface RootRouteChildren {
   AdminContentRoute: typeof AdminContentRoute
   AdminDesignSystemRoute: typeof AdminDesignSystemRoute
   AdminEmailGroupsRoute: typeof AdminEmailGroupsRoute
+  AdminEmailUsageRoute: typeof AdminEmailUsageRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminStorageRoute: typeof AdminStorageRoute
   AdminStripeLogsRoute: typeof AdminStripeLogsRoute
   AdminTrashRoute: typeof AdminTrashRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -1750,11 +1776,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEmailGroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/email-usage': {
+      id: '/admin/email-usage'
+      path: '/admin/email-usage'
+      fullPath: '/admin/email-usage'
+      preLoaderRoute: typeof AdminEmailUsageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/storage': {
+      id: '/admin/storage'
+      path: '/admin/storage'
+      fullPath: '/admin/storage'
+      preLoaderRoute: typeof AdminStorageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/stripe-logs': {
@@ -2111,7 +2151,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminContentRoute: AdminContentRoute,
   AdminDesignSystemRoute: AdminDesignSystemRoute,
   AdminEmailGroupsRoute: AdminEmailGroupsRoute,
+  AdminEmailUsageRoute: AdminEmailUsageRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminStorageRoute: AdminStorageRoute,
   AdminStripeLogsRoute: AdminStripeLogsRoute,
   AdminTrashRoute: AdminTrashRoute,
   AdminUsersRoute: AdminUsersRoute,
