@@ -3836,6 +3836,15 @@ export type Database = {
           files: number
         }[]
       }
+      admin_storage_monthly: {
+        Args: never
+        Returns: {
+          added_bytes: number
+          end_bytes: number
+          gb_hours: number
+          month: string
+        }[]
+      }
       admin_storage_summary: {
         Args: never
         Returns: {
