@@ -273,7 +273,7 @@ function CreatePostPage() {
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
         <HeroBanner
           title="Create Post"
-          subtitle={org ? `Posting to ${org.name}. It also appears in the On Planet feed.` : "Share what's happening in Baltimore."}
+          subtitle={org ? `Posting to ${org.name}.` : "Share what's happening in Baltimore."}
         />
         <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5 sm:p-6">
           {/* Type tabs */}

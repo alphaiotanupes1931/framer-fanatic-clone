@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartAvatarImage } from "@/components/shared/smart-img";
+import { getFollowedPages, PAGE_TYPE_LABEL } from "@/lib/followed-pages";
+import { orgPath } from "@/lib/org-paths";
 
 type FollowPerson = {
   id: string;
@@ -14,6 +16,8 @@ type FollowPerson = {
   avatar_url: string | null;
   neighborhood: string | null;
   allowDms: boolean | null;
+  pageType?: string;
+  href?: string;
 };
 
 const formatName = (value: string) => value.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -67,14 +71,18 @@ export function FollowListDialog({
         dmById.set(id, (row as { allow_dms?: boolean | null }).allow_dms !== false);
         return id;
       })));
+      const pages: FollowPerson[] = mode === "following"
+        ? (await getFollowedPages(profileId)).map((o) => ({ id: o.id, display_name: o.name, username: null, avatar_url: o.avatar_url, neighborhood: null, allowDms: o.allowDms, pageType: o.type, href: orgPath(o.type, o.slug) }))
+        : [];
+      if (cancelled) return;
       if (!ids.length) {
-        setPeople([]);
+        setPeople(pages);
         setLoading(false);
         return;
       }
       const { data } = await supabase.rpc("public_profiles_by_ids", { _ids: ids });
       if (!cancelled) {
-        setPeople(((data ?? []) as Omit<FollowPerson, "allowDms">[]).map((p) => ({ ...p, allowDms: dmById.get(p.id) ?? null })));
+        setPeople(((data ?? []) as Omit<FollowPerson, "allowDms">[]).map((p) => ({ ...p, allowDms: dmById.get(p.id) ?? null })).concat(pages));
         setLoading(false);
       }
     })();
@@ -85,7 +93,7 @@ export function FollowListDialog({
   const shown = useMemo(() => {
     if (!term) return people;
     return people.filter((person) =>
-      `${person.display_name ?? ""} ${person.username ?? ""} ${person.neighborhood ?? ""}`
+      `${person.display_name ?? ""} ${person.username ?? ""} ${person.neighborhood ?? ""} ${person.pageType ? PAGE_TYPE_LABEL[person.pageType] : ""}`
         .toLowerCase()
         .includes(term),
     );
@@ -129,9 +137,9 @@ export function FollowListDialog({
           ) : shown.length === 0 ? (
             <p className="p-6 text-center text-sm text-muted-foreground">No one matches that search.</p>
           ) : shown.map((person) => {
-            const name = formatName(person.display_name || person.username || "User");
-            return (
-              <Link
+            const name = person.pageType ? (person.display_name || "Page") : formatName(person.display_name || person.username || "User");
+            const body = (
+              <>
                 key={person.id}
                 to="/$username"
                 params={{ username: person.username || person.id }}
@@ -145,7 +153,7 @@ export function FollowListDialog({
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground">{name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {person.username ? `@${person.username}` : person.neighborhood || "Baltimore"}
+                    {person.pageType ? PAGE_TYPE_LABEL[person.pageType] : person.username ? `@${person.username}` : person.neighborhood || "Baltimore"}
                   </p>
                 </div>
                 {person.allowDms !== null && (
@@ -153,7 +161,13 @@ export function FollowListDialog({
                     {person.allowDms ? "Posts & Messages" : "Posts Only"}
                   </span>
                 )}
-              </Link>
+              </>
+            );
+            const cls = "flex items-center gap-3 rounded-lg px-3 py-3";
+            return person.href ? (
+              <a key={person.id} href={person.href} onClick={() => onOpenChange(false)} className={cls}>{body}</a>
+            ) : (
+              <Link key={person.id} to="/$username" params={{ username: person.username || person.id }} onClick={() => onOpenChange(false)} className={cls}>{body}</Link>
             );
           })}
         </div>
