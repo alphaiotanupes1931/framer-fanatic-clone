@@ -239,7 +239,7 @@ function CreatePostPage() {
         text_color: postType === "text" ? (bg.bg ? bg.fg : "#1c1917") : null,
         font_size: postType === "text" ? fontSize : null,
         category,
-        tag: tag || null,
+        tag: tag.trim() || null,
         visibility,
         excluded_user_ids: excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
