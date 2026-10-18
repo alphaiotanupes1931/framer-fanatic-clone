@@ -81,31 +81,36 @@ function AdminStoragePage() {
     const start = new Date(m.month + "T00:00:00");
     const end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
     const hours = (end.getTime() - start.getTime()) / 3600000;
-    return { ...m, label: start.toLocaleDateString("en-US", { month: "long", year: "numeric" }), ...monthlyStorageCharge(Number(m.gb_hours), hours, 0, DOLLARS_PER_CREDIT) };
+    const includedGb = MONTHLY_INCLUDED_CREDITS / (FILE_STORAGE_CREDITS_PER_GB_HOUR * hours);
+    const avgGb = Number(m.gb_hours) / hours;
+    return { ...m, includedGb, overGb: Math.max(0, avgGb - includedGb), label: start.toLocaleDateString("en-US", { month: "long", year: "numeric" }), ...monthlyStorageCharge(Number(m.gb_hours), hours, includedGb, DOLLARS_PER_CREDIT) };
   });
+  const includedNow = monthRows[0]?.includedGb ?? MONTHLY_INCLUDED_CREDITS / (FILE_STORAGE_CREDITS_PER_GB_HOUR * 720);
+  const remainingBytes = Math.max(0, includedNow * 1024 ** 3 - total);
 
   return (
     <AdminShell title="Storage" subtitle="Space used by photos, videos, PDFs and other uploads">
       {loading ? <div className="p-8 text-sm text-neutral-500">Loading...</div> : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <StatCard label="Storage available" value="No cap" hint="Uploads never stop. Each GB stored is billed by the hour." />
-            <StatCard label="Included each month" value={`${MONTHLY_INCLUDED_CREDITS} credits`} hint="Shared by storage, database and site traffic" />
-            <StatCard label="Storage cost this month" value={`$${(monthRows[0]?.dollars ?? 0).toFixed(2)}`} hint={`${(monthRows[0]?.credits ?? 0).toFixed(3)} credits so far`} />
+            <StatCard label="Included storage" value={`${Math.round(includedNow)} GB`} hint={`Using ${formatBytes(total)} now`} />
+            <StatCard label="Left before extra charges" value={formatBytes(remainingBytes)} hint="Resets on the 1st of each month" />
+            <StatCard label="Additional storage cost this month" value={`$${(monthRows[0]?.dollars ?? 0).toFixed(2)}`} hint="Only storage above the included amount" />
           </div>
           <section className="rounded-xl border border-neutral-200 bg-white p-5">
-            <h2 className="text-sm font-semibold text-neutral-900">Storage cost by month</h2>
-            <p className="mt-1 text-xs text-neutral-500">Updates as people upload. Based on {FILE_STORAGE_CREDITS_PER_GB_HOUR} credits per GB per hour at ${DOLLARS_PER_CREDIT.toFixed(2)} per credit.</p>
+            <h2 className="text-sm font-semibold text-neutral-900">Additional storage cost by month</h2>
+            <p className="mt-1 text-xs text-neutral-500">Updates as people upload. Only storage above the included amount is charged.</p>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="text-xs uppercase text-neutral-500"><tr><th className="py-2">Month</th><th>Stored at end</th><th>Added</th><th>Credits</th><th className="text-right">Cost</th></tr></thead>
+                <thead className="text-xs uppercase text-neutral-500"><tr><th className="py-2">Month</th><th>Stored at end</th><th>Added</th><th>Included</th><th>Over included</th><th className="text-right">Additional cost</th></tr></thead>
                 <tbody className="divide-y divide-neutral-100">
                   {monthRows.map((m) => (
                     <tr key={m.month}>
                       <td className="py-2 font-medium text-neutral-900">{m.label}</td>
                       <td className="text-neutral-700">{formatBytes(Number(m.end_bytes))}</td>
                       <td className="text-neutral-700">{formatBytes(Number(m.added_bytes))}</td>
-                      <td className="text-neutral-700">{m.credits.toFixed(3)}</td>
+                      <td className="text-neutral-700">{Math.round(m.includedGb)} GB</td>
+                      <td className="text-neutral-700">{m.overGb > 0 ? `${m.overGb.toFixed(2)} GB` : "None"}</td>
                       <td className="text-right font-semibold text-neutral-900">${m.dollars.toFixed(2)}</td>
                     </tr>
                   ))}
