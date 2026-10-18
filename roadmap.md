@@ -31,3 +31,4 @@
 - [x] Groups: Documents tab for uploads
 - [x] Top search bar: pages incl. Arts Orgs
 - [x] Back arrows return to previous page
+- [x] Lookbook: required name, optional captions, caption-less items show photo only. Verified required-name toast, optional caption placeholder, photo-only item view and grid, caption added later renders, and the test item was removed.
