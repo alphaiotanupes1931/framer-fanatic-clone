@@ -46,11 +46,11 @@ export function EmployeeLoginLink() {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Login access</DialogTitle>
-            <DialogDescription>Use the staff email and password the page owner gave you.</DialogDescription>
+            <DialogDescription>Use the email and password the page owner gave you for access to edit this page.</DialogDescription>
           </DialogHeader>
           <form className="space-y-4" onSubmit={submit}>
             <div className="space-y-1.5">
-              <Label htmlFor="emp-username">Staff email</Label>
+              <Label htmlFor="emp-username">Email</Label>
               <Input id="emp-username" type="email" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
             <div className="space-y-1.5">
