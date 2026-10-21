@@ -131,20 +131,25 @@ export function ExternalShareDialog({
         </div>
 
         <div className="grid grid-cols-3 gap-4 px-5 pt-3">
-          {apps.map((a) => (
-            <a
-              key={a.name}
-              href={a.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1.5"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full text-white" style={{ backgroundColor: a.color }}>
-                <a.icon className="h-5 w-5" />
-              </div>
-              <div className="text-xs font-medium text-neutral-800">{a.name}</div>
-            </a>
-          ))}
+          {apps.map((a) => {
+            const inner = (
+              <>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full text-white" style={{ backgroundColor: a.color }}>
+                  <a.icon className="h-5 w-5" />
+                </div>
+                <div className="text-xs font-medium text-neutral-800">{a.name}</div>
+              </>
+            );
+            return a.onClick ? (
+              <button key={a.name} type="button" onClick={a.onClick} className="flex flex-col items-center gap-1.5">
+                {inner}
+              </button>
+            ) : (
+              <a key={a.name} href={a.href} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5">
+                {inner}
+              </a>
+            );
+          })}
         </div>
 
         <div className="px-5 py-4">
