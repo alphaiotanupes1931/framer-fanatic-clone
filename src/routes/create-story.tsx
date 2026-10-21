@@ -314,7 +314,10 @@ function CreateStoryPage() {
               <button type="button" title="Clear formatting" className={tbBtn} onClick={() => exec("removeFormat")}><RemoveFormatting className="h-4 w-4" /></button>
             </div>
             <div
-              ref={editorRef}
+              ref={(el) => {
+                editorRef.current = el;
+                if (el && !el.innerHTML && form.content) el.innerHTML = form.content;
+              }}
               contentEditable
               suppressContentEditableWarning
               data-placeholder="Start writing your story..."
