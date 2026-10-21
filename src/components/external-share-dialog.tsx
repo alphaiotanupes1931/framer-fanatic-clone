@@ -33,9 +33,14 @@ export function ExternalShareDialog({
   if (!open) return null;
   const text = title || "Check this out on Planet Baltimore";
   const enc = encodeURIComponent;
-  const apps = [
+  const shareToInstagram = async () => {
+    try { await navigator.clipboard.writeText(url); toast.success("Link copied. Paste it in Instagram."); }
+    catch { toast.error("Could not copy the link"); }
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+  };
+  const apps: Array<{ name: string; icon: typeof Facebook; href?: string; onClick?: () => void; color: string }> = [
     { name: "Facebook", icon: Facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`, color: "#1877F2" },
-    { name: "IG Stories", icon: Instagram, href: `https://www.instagram.com/`, color: "#E1306C" },
+    { name: "Instagram", icon: Instagram, onClick: shareToInstagram, color: "#E1306C" },
     { name: "WhatsApp", icon: MessageCircle, href: `https://wa.me/?text=${enc(text + " " + url)}`, color: "#25D366" },
     { name: "LinkedIn", icon: Linkedin, href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`, color: "#0A66C2" },
     { name: "Telegram", icon: SendIcon, href: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`, color: "#26A5E4" },
