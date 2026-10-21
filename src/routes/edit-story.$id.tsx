@@ -83,9 +83,6 @@ function EditStoryPage() {
         description: (data as { link_description?: string | null }).link_description || "",
       });
       setLoading(false);
-      setTimeout(() => {
-        if (editorRef.current) editorRef.current.innerHTML = data.content || "";
-      }, 0);
     })();
   }, [id, navigate]);
 
@@ -259,7 +256,10 @@ function EditStoryPage() {
               <button type="button" className={tbBtn} onClick={() => exec("removeFormat")}><RemoveFormatting className="h-4 w-4" /></button>
             </div>
             <div
-              ref={editorRef}
+              ref={(el) => {
+                editorRef.current = el;
+                if (el && !el.innerHTML && form.content) el.innerHTML = form.content;
+              }}
               contentEditable
               suppressContentEditableWarning
               data-placeholder="Start writing..."
