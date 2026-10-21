@@ -2228,7 +2228,10 @@ function AboutTab({ profile, canEdit, showEmail }: { profile: any; canEdit: bool
           <dl className="mt-3 grid gap-3 sm:grid-cols-2">
             {rows.map((r) => (
               <div key={r.label}>
-                <dt className="text-xs text-muted-foreground">{r.label}</dt>
+                <dt className="text-xs text-muted-foreground">
+                  {r.label}
+                  {r.note && <span className="ml-1 text-[10px] font-normal opacity-70">{r.note}</span>}
+                </dt>
                 <dd className="break-all text-sm font-medium text-foreground">{r.value}</dd>
               </div>
             ))}
