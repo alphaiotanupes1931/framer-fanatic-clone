@@ -2167,12 +2167,12 @@ function AboutTab({ profile, canEdit, showEmail }: { profile: any; canEdit: bool
     toast.success("CV saved");
   };
 
-  const rows: Array<{ label: string; value: string | null }> = [
+  const rows: Array<{ label: string; value: string | null; note?: string }> = [
     { label: "Name", value: profile?.display_name || null },
     { label: "Username", value: profile?.username ? `@${profile.username}` : null },
     { label: "Neighborhood", value: profile?.neighborhood || null },
     { label: "City", value: profile?.city || null },
-    { label: "Email", value: showEmail ? profile?.email || null : null },
+    { label: "Email", value: showEmail ? profile?.email || null : null, note: "(not visible to public)" },
     { label: "Website", value: profile?.website || null },
   ].filter((r) => !!r.value);
   return (
