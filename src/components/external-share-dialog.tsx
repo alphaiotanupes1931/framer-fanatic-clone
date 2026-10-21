@@ -34,6 +34,20 @@ export function ExternalShareDialog({
   const text = title || "Check this out on Planet Baltimore";
   const enc = encodeURIComponent;
   const shareToInstagram = async () => {
+    // Instagram has no web share URL, so use the device share sheet: the user
+    // picks Instagram there and the OS passes the link over, no copy-paste.
+    const shareData = { title: text, text, url };
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        if (!navigator.canShare || navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          return;
+        }
+      } catch (e: unknown) {
+        // AbortError means the user closed the share sheet; anything else falls through to the copy flow.
+        if (e instanceof DOMException && e.name === "AbortError") return;
+      }
+    }
     try { await navigator.clipboard.writeText(url); toast.success("Link copied. Paste it in Instagram."); }
     catch { toast.error("Could not copy the link"); }
     window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
