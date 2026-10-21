@@ -33,9 +33,14 @@ export function ExternalShareDialog({
   if (!open) return null;
   const text = title || "Check this out on Planet Baltimore";
   const enc = encodeURIComponent;
-  const apps = [
+  const shareToInstagram = async () => {
+    try { await navigator.clipboard.writeText(url); toast.success("Link copied. Paste it in Instagram."); }
+    catch { toast.error("Could not copy the link"); }
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+  };
+  const apps: Array<{ name: string; icon: typeof Facebook; href?: string; onClick?: () => void; color: string }> = [
     { name: "Facebook", icon: Facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`, color: "#1877F2" },
-    { name: "IG Stories", icon: Instagram, href: `https://www.instagram.com/`, color: "#E1306C" },
+    { name: "Instagram", icon: Instagram, onClick: shareToInstagram, color: "#E1306C" },
     { name: "WhatsApp", icon: MessageCircle, href: `https://wa.me/?text=${enc(text + " " + url)}`, color: "#25D366" },
     { name: "LinkedIn", icon: Linkedin, href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`, color: "#0A66C2" },
     { name: "Telegram", icon: SendIcon, href: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`, color: "#26A5E4" },
@@ -126,20 +131,25 @@ export function ExternalShareDialog({
         </div>
 
         <div className="grid grid-cols-3 gap-4 px-5 pt-3">
-          {apps.map((a) => (
-            <a
-              key={a.name}
-              href={a.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1.5"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full text-white" style={{ backgroundColor: a.color }}>
-                <a.icon className="h-5 w-5" />
-              </div>
-              <div className="text-xs font-medium text-neutral-800">{a.name}</div>
-            </a>
-          ))}
+          {apps.map((a) => {
+            const inner = (
+              <>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full text-white" style={{ backgroundColor: a.color }}>
+                  <a.icon className="h-5 w-5" />
+                </div>
+                <div className="text-xs font-medium text-neutral-800">{a.name}</div>
+              </>
+            );
+            return a.onClick ? (
+              <button key={a.name} type="button" onClick={a.onClick} className="flex flex-col items-center gap-1.5">
+                {inner}
+              </button>
+            ) : (
+              <a key={a.name} href={a.href} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5">
+                {inner}
+              </a>
+            );
+          })}
         </div>
 
         <div className="px-5 py-4">
