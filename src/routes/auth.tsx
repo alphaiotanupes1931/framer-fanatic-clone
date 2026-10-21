@@ -119,7 +119,8 @@ function AuthPage() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const cleanEmail = email.trim().toLowerCase();
+    const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
     setLoading(false);
     if (error) {
       if (/not confirmed/i.test(error.message) || (error as { code?: string }).code === "email_not_confirmed") {
@@ -333,13 +334,17 @@ function AuthPage() {
               <form onSubmit={handleSignIn} className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
-                  <Input id="signin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input id="signin-email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="signin-password"
+                      autoComplete="current-password"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       type={showSignInPw ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
