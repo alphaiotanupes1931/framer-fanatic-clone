@@ -8,6 +8,7 @@ import { Play, X, Bookmark, Heart, MessageCircle, Send, Share2, BellOff, Bell, T
 import { toast } from "sonner";
 import pbLogo from "@/assets/pb-logo.png";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { ImageUpload } from "@/components/shared/image-upload";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useVideoOrientation, orientationClass } from "@/hooks/use-video-orientation";
@@ -258,7 +259,7 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
   const [showComments, setShowComments] = useState(true);
   const [draft, setDraft] = useState("");
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ title: "", description: "" });
+  const [editForm, setEditForm] = useState({ title: "", description: "", thumbnail_url: "" });
   const [savingEdit, setSavingEdit] = useState(false);
   const [posting, setPosting] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -359,7 +360,7 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
   };
 
   const startEdit = () => {
-    setEditForm({ title: video.title ?? "", description: video.description ?? "" });
+    setEditForm({ title: video.title ?? "", description: video.description ?? "", thumbnail_url: video.thumbnail_url ?? "" });
     setEditing(true);
   };
 
@@ -368,10 +369,11 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
     if (!title) { toast.error("Add a title"); return; }
     setSavingEdit(true);
     const description = editForm.description.trim() || null;
-    const { error } = await supabase.from("videos").update({ title, description } as any).eq("id", video.id);
+    const thumbnail_url = editForm.thumbnail_url || null;
+    const { error } = await supabase.from("videos").update({ title, description, thumbnail_url } as any).eq("id", video.id);
     setSavingEdit(false);
     if (error) { toast.error(error.message); return; }
-    onVideoChange({ ...video, title, description });
+    onVideoChange({ ...video, title, description, thumbnail_url });
     setEditing(false);
     toast.success("Video updated");
   };
@@ -438,6 +440,16 @@ function VideoActions({ video, onVideoChange }: { video: Video; onVideoChange: (
             placeholder="Description"
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
+          <div>
+            <div className="mb-1.5 text-xs font-semibold text-neutral-700">Cover photo (optional)</div>
+            <ImageUpload
+              value={editForm.thumbnail_url}
+              onChange={(url) => setEditForm({ ...editForm, thumbnail_url: url })}
+              label="Upload cover photo"
+              aspect={16 / 9}
+            />
+            <p className="mt-1 text-xs text-neutral-500">Shown before the video plays. Without one, the first frame is used.</p>
+          </div>
           <div className="flex justify-end gap-2">
             <button onClick={() => setEditing(false)} className="rounded-full px-4 py-2 text-sm font-semibold">Cancel</button>
             <button onClick={saveEdit} disabled={savingEdit} className="rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Save changes</button>
