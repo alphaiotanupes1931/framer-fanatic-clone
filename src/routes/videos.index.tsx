@@ -20,6 +20,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 const VIDEO_CATEGORIES = ["All", "Music", "Visual Art", "Events", "Community", "Dance & Performance", "Food & Nightlife", "News"] as const;
 import { toast } from "sonner";
 import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { ImageUpload } from "@/components/shared/image-upload";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { pageHead } from "@/lib/seo";
 
@@ -53,7 +54,7 @@ function VideosSignedIn() {
   const [cat, setCat] = useState<(typeof VIDEO_CATEGORIES)[number]>("All");
   const [shape, setShape] = useState<"all" | "landscape" | "portrait">("all");
   const UPLOAD_CATEGORIES = VIDEO_CATEGORIES.filter((c) => c !== "All");
-  const [form, setForm] = useState({ title: "", description: "", video_url: "", category: "", orientation: "" as string, aspect_ratio: null as number | null });
+  const [form, setForm] = useState({ title: "", description: "", video_url: "", thumbnail_url: "", category: "", orientation: "" as string, aspect_ratio: null as number | null });
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
 
@@ -128,11 +129,11 @@ function VideosSignedIn() {
     if (!form.orientation) { toast.error("Please select portrait or landscape"); return; }
     const { error } = await supabase.from("videos").insert({
       user_id: me.id, title: form.title.trim(), description: form.description.trim() || null,
-      video_url: form.video_url.trim(), thumbnail_url: null, category: form.category,
+      video_url: form.video_url.trim(), thumbnail_url: form.thumbnail_url || null, category: form.category,
       orientation: form.orientation, aspect_ratio: form.aspect_ratio,
     } as any);
     if (error) { toast.error(error.message); return; }
-    setOpen(false); setForm({ title: "", description: "", video_url: "", category: "", orientation: "", aspect_ratio: null });
+    setOpen(false); setForm({ title: "", description: "", video_url: "", thumbnail_url: "", category: "", orientation: "", aspect_ratio: null });
     setLocalPreview(null);
     toast.success("Video added"); load();
   };
@@ -248,6 +249,16 @@ function VideosSignedIn() {
                 <span className="text-xs text-neutral-500">MP4, MOV, WebM</span>
                 <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
               </label>
+              <div>
+                <div className="mb-1.5 text-xs font-semibold text-neutral-700">Cover photo (optional)</div>
+                <ImageUpload
+                  value={form.thumbnail_url}
+                  onChange={(url) => setForm((f) => ({ ...f, thumbnail_url: url }))}
+                  label="Upload cover photo"
+                  aspect={16 / 9}
+                />
+                <p className="mt-1 text-xs text-neutral-500">Shown before the video plays. Without one, the first frame is used.</p>
+              </div>
               {localPreview && (
                 <SmartVideo
                   src={localPreview}
