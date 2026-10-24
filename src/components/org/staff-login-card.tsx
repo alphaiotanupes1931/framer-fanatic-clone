@@ -83,7 +83,7 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
   };
 
   return (
-    <div className={`mt-4 rounded-xl border border-neutral-200 bg-white ${open || rows.length || codeFor ? "p-4" : "inline-block w-fit px-3 py-2"}`}>
+    <div className={`mt-4 rounded-xl border border-neutral-200 bg-white ${open || codeFor ? "p-4" : "inline-block w-fit px-3 py-2"}`}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <KeyRound className="h-4 w-4 text-[#d4580a]" />
@@ -109,11 +109,11 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
             });
           }}
         >
-          {rows.length ? "Change" : "Create"}
+          {open ? "Close" : rows.length ? "Change" : "Create"}
         </Button>
       </div>
 
-      {rows.length > 0 && (
+      {open && rows.length > 0 && (
         <ul className="mt-3 space-y-1.5">
           {rows.map((r) => (
             <li key={r.id} className="flex items-center justify-between rounded-md bg-neutral-50 px-3 py-2 text-sm">
@@ -134,7 +134,7 @@ export function StaffLoginCard({ orgId, orgType = "business" }: { orgId: string;
         </ul>
       )}
 
-      {rows.length > 0 && (
+      {open && rows.length > 0 && (
         <div className="mt-3 rounded-lg border border-[#ed4204]/30 bg-[#ed4204]/5 px-3 py-2.5">
           <p className="text-xs font-medium text-neutral-700">Send them this sign-in link</p>
           <div className="mt-1 flex items-center gap-2">
