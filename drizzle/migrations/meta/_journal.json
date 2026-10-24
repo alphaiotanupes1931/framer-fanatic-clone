@@ -393,6 +393,13 @@
       "when": 1792352441837,
       "tag": "0055_admin_storage_monthly",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1792867454889,
+      "tag": "0056_add_page_story_tags",
+      "breakpoints": true
     }
   ]
 }

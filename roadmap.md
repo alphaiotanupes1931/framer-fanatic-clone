@@ -5,6 +5,7 @@
 - [x] Redesign Updates tab to match reference screenshot and seed sample content
 
 ## Active
+- [x] Add custom tags to business story creation. Verified bold, italic, tag addition, duplicate prevention and removal on the signed-in owner's business Stories tab; tag storage column confirmed. No test story published.
 - [x] Enable bold and italic across story composers and preserve formatting in readers. Verified selecting text and applying both controls in the signed-in story writer; no stories were published during testing.
 - [x] Update referral parsing and retained recipient lists, restore own-invite deletion, and pass three recipient rule tests.
 - [ ] Verify referral deletion and retained recipients in the signed-in screen and provide screenshot proof. Blocked: preview is signed out and requesting user has no matching account for automatic sign-in.

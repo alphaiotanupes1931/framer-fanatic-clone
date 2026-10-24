@@ -7,6 +7,7 @@ import { ImageUpload } from "@/components/shared/image-upload";
 import { stripHtml, timeAgo } from "@/lib/text-utils";
 import { RichTextEditor, richHtmlIsEmpty } from "@/components/rich-text-editor";
 import DOMPurify from "isomorphic-dompurify";
+import { Button } from "@/components/ui/button";
 
 type OrgStory = {
   id: string;
@@ -15,6 +16,7 @@ type OrgStory = {
   media_url: string | null;
   link_url: string | null;
   created_at: string;
+  tags: string[];
 };
 
 function readMinutes(body: string | null) {
@@ -23,12 +25,19 @@ function readMinutes(body: string | null) {
 }
 
 /** Stories on a page, presented with the same reading layout as the Stories page. */
-export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }: { orgId: string; canManage: boolean; title?: string }) {
+export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", allowTags = false }: { orgId: string; canManage: boolean; title?: string; allowTags?: boolean }) {
   const [items, setItems] = useState<OrgStory[]>([]);
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
   const [active, setActive] = useState<OrgStory | null>(null);
-  const [form, setForm] = useState({ title: "", body: "", media_url: "", link_url: "" });
+  const [form, setForm] = useState({ title: "", body: "", media_url: "", link_url: "", tags: [] as string[] });
+  const [tagInput, setTagInput] = useState("");
+  const addTag = () => {
+    const tag = tagInput.trim().replace(/^#+/, "");
+    if (!tag) return;
+    setForm((f) => ({ ...f, tags: f.tags.some((existing) => existing.toLowerCase() === tag.toLowerCase()) ? f.tags : [...f.tags, tag] }));
+    setTagInput("");
+  };
   const singular = tabTitle === "Stories" ? "story" : tabTitle.replace(/s$/, "").toLowerCase();
   const [saving, setSaving] = useState(false);
 
@@ -36,7 +45,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
     setLoading(true);
     const { data } = await supabase
       .from("organization_posts")
-      .select("id, title, body, media_url, link_url, created_at")
+      .select("id, title, body, media_url, link_url, created_at, tags")
       .eq("org_id", orgId)
       .eq("kind", "press")
       .order("created_at", { ascending: false });
@@ -59,10 +68,12 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
       body: form.body.trim() || null,
       media_url: form.media_url || null,
       link_url: form.link_url.trim() || null,
+      tags: allowTags ? form.tags : [],
     });
     setSaving(false);
     if (error) return toast.error(error.message);
-    setForm({ title: "", body: "", media_url: "", link_url: "" });
+    setForm({ title: "", body: "", media_url: "", link_url: "", tags: [] });
+    setTagInput("");
     setComposing(false);
     toast.success("Published");
     void load();
@@ -119,6 +130,24 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
             onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))}
           />
 
+          {allowTags && (
+            <div className="space-y-2">
+              <label htmlFor={`story-tags-${orgId}`} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tags</label>
+              <div className="flex items-center gap-2">
+                <input id={`story-tags-${orgId}`} value={tagInput} onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(); } }}
+                  placeholder="Add a tag…" className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground" />
+                <Button type="button" variant="outline" onClick={addTag} className="hover:bg-background hover:text-foreground"><Plus /> Add</Button>
+              </div>
+              {form.tags.length > 0 && <div className="flex flex-wrap gap-2">
+                {form.tags.map((tag) => <span key={tag} className="inline-flex max-w-full items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
+                  <span className="break-all">#{tag}</span>
+                  <Button type="button" variant="ghost" size="icon-sm" title={`Remove ${tag}`} aria-label={`Remove ${tag}`} className="h-6 w-6 shrink-0 p-0 hover:bg-transparent hover:text-secondary-foreground" onClick={() => setForm((f) => ({ ...f, tags: f.tags.filter((t) => t !== tag) }))}><X /></Button>
+                </span>)}
+              </div>}
+            </div>
+          )}
+
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Content</p>
             <RichTextEditor
@@ -147,6 +176,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
                 )}
                 <div className="space-y-2 p-4">
                   <h4 className="text-[15px] font-bold leading-snug text-foreground line-clamp-2">{s.title}</h4>
+                  {s.tags?.length > 0 && <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">{s.tags.map((tag) => <span key={tag} className="break-all">#{tag}</span>)}</div>}
                   {s.body && (
                     <p className="text-sm leading-relaxed text-muted-foreground line-clamp-3">{stripHtml(s.body)}</p>
                   )}
@@ -188,6 +218,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
                   <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{active.body}</div>
                 )
               )}
+              {active.tags?.length > 0 && <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">{active.tags.map((tag) => <span key={tag} className="break-all">#{tag}</span>)}</div>}
             </div>
           </div>
         </div>
