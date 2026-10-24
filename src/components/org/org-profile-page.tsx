@@ -879,7 +879,7 @@ export function OrgProfile() {
             <OrgPostList orgId={org.id} kind="update" canManage={canManage} />
           )}
           {tab === "Jobs" && <OpportunitiesTab orgId={org.id} canManage={canManage} />}
-          {tab === "Stories" && <OrgStoriesTab orgId={org.id} canManage={canManage} />}
+          {tab === "Stories" && <OrgStoriesTab orgId={org.id} canManage={canManage} allowTags={org.type === "business"} />}
           {(tab === "Threads" || tab === "Reviews") && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder={tab === "Reviews" ? "Leave a review…" : "Start a thread…"} />}
           {tab === "Board" && <BoardTab orgId={org.id} canManage={canManage} />}
           {tab === "Comments" && <DiscussionTab orgId={org.id} me={me} canManage={canManage} placeholder="Leave a comment…" />}

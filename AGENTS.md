@@ -16,4 +16,4 @@
 - Search combines direct page-name matches with public pages owned by matched profiles, deduplicating by page ID so separately named artist and business pages remain discoverable.
 - Calendar view and separate per-view organizer filters live in URL search parameters so switching views preserves each selection and browser history.
 - Referral recipients use one normalized text source persisted per account in browser storage; deletion confirms returned database IDs before updating the list, preventing stale parsing and silent failed deletes.
-- Page story composers use the shared rich-text editor and readers preserve its HTML formatting, so bold and italic survive publication without changing story storage.
+- Page story composers use the shared rich-text editor and readers preserve its HTML formatting; business Stories opt into custom tags stored on organization_posts, keeping tags separate from the story body.
