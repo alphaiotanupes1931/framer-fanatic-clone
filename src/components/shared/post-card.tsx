@@ -18,6 +18,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { PosterVideo } from "@/components/shared/poster-video";
 import { useReaction } from "@/hooks/use-reaction";
 import { FollowButton } from "@/components/shared/follow-button";
 import { MentionText } from "@/components/shared/mention-text";
