@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { PosterVideo } from "@/components/shared/poster-video";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,7 +51,7 @@ function FeedVideoCard({ video }: { video: any }) {
             <span className="text-sm font-semibold text-neutral-900">{a.display_name ?? a.username}</span>
           </Link>
         )}
-        <SmartVideo src={video.video_url} controls playsInline preload="metadata" className={`w-full bg-black ${video.orientation === "portrait" ? "max-h-[640px] object-contain" : ""}`} />
+        <PosterVideo src={video.video_url} poster={video.thumbnail_url} videoClassName={`w-full bg-black ${video.orientation === "portrait" ? "max-h-[640px] object-contain" : ""}`} />
         <div className="p-3">
           <h3 className="font-semibold text-neutral-900">{video.title}</h3>
           {video.description && <p className="mt-1 line-clamp-3 text-sm text-neutral-600">{video.description}</p>}
@@ -148,7 +149,7 @@ function Dashboard() {
   const { data: videos = [] } = useQuery({
     queryKey: ["home-videos"],
     queryFn: async () => {
-      const { data } = await supabase.from("videos").select("id, user_id, title, description, video_url, orientation, created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(15);
+      const { data } = await supabase.from("videos").select("id, user_id, title, description, video_url, thumbnail_url, orientation, created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(15);
       const rows = data ?? [];
       const ids = [...new Set(rows.map((v) => v.user_id))];
       const { data: people } = ids.length ? await supabase.rpc("public_profiles_by_ids", { _ids: ids }) : { data: [] as any[] };

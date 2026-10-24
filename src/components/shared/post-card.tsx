@@ -18,6 +18,7 @@ import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { PosterVideo } from "@/components/shared/poster-video";
 import { useReaction } from "@/hooks/use-reaction";
 import { FollowButton } from "@/components/shared/follow-button";
 import { MentionText } from "@/components/shared/mention-text";
@@ -111,7 +112,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
   };
 
   // Build unified media list. Prefer media_urls; fall back to legacy image_url / video_url.
-  const mediaList: { url: string; kind: "image" | "video" }[] = (() => {
+  const { mediaList, videoPoster } = (() => {
     const list: { url: string; kind: "image" | "video" }[] = [];
     const inferKind = (u: string): "image" | "video" =>
       /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u) ? "video" : "image";
@@ -121,7 +122,13 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       if (post.image_url) list.push({ url: post.image_url, kind: "image" });
       if (post.video_url) list.push({ url: post.video_url, kind: "video" });
     }
-    return list;
+    // Video posts: photos are the video's thumbnail, not separate slides.
+    const videos = list.filter((m) => m.kind === "video");
+    if ((post as { post_type?: string | null }).post_type === "video" && videos.length) {
+      const img = list.find((m) => m.kind === "image");
+      return { mediaList: videos, videoPoster: img?.url ?? null };
+    }
+    return { mediaList: list, videoPoster: null as string | null };
   })();
   const current = mediaList[mediaIdx];
   const prevMedia = () => setMediaIdx((i) => (i - 1 + mediaList.length) % mediaList.length);
@@ -348,13 +355,11 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
               />
             </Link>
           ) : (
-            <SmartVideo
+            <PosterVideo
               key={current.url}
               src={current.url}
-              controls
-              playsInline
-              preload="metadata"
-              className="w-full max-h-[320px] bg-white"
+              poster={videoPoster}
+              videoClassName="w-full max-h-[520px] bg-black"
             />
           )}
           {mediaList.length > 1 && (
