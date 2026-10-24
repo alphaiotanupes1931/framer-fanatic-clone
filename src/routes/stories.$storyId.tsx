@@ -16,7 +16,14 @@ import { LinkPreviewCard } from "@/components/shared/link-fields";
 
 export const Route = createFileRoute("/stories/$storyId")({
   component: StoryDetail,
-  head: () => ({ meta: [{ title: "Story - Planet Baltimore" }] }),
+  head: () => ({ meta: [
+    { title: "Story - Planet Baltimore" },
+    { name: "description", content: "Read stories from the Planet Baltimore community." },
+    { property: "og:title", content: "Story - Planet Baltimore" },
+    { property: "og:description", content: "Read stories from the Planet Baltimore community." },
+    { property: "og:type", content: "article" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 type Story = {
@@ -238,7 +245,7 @@ function StoryDetail() {
             /<\/?(?:br|div|p|span|strong|b|em|i|u|s|ul|ol|li|a|blockquote|h[1-6]|img|pre|code)\b[^>]*>/i.test(story.content) ||
             /&(?:nbsp|amp|lt|gt|quot|#\d+);/i.test(story.content) ? (
               <div
-                className="prose prose-neutral mt-6 max-w-none text-[17px] leading-relaxed text-foreground/90"
+                className="prose mt-6 max-w-none [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic text-[17px] leading-relaxed text-foreground/90"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(story.content) }}
               />
             ) : (

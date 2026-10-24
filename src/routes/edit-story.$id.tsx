@@ -20,6 +20,11 @@ export const Route = createFileRoute("/edit-story/$id")({
   head: () => ({
     meta: [
       { title: "Edit Story - Planet Baltimore" },
+      { name: "description", content: "Edit and format your Planet Baltimore story." },
+      { property: "og:title", content: "Edit Story - Planet Baltimore" },
+      { property: "og:description", content: "Edit and format your Planet Baltimore story." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -154,7 +159,7 @@ function EditStoryPage() {
     finally { setBusy(false); }
   };
 
-  const tbBtn = "inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 hover:bg-hover hover:text-neutral-900";
+  const tbBtn = "h-8 w-8 rounded-md p-0 text-foreground hover:bg-transparent hover:text-foreground";
 
   if (loading) return <AppLayout><div className="p-8 text-sm text-muted-foreground">Loading…</div></AppLayout>;
 
@@ -228,44 +233,47 @@ function EditStoryPage() {
 
         <div className="mt-8 space-y-2">
           <div className="text-sm font-semibold text-neutral-800">Content</div>
-          <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
-            <div className="flex flex-wrap items-center gap-1 border-b border-neutral-200 bg-neutral-50 p-1.5">
+          <div className="overflow-hidden rounded-xl border border-border bg-background">
+            <div className="flex flex-wrap items-center gap-1 border-b border-border bg-muted p-1.5" onMouseDown={(e) => { if ((e.target as HTMLElement).closest("button")) e.preventDefault(); }}>
               <select onChange={(e) => { exec("formatBlock", e.target.value); e.currentTarget.value = "p"; }} defaultValue="p"
                 className="h-8 rounded-md border border-transparent bg-transparent px-2 text-sm hover:bg-hover">
                 <option value="p">Normal</option><option value="h1">Heading 1</option>
                 <option value="h2">Heading 2</option><option value="h3">Heading 3</option>
               </select>
-              <span className="mx-1 h-5 w-px bg-neutral-200" />
-              <button type="button" className={tbBtn} onClick={() => exec("bold")}><Bold className="h-4 w-4" /></button>
-              <button type="button" className={tbBtn} onClick={() => exec("italic")}><Italic className="h-4 w-4" /></button>
-              <button type="button" className={tbBtn} onClick={() => exec("underline")}><Underline className="h-4 w-4" /></button>
-              <button type="button" className={tbBtn} onClick={() => exec("strikeThrough")}><Strikethrough className="h-4 w-4" /></button>
-              <span className="mx-1 h-5 w-px bg-neutral-200" />
-              <button type="button" className={tbBtn} onClick={() => exec("insertOrderedList")}><ListOrdered className="h-4 w-4" /></button>
-              <button type="button" className={tbBtn} onClick={() => exec("insertUnorderedList")}><List className="h-4 w-4" /></button>
-              <button type="button" className={tbBtn} onClick={() => exec("formatBlock", "blockquote")}><Quote className="h-4 w-4" /></button>
-              <button type="button" className={tbBtn} onClick={() => exec("formatBlock", "pre")}><Code2 className="h-4 w-4" /></button>
-              <span className="mx-1 h-5 w-px bg-neutral-200" />
-              <button type="button" className={tbBtn} onClick={insertLink}><Link2 className="h-4 w-4" /></button>
-              <button type="button" className={tbBtn} onClick={() => inlineImgRef.current?.click()}>
+              <span className="mx-1 h-5 w-px bg-border" />
+              <Button variant="ghost" type="button" title="Bold" aria-label="Bold" className={tbBtn} onClick={() => exec("bold")}><Bold className="h-4 w-4" /></Button>
+              <Button variant="ghost" type="button" title="Italic" aria-label="Italic" className={tbBtn} onClick={() => exec("italic")}><Italic className="h-4 w-4" /></Button>
+              <Button variant="ghost" type="button" title="Underline" aria-label="Underline" className={tbBtn} onClick={() => exec("underline")}><Underline className="h-4 w-4" /></Button>
+              <Button variant="ghost" type="button" title="Strikethrough" aria-label="Strikethrough" className={tbBtn} onClick={() => exec("strikeThrough")}><Strikethrough className="h-4 w-4" /></Button>
+              <span className="mx-1 h-5 w-px bg-border" />
+              <Button variant="ghost" type="button" title="Numbered list" aria-label="Numbered list" className={tbBtn} onClick={() => exec("insertOrderedList")}><ListOrdered className="h-4 w-4" /></Button>
+              <Button variant="ghost" type="button" title="Bulleted list" aria-label="Bulleted list" className={tbBtn} onClick={() => exec("insertUnorderedList")}><List className="h-4 w-4" /></Button>
+              <Button variant="ghost" type="button" className={tbBtn} onClick={() => exec("formatBlock", "blockquote")}><Quote className="h-4 w-4" /></Button>
+              <Button variant="ghost" type="button" className={tbBtn} onClick={() => exec("formatBlock", "pre")}><Code2 className="h-4 w-4" /></Button>
+              <span className="mx-1 h-5 w-px bg-border" />
+              <Button variant="ghost" type="button" className={tbBtn} onClick={insertLink}><Link2 className="h-4 w-4" /></Button>
+              <Button variant="ghost" type="button" className={tbBtn} onClick={() => inlineImgRef.current?.click()}>
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-              </button>
+              </Button>
               <input ref={inlineImgRef} type="file" accept="image/*" hidden
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) insertImageFromFile(f); e.currentTarget.value = ""; }} />
-              <span className="mx-1 h-5 w-px bg-neutral-200" />
-              <button type="button" className={tbBtn} onClick={() => exec("removeFormat")}><RemoveFormatting className="h-4 w-4" /></button>
+              <span className="mx-1 h-5 w-px bg-border" />
+              <Button variant="ghost" type="button" title="Clear formatting" aria-label="Clear formatting" className={tbBtn} onClick={() => exec("removeFormat")}><RemoveFormatting className="h-4 w-4" /></Button>
             </div>
             <div
               ref={(el) => {
                 editorRef.current = el;
                 if (el && !el.innerHTML && form.content) el.innerHTML = form.content;
               }}
+              role="textbox"
+              aria-label="Content"
+              aria-multiline="true"
               contentEditable
               suppressContentEditableWarning
               data-placeholder="Start writing..."
               onInput={(e) => set("content", (e.currentTarget as HTMLDivElement).innerHTML)}
               onBlur={(e) => set("content", (e.currentTarget as HTMLDivElement).innerHTML)}
-              className="prose prose-neutral min-h-[360px] max-w-none p-5 text-base leading-relaxed focus:outline-none empty:before:pointer-events-none empty:before:text-neutral-300 empty:before:content-[attr(data-placeholder)]"
+              className="prose min-h-[360px] text-foreground [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic max-w-none p-5 text-base leading-relaxed focus:outline-none empty:before:pointer-events-none empty:before:text-neutral-300 empty:before:content-[attr(data-placeholder)]"
             />
           </div>
         </div>
