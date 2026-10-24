@@ -80,6 +80,7 @@ function CreatePostPage() {
   const imageRef = useRef<HTMLInputElement>(null);
 
   const videoRef = useRef<HTMLInputElement>(null);
+  const thumbRef = useRef<HTMLInputElement>(null);
 
   const [postType, setPostType] = useState<PostType>("text");
   const [content, setContent] = useState("");
@@ -428,7 +429,7 @@ function CreatePostPage() {
 
           {postType === "video" && (
             <div className="space-y-1.5">
-              <input ref={videoRef} type="file" accept="video/*,image/*" multiple className="hidden" onChange={async (e) => {
+              <input ref={videoRef} type="file" accept="video/*" multiple className="hidden" onChange={async (e) => {
                 const files = Array.from(e.target.files ?? []);
                 if (videoRef.current) videoRef.current.value = "";
                 if (!files.length) return;
@@ -483,7 +484,7 @@ function CreatePostPage() {
                   void handleFiles([f]);
                 }} />
                 <Button type="button" variant="outline" onClick={() => thumbRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
-                  <ImageIcon className="mr-2 h-4 w-4" />
+                  <ImagePlus className="mr-2 h-4 w-4" />
                   {mediaUrls.some((u) => !/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) ? "Change thumbnail" : "Upload thumbnail (optional)"}
                 </Button>
                 <p className="mt-1 text-xs text-neutral-500">People see this photo with a play button, then tap to watch.</p>
