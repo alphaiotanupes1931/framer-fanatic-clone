@@ -1764,6 +1764,7 @@ export type Database = {
           media_urls: Json
           opportunity_type: string | null
           org_id: string
+          tags: string[]
           text_color: string | null
           title: string
           updated_at: string
@@ -1784,6 +1785,7 @@ export type Database = {
           media_urls?: Json
           opportunity_type?: string | null
           org_id: string
+          tags?: string[]
           text_color?: string | null
           title: string
           updated_at?: string
@@ -1804,6 +1806,7 @@ export type Database = {
           media_urls?: Json
           opportunity_type?: string | null
           org_id?: string
+          tags?: string[]
           text_color?: string | null
           title?: string
           updated_at?: string
