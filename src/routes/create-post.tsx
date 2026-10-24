@@ -469,10 +469,25 @@ function CreatePostPage() {
               )}
               <Button type="button" variant="outline" onClick={() => videoRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
                 {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <VideoIcon className="mr-2 h-4 w-4" />}
-                {mediaUrls.length ? "Add more" : "Upload videos or images"}
+                {mediaUrls.some((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) ? "Replace or add video" : "Upload video"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
               <p className="text-xs text-neutral-500">Camera only works on mobile. Max 50MB per video.</p>
+              <div className="pt-3">
+                <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (thumbRef.current) thumbRef.current.value = "";
+                  if (!f) return;
+                  // Only one thumbnail: drop any earlier image before cropping the new one.
+                  setMediaUrls((prev) => prev.filter((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)));
+                  void handleFiles([f]);
+                }} />
+                <Button type="button" variant="outline" onClick={() => thumbRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
+                  <ImageIcon className="mr-2 h-4 w-4" />
+                  {mediaUrls.some((u) => !/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) ? "Change thumbnail" : "Upload thumbnail (optional)"}
+                </Button>
+                <p className="mt-1 text-xs text-neutral-500">People see this photo with a play button, then tap to watch.</p>
+              </div>
             </div>
           )}
 
