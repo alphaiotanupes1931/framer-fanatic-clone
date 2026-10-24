@@ -175,41 +175,43 @@
 }
 
 .dark {
-  /* Softer, warmer dark palette — easier on the eyes than pure black/white */
-  --background: oklch(0.18 0.018 260);
-  --foreground: oklch(0.92 0.01 250);
-  --card: oklch(0.22 0.02 262);
-  --card-foreground: oklch(0.92 0.01 250);
-  --popover: oklch(0.22 0.02 262);
-  --popover-foreground: oklch(0.92 0.01 250);
-  --primary: oklch(0.88 0.015 255);
-  --primary-foreground: oklch(0.2 0.02 262);
-  --secondary: oklch(0.27 0.025 260);
-  --secondary-foreground: oklch(0.92 0.01 250);
-  --muted: oklch(0.26 0.022 260);
-  --muted-foreground: oklch(0.72 0.015 255);
-  --accent: oklch(0.28 0.03 260);
-  --accent-foreground: oklch(0.92 0.01 250);
-  --destructive: oklch(0.66 0.18 22);
-  --destructive-foreground: oklch(0.96 0.01 250);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.55 0.03 260);
+  /* Instagram / iOS style: true black, neutral greys, white text */
+  --background: oklch(0 0 0);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.15 0 0);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.18 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(1 0 0);
+  --primary-foreground: oklch(0 0 0);
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.75 0 0);
+  --accent: oklch(0.24 0 0);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.66 0.2 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.6 0 0);
+  --ink: oklch(1 0 0);
+  --chat-bg: oklch(0.08 0 0);
   --map-accent: oklch(0.72 0.16 150);
-  --map-accent-foreground: oklch(0.18 0.03 150);
+  --map-accent-foreground: oklch(0 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.2 0.02 262);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.27 0.025 260);
-  --sidebar-accent-foreground: oklch(0.92 0.01 250);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.55 0.03 260);
+  --sidebar: oklch(0 0 0);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(1 0 0);
+  --sidebar-primary-foreground: oklch(0 0 0);
+  --sidebar-accent: oklch(0.2 0 0);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.6 0 0);
 }
 
 @layer base {
@@ -280,7 +282,7 @@
 .dark .text-neutral-500,
 .dark .text-gray-400,
 .dark .text-gray-500 {
-  color: oklch(0.75 0.01 255) !important;
+  color: oklch(0.75 0 0) !important;
 }
 .dark .text-neutral-600,
 .dark .text-neutral-700,
@@ -289,11 +291,18 @@
 .dark .text-gray-600,
 .dark .text-gray-700,
 .dark .text-gray-800,
-.dark .text-gray-900 {
-  color: oklch(0.9 0.01 250) !important;
+.dark .text-gray-900,
+.dark .text-zinc-700,
+.dark .text-zinc-800,
+.dark .text-zinc-900,
+.dark .text-slate-700,
+.dark .text-slate-800,
+.dark .text-slate-900,
+.dark .text-foreground {
+  color: oklch(1 0 0) !important;
 }
 .dark .text-muted-foreground {
-  color: oklch(0.75 0.015 255) !important;
+  color: oklch(0.75 0 0) !important;
 }
 /* Don't let bright white / near-white surfaces blast through in dark mode.
    Covers base, hover:, focus:, group-hover:, and md:/sm:/lg: responsive
@@ -305,14 +314,14 @@
 .dark [class*="bg-gray-50"],
 .dark [class*="bg-gray-100"],
 .dark [class*="bg-gray-200"] {
-  background-color: oklch(0.22 0.02 262) !important;
+  background-color: oklch(0.15 0 0) !important;
 }
 .dark [class*="bg-white"]:hover,
 .dark [class*="hover\\:bg-neutral-50"]:hover,
 .dark [class*="hover\\:bg-neutral-100"]:hover,
 .dark [class*="hover\\:bg-gray-50"]:hover,
 .dark [class*="hover\\:bg-gray-100"]:hover {
-  background-color: oklch(0.28 0.025 262) !important;
+  background-color: oklch(0.15 0 0) !important;
 }
 /* Light borders/dividers become invisible on dark — lift them. */
 .dark [class*="border-neutral-100"],
@@ -328,8 +337,9 @@
 /* Stark black text on (now dark) surfaces becomes invisible — lift it. */
 .dark .text-black,
 .dark .text-neutral-950,
-.dark .text-gray-950 {
-  color: oklch(0.92 0.01 250) !important;
+.dark .text-gray-950,
+.dark .text-ink {
+  color: oklch(1 0 0) !important;
 }
 
 @theme inline {
