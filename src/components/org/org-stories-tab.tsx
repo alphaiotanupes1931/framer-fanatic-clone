@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { stripHtml, timeAgo } from "@/lib/text-utils";
+import { RichTextEditor, richHtmlIsEmpty } from "@/components/rich-text-editor";
+import DOMPurify from "isomorphic-dompurify";
 
 type OrgStory = {
   id: string;
@@ -44,7 +46,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId]);
 
   const publish = async () => {
-    if (!form.title.trim() && !form.body.trim()) return toast.error("Add a title or some text");
+    if (!form.title.trim() && richHtmlIsEmpty(form.body)) return toast.error("Add a title or some text");
     const { data: sess } = await supabase.auth.getUser();
     const uid = sess.user?.id;
     if (!uid) return toast.error("Sign in required");
@@ -73,9 +75,6 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
     setItems((xs) => xs.filter((x) => x.id !== id));
     setActive(null);
   };
-
-  const inputCls =
-    "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 
   return (
     <div className="space-y-5">
@@ -122,12 +121,11 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
 
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Content</p>
-            <textarea
-              className={`${inputCls} min-h-[320px] leading-relaxed`}
-              rows={14}
+            <RichTextEditor
+              minHeight={320}
               placeholder="Start writing…"
               value={form.body}
-              onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
+              onChange={(body) => setForm((f) => ({ ...f, body }))}
             />
           </div>
         </div>
@@ -184,7 +182,11 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories" }:
                 <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {readMinutes(active.body)} min read</span>
               </div>
               {active.body && (
-                <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{stripHtml(active.body)}</div>
+                /<\/?[a-z][^>]*>/i.test(active.body) ? (
+                  <div className="text-[15px] leading-relaxed text-foreground [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(active.body) }} />
+                ) : (
+                  <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{active.body}</div>
+                )
               )}
             </div>
           </div>
