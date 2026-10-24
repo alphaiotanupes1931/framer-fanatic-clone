@@ -516,3 +516,18 @@ html.theme-mono {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Dark mode left sidebar: match the page background; items turn light on hover/active. */
+.dark .app-sidebar {
+  background-color: var(--background) !important;
+  border-color: var(--border) !important;
+}
+.dark .app-sidebar nav :is(a, button):hover,
+.dark .app-sidebar nav :is(a, button)[class*="bg-slate-100"] {
+  background-color: oklch(0.93 0 0) !important;
+  color: oklch(0 0 0) !important;
+}
+.dark .app-sidebar nav :is(a, button):hover *,
+.dark .app-sidebar nav :is(a, button)[class*="bg-slate-100"] * {
+  color: oklch(0 0 0) !important;
+}
