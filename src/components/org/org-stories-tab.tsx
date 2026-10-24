@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Trash2, Clock, X, BookOpen } from "lucide-react";
+import { Loader2, Plus, Trash2, Clock, X, BookOpen, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Img } from "@/components/shared/smart-img";
 import { ImageUpload } from "@/components/shared/image-upload";
@@ -29,6 +29,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
   const [items, setItems] = useState<OrgStory[]>([]);
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [active, setActive] = useState<OrgStory | null>(null);
   const [form, setForm] = useState({ title: "", body: "", media_url: "", link_url: "", tags: [] as string[] });
   const [tagInput, setTagInput] = useState("");
@@ -40,6 +41,21 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
   };
   const singular = tabTitle === "Stories" ? "story" : tabTitle.replace(/s$/, "").toLowerCase();
   const [saving, setSaving] = useState(false);
+
+  const closeComposer = () => {
+    setComposing(false);
+    setEditingId(null);
+    setForm({ title: "", body: "", media_url: "", link_url: "", tags: [] });
+    setTagInput("");
+  };
+
+  const edit = (story: OrgStory) => {
+    setEditingId(story.id);
+    setForm({ title: story.title, body: story.body ?? "", media_url: story.media_url ?? "", link_url: story.link_url ?? "", tags: [...(story.tags ?? [])] });
+    setTagInput("");
+    setActive(null);
+    setComposing(true);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -55,27 +71,27 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
   useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [orgId]);
 
   const publish = async () => {
+    if (!canManage || saving) return;
     if (!form.title.trim() && richHtmlIsEmpty(form.body)) return toast.error("Add a title or some text");
     const { data: sess } = await supabase.auth.getUser();
     const uid = sess.user?.id;
     if (!uid) return toast.error("Sign in required");
     setSaving(true);
-    const { error } = await supabase.from("organization_posts").insert({
-      org_id: orgId,
-      kind: "press",
-      author_id: uid,
+    const content = {
       title: form.title.trim() || "Untitled",
       body: form.body.trim() || null,
       media_url: form.media_url || null,
       link_url: form.link_url.trim() || null,
       tags: allowTags ? form.tags : [],
-    });
+    };
+    const { data, error } = editingId
+      ? await supabase.from("organization_posts").update(content).eq("id", editingId).eq("org_id", orgId).eq("kind", "press").select("id")
+      : await supabase.from("organization_posts").insert({ ...content, org_id: orgId, kind: "press", author_id: uid }).select("id");
     setSaving(false);
     if (error) return toast.error(error.message);
-    setForm({ title: "", body: "", media_url: "", link_url: "", tags: [] });
-    setTagInput("");
-    setComposing(false);
-    toast.success("Published");
+    if (!data?.length) return toast.error("This story could not be saved. Refresh the page and try again.");
+    toast.success(editingId ? "Story updated" : "Published");
+    closeComposer();
     void load();
   };
 
@@ -106,10 +122,10 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
       {composing && (
         <div className="mx-auto w-full max-w-3xl space-y-6 rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
-            <button onClick={() => setComposing(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">← Back</button>
-            <button onClick={publish} disabled={saving} className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50">
-              {saving ? "Publishing…" : "Publish"}
-            </button>
+            <Button variant="ghost" onClick={closeComposer} disabled={saving} className="text-sm font-medium text-muted-foreground hover:bg-transparent hover:text-foreground">← Back</Button>
+            <Button onClick={publish} disabled={saving} className="rounded-full px-4 py-1.5 text-xs font-semibold">
+              {saving ? "Saving…" : editingId ? "Save changes" : "Publish"}
+            </Button>
           </div>
 
           <div className="space-y-2">
@@ -187,7 +203,8 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
                 </div>
               </button>
               {canManage && (
-                <div className="flex justify-end border-t border-border px-3 py-2">
+                <div className="flex items-center justify-between border-t border-border px-3 py-2">
+                  <Button variant="ghost" size="sm" onClick={() => edit(s)} className="gap-1 text-xs hover:bg-transparent"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
                   <button onClick={() => remove(s.id)} className="inline-flex items-center gap-1 text-xs font-semibold text-destructive hover:underline">
                     <Trash2 className="h-3.5 w-3.5" /> Delete
                   </button>
@@ -219,6 +236,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
                 )
               )}
               {active.tags?.length > 0 && <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">{active.tags.map((tag) => <span key={tag} className="break-all">#{tag}</span>)}</div>}
+              {canManage && <div className="border-t border-border pt-4"><Button variant="outline" onClick={() => edit(active)} className="gap-2 hover:bg-transparent"><Pencil className="h-4 w-4" /> Edit {singular}</Button></div>}
             </div>
           </div>
         </div>
