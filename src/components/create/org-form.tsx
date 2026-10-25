@@ -206,10 +206,20 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       </Field>
       {type === "business" && (
         <Field label="Business type" required>
-          <select value={form.subtype} onChange={(e) => set("subtype", e.target.value)} className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none">
-            <option value="">Select business type...</option>
-            {BUSINESS_SUBTYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <p className="text-xs text-neutral-500">Pick the category people will find you under on the Businesses page.</p>
+          <div className="flex flex-wrap gap-2">
+            {BUSINESS_SUBTYPES.map((t) => (
+              <button
+                key={t}
+                type="button"
+                aria-pressed={form.subtype === t}
+                onClick={() => set("subtype", t)}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold ${form.subtype === t ? "bg-[#d4580a] text-white" : "border border-neutral-200 bg-white text-neutral-600"}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
         </Field>
       )}
       <Field label="Short description" required={strict || type === "group" || type === "community_assoc"}>
