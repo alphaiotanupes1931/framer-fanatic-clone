@@ -843,10 +843,7 @@ export function OrgProfile() {
               <section>
                 <PriceItemsSection orgId={org.id} subtype={org.subtype} canManage={canManage} title="Services & Pricing" />
               </section>
-              <section>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-neutral-900"><Megaphone className="h-5 w-5 text-[#d4580a]" /> Posts & Updates</h3>
-                <OrgPostList orgId={org.id} kind={null} canManage={canManage} />
-              </section>
+
             </div>
           )}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
