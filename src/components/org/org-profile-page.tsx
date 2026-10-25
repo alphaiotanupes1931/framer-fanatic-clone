@@ -1,4 +1,5 @@
 import { BUSINESS_OFFERS, BUSINESS_SUBTYPES, BUSINESS_SUBTYPE_DESCRIPTIONS } from "@/lib/categories";
+import { businessOfferTabs } from "@/lib/business-offers";
 import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { OrgPostComments } from "@/components/org/org-post-comments";
 import { OrgFollowersList } from "@/components/org/org-followers-list";
@@ -84,6 +85,7 @@ import { orgPath } from "@/lib/org-paths";
 
 
 type Org = {
+  business_offer?: string | null;
   id: string; owner_id: string; type: string; subtype: string | null;
   name: string; slug: string; bio: string | null; tagline: string | null; website: string | null;
   phone: string | null; email: string | null; address: string | null;
@@ -134,7 +136,7 @@ const TAB_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Invite: UserPlus, Comments: MessageSquare, About: FileText, Requests: UserPlus,
   Opportunities: Briefcase, Press: Megaphone, Updates: Bell, Voting: BarChart3,
   Minutes: FileText, Board: Users, "By Laws": FileText, Mission: Heart,
-  Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase,
+  Menu: List, Feed: List, Stories: Camera, Promotions: Star, Reviews: Star, Services: Briefcase, Products: ShoppingBag,
   Shop: ShoppingBag, Artists: Users, Support: Heart, Exhibition: ImageIcon, Exhibitions: ImageIcon, Dues: DollarSign,
 };
 type Tab = string;
@@ -217,7 +219,8 @@ export function OrgProfile() {
       const sub = (o?.subtype ?? "").toLowerCase();
       const isBiz = o?.type !== "community_assoc" && o?.type !== "group" && o?.type !== "arts_org" && o?.type !== "artist";
       const foodLike = /restaurant|cafe|coffee|bakery|bar|food|eat|diner|deli|pizz|grill|kitchen|brunch/.test(sub);
-      if (isBiz && foodLike) setTab("Menu");
+      if (o?.type === "business") setTab(businessOfferTabs(o.business_offer)[0]);
+      else if (isBiz && foodLike) setTab("Menu");
       else if (isBiz) setTab("Services");
     })();
     return () => { cancelled = true; };
@@ -291,12 +294,12 @@ export function OrgProfile() {
     // Deep links may use any casing (?tab=portfolio); match the real tab label
     // case-insensitively so the right content renders instead of the fallback.
     const match = wanted
-      ? VISIBLE_TABS.find((t) => t.toLowerCase() === (
+      ? (org.type === "business" ? ["Posts", ...businessOfferTabs(org.business_offer), "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite"] : VISIBLE_TABS).find((t) => t.toLowerCase() === (
           (org.type === "group" || org.type === "community_assoc") && ["mission", "rules"].includes(wanted.toLowerCase())
             ? "about" : wanted.toLowerCase()
         ))
       : undefined;
-    setTab(match ?? "Posts");
+    setTab(match ?? (org.type === "business" ? businessOfferTabs(org.business_offer)[0] : "Posts"));
   }, [org]);
   if (!org && !loaded) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
   // Either the page does not exist or it is private and this visitor is not
@@ -323,7 +326,9 @@ export function OrgProfile() {
   const artistTabs: ArtistTab[] = isArtist ? tabsForArtist(org.subtype, "artist") : [];
   const artistIcons: Record<string, React.ComponentType<{ className?: string }>> = {};
   for (const t of artistTabs) artistIcons[t.label] = t.Icon;
-  const TABS: readonly string[] = isPersonPage
+  const TABS: readonly string[] = org.type === "business"
+    ? ["Posts", ...businessOfferTabs(org.business_offer), "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite"]
+    : isPersonPage
     ? PERSON_PAGE_TABS
     : isArtist
     ? artistTabs.map((t) => t.label)
@@ -846,6 +851,7 @@ export function OrgProfile() {
 
             </div>
           )}
+          {org.type === "business" && tab === "Products" && <FashionAlbumsTab orgId={org.id} canManage={canManage} section="products" />}
           {tab === "Calendar" && <CalendarTab orgId={org.id} />}
            {(tab === "Followers" || tab === "Members" || tab === "Leaderboard") && <OrgFollowersList orgId={org.id} />}
           {tab === "Invite" && <InviteTab orgName={org.name} orgSlug={org.slug} isCommunityAssoc={isAssoc} />}
@@ -1107,16 +1113,17 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
 
   const save = async () => {
     if (!form.name.trim()) return toast.error("Name is required");
-    if (org.type === "business" && (!form.subtype || !form.business_offer)) return toast.error("Pick what your business offers and its type");
-    const { error } = await supabase.from("organizations").update({
+    if (org.type === "business" && !form.subtype) return toast.error("Pick your business type");
+    const { data: saved, error } = await supabase.from("organizations").update({
       name: form.name.trim(), bio: form.bio || null, website: form.website || null, phone: form.phone || null,
       email: form.email || null, address: form.address || null, neighborhood: form.neighborhood || null,
       tagline: form.tagline.trim() || null,
       subcategory: form.subcategory.trim() || null,
-      ...(org.type === "business" ? { subtype: form.subtype, business_offer: form.business_offer } : {}),
+      ...(org.type === "business" ? { subtype: form.subtype, business_offer: form.business_offer || null } : {}),
       hours,
-    } as never).eq("id", org.id);
+    } as never).eq("id", org.id).select("id").single();
     if (error) return toast.error(error.message);
+    if (!saved) return toast.error("Could not save changes");
     onChange({ ...org, ...form, name: form.name.trim(), hours });
     setEdit(false);
     onEditClose?.();
@@ -1146,8 +1153,8 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
               <div className="text-xs font-semibold text-muted-foreground">What does your business offer?</div>
               <div className="flex flex-wrap gap-2">
                 {BUSINESS_OFFERS.map((t) => (
-                  <button key={t} type="button" aria-pressed={form.business_offer === t} onClick={() => setForm({ ...form, business_offer: t })}
-                    className={`rounded-full px-4 py-1.5 text-sm font-semibold ${form.business_offer === t ? "bg-[#d4580a] text-white" : "border border-border bg-background text-muted-foreground"}`}>{t}</button>
+                  <Button key={t} type="button" variant={form.business_offer === t ? "default" : "outline"} aria-pressed={form.business_offer === t} onClick={() => setForm({ ...form, business_offer: t })}
+                    className="h-auto rounded-full px-4 py-1.5 text-sm font-semibold">{t}</Button>
                 ))}
               </div>
               <div className="text-xs font-semibold text-muted-foreground">What type of business is it?</div>

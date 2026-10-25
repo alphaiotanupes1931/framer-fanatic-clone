@@ -223,15 +223,16 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           <Field label="What does your business offer?" required>
             <div className="flex flex-wrap gap-2">
               {BUSINESS_OFFERS.map((t) => (
-                <button
+                <Button
                   key={t}
                   type="button"
+                  variant={form.business_offer === t ? "default" : "outline"}
                   aria-pressed={form.business_offer === t}
                   onClick={() => set("business_offer", t)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-semibold ${form.business_offer === t ? "bg-[#d4580a] text-white" : "border border-neutral-200 bg-white text-neutral-600"}`}
+                  className="h-auto rounded-full px-4 py-1.5 text-sm font-semibold"
                 >
                   {t}
-                </button>
+                </Button>
               ))}
             </div>
           </Field>

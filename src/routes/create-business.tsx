@@ -9,6 +9,10 @@ export const Route = createFileRoute("/create-business")({
     meta: [
       { title: "Create Business - Planet Baltimore" },
       { name: "description", content: "List a Baltimore business on Planet Baltimore." },
+      { property: "og:title", content: "Create Business - Planet Baltimore" },
+      { property: "og:description", content: "Create your business page with products, services or both on Planet Baltimore." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
