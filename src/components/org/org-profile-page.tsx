@@ -86,7 +86,7 @@ import { orgPath } from "@/lib/org-paths";
 
 type Org = {
   business_offer?: string | null;
-  show_comments?: boolean | null;
+  show_comments?: boolean;
   id: string; owner_id: string; type: string; subtype: string | null;
   name: string; slug: string; bio: string | null; tagline: string | null; website: string | null;
   phone: string | null; email: string | null; address: string | null;
