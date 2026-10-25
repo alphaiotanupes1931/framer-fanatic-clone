@@ -233,7 +233,7 @@ export function OrgListPage({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => { setSub(""); setArtsOnly(false); }}
-              className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+              className={`rounded-full px-6 py-2.5 text-xs font-semibold transition-colors duration-150 ${
                 sub === "" && !artsOnly
                   ? "bg-[#d4580a] text-white"
                   : "border border-border bg-background text-foreground hover:bg-muted"
@@ -244,7 +244,7 @@ export function OrgListPage({
             {type === "business" && (
               <button
                 onClick={() => { setArtsOnly((v) => !v); setSub(""); }}
-                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+                className={`rounded-full px-6 py-2.5 text-xs font-semibold transition-colors duration-150 ${
                   artsOnly
                     ? "bg-[#d4580a] text-white"
                     : "border border-border bg-background text-foreground hover:bg-muted"
@@ -259,7 +259,7 @@ export function OrgListPage({
                 <button
                   key={s}
                   onClick={() => setSub(s)}
-                  className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+                  className={`rounded-full px-6 py-2.5 text-xs font-semibold transition-colors duration-150 ${
                     sub === s
                       ? "bg-[#d4580a] text-white"
                       : "border border-border bg-background text-foreground hover:bg-muted"
