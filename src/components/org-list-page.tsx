@@ -232,10 +232,10 @@ export function OrgListPage({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => { setSub(""); setArtsOnly(false); }}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+              className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                 sub === "" && !artsOnly
                   ? "bg-[#d4580a] text-white"
-                  : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                  : "border border-border bg-background text-foreground hover:bg-muted"
               }`}
             >
               All
@@ -243,10 +243,10 @@ export function OrgListPage({
             {type === "business" && (
               <button
                 onClick={() => { setArtsOnly((v) => !v); setSub(""); }}
-                className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                   artsOnly
                     ? "bg-[#d4580a] text-white"
-                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                    : "border border-border bg-background text-foreground hover:bg-muted"
                 }`}
               >
                 Arts Orgs
@@ -257,10 +257,10 @@ export function OrgListPage({
                 key={s}
                 title={type === "business" ? BUSINESS_SUBTYPE_DESCRIPTIONS[s] : undefined}
                 onClick={() => setSub(s)}
-                className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                   sub === s
                     ? "bg-[#d4580a] text-white"
-                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
+                    : "border border-border bg-background text-foreground hover:bg-muted"
                 }`}
               >
                 {type === "business" ? s : pluralLabel(s)}
