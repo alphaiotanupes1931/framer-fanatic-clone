@@ -38,3 +38,6 @@
 - [x] Lookbook: required name, optional captions, caption-less items show photo only. Verified required-name toast, optional caption placeholder, photo-only item view and grid, caption added later renders, and the test item was removed.
 
 - [ ] Waiting on user go-ahead: email each business owner asking them to pick Product or Service (Edit Profile > Edit profile details). Wording approved.
+
+- [x] Make Create Business dropdowns and Communities tabs rounded with a light grey hover. Verified pill options with grey hover in the browser (9 types), Communities tab hover, and dark mode readability for both plus sidebar links.
+

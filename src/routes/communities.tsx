@@ -66,7 +66,7 @@ function CommunitiesPage() {
               </Link>
               <Link
                 to="/create-community"
-                className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-hover"
+                className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-muted"
               >
                 <Plus className="h-4 w-4" /> Create Group
               </Link>
@@ -82,12 +82,13 @@ function CommunitiesPage() {
                 key={t.key}
                 type="button"
                 onClick={() => setTab(t.key)}
-                className={
+                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                   active
-                    ? "rounded-full bg-[#d4580a] px-4 py-2 text-sm font-semibold text-white"
-                    : "rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-hover"
-                }
+                    ? "bg-[#d4580a] text-white"
+                    : "border border-border bg-background text-foreground hover:bg-muted"
+                }`}
               >
+
                 {t.label}
               </button>
             );

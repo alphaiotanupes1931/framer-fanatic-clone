@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/shared/image-upload";
@@ -22,6 +30,11 @@ import { orgSlug } from "@/lib/org-paths";
 import { BUSINESS_OFFERS, BUSINESS_SUBTYPES, BUSINESS_SUBTYPE_DESCRIPTIONS } from "@/lib/categories";
 
 export type OrgType = "arts_org" | "business" | "community_assoc" | "group";
+
+// Dropdown rows: rounded pills with a soft grey highlight instead of the
+// browser's solid blue hover bar.
+const SELECT_ITEM = "cursor-pointer rounded-full py-2 pr-8 pl-4 text-sm focus:bg-muted focus:text-foreground";
+
 
 export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string }) {
   const me = useCurrentProfile();
@@ -223,16 +236,21 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
             </div>
           </Field>
           <Field label="What type of business is it?" required>
-            <select
-              value={form.subtype}
-              onChange={(e) => set("subtype", e.target.value)}
-              className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30"
-            >
-              <option value="">Select a type...</option>
-              {BUSINESS_SUBTYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+            <Select value={form.subtype || undefined} onValueChange={(v) => set("subtype", v)}>
+              <SelectTrigger className="h-auto w-full rounded-md border-neutral-200 bg-white px-4 py-2.5 text-sm focus:border-[#d4580a] focus:ring-1 focus:ring-[#d4580a]/30">
+                <SelectValue placeholder="Select a type..." />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-neutral-200">
+                {BUSINESS_SUBTYPES.map((t) => (
+                  <SelectItem key={t} value={t} className={SELECT_ITEM}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {form.subtype && <p className="text-xs text-neutral-500">{BUSINESS_SUBTYPE_DESCRIPTIONS[form.subtype]}</p>}
           </Field>
+
         </>
       )}
       <Field label="Short description" required={strict || type === "group" || type === "community_assoc"}>
@@ -249,14 +267,19 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       )}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Neighborhood" required={type !== "group"}>
-          <select
-            value={form.neighborhood}
-            onChange={(e) => set("neighborhood", e.target.value)}
-            className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none focus:ring-1 focus:ring-[#d4580a]/30"
-          >
-            <option value="">Select neighborhood...</option>
-            {neighborhoods.map((n) => <option key={n.id} value={n.name}>{n.name}</option>)}
-          </select>
+          <Select value={form.neighborhood || undefined} onValueChange={(v) => set("neighborhood", v)}>
+            <SelectTrigger className="h-auto w-full rounded-md border-neutral-200 bg-white px-4 py-2.5 text-sm focus:border-[#d4580a] focus:ring-1 focus:ring-[#d4580a]/30">
+              <SelectValue placeholder="Select neighborhood..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-neutral-200">
+              {neighborhoods.map((n) => (
+                <SelectItem key={n.id} value={n.name} className={SELECT_ITEM}>
+                  {n.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
         </Field>
         <Field label="Email" required={strict}>
           <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} maxLength={200} placeholder="contact@yourorg.org" />
