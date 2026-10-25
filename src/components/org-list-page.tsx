@@ -4,7 +4,7 @@ import { orgPath } from "@/lib/org-paths";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
-import { ORG_TYPE_LABEL, subtypesFor } from "@/lib/categories";
+import { ORG_TYPE_LABEL, subtypesFor, BUSINESS_SUBTYPE_DESCRIPTIONS } from "@/lib/categories";
 import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -263,7 +263,7 @@ export function OrgListPage({
                     : "border border-neutral-200 bg-white text-neutral-600 hover:border-orange-300"
                 }`}
               >
-                {pluralLabel(s)}
+                {type === "business" ? s : pluralLabel(s)}
               </button>
             ))}
           </div>
