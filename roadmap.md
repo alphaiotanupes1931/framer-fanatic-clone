@@ -40,4 +40,6 @@
 - [ ] Waiting on user go-ahead: email each business owner asking them to pick Product or Service (Edit Profile > Edit profile details). Wording approved.
 
 - [x] Make Create Business dropdowns and Communities tabs rounded with a light grey hover. Verified pill options with grey hover in the browser (9 types), Communities tab hover, and dark mode readability for both plus sidebar links.
+- [x] Remove the Posts & Updates section from the Services tab on business pages. Verified on /b/mike: Services & Pricing remains, no Posts & Updates heading or New post button; posts still show under the Posts tab.
+
 
