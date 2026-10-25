@@ -86,6 +86,7 @@ import { orgPath } from "@/lib/org-paths";
 
 type Org = {
   business_offer?: string | null;
+  show_comments?: boolean | null;
   id: string; owner_id: string; type: string; subtype: string | null;
   name: string; slug: string; bio: string | null; tagline: string | null; website: string | null;
   phone: string | null; email: string | null; address: string | null;
@@ -353,7 +354,9 @@ export function OrgProfile() {
   for (const t of artistTabs) artistIcons[t.label] = t.Icon;
   const TABS: readonly string[] = org.type === "business"
     ? ["Posts", ...businessOfferTabs(org.business_offer), "Shop", "Events", "Promotions", "Reviews", "Stories", "About", "Comments", "Invite"].filter((t) =>
-        t === "Invite" ? isOwner : canManage || !bizHas || !(t in bizHas) || bizHas[t])
+        t === "Invite" ? isOwner
+        : t === "Comments" ? org.show_comments !== false
+        : canManage || !bizHas || !(t in bizHas) || bizHas[t])
     : isPersonPage
     ? PERSON_PAGE_TABS
     : isArtist
