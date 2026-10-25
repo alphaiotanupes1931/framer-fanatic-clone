@@ -1,3 +1,4 @@
+import { BUSINESS_OFFERS, BUSINESS_SUBTYPES, BUSINESS_SUBTYPE_DESCRIPTIONS } from "@/lib/categories";
 import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { OrgPostComments } from "@/components/org/org-post-comments";
 import { OrgFollowersList } from "@/components/org/org-followers-list";
@@ -1096,6 +1097,8 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
     email: org.email ?? "", address: org.address ?? "", neighborhood: org.neighborhood ?? "",
     tagline: org.tagline ?? "",
     subcategory: (org as { subcategory?: string | null }).subcategory ?? "",
+    subtype: org.subtype ?? "",
+    business_offer: (org as { business_offer?: string | null }).business_offer ?? "",
   });
   const days = ["mon","tue","wed","thu","fri","sat","sun"] as const;
   const dayLabels: Record<string,string> = { mon:"Mon",tue:"Tue",wed:"Wed",thu:"Thu",fri:"Fri",sat:"Sat",sun:"Sun" };
@@ -1107,13 +1110,15 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
 
   const save = async () => {
     if (!form.name.trim()) return toast.error("Name is required");
+    if (org.type === "business" && (!form.subtype || !form.business_offer)) return toast.error("Pick what your business offers and its type");
     const { error } = await supabase.from("organizations").update({
       name: form.name.trim(), bio: form.bio || null, website: form.website || null, phone: form.phone || null,
       email: form.email || null, address: form.address || null, neighborhood: form.neighborhood || null,
       tagline: form.tagline.trim() || null,
       subcategory: form.subcategory.trim() || null,
+      ...(org.type === "business" ? { subtype: form.subtype, business_offer: form.business_offer } : {}),
       hours,
-    }).eq("id", org.id);
+    } as never).eq("id", org.id);
     if (error) return toast.error(error.message);
     onChange({ ...org, ...form, name: form.name.trim(), hours });
     setEdit(false);
@@ -1137,6 +1142,23 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
             <div>
               <input value={form.subcategory} onChange={(e) => setForm({...form, subcategory: e.target.value})} maxLength={40} placeholder="Subcategory (e.g. Jazz, Spoken Word)" className="w-full rounded-lg border border-border px-3 py-2" />
               <p className="mt-1 text-xs text-neutral-500">Shows next to your category, like {org.subtype ?? "Music"} / {form.subcategory.trim() || "Jazz"}.</p>
+            </div>
+          )}
+          {org.type === "business" && (
+            <div className="space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground">What does your business offer?</div>
+              <div className="flex flex-wrap gap-2">
+                {BUSINESS_OFFERS.map((t) => (
+                  <button key={t} type="button" aria-pressed={form.business_offer === t} onClick={() => setForm({ ...form, business_offer: t })}
+                    className={`rounded-full px-4 py-1.5 text-sm font-semibold ${form.business_offer === t ? "bg-[#d4580a] text-white" : "border border-border bg-background text-muted-foreground"}`}>{t}</button>
+                ))}
+              </div>
+              <div className="text-xs font-semibold text-muted-foreground">What type of business is it?</div>
+              <select value={form.subtype} onChange={(e) => setForm({ ...form, subtype: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2">
+                <option value="">Select a type...</option>
+                {BUSINESS_SUBTYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+              {form.subtype && <p className="text-xs text-muted-foreground">{BUSINESS_SUBTYPE_DESCRIPTIONS[form.subtype]}</p>}
             </div>
           )}
           {(org.type === "group" || org.type === "community_assoc") && (
