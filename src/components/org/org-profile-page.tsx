@@ -294,13 +294,38 @@ export function OrgProfile() {
     // Deep links may use any casing (?tab=portfolio); match the real tab label
     // case-insensitively so the right content renders instead of the fallback.
     const match = wanted
-      ? (org.type === "business" ? ["Posts", ...businessOfferTabs(org.business_offer), "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite"] : VISIBLE_TABS).find((t) => t.toLowerCase() === (
+      ? (org.type === "business" ? ["Posts", ...businessOfferTabs(org.business_offer), "Shop", "Events", "Promotions", "Reviews", "Stories", "About", "Comments", "Invite"] : VISIBLE_TABS).find((t) => t.toLowerCase() === (
           (org.type === "group" || org.type === "community_assoc") && ["mission", "rules"].includes(wanted.toLowerCase())
             ? "about" : wanted.toLowerCase()
         ))
       : undefined;
-    setTab(match ?? (org.type === "business" ? businessOfferTabs(org.business_offer)[0] : "Posts"));
+    setTab(match ?? "Posts");
   }, [org]);
+  // Business tabs that hide from visitors while empty.
+  const [bizHas, setBizHas] = useState<Record<string, boolean> | null>(null);
+  useEffect(() => {
+    if (!org || org.type !== "business") { setBizHas(null); return; }
+    const id = org.id;
+    const nowIso = new Date().toISOString();
+    const head = { count: "exact" as const, head: true };
+    void Promise.all([
+      supabase.from("organization_products").select("id", head).eq("org_id", id),
+      supabase.from("events").select("id", head).eq("organization_id", id).eq("is_exhibition", false).gte("starts_at", nowIso),
+      supabase.from("organization_posts").select("id", head).eq("org_id", id).eq("kind", "update"),
+      supabase.from("organization_posts").select("id", head).eq("org_id", id).eq("kind", "press"),
+      supabase.from("organization_product_categories").select("id", head).eq("org_id", id),
+      supabase.from("organization_price_items").select("id", head).eq("organization_id", id),
+    ]).then(([shop, ev, promo, stories, products, services]) => {
+      setBizHas({
+        Shop: (shop.count ?? 0) > 0,
+        Events: (ev.count ?? 0) > 0,
+        Promotions: (promo.count ?? 0) > 0,
+        Stories: (stories.count ?? 0) > 0,
+        Products: (products.count ?? 0) > 0,
+        Services: (services.count ?? 0) > 0,
+      });
+    });
+  }, [org?.id, org?.type]);
   if (!org && !loaded) return <AppLayout title="" hero={false}><div className="py-20 text-center text-muted-foreground">Loading…</div></AppLayout>;
   // Either the page does not exist or it is private and this visitor is not
   // the owner, an admin, or an approved member. Offer the access code path.
