@@ -31,6 +31,11 @@ import { BUSINESS_OFFERS, BUSINESS_SUBTYPES, BUSINESS_SUBTYPE_DESCRIPTIONS } fro
 
 export type OrgType = "arts_org" | "business" | "community_assoc" | "group";
 
+// Dropdown rows: rounded pills with a soft grey highlight instead of the
+// browser's solid blue hover bar.
+const SELECT_ITEM = "cursor-pointer rounded-full py-2 pr-8 pl-4 text-sm focus:bg-muted focus:text-foreground";
+
+
 export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string }) {
   const me = useCurrentProfile();
   const navigate = useNavigate();
