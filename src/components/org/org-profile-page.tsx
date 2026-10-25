@@ -743,10 +743,10 @@ export function OrgProfile() {
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition ${
+                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-150 ${
                   active
                     ? "bg-[#d4580a] text-white shadow-sm"
-                    : "text-neutral-500 hover:bg-hover hover:text-neutral-800"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 {Icon && <Icon className="h-4 w-4" />}
