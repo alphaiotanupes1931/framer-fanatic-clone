@@ -255,6 +255,7 @@ export function OrgListPage({
             {subs.map((s) => (
               <button
                 key={s}
+                title={type === "business" ? BUSINESS_SUBTYPE_DESCRIPTIONS[s] : undefined}
                 onClick={() => setSub(s)}
                 className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
                   sub === s
