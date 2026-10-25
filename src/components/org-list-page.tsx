@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "@tanstack/react-router";
 import { orgPath } from "@/lib/org-paths";
 import { supabase } from "@/integrations/supabase/client";
@@ -252,20 +253,33 @@ export function OrgListPage({
                 Arts Orgs
               </button>
             )}
-            {subs.map((s) => (
-              <button
-                key={s}
-                title={type === "business" ? BUSINESS_SUBTYPE_DESCRIPTIONS[s] : undefined}
-                onClick={() => setSub(s)}
-                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
-                  sub === s
-                    ? "bg-[#d4580a] text-white"
-                    : "border border-border bg-background text-foreground hover:bg-muted"
-                }`}
-              >
-                {type === "business" ? s : pluralLabel(s)}
-              </button>
-            ))}
+            <TooltipProvider delayDuration={200}>
+            {subs.map((s) => {
+              const btn = (
+                <button
+                  key={s}
+                  onClick={() => setSub(s)}
+                  className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+                    sub === s
+                      ? "bg-[#d4580a] text-white"
+                      : "border border-border bg-background text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {type === "business" ? s : pluralLabel(s)}
+                </button>
+              );
+              const desc = type === "business" ? BUSINESS_SUBTYPE_DESCRIPTIONS[s] : undefined;
+              if (!desc) return btn;
+              return (
+                <Tooltip key={s}>
+                  <TooltipTrigger asChild>{btn}</TooltipTrigger>
+                  <TooltipContent side="bottom" sideOffset={8} className="max-w-xs rounded-xl border border-border bg-muted px-4 py-2.5 text-sm leading-snug text-foreground shadow-lg">
+                    {desc}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+            </TooltipProvider>
           </div>
         )}
 
