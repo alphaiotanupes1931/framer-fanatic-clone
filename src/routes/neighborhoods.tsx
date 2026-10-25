@@ -12,6 +12,8 @@ import { SmartAvatarImage } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
 import { OrgLink } from "@/components/org/org-link";
+import { neighborhoodArtists, type NeighborhoodArtist } from "@/lib/neighborhood-artists";
+import { titleCase } from "@/lib/utils";
 
 export const Route = createFileRoute("/neighborhoods")({
   component: NeighborhoodsPage,
@@ -21,14 +23,7 @@ export const Route = createFileRoute("/neighborhoods")({
 });
 
 type N = { id: string; name: string; region: string };
-type ArtistRow = {
-  id: string;
-  display_name: string | null;
-  username: string | null;
-  avatar_url: string | null;
-  bio: string | null;
-  neighborhood: string | null;
-};
+type ArtistRow = NeighborhoodArtist;
 
 type EventRow = {
   id: string;
@@ -48,6 +43,7 @@ type OrgRow = {
   subtype: string | null;
   avatar_url: string | null;
   bio: string | null;
+  neighborhood: string | null;
 };
 
 type TabKey = "events" | "businesses" | "groups" | "artists" | "arts_orgs" | "associations";
@@ -100,12 +96,15 @@ function NeighborhoodsPage() {
           .order("starts_at", { ascending: true }),
         supabase
           .from("organizations")
-          .select("id, name, slug, type, subtype, avatar_url, bio")
+          .select("id, name, slug, type, subtype, avatar_url, bio, neighborhood")
+          .eq("is_public", true)
+          .or("hidden_from_showcase.is.null,hidden_from_showcase.eq.false")
+          .is("deleted_at", null)
           .ilike("neighborhood", selected.name)
           .order("name"),
       ]);
       if (cancelled) return;
-      setArtists((a || []) as ArtistRow[]);
+      setArtists(neighborhoodArtists((a || []) as ArtistRow[], (o || []) as OrgRow[]));
       setEvents((e || []) as EventRow[]);
       setOrgs((o || []) as OrgRow[]);
       setLoading(false);
@@ -257,16 +256,16 @@ function NeighborhoodsPage() {
                         <ul className="grid grid-cols-1 gap-1 md:grid-cols-2 xl:grid-cols-3">
                           {artists.map((a) => (
                             <li key={a.id}>
-                              <Link to="/$username" params={{ username: a.username || a.id }} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-hover/60">
+                              <NeighborhoodArtistLink artist={a}>
                                 <Avatar className="h-12 w-12 rounded-lg">
                                   {a.avatar_url && <SmartAvatarImage src={a.avatar_url} />}
                                   <AvatarFallback className="rounded-lg bg-muted text-xs text-foreground">{(a.display_name || a.username || "?").slice(0, 1).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0 flex-1">
-                                  <div className="truncate text-[15px] font-semibold text-foreground">{a.display_name || a.username || "Unnamed Artist"}</div>
+                                  <div className="truncate text-[15px] font-semibold text-foreground">{titleCase(a.display_name || a.username || "Unnamed Artist")}</div>
                                   {a.bio && <div className="truncate text-xs text-muted-foreground">{a.bio}</div>}
                                 </div>
-                              </Link>
+                              </NeighborhoodArtistLink>
                             </li>
                           ))}
                         </ul>
@@ -338,6 +337,14 @@ function NeighborhoodsPage() {
       </div>
     </AppLayout>
   );
+}
+
+function NeighborhoodArtistLink({ artist, children }: { artist: ArtistRow; children: React.ReactNode }) {
+  const className = "flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-hover/60";
+  if (artist.page_slug) {
+    return <OrgLink type="artist" slug={artist.page_slug} className={className}>{children}</OrgLink>;
+  }
+  return <Link to="/$username" params={{ username: artist.username || artist.id }} className={className}>{children}</Link>;
 }
 
 function EmptyRow({ label }: { label: string }) {

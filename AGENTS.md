@@ -20,3 +20,4 @@
 - Referral recipients use one normalized text source persisted per account in browser storage; deletion confirms returned database IDs before updating the list, preventing stale parsing and silent failed deletes.
 - Page story composers use the shared rich-text editor and readers preserve its HTML formatting; business Stories opt into custom tags stored on organization_posts, keeping tags separate from the story body.
 - Existing page stories are edited in the shared page story composer through the authenticated browser client and existing page-management policies; updates preserve authorship and confirm returned IDs so denied saves cannot appear successful.
+- Neighborhood Artists combines personal artist profiles with public, visible artist organization pages through a browser-safe selector and canonical page links, because artist pages store their own neighborhood independently of the owner's profile.
