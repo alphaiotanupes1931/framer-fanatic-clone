@@ -236,7 +236,7 @@ export function OrgListPage({
               className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                 sub === "" && !artsOnly
                   ? "bg-[#d4580a] text-white"
-                  : "border border-border bg-background text-foreground hover:border-orange-300 hover:bg-muted"
+                  : "border border-border bg-background text-foreground hover:border-orange-300"
               }`}
             >
               All
@@ -247,7 +247,7 @@ export function OrgListPage({
                 className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                   artsOnly
                     ? "bg-[#d4580a] text-white"
-                    : "border border-border bg-background text-foreground hover:border-orange-300 hover:bg-muted"
+                    : "border border-border bg-background text-foreground hover:border-orange-300"
                 }`}
               >
                 Arts Orgs
@@ -262,7 +262,7 @@ export function OrgListPage({
                   className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                     sub === s
                       ? "bg-[#d4580a] text-white"
-                      : "border border-border bg-background text-foreground hover:border-orange-300 hover:bg-muted"
+                      : "border border-border bg-background text-foreground hover:border-orange-300"
                   }`}
                 >
                   {type === "business" ? s : pluralLabel(s)}
