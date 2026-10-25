@@ -85,7 +85,7 @@ function CommunitiesPage() {
                 className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                   active
                     ? "bg-[#d4580a] text-white"
-                    : "border border-border bg-background text-foreground hover:bg-muted"
+                    : "border border-border bg-background text-foreground hover:border-orange-300"
                 }`}
               >
 
