@@ -24,6 +24,13 @@ function readMinutes(body: string | null) {
   return Math.max(1, Math.round(words / 200));
 }
 
+/** Legacy plain-text bodies become paragraphs so line breaks survive rich editing. */
+function plainToHtml(body: string) {
+  if (!body || /<\/?[a-z][^>]*>/i.test(body)) return body;
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return body.split(/\n{2,}/).map((p) => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("");
+}
+
 /** Stories on a page, presented with the same reading layout as the Stories page. */
 export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", allowTags = false }: { orgId: string; canManage: boolean; title?: string; allowTags?: boolean }) {
   const [items, setItems] = useState<OrgStory[]>([]);
@@ -51,7 +58,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
 
   const edit = (story: OrgStory) => {
     setEditingId(story.id);
-    setForm({ title: story.title, body: story.body ?? "", media_url: story.media_url ?? "", link_url: story.link_url ?? "", tags: [...(story.tags ?? [])] });
+    setForm({ title: story.title, body: plainToHtml(story.body ?? ""), media_url: story.media_url ?? "", link_url: story.link_url ?? "", tags: [...(story.tags ?? [])] });
     setTagInput("");
     setActive(null);
     setComposing(true);
