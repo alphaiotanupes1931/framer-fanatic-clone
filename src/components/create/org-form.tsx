@@ -19,6 +19,7 @@ import {
 import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
 import { StaffVerifyScreen } from "@/components/create/staff-verify-screen";
 import { orgSlug } from "@/lib/org-paths";
+import { BUSINESS_SUBTYPES } from "@/lib/categories";
 
 export type OrgType = "arts_org" | "business" | "community_assoc" | "group";
 
@@ -42,6 +43,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
     avatar_url: "",
     banner_url: "",
     mission: "",
+    subtype: "",
   });
   const [staff, setStaff] = useState({ username: "", password: "" });
   const [staffTouched, setStaffTouched] = useState(false);
@@ -109,13 +111,13 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       /.+@.+\..+/.test(form.email.trim())
     : type === "group" || type === "community_assoc"
       ? form.name.trim().length > 1 && form.tagline.trim().length > 1
-      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0;
+      : form.name.trim().length > 1 && form.neighborhood.trim().length > 0 && (type !== "business" || !!form.subtype);
 
   const submit = async () => {
     if (!me) { toast.error("Please sign in"); return; }
     if (!form.neighborhood.trim() && type !== "group") { toast.error("Neighborhood is required"); return; }
     if (!canSubmit) {
-      toast.error(strict ? "Please fill in every required field" : type === "group" || type === "community_assoc" ? "Name and short description are required" : "Name and neighborhood are required");
+      toast.error(strict ? "Please fill in every required field" : type === "group" || type === "community_assoc" ? "Name and short description are required" : type === "business" ? "Business name, type and neighborhood are required" : "Name and neighborhood are required");
       return;
     }
     if (supportsStaffLogin && staffFilled) {
@@ -134,6 +136,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         name: form.name.trim(),
         slug,
         tagline: form.tagline.trim() || null,
+        ...(type === "business" ? { subtype: form.subtype } : {}),
         bio: form.bio.trim() || null,
         website: form.website.trim() || null,
         email: form.email.trim() || null,
@@ -201,6 +204,14 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
       <Field label={type === "business" ? "Business name" : "Name"} required>
         <Input value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={120} placeholder={`Your ${kindLabel.toLowerCase()} name`} />
       </Field>
+      {type === "business" && (
+        <Field label="Business type" required>
+          <select value={form.subtype} onChange={(e) => set("subtype", e.target.value)} className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[#d4580a] focus:outline-none">
+            <option value="">Select business type...</option>
+            {BUSINESS_SUBTYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </Field>
+      )}
       <Field label="Short description" required={strict || type === "group" || type === "community_assoc"}>
         <Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} maxLength={320} placeholder="One line describing what you do" />
         <p className="text-xs text-neutral-500">This shows right under your page name. Keep it short: 320 characters max ({form.tagline.length}/320).</p>
