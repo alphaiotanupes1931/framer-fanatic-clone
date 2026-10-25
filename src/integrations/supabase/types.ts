@@ -1118,6 +1118,7 @@ export type Database = {
           medium: string | null
           order_index: number
           org_id: string
+          product_category_id: string | null
           section: string | null
           title: string | null
           updated_at: string
@@ -1133,6 +1134,7 @@ export type Database = {
           medium?: string | null
           order_index?: number
           org_id: string
+          product_category_id?: string | null
           section?: string | null
           title?: string | null
           updated_at?: string
@@ -1148,6 +1150,7 @@ export type Database = {
           medium?: string | null
           order_index?: number
           org_id?: string
+          product_category_id?: string | null
           section?: string | null
           title?: string | null
           updated_at?: string
@@ -1158,6 +1161,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_artworks_product_category_id_fkey"
+            columns: ["product_category_id"]
+            isOneToOne: false
+            referencedRelation: "organization_product_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -1863,6 +1873,38 @@ export type Database = {
           {
             foreignKeyName: "organization_price_items_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_product_categories: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_product_categories_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]

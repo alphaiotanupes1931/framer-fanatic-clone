@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { hasCaption, normalizeCaption } from "@/lib/fashion-items";
 
-type Item = { id: string; url: string; description: string | null; album: string; cover: string | null };
+type Item = { id: string; url: string; description: string | null; album: string; cover: string | null; categoryId?: string | null };
+type ProductCategory = { id: string; name: string; cover_url: string | null };
 type Draft = { url: string; description: string };
 
 async function uploadImage(file: File): Promise<string> {
@@ -23,9 +24,11 @@ async function uploadImage(file: File): Promise<string> {
 }
 
 /** Fashion artists: albums (name only) holding items (image + caption). */
-export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_line" }: { orgId: string; canManage?: boolean; section?: "fashion_line" | "lookbook" }) {
-  const noun = "Lookbook";
-  const scope = (q: any) => section === "lookbook" ? q.eq("section", "lookbook") : q.or("section.is.null,section.eq.fashion_line");
+export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_line" }: { orgId: string; canManage?: boolean; section?: "fashion_line" | "lookbook" | "products" }) {
+  const products = section === "products";
+  const noun = products ? "Product category" : "Lookbook";
+  const scope = (q: any) => section === "fashion_line" ? q.or("section.is.null,section.eq.fashion_line") : q.eq("section", section);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [openAlbum, setOpenAlbum] = useState<string | null>(null);
@@ -43,22 +46,27 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
 
   const load = async () => {
     setLoading(true);
-    const { data } = await scope(supabase
+    const [{ data, error }, categoryResult] = await Promise.all([scope(supabase
       .from("organization_artworks")
-      .select("id, media_url, description, title, album, album_cover, order_index, created_at")
+      .select("id, media_url, description, title, album, album_cover, order_index, created_at, product_category_id")
       .eq("org_id", orgId))
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false }),
+      products ? supabase.from("organization_product_categories").select("id,name,cover_url").eq("org_id", orgId).order("created_at", { ascending: false }) : Promise.resolve({ data: [], error: null })]);
+    if (error || categoryResult.error) toast.error(error?.message ?? categoryResult.error?.message ?? "Could not load items");
+    setCategories(categoryResult.data ?? []);
     setItems((data ?? []).map((a: any) => ({
       id: a.id, url: a.media_url, description: a.description ?? null,
       album: (a.album || a.title || "Untitled Album") as string,
       cover: a.album_cover ?? null,
+      categoryId: a.product_category_id,
     })));
     setLoading(false);
   };
-  useEffect(() => { void load(); }, [orgId]);
+  useEffect(() => { setOpenAlbum(null); reset(); void load(); }, [orgId, section]);
 
-  const albums = Array.from(new Set(items.map((i) => i.album)));
-  const coverOf = (a: string) => items.find((i) => i.album === a && i.cover)?.cover ?? null;
+  const albums = products ? categories.map((category) => category.name) : Array.from(new Set(items.map((i) => i.album)));
+  const coverOf = (a: string) => products ? categories.find((category) => category.name === a)?.cover_url ?? null : items.find((i) => i.album === a && i.cover)?.cover ?? null;
+  const itemsOf = (a: string) => products ? items.filter((item) => item.categoryId === categories.find((category) => category.name === a)?.id) : items.filter((item) => item.album === a);
   const reset = () => { setFormOpen(false); setAlbumName(""); setDrafts([]); setCover(""); };
 
   const pickFiles = async (files: FileList | null) => {
@@ -75,16 +83,29 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
   };
 
   const save = async () => {
+    if (busy) return;
     const name = (openAlbum ?? albumName).trim();
     if (!name) { toast.error(`Add a ${noun.toLowerCase()} name`); return; }
+    if (products && !openAlbum) {
+      setBusy(true);
+      const { data, error } = await supabase.from("organization_product_categories").insert({ org_id: orgId, name, cover_url: cover || null }).select("id").single();
+      setBusy(false);
+      if (error || !data) { toast.error(error?.code === "23505" ? "This category already exists" : error?.message ?? "Could not save category"); return; }
+      reset(); setOpenAlbum(name); await load(); toast.success("Category added"); return;
+    }
     if (!drafts.length) { toast.error("Add at least one image"); return; }
+    const category = products ? categories.find((category) => category.name === openAlbum) : null;
+    if (products && !category) { toast.error("Choose a product category first"); return; }
     const albumCover = openAlbum ? coverOf(openAlbum) : (cover || null);
     const rows = drafts.map((d, i) => ({
       org_id: orgId, album: name, title: name, media_url: d.url, album_cover: albumCover, section,
       description: normalizeCaption(d.description), order_index: items.length + i,
+      ...(products ? { product_category_id: category?.id } : {}),
     }));
-    const { error } = await supabase.from("organization_artworks").insert(rows);
-    if (error) { toast.error(error.message); return; }
+    setBusy(true);
+    const { data: saved, error } = await supabase.from("organization_artworks").insert(rows).select("id");
+    setBusy(false);
+    if (error || saved?.length !== rows.length) { toast.error(error?.message ?? "Could not save items"); return; }
     toast.success(drafts.length === 1 ? "Item added" : `${drafts.length} items added`);
     if (!openAlbum) setOpenAlbum(name);
     reset(); void load();
@@ -95,8 +116,11 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
     setBusy(true);
     try {
       const url = await uploadImage(f);
-      const { error } = await scope(supabase.from("organization_artworks").update({ album_cover: url }).eq("org_id", orgId).eq("album", openAlbum));
+      const { data: saved, error } = products
+        ? await supabase.from("organization_product_categories").update({ cover_url: url }).eq("org_id", orgId).eq("name", openAlbum).select("id")
+        : await scope(supabase.from("organization_artworks").update({ album_cover: url }).eq("org_id", orgId).eq("album", openAlbum)).select("id");
       if (error) throw error;
+      if (!saved?.length) throw new Error("Could not update cover");
       toast.success("Cover updated"); void load();
     } catch (e: any) { toast.error(e?.message ?? "Upload failed"); }
     setBusy(false);
@@ -104,15 +128,23 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
   };
 
   const updateCaption = async (id: string, description: string) => {
-    const { error } = await supabase.from("organization_artworks").update({ description: normalizeCaption(description) }).eq("id", id);
-    if (error) toast.error(error.message); else { toast.success("Caption saved"); void load(); }
+    const { data, error } = await supabase.from("organization_artworks").update({ description: normalizeCaption(description) }).eq("id", id).eq("org_id", orgId).select("id").single();
+    if (error || !data) toast.error(error?.message ?? "Could not save caption"); else { toast.success("Caption saved"); setViewer((current) => current?.id === id ? { ...current, description: normalizeCaption(description) } : current); void load(); }
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this item?")) return;
-    const { error } = await supabase.from("organization_artworks").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    const { data, error } = await supabase.from("organization_artworks").delete().eq("id", id).eq("org_id", orgId).select("id").single();
+    if (error || !data) { toast.error(error?.message ?? "Could not delete item"); return; }
     setViewer(null); void load();
+  };
+
+  const removeCategory = async () => {
+    const category = categories.find((category) => category.name === openAlbum);
+    if (!category || !confirm("Delete this product category and all its items?")) return;
+    const { data, error } = await supabase.from("organization_product_categories").delete().eq("id", category.id).eq("org_id", orgId).select("id").single();
+    if (error || !data) { toast.error(error?.message ?? "Could not delete category"); return; }
+    setOpenAlbum(null); reset(); await load();
   };
 
   if (loading) return <div className="py-14 text-center text-sm text-muted-foreground">Loading...</div>;
@@ -123,17 +155,17 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
         <>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold">{noun} name <span className="font-normal text-muted-foreground">(required)</span></label>
-            <input value={albumName} onChange={(e) => setAlbumName(e.target.value)} aria-required="true"
+            <input value={albumName} onChange={(e) => setAlbumName(e.target.value)} aria-label={`${noun} name`} aria-required="true"
               placeholder={`${noun} name`}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
           </div>
 
           <div className="flex items-center gap-3">
             {cover && <SmartImage src={cover} alt="Cover" className="h-20 w-20 rounded-lg object-cover" />}
-            <button type="button" onClick={() => newCoverRef.current?.click()} disabled={busy}
+            <Button variant="outline" type="button" onClick={() => newCoverRef.current?.click()} disabled={busy}
               className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
               {cover ? "Change cover image" : "Add cover image"}
-            </button>
+            </Button>
             {cover && <button type="button" aria-label="Remove cover" onClick={() => setCover("")} className="text-muted-foreground"><X className="h-4 w-4" /></button>}
             <input ref={newCoverRef} type="file" accept="image/*,.heic,.heif" hidden
               onChange={async (e) => {
@@ -157,21 +189,21 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
         </div>
       ))}
       <input ref={fileRef} type="file" accept="image/*,.heic,.heif" multiple hidden onChange={(e) => void pickFiles(e.target.files)} />
-      <button onClick={() => fileRef.current?.click()} disabled={busy}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border py-6 text-sm text-muted-foreground">
+      {(!products || openAlbum) && <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}
+        className="flex h-auto w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border py-6 text-sm text-muted-foreground">
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
         {busy ? "Uploading..." : drafts.length ? "Add more images" : "Add images (you can pick several)"}
-      </button>
+      </Button>}
       <div className="flex justify-end gap-2">
-        <button onClick={reset} className="rounded-full px-4 py-2 text-sm">Cancel</button>
-        <button onClick={save} disabled={busy} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Save</button>
+        <Button variant="ghost" onClick={reset} className="rounded-full px-4 py-2 text-sm">Cancel</Button>
+        <Button onClick={save} disabled={busy} className="rounded-full px-4 py-2 text-sm font-semibold">Save</Button>
       </div>
     </div>
   );
 
   // Inside one album
   if (openAlbum) {
-    const list = items.filter((i) => i.album === openAlbum);
+    const list = itemsOf(openAlbum);
     const albumCover = coverOf(openAlbum);
     const moveViewer = (direction: number) => {
       if (!viewer || !list.length) return;
@@ -181,23 +213,24 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
     return (
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-2">
-          <button onClick={() => { setOpenAlbum(null); reset(); }} className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-            <ChevronLeft className="h-4 w-4" /> All {noun.toLowerCase()}s
-          </button>
+          <Button variant="ghost" onClick={() => { setOpenAlbum(null); reset(); }} className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+            <ChevronLeft className="h-4 w-4" /> {products ? "All product categories" : `All ${noun.toLowerCase()}s`}
+          </Button>
           {canManage && (
-            <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
+            <Button onClick={() => (formOpen ? reset() : setFormOpen(true))}
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-              {formOpen ? "Close" : "+ Add Item"}
-            </button>
+              {formOpen ? "Close" : products ? "Add item" : "+ Add Item"}
+            </Button>
           )}
         </div>
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-lg font-semibold">{openAlbum}</h3>
-          {canManage && (
-            <button onClick={() => coverRef.current?.click()} disabled={busy} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
+          <h3 className="min-w-0 break-words text-lg font-semibold">{openAlbum}</h3>
+          {canManage && <div className="flex shrink-0 gap-2">
+            <Button variant="outline" onClick={() => coverRef.current?.click()} disabled={busy} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
               {busy ? "Uploading..." : coverOf(openAlbum) ? "Change cover" : "Add cover image"}
-            </button>
-          )}
+            </Button>
+            {products && <Button variant="ghost" size="icon" aria-label="Delete category" title="Delete category" onClick={removeCategory}><Trash2 className="h-4 w-4 text-destructive" /></Button>}
+          </div>}
         </div>
         <input ref={coverRef} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => void changeCover(e.target.files)} />
         {form}
@@ -230,32 +263,34 @@ export function FashionAlbumsTab({ orgId, canManage = false, section = "fashion_
     <div className="space-y-5">
       {canManage && (
         <div className="flex justify-end">
-          <button onClick={() => (formOpen ? reset() : setFormOpen(true))}
+          <Button onClick={() => (formOpen ? reset() : setFormOpen(true))}
             className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-            {formOpen ? "Close" : `+ Add ${noun}`}
-          </button>
+            {formOpen ? "Close" : products ? "Product category" : `+ Add ${noun}`}
+          </Button>
         </div>
       )}
       {form}
       {!albums.length ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <ImageIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No {noun.toLowerCase()}s yet.</p>
-          {canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add {noun}" to name one, then add items. Captions are optional.</p>}
+          <p className="text-sm text-muted-foreground">{products ? "No product categories yet." : `No ${noun.toLowerCase()}s yet.`}</p>
+          {!products && canManage && <p className="mt-1 text-xs text-muted-foreground">Use "Add {noun}" to name one, then add items. Captions are optional.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {albums.map((a) => {
-            const list = items.filter((i) => i.album === a);
+            const list = itemsOf(a);
+            const image = coverOf(a) ?? list[0]?.url;
             return (
               <div key={a} className="overflow-hidden rounded-2xl border border-border bg-card text-left">
                 <button onClick={() => (section === "lookbook" ? (setStoryStart(0), setStory(a)) : setOpenAlbum(a))} className="block w-full">
-                  <SmartImage src={coverOf(a) ?? list[0].url} alt={a} className={`w-full ${section === "lookbook" ? "aspect-[2/3] bg-muted object-cover" : "aspect-[3/4] object-cover"}`} />
+                  {image ? <SmartImage src={image} alt={a} className={`w-full ${section === "lookbook" ? "aspect-[2/3] bg-muted object-cover" : "aspect-[3/4] object-cover"}`} /> : <div className="flex aspect-[3/4] items-center justify-center bg-muted"><ImageIcon className="h-10 w-10 text-muted-foreground" /></div>}
                 </button>
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
                     <div className="truncate font-semibold">{a}</div>
-                    {section !== "lookbook" && <div className="text-xs text-muted-foreground">{list.length} {list.length === 1 ? "photo" : "photos"}</div>}
+                    {section === "fashion_line" && <div className="text-xs text-muted-foreground">{list.length} {list.length === 1 ? "photo" : "photos"}</div>}
+                    {products && canManage && <Button onClick={() => { reset(); setOpenAlbum(a); setFormOpen(true); }} className="mt-2 h-auto rounded-full px-3 py-1.5 text-xs font-semibold">Add item</Button>}
                     {section === "lookbook" && canManage && (
                       <button onClick={() => { reset(); setOpenAlbum(a); setFormOpen(true); }}
                         className="mt-2 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">

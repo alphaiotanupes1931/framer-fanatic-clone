@@ -146,7 +146,7 @@ export const BUSINESS_SUBTYPE_DESCRIPTIONS: Record<string, string> = {
 
 export const BUSINESS_SUBTYPES = Object.keys(BUSINESS_SUBTYPE_DESCRIPTIONS) as readonly string[];
 
-export const BUSINESS_OFFERS = ["Product", "Service"] as const;
+export const BUSINESS_OFFERS = ["Product", "Service", "Both"] as const;
 
 export const GROUP_SUBTYPES = [
   "Crew",

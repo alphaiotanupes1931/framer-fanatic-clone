@@ -5,6 +5,8 @@
 - [x] Redesign Updates tab to match reference screenshot and seed sample content
 
 ## Active
+- [x] Add Both to business offers and offer-specific Products/Services tabs, with Lookbook-style product categories and items. Nine rule/caption tests pass, schema confirmed, signed-in category form and unchanged Services verified on desktop and mobile using a temporary Both preview without changing existing data.
+- [ ] Verify product category creation, photo upload and saved item viewing with real owner content. Blocked: no real product category or product photos supplied; existing blank offers remain unchanged and no sample content was saved.
 - [x] Add existing business story editing for the page owner, preserving tags and rich text. Verified owner composer access, bold, italic and tags with a signed-in session; preview builds successfully.
 - [ ] Verify an existing business story saves and reads back through the owner editor. Blocked: the requesting owner's business has no existing stories, and no test content was published.
 - [x] Add custom tags to business story creation. Verified bold, italic, tag addition, duplicate prevention and removal on the signed-in owner's business Stories tab; tag storage column confirmed. No test story published.
