@@ -24,6 +24,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import {
   Globe, Phone, Mail, MapPin, Clock, Plus, Trash2, ExternalLink, Send,
   ArrowLeft, Users, Camera, Pencil, Bell, VolumeX, Volume2, Star,
+  MessageSquareOff, MessagesSquare,
   Megaphone, Calendar as CalendarIcon, MessageCircle, BarChart3, Image as ImageIcon,
   Folder, Briefcase, Trophy, FileText, UserPlus, MessageSquare, List,
   ChevronLeft, ChevronRight, ChevronDown, Heart, DollarSign,
@@ -352,10 +353,9 @@ export function OrgProfile() {
   const artistTabs: ArtistTab[] = isArtist ? tabsForArtist(org.subtype, "artist") : [];
   const artistIcons: Record<string, React.ComponentType<{ className?: string }>> = {};
   for (const t of artistTabs) artistIcons[t.label] = t.Icon;
-  const TABS: readonly string[] = org.type === "business"
+  const BASE_TABS: readonly string[] = org.type === "business"
     ? ["Posts", ...businessOfferTabs(org.business_offer), "Shop", "Events", "Promotions", "Reviews", "Stories", "About", "Comments", "Invite"].filter((t) =>
         t === "Invite" ? isOwner
-        : t === "Comments" ? org.show_comments !== false
         : canManage || !bizHas || !(t in bizHas) || bizHas[t])
     : isPersonPage
     ? PERSON_PAGE_TABS
@@ -372,6 +372,10 @@ export function OrgProfile() {
     : isAssoc
     ? COMMUNITY_ASSOC_TABS
     : ASSOC_TABS;
+  // Whether this page type has a Comments tab at all. Owners mute or unmute it
+  // from the Edit Profile menu, so the control only appears when it does something.
+  const supportsComments = BASE_TABS.includes("Comments");
+  const TABS: readonly string[] = BASE_TABS.filter((t) => t !== "Comments" || org.show_comments !== false);
   const VISIBLE_TABS: readonly string[] =
     (isGroup || isAssoc) && canManage ? ["Requests", ...TABS] : TABS;
 
@@ -409,6 +413,16 @@ export function OrgProfile() {
     if (next) localStorage.setItem(`pb_muted_org_${org.id}`, "1");
     else localStorage.removeItem(`pb_muted_org_${org.id}`);
     toast.success(next ? "Muted" : "Unmuted");
+  };
+
+  // The Comments tab on/off switch. Saved straight away, like the other
+  // banner/avatar actions in this menu, so there is nothing else to submit.
+  const toggleComments = async () => {
+    const next = org.show_comments === false;
+    const { error } = await supabase.from("organizations").update({ show_comments: next }).eq("id", org.id);
+    if (error) return toast.error(error.message);
+    setOrg({ ...org, show_comments: next });
+    toast.success(next ? "Comments turned on" : "Comments muted");
   };
 
   const toggleJoin = async () => {
@@ -596,6 +610,14 @@ export function OrgProfile() {
                 <DropdownMenuItem onClick={() => avatarInputRef.current?.click()} disabled={uploading === "avatar_url"}>
                   <Camera className="h-4 w-4" /> Edit avatar
                 </DropdownMenuItem>
+                {supportsComments && (
+                  <DropdownMenuItem onClick={toggleComments}>
+                    {org.show_comments === false
+                      ? <MessagesSquare className="h-4 w-4" />
+                      : <MessageSquareOff className="h-4 w-4" />}
+                    {org.show_comments === false ? "Unmute comments" : "Mute comments"}
+                  </DropdownMenuItem>
+                )}
                 {me && (
                   <DropdownMenuItem onClick={toggleMute}>
                     {muted ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
@@ -1133,6 +1155,11 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
     business_offer: (org as { business_offer?: string | null }).business_offer ?? "",
     show_comments: org.show_comments !== false,
   });
+  // Keep the form in step with a change made from the Edit Profile menu while
+  // this editor is open, so saving cannot write back a stale comments setting.
+  useEffect(() => {
+    setForm((f) => (f.show_comments === (org.show_comments !== false) ? f : { ...f, show_comments: org.show_comments !== false }));
+  }, [org.show_comments]);
   const days = ["mon","tue","wed","thu","fri","sat","sun"] as const;
   const dayLabels: Record<string,string> = { mon:"Mon",tue:"Tue",wed:"Wed",thu:"Thu",fri:"Fri",sat:"Sat",sun:"Sun" };
   const [hours, setHours] = useState<Record<string, { open: string; close: string } | null>>(() => {
