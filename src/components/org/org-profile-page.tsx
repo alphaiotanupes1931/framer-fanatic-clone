@@ -352,7 +352,8 @@ export function OrgProfile() {
   const artistIcons: Record<string, React.ComponentType<{ className?: string }>> = {};
   for (const t of artistTabs) artistIcons[t.label] = t.Icon;
   const TABS: readonly string[] = org.type === "business"
-    ? ["Posts", ...businessOfferTabs(org.business_offer), "Stories", "Events", "Shop", "Promotions", "Reviews", "About", "Comments", "Invite"]
+    ? ["Posts", ...businessOfferTabs(org.business_offer), "Shop", "Events", "Promotions", "Reviews", "Stories", "About", "Comments", "Invite"].filter((t) =>
+        t === "Invite" ? isOwner : canManage || !bizHas || !(t in bizHas) || bizHas[t])
     : isPersonPage
     ? PERSON_PAGE_TABS
     : isArtist
