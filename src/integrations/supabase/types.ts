@@ -2335,6 +2335,7 @@ export type Database = {
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
+          business_offer: string | null
           bylaws: string | null
           created_at: string
           cv: Json
@@ -2366,6 +2367,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          business_offer?: string | null
           bylaws?: string | null
           created_at?: string
           cv?: Json
@@ -2397,6 +2399,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          business_offer?: string | null
           bylaws?: string | null
           created_at?: string
           cv?: Json

@@ -1,0 +1,1 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS business_offer text CHECK (business_offer IS NULL OR business_offer IN ('Product','Service'));

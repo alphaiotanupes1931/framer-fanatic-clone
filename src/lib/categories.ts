@@ -132,21 +132,21 @@ export const ARTS_ORG_SUBTYPES = [
   "Education",
 ] as const;
 
-export const BUSINESS_SUBTYPES = [
-  "Cafe",
-  "Restaurant",
-  "Bar",
-  "Venue",
-  "Retail",
-  "Service",
-  "Barber Shop",
-  "Salon",
-  "Spa",
-  "Entertainment",
-  "Health",
-  "Creative",
-  "Nonprofit",
-] as const;
+export const BUSINESS_SUBTYPE_DESCRIPTIONS: Record<string, string> = {
+  "Arts & Culture": "Arts organizations, galleries, museums, and cultural institutions.",
+  "Food & Drink": "Restaurants, cafés, bars, and catering businesses.",
+  "Shopping": "Retail stores, boutiques, markets, and online shops.",
+  "Beauty & Wellness": "Barbershops, salons, spas, and beauty services.",
+  "Entertainment": "Performers, DJs, musicians, and entertainment businesses.",
+  "Venues & Events": "Event spaces, venues, event producers, and event services.",
+  "Services": "Consultants, creative professionals, and other service providers.",
+  "Health & Fitness": "Healthcare providers, gyms, fitness studios, and trainers.",
+  "Community": "Nonprofits, community organizations, and civic groups.",
+};
+
+export const BUSINESS_SUBTYPES = Object.keys(BUSINESS_SUBTYPE_DESCRIPTIONS) as readonly string[];
+
+export const BUSINESS_OFFERS = ["Product", "Service"] as const;
 
 export const GROUP_SUBTYPES = [
   "Crew",
