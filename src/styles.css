@@ -281,7 +281,10 @@
 .dark .text-neutral-400,
 .dark .text-neutral-500,
 .dark .text-gray-400,
-.dark .text-gray-500 {
+.dark .text-gray-500,
+.dark .text-slate-400,
+.dark .text-slate-500 {
+
   color: oklch(0.75 0 0) !important;
 }
 .dark .text-neutral-600,
@@ -295,7 +298,9 @@
 .dark .text-zinc-700,
 .dark .text-zinc-800,
 .dark .text-zinc-900,
+.dark .text-slate-600,
 .dark .text-slate-700,
+
 .dark .text-slate-800,
 .dark .text-slate-900,
 .dark .text-foreground {
