@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "@tanstack/react-router";
 import { orgPath } from "@/lib/org-paths";
 import { supabase } from "@/integrations/supabase/client";
