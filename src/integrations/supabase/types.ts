@@ -2395,6 +2395,7 @@ export type Database = {
           pinned: boolean
           pinned_at: string | null
           rules: string | null
+          show_comments: boolean
           slug: string
           subcategory: string | null
           subtype: string | null
@@ -2427,6 +2428,7 @@ export type Database = {
           pinned?: boolean
           pinned_at?: string | null
           rules?: string | null
+          show_comments?: boolean
           slug: string
           subcategory?: string | null
           subtype?: string | null
@@ -2459,6 +2461,7 @@ export type Database = {
           pinned?: boolean
           pinned_at?: string | null
           rules?: string | null
+          show_comments?: boolean
           slug?: string
           subcategory?: string | null
           subtype?: string | null

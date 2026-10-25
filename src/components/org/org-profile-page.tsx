@@ -86,6 +86,7 @@ import { orgPath } from "@/lib/org-paths";
 
 type Org = {
   business_offer?: string | null;
+  show_comments?: boolean;
   id: string; owner_id: string; type: string; subtype: string | null;
   name: string; slug: string; bio: string | null; tagline: string | null; website: string | null;
   phone: string | null; email: string | null; address: string | null;
@@ -353,7 +354,9 @@ export function OrgProfile() {
   for (const t of artistTabs) artistIcons[t.label] = t.Icon;
   const TABS: readonly string[] = org.type === "business"
     ? ["Posts", ...businessOfferTabs(org.business_offer), "Shop", "Events", "Promotions", "Reviews", "Stories", "About", "Comments", "Invite"].filter((t) =>
-        t === "Invite" ? isOwner : canManage || !bizHas || !(t in bizHas) || bizHas[t])
+        t === "Invite" ? isOwner
+        : t === "Comments" ? org.show_comments !== false
+        : canManage || !bizHas || !(t in bizHas) || bizHas[t])
     : isPersonPage
     ? PERSON_PAGE_TABS
     : isArtist
@@ -1128,6 +1131,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
     subcategory: (org as { subcategory?: string | null }).subcategory ?? "",
     subtype: org.subtype ?? "",
     business_offer: (org as { business_offer?: string | null }).business_offer ?? "",
+    show_comments: org.show_comments !== false,
   });
   const days = ["mon","tue","wed","thu","fri","sat","sun"] as const;
   const dayLabels: Record<string,string> = { mon:"Mon",tue:"Tue",wed:"Wed",thu:"Thu",fri:"Fri",sat:"Sat",sun:"Sun" };
@@ -1145,7 +1149,7 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
       email: form.email || null, address: form.address || null, neighborhood: form.neighborhood || null,
       tagline: form.tagline.trim() || null,
       subcategory: form.subcategory.trim() || null,
-      ...(org.type === "business" ? { subtype: form.subtype, business_offer: form.business_offer || null } : {}),
+      ...(org.type === "business" ? { subtype: form.subtype, business_offer: form.business_offer || null, show_comments: form.show_comments } : {}),
       hours,
     } as never).eq("id", org.id).select("id").single();
     if (error) return toast.error(error.message);
@@ -1189,6 +1193,14 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
                 {BUSINESS_SUBTYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
               {form.subtype && <p className="text-xs text-muted-foreground">{BUSINESS_SUBTYPE_DESCRIPTIONS[form.subtype]}</p>}
+              <label className="flex cursor-pointer items-center justify-between gap-3 pt-2">
+                <span className="text-xs font-semibold text-muted-foreground">Show comments on page</span>
+                <button type="button" role="switch" aria-checked={form.show_comments} aria-label="Show comments on page"
+                  onClick={() => setForm({ ...form, show_comments: !form.show_comments })}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${form.show_comments ? "bg-[#d4580a]" : "bg-border"}`}>
+                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-all ${form.show_comments ? "left-[22px]" : "left-0.5"}`} />
+                </button>
+              </label>
             </div>
           )}
           {(org.type === "group" || org.type === "community_assoc") && (

@@ -414,6 +414,13 @@
       "when": 1792960072074,
       "tag": "0058_business_product_categories_and_both_offer",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1792960659667,
+      "tag": "0059_add_show_comments",
+      "breakpoints": true
     }
   ]
 }
