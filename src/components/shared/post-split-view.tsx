@@ -306,6 +306,9 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
               </div>
             )
           )}
+          {post.music_url && /\/storage\/v1\//.test(post.music_url) && (
+            <div className="px-4 pt-2"><SmartAudio src={post.music_url} controls preload="metadata" className="w-full" /></div>
+          )}
           <div className="px-4 pb-3 pt-4 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
 
           <ul className="space-y-4 px-4 pb-4 pt-4">
