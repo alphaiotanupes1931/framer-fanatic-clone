@@ -161,7 +161,7 @@ export function ReferralNetworkDialog({
   }, [profile?.username]);
 
   const defaultMessage = `Hey! I thought you would love Planet Baltimore. Join through my link and we both get points toward perks.`;
-  const defaultSubject = `${profile?.display_name || profile?.username || "A friend"} invited you to Planet Baltimore`;
+  const defaultSubject = `From ${profile?.display_name || profile?.username || "A friend"}`;
   const [subject, setSubject] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [editorKey, setEditorKey] = useState(0);

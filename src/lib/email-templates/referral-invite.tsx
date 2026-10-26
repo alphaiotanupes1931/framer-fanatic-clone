@@ -27,7 +27,7 @@ interface ReferralInviteProps {
 
 export function referralInviteSubject({ inviterName, customSubject }: ReferralInviteProps): string {
   const custom = typeof customSubject === 'string' ? customSubject.replace(/[\r\n]+/g, ' ').trim().slice(0, 150) : ''
-  return custom || `${inviterName || 'A friend'} invited you to Planet Baltimore`
+  return custom || `From ${inviterName || 'A friend'}`
 }
 
 export const ReferralInviteEmail = ({
