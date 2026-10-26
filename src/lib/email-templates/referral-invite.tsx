@@ -17,6 +17,7 @@ import type { RichEmailDocument, RichEmailInline } from '@/lib/rich-email'
 
 interface ReferralInviteProps {
   inviterName?: string
+  customSubject?: string
   personalMessage?: string
   personalMessageIntro?: string
   personalMessageDocument?: RichEmailDocument
@@ -24,8 +25,14 @@ interface ReferralInviteProps {
   imageUrl?: string
 }
 
+export function referralInviteSubject({ inviterName, customSubject }: ReferralInviteProps): string {
+  const custom = typeof customSubject === 'string' ? customSubject.replace(/[\r\n]+/g, ' ').trim().slice(0, 150) : ''
+  return custom || `${inviterName || 'A friend'} invited you to Planet Baltimore`
+}
+
 export const ReferralInviteEmail = ({
   inviterName = 'A friend',
+  customSubject = '',
   personalMessage = '',
   personalMessageIntro = '',
   personalMessageDocument = [],
@@ -34,10 +41,10 @@ export const ReferralInviteEmail = ({
 }: ReferralInviteProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{inviterName} invited you to Planet Baltimore</Preview>
+    <Preview>{referralInviteSubject({ inviterName, customSubject })}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>{inviterName} invited you to Planet Baltimore</Heading>
+        <Heading style={h1}>{referralInviteSubject({ inviterName, customSubject })}</Heading>
         {personalMessage || personalMessageIntro || personalMessageDocument.length ? (
           <Section style={quote}>
             {personalMessageIntro ? <Text style={messageParagraph}>{personalMessageIntro}</Text> : null}
@@ -97,7 +104,7 @@ function renderInline(parts: RichEmailInline[]) {
   })
 }
 
-const main = { backgroundColor: '#faf8f5', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif' }
+const main = { backgroundColor: '#ffffff', fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif' }
 const container = { margin: '0 auto', padding: '32px 24px', maxWidth: '560px' }
 const h1 = { color: '#1f2937', fontSize: '22px', fontWeight: '700', margin: '0 0 16px' }
 const text = { color: '#374151', fontSize: '15px', lineHeight: '24px' }
@@ -131,10 +138,7 @@ const footer = { color: '#9ca3af', fontSize: '12px', lineHeight: '18px' }
 
 export const template = {
   component: ReferralInviteEmail,
-  subject: (data: Record<string, any>) => {
-    const custom = typeof data['customSubject'] === 'string' ? data['customSubject'].replace(/[\r\n]+/g, ' ').trim().slice(0, 150) : ''
-    return custom || `${data['inviterName'] || 'A friend'} invited you to Planet Baltimore`
-  },
+  subject: (data: Record<string, any>) => referralInviteSubject(data),
   displayName: 'Referral Invite',
   previewData: {
     inviterName: 'Reed',
