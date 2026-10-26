@@ -1,0 +1,1 @@
+ALTER TABLE public.user_ui_prefs ADD COLUMN IF NOT EXISTS referral_email_subject text, ADD COLUMN IF NOT EXISTS referral_email_message text;
