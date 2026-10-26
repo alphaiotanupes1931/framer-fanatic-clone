@@ -1,4 +1,3 @@
-import { SmartAudio } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -18,7 +17,7 @@ import { LikesListDialog } from "@/components/likes-list-dialog";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { Img, SmartAvatarImage, SmartVideo, SmartAudio } from "@/components/shared/smart-img";
 import { PosterVideo } from "@/components/shared/poster-video";
 import { useReaction } from "@/hooks/use-reaction";
 import { FollowButton } from "@/components/shared/follow-button";

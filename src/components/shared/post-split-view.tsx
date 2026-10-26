@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
-import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { Img, SmartAvatarImage, SmartVideo, SmartAudio } from "@/components/shared/smart-img";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { readCache, writeCache } from "@/hooks/use-cached-fetch";
 import { useReaction } from "@/hooks/use-reaction";
