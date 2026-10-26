@@ -160,20 +160,57 @@ export function ReferralNetworkDialog({
     return buildInviteUrl(profile?.username);
   }, [profile?.username]);
 
-  const defaultMessage = useMemo(() => {
-    const name = profile?.display_name || profile?.username || "me";
-    return `Hey! I thought you would love Planet Baltimore. Join through my link and we both get points toward perks.`;
-  }, [profile?.display_name, profile?.username]);
+  const defaultMessage = `Hey! I thought you would love Planet Baltimore. Join through my link and we both get points toward perks.`;
+  const defaultSubject = `${profile?.display_name || profile?.username || "A friend"} invited you to Planet Baltimore`;
+  const [subject, setSubject] = useState("");
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [editorKey, setEditorKey] = useState(0);
 
   useEffect(() => {
     if (open) {
       setMessage(defaultMessage);
+      setSubject("");
       setImageUrl("");
       setImagePreview("");
       loadStats();
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase
+          .from("user_ui_prefs")
+          .select("referral_email_subject, referral_email_message")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data?.referral_email_subject) setSubject(data.referral_email_subject);
+        if (data?.referral_email_message) { setMessage(data.referral_email_message); setEditorKey((k) => k + 1); }
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  const saveTemplate = async () => {
+    setSavingTemplate(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in first");
+      const { error } = await supabase.from("user_ui_prefs").upsert(
+        { user_id: user.id, referral_email_subject: subject.trim() || null, referral_email_message: message || null, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+      if (error) throw error;
+      toast.success("Email template saved to your profile");
+    } catch (err: any) {
+      toast.error(err.message || "Could not save the template");
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
+
+  const resetTemplate = () => {
+    setSubject("");
+    setMessage(defaultMessage);
+    setEditorKey((k) => k + 1);
+  };
 
   const loadStats = async () => {
     setLoadingInvites(true);
