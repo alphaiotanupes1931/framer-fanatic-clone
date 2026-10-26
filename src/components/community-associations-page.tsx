@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -127,7 +128,7 @@ export function CommunityAssociationsPage() {
                     <div className="mt-1 truncate text-sm font-semibold text-neutral-800">{o.tagline}</div>
                   )}
                   {o.bio && (
-                    <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{o.bio}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{stripHtml(o.bio)}</p>
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-neutral-500">
                     {typeof o.member_count === "number" && (

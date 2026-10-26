@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -263,7 +264,7 @@ function NeighborhoodsPage() {
                                 </Avatar>
                                 <div className="min-w-0 flex-1">
                                   <div className="truncate text-[15px] font-semibold text-foreground">{titleCase(a.display_name || a.username || "Unnamed Artist")}</div>
-                                  {a.bio && <div className="truncate text-xs text-muted-foreground">{a.bio}</div>}
+                                  {a.bio && <div className="truncate text-xs text-muted-foreground">{stripHtml(a.bio)}</div>}
                                 </div>
                               </NeighborhoodArtistLink>
                             </li>
@@ -283,7 +284,7 @@ function NeighborhoodsPage() {
                               </Avatar>
                               <div className="min-w-0 flex-1">
                                 <div className="truncate text-[15px] font-semibold text-foreground">{o.name}</div>
-                                {o.bio && <div className="truncate text-xs text-muted-foreground">{o.bio}</div>}
+                                {o.bio && <div className="truncate text-xs text-muted-foreground">{stripHtml(o.bio)}</div>}
                               </div>
                             </OrgLink>
                           </li>

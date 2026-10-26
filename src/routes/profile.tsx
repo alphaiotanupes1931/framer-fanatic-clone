@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { getFollowedPages } from "@/lib/followed-pages";
 import { FollowOrganizerDialog } from "@/components/tickets/follow-organizer-dialog";
 import { BannerWatermark } from "@/components/shared/banner-watermark";
@@ -525,7 +526,7 @@ function ProfilePage() {
                 </div>
               )}
             </div>
-            {profile?.bio && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{profile.bio}</p>}
+            {profile?.bio && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{stripHtml(profile.bio)}</p>}
           </div>
 
           <div className="mt-5 grid grid-cols-4 gap-2 text-center text-xs sm:flex sm:gap-8 sm:text-left sm:text-sm">

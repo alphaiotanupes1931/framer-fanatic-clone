@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Img } from "@/components/shared/smart-img";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -1616,7 +1617,7 @@ function FestivalDetailPage() {
                     <div className="text-sm font-bold text-foreground">{data!.organizer.name}</div>
                     {data!.organizer.bio && (
                       <p className="mt-0.5 line-clamp-3 text-xs text-muted-foreground">
-                        {data!.organizer.bio}
+                        {stripHtml(data!.organizer.bio)}
                       </p>
                     )}
                     <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold">
@@ -1647,8 +1648,8 @@ function FestivalDetailPage() {
           <section className="mt-8 scroll-mt-24">
             <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-foreground"><MapPin className="h-5 w-5" /> Nearby on Planet Baltimore</h2>
             <div className="mt-6 space-y-7">
-              {data!.nearby.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Sparkles className="h-4 w-4" /> Nearby Arts Organizations <span className="text-xs font-normal text-muted-foreground">({data!.nearby.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearby.map((o) => <NearbyCard key={o.id} href={orgPath(o.type, o.slug)} image={o.banner_url || o.avatar_url} label={o.subtype || o.type} title={o.name} description={o.tagline || o.bio} />)}</div></div>}
-              {data!.nearbyArtists.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Users className="h-4 w-4" /> Nearby Artists <span className="text-xs font-normal text-muted-foreground">({data!.nearbyArtists.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearbyArtists.map((artist) => <NearbyCard key={artist.id} href={`/${artist.username ?? ""}`} image={artist.banner_url || artist.avatar_url} label={artist.category} title={titleCase(artist.display_name || artist.username || "Artist")} description={artist.bio} />)}</div></div>}
+              {data!.nearby.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Sparkles className="h-4 w-4" /> Nearby Arts Organizations <span className="text-xs font-normal text-muted-foreground">({data!.nearby.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearby.map((o) => <NearbyCard key={o.id} href={orgPath(o.type, o.slug)} image={o.banner_url || o.avatar_url} label={o.subtype || o.type} title={o.name} description={stripHtml(o.tagline || o.bio)} />)}</div></div>}
+              {data!.nearbyArtists.length > 0 && <div><h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground"><Users className="h-4 w-4" /> Nearby Artists <span className="text-xs font-normal text-muted-foreground">({data!.nearbyArtists.length})</span></h3><div className="flex gap-3 overflow-x-auto pb-2">{data!.nearbyArtists.map((artist) => <NearbyCard key={artist.id} href={`/${artist.username ?? ""}`} image={artist.banner_url || artist.avatar_url} label={artist.category} title={titleCase(artist.display_name || artist.username || "Artist")} description={stripHtml(artist.bio)} />)}</div></div>}
             </div>
           </section>
         )}

@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { chooseFollowMode } from "@/components/shared/follow-mode-dialog";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Img } from "@/components/shared/smart-img";
@@ -1066,7 +1067,7 @@ function FestivalsPage() {
                         </div>
                       </div>
                     </div>
-                    {o.bio && <p className="line-clamp-2 text-xs text-muted-foreground">{o.bio}</p>}
+                    {o.bio && <p className="line-clamp-2 text-xs text-muted-foreground">{stripHtml(o.bio)}</p>}
                     <div className="flex flex-wrap items-center gap-3">
                       <OrgFollowButton orgId={o.id} meId={me?.id} />
                       <OrgLink

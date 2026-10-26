@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bookmark, ExternalLink } from "lucide-react";
@@ -42,7 +43,7 @@ export function PersonAboutTab({ profile }: { profile: any }) {
       <div className="rounded-xl border border-border bg-card p-5">
         <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">About</h3>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-          {longAbout || profile?.bio || "Nothing here yet."}
+          {stripHtml(longAbout || profile?.bio) || "Nothing here yet."}
         </p>
       </div>
       {rows.length > 0 && (
