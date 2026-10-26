@@ -421,6 +421,13 @@
       "when": 1792960659667,
       "tag": "0059_add_show_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1793029257236,
+      "tag": "0060_referral_email_template_prefs",
+      "breakpoints": true
     }
   ]
 }

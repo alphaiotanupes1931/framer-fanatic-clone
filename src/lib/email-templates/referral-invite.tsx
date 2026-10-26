@@ -131,8 +131,10 @@ const footer = { color: '#9ca3af', fontSize: '12px', lineHeight: '18px' }
 
 export const template = {
   component: ReferralInviteEmail,
-  subject: (data: Record<string, any>) =>
-    `${data['inviterName'] || 'A friend'} invited you to Planet Baltimore`,
+  subject: (data: Record<string, any>) => {
+    const custom = typeof data['customSubject'] === 'string' ? data['customSubject'].replace(/[\r\n]+/g, ' ').trim().slice(0, 150) : ''
+    return custom || `${data['inviterName'] || 'A friend'} invited you to Planet Baltimore`
+  },
   displayName: 'Referral Invite',
   previewData: {
     inviterName: 'Reed',

@@ -3530,16 +3530,22 @@ export type Database = {
       user_ui_prefs: {
         Row: {
           onboarding_dismissed: boolean
+          referral_email_message: string | null
+          referral_email_subject: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           onboarding_dismissed?: boolean
+          referral_email_message?: string | null
+          referral_email_subject?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           onboarding_dismissed?: boolean
+          referral_email_message?: string | null
+          referral_email_subject?: string | null
           updated_at?: string
           user_id?: string
         }
