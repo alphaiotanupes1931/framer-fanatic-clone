@@ -14,3 +14,8 @@ describe('referral subject consistency', () => {
     expect(template.subject(data)).toBe(referralInviteSubject(data))
   })
 })
+describe('referral default heading', () => {
+  it('reads "From [sender name]"', () => {
+    expect(referralInviteSubject({ inviterName: 'Ainsley Burrows' })).toBe('From Ainsley Burrows')
+  })
+})
