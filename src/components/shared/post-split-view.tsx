@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { timeAgo } from "@/lib/text-utils";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
-import { Img, SmartAvatarImage, SmartVideo } from "@/components/shared/smart-img";
+import { Img, SmartAvatarImage, SmartVideo, SmartAudio } from "@/components/shared/smart-img";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { readCache, writeCache } from "@/hooks/use-cached-fetch";
 import { useReaction } from "@/hooks/use-reaction";
@@ -305,6 +305,9 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
                 <MentionText text={post.content} />
               </div>
             )
+          )}
+          {post.music_url && /\/storage\/v1\//.test(post.music_url) && (
+            <div className="px-4 pt-2"><SmartAudio src={post.music_url} controls preload="metadata" className="w-full" /></div>
           )}
           <div className="px-4 pb-3 pt-4 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{timeAgo(post.created_at)}</div>
 

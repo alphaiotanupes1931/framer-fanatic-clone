@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "@tanstack/react-router";
@@ -305,7 +306,7 @@ export function OrgListPage({
                   <div className="px-4 pb-4 pt-12">
                     <div className="truncate text-base font-bold text-neutral-900">{o.name}</div>
                     {o.subtype && <div className="mt-1 text-sm text-neutral-600">{prettyLabel(o.subtype)}</div>}
-                    {o.bio && <p className="mt-2 line-clamp-3 text-sm text-neutral-600">{o.bio}</p>}
+                    {o.bio && <p className="mt-2 line-clamp-3 text-sm text-neutral-600">{stripHtml(o.bio)}</p>}
                     {o.neighborhood && (
                       <div className="mt-3 inline-flex items-center gap-1 text-sm text-neutral-500">
                         <MapPin className="h-3.5 w-3.5" /> {o.neighborhood}

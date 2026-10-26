@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
 import { useCachedFetch } from "@/hooks/use-cached-fetch";
@@ -86,7 +87,7 @@ function PodcastsPage() {
                         <MapPin className="h-3.5 w-3.5" /> {p.neighborhood}
                       </div>
                     )}
-                    {p.bio && <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{p.bio}</p>}
+                    {p.bio && <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{stripHtml(p.bio)}</p>}
                   </div>
                 </Link>
               );

@@ -751,7 +751,7 @@ function EventDetail() {
                       <OrgLink key={o.id} type={o.type} slug={o.slug} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
                         <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{(o.subtype || o.type).replaceAll("_", " ")}</div>
                         <div className="mt-0.5 text-sm font-bold text-foreground">{o.name}</div>
-                        {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{o.tagline || o.bio}</p>}
+                        {(o.tagline || o.bio) && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{stripHtml(o.tagline || o.bio || "")}</p>}
                         <span className="mt-3 inline-block text-xs font-semibold" style={{ color: "#d4580a" }}>View</span>
                       </OrgLink>
                     ))}
@@ -766,7 +766,7 @@ function EventDetail() {
                       <Link key={artist.id} to="/$username" params={{ username: artist.username ?? "" }} className="rounded-xl border border-border bg-card p-4 transition hover:border-[#d4580a]">
                         {artist.category && <div className="text-[11px] font-semibold uppercase" style={{ color: "#d4580a" }}>{artist.category.replaceAll("_", " ")}</div>}
                         <div className="mt-0.5 text-sm font-bold text-foreground">{titleCase(artist.display_name || artist.username || "Artist")}</div>
-                        {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{artist.bio}</p>}
+                        {artist.bio && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{stripHtml(artist.bio || "")}</p>}
                         <span className="mt-3 inline-block text-xs font-semibold" style={{ color: "#d4580a" }}>View</span>
                       </Link>
                     ))}

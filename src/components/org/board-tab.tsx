@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ export function BoardTab({ orgId, canManage }: { orgId: string; canManage: boole
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-neutral-900">{m.name}</p>
                 {m.title && <p className="text-sm font-medium text-[#d4580a]">{m.title}</p>}
-                {m.bio && <p className="mt-1 text-sm text-neutral-600">{m.bio}</p>}
+                {m.bio && <p className="mt-1 text-sm text-neutral-600">{stripHtml(m.bio)}</p>}
                 {m.email && (
                   <a href={`mailto:${m.email}`} className="mt-1 inline-flex items-center gap-1 text-xs text-neutral-500 hover:underline">
                     <Mail className="h-3 w-3" /> {m.email}

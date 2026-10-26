@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -98,7 +99,7 @@ export function GuestsTab({ orgId, ownerId, canManage }: { orgId: string; ownerI
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold text-foreground">{g.name}</div>
-                {g.bio && <div className="truncate text-xs text-muted-foreground">{g.bio}</div>}
+                {g.bio && <div className="truncate text-xs text-muted-foreground">{stripHtml(g.bio)}</div>}
               </div>
               {canManage && (
                 <div className="flex shrink-0 items-center gap-1">

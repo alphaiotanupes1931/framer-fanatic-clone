@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -85,7 +86,7 @@ export function ArtistsTab({ orgId, canManage }: { orgId: string; canManage: boo
                       </div>
                     )}
                   </div>
-                  {a.bio && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.bio}</p>}
+                  {a.bio && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{stripHtml(a.bio)}</p>}
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
                     {a.website && (
                       <a href={a.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary">

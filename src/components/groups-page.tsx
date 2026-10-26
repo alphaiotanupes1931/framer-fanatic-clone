@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -212,7 +213,7 @@ export function GroupsPage() {
                     </div>
                   )}
                   {o.bio && (
-                    <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{o.bio}</p>
+                    <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{stripHtml(o.bio)}</p>
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
                     {typeof o.member_count === "number" && (

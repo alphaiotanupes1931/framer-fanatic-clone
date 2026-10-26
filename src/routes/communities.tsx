@@ -1,3 +1,4 @@
+import { stripHtml } from "@/lib/text-utils";
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -140,7 +141,7 @@ function CommunitiesPage() {
                     </span>
                   </div>
                   {o.tagline && <div className="mt-1 truncate text-sm font-semibold text-neutral-800">{o.tagline}</div>}
-                  {o.bio && <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{o.bio}</p>}
+                  {o.bio && <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{stripHtml(o.bio)}</p>}
                   <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-neutral-500">
                     {typeof o.member_count === "number" && (
                       <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {o.member_count} members</span>
