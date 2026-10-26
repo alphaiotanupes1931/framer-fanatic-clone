@@ -325,6 +325,7 @@ export function ReferralNetworkDialog({
           idempotencyKey: `referral-${session.user.id}-${to}-${Date.now()}`,
           templateData: {
             inviterName,
+            customSubject: subject.trim() || undefined,
             personalMessageDocument: richHtmlToEmailDocument(message),
             inviteUrl: trackedUrl,
             imageUrl: imageUrl || undefined,
@@ -701,10 +702,23 @@ export function ReferralNetworkDialog({
                 )}
 
                 <div>
+                  <label htmlFor="referral-subject" className="mb-1.5 block text-xs font-semibold text-foreground">
+                    Email subject
+                  </label>
+                  <Input
+                    id="referral-subject"
+                    value={subject}
+                    maxLength={150}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder={defaultSubject}
+                  />
+                </div>
+                <div>
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    Personal message (optional)
+                    Email message
                   </label>
                   <RichTextEditor
+                    key={editorKey}
                     value={message}
                     onChange={setMessage}
                     placeholder="Tell them why they'd love Planet Baltimore..."
@@ -740,6 +754,12 @@ export function ReferralNetworkDialog({
                       }}
                     />
                   </div>
+                </div>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <Button type="button" variant="ghost" size="sm" onClick={resetTemplate}>Reset to default</Button>
+                  <Button type="button" variant="outline" size="sm" disabled={savingTemplate} onClick={saveTemplate}>
+                    {savingTemplate ? "Saving..." : "Save template"}
+                  </Button>
                 </div>
                 <EmailQuotaNotice quota={quota} />
                 <Button
