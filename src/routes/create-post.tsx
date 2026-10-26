@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MentionField } from "@/components/shared/mention-input";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Camera, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star } from "lucide-react";
+import { ImagePlus, Camera, Loader2, Video as VideoIcon, Type as TypeIcon, X, Users, Globe, Lock, Star, Music } from "lucide-react";
 import { toast } from "sonner";
-import { Img, SmartVideo } from "@/components/shared/smart-img";
+import { Img, SmartVideo, SmartAudio } from "@/components/shared/smart-img";
 import { STORED_URL_TTL, compressImage } from "@/lib/image-compress";
 import { ImageCropDialog } from "@/components/image-crop-dialog";
 
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/create-post")({
   }),
 });
 
-type PostType = "text" | "photo" | "video";
+type PostType = "text" | "photo" | "video" | "audio";
 type Visibility = "public" | "followers" | "close_friends" | "only_me";
 
 const CATEGORIES = [
@@ -81,6 +81,9 @@ function CreatePostPage() {
 
   const videoRef = useRef<HTMLInputElement>(null);
   const thumbRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioName, setAudioName] = useState("");
 
   const [postType, setPostType] = useState<PostType>("text");
   const [content, setContent] = useState("");
@@ -110,7 +113,8 @@ function CreatePostPage() {
   const contentValid = content.trim().length === 0 || content.trim().length <= 2000;
   const hasMedia =
     (postType === "photo" && (mediaUrls.length > 0 || !!imagePath)) ||
-    (postType === "video" && (mediaUrls.length > 0 || !!videoPath));
+    (postType === "video" && (mediaUrls.length > 0 || !!videoPath)) ||
+    (postType === "audio" && !!audioUrl);
   useEffect(() => {
     supabase
       .from("neighborhoods")
@@ -137,22 +141,23 @@ function CreatePostPage() {
     return () => clearTimeout(t);
   }, [excludeQuery, excluded]);
 
-  const uploadTo = async (bucket: "post-media", file: File, kind: "image" | "video") => {
-    file = await compressImage(file);
+  const uploadTo = async (bucket: "post-media", file: File, kind: "image" | "video" | "audio") => {
+    if (kind === "image") file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return null; }
-    const cap = kind === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
-    if (file.size > cap) { toast.error(`${kind === "image" ? "Image" : "Video"} must be under ${cap / 1024 / 1024}MB`); return null; }
+    const cap = kind === "image" ? 10 * 1024 * 1024 : kind === "audio" ? 100 * 1024 * 1024 : 50 * 1024 * 1024;
+    const kindLabel = kind === "image" ? "Image" : kind === "audio" ? "Audio" : "Video";
+    if (file.size > cap) { toast.error(`${kindLabel} must be under ${cap / 1024 / 1024}MB`); return null; }
     setUploading(true);
     const tId = toast.loading(`Uploading ${kind}...`);
     try {
-      const ext = (file.name.split(".").pop() || (kind === "image" ? "jpg" : "mp4")).toLowerCase();
+      const ext = (file.name.split(".").pop() || (kind === "image" ? "jpg" : kind === "audio" ? "mp3" : "mp4")).toLowerCase();
       const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
       // Bucket is private: create a long-lived signed URL so posts render everywhere.
       const { data: signed, error: sErr } = await supabase.storage.from(bucket).createSignedUrl(path, STORED_URL_TTL);
       if (sErr || !signed?.signedUrl) throw sErr || new Error("Could not sign URL");
-      toast.success(`${kind === "image" ? "Image" : "Video"} uploaded`, { id: tId });
+      toast.success(`${kindLabel} uploaded`, { id: tId });
       return signed.signedUrl;
     } catch (e) {
       console.error("upload failed", e);
@@ -231,8 +236,8 @@ function CreatePostPage() {
         link_url: null,
         link_title: null,
         link_description: null,
-        media_urls: mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
-        music_url: null,
+        media_urls: postType === "audio" ? [] : mediaUrls.length ? mediaUrls : (imagePath ? [imagePath] : videoPath ? [videoPath] : []),
+        music_url: postType === "audio" ? audioUrl || null : null,
         post_type: postType,
         // Text posts always carry their canvas colours so the published card
         // looks exactly like the square composer, line breaks included.
@@ -260,6 +265,7 @@ function CreatePostPage() {
     { id: "text",  label: "Text",  Icon: TypeIcon },
     { id: "photo", label: "Photo", Icon: ImagePlus },
     { id: "video", label: "Video", Icon: VideoIcon },
+    { id: "audio", label: "Audio", Icon: Music },
   ];
 
   const visibilityOpts: { id: Visibility; label: string; hint: string; Icon: typeof Globe }[] = [
@@ -424,6 +430,34 @@ function CreatePostPage() {
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
               <p className="text-xs text-neutral-500">Camera only works on mobile. Max 50MB per video.</p>
+            </div>
+          )}
+
+          {postType === "audio" && (
+            <div className="space-y-2">
+              <input ref={audioRef} type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.flac,.ogg" className="hidden" onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (audioRef.current) audioRef.current.value = "";
+                if (!f) return;
+                const url = await uploadTo("post-media", f, "audio");
+                if (url) { setAudioUrl(url); setAudioName(f.name); }
+              }} />
+              {audioUrl && (
+                <div className="flex items-center gap-2 rounded-xl border border-border p-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="mb-2 truncate text-sm font-medium text-foreground">{audioName}</p>
+                    <SmartAudio src={audioUrl} controls className="w-full" />
+                  </div>
+                  <button type="button" onClick={() => { setAudioUrl(""); setAudioName(""); }} aria-label="Remove audio" className="rounded-full p-1 text-muted-foreground">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+              <Button type="button" variant="outline" onClick={() => audioRef.current?.click()} disabled={uploading} className="w-full sm:w-auto">
+                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Music className="mr-2 h-4 w-4" />}
+                {audioUrl ? "Replace audio" : "Upload audio"}
+              </Button>
+              <p className="text-xs text-neutral-500">MP3, M4A, WAV, AAC or FLAC. Max 100MB.</p>
             </div>
           )}
 

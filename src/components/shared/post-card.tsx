@@ -1,3 +1,4 @@
+import { SmartAudio } from "@/components/shared/smart-img";
 import { siteUrl } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -447,6 +448,9 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
       )}
       {post.music_url && (
         <div className="order-3 px-4 pb-2.5 sm:px-6">
+          {/\/storage\/v1\//.test(post.music_url) ? (
+            <SmartAudio src={post.music_url} controls preload="metadata" className="w-full" onClick={(e) => e.stopPropagation()} />
+          ) : (
           <a
             href={post.music_url}
             target="_blank"
@@ -455,6 +459,7 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
           >
             🎵 Listen
           </a>
+          )}
         </div>
       )}
       <footer className="order-5 flex items-center gap-4 px-4 py-2.5 text-sm text-muted-foreground sm:gap-6 sm:px-6 sm:py-3">
