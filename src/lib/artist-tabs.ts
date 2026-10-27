@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   List, Disc3, Music2, Mic, Ticket, FileText, Calendar, MessageCircle,
   UserPlus2, Layers, Image as ImageIcon, Headphones, Mail, Shirt,
-  ShoppingBag, Package, Users, Film, Camera, Radio, Bookmark,
+  ShoppingBag, Users, Film, Camera, Radio, Bookmark,
 } from "lucide-react";
 import { DollarSign, Scissors, Building2, Newspaper, PenTool, MapPin } from "lucide-react";
 
@@ -141,7 +141,6 @@ const FASHION: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
   { key: "cv", label: "CV/Bio", Icon: FileText },
   { key: "fashion_line", label: "Lookbook", Icon: Layers },
-  { key: "drops", label: "Drops", Icon: Package },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
