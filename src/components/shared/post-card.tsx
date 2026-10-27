@@ -26,6 +26,7 @@ import { MentionField } from "@/components/shared/mention-input";
 import { RepostEmbed } from "@/components/shared/repost-embed";
 import { myRepostId, toggleRepostPost } from "@/lib/repost";
 import { Facepile } from "@/components/shared/facepile";
+import { OrgLink } from "@/components/org/org-link";
 
 type Post = {
   id: string;
@@ -49,6 +50,8 @@ type Post = {
   author_name?: string;
   author_avatar?: string | null;
   author_username?: string | null;
+  author_page_type?: string | null;
+  author_page_slug?: string | null;
   neighborhood_name?: string | null;
   is_founder?: boolean;
   tag?: string | null;
@@ -270,7 +273,14 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         </div>
       )}
       <header className="order-4 mx-3 mb-1 mt-1 flex items-center gap-2.5 rounded-xl bg-muted/40 px-3 py-2 sm:mx-5">
-        {authorProfilePath ? (
+        {post.author_page_slug ? (
+          <OrgLink type={post.author_page_type ?? ""} slug={post.author_page_slug} className="shrink-0">
+            <Avatar className="h-9 w-9 sm:h-10 sm:w-10">
+              {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
+              <AvatarFallback className="bg-muted text-xs text-muted-foreground">{initial}</AvatarFallback>
+            </Avatar>
+          </OrgLink>
+        ) : authorProfilePath ? (
           <Link {...authorProfilePath} className="shrink-0">
             <Avatar className="h-9 w-9 sm:h-10 sm:w-10">
               {post.author_avatar && <SmartAvatarImage src={post.author_avatar} />}
@@ -285,7 +295,9 @@ export function PostCard({ post, currentUserId, onDelete, onPinnedChange, reason
         )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-foreground">
-            {authorProfilePath ? (
+            {post.author_page_slug ? (
+              <OrgLink type={post.author_page_type ?? ""} slug={post.author_page_slug} className="truncate hover:text-[#d4580a]">{authorName}</OrgLink>
+            ) : authorProfilePath ? (
               <Link {...authorProfilePath} className="truncate hover:text-[#d4580a]">{authorName}</Link>
             ) : (
               <span className="truncate">{authorName}</span>
