@@ -27,7 +27,7 @@ import {
 import { staffLoginCopy, supportsStaffLoginType } from "@/lib/staff-login-copy";
 import { StaffVerifyScreen } from "@/components/create/staff-verify-screen";
 import { orgSlug } from "@/lib/org-paths";
-import { BUSINESS_OFFERS, BUSINESS_SUBTYPES, BUSINESS_SUBTYPE_DESCRIPTIONS } from "@/lib/categories";
+import { ARTS_ORG_SUBTYPES, BUSINESS_OFFERS, BUSINESS_SUBTYPES, BUSINESS_SUBTYPE_DESCRIPTIONS } from "@/lib/categories";
 
 export type OrgType = "arts_org" | "business" | "community_assoc" | "group";
 
@@ -118,6 +118,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
 
   const canSubmit = strict
     ? form.name.trim().length > 1 &&
+      !!form.subtype &&
       form.tagline.trim().length > 1 &&
       form.bio.trim().length > 9 &&
       form.mission.trim().length > 9 &&
@@ -151,6 +152,7 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
         slug,
         tagline: form.tagline.trim() || null,
         ...(type === "business" ? { subtype: form.subtype, business_offer: form.business_offer } : {}),
+        ...(type === "arts_org" ? { subtype: form.subtype } : {}),
         bio: form.bio.trim() || null,
         website: form.website.trim() || null,
         email: form.email.trim() || null,
@@ -253,6 +255,22 @@ export function OrgForm({ type, kindLabel }: { type: OrgType; kindLabel: string 
           </Field>
 
         </>
+      )}
+      {type === "arts_org" && (
+        <Field label="What type of arts organization is it?" required>
+          <Select value={form.subtype || undefined} onValueChange={(v) => set("subtype", v)}>
+            <SelectTrigger className="h-auto w-full rounded-md border-neutral-200 bg-white px-4 py-2.5 text-sm focus:border-[#d4580a] focus:ring-1 focus:ring-[#d4580a]/30">
+              <SelectValue placeholder="Select a type..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-neutral-200">
+              {ARTS_ORG_SUBTYPES.map((t) => (
+                <SelectItem key={t} value={t} className={SELECT_ITEM}>
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
       )}
       <Field label="Short description" required={strict || type === "group" || type === "community_assoc"}>
         <Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} maxLength={320} placeholder="One line describing what you do" />
