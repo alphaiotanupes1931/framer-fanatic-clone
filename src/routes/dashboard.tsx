@@ -308,6 +308,37 @@ function Dashboard() {
     prefetchImageUrls(srcs.filter(Boolean));
   }, [orderedFeedItems, visibleCount]);
 
+  // Remember feed position so returning from a post lands in the same spot.
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    const save = () => {
+      try {
+        sessionStorage.setItem("pb-feed-pos", JSON.stringify({ y: window.scrollY, n: visibleCountRef.current, f: activeFilterRef.current }));
+      } catch { /* ignore */ }
+    };
+    window.addEventListener("pagehide", save);
+    return () => { window.removeEventListener("pagehide", save); save(); };
+  }, []);
+  const visibleCountRef = useRef(visibleCount);
+  visibleCountRef.current = visibleCount;
+  const activeFilterRef = useRef(activeFilter);
+  activeFilterRef.current = activeFilter;
+  useEffect(() => {
+    if (restoredRef.current || orderedFeedItems.length === 0) return;
+    restoredRef.current = true;
+    let saved: { y: number; n: number; f: Filter } | null = null;
+    try { saved = JSON.parse(sessionStorage.getItem("pb-feed-pos") || "null"); } catch { saved = null; }
+    if (!saved || saved.f !== activeFilter || !saved.y) return;
+    setVisibleCount(Math.max(12, saved.n || 12));
+    const y = saved.y;
+    let tries = 0;
+    const tick = () => {
+      window.scrollTo(0, y);
+      if (Math.abs(window.scrollY - y) > 4 && tries++ < 30) setTimeout(tick, 100);
+    };
+    requestAnimationFrame(tick);
+  }, [orderedFeedItems.length, activeFilter]);
+
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMore) return;

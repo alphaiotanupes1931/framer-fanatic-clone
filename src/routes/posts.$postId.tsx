@@ -16,7 +16,7 @@ function PostDetail() {
   return (
     <AppLayout title="" hero={false}>
       <div className="mx-auto max-w-5xl">
-        <button onClick={() => navigate({ to: "/dashboard" })} className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <button onClick={() => { if (window.history.length > 1) window.history.back(); else navigate({ to: "/dashboard" }); }} className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
         <div className="overflow-hidden rounded-3xl border border-border bg-card">
