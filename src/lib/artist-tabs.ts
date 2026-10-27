@@ -115,8 +115,7 @@ const MIXED: ArtistTab[] = [
 const PERFORMANCE: ArtistTab[] = [
   { key: "posts", label: "Posts", Icon: List },
   { key: "cv", label: "CV/Bio", Icon: FileText },
-  { key: "repertoire", label: "Repertoire", Icon: Layers },
-  { key: "reel", label: "Reel", Icon: Radio },
+  { key: "reel", label: "Reels", Icon: Radio },
   { key: "shop", label: "Shop", Icon: ShoppingBag },
   { key: "saved", label: "Saved", Icon: Bookmark },
   { key: "events", label: "Events", Icon: Calendar },
