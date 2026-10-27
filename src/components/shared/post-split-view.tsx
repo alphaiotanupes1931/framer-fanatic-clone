@@ -18,6 +18,8 @@ import { MentionText } from "@/components/shared/mention-text";
 import { MentionField } from "@/components/shared/mention-input";
 import { LikesListDialog } from "@/components/likes-list-dialog";
 import { RepostEmbed } from "@/components/shared/repost-embed";
+import { OrgLink } from "@/components/org/org-link";
+import { loadPageAuthors } from "@/lib/post-page-author";
 
 type Post = {
   id: string; user_id: string; content: string | null;
@@ -30,7 +32,7 @@ type Post = {
   neighborhood: string | null; created_at: string;
   repost_of_post_id?: string | null; repost_of_event_id?: string | null;
 };
-type Author = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
+type Author = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; page_type?: string; page_slug?: string; neighborhood?: string | null };
 type Comment = { id: string; user_id: string; body: string; created_at: string; author?: Author | null };
 
 export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { postId: string; meId?: string | null; onDeleted?: () => void; onPinnedChange?: (id: string, pinned: boolean) => void }) {
@@ -65,7 +67,11 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
     setPost(p as Post | null);
     if (p) {
       const { data: profs } = await supabase.rpc("public_profiles_by_ids", { _ids: [p.user_id] });
-      const a = ((profs || [])[0] as Author) || null;
+      let a = ((profs || [])[0] as Author) || null;
+      if ((p as { organization_id?: string | null }).organization_id) {
+        const pg = (await loadPageAuthors([(p as { organization_id: string }).organization_id])).values().next().value;
+        if (pg) a = { id: pg.id, display_name: pg.name, username: null, avatar_url: pg.avatar_url, page_type: pg.type, page_slug: pg.slug, neighborhood: pg.neighborhood };
+      }
       setAuthor(a);
       const { data: cs } = await supabase.from("post_comments").select("*").eq("post_id", postId).order("created_at", { ascending: true });
       const list = (cs || []) as Comment[];
@@ -225,7 +231,18 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
       )}
       <div className="flex min-w-0 flex-col">
         <header className="flex items-center gap-3 border-b border-border py-4 pl-4 pr-16">
-          {author && authorProfilePath ? (
+          {author?.page_slug ? (
+            <OrgLink type={author.page_type ?? ""} slug={author.page_slug} className="flex min-w-0 items-center gap-2.5">
+              <Avatar className="h-9 w-9 shrink-0">
+                {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
+                <AvatarFallback className="bg-[#d4580a]/10 text-xs text-[#d4580a]">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold text-foreground">{author.display_name}</div>
+                <div className="truncate text-[11px] text-muted-foreground">{post.neighborhood || author.neighborhood || "Baltimore"}</div>
+              </div>
+            </OrgLink>
+          ) : author && authorProfilePath ? (
             <Link {...authorProfilePath} className="flex min-w-0 items-center gap-2.5">
               <Avatar className="h-9 w-9 shrink-0">
                 {author.avatar_url && <SmartAvatarImage src={author.avatar_url} alt="" />}
@@ -248,7 +265,7 @@ export function PostSplitView({ postId, meId, onDeleted, onPinnedChange }: { pos
               </div>
             </div>
           ) : <div className="text-sm text-muted-foreground">Someone</div>}
-          <FollowButton userId={post.user_id} currentUserId={meId} compact className="ml-auto shrink-0" />
+          {author?.page_slug ? <span className="ml-auto" /> : <FollowButton userId={post.user_id} currentUserId={meId} compact className="ml-auto shrink-0" />}
           {!isOwner && <ReportButton contentType="post" contentId={post.id} className="shrink-0" />}
           {isOwner && (
             <div className="flex items-center gap-1">

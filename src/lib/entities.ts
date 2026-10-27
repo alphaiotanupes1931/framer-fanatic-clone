@@ -80,7 +80,14 @@ export const Post = {
       .order(column, { ascending })
       .limit(limit);
     if (error) throw error;
-    return attachAuthors(data ?? []);
+    const rows = await attachAuthors(data ?? []);
+    const { loadPageAuthors } = await import("@/lib/post-page-author");
+    const pages = await loadPageAuthors(rows.map((r) => r.organization_id));
+    return rows.map((r) => {
+      const pg = r.organization_id ? pages.get(r.organization_id) : undefined;
+      if (!pg) return r;
+      return { ...r, author_name: pg.name, author_avatar: pg.avatar_url, author_username: null, is_founder: false, neighborhood_name: r.neighborhood ?? pg.neighborhood, author_page_type: pg.type, author_page_slug: pg.slug };
+    });
   },
   async delete(id: string) {
     // Soft delete
