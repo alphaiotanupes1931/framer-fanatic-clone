@@ -6,7 +6,7 @@ import { orgPath } from "@/lib/org-paths";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
-import { ORG_TYPE_LABEL, subtypesFor, BUSINESS_SUBTYPE_DESCRIPTIONS } from "@/lib/categories";
+import { ORG_TYPE_LABEL, subtypesFor, BUSINESS_SUBTYPE_DESCRIPTIONS, ARTS_ORG_SUBTYPES } from "@/lib/categories";
 import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -137,7 +137,7 @@ export function OrgListPage({
   const items = useMemo(() => {
     let list = all ?? [];
     if (artsOnly) list = list.filter((o) => o.type === "arts_org");
-    if (sub) list = list.filter((o) => o.subtype === sub);
+    if (sub) list = list.filter((o) => (o.subtype ?? "").toLowerCase() === sub.toLowerCase());
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter(
@@ -255,7 +255,7 @@ export function OrgListPage({
               </button>
             )}
             <TooltipProvider delayDuration={200}>
-            {subs.map((s) => {
+            {(type === "business" && artsOnly ? ARTS_ORG_SUBTYPES : subs).map((s) => {
               const btn = (
                 <button
                   key={s}
@@ -269,7 +269,7 @@ export function OrgListPage({
                   {type === "business" ? s : pluralLabel(s)}
                 </button>
               );
-              const desc = type === "business" ? BUSINESS_SUBTYPE_DESCRIPTIONS[s] : undefined;
+              const desc = type === "business" && !artsOnly ? BUSINESS_SUBTYPE_DESCRIPTIONS[s] : undefined;
               if (!desc) return btn;
               return (
                 <Tooltip key={s}>
