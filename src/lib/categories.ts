@@ -148,15 +148,20 @@ export const ARTS_ORG_LABELS: Record<string, { singular: string; plural: string;
 };
 
 export const BUSINESS_SUBTYPE_DESCRIPTIONS: Record<string, string> = {
-  "Arts & Culture": "Arts organizations, galleries, museums, and cultural institutions.",
-  "Food & Drink": "Restaurants, cafés, bars, and catering businesses.",
-  "Shopping": "Retail stores, boutiques, markets, and online shops.",
-  "Beauty & Wellness": "Barbershops, salons, spas, and beauty services.",
-  "Entertainment": "Performers, DJs, musicians, and entertainment businesses.",
-  "Venues & Events": "Event spaces, venues, event producers, and event services.",
-  "Services": "Consultants, creative professionals, and other service providers.",
-  "Health & Fitness": "Healthcare providers, gyms, fitness studios, and trainers.",
-  "Community": "Nonprofits, community organizations, and civic groups.",
+  "Restaurants": "Restaurants, diners, takeout spots, food trucks, and other prepared-food businesses.",
+  "Bars": "Bars, lounges, pubs, taverns, and nightlife establishments.",
+  "Cafés": "Coffee shops, tea houses, bakeries, and casual cafés.",
+  "Retail": "Boutiques, clothing stores, bookstores, gift shops, and other retail businesses.",
+  "Groceries": "Grocery stores, markets, specialty food shops, and convenience stores.",
+  "Salons": "Hair salons, nail salons, beauty studios, and other personal grooming businesses.",
+  "Barbers": "Barbershops and professional barbering services.",
+  "Venues": "Event spaces, performance halls, theaters, and other locations available for gatherings or events.",
+  "Entertainment": "Businesses providing live entertainment, recreational experiences, nightlife activities, and amusement.",
+  "Creative": "Design studios, photography businesses, production companies, and other creative enterprises.",
+  "Services": "Professional, personal, home, automotive, and other service-based businesses.",
+  "Health": "Medical practices, wellness centers, fitness studios, therapists, and other health-related businesses.",
+  "Hotels": "Hotels, inns, boutique accommodations, and other lodging establishments.",
+  "Nonprofits": "Charitable, civic, cultural, educational, and community-based nonprofit organizations.",
 };
 
 export const BUSINESS_SUBTYPES = Object.keys(BUSINESS_SUBTYPE_DESCRIPTIONS) as readonly string[];
