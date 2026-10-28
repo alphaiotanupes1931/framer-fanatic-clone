@@ -6,7 +6,7 @@ import { orgPath } from "@/lib/org-paths";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { useUserRole } from "@/hooks/use-user-role";
-import { ORG_TYPE_LABEL, subtypesFor, BUSINESS_SUBTYPE_DESCRIPTIONS, ARTS_ORG_SUBTYPES, ARTS_ORG_LABELS } from "@/lib/categories";
+import { ORG_TYPE_LABEL, subtypesFor, ARTS_ORG_SUBTYPES, ARTS_ORG_LABELS } from "@/lib/categories";
 import { Plus, MapPin, Search, Building2, List } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -234,7 +234,7 @@ export function OrgListPage({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => { setSub(""); setArtsOnly(false); }}
-              className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+              className={`rounded-full px-5 py-1.5 text-sm font-semibold transition-colors duration-150 ${
                 sub === "" && !artsOnly
                   ? "bg-[#d4580a] text-white"
                   : "border border-border bg-background text-foreground hover:border-orange-300"
@@ -245,7 +245,7 @@ export function OrgListPage({
             {type === "business" && (
               <button
                 onClick={() => { setArtsOnly((v) => !v); setSub(""); }}
-                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+                className={`rounded-full px-5 py-1.5 text-sm font-semibold transition-colors duration-150 ${
                   artsOnly
                     ? "bg-[#d4580a] text-white"
                     : "border border-border bg-background text-foreground hover:border-orange-300"
@@ -260,7 +260,7 @@ export function OrgListPage({
                 <button
                   key={s}
                   onClick={() => setSub(s)}
-                  className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+                  className={`rounded-full px-5 py-1.5 text-sm font-semibold transition-colors duration-150 ${
                     sub === s
                       ? "bg-[#d4580a] text-white"
                       : "border border-border bg-background text-foreground hover:border-orange-300"
@@ -269,7 +269,7 @@ export function OrgListPage({
                   {(type === "arts_org" || artsOnly) && ARTS_ORG_LABELS[s] ? ARTS_ORG_LABELS[s].plural : type === "business" ? s : pluralLabel(s)}
                 </button>
               );
-              const desc = type === "business" && !artsOnly ? BUSINESS_SUBTYPE_DESCRIPTIONS[s] : (type === "arts_org" || artsOnly) ? ARTS_ORG_LABELS[s]?.description : undefined;
+              const desc = type === "business" && !artsOnly ? undefined : (type === "arts_org" || artsOnly) ? ARTS_ORG_LABELS[s]?.description : undefined;
               if (!desc) return btn;
               return (
                 <Tooltip key={s}>
