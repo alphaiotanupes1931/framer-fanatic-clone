@@ -132,6 +132,21 @@ export const ARTS_ORG_SUBTYPES = [
   "Education",
 ] as const;
 
+/** Display names for stored arts org types; stored values stay unchanged. */
+export const ARTS_ORG_LABELS: Record<string, { singular: string; plural: string; description?: string }> = {
+  Museum: { singular: "Museum", plural: "Museums", description: "Collecting, preserving, and exhibiting art and culture." },
+  Gallery: { singular: "Gallery", plural: "Galleries", description: "Exhibiting, promoting, and selling visual art." },
+  "Studio Space": { singular: "Studio", plural: "Studios", description: "Individual and shared creative workspaces." },
+  Collective: { singular: "Collective", plural: "Collectives", description: "Artists collaborating on projects and programming." },
+  Residency: { singular: "Residency", plural: "Residencies", description: "Providing artists with space, resources, and support." },
+  Nonprofit: { singular: "Nonprofit", plural: "Nonprofits" },
+  Cultural: { singular: "Cultural", plural: "Cultural", description: "Celebrating and preserving cultural heritage and traditions." },
+  Performance: { singular: "Performing Arts", plural: "Performing Arts", description: "Theater, dance, music, and live performance." },
+  Community: { singular: "Community Arts", plural: "Community Arts", description: "Connecting communities through creative programs." },
+  "DIY / Alt": { singular: "DIY/Alt", plural: "DIY/Alt", description: "Independent, experimental, and artist-run spaces." },
+  Education: { singular: "Arts Education", plural: "Arts Education", description: "Classes, workshops, and creative training." },
+};
+
 export const BUSINESS_SUBTYPE_DESCRIPTIONS: Record<string, string> = {
   "Arts & Culture": "Arts organizations, galleries, museums, and cultural institutions.",
   "Food & Drink": "Restaurants, cafés, bars, and catering businesses.",
