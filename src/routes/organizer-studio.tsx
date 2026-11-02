@@ -504,7 +504,7 @@ function OrganizerStudioPage() {
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 rounded-full bg-neutral-100 p-1 text-sm sm:grid-cols-4">
           <button onClick={() => { setTab("manage"); setSelected(null); }} className={`rounded-full py-2 font-semibold transition ${tab === "manage" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>Manage Events</button>
           <button onClick={() => { setTab("drafts"); setSelected(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "drafts" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
             <FileText className="h-4 w-4" /> Drafts
@@ -523,17 +523,6 @@ function OrganizerStudioPage() {
             }`}
           >
             <CreditCard className="h-4 w-4" /> Stripe
-          </button>
-          <button
-            onClick={() => { void saveTickets(); }}
-            disabled={publishChecking}
-            className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition disabled:opacity-60 ${
-              ticketsDirty
-                ? "bg-[#d4580a] text-white shadow hover:brightness-110"
-                : "text-neutral-600 hover:text-neutral-900"
-            }`}
-          >
-            <Ticket className="h-4 w-4" /> {publishChecking ? "Checking Stripe…" : "Save Tickets"}
           </button>
           <button onClick={() => { setTab("campaign"); setSelected(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 font-semibold transition ${tab === "campaign" ? "bg-[#d4580a] text-white shadow" : "text-neutral-600 hover:text-neutral-900"}`}>
             <Mail className="h-4 w-4" /> Campaign
@@ -634,6 +623,7 @@ function OrganizerStudioPage() {
             )}
           </>
         ) : (
+          <>
           <EventDetail
             evt={selected}
             onBack={() => setSelected(null)}
@@ -642,6 +632,18 @@ function OrganizerStudioPage() {
             saveTicketsSignal={saveTicketsSignal}
             onTicketsSaved={() => navigate({ to: "/events/$eventId", params: { eventId: selected.id } })}
           />
+          <div className="flex justify-end">
+            <button
+              onClick={() => { void saveTickets(); }}
+              disabled={publishChecking}
+              className={`inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition disabled:opacity-60 ${
+                ticketsDirty ? "bg-[#d4580a] text-white shadow hover:brightness-110" : "border border-[#d4580a] text-[#d4580a]"
+              }`}
+            >
+              <Ticket className="h-4 w-4" /> {publishChecking ? "Checking Stripe…" : "Save Tickets"}
+            </button>
+          </div>
+          </>
         )}
       </div>
     </AppLayout>
