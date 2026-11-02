@@ -3,6 +3,8 @@ import { navigateExternal, openExternalWindow, closeExternalWindow } from "@/lib
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/shared/follow-button";
+import { PageFollowButton } from "@/components/shared/page-follow-button";
+import { orgPath } from "@/lib/org-paths";
 import { AppLayout } from "@/components/app-layout";
 import { MapPin, Navigation, Ticket, ArrowLeft, Send, Trash2, Edit3, EyeOff, Bookmark, Repeat2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { titleCase } from "@/lib/utils";
@@ -48,6 +50,7 @@ type TicketTier = {
 };
 
 type Host = { id: string; display_name: string | null; username: string | null; avatar_url: string | null };
+type HostPage = { id: string; name: string; slug: string; type: string; avatar_url: string | null };
 type NearbyOrg = { id: string; name: string; slug: string; type: string; subtype: string | null; tagline: string | null; bio: string | null };
 type NearbyArtist = { id: string; display_name: string | null; username: string | null; category: string | null; bio: string | null };
 
@@ -162,6 +165,7 @@ function EventDetail() {
   const navigate = useNavigate();
   const [evt, setEvt] = useState<EventRow | null>(null);
   const [host, setHost] = useState<Host | null>(null);
+  const [hostPage, setHostPage] = useState<HostPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
   const [rsvping, setRsvping] = useState(false);
@@ -242,6 +246,11 @@ function EventDetail() {
         setDonationsOn(!!(data as { donations_enabled?: boolean | null }).donations_enabled);
         const { data: h } = await (supabase as any).from("profiles_public").select("id, display_name, username, avatar_url").eq("id", (data as EventRow).user_id).maybeSingle();
         setHost((h as Host) || null);
+        const orgId = (data as { organization_id?: string | null }).organization_id;
+        if (orgId) {
+          const { data: o } = await supabase.from("organizations").select("id, name, slug, type, avatar_url").eq("id", orgId).maybeSingle();
+          setHostPage((o as HostPage) || null);
+        } else setHostPage(null);
         if (uid) {
           const { data: sv } = await supabase.from("event_saves").select("event_id").eq("event_id", eventId).eq("user_id", uid).maybeSingle();
           setSaved(!!sv);
@@ -513,7 +522,19 @@ function EventDetail() {
           </div>
         )}
 
-        {host && (
+        {hostPage ? (
+          <a href={orgPath(hostPage.type, hostPage.slug)} onClick={(e) => { e.preventDefault(); navigate({ to: orgPath(hostPage.type, hostPage.slug) as never }); }} className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl transition-colors">
+            <Avatar className="w-10 h-10">
+              <SmartAvatarImage src={hostPage.avatar_url ?? undefined} />
+              <AvatarFallback style={{ backgroundColor: "rgba(212,88,10,0.1)", color: "#d4580a" }}>{hostPage.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-muted-foreground">Hosted by</p>
+              <p className="truncate font-medium text-foreground">{hostPage.name}</p>
+            </div>
+            <PageFollowButton orgId={hostPage.id} meId={me} ownerId={evt.user_id} className="flex-shrink-0" />
+          </a>
+        ) : host && (
           <Link to="/$username" params={{ username: host.username || host.id }} className="flex items-center gap-3 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors">
             <Avatar className="w-10 h-10">
               <SmartAvatarImage src={host.avatar_url ?? undefined} />
