@@ -50,6 +50,7 @@ function NewEventPage() {
   type MyOrg = { id: string; name: string; type: string };
   const [myOrgs, setMyOrgs] = useState<MyOrg[]>([]);
   const [postToOrg, setPostToOrg] = useState<string>(orgId ?? "");
+  const [alsoPublic, setAlsoPublic] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -378,6 +379,7 @@ function NewEventPage() {
       const { data, error } = await supabase.from("events").insert({
         user_id: me.id,
         organization_id: postToOrg || null,
+        also_public: alsoPublic,
         is_exhibition: isExhibition,
         title: form.title.trim(),
         description: form.description.trim() || null,
@@ -470,11 +472,19 @@ function NewEventPage() {
               if (!sel) return null;
               const isPrivate = sel.type === "group" || sel.type === "community_assoc";
               return (
+                <>
                 <p className="mt-2 text-xs text-neutral-500">
-                  {isPrivate
+                  {isPrivate && !alsoPublic
                     ? `Private to ${sel.name}. This event shows on that page only, not on the public Events page.`
                     : `This event shows on ${sel.name} and on the public Events page.`}
                 </p>
+                {isPrivate && (
+                  <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm font-medium">
+                    <input type="checkbox" checked={alsoPublic} onChange={(e) => setAlsoPublic(e.target.checked)} className="h-4 w-4 accent-[#d4580a]" />
+                    Also make this event public
+                  </label>
+                )}
+                </>
               );
             })()}
           </div>

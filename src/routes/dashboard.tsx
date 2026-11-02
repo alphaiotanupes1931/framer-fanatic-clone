@@ -190,7 +190,7 @@ function Dashboard() {
   const feedItems = useMemo<FeedItem[]>(() => {
     const followedIds = new Set(follows.map((f: any) => f.target_id));
     const filteredPosts = (posts as any[]).filter(
-      (p) => !p.is_deleted && !excludeOrgIds.has(p.organization_id),
+      (p) => !p.is_deleted && (p.also_public || !excludeOrgIds.has(p.organization_id)),
     );
 
     if (activeFilter === "On Planet") {

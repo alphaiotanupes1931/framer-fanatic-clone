@@ -84,6 +84,7 @@ function CreatePostPage() {
   const audioRef = useRef<HTMLInputElement>(null);
   const [audioUrl, setAudioUrl] = useState("");
   const [audioName, setAudioName] = useState("");
+  const [alsoPublic, setAlsoPublic] = useState(false);
 
   const [postType, setPostType] = useState<PostType>("text");
   const [content, setContent] = useState("");
@@ -249,6 +250,7 @@ function CreatePostPage() {
         visibility,
         excluded_user_ids: excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
+        also_public: isCommunityPost && alsoPublic,
       });
       if (error) throw error;
       toast.success("Posted");
@@ -526,6 +528,15 @@ function CreatePostPage() {
             </div>
           )}
 
+          {isCommunityPost && (
+            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-neutral-200 p-3">
+              <input type="checkbox" checked={alsoPublic} onChange={(e) => setAlsoPublic(e.target.checked)} className="mt-1 h-4 w-4 accent-[#d4580a]" />
+              <span>
+                <span className="block text-sm font-semibold">Also make this post public</span>
+                <span className="block text-xs text-neutral-500">It stays on {org?.name ?? "this page"} and also shows in the home feed for everyone.</span>
+              </span>
+            </label>
+          )}
           {/* Groups and Community Associations post without extra fields. */}
           {!isCommunityPost && (<>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
