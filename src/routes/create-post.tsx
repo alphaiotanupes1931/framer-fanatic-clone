@@ -84,6 +84,7 @@ function CreatePostPage() {
   const audioRef = useRef<HTMLInputElement>(null);
   const [audioUrl, setAudioUrl] = useState("");
   const [audioName, setAudioName] = useState("");
+  const [alsoPublic, setAlsoPublic] = useState(false);
 
   const [postType, setPostType] = useState<PostType>("text");
   const [content, setContent] = useState("");
@@ -249,6 +250,7 @@ function CreatePostPage() {
         visibility,
         excluded_user_ids: excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
+        also_public: isCommunityPost && alsoPublic,
       });
       if (error) throw error;
       toast.success("Posted");
