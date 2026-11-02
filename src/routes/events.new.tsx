@@ -50,6 +50,7 @@ function NewEventPage() {
   type MyOrg = { id: string; name: string; type: string };
   const [myOrgs, setMyOrgs] = useState<MyOrg[]>([]);
   const [postToOrg, setPostToOrg] = useState<string>(orgId ?? "");
+  const [alsoPublic, setAlsoPublic] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
