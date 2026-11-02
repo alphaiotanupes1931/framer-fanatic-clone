@@ -140,11 +140,26 @@ export function OrgListPage({
     if (sub) list = list.filter((o) => (o.subtype ?? "").toLowerCase() === sub.toLowerCase());
     const needle = q.trim().toLowerCase();
     if (needle) {
+      // Also match the page's type and category names, so typing "Arts Orgs",
+      // "Restaurants" or "Gallery" brings up the pages filed under them.
+      const typeTerms = (o: Org) => {
+        const terms: string[] = [];
+        if (o.type === "arts_org") {
+          terms.push("arts orgs", "arts organizations", "arts org");
+          const l = o.subtype ? ARTS_ORG_LABELS[o.subtype] : undefined;
+          if (l) terms.push(l.singular, l.plural);
+        } else if (o.type === "business") {
+          terms.push("business", "businesses");
+        }
+        if (o.subtype) terms.push(o.subtype, pluralLabel(o.subtype));
+        return terms.join(" | ").toLowerCase();
+      };
       list = list.filter(
         (o) =>
           o.name.toLowerCase().includes(needle) ||
-          (o.bio ?? "").toLowerCase().includes(needle) ||
-          (o.neighborhood ?? "").toLowerCase().includes(needle),
+          stripHtml(o.bio ?? "").toLowerCase().includes(needle) ||
+          (o.neighborhood ?? "").toLowerCase().includes(needle) ||
+          typeTerms(o).includes(needle),
       );
     }
     const time = (v?: string | null) => (v ? new Date(v).getTime() : 0);
