@@ -523,6 +523,7 @@ export type Database = {
       events: {
         Row: {
           address: string | null
+          also_public: boolean
           capacity: number | null
           category: string | null
           created_at: string
@@ -555,6 +556,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          also_public?: boolean
           capacity?: number | null
           category?: string | null
           created_at?: string
@@ -587,6 +589,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          also_public?: boolean
           capacity?: number | null
           category?: string | null
           created_at?: string
@@ -2606,6 +2609,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          also_public: boolean
           bg_color: string | null
           category: string | null
           comments_count: number
@@ -2640,6 +2644,7 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          also_public?: boolean
           bg_color?: string | null
           category?: string | null
           comments_count?: number
@@ -2674,6 +2679,7 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          also_public?: boolean
           bg_color?: string | null
           category?: string | null
           comments_count?: number
