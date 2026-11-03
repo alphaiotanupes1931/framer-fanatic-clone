@@ -655,7 +655,7 @@ function CreatePostPage() {
               </div>
             )}
           </div>
-          </>)}
+          </>
 
           <div className="flex justify-end">
 
