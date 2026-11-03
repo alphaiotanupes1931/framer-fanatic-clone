@@ -449,6 +449,13 @@
       "when": 1793668638109,
       "tag": "0063_group_posts_members_only",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1793668667340,
+      "tag": "0064_group_posts_members_only_fix_type",
+      "breakpoints": true
     }
   ]
 }
