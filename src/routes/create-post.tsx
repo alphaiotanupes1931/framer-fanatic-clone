@@ -248,7 +248,7 @@ function CreatePostPage() {
         category,
         tag: tag.trim() || null,
         visibility,
-        excluded_user_ids: excluded.map((e) => e.id),
+        excluded_user_ids: isCommunityPost ? [] : excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
         also_public: isCommunityPost && alsoPublic,
       });
