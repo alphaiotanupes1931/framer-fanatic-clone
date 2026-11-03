@@ -570,7 +570,9 @@ function CreatePostPage() {
               maxLength={40}
             />
           </div>
+          </>)}
 
+          <>
           <div className="mt-10 space-y-2">
             <Label className="text-sm font-medium">Who can see this?</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
