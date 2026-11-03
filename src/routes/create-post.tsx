@@ -248,7 +248,7 @@ function CreatePostPage() {
         category,
         tag: tag.trim() || null,
         visibility,
-        excluded_user_ids: excluded.map((e) => e.id),
+        excluded_user_ids: isCommunityPost ? [] : excluded.map((e) => e.id),
         neighborhood: neighborhood.trim() || null,
         also_public: isCommunityPost && alsoPublic,
       });
@@ -572,7 +572,7 @@ function CreatePostPage() {
           </div>
           </>)}
 
-          <>
+          {!isCommunityPost && (<>
           <div className="mt-10 space-y-2">
             <Label className="text-sm font-medium">Who can see this?</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -655,7 +655,7 @@ function CreatePostPage() {
               </div>
             )}
           </div>
-          </>
+          </>)}
 
           <div className="flex justify-end">
 
