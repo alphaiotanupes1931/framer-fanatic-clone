@@ -456,6 +456,20 @@
       "when": 1793668667340,
       "tag": "0064_group_posts_members_only_fix_type",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1794281663194,
+      "tag": "0065_private_group_followers_and_rename_slug",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1794281686154,
+      "tag": "0066_slug_trigger_on_rename",
+      "breakpoints": true
     }
   ]
 }

@@ -19,3 +19,7 @@
 - Page story composers use the shared rich-text editor and readers preserve its HTML formatting; business Stories opt into custom tags stored on organization_posts, keeping tags separate from the story body.
 - Existing page stories are edited in the shared page story composer through the authenticated browser client and existing page-management policies; updates preserve authorship and confirm returned IDs so denied saves cannot appear successful.
 - Neighborhood Artists combines personal artist profiles with public, visible artist organization pages through a browser-safe selector and canonical page links, because artist pages store their own neighborhood independently of the owner's profile.
+- Renaming an organization regenerates its slug in the database trigger (old slug kept as an alias), so links and the URL stay in sync with the name.
+- Explicit followers of a private page keep read access through `is_org_follower`; new follows on private pages require approved membership, so following cannot bypass join approval.
+- Shared-item previews in messages are cleaned to plain text in `share-preview.ts` on both send and read, so stored formatting never shows as code.
+- The home feed saves its scroll position while scrolling (not on leave), because the next page resets scroll before the feed unmounts.

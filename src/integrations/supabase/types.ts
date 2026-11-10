@@ -4024,6 +4024,10 @@ export type Database = {
         Returns: boolean
       }
       is_founder_visible: { Args: { _user_id: string }; Returns: boolean }
+      is_org_follower: {
+        Args: { _org: string; _uid: string }
+        Returns: boolean
+      }
       is_org_member: { Args: { _org: string; _uid: string }; Returns: boolean }
       is_org_staff: { Args: { _organization_id: string }; Returns: boolean }
       link_first_friends: { Args: never; Returns: number }

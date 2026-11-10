@@ -310,34 +310,47 @@ function Dashboard() {
 
   // Remember feed position so returning from a post lands in the same spot.
   const restoredRef = useRef(false);
+  const restoringRef = useRef(false);
   useEffect(() => {
+    // Save while scrolling, not on leave: by the time the feed unmounts the
+    // next page has already reset the window to the top, which would erase it.
+    let frame = 0;
     const save = () => {
+      frame = 0;
+      if (!restoredRef.current) return;
       try {
         sessionStorage.setItem("pb-feed-pos", JSON.stringify({ y: window.scrollY, n: visibleCountRef.current, f: activeFilterRef.current }));
       } catch { /* ignore */ }
     };
-    window.addEventListener("pagehide", save);
-    return () => { window.removeEventListener("pagehide", save); save(); };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(save); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); if (frame) cancelAnimationFrame(frame); };
   }, []);
   const visibleCountRef = useRef(visibleCount);
   visibleCountRef.current = visibleCount;
   const activeFilterRef = useRef(activeFilter);
   activeFilterRef.current = activeFilter;
   useEffect(() => {
-    if (restoredRef.current || orderedFeedItems.length === 0) return;
-    restoredRef.current = true;
+    if (restoredRef.current || restoringRef.current || !checked || loadingPosts || orderedFeedItems.length === 0) return;
+    restoringRef.current = true;
     let saved: { y: number; n: number; f: Filter } | null = null;
     try { saved = JSON.parse(sessionStorage.getItem("pb-feed-pos") || "null"); } catch { saved = null; }
-    if (!saved || saved.f !== activeFilter || !saved.y) return;
+    if (!saved || saved.f !== activeFilter || !saved.y) { restoredRef.current = true; return; }
     setVisibleCount(Math.max(12, saved.n || 12));
     const y = saved.y;
     let tries = 0;
+    let userMoved = false;
+    const stop = () => { userMoved = true; };
+    window.addEventListener("wheel", stop, { passive: true, once: true });
+    window.addEventListener("touchstart", stop, { passive: true, once: true });
     const tick = () => {
+      if (userMoved) { restoredRef.current = true; return; }
       window.scrollTo(0, y);
-      if (Math.abs(window.scrollY - y) > 4 && tries++ < 30) setTimeout(tick, 100);
+      if (Math.abs(window.scrollY - y) > 4 && tries++ < 50) setTimeout(tick, 100);
+      else restoredRef.current = true;
     };
     requestAnimationFrame(tick);
-  }, [orderedFeedItems.length, activeFilter]);
+  }, [orderedFeedItems.length, activeFilter, checked, loadingPosts]);
 
   useEffect(() => {
     const el = sentinelRef.current;

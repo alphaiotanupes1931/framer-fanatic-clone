@@ -738,10 +738,12 @@ export function OrgProfile() {
             </span>
           </div>
         )}
-        {(org.type === "group" || org.type === "community_assoc") && org.tagline && (
+        {(org.type === "group" || org.type === "community_assoc" || org.type === "business") && org.tagline && (
           <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-neutral-700">{org.tagline}</p>
         )}
-        {org.bio && org.type !== "group" && org.type !== "community_assoc" && (
+        {/* Businesses show their Short Description up top; the full Description lives in About.
+            Until a business writes one, the full description keeps showing here. */}
+        {org.bio && org.type !== "group" && org.type !== "community_assoc" && !(org.type === "business" && org.tagline) && (
           /<[a-z][\s\S]*>/i.test(org.bio) ? (
             <RichHtml html={org.bio} className="mt-3 max-w-3xl text-[15px] text-neutral-700" />
           ) : (
@@ -1177,10 +1179,15 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
       subcategory: form.subcategory.trim() || null,
       ...(org.type === "business" ? { subtype: form.subtype, business_offer: form.business_offer || null, show_comments: form.show_comments } : {}),
       hours,
-    } as never).eq("id", org.id).select("id").single();
+    } as never).eq("id", org.id).select("id, slug").single();
     if (error) return toast.error(error.message);
     if (!saved) return toast.error("Could not save changes");
-    onChange({ ...org, ...form, name: form.name.trim(), hours });
+    const newSlug = (saved as { slug?: string }).slug ?? org.slug;
+    onChange({ ...org, ...form, tagline: form.tagline.trim() || null, name: form.name.trim(), slug: newSlug, hours });
+    // A rename gives the page a new web address; old links keep redirecting.
+    if (newSlug !== org.slug && typeof window !== "undefined") {
+      window.history.replaceState(window.history.state, "", orgPath(org.type, newSlug) + window.location.search);
+    }
     setEdit(false);
     onEditClose?.();
     toast.success("Saved");
@@ -1229,13 +1236,15 @@ function AboutTabImpl({ org, canManage, onChange, initialEdit, onEditClose }: { 
               </label>
             </div>
           )}
-          {(org.type === "group" || org.type === "community_assoc") && (
+          {(org.type === "group" || org.type === "community_assoc" || org.type === "business") && (
             <div>
+              {org.type === "business" && <div className="mb-1 text-xs font-semibold text-muted-foreground">Short Description</div>}
               <input value={form.tagline} onChange={(e) => setForm({...form, tagline: e.target.value})} maxLength={320} placeholder="Short description" className="w-full rounded-lg border border-border px-3 py-2" />
               <p className="mt-1 text-xs text-neutral-500">This shows right under your page name. Keep it short: 320 characters max ({form.tagline.length}/320).</p>
             </div>
           )}
-          <RichTextEditor value={form.bio} onChange={(v) => setForm({...form, bio: v})} placeholder="About" minHeight={120} />
+          {org.type === "business" && <div className="-mb-2 text-xs font-semibold text-muted-foreground">Description</div>}
+          <RichTextEditor value={form.bio} onChange={(v) => setForm({...form, bio: v})} placeholder={org.type === "business" ? "Description (no limit)" : "About"} minHeight={120} />
           <div className="grid grid-cols-2 gap-2">
             <input value={form.website} onChange={(e) => setForm({...form, website: e.target.value})} placeholder="Website" className="rounded-lg border border-border px-3 py-2" />
             <input value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} placeholder="Phone" className="rounded-lg border border-border px-3 py-2" />

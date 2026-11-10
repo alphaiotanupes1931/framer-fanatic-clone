@@ -5,7 +5,7 @@ import { Send, Users, X, Search, Link as LinkIcon, Check, AlertTriangle, Refresh
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/components/app-layout";
 import { toast } from "sonner";
-import { encodeSharePreview, type SharePreview } from "@/lib/share-preview";
+import { encodeSharePreview, shareText, type SharePreview } from "@/lib/share-preview";
 import { Img } from "@/components/shared/smart-img";
 import { logShareEvent } from "@/lib/share-log";
 import { type Person } from "@/lib/connections";
@@ -581,7 +581,7 @@ export function ShareToUsersDialog({
                   <div className="truncate text-sm font-semibold text-neutral-900">{preview.title}</div>
                 )}
                 {preview.excerpt && (
-                  <div className="mt-0.5 line-clamp-2 text-xs text-neutral-500">{preview.excerpt}</div>
+                  <div className="mt-0.5 line-clamp-2 text-xs text-neutral-500">{shareText(preview.excerpt)}</div>
                 )}
                 {preview.author && (
                   <div className="mt-0.5 truncate text-xs text-[#d4580a]">{preview.author}</div>

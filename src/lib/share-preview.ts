@@ -10,8 +10,31 @@ export type SharePreview = {
 
 const MARKER = "::share::";
 
+const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", "#39": "'" };
+
+/** Turns formatted (HTML) text into clean readable text, so shared cards never show markup. */
+export function shareText(value: string | null | undefined): string | null {
+  if (!value) return value ?? null;
+  const text = value
+    .replace(/<(br|\/p|\/div|\/li|\/h[1-6])[^>]*>/gi, " ")
+    .replace(/<[^>]*>?/g, "")
+    .replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (m, e: string) => {
+      const k = e.toLowerCase();
+      if (k.startsWith("#x")) return String.fromCodePoint(parseInt(k.slice(2), 16));
+      if (k.startsWith("#") && k !== "#39") return String.fromCodePoint(parseInt(k.slice(1), 10));
+      return ENTITIES[k] ?? m;
+    })
+    .replace(/\s+/g, " ")
+    .trim();
+  return text || null;
+}
+
+function cleanPreview(preview: SharePreview): SharePreview {
+  return { ...preview, title: shareText(preview.title), excerpt: shareText(preview.excerpt) };
+}
+
 export function encodeSharePreview(preview: SharePreview, note?: string): string {
-  const payload = MARKER + JSON.stringify(preview);
+  const payload = MARKER + JSON.stringify(cleanPreview(preview));
   const trimmed = (note || "").trim();
   return trimmed ? `${payload}\n${trimmed}` : payload;
 }
@@ -25,7 +48,7 @@ export function parseSharePreview(content: string): { preview: SharePreview; not
   try {
     const preview = JSON.parse(jsonPart) as SharePreview;
     if (!preview || !preview.type || !preview.id) return null;
-    return { preview, note };
+    return { preview: cleanPreview(preview), note };
   } catch {
     return null;
   }
