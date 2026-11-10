@@ -29,7 +29,7 @@ export function assetUrl(url: string): string {
   return url;
 }
 
-// Strip any accidental "Lovable" branding from error messages surfaced to users,
+// Strip any accidental third-party branding from error messages surfaced to users,
 // and hide payment-processor internals (dashboard links, platform-profile setup
 // notices) that customers should never see.
 export function sanitizeErrorMessage(input: unknown, fallback = "Something went wrong"): string {

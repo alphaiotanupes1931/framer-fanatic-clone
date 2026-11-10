@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "Framer Clone Project"
+const SITE_NAME = "Planet Baltimore"
 const ROOT_DOMAIN = "reeddigitalgroup.com"
 
 // Sample data for preview mode ONLY (not used in actual email sending).
@@ -26,7 +26,7 @@ const ROOT_DOMAIN = "reeddigitalgroup.com"
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://framer-fanatic-clone.lovable.app"
+const SAMPLE_PROJECT_URL = "https://www.planetbaltimore.com"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
@@ -73,7 +73,7 @@ export const Route = createFileRoute("/lovable/email/auth/preview")({
           )
         }
 
-        // Verify the caller is authorized with LOVABLE_API_KEY
+        // Verify the caller is authorized with the email service credential.
         const authHeader = request.headers.get('Authorization')
         if (!authHeader || authHeader !== `Bearer ${apiKey}`) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 })

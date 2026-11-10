@@ -9,6 +9,14 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
+> [!IMPORTANT]
+> Avoid rewriting published git history by force pushing or rebasing, amending,
+> or squashing commits that are already pushed. This can cause project history
+> to be lost in the connected editor.
+>
+> Commits on the connected branch sync to the editor, so keep the branch in a
+> working state.
+
 - Canonical organization pages use type-prefixed, dashless slugs through shared page-link helpers; the database allocates collision-safe slugs and aliases old slugs, while `/o/:slug` remains redirect-only for compatibility.
 - Page follower counts and lists share a deduplicated audience reader combining approved memberships and explicit follows, because existing Follow controls persist memberships; pending requests remain excluded.
 - Group and community About composes the existing details and text-document editors, synchronizing saved mission and rules into page state so tab changes preserve current content without changing storage or permissions.
