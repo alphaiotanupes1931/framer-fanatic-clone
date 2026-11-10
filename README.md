@@ -8,7 +8,7 @@ This is a full-stack application, not a static website. Running the frontend loc
 
 ## How it was built
 
-The project has been developed iteratively with Claude Code. It uses React and TanStack Start for the application, with PostgreSQL, managed authentication, and object storage behind it. Most features combine file-based routes, shared React components, browser queries, and server functions for operations that need credentials or privileged access.
+The project is built with React and TanStack Start, with PostgreSQL, managed authentication, and object storage behind it. Most features combine file-based routes, shared React components, browser queries, and server functions for operations that need credentials or privileged access.
 
 Parts of the UI were ported from an earlier application. `src/lib/entities.ts` is the compatibility adapter: it translates older field names such as `author_id` and `created_date` into the current database shape. Not every screen uses that adapter; many query the database client directly. Check both paths before changing a shared data field.
 
@@ -61,10 +61,8 @@ Browser configuration is injected through Vite. Server credentials must remain s
 | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | Server-side public client configuration used by some handlers |
 | `SUPABASE_SERVICE_ROLE_KEY` | Privileged server access where supplied by the deployment |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Checkout, Connect operations, and webhook verification |
-| `RESEND_API_KEY`, `LOVABLE_API_KEY` | Connected email delivery and managed email services |
-| `LOVABLE_SEND_URL` | Optional managed auth-email delivery URL |
+| `RESEND_API_KEY` | Email delivery |
 | `ADMIN_SHARED_USERNAME`, `ADMIN_SHARED_PASSWORD`, `ADMIN_SESSION_SECRET_V2` | Separate admin login and signed session configuration |
-| `LOVABLE_DB_MIGRATION_URL` | Connection used by the Drizzle migration configuration |
 
 These are variable names, not instructions to copy production secrets into a local checkout. The managed backend does not expose its privileged key or database password to project users. An independent deployment needs its own backend and credentials; some email endpoints also depend on managed services and are not portable by setting a mail key alone.
 
