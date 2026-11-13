@@ -122,7 +122,7 @@ function EditPostPage() {
     file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return null; }
     const kind: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
-    const cap = kind === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
+    const cap = kind === "image" ? 10 * 1024 * 1024 : 200 * 1024 * 1024;
     if (file.size > cap) { toast.error(`${kind} must be under ${cap/1024/1024}MB`); return null; }
     setUploading(true);
     const tId = toast.loading("Uploading…");

@@ -2215,7 +2215,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
   const uploadFile = async (file: File) => {
     file = await compressImage(file);
     const isVideo = file.type.startsWith("video/");
-    const cap = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    const cap = isVideo ? 200 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > cap) { toast.error(`${isVideo ? "Video" : "Image"} must be under ${cap / 1024 / 1024}MB`); return; }
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
@@ -2446,7 +2446,7 @@ function OrgPostListImpl({ orgId, kind, canManage }: { orgId: string; kind: stri
               <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-white px-3 py-3 text-sm font-medium text-neutral-600 hover:border-orange-300 hover:text-[#d4580a] disabled:opacity-60">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (mode === "video" ? <VideoIcon className="h-4 w-4" /> : <ImagePlus className="h-4 w-4" />)}
-                {uploading ? "Uploading…" : mediaUrls.length ? "Add more" : mode === "video" ? "Upload video (up to 50MB)" : "Upload image or video"}
+                {uploading ? "Uploading…" : mediaUrls.length ? "Add more" : mode === "video" ? "Upload video (up to 200MB)" : "Upload image or video"}
               </button>
             </div>
           )}

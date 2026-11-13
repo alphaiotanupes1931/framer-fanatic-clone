@@ -145,7 +145,7 @@ function CreatePostPage() {
   const uploadTo = async (bucket: "post-media", file: File, kind: "image" | "video" | "audio") => {
     if (kind === "image") file = await compressImage(file);
     if (!me) { toast.error("Please sign in"); return null; }
-    const cap = kind === "image" ? 10 * 1024 * 1024 : kind === "audio" ? 100 * 1024 * 1024 : 50 * 1024 * 1024;
+    const cap = kind === "image" ? 10 * 1024 * 1024 : kind === "audio" ? 100 * 1024 * 1024 : 200 * 1024 * 1024;
     const kindLabel = kind === "image" ? "Image" : kind === "audio" ? "Audio" : "Video";
     if (file.size > cap) { toast.error(`${kindLabel} must be under ${cap / 1024 / 1024}MB`); return null; }
     setUploading(true);
@@ -431,7 +431,7 @@ function CreatePostPage() {
                 {mediaUrls.length ? "Add more" : "Upload images or videos"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Camera only works on mobile. Max 50MB per video.</p>
+              <p className="text-xs text-neutral-500">Camera only works on mobile. Max 200MB per video.</p>
             </div>
           )}
 
@@ -509,7 +509,7 @@ function CreatePostPage() {
                 {mediaUrls.some((u) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u)) ? "Replace or add video" : "Upload video"}
               </Button>
               <CameraCapture disabled={uploading} onFiles={handleFiles} />
-              <p className="text-xs text-neutral-500">Camera only works on mobile. Max 50MB per video.</p>
+              <p className="text-xs text-neutral-500">Camera only works on mobile. Max 200MB per video.</p>
               <div className="pt-3">
                 <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
                   const f = e.target.files?.[0];

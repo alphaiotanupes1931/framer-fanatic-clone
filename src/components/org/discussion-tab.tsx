@@ -101,7 +101,7 @@ export function DiscussionTab({
   const upload = async (file: File) => {
     const f = await compressImage(file);
     const video = f.type.startsWith("video/");
-    const cap = video ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    const cap = video ? 200 * 1024 * 1024 : 10 * 1024 * 1024;
     if (f.size > cap) { toast.error(`${video ? "Video" : "Image"} must be under ${cap / 1024 / 1024}MB`); return; }
     if (!me) { toast.error("Sign in first"); return; }
     setUploading(true);
