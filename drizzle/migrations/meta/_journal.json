@@ -484,6 +484,13 @@
       "when": 1794586522141,
       "tag": "0068_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1794586582606,
+      "tag": "0069_pin_email_fn_search_path_and_tighten_policies",
+      "breakpoints": true
     }
   ]
 }
