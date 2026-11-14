@@ -107,7 +107,7 @@ export function CommunityAssociationsPage() {
               >
                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100">
                   {(o.avatar_url || o.banner_url) && (
-                    <Img
+                    <Img bucket="avatars"
                       src={(o.avatar_url ?? o.banner_url) as string}
                       alt=""
                       className="h-full w-full object-cover"

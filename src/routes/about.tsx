@@ -9,7 +9,7 @@ import pbLogo from "@/assets/pb-logo.png";
 import pbLogoDark from "@/assets/pb-logo-dark.png";
 import aboutFounders from "@/assets/about-founders.png.asset.json";
 import { assetUrl } from "@/lib/utils";
-import heroBaltimore from "@/assets/baltimore-hero-mobile.png.asset.json";
+import heroBaltimore from "@/assets/baltimore-hero-mobile.jpg";
 import { Img } from "@/components/shared/smart-img";
 import { pageHead } from "@/lib/seo";
 
@@ -95,7 +95,7 @@ function Hero() {
           className="relative aspect-[16/9] w-full overflow-hidden rounded-[24px] md:rounded-[36px] bg-ink/5"
         >
           <img
-            src={assetUrl(heroBaltimore.url)}
+            src={heroBaltimore}
             alt="Baltimore skyline at sunset from Patterson Park"
             className="absolute inset-0 h-full w-full object-cover"
           />

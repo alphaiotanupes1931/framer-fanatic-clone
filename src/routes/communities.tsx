@@ -31,7 +31,7 @@ function CommunitiesPage() {
   const { data, loading } = useCachedFetch<Org[]>("orgs:communities_hub", async () => {
     const { data } = await supabase
       .from("organizations")
-      .select("*")
+      .select("id,slug,name,bio,tagline,type,subtype,neighborhood,avatar_url,banner_url")
       .in("type", ["community_assoc", "group"])
       .order("name", { ascending: true });
     return (data ?? []) as Org[];
@@ -124,7 +124,7 @@ function CommunitiesPage() {
               >
                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-100">
                   {(o.avatar_url || o.banner_url) && (
-                    <Img
+                    <Img bucket="avatars"
                       src={(o.avatar_url ?? o.banner_url) as string}
                       alt=""
                       className="h-full w-full object-cover"

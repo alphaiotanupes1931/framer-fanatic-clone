@@ -6,7 +6,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import heroVideoWebmAsset from "@/assets/hero.webm.asset.json";
-import heroMobileAsset from "@/assets/baltimore-hero-mobile.png.asset.json";
+import heroMobileImg from "@/assets/baltimore-hero-mobile.jpg";
 import { assetUrl } from "@/lib/utils";
 import { stripHtml, truncateText } from "@/lib/text-utils";
 import terrellSpeaks from "@/assets/terrell-speaks.jpg";
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
     }),
     links: [
       { rel: "canonical", href: "https://planetbaltimore.com/" },
-      { rel: "preload", as: "image", href: heroMobileAsset.url, fetchPriority: "high" },
+      { rel: "preload", as: "image", href: heroMobileImg, fetchPriority: "high" },
     ],
     scripts: [
       {
@@ -421,7 +421,7 @@ function HeroParallax() {
     <motion.div ref={ref} style={{ y, scale }} className="absolute inset-0">
       {/* Mobile hero image */}
       <img
-        src={assetUrl(heroMobileAsset.url)}
+        src={heroMobileImg}
         alt="Baltimore skyline at sunset from Patterson Park"
         loading="eager"
         fetchPriority="high"
@@ -431,7 +431,7 @@ function HeroParallax() {
       />
       {/* Desktop fallback image (behind video) */}
       <img
-        src={assetUrl(heroMobileAsset.url)}
+        src={heroMobileImg}
         alt=""
         aria-hidden
         loading="eager"
@@ -448,7 +448,7 @@ function HeroParallax() {
             loop
             playsInline
             preload="metadata"
-            poster={assetUrl(heroMobileAsset.url)}
+            poster={heroMobileImg}
             className="absolute inset-0 w-full h-full object-cover"
           >
             <source src={assetUrl(heroVideoWebmAsset.url)} type="video/webm" />

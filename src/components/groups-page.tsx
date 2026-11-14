@@ -184,12 +184,12 @@ export function GroupsPage() {
                 <div className="relative h-32 w-full bg-gradient-to-br from-neutral-200 to-neutral-100 sm:h-40">
                   <div className="absolute inset-0 overflow-hidden">
                     {o.banner_url && (
-                      <Img src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <Img bucket="avatars" src={o.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                     )}
                   </div>
                   <div className="absolute -bottom-7 left-4 z-20 flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 shadow-md ring-4 ring-white sm:-bottom-8 sm:h-20 sm:w-20 sm:ring-[5px]">
                     {o.avatar_url ? (
-                      <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />
+                      <Img bucket="avatars" src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" />
                     ) : (
                       <span className="text-xl font-bold text-neutral-400">{o.name.charAt(0).toUpperCase()}</span>
                     )}
