@@ -5,6 +5,8 @@
 - [x] Redesign Updates tab to match reference screenshot and seed sample content
 
 ## Active
+- [x] Speed up organization directory images by signing avatar and banner paths directly in the avatars bucket. Verified a cold signed-in visit only calls the avatars signing endpoint.
+- [x] Add incremental card loading to organization directories and verify business filtering, scrolling and image requests. Verified 24 initial cards at the test viewport, all 44 after scrolling, 12 Arts Orgs after filtering, and no runtime errors.
 - [x] Remove tool branding from project documentation, editable source comments and email preview wording, preserving required service identifiers and connections.
 - [x] Restore artist pages in their selected neighborhood's Artists tab. Verified Harwood lists Ainsley Burrows Mighty, Laurielle Noel, LN Fashion and Marz.D, and the artist link opens its canonical page. Three tests pass with no runtime errors.
 - [x] Add Both to business offers and offer-specific Products/Services tabs, with Lookbook-style product categories and items. Nine rule/caption tests pass, schema confirmed, signed-in category form and unchanged Services verified on desktop and mobile using a temporary Both preview without changing existing data.

@@ -1,5 +1,5 @@
 import { stripHtml } from "@/lib/text-utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "@tanstack/react-router";
 import { orgPath } from "@/lib/org-paths";
@@ -66,14 +66,14 @@ function OrgCardCover({ name, bannerUrl, avatarUrl }: { name: string; bannerUrl:
   if (bannerUrl) {
     return (
       <div className="absolute inset-0 overflow-hidden">
-        <Img src={bannerUrl} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+        <Img src={bannerUrl} bucket="avatars" alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
       </div>
     );
   }
   if (avatarUrl) {
     return (
       <div className="absolute inset-0 overflow-hidden">
-        <Img src={avatarUrl} alt="" className="h-full w-full scale-125 object-cover blur-xl" loading="lazy" decoding="async" />
+        <Img src={avatarUrl} bucket="avatars" alt="" className="h-full w-full scale-125 object-cover blur-xl" loading="lazy" decoding="async" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
       </div>
     );
@@ -109,6 +109,8 @@ export function OrgListPage({
   const [artsOnly, setArtsOnly] = useState(false);
   const [sort, setSort] = useState<"newest" | "followed" | "active">("newest");
   const [view, setView] = useState<"list" | "map">("list");
+  const [visibleCount, setVisibleCount] = useState(12);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // One fetch per org type, cached across visits. Search, subtype and sort all
   // filter that list in memory so typing and tab switching are instant.
@@ -117,8 +119,8 @@ export function OrgListPage({
       // The Businesses page also lists arts organizations so "All" covers both;
       // the Arts Orgs chip narrows the same list instead of leaving the page.
       (type === "business"
-        ? supabase.from("organizations").select("*").in("type", ["business", "arts_org"]).order("created_at", { ascending: false })
-        : supabase.from("organizations").select("*").eq("type", type).order("created_at", { ascending: false })),
+        ? supabase.from("organizations").select("id,slug,name,bio,type,subtype,neighborhood,avatar_url,banner_url,created_at").in("type", ["business", "arts_org"]).order("created_at", { ascending: false })
+        : supabase.from("organizations").select("id,slug,name,bio,type,subtype,neighborhood,avatar_url,banner_url,created_at").eq("type", type).order("created_at", { ascending: false })),
       supabase.rpc("public_org_stats", { _type: type }),
     ]);
     const stats = new Map<string, { follower_count: number; last_active_at: string | null }>(
@@ -130,7 +132,9 @@ export function OrgListPage({
       follower_count: stats.get(o.id)?.follower_count ?? 0,
       last_active_at: stats.get(o.id)?.last_active_at ?? (o as { created_at?: string }).created_at ?? null,
     })) as Org[];
-    prefetchImageUrls(list.slice(0, 12).flatMap((o) => [o.avatar_url, o.banner_url]));
+    // Warm only the first row. Every other image waits until its card is near
+    // the viewport, and org media always lives in the avatars bucket.
+    prefetchImageUrls(list.slice(0, 3).flatMap((o) => [o.avatar_url, o.banner_url]), "avatars");
     return list;
   });
 
@@ -182,6 +186,27 @@ export function OrgListPage({
       return time(bn.created_at) - time(an.created_at);
     });
   }, [all, sub, q, sort, artsOnly]);
+
+  const visibleItems = items.slice(0, visibleCount);
+
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [q, sub, artsOnly, sort, showFeatured, type]);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node || loading || view === "map" || visibleCount >= items.length) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisibleCount((count) => Math.min(count + 12, items.length));
+        }
+      },
+      { rootMargin: "500px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [items.length, loading, view, visibleCount]);
 
   const handleDelete = async (e: React.MouseEvent, o: Org) => {
     e.preventDefault();
@@ -310,12 +335,12 @@ export function OrgListPage({
             <h2 className="mb-3 text-lg font-bold text-neutral-900">Featured</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.slice(0, 3).map((o) => (
-                <Link key={`f-${o.id}`} to={orgPath(o.type, o.slug)}
+                <Link key={`f-${o.id}`} data-org-card={o.type} to={orgPath(o.type, o.slug)}
                   className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                   <div className="relative h-40 bg-neutral-100">
                     <OrgCardCover name={o.name} bannerUrl={o.banner_url} avatarUrl={o.avatar_url} />
                     <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
-                      {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                      {o.avatar_url && <Img src={o.avatar_url} bucket="avatars" alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                     </div>
                   </div>
                   <div className="px-4 pb-4 pt-12">
@@ -349,9 +374,10 @@ export function OrgListPage({
             ) : undefined}
           />
         ) : (
+          <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {(showFeatured ? items.slice(3) : items).map((o) => (
-              <Link key={o.id} to={orgPath(o.type, o.slug)}
+            {(showFeatured ? visibleItems.slice(3) : visibleItems).map((o) => (
+              <Link key={o.id} data-org-card={o.type} to={orgPath(o.type, o.slug)}
                 className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-orange-300 hover:shadow-sm">
                 {isAdmin && (
                   <button
@@ -366,7 +392,7 @@ export function OrgListPage({
                 <div className="relative h-40 bg-neutral-100">
                   <OrgCardCover name={o.name} bannerUrl={o.banner_url} avatarUrl={o.avatar_url} />
                   <div className="absolute -bottom-8 left-4 h-16 w-16 overflow-hidden rounded-xl border-[5px] border-white bg-neutral-200 shadow-md">
-                    {o.avatar_url && <Img src={o.avatar_url} alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                    {o.avatar_url && <Img src={o.avatar_url} bucket="avatars" alt={o.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />}
                   </div>
                 </div>
                 <div className="px-4 pb-4 pt-12">
@@ -384,6 +410,18 @@ export function OrgListPage({
               </Link>
             ))}
           </div>
+          {visibleCount < items.length && (
+            <div ref={loadMoreRef} className="flex justify-center py-4">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((count) => Math.min(count + 12, items.length))}
+                className="rounded-full border border-border bg-background px-5 py-2 text-sm font-semibold text-foreground"
+              >
+                Load more
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
     </AppLayout>

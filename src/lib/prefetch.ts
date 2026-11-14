@@ -84,8 +84,8 @@ const registry: Record<string, Prefetcher> = {
     run: async () => {
       const { data } = await supabase
         .from("organizations")
-        .select("*")
-        .eq("type", "business")
+        .select("id,slug,name,bio,type,subtype,neighborhood,avatar_url,banner_url,created_at")
+        .in("type", ["business", "arts_org"])
         .order("created_at", { ascending: false });
       return data ?? [];
     },

@@ -247,14 +247,18 @@ async function resolveAsync(src: string, bucketHint?: string): Promise<string | 
   // an image or video element, which previously made valid post previews fall
   // back to their expired database URL and render as empty boxes.
   if (signed) return signed;
-  // The hinted bucket didn't have the object (older uploads landed in a
-  // different bucket). Try the rest before giving up.
-  for (const b of CANDIDATE_BUCKETS) {
-    if (b === t.bucket) continue;
-    const cachedAlt = readCache(b, t.path);
-    if (cachedAlt) return cachedAlt;
-    const alt = await signBatched(b, t.path);
-    if (alt && (await urlResolves(alt))) return alt;
+  // An explicit bucket hint is authoritative. Do not probe every other bucket
+  // when it fails: directory cards all mount together, so that fallback creates
+  // a network waterfall for a single missing or inaccessible image. Unhinted
+  // legacy media keeps the old cross-bucket recovery behavior.
+  if (!bucketHint) {
+    for (const b of CANDIDATE_BUCKETS) {
+      if (b === t.bucket) continue;
+      const cachedAlt = readCache(b, t.path);
+      if (cachedAlt) return cachedAlt;
+      const alt = await signBatched(b, t.path);
+      if (alt && (await urlResolves(alt))) return alt;
+    }
   }
   // Fall back to the original URL — it may still work if the bucket has
   // since been made public.
