@@ -498,6 +498,13 @@
       "when": 1794620722898,
       "tag": "0070_scope_public_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1794620842095,
+      "tag": "0071_bind_public_media_reads_to_visible_content",
+      "breakpoints": true
     }
   ]
 }

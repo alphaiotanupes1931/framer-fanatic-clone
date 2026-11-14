@@ -4252,6 +4252,7 @@ export type Database = {
       }
       set_my_profile_kind: { Args: { _kind: string }; Returns: undefined }
       slugify_username: { Args: { s: string }; Returns: string }
+      storage_media_is_referenced: { Args: { _name: string }; Returns: boolean }
       titlecase_name: { Args: { s: string }; Returns: string }
       top_creators: {
         Args: { lim?: number }
