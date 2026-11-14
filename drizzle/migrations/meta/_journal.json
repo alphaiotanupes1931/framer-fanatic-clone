@@ -505,6 +505,13 @@
       "when": 1794620842095,
       "tag": "0071_bind_public_media_reads_to_visible_content",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1794621670463,
+      "tag": "0072_bind_post_media_profile_reads",
+      "breakpoints": true
     }
   ]
 }
