@@ -1,4 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
+import { createRequestCache } from "@/lib/request-cache";
+
+const liveSessions = createRequestCache<string | null>(60_000);
+if (typeof window !== "undefined") {
+  supabase.auth.onAuthStateChange(() => liveSessions.clear());
+}
 
 /**
  * A session token stays in localStorage even after the account behind it is
@@ -32,10 +38,12 @@ export async function purgeDeadSession() {
 export async function ensureLiveSession(): Promise<string | null> {
   const { data } = await supabase.auth.getSession();
   if (!data.session) return null;
+  return liveSessions.read(data.session.access_token, async () => {
   const { data: userData, error } = await supabase.auth.getUser();
   if (error || !userData.user) {
     await purgeDeadSession();
     return null;
   }
   return userData.user.id;
+  });
 }

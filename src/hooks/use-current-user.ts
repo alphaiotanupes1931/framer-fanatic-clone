@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { readCurrentProfile, clearCurrentProfileRequest } from "@/lib/current-profile";
 
 export type CurrentUser = {
   id: string;
@@ -20,17 +21,14 @@ export function useCurrentUser() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data: session } = await supabase.auth.getUser();
-    const authUser = session.user;
-    if (!authUser) { setUser(null); setLoading(false); return; }
-    const { data: rows } = await supabase.rpc("my_profile");
-    const p = (rows as unknown as Array<Record<string, unknown>> | null)?.[0] as
+    try {
+    const p = (await readCurrentProfile()) as
       | (CurrentUser & { onboarded?: boolean; neighborhood_names?: string[] | null })
-      | undefined;
+      | null;
     if (p) {
       setUser({
         id: p.id,
-        email: p.email ?? authUser.email ?? null,
+        email: p.email ?? null,
         display_name: p.display_name,
         username: p.username,
         avatar_url: p.avatar_url,
@@ -43,10 +41,19 @@ export function useCurrentUser() {
     } else {
       setUser(null);
     }
-    setLoading(false);
+    } catch { setUser(null); }
+    finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+    const { data } = supabase.auth.onAuthStateChange(() => {
+      setUser(null);
+      // Defer reads until the auth callback has released its session lock.
+      setTimeout(() => void load(), 0);
+    });
+    return () => data.subscription.unsubscribe();
+  }, [load]);
 
-  return { user, loading, refetch: load };
+  return { user, loading, refetch: () => { clearCurrentProfileRequest(); return load(); } };
 }

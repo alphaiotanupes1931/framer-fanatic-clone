@@ -5,7 +5,8 @@
 - [x] Redesign Updates tab to match reference screenshot and seed sample content
 
 ## Active
-- [ ] Reduce route metadata delays, accidental link preloads, repeated profile/notification requests, and image signing waterfalls; verify signed-in desktop and mobile navigation.
+- [x] Reduce route metadata delays, accidental link preloads, repeated profile/notification requests, and avatar signing waterfalls. Shared-request tests pass; preview build is successful. Database health shows spare capacity, no upgrade required.
+- [ ] Verify signed-in desktop and mobile navigation after performance changes. Blocked: the local preview times out on all content pages even after supervised restart and cache recovery, so browser timing and image rendering remain unverified.
 - [x] Speed up organization directory images by signing avatar and banner paths directly in the avatars bucket. Verified a cold signed-in visit only calls the avatars signing endpoint.
 - [x] Add incremental card loading to organization directories and verify business filtering, scrolling and image requests. Verified 24 initial cards at the test viewport, all 44 after scrolling, 12 Arts Orgs after filtering, and no runtime errors.
 - [x] Remove tool branding from project documentation, editable source comments and email preview wording, preserving required service identifiers and connections.

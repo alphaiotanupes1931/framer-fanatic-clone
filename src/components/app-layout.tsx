@@ -10,7 +10,7 @@ import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { TopMenuBar } from "@/components/layout/top-menu-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { isStaffAllowedPath, setStaffMode, useStaffMode } from "@/lib/staff-mode";
-import { ensureLiveSession } from "@/lib/session-health";
+import { readCurrentProfile, clearCurrentProfileRequest } from "@/lib/current-profile";
 
 
 export type Profile = {
@@ -69,8 +69,8 @@ function loadProfile(): Promise<Profile | null> {
     profileRequest = (async () => {
       // Validate the session with the server: a deleted or revoked account
       // still leaves a token in storage, and trusting it looped the app.
-      const uid = await ensureLiveSession();
-      if (!uid) {
+      const row = await readCurrentProfile();
+      if (!row) {
         // No session: drop any optimistically restored profile so guards and
         // the sidebar reflect the real signed-out state.
         profileCache = null;
@@ -78,8 +78,7 @@ function loadProfile(): Promise<Profile | null> {
         for (const fn of profileSubscribers) fn(null);
         return null;
       }
-      const { data: rows } = await supabase.rpc("my_profile");
-      const p = (rows as unknown as Profile[] | null)?.[0] ?? null;
+      const p = row as unknown as Profile;
       publishProfile(p);
       return p;
     })().finally(() => {
@@ -92,6 +91,7 @@ function loadProfile(): Promise<Profile | null> {
 
 /** Drop the cached profile so the next read refetches (after edits/sign-out). */
 export function invalidateCurrentProfile() {
+  clearCurrentProfileRequest();
   profileCache = null;
   profileRequest = null;
 }
@@ -134,7 +134,7 @@ export function useCurrentProfile() {
       if (!p && !profileCache && !isPublicPath(path)) navigateRef.current({ to: "/auth" });
       // Warm the people-you-know list so share sheets open with no spinner.
       if (p?.id) warmConnections(p.id);
-    });
+    }).catch(() => { /* Leave current chrome intact during a transient failure. */ });
     return () => {
       cancelled = true;
       profileSubscribers.delete(setProfile);
@@ -168,7 +168,9 @@ if (typeof window !== "undefined") {
         clearCachedAppData();
       }
       publishProfile(null);
-      if (event !== "SIGNED_OUT") void loadProfile();
+      if (event !== "SIGNED_OUT") setTimeout(() => {
+        void loadProfile().catch(() => { /* Retry when a page mounts. */ });
+      }, 0);
     }
   });
 }
