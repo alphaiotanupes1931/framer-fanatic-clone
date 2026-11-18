@@ -1,6 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 
 export type PublicEventMeta = {
   id: string;
@@ -30,16 +28,14 @@ export const getPublicEvent = createServerFn({ method: "GET" })
     return input;
   })
   .handler(async ({ data }): Promise<PublicEventMeta> => {
-    const supabasePublic = createClient<Database>(
-      process.env["SUPABASE_URL"]!,
-      process.env["SUPABASE_PUBLISHABLE_KEY"]!,
-      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-    );
+    const { createPublicClient } = await import("@/lib/public-client.server");
+    const supabasePublic = createPublicClient();
 
     const { data: evt } = await supabasePublic
       .from("events")
       .select("id, user_id, title, description, venue_name, address, location, neighborhood, image_url, starts_at, ends_at, price_cents, is_published, status")
       .eq("id", data.eventId)
+      .eq("is_published", true)
       .maybeSingle();
     if (!evt) return null;
 

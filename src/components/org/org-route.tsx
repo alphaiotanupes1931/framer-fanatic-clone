@@ -1,19 +1,19 @@
 import { redirect } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
-import { getOrgSeo, resolveOrgSlug } from "@/lib/org-access.functions";
+import { getOrgSeo } from "@/lib/org-access.functions";
 import { orgPrefix } from "@/lib/org-paths";
 
 /** Loader for typed page URLs: sends a page opened under the wrong letter to the right one. */
 export async function loadOrgSeo(slug: string, prefix: string) {
-  const resolved = await resolveOrgSlug({ data: { slug } });
-  if (resolved.slug && resolved.slug !== slug) {
-    throw redirect({ href: `/${orgPrefix(resolved.type)}/${resolved.slug}`, replace: true });
-  }
   let seo: Awaited<ReturnType<typeof getOrgSeo>>;
   try {
     seo = await getOrgSeo({ data: { slug } });
   } catch {
     return { indexable: false as const };
+  }
+  if ("resolvedSlug" in seo && seo.resolvedSlug &&
+      (seo.resolvedSlug !== slug || orgPrefix(seo.resolvedType) !== prefix)) {
+    throw redirect({ href: `/${orgPrefix(seo.resolvedType)}/${seo.resolvedSlug}`, replace: true });
   }
   if (seo.indexable && orgPrefix(seo.type) !== prefix) {
     throw redirect({ href: `/${orgPrefix(seo.type)}/${slug}`, replace: true });
@@ -26,6 +26,11 @@ export function orgHead(prefix: string, slug: string, loaderData: Awaited<Return
     return {
       meta: [
         { title: "Private page - Planet Baltimore" },
+        { name: "description", content: "This Planet Baltimore page is not publicly available." },
+        { property: "og:title", content: "Private page - Planet Baltimore" },
+        { property: "og:description", content: "This Planet Baltimore page is not publicly available." },
+        { property: "og:type", content: "profile" },
+        { name: "twitter:card", content: "summary" },
         { name: "robots", content: "noindex, nofollow, noarchive" },
         { name: "googlebot", content: "noindex, nofollow" },
       ],

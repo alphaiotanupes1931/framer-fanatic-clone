@@ -21,8 +21,8 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
     defaultStaleTime: 30_000,
     defaultGcTime: 5 * 60_000,
-    defaultPreload: "intent",
-    defaultPreloadDelay: 50,
+    // Navigation fetches only when selected, not during casual touch/scroll.
+    defaultPreload: false,
   });
 
   return router;

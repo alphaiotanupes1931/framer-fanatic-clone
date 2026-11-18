@@ -38,7 +38,7 @@ type AvatarImageProps = React.ComponentProps<typeof AvatarImage>;
 
 /** Avatar image that signs private storage URLs before rendering. */
 export function SmartAvatarImage({ src, ...rest }: AvatarImageProps) {
-  const resolved = useSmartImageUrl(typeof src === "string" ? src : undefined);
+  const resolved = useSmartImageUrl(typeof src === "string" ? src : undefined, "avatars");
   if (!resolved) return null;
   return <AvatarImage {...rest} src={resolved} />;
 }

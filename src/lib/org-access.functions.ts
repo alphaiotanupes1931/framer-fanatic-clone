@@ -23,20 +23,23 @@ export const getOrgSeo = createServerFn({ method: "GET" })
   .inputValidator((data: { slug: string }) => data)
   .handler(async ({ data }) => {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabasePublic = createClient(
-        process.env["SUPABASE_URL"]!,
-        process.env["SUPABASE_PUBLISHABLE_KEY"]!,
-        { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-      );
+      const { createPublicClient } = await import("@/lib/public-client.server");
+      const supabasePublic = createPublicClient();
       const { data: row } = await supabasePublic
         .from("organizations")
-        .select("name, bio, type, is_public")
-        .eq("slug", data.slug)
+        .select("name, bio, type, is_public, slug")
+        .eq("slug", data.slug.toLowerCase())
         .maybeSingle();
-      if (!row || row.is_public === false) return { indexable: false as const };
+      if (!row) {
+        const { resolvePageSlug } = await import("@/lib/org-slug.server");
+        const resolved = await resolvePageSlug(data.slug);
+        return { indexable: false as const, resolvedSlug: resolved.slug, resolvedType: resolved.type };
+      }
+      if (row.is_public === false) return { indexable: false as const, resolvedSlug: row.slug, resolvedType: row.type };
       return {
         indexable: true as const,
+        resolvedSlug: row.slug,
+        resolvedType: row.type,
         name: row.name as string,
         type: row.type as string,
         description: ((row.bio as string | null) ?? "").replace(/\s+/g, " ").slice(0, 155),
@@ -130,50 +133,6 @@ export const getOrgType = createServerFn({ method: "GET" })
 export const resolveOrgSlug = createServerFn({ method: "GET" })
   .inputValidator((data: { slug: string }) => data)
   .handler(async ({ data }) => {
-    try {
-      // Shared URLs are lowercase, but people often type the page name with
-      // capitals. Resolve those to the canonical slug before loading the page.
-      const slug = data.slug.toLowerCase();
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: current } = await supabaseAdmin
-        .from("organizations")
-        .select("slug, type")
-        .eq("slug", slug)
-        .maybeSingle();
-      if (current) return { slug: current.slug as string, type: current.type as string };
-
-      const { data: alias } = await supabaseAdmin
-        .from("organization_slug_aliases")
-        .select("organization_id")
-        .eq("old_slug", slug)
-        .maybeSingle();
-      if (!alias) {
-        // People often type a shorter version of the page name (for example
-        // "ainsleyburrows" for "ainsleyburrowsmighty") or add dashes. Use the
-        // joined form and send them to the page only when exactly one matches.
-        const joined = slug.replace(/[^a-z0-9]/g, "");
-        if (joined.length < 4) return { slug: null, type: null };
-        const { data: exact } = await supabaseAdmin
-          .from("organizations").select("slug, type").eq("slug", joined).maybeSingle();
-        if (exact) return { slug: exact.slug as string, type: exact.type as string };
-        const { data: starts } = await supabaseAdmin
-          .from("organizations").select("slug, type").like("slug", `${joined}%`).limit(2);
-        if (starts && starts.length === 1) {
-          return { slug: starts[0].slug as string, type: starts[0].type as string };
-        }
-        return { slug: null, type: null };
-      }
-
-      const { data: organization } = await supabaseAdmin
-        .from("organizations")
-        .select("slug, type")
-        .eq("id", alias.organization_id)
-        .maybeSingle();
-      return {
-        slug: (organization?.slug as string | undefined) ?? null,
-        type: (organization?.type as string | undefined) ?? null,
-      };
-    } catch {
-      return { slug: null, type: null };
-    }
+    const { resolvePageSlug } = await import("@/lib/org-slug.server");
+    return resolvePageSlug(data.slug);
   });
