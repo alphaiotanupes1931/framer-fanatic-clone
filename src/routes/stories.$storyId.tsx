@@ -6,7 +6,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, ArrowRight, Heart, MessageCircle, Clock, Trash2, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import DOMPurify from "isomorphic-dompurify";
+import { SanitizedStoryHtml } from "@/components/sanitized-story-html";
 import { ReportButton } from "@/components/shared/report-button";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
 import { externalShare } from "@/lib/share-preview";
@@ -244,9 +244,9 @@ function StoryDetail() {
           {story.content && (
             /<\/?(?:br|div|p|span|strong|b|em|i|u|s|ul|ol|li|a|blockquote|h[1-6]|img|pre|code)\b[^>]*>/i.test(story.content) ||
             /&(?:nbsp|amp|lt|gt|quot|#\d+);/i.test(story.content) ? (
-              <div
+              <SanitizedStoryHtml
                 className="prose mt-6 max-w-none [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic text-[17px] leading-relaxed text-foreground/90"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(story.content) }}
+                html={story.content}
               />
             ) : (
               <div className="prose prose-neutral mt-6 max-w-none whitespace-pre-wrap text-[17px] leading-relaxed text-foreground/90">

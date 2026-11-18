@@ -25,3 +25,4 @@
 - The home feed saves its scroll position while scrolling (not on leave), because the next page resets scroll before the feed unmounts.
 - Public route metadata uses a request-scoped anonymous client with opaque-key handling and bounded fetches; canonical organization metadata resolves in one call, with alias lookup only when needed, to avoid serial navigation stalls.
 - Disable automatic router preloading so touch scrolling cannot issue speculative page requests; deduplicate account-scoped profile and unread-count reads across mounted consumers.
+- Story readers load the existing HTML sanitizer after hydration and render only its sanitized result; importing its Node DOM emulator into the SSR route graph can stall the preview on every page.

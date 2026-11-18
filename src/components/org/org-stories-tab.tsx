@@ -6,7 +6,7 @@ import { Img } from "@/components/shared/smart-img";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { stripHtml, timeAgo } from "@/lib/text-utils";
 import { RichTextEditor, richHtmlIsEmpty } from "@/components/rich-text-editor";
-import DOMPurify from "isomorphic-dompurify";
+import { SanitizedStoryHtml } from "@/components/sanitized-story-html";
 import { Button } from "@/components/ui/button";
 
 type OrgStory = {
@@ -237,7 +237,7 @@ export function OrgStoriesTab({ orgId, canManage, title: tabTitle = "Stories", a
               </div>
               {active.body && (
                 /<\/?[a-z][^>]*>/i.test(active.body) ? (
-                  <div className="text-[15px] leading-relaxed text-foreground [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(active.body) }} />
+                  <SanitizedStoryHtml className="text-[15px] leading-relaxed text-foreground [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic" html={active.body} />
                 ) : (
                   <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{active.body}</div>
                 )
