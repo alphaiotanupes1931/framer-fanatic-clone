@@ -512,6 +512,13 @@
       "when": 1794621670463,
       "tag": "0072_bind_post_media_profile_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1795103615413,
+      "tag": "0073_bind_artwork_profile_media_to_verified_uploaders",
+      "breakpoints": true
     }
   ]
 }

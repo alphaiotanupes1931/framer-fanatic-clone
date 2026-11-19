@@ -4068,6 +4068,10 @@ export type Database = {
         Returns: string
       }
       payouts_ready: { Args: { _user_id: string }; Returns: boolean }
+      post_media_artwork_uploader_matches_org: {
+        Args: { _org: string; _uploader: string }
+        Returns: boolean
+      }
       public_artists: {
         Args: { lim?: number; search?: string; sort_by?: string }
         Returns: {
