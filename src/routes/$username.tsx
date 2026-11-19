@@ -202,7 +202,7 @@ function PublicProfilePage() {
         setContentLoading(true);
         const [postsRes, storiesRes, eventsRes] = await Promise.all([
           supabase.from("posts").select("*").eq("user_id", publicProfile.id).eq("is_deleted", false).is("organization_id", null).order("created_at", { ascending: false }).limit(50),
-          supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("created_at", { ascending: false }).limit(30),
+          supabase.from("stories").select("*").eq("user_id", publicProfile.id).eq("status", "published").order("created_at", { ascending: false }).limit(1000),
           supabase.from("events").select("*").eq("user_id", publicProfile.id).is("organization_id", null).order("starts_at", { ascending: false }).limit(30),
         ]);
         if (cancelled) return;

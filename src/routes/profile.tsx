@@ -1903,7 +1903,7 @@ function MyWritingsTab({ userId }: { userId: string }) {
         .select("id,title,excerpt,cover_url,created_at,status")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(1000);
       setRows((data ?? []) as never);
       setLoading(false);
     };
