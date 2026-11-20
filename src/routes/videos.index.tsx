@@ -1,7 +1,8 @@
 import { siteUrl } from "@/lib/utils";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useCachedFetch } from "@/hooks/use-cached-fetch";
+import { useEffect, useRef, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { uniqueVideos, videoPage, videoPageRange } from "@/lib/video-pagination";
 import { prefetchImageUrls } from "@/components/smart-image";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo } from "@/lib/text-utils";
@@ -9,7 +10,7 @@ import { AppLayout, useCurrentProfile } from "@/components/app-layout";
 import { useAuthState } from "@/components/public-preview";
 import { HeroBanner } from "@/components/shared/hero-banner";
 import { Button } from "@/components/ui/button";
-import { Play, Search, Star, Plus, X, Upload, Bookmark, Send, Share2, Trash2 } from "lucide-react";
+import { Play, Search, Star, Plus, X, Upload, Bookmark, Send, Share2, Trash2, Loader2 } from "lucide-react";
 import { useVideoOrientation, orientationClass } from "@/hooks/use-video-orientation";
 import { probeVideo } from "@/lib/video-orientation";
 import { ShareToUsersDialog } from "@/components/share-to-users-dialog";
@@ -57,22 +58,55 @@ function VideosSignedIn() {
   const [form, setForm] = useState({ title: "", description: "", video_url: "", thumbnail_url: "", category: "", orientation: "" as string, aspect_ratio: null as number | null });
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(query.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  const { data: vidsData, loading: vidsLoading, refetch: load } = useCachedFetch<Video[]>("videos:list", async () => {
-    const { data } = await supabase.from("videos").select("*").order("created_at", { ascending: false }).limit(50);
-    const list = (data || []) as Video[];
+  const { data: vidsData, isPending: vidsLoading, refetch: load, fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError, isError } = useInfiniteQuery({
+    queryKey: ["videos", "browse", me?.id, search, cat, sort, shape],
+    initialPageParam: 0,
+    staleTime: 60_000,
+    queryFn: async ({ pageParam, signal }) => {
+    const { from, to } = videoPageRange(pageParam);
+    let request = supabase.from("videos")
+      .select("id,user_id,title,description,video_url,thumbnail_url,featured,created_at,category,orientation,aspect_ratio")
+      .order("created_at", { ascending: sort === "oldest" })
+      .order("id", { ascending: sort === "oldest" });
+    if (search) request = request.ilike("title", `%${search.replace(/[\\%_]/g, "\\$&")}%`);
+    if (cat !== "All") request = request.eq("category", cat);
+    if (shape === "portrait") request = request.eq("orientation", "portrait");
+    if (shape === "landscape") request = request.or("orientation.is.null,orientation.neq.portrait");
+    const { data, error } = await request.range(from, to).abortSignal(signal);
+    if (error) throw error;
+    const page = videoPage((data || []) as Video[], pageParam);
+    const list = page.items;
     const ids = Array.from(new Set(list.map((v) => v.user_id)));
     if (ids.length) {
-      const { data: profs } = await (supabase as any).from("profiles_public").select("id, display_name, username").in("id", ids);
+      const { data: profs, error: profileError } = await supabase.from("profiles_public").select("id, display_name, username").in("id", ids).abortSignal(signal);
+      if (profileError) throw profileError;
       const byId = new Map((profs || []).map((p: any) => [p.id, p]));
       list.forEach((v) => { v.author = byId.get(v.user_id) as any; });
     }
     // Warm poster frames so the grid paints without grey placeholders.
     prefetchImageUrls(list.map((v) => v.thumbnail_url));
-    return list;
+    return page;
+    },
+    getNextPageParam: (page) => page.nextPage,
   });
-  const vids: Video[] = vidsData ?? [];
+  const vids = uniqueVideos(vidsData?.pages ?? []);
   const loaded = !vidsLoading;
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !hasNextPage || isFetchingNextPage || isFetchNextPageError || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) void fetchNextPage();
+    }, { rootMargin: "300px" });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
 
   const handleFileUpload = async (file: File) => {
     file = await compressImage(file);
@@ -105,17 +139,7 @@ function VideosSignedIn() {
     }
   };
 
-  const filtered = vids
-    .filter((v) =>
-      v.title.toLowerCase().includes(query.toLowerCase()) &&
-      (cat === "All" || (v.category || "") === cat)
-    )
-    .slice()
-    .sort((a, b) =>
-      sort === "oldest"
-        ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        : new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
+  const filtered = vids;
   // Only landscape videos can be featured; a portrait video that was featured
   // before this rule existed falls back into the portrait grid.
   const featured = filtered.filter((v) => v.featured && v.orientation !== "portrait");
@@ -193,13 +217,18 @@ function VideosSignedIn() {
               <h2 className="mb-3 text-sm font-bold">Landscape</h2>
               <CardGridSkeleton count={6} />
             </>
-          ) : landscapeRest.length + portraitRest.length === 0 ? (
+          ) : isError && vids.length === 0 ? (
+            <div role="alert" className="space-y-3 text-sm text-muted-foreground">
+              <p>Videos could not be loaded.</p>
+              <Button variant="outline" onClick={() => void load()}>Try again</Button>
+            </div>
+          ) : filtered.length === 0 ? (
             <>
             <h2 className="mb-3 text-sm font-bold">All Videos</h2>
             <EmptyState
               icon={Play}
-              title="No videos yet"
-              description="Add the first video from Baltimore creators."
+              title={search || cat !== "All" || shape !== "all" ? "No matching videos" : "No videos yet"}
+              description={search || cat !== "All" || shape !== "all" ? "" : "Add the first video from Baltimore creators."}
               action={
                 <button onClick={() => setOpen(true)} className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
                   Add Video
@@ -228,6 +257,15 @@ function VideosSignedIn() {
             </div>
           )}
         </section>
+        <div ref={loadMoreRef} className="flex min-h-14 flex-col items-center justify-center gap-2" aria-live="polite">
+          {isFetchNextPageError && <p role="alert" className="text-sm text-muted-foreground">More videos could not be loaded. Please try again.</p>}
+          {hasNextPage && (
+            <Button variant="outline" disabled={isFetchingNextPage} onClick={() => void fetchNextPage()}>
+              {isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
+              {isFetchingNextPage ? "Loading videos..." : isFetchNextPageError ? "Try again" : "Load more"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {open && (

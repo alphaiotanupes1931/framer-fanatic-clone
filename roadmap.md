@@ -5,6 +5,7 @@
 - [x] Redesign Updates tab to match reference screenshot and seed sample content
 
 ## Active
+- [x] Load Videos in batches of 24 with automatic scrolling and a retryable Load more button. Four pagination tests verify 24-row batches, browsing 101 rows, stopping and deduplication; signed-in desktop/mobile checks verify existing videos, search, sorting and no overflow or runtime errors. Only seven videos are currently visible, so live multi-batch scrolling cannot be exercised with existing content.
 - [x] Reduce route metadata delays, accidental link preloads, repeated profile/notification requests, and avatar signing waterfalls. Shared-request tests pass; preview build is successful. Database health shows spare capacity, no upgrade required.
 - [x] Retry actual desktop/mobile page loading and remove the story sanitizer's Node DOM emulator from the server import graph. Signed-in visible content: Businesses 0.69-1.32s, artist 2.39-2.83s, story 2.31-2.37s; business card navigation 1.30-1.35s with zero additional profile/notification requests. Photos render, no runtime errors, four cache tests pass. These are local browser checks, not production mobile-network guarantees.
 - [x] Speed up organization directory images by signing avatar and banner paths directly in the avatars bucket. Verified a cold signed-in visit only calls the avatars signing endpoint.
